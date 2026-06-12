@@ -1,0 +1,140 @@
+{
+  "Common": {
+    "appName": "ModParks",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "publish": "Publish",
+    "draft": "Draft",
+    "search": "Search",
+    "submit": "Submit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "Nav": {
+    "home": "Home",
+    "projects": "Projects",
+    "myProjects": "My Projects",
+    "newProject": "New Project",
+    "profile": "Profile",
+    "admin": "Admin",
+    "login": "Sign in with GitHub",
+    "logout": "Sign out"
+  },
+  "Home": {
+    "hero": {
+      "title": "Discover & Share Minecraft",
+      "titleHighlight": "Mods & Plugins",
+      "description": "ModParks is a Japan-based platform for Minecraft Java Edition Mods and Plugins.",
+      "searchPlaceholder": "Search Mods & Plugins..."
+    },
+    "newProjects": "New Projects",
+    "viewAll": "View all"
+  },
+  "Project": {
+    "type": {
+      "mod": "Mod",
+      "plugin": "Plugin"
+    },
+    "status": {
+      "published": "Published",
+      "draft": "Draft"
+    },
+    "fields": {
+      "name": "Project Name",
+      "slug": "URL Slug",
+      "description": "Description",
+      "icon": "Icon",
+      "type": "Type",
+      "license": "License",
+      "sourceUrl": "Source Code URL (optional)",
+      "tags": "Tags",
+      "status": "Status"
+    },
+    "create": {
+      "title": "New Project",
+      "success": "Project created successfully"
+    },
+    "edit": {
+      "title": "Edit Project",
+      "success": "Project updated successfully"
+    },
+    "versions": "Versions",
+    "noVersions": "No versions yet",
+    "downloads": "Downloads",
+    "author": "Author",
+    "download": "Download",
+    "report": "Report"
+  },
+  "Version": {
+    "fields": {
+      "versionNumber": "Version Number",
+      "mcVersions": "Minecraft Versions",
+      "loaders": "Loaders",
+      "changelog": "Changelog",
+      "file": "File"
+    },
+    "create": {
+      "title": "Add Version",
+      "success": "Version added successfully"
+    },
+    "loaders": {
+      "fabric": "Fabric",
+      "forge": "Forge",
+      "neoforge": "NeoForge",
+      "quilt": "Quilt",
+      "paper": "Paper",
+      "spigot": "Spigot",
+      "bukkit": "Bukkit",
+      "velocity": "Velocity"
+    }
+  },
+  "Report": {
+    "title": "Report",
+    "description": "Report an issue with this project",
+    "reasons": {
+      "copyright": "Copyright Infringement",
+      "malware": "Suspected Malware",
+      "spam": "Spam",
+      "other": "Other"
+    },
+    "detail": "Details (optional)",
+    "success": "Report submitted. We will review it shortly."
+  },
+  "Profile": {
+    "title": "Edit Profile",
+    "displayName": "Display Name",
+    "bio": "Bio",
+    "success": "Profile updated successfully"
+  },
+  "Admin": {
+    "title": "Admin Dashboard",
+    "reports": {
+      "title": "Reports",
+      "status": {
+        "pending": "Pending",
+        "resolved": "Resolved",
+        "dismissed": "Dismissed"
+      },
+      "resolve": "Mark as Resolved",
+      "dismiss": "Dismiss",
+      "unpublish": "Unpublish Project"
+    }
+  },
+  "Search": {
+    "placeholder": "Search Mods & Plugins...",
+    "results": "{count} projects found",
+    "noResults": "No results found",
+    "filters": {
+      "type": "Type",
+      "all": "All"
+    }
+  }
+}

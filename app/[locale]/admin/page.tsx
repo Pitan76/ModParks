@@ -1,0 +1,57 @@
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/routing";
+import LinkButton from "@/components/ui/LinkButton";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import FlagIcon from "@mui/icons-material/Flag";
+
+interface AdminDashboardProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function AdminDashboardPage({ params }: AdminDashboardProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const session = await auth();
+  if (session?.user?.role !== "admin") redirect("/");
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 5 }}>
+      <Typography variant="h4" fontWeight={800} sx={{ mb: 4 }}>
+        管理ダッシュボード
+      </Typography>
+
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Card id="admin-reports-card">
+            <CardContent>
+              <Stack spacing={2}>
+                <FlagIcon sx={{ fontSize: 40, color: "error.main" }} />
+                <Typography variant="h6" fontWeight={700}>通報管理</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  ユーザーからの通報を確認・処理します
+                </Typography>
+                <LinkButton
+                  href="/admin/reports"
+                  variant="contained"
+                  id="admin-reports-btn"
+                >
+                  通報一覧を見る
+                </LinkButton>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Container>
+  );
+}

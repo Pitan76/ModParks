@@ -1,0 +1,140 @@
+{
+  "Common": {
+    "appName": "ModParks",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "publish": "公開",
+    "draft": "下書き",
+    "search": "検索",
+    "submit": "送信",
+    "close": "閉じる",
+    "confirm": "確認",
+    "back": "戻る",
+    "next": "次へ",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "Nav": {
+    "home": "ホーム",
+    "projects": "プロジェクト",
+    "myProjects": "マイプロジェクト",
+    "newProject": "新規プロジェクト",
+    "profile": "プロフィール",
+    "admin": "管理",
+    "login": "GitHubでログイン",
+    "logout": "ログアウト"
+  },
+  "Home": {
+    "hero": {
+      "title": "Minecraftのプラグイン・Modを",
+      "titleHighlight": "簡単に公開・発見",
+      "description": "ModParksは日本発のMinecraft Java Edition向けMod・Pluginプラットフォームです。",
+      "searchPlaceholder": "Mod・Pluginを検索..."
+    },
+    "newProjects": "新着プロジェクト",
+    "viewAll": "すべて見る"
+  },
+  "Project": {
+    "type": {
+      "mod": "Mod",
+      "plugin": "Plugin"
+    },
+    "status": {
+      "published": "公開中",
+      "draft": "下書き"
+    },
+    "fields": {
+      "name": "プロジェクト名",
+      "slug": "URLスラッグ",
+      "description": "説明",
+      "icon": "アイコン",
+      "type": "種類",
+      "license": "ライセンス",
+      "sourceUrl": "ソースコードURL（任意）",
+      "tags": "タグ",
+      "status": "公開状態"
+    },
+    "create": {
+      "title": "新規プロジェクト",
+      "success": "プロジェクトを作成しました"
+    },
+    "edit": {
+      "title": "プロジェクト編集",
+      "success": "プロジェクトを更新しました"
+    },
+    "versions": "バージョン",
+    "noVersions": "バージョンがまだありません",
+    "downloads": "ダウンロード",
+    "author": "作者",
+    "download": "ダウンロード",
+    "report": "通報"
+  },
+  "Version": {
+    "fields": {
+      "versionNumber": "バージョン番号",
+      "mcVersions": "対応Minecraftバージョン",
+      "loaders": "ローダー",
+      "changelog": "更新内容",
+      "file": "ファイル"
+    },
+    "create": {
+      "title": "バージョン登録",
+      "success": "バージョンを登録しました"
+    },
+    "loaders": {
+      "fabric": "Fabric",
+      "forge": "Forge",
+      "neoforge": "NeoForge",
+      "quilt": "Quilt",
+      "paper": "Paper",
+      "spigot": "Spigot",
+      "bukkit": "Bukkit",
+      "velocity": "Velocity"
+    }
+  },
+  "Report": {
+    "title": "通報",
+    "description": "このプロジェクトについて問題を報告します",
+    "reasons": {
+      "copyright": "著作権侵害",
+      "malware": "マルウェア疑い",
+      "spam": "スパム",
+      "other": "その他"
+    },
+    "detail": "詳細（任意）",
+    "success": "通報しました。確認後に対応いたします。"
+  },
+  "Profile": {
+    "title": "プロフィール編集",
+    "displayName": "表示名",
+    "bio": "自己紹介",
+    "success": "プロフィールを更新しました"
+  },
+  "Admin": {
+    "title": "管理ダッシュボード",
+    "reports": {
+      "title": "通報一覧",
+      "status": {
+        "pending": "未対応",
+        "resolved": "対応済",
+        "dismissed": "却下"
+      },
+      "resolve": "対応済にする",
+      "dismiss": "却下",
+      "unpublish": "プロジェクトを非公開"
+    }
+  },
+  "Search": {
+    "placeholder": "Mod・Pluginを検索...",
+    "results": "{count}件のプロジェクト",
+    "noResults": "見つかりませんでした",
+    "filters": {
+      "type": "種類",
+      "all": "すべて"
+    }
+  }
+}

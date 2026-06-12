@@ -1,0 +1,11 @@
+"use client";
+
+import Button, { ButtonProps } from "@mui/material/Button";
+import { Link } from "@/i18n/routing";
+import { ComponentProps } from "react";
+
+type LinkButtonProps = ButtonProps & ComponentProps<typeof Link>;
+
+export default function LinkButton(props: LinkButtonProps) {
+  return <Button component={Link} {...props} />;
+}
