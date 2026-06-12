@@ -58,7 +58,7 @@ const theme = createTheme({
     h6: { fontWeight: 500 },
   },
   shape: {
-    borderRadius: 10,
+    borderRadius: 4,
   },
   components: {
     MuiButton: {
@@ -66,7 +66,7 @@ const theme = createTheme({
         root: {
           textTransform: "none",
           fontWeight:    600,
-          borderRadius:  8,
+          borderRadius:  4,
         },
         containedPrimary: {
           background: "linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)",
@@ -81,7 +81,7 @@ const theme = createTheme({
         root: {
           background:   "#1e293b",
           border:       "1px solid #334155",
-          borderRadius: 12,
+          borderRadius: 4,
           transition:   "border-color 0.2s",
           "&:hover": {
             borderColor: "#38bdf8af",
@@ -92,7 +92,7 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 6,
+          borderRadius: 4,
           fontWeight:   500,
         },
       },
