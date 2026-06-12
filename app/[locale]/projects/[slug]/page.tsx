@@ -79,7 +79,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const p = project as any;
   const t = await getTranslations("Project");
 
-  const isOwner = session?.user?.id === p.authorId;
+  // TODO: DB接続後は isOwner = session?.user?.id === p.authorId; に戻す
+  const canEdit = !!session?.user;
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
@@ -127,8 +128,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </Box>
             </Box>
 
-            {/* 編集ボタン（オーナーのみ） */}
-            {isOwner && (
+            {/* 編集ボタン（ログイン中のみ） */}
+            {canEdit && (
               <LinkButton
                 href={`/projects/${p.slug}/edit`}
                 id="project-edit-btn"
@@ -163,7 +164,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <Typography variant="h6" fontWeight={700}>
                 {t("versions")}
               </Typography>
-              {isOwner && (
+              {canEdit && (
                 <LinkButton
                   href={`/projects/${p.slug}/versions/new`}
                   id="version-upload-btn"
