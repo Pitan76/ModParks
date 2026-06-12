@@ -234,7 +234,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 <Typography variant="caption" color="text.disabled" sx={{ mb: 1, display: "block" }}>
                   タグ
                 </Typography>
-                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
                   {p.tags.map((tag: string) => (
                     <Chip
                       key={tag}
