@@ -39,7 +39,7 @@ export default function AppFooter() {
               ModParks
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Minecraft Java Edition向けMod・Pluginプラットフォーム
+              Minecraft Java Edition向けMod/Pluginプラットフォーム
             </Typography>
           </Box>
 
