@@ -213,22 +213,22 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
             </Menu>
           </>
         ) : (
-          <Button
+          <LinkButton
             id="login-button"
-            href="/api/auth/signin"
+            href="/login"
             variant="outlined"
             size="small"
             sx={{
               borderColor: "primary.main",
               color:        "primary.main",
               "&:hover": {
-                background:   "rgba(74,222,128,0.08)",
+                background:   "rgba(56,189,248,0.08)",
                 borderColor:  "primary.light",
               },
             }}
           >
             {t("login")}
-          </Button>
+          </LinkButton>
         )}
       </Toolbar>
     </AppBar>

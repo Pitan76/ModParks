@@ -26,7 +26,7 @@ const theme = createTheme({
       contrastText: "#1e3a8a",
     },
     background: {
-      default: "#0f172a",  // Slate 900
+      default: "#101a30",  // Slate 900
       paper:   "#1e293b",  // Slate 800
     },
     surface: {
@@ -82,10 +82,9 @@ const theme = createTheme({
           background:   "#1e293b",
           border:       "1px solid #334155",
           borderRadius: 12,
-          transition:   "border-color 0.2s, box-shadow 0.2s",
+          transition:   "border-color 0.2s",
           "&:hover": {
-            borderColor: "#38bdf8",
-            boxShadow:   "0 0 24px rgba(56,189,248,0.12)",
+            borderColor: "#38bdf8af",
           },
         },
       },

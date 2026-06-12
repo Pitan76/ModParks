@@ -16,7 +16,7 @@ export default function AppFooter() {
       sx={{
         mt:         "auto",
         py:         4,
-        background: "#080d0a",
+        background: "#0f172a",
         borderTop:  "1px solid",
         borderColor: "divider",
       }}

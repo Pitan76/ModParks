@@ -80,13 +80,13 @@ export default async function HomePage({ params }: HomePageProps) {
           position:   "relative",
           py:         { xs: 8, md: 14 },
           overflow:   "hidden",
-          background: "linear-gradient(180deg, rgba(74,222,128,0.08) 0%, transparent 100%)",
+          // background: "linear-gradient(180deg, rgba(74,222,128,0.08) 0%, transparent 100%)",
           "&::before": {
             content:  '""',
             position: "absolute",
             inset:    0,
-            background:
-              "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(74,222,128,0.15) 0%, transparent 70%)",
+            // background:
+            //   "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(74,222,128,0.15) 0%, transparent 70%)",
           },
         }}
       >

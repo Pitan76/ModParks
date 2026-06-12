@@ -5,21 +5,77 @@ import {
   primaryKey,
 } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
+import type { AdapterAccountType } from "next-auth/adapters";
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 export const users = sqliteTable("users", {
-  id:          text("id").primaryKey(),
-  githubId:    text("github_id").unique().notNull(),
-  username:    text("username").unique().notNull(),
-  displayName: text("display_name").notNull(),
-  avatarUrl:   text("avatar_url"),
-  bio:         text("bio"),
-  role:        text("role", { enum: ["user", "admin"] }).notNull().default("user"),
-  createdAt:   integer("created_at", { mode: "timestamp" })
+  id:            text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  
+  // Auth.js standard fields
+  name:          text("name"),
+  email:         text("email").unique(),
+  emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
+  image:         text("image"),
+  
+  // Custom ModParks fields
+  passwordHash:  text("password_hash"),
+  githubId:      text("github_id").unique(),
+  username:      text("username").unique(),
+  displayName:   text("display_name"),
+  avatarUrl:     text("avatar_url"),
+  bio:           text("bio"),
+  role:          text("role", { enum: ["user", "admin"] }).notNull().default("user"),
+  createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 });
+
+export const accounts = sqliteTable(
+  "account",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").$type<AdapterAccountType>().notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (account) => ({
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+  })
+);
+
+export const sessions = sqliteTable("session", {
+  sessionToken: text("sessionToken").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+});
+
+export const verificationTokens = sqliteTable(
+  "verificationToken",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  })
+);
 
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
