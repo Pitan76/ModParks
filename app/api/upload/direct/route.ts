@@ -37,9 +37,9 @@ export async function PUT(req: NextRequest) {
 
   try {
     const contentType = req.headers.get("content-type") || "application/octet-stream";
-    const body = req.body;
+    const body = await req.arrayBuffer();
     
-    if (!body) {
+    if (!body || body.byteLength === 0) {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 

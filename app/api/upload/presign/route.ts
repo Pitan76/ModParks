@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { buildR2Key } from "@/lib/r2";
+import { buildR2Key, getR2PublicUrl } from "@/lib/r2";
 import { createId } from "@paralleldrive/cuid2";
 
 /** POST /api/upload/presign
@@ -50,6 +50,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     key,
     uploadUrl: `/api/upload/direct?key=${encodeURIComponent(key)}`,
-    publicUrl: `${process.env.R2_PUBLIC_URL ?? ""}/${key}`,
+    publicUrl: getR2PublicUrl(key),
   });
 }

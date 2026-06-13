@@ -18,9 +18,11 @@ export async function uploadToR2(
 
 /** R2 オブジェクトの公開 URL を生成（バケットがパブリックの場合）*/
 export function getR2PublicUrl(key: string): string {
-  const baseUrl =
-    process.env.R2_PUBLIC_URL ?? "https://files.modparks.example.com";
-  return `${baseUrl}/${key}`;
+  if (process.env.R2_PUBLIC_URL) {
+    return `${process.env.R2_PUBLIC_URL}/${key}`;
+  }
+  // R2_PUBLIC_URL が設定されていない場合（ローカル開発時など）は、API経由でアクセス
+  return `/api/r2/${key}`;
 }
 
 /** R2 からオブジェクトを削除する */
