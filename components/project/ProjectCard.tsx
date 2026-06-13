@@ -10,6 +10,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import { Link } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
+import { formatCompactNumber } from "@/lib/utils/format";
+import { useLocale } from "next-intl";
 
 /**
  * プロジェクト一覧のカードに表示するデータの型定義
@@ -42,17 +44,14 @@ const TYPE_LABEL = {
   plugin: "Plugin",
 } as const;
 
-function formatDownloads(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
-}
 
 /**
  * プロジェクトをカード形式で表示するコンポーネント
  * @param props ProjectCardProps プロジェクトのメタ情報や作者情報を含む
  */
 export default function ProjectCard({ project }: ProjectCardProps) {
+  const locale = useLocale();
+
   return (
     <Card id={`project-card-${project.slug}`}>
       <LinkCardActionArea href={`/projects/${project.slug}`}>
@@ -152,8 +151,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <DownloadIcon fontSize="small" sx={{ color: "text.disabled", fontSize: 16 }} />
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                {formatDownloads(project.downloads)}
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {formatCompactNumber(project.downloads, locale)}
               </Typography>
             </Box>
             <Typography variant="caption" color="text.disabled">
