@@ -35,6 +35,12 @@ export async function createProject(formData: FormData) {
   const db = getDb(d1);
   const id = createId();
 
+  // スラッグの重複チェック
+  const existingProject = await db.select().from(projects).where(eq(projects.slug, slug)).get();
+  if (existingProject) {
+    return { error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } };
+  }
+
   await db.insert(projects).values({
     id,
     slug,
@@ -95,6 +101,14 @@ export async function updateProject(projectId: string, formData: FormData) {
   }
 
   const { tags, ...fields } = parsed.data;
+
+  // スラッグが変更された場合の重複チェック
+  if (fields.slug && fields.slug !== project.slug) {
+    const existingSlug = await db.select().from(projects).where(eq(projects.slug, fields.slug)).get();
+    if (existingSlug) {
+      return { error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } };
+    }
+  }
 
   await db
     .update(projects)
