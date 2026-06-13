@@ -37,7 +37,8 @@
       "searchPlaceholder": "MOD/プラグインを検索..."
     },
     "newProjects": "新着プロジェクト",
-    "viewAll": "すべて見る"
+    "viewAll": "すべて見る",
+    "cta": "投稿する"
   },
   "Project": {
     "type": {

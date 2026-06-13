@@ -36,7 +36,8 @@
       "searchPlaceholder": "Search Mods & Plugins..."
     },
     "newProjects": "New Projects",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "cta": "Submit Project"
   },
   "Project": {
     "type": {
