@@ -78,6 +78,26 @@ export const verificationTokens = sqliteTable(
   })
 );
 
+// ─── API Keys ─────────────────────────────────────────────────────────────────
+
+export const apiKeys = sqliteTable("api_keys", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  key: text("key").unique().notNull(),
+  name: text("name").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  expiresAt: integer("expires_at", { mode: "timestamp" }),
+  lastUsedAt: integer("last_used_at", { mode: "timestamp" }),
+}, (table) => ({
+  userIdx: index("api_keys_user_idx").on(table.userId),
+}));
+
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
 export const projects = sqliteTable("projects", {
@@ -314,3 +334,4 @@ export type Version     = typeof versions.$inferSelect;
 export type Report      = typeof reports.$inferSelect;
 export type Idea        = typeof ideas.$inferSelect;
 export type IdeaComment = typeof ideaComments.$inferSelect;
+export type ApiKey      = typeof apiKeys.$inferSelect;

@@ -36,6 +36,13 @@
       "when": 1781351871745,
       "tag": "0004_late_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1781366376320,
+      "tag": "0005_rich_leader",
+      "breakpoints": true
     }
   ]
 }
