@@ -34,15 +34,15 @@
       "title": "マイクラのMOD、プラグインを",
       "titleHighlight": "みんなで一緒につくったり、探したりしてみませんか？",
       "description": "ModParksは日本発のMinecraft Java Edition向けMod/Pluginプラットフォームです。",
-      "searchPlaceholder": "Mod/Pluginを検索..."
+      "searchPlaceholder": "MOD/プラグインを検索..."
     },
     "newProjects": "新着プロジェクト",
     "viewAll": "すべて見る"
   },
   "Project": {
     "type": {
-      "mod": "Mod",
-      "plugin": "Plugin"
+      "mod": "MOD",
+      "plugin": "プラグイン"
     },
     "status": {
       "published": "公開中",
@@ -82,13 +82,13 @@
     "fields": {
       "versionNumber": "バージョン番号",
       "mcVersions": "対応Minecraftバージョン",
-      "loaders": "ローダー",
+      "loaders": "プラットフォーム",
       "changelog": "更新内容",
       "file": "ファイル"
     },
     "create": {
-      "title": "バージョン登録",
-      "success": "バージョンを登録しました"
+      "title": "バージョン追加",
+      "success": "バージョンを追加しました"
     },
     "loaders": {
       "fabric": "Fabric",
@@ -134,7 +134,7 @@
     }
   },
   "Search": {
-    "placeholder": "Mod・Pluginを検索...",
+    "placeholder": "MOD/プラグインを検索...",
     "results": "{count}件のプロジェクト",
     "noResults": "見つかりませんでした",
     "filters": {
