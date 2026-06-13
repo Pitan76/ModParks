@@ -15,6 +15,9 @@ import FormControl from "@mui/material/FormControl";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import JSZip from "jszip";
+import { parse as parseToml } from "smol-toml";
+import semver from "semver";
 import { createVersion } from "@/lib/actions/version";
 import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
 
@@ -37,7 +40,120 @@ export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
   const [mcVersions, setMcVersions] = useState<string[]>([]);
   const [loaders, setLoaders] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [versionNumber, setVersionNumber] = useState("");
+  const [parsing, setParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    setFile(selectedFile);
+    if (!selectedFile) return;
+
+    setParsing(true);
+    try {
+      const zip = new JSZip();
+      const loadedZip = await zip.loadAsync(selectedFile);
+      
+      let detectedVersion = "";
+      let detectedLoaders: string[] = [];
+      let detectedMcVersions: string[] = [];
+
+      // 1. Check fabric.mod.json
+      const fabricJson = loadedZip.file("fabric.mod.json");
+      if (fabricJson) {
+        const content = await fabricJson.async("string");
+        try {
+          const parsed = JSON.parse(content);
+          if (parsed.version && !parsed.version.includes("${")) detectedVersion = parsed.version;
+          detectedLoaders.push("fabric");
+          
+          const mcDep = parsed.depends?.minecraft;
+          if (mcDep) {
+            let ranges: string[] = [];
+            if (typeof mcDep === "string") ranges.push(mcDep);
+            else if (Array.isArray(mcDep)) ranges.push(...mcDep);
+
+            const satisfying = MC_VERSIONS.filter(v => ranges.some(range => {
+              try {
+                return semver.satisfies(v + (v.split(".").length === 2 ? ".0" : ""), range);
+              } catch (e) {
+                return v === range || range.includes(v);
+              }
+            }));
+            detectedMcVersions.push(...satisfying);
+          }
+        } catch (e) { console.error("Failed to parse fabric.mod.json", e); }
+      }
+
+      // 2. Check META-INF/mods.toml (Forge)
+      const forgeToml = loadedZip.file("META-INF/mods.toml");
+      if (forgeToml) {
+        const content = await forgeToml.async("string");
+        try {
+          const parsed: any = parseToml(content);
+          if (parsed.mods && parsed.mods[0]) {
+            const modVersion = parsed.mods[0].version;
+            if (modVersion && !modVersion.includes("${")) {
+              detectedVersion = modVersion;
+            }
+          }
+          detectedLoaders.push("forge");
+          
+          if (parsed.dependencies) {
+             const deps = Object.values(parsed.dependencies).flat() as any[];
+             const mcDep = deps.find(d => d.modId === "minecraft");
+             if (mcDep && mcDep.versionRange) {
+               MC_VERSIONS.forEach(v => {
+                 if (mcDep.versionRange.includes(v)) detectedMcVersions.push(v);
+               });
+             }
+          }
+        } catch (e) { console.error("Failed to parse mods.toml", e); }
+      }
+
+      // 3. Check META-INF/neoforge.mods.toml
+      const neoToml = loadedZip.file("META-INF/neoforge.mods.toml");
+      if (neoToml) {
+        const content = await neoToml.async("string");
+        try {
+          const parsed: any = parseToml(content);
+          if (parsed.mods && parsed.mods[0]) {
+            const modVersion = parsed.mods[0].version;
+            if (modVersion && !modVersion.includes("${")) {
+              detectedVersion = modVersion;
+            }
+          }
+          detectedLoaders.push("neoforge");
+          
+          if (parsed.dependencies) {
+             const deps = Object.values(parsed.dependencies).flat() as any[];
+             const mcDep = deps.find(d => d.modId === "minecraft");
+             if (mcDep && mcDep.versionRange) {
+               MC_VERSIONS.forEach(v => {
+                 if (mcDep.versionRange.includes(v)) detectedMcVersions.push(v);
+               });
+             }
+          }
+        } catch (e) { console.error("Failed to parse neoforge.mods.toml", e); }
+      }
+
+      if (detectedVersion) setVersionNumber(detectedVersion);
+      
+      if (detectedLoaders.length > 0) {
+        const validLoaders = detectedLoaders.filter(l => AVAILABLE_LOADERS.includes(l));
+        setLoaders(Array.from(new Set(validLoaders)));
+      }
+
+      if (detectedMcVersions.length > 0) {
+        setMcVersions(Array.from(new Set([...mcVersions, ...detectedMcVersions])));
+      }
+
+    } catch (err) {
+      console.error("Failed to read JAR/ZIP", err);
+    } finally {
+      setParsing(false);
+    }
+  };
 
   /**
    * フォーム送信処理。
@@ -112,9 +228,35 @@ export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
     <Card>
       <CardContent sx={{ p: 4 }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <Box sx={{ border: "1px dashed", borderColor: "divider", borderRadius: 1, p: 3, textAlign: "center", bgcolor: "background.paper" }}>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+              accept=".jar,.zip"
+            />
+            <Button variant="outlined" onClick={() => fileInputRef.current?.click()} disabled={pending || parsing}>
+              ファイルを選択 (.jar, .zip)
+            </Button>
+            {parsing && (
+              <Typography variant="body2" sx={{ mt: 2, color: "text.secondary", display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+                <CircularProgress size={16} /> JARファイルを解析中...
+              </Typography>
+            )}
+            {file && !parsing && (
+              <Typography variant="body2" sx={{ mt: 2, fontWeight: 500 }}>
+                選択中: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+              </Typography>
+            )}
+            {error?.fileUrl && <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>{error.fileUrl[0]}</Typography>}
+          </Box>
+
           <TextField
             id="version-number"
             name="versionNumber"
+            value={versionNumber}
+            onChange={(e) => setVersionNumber(e.target.value)}
             label="バージョン番号 (例: 1.0.0)"
             fullWidth
             required
@@ -190,24 +332,6 @@ export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
             helperText={error?.changelog?.[0]}
           />
 
-          <Box sx={{ border: "1px dashed", borderColor: "divider", borderRadius: 1, p: 3, textAlign: "center" }}>
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              accept=".jar,.zip"
-            />
-            <Button variant="outlined" onClick={() => fileInputRef.current?.click()} disabled={pending}>
-              ファイルを選択 (.jar, .zip)
-            </Button>
-            {file && (
-              <Typography variant="body2" sx={{ mt: 2 }}>
-                選択中: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-              </Typography>
-            )}
-            {error?.fileUrl && <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>{error.fileUrl[0]}</Typography>}
-          </Box>
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
