@@ -10,33 +10,11 @@ import Divider from "@mui/material/Divider";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
-import { unpublishProject, updateReportStatus } from "@/lib/actions/report";
+import { unpublishProject, updateReportStatus, getReports } from "@/lib/actions/report";
 
 interface AdminReportsPageProps {
   params: Promise<{ locale: string }>;
 }
-
-// ダミーデータ（DB接続後に置き換え）
-const DUMMY_REPORTS = [
-  {
-    id: "r1",
-    reason: "copyright",
-    detail: "このModは〇〇のコードを無断で使用しています。",
-    status: "pending",
-    createdAt: new Date("2024-11-01"),
-    reporter: { username: "reporter1", displayName: "Reporter 1" },
-    project:  { id: "p1", slug: "example-fabric-mod", name: "ExampleFabricMod" },
-  },
-  {
-    id: "r2",
-    reason: "spam",
-    detail: null,
-    status: "pending",
-    createdAt: new Date("2024-11-02"),
-    reporter: { username: "reporter2", displayName: "Reporter 2" },
-    project:  { id: "p2", slug: "example-paper-plugin", name: "ExamplePaperPlugin" },
-  },
-];
 
 const REASON_LABEL: Record<string, string> = {
   copyright: "著作権侵害",
@@ -64,6 +42,8 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
   const session = await auth();
   if (session?.user?.role !== "admin") redirect("/");
 
+  const reports = await getReports();
+
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
       <Typography variant="h4" fontWeight={800} sx={{ mb: 4 }}>
@@ -71,7 +51,10 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
       </Typography>
 
       <Stack spacing={2}>
-        {DUMMY_REPORTS.map((report) => (
+        {reports.length === 0 && (
+          <Typography color="text.secondary">現在のところ通報はありません。</Typography>
+        )}
+        {reports.map(({ report, project, reporter }) => (
           <Card key={report.id} id={`report-card-${report.id}`}>
             <CardContent>
               <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
@@ -95,11 +78,11 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                   </Box>
 
                   <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
-                    プロジェクト: {report.project.name}
+                    プロジェクト: {project.name}
                   </Typography>
 
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    通報者: {report.reporter.displayName}
+                    通報者: {reporter.displayName ?? reporter.username}
                   </Typography>
 
                   {report.detail && (
@@ -133,9 +116,9 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                         対応済
                       </Button>
                     </form>
-                    <form action={unpublishProject.bind(null, report.project.id)}>
+                    <form action={unpublishProject.bind(null, project.id)}>
                       <Button
-                        id={`unpublish-btn-${report.project.id}`}
+                        id={`unpublish-btn-${project.id}`}
                         type="submit"
                         variant="outlined"
                         size="small"

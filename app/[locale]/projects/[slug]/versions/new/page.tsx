@@ -14,7 +14,8 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
-import { useState, use } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useState, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
 
@@ -33,29 +34,73 @@ export default function NewVersionPage({ params }: NewVersionPageProps) {
   
   const [mcVersions, setMcVersions] = useState<string[]>([]);
   const [loaders, setLoaders] = useState<string[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!file) {
+      setError({ fileUrl: ["ファイルを選択してください"] });
+      return;
+    }
+
     setPending(true);
     setError(null);
 
-    const formData = new FormData(e.currentTarget);
-    mcVersions.forEach(v => formData.append("mcVersions", v));
-    loaders.forEach(l => formData.append("loaders", l));
-    
-    // ダミーのファイル情報を付与（本来はここでR2にアップロードしてURLを取得する）
-    formData.append("fileUrl", "https://example.com/dummy.jar");
-    formData.append("fileName", "dummy.jar");
-    formData.append("fileSize", "1024000");
+    try {
+      // 1. 署名付きアップロードURL（または直接アップロードURL）を取得
+      const presignRes = await fetch("/api/upload/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          contentType: file.type || "application/java-archive",
+          type: "mod",
+          projectSlug: slug,
+        }),
+      });
 
-    // Server Action呼び出し
-    const result = await createVersion(slug, formData);
-    
-    if (result && result.error) {
-      setError(result.error as { [key: string]: string[] });
+      if (!presignRes.ok) {
+        const d = await presignRes.json();
+        throw new Error(d.error || "Presign failed");
+      }
+
+      const { uploadUrl, publicUrl } = await presignRes.json();
+
+      // 2. R2 へファイルをアップロード
+      // 開発環境のプロキシ向けに ArrayBuffer で送る
+      const arrayBuffer = await file.arrayBuffer();
+      const uploadRes = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type || "application/java-archive" },
+        body: arrayBuffer,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("アップロードに失敗しました");
+      }
+
+      // 3. Server Action呼び出し
+      const formData = new FormData(e.currentTarget);
+      mcVersions.forEach(v => formData.append("mcVersions", v));
+      loaders.forEach(l => formData.append("loaders", l));
+      
+      formData.append("fileUrl", publicUrl);
+      formData.append("fileName", file.name);
+      formData.append("fileSize", file.size.toString());
+
+      const result = await createVersion(slug, formData);
+      
+      if (result && result.error) {
+        setError(result.error as { [key: string]: string[] });
+        setPending(false);
+      } else {
+        router.push(`/projects/${slug}`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError({ fileUrl: [err.message || "アップロード中にエラーが発生しました"] });
       setPending(false);
-    } else {
-      router.push(`/projects/${slug}`);
     }
   };
 
@@ -137,12 +182,31 @@ export default function NewVersionPage({ params }: NewVersionPageProps) {
               helperText={error?.changelog?.[0]}
             />
 
+            <Box sx={{ border: "1px dashed", borderColor: "divider", borderRadius: 1, p: 3, textAlign: "center" }}>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                accept=".jar,.zip"
+              />
+              <Button variant="outlined" onClick={() => fileInputRef.current?.click()} disabled={pending}>
+                ファイルを選択 (.jar, .zip)
+              </Button>
+              {file && (
+                <Typography variant="body2" sx={{ mt: 2 }}>
+                  選択中: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                </Typography>
+              )}
+              {error?.fileUrl && <Typography color="error" variant="caption" display="block" sx={{ mt: 1 }}>{error.fileUrl[0]}</Typography>}
+            </Box>
+
             <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
               <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
                 キャンセル
               </Button>
-              <Button type="submit" variant="contained" size="large" disabled={pending || mcVersions.length === 0 || loaders.length === 0}>
-                {pending ? "アップロード中..." : "バージョンを公開"}
+              <Button type="submit" variant="contained" size="large" disabled={pending || mcVersions.length === 0 || loaders.length === 0 || !file}>
+                {pending ? <CircularProgress size={24} color="inherit" /> : "バージョンを公開"}
               </Button>
             </Box>
           </Box>

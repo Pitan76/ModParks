@@ -12,8 +12,8 @@ interface VersionCardProps {
   version: {
     id:            string;
     versionNumber: string;
-    mcVersions:    string[];
-    loaders:       string[];
+    mcVersions:    string | string[];
+    loaders:       string | string[];
     changelog:     string;
     fileUrl:       string;
     fileName:      string;
@@ -48,6 +48,14 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
       : version.createdAt
   );
 
+  const parsedLoaders = Array.isArray(version.loaders)
+    ? version.loaders
+    : (JSON.parse(version.loaders || "[]") as string[]);
+
+  const parsedMcVersions = Array.isArray(version.mcVersions)
+    ? version.mcVersions
+    : (JSON.parse(version.mcVersions || "[]") as string[]);
+
   return (
     <Card
       id={`version-card-${version.id}`}
@@ -63,7 +71,7 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
               </Typography>
 
               {/* ローダー */}
-              {version.loaders.map((loader) => (
+              {parsedLoaders.map((loader) => (
                 <Chip
                   key={loader}
                   label={loader}
@@ -74,7 +82,7 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
               ))}
 
               {/* MC バージョン */}
-              {version.mcVersions.slice(0, 3).map((mc) => (
+              {parsedMcVersions.slice(0, 3).map((mc) => (
                 <Chip
                   key={mc}
                   label={mc}
@@ -83,9 +91,9 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
                   sx={{ height: 20, fontSize: "0.65rem", borderColor: "divider", color: "text.secondary" }}
                 />
               ))}
-              {version.mcVersions.length > 3 && (
+              {parsedMcVersions.length > 3 && (
                 <Typography variant="caption" color="text.disabled">
-                  +{version.mcVersions.length - 3}
+                  +{parsedMcVersions.length - 3}
                 </Typography>
               )}
             </Box>
