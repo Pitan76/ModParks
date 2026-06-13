@@ -5,8 +5,11 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { createIdeaComment } from "@/lib/actions/idea";
+import { useTranslations } from "next-intl";
 
 export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
+  const tIdea = useTranslations("Idea");
+  const tCommon = useTranslations("Common");
   const [pending, setPending] = useState(false);
   const [content, setContent] = useState("");
 
@@ -20,7 +23,7 @@ export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
 
     const res = await createIdeaComment(ideaId, formData);
     if (res?.error) {
-      alert(res.error.server?.[0] || "エラーが発生しました");
+      alert(res.error.server?.[0] || tCommon("error"));
     } else {
       setContent("");
     }
@@ -32,21 +35,29 @@ export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
       <TextField
         fullWidth
         multiline
-        rows={2}
-        placeholder="コメントを追加..."
+        minRows={2}
+        name="content"
         value={content}
         onChange={(e) => setContent(e.target.value)}
+        placeholder={tIdea("addCommentPlaceholder")}
         disabled={pending}
-        size="small"
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            bgcolor: "background.paper",
+            borderRadius: 2,
+          }
+        }}
       />
-      <Button
-        type="submit"
-        variant="contained"
-        disabled={pending || !content.trim()}
-        sx={{ mt: 0.5, borderRadius: 8 }}
-      >
-        送信
-      </Button>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+        <Button 
+          type="submit" 
+          variant="contained" 
+          disabled={pending || !content.trim()}
+          sx={{ borderRadius: 8, px: 3 }}
+        >
+          {tCommon("submit")}
+        </Button>
+      </Box>
     </Box>
   );
 }

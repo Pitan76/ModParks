@@ -9,15 +9,19 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Divider from "@mui/material/Divider";
+import Button from "@mui/material/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LinkButton from "@/components/ui/LinkButton";
 import { Link } from "@/i18n/routing";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
 import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export default async function IdeaDetailPage({ params }: { params: Promise<{ locale: string, id: string }> }) {
-  const { id } = await params;
+  const { id, locale } = await params;
+  setRequestLocale(locale);
+  const tIdea = await getTranslations("Idea");
   const session = await auth();
 
   const d1 = await getD1();
@@ -66,7 +70,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
     .orderBy(desc(ideaComments.createdAt))
     .all();
 
-  // 4. Fetch Linked Versions (Mods that fulfill this idea)
+  // 4. Fetch Linked Versions
   const linkedVersions = await db
     .select({
       versionId: versions.id,
@@ -74,6 +78,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       projectId: projects.id,
       projectName: projects.name,
       projectSlug: projects.slug,
+      projectDescription: projects.description,
     })
     .from(versionIdeas)
     .innerJoin(versions, eq(versionIdeas.versionId, versions.id))
@@ -85,7 +90,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Box sx={{ mb: 3 }}>
         <LinkButton href="/ideas" variant="text" color="inherit" startIcon={<ArrowBackIcon />}>
-          アイデア一覧に戻る
+          {tIdea("backToIdeas")}
         </LinkButton>
       </Box>
 
@@ -115,9 +120,14 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
           </Typography>
 
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <IdeaLikeButton ideaId={id} initialCount={initialCount} initialLiked={initialLiked} />
+            <IdeaLikeButton 
+              ideaId={id} 
+              initialCount={initialCount} 
+              initialLiked={initialLiked} 
+              isLoggedIn={!!session} 
+            />
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-              ステータス: {ideaData.status === "open" ? "募集中" : ideaData.status === "in_progress" ? "開発中" : "実現済"}
+              {tIdea("statusLabel", { status: ideaData.status === "open" ? tIdea("status.open") : ideaData.status === "in_progress" ? tIdea("status.in_progress") : tIdea("status.resolved") })}
             </Typography>
           </Box>
         </CardContent>
@@ -126,19 +136,27 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       {/* Linked Versions */}
       {linkedVersions.length > 0 && (
         <Box sx={{ mb: 6 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-            このアイデアを実現したMod
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+            <CheckCircleIcon color="success" />
+            {tIdea("resolvedBy")}
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {linkedVersions.map((v) => (
               <Card key={v.versionId} variant="outlined" sx={{ borderRadius: 2, bgcolor: "success.50", borderColor: "success.main" }}>
                 <CardContent sx={{ py: 2, display: "flex", justifyContent: "space-between", alignItems: "center", "&:last-child": { pb: 2 } }}>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: "success.dark" }}>
-                    {v.projectName} (v{v.versionNumber})
-                  </Typography>
-                  <LinkButton href={`/projects/${v.projectSlug}`} variant="contained" color="success" size="small" sx={{ borderRadius: 8 }}>
-                    プロジェクトを見る
-                  </LinkButton>
+                  <Box>
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: "success.dark" }}>
+                      {v.projectName} (v{v.versionNumber})
+                    </Typography>
+                    {v.projectDescription && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        {v.projectDescription}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Button variant="outlined" size="small" component={Link} href={`/projects/${v.projectSlug}`}>
+                    {tIdea("viewProject")}
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -148,8 +166,8 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
 
       {/* Comments */}
       <Box>
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
-          コメント ({comments.length})
+        <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>
+          {tIdea("comments", { count: comments.length })}
         </Typography>
 
         {session?.user ? (
@@ -157,9 +175,11 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             <IdeaCommentForm ideaId={id} />
           </Box>
         ) : (
-          <Typography color="text.secondary" sx={{ mb: 4 }}>
-            コメントするにはログインが必要です。
-          </Typography>
+          <Box sx={{ p: 3, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider", mb: 4 }}>
+            <Typography color="text.secondary">
+              {tIdea("loginToComment")}
+            </Typography>
+          </Box>
         )}
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -184,7 +204,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             </Box>
           ))}
           {comments.length === 0 && (
-            <Typography color="text.secondary">まだコメントはありません。</Typography>
+            <Typography color="text.secondary">{tIdea("noComments")}</Typography>
           )}
         </Box>
       </Box>

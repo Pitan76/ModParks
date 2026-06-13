@@ -7,25 +7,38 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
+import Divider from "@mui/material/Divider";
 import { Link } from "@/i18n/routing";
 import { registerUser } from "@/lib/actions/auth";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
+  const tAuth = useTranslations("Auth");
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError("");
+
+    if (password.length < 8) {
+      setError(tAuth("register.error.passwordLength"));
+      setLoading(false);
+      return;
+    }
 
     const res = await registerUser(formData);
     if (res?.error) {
       setError(res.error);
       setLoading(false);
     } else {
-      router.push("/ja/login?registered=true");
+      router.push("/login?registered=true");
     }
   }
 
@@ -41,10 +54,10 @@ export default function RegisterPage() {
         }}
       >
         <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }} align="center" color="primary.main">
-          新規登録
+          {tAuth("register.title")}
         </Typography>
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
-          ModParks へようこそ！
+          {tAuth("register.welcome")}
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
@@ -52,38 +65,43 @@ export default function RegisterPage() {
         <form action={handleSubmit}>
           <TextField
             name="username"
-            label="ユーザーネーム (ID)"
+            label={tAuth("fields.username")}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             fullWidth
             required
             margin="normal"
-            placeholder="例: example_dev"
-            helperText="ログインIDやURLの一部として使用されます（英数字）"
+            helperText={tAuth("fields.usernameHelper")}
           />
           <TextField
             name="displayName"
-            label="表示名"
+            label={tAuth("fields.displayName")}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
             fullWidth
             required
             margin="normal"
-            placeholder="例: Example Developer"
-            helperText="サイト上に表示される名前です"
+            helperText={tAuth("fields.displayNameHelper")}
           />
           <TextField
             name="email"
-            label="メールアドレス"
+            label={tAuth("fields.email")}
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             fullWidth
             required
             margin="normal"
           />
           <TextField
             name="password"
-            label="パスワード"
+            label={tAuth("fields.passwordWithRule")}
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             fullWidth
             required
             margin="normal"
-            helperText="8文字以上で入力してください"
           />
 
           <Button
@@ -93,15 +111,19 @@ export default function RegisterPage() {
             disabled={loading}
             sx={{ mt: 4, py: 1.5, fontSize: "1rem" }}
           >
-            {loading ? "登録中..." : "アカウントを登録"}
+            {loading ? tAuth("register.registering") : tAuth("register.title")}
           </Button>
         </form>
 
+        <Divider sx={{ my: 4 }}>
+          <Typography variant="body2" color="text.disabled">{tAuth("or")}</Typography>
+        </Divider>
+
         <Box sx={{ mt: 3, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
-            すでにアカウントをお持ちですか？{" "}
+            {tAuth("register.alreadyHaveAccount")}{" "}
             <Link href="/login" style={{ color: "#38bdf8", textDecoration: "none" }}>
-              ログインはこちら
+              {tAuth("register.loginLink")}
             </Link>
           </Typography>
         </Box>

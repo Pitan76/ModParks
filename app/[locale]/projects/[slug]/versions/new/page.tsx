@@ -4,6 +4,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { ideas } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
+import { getTranslations } from "next-intl/server";
 
 interface NewVersionPageProps {
   params: Promise<{ slug: string }>;
@@ -11,6 +12,7 @@ interface NewVersionPageProps {
 
 export default async function NewVersionPage({ params }: NewVersionPageProps) {
   const { slug } = await params;
+  const t = await getTranslations("Project");
 
   const d1 = await getD1();
   const db = getDb(d1);
@@ -23,7 +25,7 @@ export default async function NewVersionPage({ params }: NewVersionPageProps) {
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Typography variant="h4" sx={{ fontWeight: 800,  mb: 4  }}>
-        新バージョンをアップロード
+        {t("uploadNewVersion")}
       </Typography>
 
       <VersionUploadForm slug={slug} openIdeas={openIdeas} />

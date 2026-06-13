@@ -17,6 +17,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import { getProjectBySlug } from "@/lib/actions/project";
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
+import VersionCard from "@/components/project/VersionCard";
 
 interface ProjectDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -55,14 +56,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 {t("versions")}
               </Typography>
               {canEdit && (
-                <LinkButton
-                  href={`/projects/${p.slug}/versions/new`}
-                  id="version-upload-btn"
-                  variant="contained"
-                  startIcon={<UploadIcon />}
-                >
-                  新バージョン追加
-                </LinkButton>
+                <Button variant="contained" size="small" component={Link} href={`/projects/${p.slug}/versions/new`}>
+                  {t("header.addVersion")}
+                </Button>
               )}
             </Box>
 

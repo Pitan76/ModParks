@@ -20,6 +20,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Home");
+  const tIdea = await getTranslations("Idea");
 
   const d1 = await getD1();
   const db = getDb(d1);
@@ -48,10 +49,10 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
         <Box>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
-            アイデア
+            {tIdea("title")}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            マイクラのMOD、プラグインをみんなで一緒につくったり、探したりしてみませんか？
+            {tIdea("description")}
           </Typography>
         </Box>
         <LinkButton
@@ -60,7 +61,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
           startIcon={<AddIcon />}
           sx={{ flexShrink: 0 }}
         >
-          アイデアを投稿
+          {tIdea("postIdea")}
         </LinkButton>
       </Box>
 
@@ -89,7 +90,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
                       <Typography variant="body2">{idea.commentsCount}</Typography>
                     </Box>
                     <Chip 
-                      label={idea.status === "open" ? "募集中" : idea.status === "in_progress" ? "開発中" : "実現済"} 
+                      label={idea.status === "open" ? tIdea("status.open") : idea.status === "in_progress" ? tIdea("status.in_progress") : tIdea("status.resolved")} 
                       size="small" 
                       color={idea.status === "open" ? "primary" : idea.status === "in_progress" ? "warning" : "success"}
                       variant="outlined"
@@ -106,10 +107,10 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
         {allIdeas.length === 0 && (
           <Box sx={{ textAlign: "center", py: 8 }}>
             <Typography variant="h6" color="text.secondary" gutterBottom>
-              まだアイデアがありません
+              {tIdea("noIdeas")}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              あなたの「こんなModが欲しい！」を投稿してみましょう！
+              {tIdea("postFirstIdea")}
             </Typography>
           </Box>
         )}

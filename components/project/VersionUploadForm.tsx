@@ -20,6 +20,8 @@ import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
 import { MC_VERSIONS } from "@/lib/validations";
 import { parseModJar } from "@/lib/utils/modParser";
 
+import { useTranslations } from "next-intl";
+
 /**
  * プロジェクトの新バージョン（ファイル）をアップロードするフォームコンポーネント。
  * R2への署名付きアップロードと、DBへのバージョン情報登録を行います。
@@ -33,6 +35,8 @@ export interface VersionUploadFormProps {
 
 export default function VersionUploadForm({ slug, openIdeas }: VersionUploadFormProps) {
   const router = useRouter();
+  const tVersion = useTranslations("Version");
+  const tCommon = useTranslations("Common");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
   
@@ -77,7 +81,7 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!file) {
-      setError({ fileUrl: ["ファイルを選択してください"] });
+      setError({ fileUrl: [tVersion("uploadForm.error.fileRequired")] });
       return;
     }
 
@@ -111,7 +115,7 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
       });
 
       if (!uploadRes.ok) {
-        throw new Error("アップロードに失敗しました");
+        throw new Error(tVersion("uploadForm.error.uploadFailed"));
       }
 
       const formData = new FormData(e.currentTarget);
@@ -132,7 +136,8 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
       }
     } catch (err: any) {
       console.error(err);
-      setError({ fileUrl: [err.message || "アップロード中にエラーが発生しました"] });
+      setError({ fileUrl: [err.message || tVersion("uploadForm.error.uploadError")] });
+    } finally {
       setPending(false);
     }
   };
@@ -142,67 +147,61 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
       <CardContent sx={{ p: 4 }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <Box sx={{ border: "1px dashed", borderColor: "divider", borderRadius: 1, p: 3, textAlign: "center", bgcolor: "background.paper" }}>
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-              accept=".jar,.zip"
-            />
             <Button variant="outlined" onClick={() => fileInputRef.current?.click()} disabled={pending || parsing}>
-              ファイルを選択 (.jar, .zip)
+              {tVersion("uploadForm.fileSelect")}
+              <input type="file" hidden accept=".jar,.zip" ref={fileInputRef} onChange={handleFileChange} />
             </Button>
             {parsing && (
-              <Typography variant="body2" sx={{ mt: 2, color: "text.secondary", display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-                <CircularProgress size={16} /> JARファイルを解析中...
+              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CircularProgress size={16} /> {tVersion("uploadForm.parsingJar")}
               </Typography>
             )}
             {file && !parsing && (
-              <Typography variant="body2" sx={{ mt: 2, fontWeight: 500 }}>
-                選択中: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+              <Typography variant="caption" color="success.main">
+                {tVersion("uploadForm.selectedFile", { name: file.name, size: (file.size / 1024 / 1024).toFixed(2) })}
               </Typography>
             )}
             {error?.fileUrl && <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>{error.fileUrl[0]}</Typography>}
           </Box>
 
-          <FormControl fullWidth>
-            <InputLabel>解決するアイデア (任意)</InputLabel>
-            <Select
-              name="ideaId"
-              label="解決するアイデア (任意)"
-              defaultValue=""
-              disabled={pending}
-            >
-              <MenuItem value="">なし</MenuItem>
-              {openIdeas.map((idea) => (
+          {openIdeas.length > 0 && (
+            <FormControl fullWidth size="small">
+              <InputLabel>{tVersion("uploadForm.resolveIdea")}</InputLabel>
+              <Select
+                name="ideaId"
+                label={tVersion("uploadForm.resolveIdea")}
+                defaultValue=""
+              >
+                <MenuItem value="">{tVersion("uploadForm.none")}</MenuItem>
+                {openIdeas.map(idea => (
                 <MenuItem key={idea.id} value={idea.id}>
                   {idea.title}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+          )}
 
           <TextField
-            id="version-number"
             name="versionNumber"
+            label={tVersion("uploadForm.versionNumberPlaceholder")}
             value={versionNumber}
             onChange={(e) => setVersionNumber(e.target.value)}
-            label="バージョン番号 (例: 1.0.0)"
             fullWidth
             required
             error={!!error?.versionNumber}
             helperText={error?.versionNumber?.[0]}
           />
 
-          <FormControl fullWidth error={!!error?.mcVersions}>
-            <InputLabel id="mc-versions-label">Minecraft バージョン</InputLabel>
+          <FormControl fullWidth required error={!!error?.mcVersions} size="small">
+            <InputLabel id="mc-versions-label">{tVersion("fields.mcVersions")}</InputLabel>
             <Select
               labelId="mc-versions-label"
-              id="mc-versions"
+              name="mcVersions"
               multiple
               value={mcVersions}
-              onChange={(e) => setMcVersions(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
-              input={<OutlinedInput label="Minecraft バージョン" />}
+              onChange={(e) => setMcVersions(typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value)}
+              input={<OutlinedInput label={tVersion("fields.mcVersions")} />}
               renderValue={(selected) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map((value) => (
@@ -218,15 +217,15 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
             {error?.mcVersions && <Typography color="error" variant="caption">{error.mcVersions[0]}</Typography>}
           </FormControl>
 
-          <FormControl fullWidth error={!!error?.loaders}>
-            <InputLabel id="loaders-label">ローダー</InputLabel>
+          <FormControl fullWidth required error={!!error?.loaders} size="small">
+            <InputLabel id="loaders-label">{tVersion("fields.loaders")}</InputLabel>
             <Select
               labelId="loaders-label"
-              id="loaders"
+              name="loaders"
               multiple
               value={loaders}
-              onChange={(e) => setLoaders(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
-              input={<OutlinedInput label="ローダー" />}
+              onChange={(e) => setLoaders(typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value)}
+              input={<OutlinedInput label={tVersion("fields.loaders")} />}
               renderValue={(selected) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map((value) => {
@@ -252,11 +251,10 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
           </FormControl>
 
           <TextField
-            id="version-changelog"
             name="changelog"
-            label="変更履歴 (Changelog)"
+            label={tVersion("fields.changelog")}
             multiline
-            rows={4}
+            rows={5}
             fullWidth
             error={!!error?.changelog}
             helperText={error?.changelog?.[0]}
@@ -265,10 +263,10 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
-              キャンセル
+              {tCommon("cancel")}
             </Button>
-            <Button type="submit" variant="contained" size="large" disabled={pending || mcVersions.length === 0 || loaders.length === 0 || !file}>
-              {pending ? <CircularProgress size={24} color="inherit" /> : "バージョンを公開"}
+            <Button type="submit" variant="contained" disabled={pending || !file}>
+              {pending ? <CircularProgress size={24} color="inherit" /> : tVersion("uploadForm.publish")}
             </Button>
           </Box>
         </Box>

@@ -61,7 +61,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
             startIcon={<AddIcon />}
             sx={{ flexShrink: 0 }}
           >
-            新規プロジェクト
+            {tProject("newProject")}
           </LinkButton>
         )}
       </Box>

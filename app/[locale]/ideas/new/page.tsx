@@ -12,10 +12,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createIdea } from "@/lib/actions/idea";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import LinkButton from "@/components/ui/LinkButton";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function NewIdeaPage() {
   const router = useRouter();
+  const tIdea = useTranslations("Idea");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
 
@@ -39,15 +41,14 @@ export default function NewIdeaPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
-      <Box sx={{ mb: 3 }}>
-        <LinkButton href="/ideas" variant="text" color="inherit" startIcon={<ArrowBackIcon />}>
-          アイデア一覧に戻る
-        </LinkButton>
+      <Box sx={{ mb: 4 }}>
+        <Button startIcon={<ArrowBackIcon />} component={Link} href="/ideas" sx={{ mb: 2 }}>
+          {tIdea("backToList")}
+        </Button>
+        <Typography variant="h4" sx={{ fontWeight: 800 }}>
+          {tIdea("postIdeaTitle")}
+        </Typography>
       </Box>
-
-      <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>
-        アイデアを投稿
-      </Typography>
 
       <Card variant="outlined" sx={{ borderRadius: 3 }}>
         <CardContent sx={{ p: 4 }}>
@@ -60,25 +61,27 @@ export default function NewIdeaPage() {
               )}
 
               <TextField
-                label="タイトル"
+                id="title"
                 name="title"
-                required
+                label={tIdea("fields.title")}
                 fullWidth
+                required
                 error={!!error?.title}
-                helperText={error?.title?.[0] || "例: 建築が楽になる魔法の杖を追加するMod"}
+                helperText={error?.title?.[0] || tIdea("fields.titlePlaceholder")}
                 disabled={pending}
                 size="small"
               />
 
               <TextField
-                label="どんなMod/Pluginが欲しいですか？"
+                id="content"
                 name="content"
-                required
+                label={tIdea("fields.content")}
                 fullWidth
+                required
                 multiline
-                rows={8}
+                rows={6}
                 error={!!error?.content}
-                helperText={error?.content?.[0] || "具体的な機能や、なぜ欲しいのかを書いてみましょう。"}
+                helperText={error?.content?.[0] || tIdea("fields.contentPlaceholder")}
                 disabled={pending}
               />
 
@@ -90,7 +93,7 @@ export default function NewIdeaPage() {
                   disabled={pending}
                   sx={{ px: 5, borderRadius: 8 }}
                 >
-                  {pending ? "送信中..." : "アイデアを投稿する"}
+                  {pending ? tIdea("submitting") : tIdea("submitIdea")}
                 </Button>
               </Box>
             </Stack>

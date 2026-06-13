@@ -15,7 +15,7 @@ export async function updateProfile(formData: FormData) {
   const avatarUrl = formData.get("avatarUrl") as string;
 
   if (!displayName) {
-    return { error: "表示名は必須です" };
+    return { error: "displayNameRequired" };
   }
 
   const d1 = await getD1();

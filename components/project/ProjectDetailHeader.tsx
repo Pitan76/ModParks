@@ -5,8 +5,11 @@ import Avatar from "@mui/material/Avatar";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import EditIcon from "@mui/icons-material/Edit";
 import DownloadIcon from "@mui/icons-material/Download";
+import Button from "@mui/material/Button";
+import Link from "next/link";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import LinkButton from "@/components/ui/LinkButton";
+import AddIcon from "@mui/icons-material/Add";
+import { useTranslations } from "next-intl";
 
 /**
  * プロジェクト詳細のヘッダーおよび説明文を表示するコンポーネント
@@ -32,6 +35,9 @@ export interface ProjectDetailHeaderProps {
 }
 
 export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDetailHeaderProps) {
+  const tProject = useTranslations("Project");
+  const tCommon = useTranslations("Common");
+
   return (
     <>
       <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", mb: 3 }}>
@@ -77,27 +83,37 @@ export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDeta
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
               <AccessTimeIcon sx={{ fontSize: 14 }} />
               <Typography variant="caption">
-                公開: {new Date(p.createdAt).toLocaleDateString()}
+                {tProject("header.publishedAt", { date: new Date(p.createdAt).toLocaleDateString() })}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
               <EditIcon sx={{ fontSize: 14 }} />
               <Typography variant="caption">
-                更新: {new Date(p.updatedAt).toLocaleDateString()}
+                {tProject("header.updatedAt", { date: new Date(p.updatedAt).toLocaleDateString() })}
               </Typography>
             </Box>
           </Box>
         </Box>
 
         {canEdit && (
-          <LinkButton
-            href={`/projects/${p.slug}/edit`}
-            id="project-edit-btn"
-            variant="contained"
-            startIcon={<EditIcon />}
-          >
-            プロジェクト編集
-          </LinkButton>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<EditIcon />}
+              component={Link}
+              href={`/projects/${p.slug}/edit`}
+            >
+              {tCommon("edit")}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              component={Link}
+              href={`/projects/${p.slug}/versions/new`}
+            >
+              {tProject("header.addVersion")}
+            </Button>
+          </Box>
         )}
       </Box>
 

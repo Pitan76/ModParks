@@ -83,9 +83,23 @@
       "title": "Edit Project",
       "success": "Project updated successfully"
     },
+    "sidebar": {
+      "license": "License",
+      "sourceCode": "Source Code",
+      "tags": "Tags",
+      "report": "Report"
+    },
+    "header": {
+      "publishedAt": "Published: {date}",
+      "updatedAt": "Updated: {date}",
+      "addVersion": "Add Version"
+    },
     "versions": "Versions",
     "noVersions": "No versions yet",
     "downloads": "Downloads",
+    "createdAt": "Created Date",
+    "newProject": "New Project",
+    "uploadNewVersion": "Upload New Version",
     "author": "Author",
     "download": "Download",
     "report": "Report"
@@ -101,6 +115,20 @@
     "create": {
       "title": "Add Version",
       "success": "Version added successfully"
+    },
+    "uploadForm": {
+      "error": {
+        "fileRequired": "Please select a file",
+        "uploadFailed": "Failed to upload",
+        "uploadError": "An error occurred during upload"
+      },
+      "fileSelect": "Select File (.jar, .zip)",
+      "parsingJar": "Parsing JAR file...",
+      "selectedFile": "Selected: {name} ({size} MB)",
+      "resolveIdea": "Resolve Idea (optional)",
+      "none": "None",
+      "versionNumberPlaceholder": "Version Number (e.g. 1.0.0)",
+      "publish": "Publish Version"
     },
     "loaders": {
       "fabric": "Fabric",
@@ -129,22 +157,110 @@
     "title": "Edit Profile",
     "displayName": "Display Name",
     "bio": "Bio",
-    "success": "Profile updated successfully",
+    "updateSuccess": "Profile updated successfully",
+    "githubLinked": "Linked with GitHub account",
+    "githubNotLinked": "GitHub not linked",
+    "bioHelper": "Max 500 characters",
+    "saving": "Saving...",
+    "save": "Save",
     "uploadError": "Failed to prepare upload",
-    "uploadFailed": "Failed to upload image"
+    "uploadFailed": "Failed to upload image",
+    "error": {
+      "displayNameRequired": "Display Name is required"
+    }
+  },
+  "Idea": {
+    "addCommentPlaceholder": "Add a comment...",
+    "like": "Like {count}",
+    "title": "Ideas",
+    "description": "Let's create and find Minecraft Mods and Plugins together!",
+    "postIdea": "Post Idea",
+    "status": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "resolved": "Resolved"
+    },
+    "noIdeas": "No ideas yet",
+    "postFirstIdea": "Post your \"I want this Mod!\" idea!",
+    "backToList": "Back to Ideas",
+    "postIdeaTitle": "Post an Idea",
+    "fields": {
+      "title": "Title",
+      "titlePlaceholder": "e.g. A magic wand mod for easier building",
+      "content": "What kind of Mod/Plugin do you want?",
+      "contentPlaceholder": "Describe the specific features and why you want it."
+    },
+    "submitting": "Submitting...",
+    "submitIdea": "Post Idea",
+    "statusLabel": "Status: {status}",
+    "resolvedBy": "Mod that resolved this idea",
+    "viewProject": "View Project",
+    "comments": "Comments ({count})",
+    "loginToComment": "You must be logged in to comment.",
+    "noComments": "No comments yet."
+  },
+  "Auth": {
+    "login": {
+      "title": "Login",
+      "welcomeBack": "Welcome Back!",
+      "registrationComplete": "Registration complete. Please log in.",
+      "loggingIn": "Logging in...",
+      "loginWithGithub": "Log in with GitHub",
+      "noAccount": "Don't have an account? ",
+      "registerLink": "Register",
+      "error": {
+        "invalidCredentials": "Invalid email or password."
+      }
+    },
+    "register": {
+      "title": "Register",
+      "welcome": "Welcome to ModParks!",
+      "registering": "Registering...",
+      "registerWithGithub": "Register with GitHub",
+      "alreadyHaveAccount": "Already have an account? ",
+      "loginLink": "Log in",
+      "error": {
+        "passwordLength": "Password must be at least 8 characters long",
+        "registrationFailed": "Failed to create account."
+      }
+    },
+    "fields": {
+      "username": "Username",
+      "displayName": "Display Name",
+      "usernameHelper": "Used as your login ID and part of the URL (alphanumeric)",
+      "displayNameHelper": "The name displayed on the site",
+      "email": "Email Address",
+      "password": "Password",
+      "passwordWithRule": "Password (8+ chars)"
+    },
+    "or": "or"
   },
   "Admin": {
     "title": "Admin Dashboard",
     "reports": {
-      "title": "Reports",
+      "title": "Report Management",
+      "description": "Review and process user reports",
+      "viewList": "View Reports",
+      "listTitle": "Reports List",
+      "noReports": "There are no reports at this time.",
+      "project": "Project: {name}",
+      "reporter": "Reporter: {name}",
+      "reasons": {
+        "copyright": "Copyright Infringement",
+        "malware": "Suspected Malware",
+        "spam": "Spam",
+        "other": "Other"
+      },
       "status": {
         "pending": "Pending",
         "resolved": "Resolved",
         "dismissed": "Dismissed"
       },
-      "resolve": "Mark as Resolved",
-      "dismiss": "Dismiss",
-      "unpublish": "Unpublish Project"
+      "actions": {
+        "resolve": "Resolve",
+        "unpublish": "Unpublish",
+        "dismiss": "Dismiss"
+      }
     }
   },
   "Search": {

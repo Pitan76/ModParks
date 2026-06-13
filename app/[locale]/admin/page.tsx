@@ -24,10 +24,12 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
   const session = await auth();
   if (session?.user?.role !== "admin") redirect("/");
 
+  const tAdmin = await getTranslations("Admin");
+
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
       <Typography variant="h4" sx={{ fontWeight: 800,  mb: 4  }}>
-        管理ダッシュボード
+        {tAdmin("title")}
       </Typography>
 
       <Grid container spacing={3}>
@@ -36,17 +38,17 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
             <CardContent>
               <Stack spacing={2}>
                 <FlagIcon sx={{ fontSize: 40, color: "error.main" }} />
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>通報管理</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  ユーザーからの通報を確認・処理します
-                </Typography>
-                <LinkButton
-                  href="/admin/reports"
-                  variant="contained"
-                  id="admin-reports-btn"
-                >
-                  通報一覧を見る
-                </LinkButton>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{tAdmin("reports.title")}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {tAdmin("reports.description")}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button variant="contained" component={Link} href="/admin/reports">
+                    {tAdmin("reports.viewList")}
+                  </Button>
+                </Box>
               </Stack>
             </CardContent>
           </Card>

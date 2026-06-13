@@ -10,30 +10,12 @@ import Divider from "@mui/material/Divider";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { unpublishProject, updateReportStatus, getReports } from "@/lib/actions/report";
 
 interface AdminReportsPageProps {
   params: Promise<{ locale: string }>;
 }
-
-const REASON_LABEL: Record<string, string> = {
-  copyright: "著作権侵害",
-  malware:   "マルウェア疑い",
-  spam:      "スパム",
-  other:     "その他",
-};
-
-const STATUS_COLOR: Record<string, "warning" | "success" | "default"> = {
-  pending:   "warning",
-  resolved:  "success",
-  dismissed: "default",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  pending:   "未対応",
-  resolved:  "対応済",
-  dismissed: "却下",
-};
 
 export default async function AdminReportsPage({ params }: AdminReportsPageProps) {
   const { locale } = await params;
@@ -42,17 +24,37 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
   const session = await auth();
   if (session?.user?.role !== "admin") redirect("/");
 
+  const tAdmin = await getTranslations("Admin");
   const reports = await getReports();
+
+  const reasonLabels: Record<string, string> = {
+    copyright: tAdmin("reports.reasons.copyright"),
+    malware:   tAdmin("reports.reasons.malware"),
+    spam:      tAdmin("reports.reasons.spam"),
+    other:     tAdmin("reports.reasons.other"),
+  };
+
+  const statusColors: Record<string, "warning" | "success" | "default"> = {
+    pending:   "warning",
+    resolved:  "success",
+    dismissed: "default",
+  };
+
+  const statusLabels: Record<string, string> = {
+    pending:   tAdmin("reports.status.pending"),
+    resolved:  tAdmin("reports.status.resolved"),
+    dismissed: tAdmin("reports.status.dismissed"),
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
       <Typography variant="h4" sx={{ fontWeight: 800,  mb: 4  }}>
-        通報一覧
+        {tAdmin("reports.listTitle")}
       </Typography>
 
       <Stack spacing={2}>
         {reports.length === 0 && (
-          <Typography color="text.secondary">現在のところ通報はありません。</Typography>
+          <Typography color="text.secondary">{tAdmin("reports.noReports")}</Typography>
         )}
         {reports.map(({ report, project, reporter }) => (
           <Card key={report.id} id={`report-card-${report.id}`}>
@@ -62,13 +64,13 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap", mb: 1 }}>
                     <Chip
-                      label={REASON_LABEL[report.reason]}
+                      label={reasonLabels[report.reason]}
                       color="error"
                       size="small"
                     />
                     <Chip
-                      label={STATUS_LABEL[report.status]}
-                      color={STATUS_COLOR[report.status]}
+                      label={statusLabels[report.status]}
+                      color={statusColors[report.status]}
                       size="small"
                       variant="outlined"
                     />
@@ -77,12 +79,17 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                     </Typography>
                   </Box>
 
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700,  mb: 0.5  }}>
-                    プロジェクト: {project.name}
-                  </Typography>
+                  <Box sx={{ mt: 2, display: "flex", gap: 2, alignItems: "center" }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {tAdmin("reports.project", { name: project.name })}
+                    </Typography>
+                    <Link href={`/projects/${project.slug}`} style={{ fontSize: "0.875rem" }}>
+                      Link
+                    </Link>
+                  </Box>
 
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    通報者: {reporter.displayName ?? reporter.username}
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {tAdmin("reports.reporter", { name: reporter.displayName ?? reporter.username })}
                   </Typography>
 
                   {report.detail && (
@@ -90,6 +97,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                       variant="body2"
                       color="text.secondary"
                       sx={{
+                        mt: 1,
                         p: 1.5,
                         bgcolor: "background.default",
                         borderRadius: 1,
@@ -107,35 +115,32 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                   <Stack spacing={1} alignItems="flex-end">
                     <form action={updateReportStatus.bind(null, report.id, "resolved")}>
                       <Button
-                        id={`resolve-btn-${report.id}`}
                         type="submit"
-                        variant="contained"
+                        variant="outlined"
                         size="small"
                         color="success"
                       >
-                        対応済
+                        {tAdmin("reports.actions.resolve")}
                       </Button>
                     </form>
                     <form action={unpublishProject.bind(null, project.id)}>
                       <Button
-                        id={`unpublish-btn-${project.id}`}
                         type="submit"
-                        variant="outlined"
+                        variant="contained"
                         size="small"
                         color="error"
                       >
-                        非公開にする
+                        {tAdmin("reports.actions.unpublish")}
                       </Button>
                     </form>
                     <form action={updateReportStatus.bind(null, report.id, "dismissed")}>
                       <Button
-                        id={`dismiss-btn-${report.id}`}
                         type="submit"
                         variant="text"
                         size="small"
                         color="inherit"
                       >
-                        却下
+                        {tAdmin("reports.actions.dismiss")}
                       </Button>
                     </form>
                   </Stack>

@@ -12,23 +12,23 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import { Link } from "@/i18n/routing";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const tAuth = useTranslations("Auth");
 
-  const registered = searchParams.get("registered");
+  const registered = searchParams.get("registered") === "true";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
 
     const res = await signIn("credentials", {
       email,
@@ -37,13 +37,17 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      setError("メールアドレスまたはパスワードが間違っています。");
+      setError(tAuth("login.error.invalidCredentials"));
       setLoading(false);
     } else {
       router.push("/ja/projects");
       router.refresh();
     }
   }
+
+  const handleGithubLogin = () => {
+    signIn("github", { callbackUrl: "/ja/projects" });
+  };
 
   return (
     <Container maxWidth="xs" sx={{ py: 8 }}>
@@ -57,63 +61,71 @@ export default function LoginPage() {
         }}
       >
         <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }} align="center" color="primary.main">
-          ログイン
+          {tAuth("login.title")}
         </Typography>
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
-          お帰りなさい！
+          {tAuth("login.welcomeBack")}
         </Typography>
 
-        {registered && <Alert severity="success" sx={{ mb: 3 }}>登録が完了しました。ログインしてください。</Alert>}
+        {registered && <Alert severity="success" sx={{ mb: 3 }}>{tAuth("login.registrationComplete")}</Alert>}
         {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
         <form onSubmit={handleSubmit}>
           <TextField
             name="email"
-            label="メールアドレス"
+            label={tAuth("fields.email")}
             type="email"
             fullWidth
             required
             margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
           />
           <TextField
             name="password"
-            label="パスワード"
+            label={tAuth("fields.password")}
             type="password"
             fullWidth
             required
             margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
 
           <Button
             type="submit"
             variant="contained"
             fullWidth
+            size="large"
             disabled={loading}
             sx={{ mt: 3, py: 1.5, fontSize: "1rem" }}
           >
-            {loading ? "ログイン中..." : "ログイン"}
+            {loading ? tAuth("login.loggingIn") : tAuth("login.title")}
           </Button>
         </form>
 
         <Divider sx={{ my: 3 }}>
-          <Typography variant="body2" color="text.disabled">または</Typography>
+          <Typography variant="body2" color="text.disabled">{tAuth("or")}</Typography>
         </Divider>
 
         <Button
           variant="outlined"
           fullWidth
+          size="large"
           startIcon={<GitHubIcon />}
-          onClick={() => signIn("github", { callbackUrl: "/ja/projects" })}
+          onClick={handleGithubLogin}
           sx={{ py: 1.2 }}
         >
-          GitHub でログイン
+          {tAuth("login.loginWithGithub")}
         </Button>
 
         <Box sx={{ mt: 4, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
-            アカウントをお持ちでないですか？{" "}
+            {tAuth("login.noAccount")}{" "}
             <Link href="/register" style={{ color: "#38bdf8", textDecoration: "none" }}>
-              新規登録はこちら
+              {tAuth("login.registerLink")}
             </Link>
           </Typography>
         </Box>

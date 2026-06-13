@@ -5,6 +5,11 @@ import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import ReportIcon from "@mui/icons-material/Report";
+import GavelIcon from "@mui/icons-material/Gavel";
+import CodeIcon from "@mui/icons-material/Code";
+import { useTranslations } from "next-intl";
 import ReportDialog from "@/components/project/ReportDialog";
 
 /**
@@ -23,6 +28,8 @@ export interface ProjectSidebarProps {
 }
 
 export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectSidebarProps) {
+  const t = useTranslations("Project");
+
   return (
     <Box
       sx={{
@@ -37,10 +44,11 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
     >
       {/* ライセンス */}
       <Box sx={{ mb: 2 }}>
-        <Typography variant="caption" color="text.disabled" sx={{ mb: 0.5, display: "block" }}>
-          ライセンス
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <GavelIcon fontSize="small" color="action" />
+          {t("sidebar.license")}
         </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+        <Typography variant="body2">
           {p.license}
         </Typography>
       </Box>
@@ -50,6 +58,10 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
       {/* ソースコード */}
       {p.sourceUrl && (
         <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <CodeIcon fontSize="small" color="action" />
+            {t("sidebar.sourceCode")}
+          </Typography>
           <Button
             id="source-code-btn"
             href={p.sourceUrl}
@@ -60,7 +72,7 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
             variant="outlined"
             size="small"
           >
-            ソースコード
+            GitHub
           </Button>
         </Box>
       )}
@@ -68,8 +80,9 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
       {/* タグ */}
       {p.tags.length > 0 && (
         <Box>
-          <Typography variant="caption" color="text.disabled" sx={{ mb: 1, display: "block" }}>
-            タグ
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <LocalOfferIcon fontSize="small" color="action" />
+            {t("sidebar.tags")}
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
             {p.tags.map((tag: string) => (

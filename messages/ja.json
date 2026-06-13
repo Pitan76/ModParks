@@ -85,9 +85,23 @@
       "title": "プロジェクト編集",
       "success": "プロジェクトを更新しました"
     },
+    "sidebar": {
+      "license": "ライセンス",
+      "sourceCode": "ソースコード",
+      "tags": "タグ",
+      "report": "通報"
+    },
+    "header": {
+      "publishedAt": "公開: {date}",
+      "updatedAt": "更新: {date}",
+      "addVersion": "新バージョンを追加"
+    },
     "versions": "バージョン",
     "noVersions": "バージョンがまだありません",
     "downloads": "ダウンロード",
+    "createdAt": "公開日",
+    "newProject": "新規プロジェクト",
+    "uploadNewVersion": "新バージョンをアップロード",
     "author": "作者",
     "download": "ダウンロード",
     "report": "通報"
@@ -103,6 +117,20 @@
     "create": {
       "title": "バージョン追加",
       "success": "バージョンを追加しました"
+    },
+    "uploadForm": {
+      "error": {
+        "fileRequired": "ファイルを選択してください",
+        "uploadFailed": "アップロードに失敗しました",
+        "uploadError": "アップロード中にエラーが発生しました"
+      },
+      "fileSelect": "ファイルを選択 (.jar, .zip)",
+      "parsingJar": "JARファイルを解析中...",
+      "selectedFile": "選択中: {name} ({size} MB)",
+      "resolveIdea": "解決するアイデア (任意)",
+      "none": "なし",
+      "versionNumberPlaceholder": "バージョン番号 (例: 1.0.0)",
+      "publish": "バージョンを公開"
     },
     "loaders": {
       "fabric": "Fabric",
@@ -128,25 +156,110 @@
     "success": "通報しました。確認後に対応いたします。"
   },
   "Profile": {
-    "title": "プロフィール編集",
-    "displayName": "表示名",
-    "bio": "自己紹介",
-    "success": "プロフィールを更新しました",
+    "updateSuccess": "プロフィールを更新しました",
+    "githubLinked": "GitHub アカウントで連携済",
+    "githubNotLinked": "GitHub 未連携",
+    "bioHelper": "500文字以内",
+    "saving": "保存中...",
+    "save": "保存",
     "uploadError": "アップロードの準備に失敗しました",
-    "uploadFailed": "画像のアップロードに失敗しました"
+    "uploadFailed": "画像のアップロードに失敗しました",
+    "error": {
+      "displayNameRequired": "表示名は必須です"
+    }
+  },
+  "Idea": {
+    "addCommentPlaceholder": "コメントを追加...",
+    "like": "いいね {count}",
+    "title": "アイデア",
+    "description": "マイクラのMOD、プラグインをみんなで一緒につくったり、探したりしてみませんか？",
+    "postIdea": "アイデアを投稿",
+    "status": {
+      "open": "募集中",
+      "in_progress": "開発中",
+      "resolved": "実現済"
+    },
+    "noIdeas": "まだアイデアがありません",
+    "postFirstIdea": "あなたの「こんなModが欲しい！」を投稿してみましょう！",
+    "backToList": "アイデア一覧に戻る",
+    "postIdeaTitle": "アイデアを投稿",
+    "fields": {
+      "title": "タイトル",
+      "titlePlaceholder": "例: 建築が楽になる魔法の杖を追加するMod",
+      "content": "どんなMod/Pluginが欲しいですか？",
+      "contentPlaceholder": "具体的な機能や、なぜ欲しいのかを書いてみましょう。"
+    },
+    "submitting": "送信中...",
+    "submitIdea": "アイデアを投稿する",
+    "statusLabel": "ステータス: {status}",
+    "resolvedBy": "このアイデアを実現したMod",
+    "viewProject": "プロジェクトを見る",
+    "comments": "コメント ({count})",
+    "loginToComment": "コメントするにはログインが必要です。",
+    "noComments": "まだコメントはありません。"
+  },
+  "Auth": {
+    "login": {
+      "title": "ログイン",
+      "welcomeBack": "お帰りなさい！",
+      "registrationComplete": "登録が完了しました。ログインしてください。",
+      "loggingIn": "ログイン中...",
+      "loginWithGithub": "GitHub でログイン",
+      "noAccount": "アカウントをお持ちでないですか？ ",
+      "registerLink": "新規登録",
+      "error": {
+        "invalidCredentials": "メールアドレスまたはパスワードが間違っています。"
+      }
+    },
+    "register": {
+      "title": "新規登録",
+      "welcome": "ModParksへようこそ！",
+      "registering": "登録中...",
+      "registerWithGithub": "GitHub で登録",
+      "alreadyHaveAccount": "すでにアカウントをお持ちですか？ ",
+      "loginLink": "ログイン",
+      "error": {
+        "passwordLength": "パスワードは8文字以上である必要があります",
+        "registrationFailed": "アカウント作成に失敗しました。"
+      }
+    },
+    "fields": {
+      "username": "ユーザー名",
+      "displayName": "表示名",
+      "usernameHelper": "ログインIDやURLの一部として使用されます（英数字）",
+      "displayNameHelper": "サイト上に表示される名前です",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "passwordWithRule": "パスワード (8文字以上)"
+    },
+    "or": "または"
   },
   "Admin": {
     "title": "管理ダッシュボード",
     "reports": {
-      "title": "通報一覧",
+      "title": "通報管理",
+      "description": "ユーザーからの通報を確認・処理します",
+      "viewList": "通報一覧を見る",
+      "listTitle": "通報一覧",
+      "noReports": "現在のところ通報はありません。",
+      "project": "プロジェクト: {name}",
+      "reporter": "通報者: {name}",
+      "reasons": {
+        "copyright": "著作権侵害",
+        "malware": "マルウェア疑い",
+        "spam": "スパム",
+        "other": "その他"
+      },
       "status": {
         "pending": "未対応",
         "resolved": "対応済",
         "dismissed": "却下"
       },
-      "resolve": "対応済にする",
-      "dismiss": "却下",
-      "unpublish": "プロジェクトを非公開"
+      "actions": {
+        "resolve": "対応済",
+        "unpublish": "非公開にする",
+        "dismiss": "却下"
+      }
     }
   },
   "Search": {

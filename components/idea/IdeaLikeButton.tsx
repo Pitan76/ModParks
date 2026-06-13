@@ -5,14 +5,17 @@ import Button from "@mui/material/Button";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { toggleIdeaLike } from "@/lib/actions/idea";
+import { useTranslations } from "next-intl";
 
-interface IdeaLikeButtonProps {
+export interface IdeaLikeButtonProps {
   ideaId: string;
   initialLiked: boolean;
   initialCount: number;
+  isLoggedIn: boolean;
 }
 
-export default function IdeaLikeButton({ ideaId, initialLiked, initialCount }: IdeaLikeButtonProps) {
+export default function IdeaLikeButton({ ideaId, initialLiked, initialCount, isLoggedIn }: IdeaLikeButtonProps) {
+  const tIdea = useTranslations("Idea");
   const [isPending, startTransition] = useTransition();
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
@@ -39,10 +42,15 @@ export default function IdeaLikeButton({ ideaId, initialLiked, initialCount }: I
       color={liked ? "error" : "inherit"}
       startIcon={liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
       onClick={handleToggle}
-      disabled={isPending}
-      sx={{ borderRadius: 8, px: 3 }}
+      disabled={!isLoggedIn || isPending}
+      sx={{ 
+        borderRadius: 8, 
+        px: 2,
+        textTransform: "none",
+        fontWeight: "bold",
+      }}
     >
-      いいね {count}
+      {tIdea("like", { count })}
     </Button>
   );
 }

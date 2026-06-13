@@ -1,7 +1,7 @@
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import { notFound, redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { getProjectBySlug } from "@/lib/actions/project";
 import ProjectEditForm from "@/components/project/ProjectEditForm";
@@ -30,10 +30,12 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     redirect(`/projects/${slug}`);
   }
 
+  const t = await getTranslations("Project");
+
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 800,  mb: 4  }}>
-        プロジェクト編集
+        {t("edit.title")}
       </Typography>
 
       <ProjectEditForm project={project} />

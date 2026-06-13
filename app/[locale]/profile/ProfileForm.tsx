@@ -15,6 +15,7 @@ import { updateProfile } from "@/lib/actions/profile";
 import { useRouter } from "next/navigation";
 import { resizeImageFile } from "@/lib/utils/image";
 import { useTranslations } from "next-intl";
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 interface ProfileFormProps {
   initialData: {
@@ -99,10 +100,10 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
     
     const result = await updateProfile(formData);
 
-    if (result.error) {
-      setMessage({ type: "error", text: result.error });
+    if (result && result.error) {
+      setMessage({ type: "error", text: t("error." + result.error) || result.error });
     } else {
-      setMessage({ type: "success", text: "プロフィールを更新しました" });
+      setMessage({ type: "success", text: t("updateSuccess") });
       router.refresh();
     }
     setPending(false);
@@ -146,8 +147,9 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             @{initialData.username}
           </Typography>
-          <Typography variant="body2" color={initialData.hasGitHub ? "text.secondary" : "text.disabled"}>
-            {initialData.hasGitHub ? "GitHub アカウントで連携済" : "GitHub 未連携"}
+          <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <GitHubIcon fontSize="small" />
+            {initialData.hasGitHub ? t("githubLinked") : t("githubNotLinked")}
           </Typography>
         </Box>
       </Box>
@@ -167,18 +169,17 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
         label={labels.bio}
         defaultValue={initialData.bio}
         multiline
-        rows={3}
+        rows={4}
         fullWidth
+        helperText={t("bioHelper")}
         slotProps={{ htmlInput: { maxLength: 500 } }}
-        helperText="500文字以内"
       />
       <Button
-        id="profile-save-btn"
         type="submit"
         variant="contained"
         disabled={pending}
       >
-        {pending ? "保存中..." : "保存"}
+        {pending ? t("saving") : t("save")}
       </Button>
     </Box>
   );
