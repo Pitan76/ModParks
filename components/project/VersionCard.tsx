@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { getLoaderInfo } from "@/lib/loaders";
 
 /**
  * バージョン一覧の各カードに表示するデータの型定義
@@ -33,16 +34,6 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-const LOADER_COLOR: Record<string, "default" | "primary" | "secondary" | "warning"> = {
-  fabric:   "primary",
-  forge:    "warning",
-  neoforge: "warning",
-  quilt:    "secondary",
-  paper:    "secondary",
-  spigot:   "secondary",
-  bukkit:   "secondary",
-  velocity: "secondary",
-};
 
 /**
  * プロジェクトの特定バージョンをカード形式で表示するコンポーネント
@@ -66,7 +57,7 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
   return (
     <Card
       id={`version-card-${version.id}`}
-      sx={{ mb: 1.5, "&:hover": { borderColor: "primary.dark" } }}
+      sx={{ mb: 1.5, "&:hover": { borderColor: "primary.main" } }}
     >
       <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}>
@@ -78,15 +69,21 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
               </Typography>
 
               {/* ローダー */}
-              {parsedLoaders.map((loader) => (
-                <Chip
-                  key={loader}
-                  label={loader}
-                  size="small"
-                  color={LOADER_COLOR[loader] ?? "default"}
-                  sx={{ height: 20, fontSize: "0.65rem", textTransform: "capitalize" }}
-                />
-              ))}
+              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", mt: 1 }}>
+                {parsedLoaders.map((l) => {
+                  const info = getLoaderInfo(l);
+                  return (
+                    <Chip
+                      key={l}
+                      label={info.name}
+                      size="small"
+                      color={info.color as any}
+                      avatar={info.icon}
+                      sx={{ borderRadius: "4px" }}
+                    />
+                  );
+                })}
+              </Stack>
 
               {/* MC バージョン */}
               {parsedMcVersions.slice(0, 3).map((mc) => (

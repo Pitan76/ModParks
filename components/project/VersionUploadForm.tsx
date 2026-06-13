@@ -16,9 +16,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
+import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
 
 const MC_VERSIONS = ["1.21.5", "1.21.4", "1.21.1", "1.20.6", "1.20.4", "1.20.1", "1.19.4"];
-const LOADERS = ["fabric", "forge", "neoforge", "quilt", "paper", "purpur", "velocity", "waterfall"];
 
 /**
  * プロジェクトの新バージョン（ファイル）をアップロードするフォームコンポーネント。
@@ -157,15 +157,24 @@ export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
               input={<OutlinedInput label="ローダー" />}
               renderValue={(selected) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} size="small" />
-                  ))}
+                  {selected.map((value) => {
+                    const info = getLoaderInfo(value);
+                    return <Chip key={value} label={info.name} size="small" avatar={info.icon} color={info.color} />;
+                  })}
                 </Box>
               )}
             >
-              {LOADERS.map((l) => (
-                <MenuItem key={l} value={l}>{l}</MenuItem>
-              ))}
+              {AVAILABLE_LOADERS.map((l) => {
+                const info = getLoaderInfo(l);
+                return (
+                  <MenuItem key={l} value={l}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      {info.icon}
+                      {info.name}
+                    </Box>
+                  </MenuItem>
+                );
+              })}
             </Select>
             {error?.loaders && <Typography color="error" variant="caption">{error.loaders[0]}</Typography>}
           </FormControl>
