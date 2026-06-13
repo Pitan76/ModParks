@@ -8,6 +8,15 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+/**
+ * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action
+ * @param projectSlug 対象プロジェクトのSlug
+ * @param formData フォームデータ (versionNumber, mcVersions, loaders, changelog, fileUrl, fileName 等)
+ * @returns { success: boolean, versionId: string } または { error: Record<string, string[]> }
+ * @throws Unauthorized ログインしていない場合
+ * @throws Forbidden プロジェクトの作成者ではない場合
+ * @throws Error プロジェクトが見つからない場合
+ */
 export async function createVersion(projectSlug: string, formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");

@@ -11,6 +11,12 @@ import { redirect } from "next/navigation";
 
 // ─── プロジェクト作成 ─────────────────────────────────────────────────────────
 
+/**
+ * 新しいプロジェクト（Mod/Plugin）を作成する Server Action
+ * @param formData 送信されたフォームデータ (name, summary, type, description 等)
+ * @returns { success: boolean, slug: string } または { error: Record<string, string[]> }
+ * @throws Unauthorized ログインしていない場合
+ */
 export async function createProject(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
@@ -66,7 +72,15 @@ export async function createProject(formData: FormData) {
 
 // ─── プロジェクト更新 ─────────────────────────────────────────────────────────
 
-export async function updateProject(projectId: string, formData: FormData) {
+/**
+ * 既存のプロジェクト情報を更新する Server Action
+ * @param slug 更新対象プロジェクトのSlug
+ * @param formData 送信されたフォームデータ
+ * @returns { success: boolean } または { error: Record<string, string[]> }
+ * @throws Unauthorized ログインしていない場合
+ * @throws Forbidden プロジェクトの作者ではない、または管理者権限がない場合
+ */
+export async function updateProject(slug: string, formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -76,7 +90,7 @@ export async function updateProject(projectId: string, formData: FormData) {
   const project = await db
     .select()
     .from(projects)
-    .where(eq(projects.id, projectId))
+    .where(eq(projects.slug, slug))
     .get();
 
   if (!project) throw new Error("Project not found");
@@ -118,14 +132,14 @@ export async function updateProject(projectId: string, formData: FormData) {
       iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
       updatedAt: new Date(),
     })
-    .where(eq(projects.id, projectId))
+    .where(eq(projects.id, project.id))
     .run();
 
   if (tags !== undefined) {
-    await db.delete(projectTags).where(eq(projectTags.projectId, projectId)).run();
+    await db.delete(projectTags).where(eq(projectTags.projectId, project.id)).run();
     if (tags.length > 0) {
       await db.insert(projectTags).values(
-        tags.map((tag) => ({ projectId, tag }))
+        tags.map((tag) => ({ projectId: project.id, tag }))
       ).run();
     }
   }
@@ -136,6 +150,17 @@ export async function updateProject(projectId: string, formData: FormData) {
 
 // ─── プロジェクト取得（一覧・検索） ─────────────────────────────────────────────
 
+/**
+ * 公開中のプロジェクト一覧を取得する Server Action
+ * ページネーション、検索クエリ、フィルタリングに対応
+ * @param params 検索・フィルタ条件
+ * @param params.q 検索文字列（名前、概要にマッチ）
+ * @param params.type プロジェクト種別（mod / plugin）
+ * @param params.authorId 特定の作者のプロジェクトのみ取得する場合に指定
+ * @param params.limit 1ページあたりの取得件数
+ * @param params.offset 取得開始位置
+ * @returns projects配列
+ */
 export async function getProjects(params: {
   q?:    string;
   type?: "mod" | "plugin";
@@ -154,7 +179,8 @@ export async function getProjects(params: {
     conditions.push(eq(projects.status, "published"));
   }
   
-  if (type && type !== "all" as any) conditions.push(eq(projects.type, type));
+  // @ts-ignore
+  if (type && type !== "all") conditions.push(eq(projects.type, type));
   if (q) conditions.push(like(projects.name, `%${q}%`));
 
   // プロジェクトと著者の情報をJOINして取得
@@ -194,6 +220,11 @@ export async function getProjects(params: {
   }));
 }
 
+/**
+ * プロジェクトのSlugから詳細情報を取得する Server Action
+ * @param slug プロジェクトの一意な識別子
+ * @returns プロジェクトの詳細データ（作者情報やバージョン情報を含む）。存在しない場合は null。
+ */
 export async function getProjectBySlug(slug: string) {
   const d1 = await getD1();
   const db = getDb(d1);

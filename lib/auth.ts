@@ -11,6 +11,10 @@ import bcrypt from "bcryptjs";
 // @ts-expect-error D1 binding
 const d1 = typeof process !== "undefined" ? process.env.DB : undefined;
 
+/**
+ * NextAuthの認証設定オブジェクト。
+ * GitHub OAuthの設定と、セッション情報のカスタマイズを行います。
+ */
 export const authConfig = {
   adapter: d1 ? DrizzleAdapter(getDb(d1)) : undefined,
   providers: [
@@ -92,4 +96,8 @@ export const authConfig = {
   session: { strategy: "jwt" },
 } satisfies NextAuthConfig;
 
+/**
+ * NextAuthの初期化。
+ * アプリケーション全体で使用する認証系の関数（サインイン、サインアウト、セッション取得等）を提供します。
+ */
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);

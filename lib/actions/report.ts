@@ -8,6 +8,13 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+/**
+ * ユーザーがプロジェクトを通報する Server Action
+ * @param projectId 通報対象のプロジェクトID
+ * @param formData フォームデータ (reason, detail)
+ * @returns { success: boolean } または { error: Record<string, string[]> }
+ * @throws Unauthorized ログインしていない場合
+ */
 export async function createReport(projectId: string, formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
@@ -39,6 +46,13 @@ export async function createReport(projectId: string, formData: FormData) {
 
 // ─── 管理者: 通報ステータス更新 ───────────────────────────────────────────────
 
+/**
+ * 管理者が通報のステータスを更新する Server Action
+ * @param reportId 対象の通報ID
+ * @param status 変更後のステータス ("resolved" または "dismissed")
+ * @returns { success: boolean }
+ * @throws Forbidden 管理者権限がない場合
+ */
 export async function updateReportStatus(
   reportId: string,
   status: "resolved" | "dismissed"
@@ -61,6 +75,12 @@ export async function updateReportStatus(
 
 // ─── 管理者: プロジェクト非公開 ──────────────────────────────────────────────
 
+/**
+ * 管理者が問題のあるプロジェクトを非公開(draft)にする Server Action
+ * @param projectId 対象のプロジェクトID
+ * @returns { success: boolean }
+ * @throws Forbidden 管理者権限がない場合
+ */
 export async function unpublishProject(projectId: string) {
   const session = await auth();
   if (session?.user?.role !== "admin") throw new Error("Forbidden");
@@ -81,6 +101,11 @@ export async function unpublishProject(projectId: string) {
 
 // ─── 管理者: 通報一覧取得 ───────────────────────────────────────────────────
 
+/**
+ * 管理者向け: すべての通報一覧を取得する Server Action
+ * @returns 通報データ(report)と、対象プロジェクト(project)、通報者(reporter)の結合配列
+ * @throws Forbidden 管理者権限がない場合
+ */
 export async function getReports() {
   const session = await auth();
   if (session?.user?.role !== "admin") throw new Error("Forbidden");
