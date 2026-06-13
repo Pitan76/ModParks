@@ -12,6 +12,7 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { updateProject } from "@/lib/actions/project";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 
@@ -30,6 +31,7 @@ interface ProjectEditFormProps {
 
 export default function ProjectEditForm({ project }: ProjectEditFormProps) {
   const router = useRouter();
+  const t = useTranslations("Project.form");
   
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
@@ -58,26 +60,26 @@ export default function ProjectEditForm({ project }: ProjectEditFormProps) {
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <ProjectFormFields error={error} project={project as any}>
             <FormControl fullWidth required>
-              <InputLabel id="project-status-label">公開状態</InputLabel>
+              <InputLabel id="project-status-label">{t("status")}</InputLabel>
               <Select
                 labelId="project-status-label"
                 id="project-status"
                 name="status"
-                label="公開状態"
+                label={t("status")}
                 defaultValue={project.status}
               >
-                <MenuItem value="published">公開中</MenuItem>
-                <MenuItem value="draft">非公開 (下書き)</MenuItem>
+                <MenuItem value="published">{t("published")}</MenuItem>
+                <MenuItem value="draft">{t("draft")}</MenuItem>
               </Select>
             </FormControl>
           </ProjectFormFields>
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
-              キャンセル
+              {t("cancel")}
             </Button>
             <Button type="submit" variant="contained" size="large" disabled={pending}>
-              {pending ? "保存中..." : "変更を保存"}
+              {pending ? t("saving") : t("save")}
             </Button>
           </Box>
         </Box>

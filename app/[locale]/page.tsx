@@ -148,7 +148,7 @@ export default async function HomePage({ params }: HomePageProps) {
                   color:        "primary.main",
                 }}
               >
-                投稿する
+                {t("cta")}
               </LinkButton>
             </Box>
 
@@ -191,7 +191,7 @@ export default async function HomePage({ params }: HomePageProps) {
         <Grid container spacing={2}>
           {DUMMY_PROJECTS.map((project) => (
             <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={project} />
+              <ProjectCard project={project} layout="grid" />
             </Grid>
           ))}
         </Grid>

@@ -175,15 +175,6 @@
       "displayNameRequired": "Display Name is required"
     }
   },
-  "Home": {
-    "hero": {
-      "title": "Discover amazing Mods on",
-      "titleHighlight": "ModParks",
-      "description": "The best platform from Japan to easily publish, search, and download Minecraft Java Edition Mods and Plugins."
-    },
-    "newProjects": "New Projects",
-    "cta": "Submit Project"
-  },
   "Idea": {
     "addCommentPlaceholder": "Add a comment...",
     "like": "Like {count}",

@@ -100,7 +100,7 @@ export default function ReportDialog({ projectId }: ReportDialogProps) {
         </DialogContent>
         <DialogActions>
           <Button id="report-cancel" onClick={() => setOpen(false)}>
-            キャンセル
+            {t("cancel")}
           </Button>
           {!success && (
             <Button
@@ -110,7 +110,7 @@ export default function ReportDialog({ projectId }: ReportDialogProps) {
               color="error"
               disabled={pending}
             >
-              {pending ? "送信中..." : "送信"}
+              {pending ? t("sending") : t("submit")}
             </Button>
           )}
         </DialogActions>

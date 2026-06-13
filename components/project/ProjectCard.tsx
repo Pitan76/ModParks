@@ -33,6 +33,7 @@ export interface ProjectCardProps {
     authorAvatarUrl?: string | null;
     updatedAt:   Date | number;
   };
+  layout?: "list" | "grid";
 }
 
 const TYPE_COLOR = {
@@ -50,13 +51,23 @@ const TYPE_LABEL = {
  * プロジェクトをカード形式で表示するコンポーネント
  * @param props ProjectCardProps プロジェクトのメタ情報や作者情報を含む
  */
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
   const locale = useLocale();
+  const isGrid = layout === "grid";
 
   return (
-    <Card id={`project-card-${project.slug}`}>
-      <LinkCardActionArea href={`/projects/${project.slug}`}>
-        <CardContent sx={{ p: 2, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "flex-start", sm: "center" }, gap: 2 }}>
+    <Card id={`project-card-${project.slug}`} sx={{ height: "100%" }}>
+      <LinkCardActionArea href={`/projects/${project.slug}`} sx={{ height: "100%" }}>
+        <CardContent 
+          sx={{ 
+            p: 2, 
+            display: "flex", 
+            flexDirection: isGrid ? "column" : { xs: "column", sm: "row" }, 
+            alignItems: isGrid ? "flex-start" : { xs: "flex-start", sm: "center" }, 
+            gap: 2,
+            height: "100%"
+          }}
+        >
           {/* アイコン */}
           <Avatar
             src={project.iconUrl ?? undefined}
@@ -73,7 +84,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </Avatar>
 
           {/* メイン情報（タイトル・説明・作者） */}
-          <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5, width: "100%" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
                 {project.name}
@@ -111,7 +122,18 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </Box>
 
           {/* メタ情報（ダウンロード数など） */}
-          <Box sx={{ display: "flex", flexDirection: { xs: "row", sm: "column" }, alignItems: { xs: "center", sm: "flex-end" }, gap: { xs: 2, sm: 0.5 }, flexShrink: 0 }}>
+          <Box 
+            sx={{ 
+              display: "flex", 
+              flexDirection: isGrid ? "row" : { xs: "row", sm: "column" }, 
+              alignItems: isGrid ? "center" : { xs: "center", sm: "flex-end" }, 
+              justifyContent: isGrid ? "space-between" : "flex-start",
+              width: isGrid ? "100%" : "auto",
+              gap: isGrid ? 2 : { xs: 2, sm: 0.5 }, 
+              flexShrink: 0,
+              mt: isGrid ? "auto" : 0
+            }}
+          >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
               <DownloadIcon sx={{ fontSize: "1rem" }} />
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -120,8 +142,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             </Box>
             
             {project.tags.length > 0 && (
-              <Box sx={{ display: "flex", gap: 0.5, mt: { xs: 0, sm: 1 } }}>
-                {project.tags.slice(0, 3).map((tag) => (
+              <Box sx={{ display: "flex", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                {project.tags.slice(0, isGrid ? 2 : 3).map((tag) => (
                   <Chip
                     key={tag}
                     label={tag}
@@ -130,9 +152,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                     sx={{ height: 18, fontSize: "0.6rem", borderColor: "divider" }}
                   />
                 ))}
-                {project.tags.length > 3 && (
+                {project.tags.length > (isGrid ? 2 : 3) && (
                   <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5 }}>
-                    +{project.tags.length - 3}
+                    +{project.tags.length - (isGrid ? 2 : 3)}
                   </Typography>
                 )}
               </Box>
