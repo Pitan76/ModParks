@@ -5,17 +5,7 @@ import Box from "@mui/material/Box";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";
 import AppHeader from "./AppHeader";
 
-interface Session {
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    username?: string;
-    displayName?: string;
-    avatarUrl?: string;
-    role?: string;
-  };
-}
+import type { Session } from "next-auth";
 
 export default function AppLayout({
   children,

@@ -4,7 +4,6 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import ThemeRegistry from "@/components/ThemeRegistry";
-import Box from "@mui/material/Box";
 import { auth } from "@/lib/auth";
 import { getDb, getD1 } from "@/lib/db";
 import { users } from "@/db/schema";
@@ -51,7 +50,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     const dbUser = await db.select().from(users).where(eq(users.id, session.user.id)).get();
     if (dbUser) {
       session.user.avatarUrl = dbUser.avatarUrl;
-      session.user.displayName = dbUser.displayName;
+      session.user.displayName = dbUser.displayName ?? "";
     }
   }
 

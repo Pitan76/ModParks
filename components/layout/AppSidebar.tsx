@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -21,12 +20,7 @@ import { useTranslations } from "next-intl";
 
 export const SIDEBAR_WIDTH = 260;
 
-interface Session {
-  user?: {
-    name?: string | null;
-    role?: string;
-  };
-}
+import type { Session } from "next-auth";
 
 interface AppSidebarProps {
   mobileOpen: boolean;
@@ -66,21 +60,16 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
         <Link href="/" style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 8 }}>
           {/* ロゴやタイトル */}
           <Box
+            component="img"
+            src="/icon.png"
+            alt="ModParks Logo"
             sx={{
               width: 32,
               height: 32,
               borderRadius: "8px",
-              background: "linear-gradient(135deg, #38bdf8, #0284c7)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 900,
-              fontSize: "18px",
-              color: "#082f49",
+              objectFit: "cover"
             }}
-          >
-            M
-          </Box>
+          />
           <Box sx={{ fontWeight: 800, fontSize: "1.1rem", letterSpacing: "-0.5px" }}>
             ModParks
           </Box>

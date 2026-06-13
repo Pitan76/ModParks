@@ -4,7 +4,6 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
@@ -22,17 +21,7 @@ import { usePathname, useRouter, Link } from "@/i18n/routing";
 import LinkButton from "@/components/ui/LinkButton";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 
-interface Session {
-  user?: {
-    name?:        string | null;
-    email?:       string | null;
-    image?:       string | null;
-    username?:    string;
-    displayName?: string;
-    avatarUrl?:   string;
-    role?:        string;
-  };
-}
+import type { Session } from "next-auth";
 
 interface AppHeaderProps {
   session: Session | null;
@@ -74,21 +63,16 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
         <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
           <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", gap: 1 }}>
             <Box
+              component="img"
+              src="/icon.png"
+              alt="ModParks Logo"
               sx={{
-                width:        32,
-                height:       32,
+                width: 32,
+                height: 32,
                 borderRadius: "8px",
-                background:   "linear-gradient(135deg, #38bdf8, #0284c7)",
-                display:      "flex",
-                alignItems:   "center",
-                justifyContent: "center",
-                fontWeight:   900,
-                fontSize:     "18px",
-                color:        "#082f49",
+                objectFit: "cover"
               }}
-            >
-              M
-            </Box>
+            />
             <Typography
               variant="h6"
               component="span"
