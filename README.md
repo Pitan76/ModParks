@@ -331,9 +331,46 @@ Modrinth の代替ではなく、
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## ローカル開発のセットアップ (Getting Started)
 
-First, run the development server:
+このプロジェクトは Next.js と Cloudflare D1 (SQLite) を使用しています。
+ローカル開発でデータベース機能（ログイン・登録・プロジェクト作成など）をテストするには、以下の手順でセットアップを行ってください。
+
+### 1. 依存関係のインストール
+
+```bash
+npm install
+```
+
+### 2. ローカルデータベースの準備
+
+Cloudflare D1 のローカル用テーブルを作成します。
+
+```bash
+# データベーススキーマの生成
+npm run db:generate
+
+# ローカルデータベースへのマイグレーション適用
+npm run db:migrate:local
+```
+
+### 3. 環境変数の設定
+
+プロジェクトルートに `.env.local` ファイルを作成し、以下の内容を記述してください。（GitHub ログインを使用しない場合は任意のダミー値で構いません）
+
+```env
+# ログイン後のリダイレクト先や NextAuth のベース URL
+NEXTAUTH_URL="http://localhost:3000"
+
+# (オプション) GitHub ログイン機能のテスト用
+# AUTH_GITHUB_ID="your_github_client_id"
+# AUTH_GITHUB_SECRET="your_github_client_secret"
+
+# NextAuth のセッション暗号化キー (適当なランダム文字列)
+AUTH_SECRET="secret"
+```
+
+### 4. 開発サーバーの起動
 
 ```bash
 npm run dev
@@ -345,7 +382,8 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+起動後、ブラウザで [http://localhost:3000](http://localhost:3000) を開いてください。
+※ ローカル開発環境では、Wrangler の `getPlatformProxy()` を用いて D1 データベースのバインディングを自動的にシミュレートしています。そのため、特別なプロキシサーバーを別途立ち上げる必要はありません。
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

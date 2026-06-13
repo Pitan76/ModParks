@@ -15,3 +15,27 @@ export interface Env {
 export function getDb(d1: D1Database): DrizzleD1Database<typeof schema> {
   return drizzle(d1, { schema });
 }
+
+let localD1Proxy: D1Database | null = null;
+
+/**
+ * 実行環境（本番/エッジ）またはローカル環境（Next dev）に応じた D1 バインディングを取得する。
+ * ローカル開発時は Wrangler の Platform Proxy を使用します。
+ */
+export async function getD1(): Promise<D1Database> {
+  if (process.env.NODE_ENV === "development" && typeof process !== "undefined") {
+    // 開発環境（Node.js ランタイム）では Wrangler の proxy を利用
+    if (!localD1Proxy) {
+      const { getPlatformProxy } = await import("wrangler");
+      const proxy = await getPlatformProxy<Env>();
+      localD1Proxy = proxy.env.DB;
+    }
+    if (!localD1Proxy) throw new Error("Local D1 proxy not found.");
+    return localD1Proxy;
+  }
+
+  // 本番環境（Cloudflare Workers/Pages）では process.env 等にバインディングが渡される
+  const db = (process.env as unknown as Env).DB;
+  if (!db) throw new Error("D1 binding not found in process.env");
+  return db;
+}

@@ -1,17 +1,10 @@
 "use server";
 
-import { getDb } from "@/lib/db";
+import { getDb, getD1 } from "@/lib/db";
 import { users } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { createId } from "@paralleldrive/cuid2";
-
-function getD1(): D1Database {
-  // @ts-expect-error Cloudflare Workers env binding
-  const db = (process.env as unknown as { DB: D1Database }).DB;
-  if (!db) throw new Error("D1 binding not found");
-  return db;
-}
 
 export async function registerUser(formData: FormData) {
   const username    = formData.get("username") as string;
@@ -27,7 +20,8 @@ export async function registerUser(formData: FormData) {
     return { error: "パスワードは8文字以上で入力してください。" };
   }
 
-  const db = getDb(getD1());
+  const d1 = await getD1();
+  const db = getDb(d1);
 
   // 重複チェック
   const existingUser = await db

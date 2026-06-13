@@ -40,7 +40,9 @@ export const authConfig = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const db = getDb((process.env as any).DB);
+        const { getD1 } = await import("@/lib/db");
+        const d1 = await getD1();
+        const db = getDb(d1);
         const user = await db.select().from(users).where(eq(users.email, credentials.email as string)).get();
 
         if (!user || !user.passwordHash) return null;
