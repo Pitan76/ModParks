@@ -159,9 +159,72 @@ export const reports = sqliteTable("reports", {
     .default(sql`(unixepoch())`),
 });
 
+// ─── Ideas ────────────────────────────────────────────────────────────────────
+
+export const ideas = sqliteTable("ideas", {
+  id:          text("id").primaryKey(),
+  title:       text("title").notNull(),
+  content:     text("content").notNull(),
+  authorId:    text("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status:      text("status", { enum: ["open", "in_progress", "fulfilled"] }).notNull().default("open"),
+  createdAt:   integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt:   integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+export const ideaLikes = sqliteTable(
+  "idea_likes",
+  {
+    ideaId: text("idea_id")
+      .notNull()
+      .references(() => ideas.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.ideaId, t.userId] }) })
+);
+
+export const ideaComments = sqliteTable("idea_comments", {
+  id:          text("id").primaryKey(),
+  ideaId:      text("idea_id")
+    .notNull()
+    .references(() => ideas.id, { onDelete: "cascade" }),
+  authorId:    text("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  content:     text("content").notNull(),
+  createdAt:   integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt:   integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+export const versionIdeas = sqliteTable(
+  "version_ideas",
+  {
+    versionId: text("version_id")
+      .notNull()
+      .references(() => versions.id, { onDelete: "cascade" }),
+    ideaId: text("idea_id")
+      .notNull()
+      .references(() => ideas.id, { onDelete: "cascade" }),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.versionId, t.ideaId] }) })
+);
+
 // ─── Type Exports ─────────────────────────────────────────────────────────────
 
-export type User    = typeof users.$inferSelect;
-export type Project = typeof projects.$inferSelect;
-export type Version = typeof versions.$inferSelect;
-export type Report  = typeof reports.$inferSelect;
+export type User        = typeof users.$inferSelect;
+export type Project     = typeof projects.$inferSelect;
+export type Version     = typeof versions.$inferSelect;
+export type Report      = typeof reports.$inferSelect;
+export type Idea        = typeof ideas.$inferSelect;
+export type IdeaComment = typeof ideaComments.$inferSelect;
