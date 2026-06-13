@@ -143,15 +143,21 @@
   },
   "Report": {
     "title": "Report",
-    "description": "Report an issue with this project",
+    "description": "If you believe this project violates rules, please report it using the form below.",
+    "detail": "Details (Optional)",
     "reasons": {
       "copyright": "Copyright Infringement",
-      "malware": "Suspected Malware",
+      "malware": "Malware/Virus",
       "spam": "Spam",
       "other": "Other"
     },
-    "detail": "Details (optional)",
-    "success": "Report submitted. We will review it shortly."
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "submit": "Submit",
+    "success": "Report submitted successfully.",
+    "error": {
+      "submitFailed": "Failed to submit report"
+    }
   },
   "Profile": {
     "title": "Edit Profile",
@@ -168,6 +174,15 @@
     "error": {
       "displayNameRequired": "Display Name is required"
     }
+  },
+  "Home": {
+    "hero": {
+      "title": "Discover amazing Mods on",
+      "titleHighlight": "ModParks",
+      "description": "The best platform from Japan to easily publish, search, and download Minecraft Java Edition Mods and Plugins."
+    },
+    "newProjects": "New Projects",
+    "cta": "Submit Project"
   },
   "Idea": {
     "addCommentPlaceholder": "Add a comment...",
@@ -233,7 +248,15 @@
       "password": "Password",
       "passwordWithRule": "Password (8+ chars)"
     },
-    "or": "or"
+    "or": "or",
+    "error": {
+      "allFieldsRequired": "All fields are required.",
+      "passwordLength": "Password must be at least 8 characters long.",
+      "emailTaken": "This email address is already in use.",
+      "usernameTaken": "This username is already taken.",
+      "submitFailed": "An error occurred.",
+      "unauthorized": "Unauthorized access."
+    }
   },
   "Admin": {
     "title": "Admin Dashboard",

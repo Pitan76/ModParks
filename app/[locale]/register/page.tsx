@@ -28,17 +28,22 @@ export default function RegisterPage() {
     setError("");
 
     if (password.length < 8) {
-      setError(tAuth("register.error.passwordLength"));
+      setError(tAuth("error.passwordLength"));
       setLoading(false);
       return;
     }
 
-    const res = await registerUser(formData);
-    if (res?.error) {
-      setError(res.error);
+    try {
+      const res = await registerUser(formData);
+      if (res?.error) {
+        setError(res.error ? tAuth(`error.${res.error}`) : tAuth("register.error.registrationFailed"));
+        setLoading(false);
+      } else {
+        router.push("/login?registered=true");
+      }
+    } catch (err) {
+      setError(tAuth("register.error.registrationFailed"));
       setLoading(false);
-    } else {
-      router.push("/login?registered=true");
     }
   }
 

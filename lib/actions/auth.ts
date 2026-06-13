@@ -13,11 +13,11 @@ export async function registerUser(formData: FormData) {
   const password    = formData.get("password") as string;
 
   if (!username || !displayName || !email || !password) {
-    return { error: "すべての項目を入力してください。" };
+    return { error: "allFieldsRequired" };
   }
 
   if (password.length < 8) {
-    return { error: "パスワードは8文字以上で入力してください。" };
+    return { error: "passwordLength" };
   }
 
   const d1 = await getD1();
@@ -32,10 +32,10 @@ export async function registerUser(formData: FormData) {
 
   if (existingUser) {
     if (existingUser.email === email) {
-      return { error: "このメールアドレスは既に登録されています。" };
+      return { error: "emailTaken" };
     }
     if (existingUser.username === username) {
-      return { error: "このユーザーネームは既に使用されています。" };
+      return { error: "usernameTaken" };
     }
   }
 

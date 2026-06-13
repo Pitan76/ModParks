@@ -144,18 +144,24 @@
     }
   },
   "Report": {
-    "title": "通報",
-    "description": "このプロジェクトについて問題を報告します",
+    "title": "通報する",
+    "description": "このプロジェクトに問題があると思われる場合は、以下のフォームから通報してください。",
+    "detail": "詳細（任意）",
     "reasons": {
       "copyright": "著作権侵害",
       "malware": "マルウェア疑い",
       "spam": "スパム",
       "other": "その他"
     },
-    "detail": "詳細（任意）",
+    "cancel": "キャンセル",
+    "sending": "送信中...",
+    "submit": "送信",
     "success": "通報しました。確認後に対応いたします。"
   },
   "Profile": {
+    "title": "プロフィール編集",
+    "displayName": "表示名",
+    "bio": "自己紹介",
     "updateSuccess": "プロフィールを更新しました",
     "githubLinked": "GitHub アカウントで連携済",
     "githubNotLinked": "GitHub 未連携",
@@ -196,7 +202,12 @@
     "viewProject": "プロジェクトを見る",
     "comments": "コメント ({count})",
     "loginToComment": "コメントするにはログインが必要です。",
-    "noComments": "まだコメントはありません。"
+    "noComments": "まだコメントはありません。",
+    "error": {
+      "submitFailed": "アイデアの投稿に失敗しました",
+      "likeFailed": "いいねの操作に失敗しました",
+      "commentFailed": "コメントの投稿に失敗しました"
+    }
   },
   "Auth": {
     "login": {
@@ -232,7 +243,15 @@
       "password": "パスワード",
       "passwordWithRule": "パスワード (8文字以上)"
     },
-    "or": "または"
+    "or": "または",
+    "error": {
+      "allFieldsRequired": "すべての項目を入力してください。",
+      "passwordLength": "パスワードは8文字以上で入力してください。",
+      "emailTaken": "このメールアドレスは既に登録されています。",
+      "usernameTaken": "このユーザーネームは既に使用されています。",
+      "submitFailed": "エラーが発生しました。",
+      "unauthorized": "認証に失敗しました。"
+    }
   },
   "Admin": {
     "title": "管理ダッシュボード",
