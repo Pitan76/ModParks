@@ -13,12 +13,17 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import InputAdornment from "@mui/material/InputAdornment";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createProject } from "@/lib/actions/project";
 
 export default function NewProjectPage() {
+  const { locale } = useParams();
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
   const router = useRouter();
   const t = useTranslations("Project");
   const tCommon = useTranslations("Common");
@@ -66,13 +71,19 @@ export default function NewProjectPage() {
                 label={t("fields.slug")}
                 fullWidth
                 required
-                error={!!error?.slug}
-                helperText={error?.slug?.[0] || "半角英数字とハイフン(-)、アンダースコア(_)が使用可能です"}
-                slotProps={{
-                  input: {
-                    startAdornment: <InputAdornment position="start">https://modparks.pages.dev/projects/</InputAdornment>,
-                  }
-                }}
+                helperText={
+                  error?.slug?.[0] || 
+                  (isSmUp 
+                    ? "半角英数字とハイフン(-)、アンダースコア(_)が使用可能です" 
+                    : "URL: https://modparks.pages.dev/projects/<スラッグ> (半角英数字、ハイフン、アンダースコアのみ)")
+                }
+                slotProps={
+                  isSmUp ? {
+                    input: {
+                      startAdornment: <InputAdornment position="start">https://modparks.pages.dev/projects/</InputAdornment>,
+                    }
+                  } : undefined
+                }
               />
             </Stack>
 
