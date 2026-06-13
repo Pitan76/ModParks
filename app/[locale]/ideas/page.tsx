@@ -49,7 +49,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
         <Box>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
-            アイデア (Ideas)
+            アイデア
           </Typography>
           <Typography variant="body1" color="text.secondary">
             マイクラのMOD、プラグインをみんなで一緒につくったり、探したりしてみませんか？
