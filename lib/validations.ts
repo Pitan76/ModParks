@@ -8,7 +8,9 @@ const LOADERS = [
   "paper",
   "spigot",
   "bukkit",
+  "purpur",
   "velocity",
+  "waterfall",
 ] as const;
 
 const MC_VERSIONS = [

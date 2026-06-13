@@ -15,13 +15,10 @@ import FormControl from "@mui/material/FormControl";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import JSZip from "jszip";
-import { parse as parseToml } from "smol-toml";
-import semver from "semver";
 import { createVersion } from "@/lib/actions/version";
 import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
-
 import { MC_VERSIONS } from "@/lib/validations";
+import { parseModJar } from "@/lib/utils/modParser";
 
 /**
  * プロジェクトの新バージョン（ファイル）をアップロードするフォームコンポーネント。
@@ -51,103 +48,17 @@ export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
 
     setParsing(true);
     try {
-      const zip = new JSZip();
-      const loadedZip = await zip.loadAsync(selectedFile);
-      
-      let detectedVersion = "";
-      let detectedLoaders: string[] = [];
-      let detectedMcVersions: string[] = [];
-
-      // 1. Check fabric.mod.json
-      const fabricJson = loadedZip.file("fabric.mod.json");
-      if (fabricJson) {
-        const content = await fabricJson.async("string");
-        try {
-          const parsed = JSON.parse(content);
-          if (parsed.version && !parsed.version.includes("${")) detectedVersion = parsed.version;
-          detectedLoaders.push("fabric");
-          
-          const mcDep = parsed.depends?.minecraft;
-          if (mcDep) {
-            let ranges: string[] = [];
-            if (typeof mcDep === "string") ranges.push(mcDep);
-            else if (Array.isArray(mcDep)) ranges.push(...mcDep);
-
-            const satisfying = MC_VERSIONS.filter(v => ranges.some(range => {
-              try {
-                return semver.satisfies(v + (v.split(".").length === 2 ? ".0" : ""), range);
-              } catch (e) {
-                return v === range || range.includes(v);
-              }
-            }));
-            detectedMcVersions.push(...satisfying);
-          }
-        } catch (e) { console.error("Failed to parse fabric.mod.json", e); }
-      }
-
-      // 2. Check META-INF/mods.toml (Forge)
-      const forgeToml = loadedZip.file("META-INF/mods.toml");
-      if (forgeToml) {
-        const content = await forgeToml.async("string");
-        try {
-          const parsed: any = parseToml(content);
-          if (parsed.mods && parsed.mods[0]) {
-            const modVersion = parsed.mods[0].version;
-            if (modVersion && !modVersion.includes("${")) {
-              detectedVersion = modVersion;
-            }
-          }
-          detectedLoaders.push("forge");
-          
-          if (parsed.dependencies) {
-             const deps = Object.values(parsed.dependencies).flat() as any[];
-             const mcDep = deps.find(d => d.modId === "minecraft");
-             if (mcDep && mcDep.versionRange) {
-               MC_VERSIONS.forEach(v => {
-                 if (mcDep.versionRange.includes(v)) detectedMcVersions.push(v);
-               });
-             }
-          }
-        } catch (e) { console.error("Failed to parse mods.toml", e); }
-      }
-
-      // 3. Check META-INF/neoforge.mods.toml
-      const neoToml = loadedZip.file("META-INF/neoforge.mods.toml");
-      if (neoToml) {
-        const content = await neoToml.async("string");
-        try {
-          const parsed: any = parseToml(content);
-          if (parsed.mods && parsed.mods[0]) {
-            const modVersion = parsed.mods[0].version;
-            if (modVersion && !modVersion.includes("${")) {
-              detectedVersion = modVersion;
-            }
-          }
-          detectedLoaders.push("neoforge");
-          
-          if (parsed.dependencies) {
-             const deps = Object.values(parsed.dependencies).flat() as any[];
-             const mcDep = deps.find(d => d.modId === "minecraft");
-             if (mcDep && mcDep.versionRange) {
-               MC_VERSIONS.forEach(v => {
-                 if (mcDep.versionRange.includes(v)) detectedMcVersions.push(v);
-               });
-             }
-          }
-        } catch (e) { console.error("Failed to parse neoforge.mods.toml", e); }
-      }
+      const { detectedVersion, detectedLoaders, detectedMcVersions } = await parseModJar(selectedFile);
 
       if (detectedVersion) setVersionNumber(detectedVersion);
       
       if (detectedLoaders.length > 0) {
-        const validLoaders = detectedLoaders.filter(l => AVAILABLE_LOADERS.includes(l));
-        setLoaders(Array.from(new Set(validLoaders)));
+        setLoaders(detectedLoaders);
       }
 
       if (detectedMcVersions.length > 0) {
-        setMcVersions(Array.from(new Set([...mcVersions, ...detectedMcVersions])));
+        setMcVersions((prev) => Array.from(new Set([...prev, ...detectedMcVersions])));
       }
-
     } catch (err) {
       console.error("Failed to read JAR/ZIP", err);
     } finally {
