@@ -33,6 +33,12 @@ export const LOADERS_MAP: Record<string, LoaderInfo> = {
     color: "secondary",
     icon: <Box component="img" src="/icons/loaders/quilt.png" sx={{ width: 18, height: 18, objectFit: "contain", borderRadius: "2px" }} />,
   },
+  spigot: {
+    id: "spigot",
+    name: "Spigot",
+    color: "default",
+    icon: <Box component="img" src="/icons/loaders/spigot.png" sx={{ width: 18, height: 18, objectFit: "contain", borderRadius: "2px" }} />,
+  },
   paper: {
     id: "paper",
     name: "Paper",

@@ -11,6 +11,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link } from "@/i18n/routing";
 import LinkButton from "@/components/ui/LinkButton";
 import ProjectCard from "@/components/project/ProjectCard";
+import { getLoaderInfo } from "@/lib/loaders";
 
 // ダミーデータ（後でDB接続に置き換え）
 const DUMMY_PROJECTS = [
@@ -153,15 +154,19 @@ export default async function HomePage({ params }: HomePageProps) {
 
             {/* バッジ */}
             <Box sx={{ display: "flex", gap: 1, justifyContent: "center", mt: 4, flexWrap: "wrap" }}>
-              {["Fabric", "Forge", "NeoForge", "Paper", "Spigot", "Quilt"].map((l) => (
-                <Chip
-                  key={l}
-                  label={l}
-                  variant="outlined"
-                  size="small"
-                  sx={{ borderColor: "divider", color: "text.secondary" }}
-                />
-              ))}
+              {["Fabric", "Forge", "NeoForge", "Paper", "Spigot", "Quilt"].map((l) => {
+                const info = getLoaderInfo(l.toLowerCase());
+                return (
+                  <Chip
+                    key={l}
+                    label={info.name}
+                    variant="outlined"
+                    size="small"
+                    icon={info.icon}
+                    sx={{ borderColor: "divider", color: "text.secondary" }}
+                  />
+                );
+              })}
             </Box>
           </Box>
         </Container>
