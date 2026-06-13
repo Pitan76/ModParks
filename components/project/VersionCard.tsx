@@ -8,6 +8,9 @@ import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
+/**
+ * バージョン一覧の各カードに表示するデータの型定義
+ */
 interface VersionCardProps {
   version: {
     id:            string;
@@ -41,6 +44,10 @@ const LOADER_COLOR: Record<string, "default" | "primary" | "secondary" | "warnin
   velocity: "secondary",
 };
 
+/**
+ * プロジェクトの特定バージョンをカード形式で表示するコンポーネント
+ * ダウンロードボタン、対応MCバージョン、ローダー等を整理して表示します。
+ */
 export default function VersionCard({ version, projectSlug }: VersionCardProps) {
   const date = new Date(
     typeof version.createdAt === "number"

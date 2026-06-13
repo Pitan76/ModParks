@@ -11,7 +11,10 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import { Link } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 
-interface ProjectCardProps {
+/**
+ * プロジェクト一覧のカードに表示するデータの型定義
+ */
+export interface ProjectCardProps {
   project: {
     id:          string;
     slug:        string;
@@ -45,6 +48,10 @@ function formatDownloads(n: number): string {
   return String(n);
 }
 
+/**
+ * プロジェクトをカード形式で表示するコンポーネント
+ * @param props ProjectCardProps プロジェクトのメタ情報や作者情報を含む
+ */
 export default function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Card id={`project-card-${project.slug}`}>
