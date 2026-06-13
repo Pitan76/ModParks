@@ -56,12 +56,6 @@ export const theme = createTheme({
         root: {
           textTransform: "none",
           fontWeight: 600,
-          boxShadow: "none",
-        },
-        containedPrimary: {
-          "&:hover": {
-            boxShadow: "none",
-          },
         },
       },
     },
@@ -111,16 +105,19 @@ export const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundImage: "none",
+          background:  "rgba(15, 23, 42, 0.75)",
+          backdropFilter: "blur(8px)",
+          borderBottom: "1px solid #334155",
           boxShadow: "none",
-          border: "1px solid #334155",
+          backgroundImage: "none",
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: "#0f172a",
+          background: "rgba(15, 23, 42, 0.75)",
+          backdropFilter: "blur(8px)",
           borderRight: "1px solid #334155",
         },
       },
