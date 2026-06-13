@@ -171,7 +171,6 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
         id="profile-save-btn"
         type="submit"
         variant="contained"
-        size="large"
         disabled={pending}
       >
         {pending ? "保存中..." : "保存"}

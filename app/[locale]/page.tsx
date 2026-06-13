@@ -133,7 +133,7 @@ export default async function HomePage({ params }: HomePageProps) {
                 startIcon={<SearchIcon />}
                 sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
               >
-                {tc("search")} Mod / Plugin
+                {tc("search")}
               </LinkButton>
               <LinkButton
                 href="/projects/new"

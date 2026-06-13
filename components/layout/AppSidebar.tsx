@@ -15,7 +15,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import FolderIcon from "@mui/icons-material/Folder";
-import { usePathname, useRouter } from "@/i18n/routing";
+import { usePathname, useRouter, Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -63,26 +63,28 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
-        {/* ロゴやタイトル */}
-        <Box
-          sx={{
-            width: 32,
-            height: 32,
-            borderRadius: "8px",
-            background: "linear-gradient(135deg, #38bdf8, #0284c7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 900,
-            fontSize: "18px",
-            color: "#082f49",
-          }}
-        >
-          M
-        </Box>
-        <Box sx={{ fontWeight: 800, fontSize: "1.1rem", letterSpacing: "-0.5px" }}>
-          ModParks
-        </Box>
+        <Link href="/" style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 8 }}>
+          {/* ロゴやタイトル */}
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: "8px",
+              background: "linear-gradient(135deg, #38bdf8, #0284c7)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 900,
+              fontSize: "18px",
+              color: "#082f49",
+            }}
+          >
+            M
+          </Box>
+          <Box sx={{ fontWeight: 800, fontSize: "1.1rem", letterSpacing: "-0.5px" }}>
+            ModParks
+          </Box>
+        </Link>
       </Box>
       <Divider />
       <List sx={{ px: 1, py: 2 }}>

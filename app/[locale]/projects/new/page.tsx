@@ -122,7 +122,7 @@ export default function NewProjectPage() {
               <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
                 {tCommon("cancel")}
               </Button>
-              <Button type="submit" variant="contained" size="large" disabled={pending}>
+              <Button type="submit" variant="contained" disabled={pending}>
                 {pending ? t("create.creating") : t("create.submit")}
               </Button>
             </Box>

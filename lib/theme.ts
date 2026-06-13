@@ -62,17 +62,22 @@ const theme = createTheme({
   },
   components: {
     MuiButton: {
+      variants: [
+        {
+          props: { variant: "contained", color: "primary" },
+          style: {
+            background: "linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)",
+            "&:hover": {
+              background: "linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%)",
+            },
+          },
+        },
+      ],
       styleOverrides: {
         root: {
           textTransform: "none",
           fontWeight:    600,
           borderRadius:  4,
-        },
-        containedPrimary: {
-          background: "linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)",
-          "&:hover": {
-            background: "linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%)",
-          },
         },
       },
     },
@@ -98,6 +103,9 @@ const theme = createTheme({
       },
     },
     MuiTextField: {
+      defaultProps: {
+        size: "small",
+      },
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
@@ -106,6 +114,16 @@ const theme = createTheme({
             "&.Mui-focused fieldset": { borderColor: "#38bdf8" },
           },
         },
+      },
+    },
+    MuiFormControl: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiSelect: {
+      defaultProps: {
+        size: "small",
       },
     },
     MuiAppBar: {

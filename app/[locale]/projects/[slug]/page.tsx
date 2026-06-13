@@ -13,6 +13,7 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Link } from "@/i18n/routing";
+import LinkButton from "@/components/ui/LinkButton";
 import { getProjectBySlug } from "@/lib/actions/project";
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
