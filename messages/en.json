@@ -59,6 +59,20 @@
       "status": "Status",
       "slugRule": "Alphanumeric and hyphens only"
     },
+    "iconUpload": {
+      "title": "Project Icon (Max 400x400)",
+      "select": "Select Icon",
+      "autoResizeNote": "*Large images will be automatically resized to 400x400",
+      "error": "Failed to upload icon"
+    },
+    "explore": {
+      "title": "Explore Projects",
+      "description": "Discover various mods and plugins."
+    },
+    "myProjects": {
+      "title": "My Projects",
+      "description": "A list of mods and plugins you've created. (Drafts included)"
+    },
     "create": {
       "title": "New Project",
       "success": "Project created successfully",
@@ -115,7 +129,9 @@
     "title": "Edit Profile",
     "displayName": "Display Name",
     "bio": "Bio",
-    "success": "Profile updated successfully"
+    "success": "Profile updated successfully",
+    "uploadError": "Failed to prepare upload",
+    "uploadFailed": "Failed to upload image"
   },
   "Admin": {
     "title": "Admin Dashboard",
@@ -138,6 +154,15 @@
     "filters": {
       "type": "Type",
       "all": "All"
+    },
+    "sort": {
+      "label": "Sort By",
+      "updated": "Recently Updated",
+      "downloads": "Most Downloaded",
+      "newest": "Newest"
+    },
+    "loader": {
+      "label": "Loader"
     }
   }
 }

@@ -16,7 +16,7 @@ export interface ProjectIconUploadProps {
 }
 
 export default function ProjectIconUpload({ initialIconUrl, projectSlug }: ProjectIconUploadProps) {
-  const t = useTranslations("Project"); // 既存のProject翻訳を使うか、直接日本語でフォールバック
+  const t = useTranslations("Project");
   const [iconUrl, setIconUrl] = useState<string>(initialIconUrl || "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,8 +46,7 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
       });
 
       if (!presignRes.ok) {
-        const errorData = await presignRes.json();
-        throw new Error(errorData.error || "アップロードの準備に失敗しました");
+        throw new Error(t("iconUpload.error"));
       }
 
       const { uploadUrl, publicUrl } = await presignRes.json();
@@ -59,7 +58,7 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
         body: resizedFile,
       });
 
-      if (!uploadRes.ok) throw new Error("画像のアップロードに失敗しました");
+      if (!uploadRes.ok) throw new Error(t("iconUpload.error"));
 
       setIconUrl(publicUrl);
     } catch (err: any) {
@@ -75,7 +74,7 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "flex-start", mb: 3 }}>
       <Typography variant="subtitle2" color="text.secondary">
-        プロジェクトアイコン (最大 400x400)
+        {t("iconUpload.title")}
       </Typography>
       <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
         <Avatar
@@ -99,7 +98,7 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
             disabled={uploading}
             size="small"
           >
-            {uploading ? <CircularProgress size={20} /> : "アイコンを選択"}
+            {uploading ? <CircularProgress size={20} /> : t("iconUpload.select")}
             <input
               type="file"
               hidden
@@ -114,7 +113,7 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
             </Typography>
           )}
           <Typography variant="caption" color="text.disabled">
-            ※大きな画像は自動的に400x400にリサイズされます
+            {t("iconUpload.autoResizeNote")}
           </Typography>
         </Box>
       </Box>

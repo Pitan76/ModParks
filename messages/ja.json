@@ -61,6 +61,20 @@
       "status": "公開状態",
       "slugRule": "半角英数字とハイフンのみ"
     },
+    "iconUpload": {
+      "title": "プロジェクトアイコン (最大 400x400)",
+      "select": "アイコンを選択",
+      "autoResizeNote": "※大きな画像は自動的に400x400にリサイズされます",
+      "error": "アイコンのアップロードに失敗しました"
+    },
+    "explore": {
+      "title": "プロジェクトを探す",
+      "description": "様々なModやプラグインを見つけましょう。"
+    },
+    "myProjects": {
+      "title": "マイプロジェクト",
+      "description": "あなたが作成したModやプラグインの一覧です。（下書きも表示されます）"
+    },
     "create": {
       "title": "新規プロジェクト",
       "success": "プロジェクトを作成しました",
@@ -117,7 +131,9 @@
     "title": "プロフィール編集",
     "displayName": "表示名",
     "bio": "自己紹介",
-    "success": "プロフィールを更新しました"
+    "success": "プロフィールを更新しました",
+    "uploadError": "アップロードの準備に失敗しました",
+    "uploadFailed": "画像のアップロードに失敗しました"
   },
   "Admin": {
     "title": "管理ダッシュボード",
@@ -140,6 +156,15 @@
     "filters": {
       "type": "種類",
       "all": "すべて"
+    },
+    "sort": {
+      "label": "並び順",
+      "updated": "更新日順",
+      "downloads": "ダウンロード順",
+      "newest": "新着順"
+    },
+    "loader": {
+      "label": "ローダー"
     }
   }
 }

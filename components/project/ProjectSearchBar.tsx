@@ -92,40 +92,40 @@ export default function ProjectSearchBar({
           }}
           size="small"
         >
-          <ToggleButton value="all"    id="filter-all">    すべて  </ToggleButton>
+          <ToggleButton value="all"    id="filter-all">    {t("filters.all")}  </ToggleButton>
           <ToggleButton value="mod"    id="filter-mod">    Mod     </ToggleButton>
           <ToggleButton value="plugin" id="filter-plugin"> Plugin  </ToggleButton>
         </ToggleButtonGroup>
 
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel id="sort-select-label">並び順</InputLabel>
+          <InputLabel id="sort-select-label">{t("sort.label")}</InputLabel>
           <Select
             labelId="sort-select-label"
             value={sort}
-            label="並び順"
+            label={t("sort.label")}
             onChange={(e) => {
               setSort(e.target.value);
               updateSearch(q, type, e.target.value, loader, mcVersion);
             }}
           >
-            <MenuItem value="updated">更新日順</MenuItem>
-            <MenuItem value="downloads">ダウンロード順</MenuItem>
-            <MenuItem value="newest">新着順</MenuItem>
+            <MenuItem value="updated">{t("sort.updated")}</MenuItem>
+            <MenuItem value="downloads">{t("sort.downloads")}</MenuItem>
+            <MenuItem value="newest">{t("sort.newest")}</MenuItem>
           </Select>
         </FormControl>
 
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel id="loader-select-label">ローダー</InputLabel>
+          <InputLabel id="loader-select-label">{t("loader.label")}</InputLabel>
           <Select
             labelId="loader-select-label"
             value={loader}
-            label="ローダー"
+            label={t("loader.label")}
             onChange={(e) => {
               setLoader(e.target.value);
               updateSearch(q, type, sort, e.target.value, mcVersion);
             }}
           >
-            <MenuItem value="all">すべて</MenuItem>
+            <MenuItem value="all">{t("filters.all")}</MenuItem>
             <MenuItem value="Fabric">Fabric</MenuItem>
             <MenuItem value="Forge">Forge</MenuItem>
             <MenuItem value="NeoForge">NeoForge</MenuItem>

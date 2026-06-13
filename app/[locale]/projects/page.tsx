@@ -22,7 +22,8 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const { q, type, author, sort, loader, mcVersion } = await searchParams;
   setRequestLocale(locale);
 
-  const t = await getTranslations("Search");
+  const tSearch = await getTranslations("Search");
+  const tProject = await getTranslations("Project");
   const session = await auth();
 
   // /projects?author=me の場合は自分のプロジェクトのみ（下書き含む）を取得
@@ -44,12 +45,12 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "flex-start", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
         <Box>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }} gutterBottom>
-            {author === "me" ? "マイプロジェクト" : "プロジェクトを探す"}
+            {author === "me" ? tProject("myProjects.title") : tProject("explore.title")}
           </Typography>
           <Typography variant="body1" color="text.secondary">
             {author === "me" 
-              ? "あなたが作成したModやプラグインの一覧です。（下書きも表示されます）" 
-              : "様々なModやプラグインを見つけましょう。"}
+              ? tProject("myProjects.description") 
+              : tProject("explore.description")}
           </Typography>
         </Box>
         
@@ -77,7 +78,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       {/* 件数表示 */}
       <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
         <Typography variant="body2" color="text.secondary">
-          {t("results", { count: filtered.length })}
+          {tSearch("results", { count: filtered.length })}
         </Typography>
       </Box>
 
@@ -91,7 +92,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       ) : (
         <Box sx={{ textAlign: "center", py: 10 }}>
           <Typography variant="h6" color="text.secondary">
-            {t("noResults")}
+            {tSearch("noResults")}
           </Typography>
         </Box>
       )}

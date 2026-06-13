@@ -14,6 +14,7 @@ import { useState, useRef } from "react";
 import { updateProfile } from "@/lib/actions/profile";
 import { useRouter } from "next/navigation";
 import { resizeImageFile } from "@/lib/utils/image";
+import { useTranslations } from "next-intl";
 
 interface ProfileFormProps {
   initialData: {
@@ -36,6 +37,7 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const t = useTranslations("Profile");
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -62,8 +64,7 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
         }),
       });
       if (!presignRes.ok) {
-        const errorData = await presignRes.json();
-        throw new Error(errorData.error || "アップロードの準備に失敗しました");
+        throw new Error(t("uploadError"));
       }
       
       const { uploadUrl, publicUrl } = await presignRes.json();
@@ -75,7 +76,7 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
         body: resizedFile,
       });
       
-      if (!uploadRes.ok) throw new Error("画像のアップロードに失敗しました");
+      if (!uploadRes.ok) throw new Error(t("uploadFailed"));
 
       setAvatarUrl(publicUrl);
     } catch (err: any) {
