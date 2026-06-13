@@ -78,12 +78,7 @@ const theme = createTheme({
         },
       },
     },
-    MuiTextField: {
-      defaultProps: { size: "small" },
-    },
-    MuiSelect: {
-      defaultProps: { size: "small" },
-    },
+
     MuiOutlinedInput: {
       defaultProps: { size: "small" },
     },

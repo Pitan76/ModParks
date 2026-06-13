@@ -50,7 +50,7 @@
     },
     "fields": {
       "name": "プロジェクト名",
-      "slug": "URLスラッグ",
+      "slug": "スラッグ",
       "description": "説明",
       "icon": "アイコン",
       "type": "種類",

@@ -11,6 +11,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import InputAdornment from "@mui/material/InputAdornment";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProject } from "@/lib/actions/project";
@@ -69,12 +70,15 @@ export default function ProjectEditForm({ project }: ProjectEditFormProps) {
             <TextField
               id="project-slug"
               name="slug"
-              label="URLスラッグ"
+              label="スラッグ"
               fullWidth
               required
               defaultValue={project.slug}
               error={!!error?.slug}
               helperText={error?.slug?.[0] || "半角英数字とハイフンのみ"}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">https://modparks.net/projects/</InputAdornment>,
+              }}
             />
           </Stack>
 

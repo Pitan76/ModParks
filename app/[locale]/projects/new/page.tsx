@@ -12,6 +12,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import InputAdornment from "@mui/material/InputAdornment";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -66,7 +67,10 @@ export default function NewProjectPage() {
                 fullWidth
                 required
                 error={!!error?.slug}
-                helperText={error?.slug?.[0] || t("fields.slugRule")}
+                helperText={error?.slug?.[0] || "半角英数字とハイフン(-)、アンダースコア(_)が使用可能です"}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">https://modparks.pages.dev/projects/</InputAdornment>,
+                }}
               />
             </Stack>
 
