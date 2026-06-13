@@ -17,12 +17,16 @@ export async function POST(req: NextRequest) {
   const { fileName, contentType, type, projectSlug } = body as {
     fileName:    string;
     contentType: string;
-    type:        "icon" | "mod";
-    projectSlug: string;
+    type:        "icon" | "mod" | "avatar";
+    projectSlug?: string;
   };
 
-  if (!fileName || !contentType || !type || !projectSlug) {
+  if (!fileName || !contentType || !type) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  if (type !== "avatar" && !projectSlug) {
+    return NextResponse.json({ error: "Missing projectSlug" }, { status: 400 });
   }
 
   // ファイルタイプ検証
@@ -32,13 +36,14 @@ export async function POST(req: NextRequest) {
   if (type === "mod" && !ALLOWED_MOD_TYPES.includes(contentType)) {
     return NextResponse.json({ error: "Invalid file type for mod" }, { status: 400 });
   }
-  if (type === "icon" && !ALLOWED_ICON_TYPES.includes(contentType)) {
-    return NextResponse.json({ error: "Invalid file type for icon" }, { status: 400 });
+  if ((type === "icon" || type === "avatar") && !ALLOWED_ICON_TYPES.includes(contentType)) {
+    return NextResponse.json({ error: `Invalid file type for ${type}` }, { status: 400 });
   }
 
   const uniqueId = createId();
   const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const key = buildR2Key(type, projectSlug, `${uniqueId}_${safeFileName}`);
+  const slugOrId = type === "avatar" ? session.user.id : projectSlug!;
+  const key = buildR2Key(type, slugOrId, `${uniqueId}_${safeFileName}`);
 
   // 開発環境では署名付きURLの代わりに直接アップロードURLを返す
   // 本番: Cloudflare Workers の R2 バインディングから createPresignedUrl を使用

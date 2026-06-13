@@ -33,10 +33,10 @@ export async function deleteFromR2(
 
 /** ファイルキーを生成する */
 export function buildR2Key(
-  type: "icon" | "mod",
-  projectSlug: string,
+  type: "icon" | "mod" | "avatar",
+  slugOrId: string,
   fileName: string
 ): string {
   const timestamp = Date.now();
-  return `${type}/${projectSlug}/${timestamp}_${fileName}`;
+  return `${type}/${slugOrId}/${timestamp}_${fileName}`;
 }

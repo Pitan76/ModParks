@@ -42,29 +42,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
       <Card>
         <CardContent sx={{ p: 3 }}>
-          {/* アバター表示 */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-            <Avatar
-              src={user.avatarUrl ?? user.image ?? undefined}
-              alt={user.displayName ?? ""}
-              sx={{ width: 64, height: 64 }}
-            />
-            <Box>
-              <Typography variant="subtitle1" fontWeight={700}>
-                @{user.username}
-              </Typography>
-              <Typography variant="body2" color={hasGitHub ? "text.secondary" : "text.disabled"}>
-                {hasGitHub ? "GitHub アカウントで連携済" : "GitHub 未連携"}
-              </Typography>
-            </Box>
-          </Box>
-
           {/* プロフィール編集フォーム */}
           <ProfileForm
             initialData={{
               displayName: user.displayName ?? "",
               bio: user.bio ?? "",
-              avatarUrl: user.avatarUrl ?? "",
+              avatarUrl: user.avatarUrl ?? user.image ?? "",
+              username: user.username!,
+              hasGitHub,
             }}
             labels={{
               displayName: t("displayName"),
