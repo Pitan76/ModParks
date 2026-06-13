@@ -159,7 +159,7 @@ export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map((value) => {
                     const info = getLoaderInfo(value);
-                    return <Chip key={value} label={info.name} size="small" avatar={info.icon} color={info.color} />;
+                    return <Chip key={value} label={info.name} size="small" icon={info.icon} color={info.color} />;
                   })}
                 </Box>
               )}

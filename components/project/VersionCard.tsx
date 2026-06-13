@@ -78,7 +78,7 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
                       label={info.name}
                       size="small"
                       color={info.color as any}
-                      avatar={info.icon}
+                      icon={info.icon}
                       sx={{ borderRadius: "4px" }}
                     />
                   );
