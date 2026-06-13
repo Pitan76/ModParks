@@ -68,8 +68,10 @@ export default function NewProjectPage() {
                 required
                 error={!!error?.slug}
                 helperText={error?.slug?.[0] || "半角英数字とハイフン(-)、アンダースコア(_)が使用可能です"}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">https://modparks.pages.dev/projects/</InputAdornment>,
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">https://modparks.pages.dev/projects/</InputAdornment>,
+                  }
                 }}
               />
             </Stack>

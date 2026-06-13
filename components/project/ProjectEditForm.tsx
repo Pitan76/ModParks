@@ -76,8 +76,10 @@ export default function ProjectEditForm({ project }: ProjectEditFormProps) {
               defaultValue={project.slug}
               error={!!error?.slug}
               helperText={error?.slug?.[0] || "半角英数字とハイフンのみ"}
-              InputProps={{
-                startAdornment: <InputAdornment position="start">https://modparks.net/projects/</InputAdornment>,
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start">https://modparks.pages.dev/projects/</InputAdornment>,
+                }
               }}
             />
           </Stack>
