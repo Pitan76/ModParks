@@ -59,7 +59,7 @@ export default function NewProjectPage() {
               <TextField
                 id="project-slug"
                 name="slug"
-                label="URLスラッグ (例: my-awesome-mod)"
+                label="スラッグ (例: my-mod)"
                 fullWidth
                 required
                 error={!!error?.slug}
