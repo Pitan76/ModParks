@@ -29,6 +29,12 @@ export interface ProjectSidebarProps {
 
 export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectSidebarProps) {
   const t = useTranslations("Project");
+  const tTags = useTranslations("Tags");
+
+  const getTagLabel = (tag: string) => {
+    const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    return tTags.has(key as any) ? tTags(key as any) : tag;
+  };
 
   return (
     <Box
@@ -88,7 +94,7 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
             {p.tags.map((tag: string) => (
               <Chip
                 key={tag}
-                label={tag}
+                label={getTagLabel(tag)}
                 size="small"
                 variant="outlined"
                 sx={{ borderColor: "divider", color: "text.secondary" }}

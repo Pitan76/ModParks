@@ -293,7 +293,21 @@
       "newest": "Newest"
     },
     "loader": {
-      "label": "Loader"
+      "label": "Platform"
     }
+  },
+  "Tags": {
+    "fabric": "Fabric",
+    "forge": "Forge",
+    "neoforge": "NeoForge",
+    "paper": "Paper",
+    "spigot": "Spigot",
+    "quilt": "Quilt",
+    "items": "Items",
+    "blocks": "Blocks",
+    "commands": "Commands",
+    "permissions": "Permissions",
+    "utility": "Utility",
+    "qol": "QoL"
   }
 }

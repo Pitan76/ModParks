@@ -13,7 +13,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { Link } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { formatCompactNumber } from "@/lib/utils/format";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 /**
  * プロジェクト一覧のカードに表示するデータの型定義
@@ -54,7 +54,13 @@ const TYPE_LABEL = {
  */
 export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
   const locale = useLocale();
+  const tTags = useTranslations("Tags");
   const isGrid = layout === "grid";
+
+  const getTagLabel = (tag: string) => {
+    const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    return tTags.has(key as any) ? tTags(key as any) : tag;
+  };
 
   return (
     <Card id={`project-card-${project.slug}`} sx={{ height: "100%" }}>
@@ -147,14 +153,14 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 {project.tags.slice(0, isGrid ? 2 : 3).map((tag) => (
                   <Chip
                     key={tag}
-                    label={tag}
+                    label={getTagLabel(tag)}
                     size="small"
                     variant="outlined"
                     sx={{ height: 18, fontSize: "0.6rem", borderColor: "divider" }}
                   />
                 ))}
                 {project.tags.length > (isGrid ? 2 : 3) && (
-                  <Tooltip title={project.tags.slice(isGrid ? 2 : 3).join(", ")} arrow placement="top">
+                  <Tooltip title={project.tags.slice(isGrid ? 2 : 3).map(getTagLabel).join(", ")} arrow placement="top">
                     <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5, cursor: "help" }}>
                       +{project.tags.length - (isGrid ? 2 : 3)}
                     </Typography>

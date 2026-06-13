@@ -299,5 +299,19 @@
     "loader": {
       "label": "プラットフォーム"
     }
+  },
+  "Tags": {
+    "fabric": "Fabric",
+    "forge": "Forge",
+    "neoforge": "NeoForge",
+    "paper": "Paper",
+    "spigot": "Spigot",
+    "quilt": "Quilt",
+    "items": "アイテム",
+    "blocks": "ブロック",
+    "commands": "コマンド",
+    "permissions": "権限",
+    "utility": "ユーティリティ",
+    "qol": "QoL"
   }
 }
