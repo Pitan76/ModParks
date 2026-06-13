@@ -46,7 +46,7 @@ export default function AppFooter() {
           {/* リンク */}
           <Stack direction="row" spacing={3} sx={{ alignItems: "center" }}>
             <Link
-              href="https://github.com/ptms76/modparks"
+              href="https://github.com/Pitan76/modparks"
               target="_blank"
               rel="noopener noreferrer"
               id="footer-github"

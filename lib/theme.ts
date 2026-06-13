@@ -62,17 +62,7 @@ const theme = createTheme({
   },
   components: {
     MuiButton: {
-      variants: [
-        {
-          props: { variant: "contained", color: "primary" },
-          style: {
-            background: "linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)",
-            "&:hover": {
-              background: "linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%)",
-            },
-          },
-        },
-      ],
+
       styleOverrides: {
         root: {
           textTransform: "none",
