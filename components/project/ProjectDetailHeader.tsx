@@ -46,7 +46,7 @@ export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDeta
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
-            <Typography variant="h4" component="h1" fontWeight={800}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
               {p.name}
             </Typography>
             <Chip

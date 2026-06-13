@@ -36,7 +36,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <Container maxWidth="sm" sx={{ py: 5 }}>
-      <Typography variant="h4" fontWeight={800} sx={{ mb: 4 }}>
+      <Typography variant="h4" sx={{ fontWeight: 800,  mb: 4  }}>
         {t("title")}
       </Typography>
 

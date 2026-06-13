@@ -42,7 +42,7 @@ export default function NewProjectPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
-      <Typography variant="h4" fontWeight={800} sx={{ mb: 4 }}>
+      <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>
         {t("create.title")}
       </Typography>
 

@@ -32,7 +32,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
-      <Typography variant="h4" component="h1" fontWeight={800} sx={{ mb: 4 }}>
+      <Typography variant="h4" component="h1" sx={{ fontWeight: 800,  mb: 4  }}>
         プロジェクト編集
       </Typography>
 

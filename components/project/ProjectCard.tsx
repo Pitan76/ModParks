@@ -25,9 +25,9 @@ export interface ProjectCardProps {
     license:     string;
     downloads:   number;
     tags:        string[];
-    authorUsername: string;
-    authorDisplayName: string;
-    authorAvatarUrl: string | null;
+    authorUsername?: string | null;
+    authorDisplayName?: string | null;
+    authorAvatarUrl?: string | null;
     updatedAt:   Date | number;
   };
 }
@@ -97,11 +97,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                 <Avatar
                   src={project.authorAvatarUrl ?? undefined}
-                  alt={project.authorDisplayName}
+                  alt={project.authorDisplayName || "Unknown"}
                   sx={{ width: 18, height: 18 }}
                 />
                 <Typography variant="caption" color="text.secondary">
-                  {project.authorDisplayName}
+                  {project.authorDisplayName || "Unknown"}
                 </Typography>
               </Box>
             </Box>
@@ -152,7 +152,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <DownloadIcon fontSize="small" sx={{ color: "text.disabled", fontSize: 16 }} />
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                 {formatDownloads(project.downloads)}
               </Typography>
             </Box>

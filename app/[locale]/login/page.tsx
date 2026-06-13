@@ -56,7 +56,7 @@ export default function LoginPage() {
           borderColor: "divider",
         }}
       >
-        <Typography variant="h4" component="h1" fontWeight={800} align="center" mb={1} color="primary.main">
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }} align="center" mb={1} color="primary.main">
           ログイン
         </Typography>
         <Typography variant="body2" color="text.secondary" align="center" mb={4}>

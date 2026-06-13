@@ -170,7 +170,7 @@ export default async function HomePage({ params }: HomePageProps) {
       {/* ─── 新着プロジェクト ──────────────────────────────────────────── */}
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          <Typography variant="h5" fontWeight={700}>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
             {t("newProjects")}
           </Typography>
           <LinkButton

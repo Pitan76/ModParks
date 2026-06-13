@@ -40,7 +40,7 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
         <Typography variant="caption" color="text.disabled" sx={{ mb: 0.5, display: "block" }}>
           ライセンス
         </Typography>
-        <Typography variant="body2" fontWeight={600}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
           {p.license}
         </Typography>
       </Box>

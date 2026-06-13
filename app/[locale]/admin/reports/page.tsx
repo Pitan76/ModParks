@@ -46,7 +46,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
-      <Typography variant="h4" fontWeight={800} sx={{ mb: 4 }}>
+      <Typography variant="h4" sx={{ fontWeight: 800,  mb: 4  }}>
         通報一覧
       </Typography>
 
@@ -77,7 +77,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                     </Typography>
                   </Box>
 
-                  <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700,  mb: 0.5  }}>
                     プロジェクト: {project.name}
                   </Typography>
 

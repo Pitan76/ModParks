@@ -26,7 +26,7 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
-      <Typography variant="h4" fontWeight={800} sx={{ mb: 4 }}>
+      <Typography variant="h4" sx={{ fontWeight: 800,  mb: 4  }}>
         管理ダッシュボード
       </Typography>
 
@@ -36,7 +36,7 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
             <CardContent>
               <Stack spacing={2}>
                 <FlagIcon sx={{ fontSize: 40, color: "error.main" }} />
-                <Typography variant="h6" fontWeight={700}>通報管理</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>通報管理</Typography>
                 <Typography variant="body2" color="text.secondary">
                   ユーザーからの通報を確認・処理します
                 </Typography>

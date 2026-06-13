@@ -73,7 +73,7 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
           {/* 左: バージョン情報 */}
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", mb: 1 }}>
-              <Typography variant="subtitle2" fontWeight={700} sx={{ color: "primary.main" }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700,  color: "primary.main"  }}>
                 v{version.versionNumber}
               </Typography>
 

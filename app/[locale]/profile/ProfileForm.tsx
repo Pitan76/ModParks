@@ -138,7 +138,7 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
           />
         </Badge>
         <Box>
-          <Typography variant="subtitle1" fontWeight={700}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             @{initialData.username}
           </Typography>
           <Typography variant="body2" color={initialData.hasGitHub ? "text.secondary" : "text.disabled"}>

@@ -50,7 +50,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           {/* バージョン一覧 */}
           <Box>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" fontWeight={700}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {t("versions")}
               </Typography>
               {canEdit && (

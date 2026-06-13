@@ -36,7 +36,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     <Container maxWidth="lg" sx={{ py: 5 }}>
       {/* ページタイトル */}
       <Box sx={{ mb: 4, textAlign: "center" }}>
-        <Typography variant="h4" component="h1" fontWeight={800} gutterBottom>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }} gutterBottom>
           {author === "me" ? "マイプロジェクト" : "プロジェクトを探す"}
         </Typography>
         <Typography variant="body1" color="text.secondary">
