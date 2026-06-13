@@ -22,6 +22,13 @@
       "when": 1781334709472,
       "tag": "0002_youthful_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1781336184381,
+      "tag": "0003_shiny_gideon",
+      "breakpoints": true
     }
   ]
 }

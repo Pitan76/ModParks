@@ -143,10 +143,17 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
       <Drawer
         variant="permanent"
         sx={{
-          display: { xs: "none", md: "block" },
-          "& .MuiDrawer-paper": { boxSizing: "border-box", width: SIDEBAR_WIDTH, borderRight: "1px solid", borderColor: "divider" },
-        }}
-        open
+          width: SIDEBAR_WIDTH,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: SIDEBAR_WIDTH,
+            boxSizing: "border-box",
+            bgcolor: "rgba(30, 41, 59, 0.85)",
+            backdropFilter: "blur(12px)",
+            borderRight: "1px solid",
+            borderColor: "divider",
+          },
+        }}open
       >
         {drawerContent}
       </Drawer>

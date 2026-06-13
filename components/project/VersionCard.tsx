@@ -7,6 +7,8 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { getLoaderInfo } from "@/lib/loaders";
 
 /**
@@ -137,6 +139,12 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
                   {formatBytes(version.fileSize)}
                 </Typography>
               )}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <AccessTimeIcon sx={{ fontSize: 16 }} />
+                <Typography variant="caption">
+                  {new Date(version.createdAt).toLocaleDateString()}
+                </Typography>
+              </Box>
             </Stack>
           </Box>
 

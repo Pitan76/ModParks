@@ -45,7 +45,14 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
   };
 
   return (
-    <AppBar position="sticky" id="app-header">
+    <AppBar position="sticky" id="app-header" sx={{
+      bgcolor: "rgba(16, 26, 48, 0.8)",
+      backdropFilter: "blur(12px)",
+      borderBottom: "1px solid",
+      borderColor: "divider",
+      backgroundImage: "none",
+      boxShadow: "none"
+    }}>
       <Toolbar sx={{ gap: 1 }}>
         {/* ハンバーガーメニュー（モバイル） */}
         <IconButton

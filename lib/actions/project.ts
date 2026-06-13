@@ -2,10 +2,10 @@
 
 import { auth } from "@/lib/auth";
 import { getDb, getD1 } from "@/lib/db";
-import { projects, projectTags, versions, users } from "@/db/schema";
+import { projects, projectTags, users, versions } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, and, like, desc } from "drizzle-orm";
+import { eq, desc, and, like, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -205,10 +205,11 @@ export async function getProjects(params: {
   const projectIds = rows.map((r) => r.project.id);
   let tagsData: { projectId: string; tag: string }[] = [];
   if (projectIds.length > 0) {
-    // IN句の代わりにORを使うか、あるいは1つずつ取得（今回は簡易的に全タグ取得してフィルタ）
-    // 本来は inArray() が使えますが、ここではシンプルに
-    const tagsRows = await db.select().from(projectTags).all();
-    tagsData = tagsRows.filter((t) => projectIds.includes(t.projectId));
+    tagsData = await db
+      .select()
+      .from(projectTags)
+      .where(inArray(projectTags.projectId, projectIds))
+      .all();
   }
 
   return rows.map((row) => ({

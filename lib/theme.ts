@@ -62,14 +62,30 @@ const theme = createTheme({
   },
   components: {
     MuiButton: {
-
+      defaultProps: {
+        size: "small",
+        disableElevation: true,
+      },
       styleOverrides: {
         root: {
           textTransform: "none",
           fontWeight:    600,
-          borderRadius:  4,
+          borderRadius:  6,
+          transition: "transform 0.2s, background-color 0.2s",
+          "&:active": {
+            transform: "scale(0.98)",
+          },
         },
       },
+    },
+    MuiTextField: {
+      defaultProps: { size: "small" },
+    },
+    MuiSelect: {
+      defaultProps: { size: "small" },
+    },
+    MuiOutlinedInput: {
+      defaultProps: { size: "small" },
     },
     MuiCard: {
       styleOverrides: {

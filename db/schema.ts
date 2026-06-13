@@ -3,6 +3,7 @@ import {
   text,
   integer,
   primaryKey,
+  index,
 } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import type { AdapterAccountType } from "next-auth/adapters";
@@ -99,7 +100,11 @@ export const projects = sqliteTable("projects", {
   updatedAt:   integer("updated_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-});
+}, (table) => ({
+  authorIdx: index("projects_author_idx").on(table.authorId),
+  statusIdx: index("projects_status_idx").on(table.status),
+  typeIdx: index("projects_type_idx").on(table.type),
+}));
 
 // ─── Versions ─────────────────────────────────────────────────────────────────
 
@@ -122,7 +127,9 @@ export const versions = sqliteTable("versions", {
   createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-});
+}, (table) => ({
+  projectIdx: index("versions_project_idx").on(table.projectId),
+}));
 
 // ─── Project Tags ─────────────────────────────────────────────────────────────
 
@@ -134,7 +141,10 @@ export const projectTags = sqliteTable(
       .references(() => projects.id, { onDelete: "cascade" }),
     tag: text("tag").notNull(),
   },
-  (t) => ({ pk: primaryKey({ columns: [t.projectId, t.tag] }) })
+  (t) => ({ 
+    pk: primaryKey({ columns: [t.projectId, t.tag] }),
+    projectIdx: index("project_tags_project_idx").on(t.projectId),
+  })
 );
 
 // ─── Reports ──────────────────────────────────────────────────────────────────
@@ -157,7 +167,10 @@ export const reports = sqliteTable("reports", {
   createdAt:  integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-});
+}, (table) => ({
+  reporterIdx: index("reports_reporter_idx").on(table.reporterId),
+  projectIdx:  index("reports_project_idx").on(table.projectId),
+}));
 
 // ─── Ideas ────────────────────────────────────────────────────────────────────
 
@@ -175,7 +188,10 @@ export const ideas = sqliteTable("ideas", {
   updatedAt:   integer("updated_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-});
+}, (table) => ({
+  authorIdx: index("ideas_author_idx").on(table.authorId),
+  statusIdx: index("ideas_status_idx").on(table.status),
+}));
 
 export const ideaLikes = sqliteTable(
   "idea_likes",
@@ -187,7 +203,11 @@ export const ideaLikes = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
   },
-  (t) => ({ pk: primaryKey({ columns: [t.ideaId, t.userId] }) })
+  (t) => ({ 
+    pk: primaryKey({ columns: [t.ideaId, t.userId] }),
+    ideaIdx: index("idea_likes_idea_idx").on(t.ideaId),
+    userIdx: index("idea_likes_user_idx").on(t.userId),
+  })
 );
 
 export const ideaComments = sqliteTable("idea_comments", {
@@ -205,7 +225,10 @@ export const ideaComments = sqliteTable("idea_comments", {
   updatedAt:   integer("updated_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-});
+}, (table) => ({
+  ideaIdx: index("idea_comments_idea_idx").on(table.ideaId),
+  authorIdx: index("idea_comments_author_idx").on(table.authorId),
+}));
 
 export const versionIdeas = sqliteTable(
   "version_ideas",
@@ -217,7 +240,11 @@ export const versionIdeas = sqliteTable(
       .notNull()
       .references(() => ideas.id, { onDelete: "cascade" }),
   },
-  (t) => ({ pk: primaryKey({ columns: [t.versionId, t.ideaId] }) })
+  (t) => ({ 
+    pk: primaryKey({ columns: [t.versionId, t.ideaId] }),
+    versionIdx: index("version_ideas_version_idx").on(t.versionId),
+    ideaIdx: index("version_ideas_idea_idx").on(t.ideaId),
+  })
 );
 
 // ─── Type Exports ─────────────────────────────────────────────────────────────

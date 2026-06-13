@@ -5,6 +5,7 @@ import Avatar from "@mui/material/Avatar";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import EditIcon from "@mui/icons-material/Edit";
 import DownloadIcon from "@mui/icons-material/Download";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LinkButton from "@/components/ui/LinkButton";
 
 /**
@@ -19,6 +20,8 @@ export interface ProjectDetailHeaderProps {
     description: string;
     iconUrl?: string | null;
     downloads: number;
+    createdAt: Date;
+    updatedAt: Date;
     author: {
       displayName: string;
       avatarUrl?: string | null;
@@ -66,6 +69,21 @@ export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDeta
               <DownloadIcon sx={{ fontSize: 14, color: "text.disabled" }} />
               <Typography variant="body2" color="text.disabled">
                 {p.downloads.toLocaleString()}
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
+              <AccessTimeIcon sx={{ fontSize: 14 }} />
+              <Typography variant="caption">
+                公開: {new Date(p.createdAt).toLocaleDateString()}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
+              <EditIcon sx={{ fontSize: 14 }} />
+              <Typography variant="caption">
+                更新: {new Date(p.updatedAt).toLocaleDateString()}
               </Typography>
             </Box>
           </Box>

@@ -8,6 +8,7 @@ import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExtensionIcon from "@mui/icons-material/Extension";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { Link } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { formatCompactNumber } from "@/lib/utils/format";
@@ -155,9 +156,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 {formatCompactNumber(project.downloads, locale)}
               </Typography>
             </Box>
-            <Typography variant="caption" color="text.disabled">
-              {project.license}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.disabled" }}>
+              <AccessTimeIcon sx={{ fontSize: 14 }} />
+              <Typography variant="caption">
+                {new Date(project.updatedAt).toLocaleDateString()}
+              </Typography>
+            </Box>
           </Box>
         </CardContent>
       </LinkCardActionArea>
