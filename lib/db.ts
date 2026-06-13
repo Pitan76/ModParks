@@ -23,11 +23,16 @@ let localD1Proxy: D1Database | null = null;
  * ローカル開発時は Wrangler の Platform Proxy を使用します。
  */
 export async function getD1(): Promise<D1Database> {
-  if (process.env.NODE_ENV === "development" && typeof process !== "undefined") {
-    // 開発環境（Node.js ランタイム）では Wrangler の proxy を利用
+  // 開発環境かつ Node.js ランタイムの場合のみ Wrangler の Proxy を利用
+  if (
+    process.env.NODE_ENV === "development" &&
+    typeof process !== "undefined" &&
+    process.release?.name === "node"
+  ) {
     if (!localD1Proxy) {
-      const { getPlatformProxy } = await import("wrangler");
-      const proxy = await getPlatformProxy<Env>();
+      // Webpack (Edgeランタイム) がエラーを出さないように ignore する
+      const wrangler = await import(/* webpackIgnore: true */ "wrangler");
+      const proxy = await wrangler.getPlatformProxy<Env>();
       localD1Proxy = proxy.env.DB;
     }
     if (!localD1Proxy) throw new Error("Local D1 proxy not found.");
