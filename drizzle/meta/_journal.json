@@ -15,6 +15,13 @@
       "when": 1781275497904,
       "tag": "0001_flowery_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1781334709472,
+      "tag": "0002_youthful_kronos",
+      "breakpoints": true
     }
   ]
 }
