@@ -141,7 +141,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 />
               ))}
               {project.tags.length > 4 && (
-                <Typography variant="caption" color="text.disabled" alignSelf="center">
+                <Typography variant="caption" color="text.disabled" sx={{ alignSelf: "center" }}>
                   +{project.tags.length - 4}
                 </Typography>
               )}

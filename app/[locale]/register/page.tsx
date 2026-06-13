@@ -40,10 +40,10 @@ export default function RegisterPage() {
           borderColor: "divider",
         }}
       >
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }} align="center" mb={1} color="primary.main">
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }} align="center" color="primary.main">
           新規登録
         </Typography>
-        <Typography variant="body2" color="text.secondary" align="center" mb={4}>
+        <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
           ModParks へようこそ！
         </Typography>
 
