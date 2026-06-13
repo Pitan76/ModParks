@@ -14,12 +14,12 @@ import { Link } from "@/i18n/routing";
 
 interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; type?: string; author?: string }>;
+  searchParams: Promise<{ q?: string; type?: string; author?: string; sort?: string; loader?: string; mcVersion?: string }>;
 }
 
 export default async function ProjectsPage({ params, searchParams }: ProjectsPageProps) {
   const { locale } = await params;
-  const { q, type, author } = await searchParams;
+  const { q, type, author, sort, loader, mcVersion } = await searchParams;
   setRequestLocale(locale);
 
   const t = await getTranslations("Search");
@@ -31,8 +31,11 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   // フィルタリング
   const filtered = await getProjects({
     q,
-    type: type as "mod" | "plugin",
+    type: type as "mod" | "plugin" | "all",
     authorId,
+    sort: sort as any,
+    loader,
+    mcVersion,
   });
 
   return (
@@ -63,7 +66,13 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       </Box>
 
       {/* 検索バー */}
-      <ProjectSearchBar initialQ={q} initialType={type} />
+      <ProjectSearchBar 
+        initialQ={q} 
+        initialType={type} 
+        initialSort={sort}
+        initialLoader={loader}
+        initialMcVersion={mcVersion}
+      />
 
       {/* 件数表示 */}
       <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
@@ -74,13 +83,11 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
 
       {/* プロジェクト一覧 */}
       {filtered.length > 0 ? (
-        <Grid container spacing={2}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {filtered.map((project) => (
-            <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={project} />
-            </Grid>
+            <ProjectCard key={project.id} project={project} />
           ))}
-        </Grid>
+        </Box>
       ) : (
         <Box sx={{ textAlign: "center", py: 10 }}>
           <Typography variant="h6" color="text.secondary">

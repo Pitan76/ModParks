@@ -104,7 +104,34 @@ export const projects = sqliteTable("projects", {
   authorIdx: index("projects_author_idx").on(table.authorId),
   statusIdx: index("projects_status_idx").on(table.status),
   typeIdx: index("projects_type_idx").on(table.type),
+  downloadsIdx: index("projects_downloads_idx").on(table.downloads),
+  updatedAtIdx: index("projects_updated_at_idx").on(table.updatedAt),
 }));
+
+// ─── Project Categories ───────────────────────────────────────────────────────
+
+export const categories = sqliteTable("categories", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type", { enum: ["mod", "plugin"] }).notNull(),
+});
+
+export const projectCategories = sqliteTable(
+  "project_categories",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    categoryId: text("category_id")
+      .notNull()
+      .references(() => categories.id, { onDelete: "cascade" }),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.projectId, t.categoryId] }),
+    projectIdx: index("project_categories_project_idx").on(t.projectId),
+    categoryIdx: index("project_categories_category_idx").on(t.categoryId),
+  })
+);
 
 // ─── Versions ─────────────────────────────────────────────────────────────────
 
@@ -130,6 +157,38 @@ export const versions = sqliteTable("versions", {
 }, (table) => ({
   projectIdx: index("versions_project_idx").on(table.projectId),
 }));
+
+// ─── Version Search Optimizations ──────────────────────────────────────────────
+
+export const versionLoaders = sqliteTable(
+  "version_loaders",
+  {
+    versionId: text("version_id")
+      .notNull()
+      .references(() => versions.id, { onDelete: "cascade" }),
+    loader: text("loader").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.versionId, t.loader] }),
+    versionIdx: index("version_loaders_version_idx").on(t.versionId),
+    loaderIdx: index("version_loaders_loader_idx").on(t.loader),
+  })
+);
+
+export const versionMcVersions = sqliteTable(
+  "version_mc_versions",
+  {
+    versionId: text("version_id")
+      .notNull()
+      .references(() => versions.id, { onDelete: "cascade" }),
+    mcVersion: text("mc_version").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.versionId, t.mcVersion] }),
+    versionIdx: index("version_mc_versions_version_idx").on(t.versionId),
+    mcVersionIdx: index("version_mc_versions_mc_version_idx").on(t.mcVersion),
+  })
+);
 
 // ─── Project Tags ─────────────────────────────────────────────────────────────
 

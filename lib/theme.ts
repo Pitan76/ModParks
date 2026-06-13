@@ -10,43 +10,29 @@ export const roboto = Roboto({
 });
 
 /** ModParks テーマ — Minecraft をイメージした青・水色メインのダークテーマ */
-const theme = createTheme({
+export const theme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main:        "#38bdf8", // Sky blue
-      light:       "#7dd3fc",
-      dark:        "#0284c7",
-      contrastText: "#082f49",
+      main: "#3b82f6", // シンプルなブルー
+      light: "#60a5fa",
+      dark: "#2563eb",
+      contrastText: "#ffffff",
     },
     secondary: {
-      main:        "#60a5fa", // Blue
-      light:       "#93c5fd",
-      dark:        "#2563eb",
-      contrastText: "#1e3a8a",
+      main: "#10b981", // シンプルなグリーン
+      light: "#34d399",
+      dark: "#059669",
+      contrastText: "#ffffff",
     },
     background: {
-      default: "#101a30",  // Slate 900
-      paper:   "#1e293b",  // Slate 800
-    },
-    surface: {
-      main: "#334155", // Slate 700
+      default: "#0f172a", // ダークネイビー
+      paper: "#1e293b",   // 少し明るいネイビー
     },
     text: {
-      primary:   "#f8fafc",
+      primary: "#f8fafc",
       secondary: "#94a3b8",
-      disabled:  "#64748b",
     },
-    error: {
-      main: "#f87171",
-    },
-    warning: {
-      main: "#fbbf24",
-    },
-    success: {
-      main: "#38bdf8",
-    },
-    divider: "#334155",
   },
   typography: {
     fontFamily: roboto.style.fontFamily,
@@ -58,7 +44,7 @@ const theme = createTheme({
     h6: { fontWeight: 500 },
   },
   shape: {
-    borderRadius: 4,
+    borderRadius: 4, // 10万規模向けにシャープで高密度なデザインに変更
   },
   components: {
     MuiButton: {
@@ -69,11 +55,12 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          fontWeight:    600,
-          borderRadius:  6,
-          transition: "transform 0.2s, background-color 0.2s",
-          "&:active": {
-            transform: "scale(0.98)",
+          fontWeight: 600,
+          boxShadow: "none",
+        },
+        containedPrimary: {
+          "&:hover": {
+            boxShadow: "none",
           },
         },
       },
@@ -88,10 +75,6 @@ const theme = createTheme({
           background:   "#1e293b",
           border:       "1px solid #334155",
           borderRadius: 4,
-          transition:   "border-color 0.2s",
-          "&:hover": {
-            borderColor: "#38bdf8af",
-          },
         },
       },
     },
@@ -111,8 +94,6 @@ const theme = createTheme({
         root: {
           "& .MuiOutlinedInput-root": {
             "& fieldset": { borderColor: "#334155" },
-            "&:hover fieldset":  { borderColor: "#38bdf8" },
-            "&.Mui-focused fieldset": { borderColor: "#38bdf8" },
           },
         },
       },
@@ -130,10 +111,9 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background:  "rgba(15, 23, 42, 0.92)",
-          backdropFilter: "blur(12px)",
-          borderBottom:   "1px solid #334155",
-          boxShadow:      "none",
+          backgroundImage: "none",
+          boxShadow: "none",
+          border: "1px solid #334155",
         },
       },
     },

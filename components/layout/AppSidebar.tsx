@@ -149,10 +149,6 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
           "& .MuiDrawer-paper": {
             width: SIDEBAR_WIDTH,
             boxSizing: "border-box",
-            bgcolor: "rgba(30, 41, 59, 0.85)",
-            backdropFilter: "blur(12px)",
-            borderRight: "1px solid",
-            borderColor: "divider",
           },
         }}
         open

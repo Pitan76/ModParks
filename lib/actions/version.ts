@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { getDb, getD1 } from "@/lib/db";
-import { versions, projects, versionIdeas, ideas } from "@/db/schema";
+import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
 import { createVersionSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
@@ -67,6 +67,24 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     projectId:     project.id,
     createdAt:     new Date(),
   }).run();
+
+  // 対応ローダーの保存 (複数)
+  if (parsed.data.loaders && parsed.data.loaders.length > 0) {
+    const loaderValues = parsed.data.loaders.map(loader => ({
+      versionId: id,
+      loader,
+    }));
+    await db.insert(versionLoaders).values(loaderValues).run();
+  }
+
+  // 対応MCバージョンの保存 (複数)
+  if (parsed.data.mcVersions && parsed.data.mcVersions.length > 0) {
+    const mcValues = parsed.data.mcVersions.map(mc => ({
+      versionId: id,
+      mcVersion: mc,
+    }));
+    await db.insert(versionMcVersions).values(mcValues).run();
+  }
 
   const ideaId = formData.get("ideaId") as string;
   if (ideaId) {

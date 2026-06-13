@@ -159,18 +159,24 @@ export async function updateProject(slug: string, formData: FormData) {
  * @param params.authorId 特定の作者のプロジェクトのみ取得する場合に指定
  * @param params.limit 1ページあたりの取得件数
  * @param params.offset 取得開始位置
+ * @param params.sort 並び順
+ * @param params.loader ローダーフィルター
+ * @param params.mcVersion MCバージョンフィルター
  * @returns projects配列
  */
 export async function getProjects(params: {
   q?:    string;
-  type?: "mod" | "plugin";
+  type?: "mod" | "plugin" | "all";
   authorId?: string;
   limit?: number;
   offset?: number;
+  sort?: "downloads" | "newest" | "updated";
+  loader?: string;
+  mcVersion?: string;
 }) {
   const d1 = await getD1();
   const db = getDb(d1);
-  const { q, type, authorId, limit = 20, offset = 0 } = params;
+  const { q, type, authorId, limit = 20, offset = 0, sort = "updated", loader, mcVersion } = params;
 
   const conditions = [];
   if (authorId) {
@@ -182,6 +188,22 @@ export async function getProjects(params: {
   // @ts-ignore
   if (type && type !== "all") conditions.push(eq(projects.type, type));
   if (q) conditions.push(like(projects.name, `%${q}%`));
+
+  if (loader && loader !== "all") {
+    conditions.push(
+      sql`${projects.id} IN (SELECT project_id FROM versions WHERE id IN (SELECT version_id FROM version_loaders WHERE loader = ${loader}))`
+    );
+  }
+
+  if (mcVersion && mcVersion !== "all") {
+    conditions.push(
+      sql`${projects.id} IN (SELECT project_id FROM versions WHERE id IN (SELECT version_id FROM version_mc_versions WHERE mc_version = ${mcVersion}))`
+    );
+  }
+
+  let orderByExpr = desc(projects.updatedAt);
+  if (sort === "downloads") orderByExpr = desc(projects.downloads);
+  if (sort === "newest") orderByExpr = desc(projects.createdAt);
 
   // プロジェクトと著者の情報をJOINして取得
   const rows = await db
@@ -196,7 +218,7 @@ export async function getProjects(params: {
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(projects.createdAt))
+    .orderBy(orderByExpr)
     .limit(limit)
     .offset(offset)
     .all();
