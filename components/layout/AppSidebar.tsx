@@ -63,7 +63,7 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
           {/* ロゴやタイトル */}
           <Box
             component="img"
-            src="/icon.png"
+            src="/icon.svg"
             alt="ModParks Logo"
             sx={{
               width: 32,

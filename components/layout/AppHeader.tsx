@@ -64,7 +64,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
           <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", gap: 1 }}>
             <Box
               component="img"
-              src="/icon.png"
+              src="/icon.svg"
               alt="ModParks Logo"
               sx={{
                 width: 32,

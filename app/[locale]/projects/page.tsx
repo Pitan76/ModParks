@@ -42,7 +42,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         <Typography variant="body1" color="text.secondary">
           {author === "me" 
             ? "あなたが作成したModやプラグインの一覧です。（下書きも表示されます）" 
-            : "世界中の開発者が作成した素晴らしいModやプラグインを見つけましょう。"}
+            : "様々なModやプラグインを見つけましょう。"}
         </Typography>
       </Box>
 
