@@ -7,14 +7,13 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardActionArea from "@mui/material/CardActionArea";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
 import AddIcon from "@mui/icons-material/Add";
-import { Link } from "@/i18n/routing";
+import Stack from "@mui/material/Stack";
+import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import LinkButton from "@/components/ui/LinkButton";
 
 export default async function IdeasPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -68,7 +67,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {allIdeas.map((idea) => (
           <Card key={idea.id} variant="outlined" sx={{ borderRadius: 3, transition: "0.2s", "&:hover": { borderColor: "primary.main" } }}>
-            <CardActionArea component={Link} href={`/ideas/${idea.id}`} sx={{ p: 3 }}>
+            <LinkCardActionArea href={`/ideas/${idea.id}`} sx={{ p: 3 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Avatar src={idea.authorAvatar || undefined} sx={{ width: 48, height: 48 }}>
                   {idea.authorName?.[0] || "U"}
@@ -80,7 +79,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {idea.content}
                   </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+                  <Stack direction="row" alignItems="center" gap={3}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
                       <FavoriteIcon fontSize="small" />
                       <Typography variant="body2">{idea.likesCount}</Typography>
@@ -98,10 +97,10 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
                     <Typography variant="caption" color="text.disabled" sx={{ ml: "auto" }}>
                       {new Date(idea.createdAt!).toLocaleDateString()}
                     </Typography>
-                  </Box>
+                  </Stack>
                 </Box>
               </Box>
-            </CardActionArea>
+            </LinkCardActionArea>
           </Card>
         ))}
         {allIdeas.length === 0 && (

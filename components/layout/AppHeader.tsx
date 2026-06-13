@@ -94,23 +94,21 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
         <Box sx={{ flexGrow: 1 }} />
 
         {/* デスクトップナビ（アクションのみ） */}
-        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, alignItems: "center" }}>
+        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, alignItems: "center" }} />
 
-          {session?.user && (
-            <LinkButton
-              href="/projects/new"
-              id="nav-new-project"
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              sx={{ ml: 1 }}
-            >
-              <Box component="span" sx={{ mt: "1px" }}>
-                {t("newProject")}
-              </Box>
-            </LinkButton>
-          )}
-        </Box>
+        {/* 新規プロジェクトボタン (全画面・未ログインでも表示) */}
+        <LinkButton
+          href="/projects/new"
+          id="nav-new-project"
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          sx={{ ml: { xs: 0, md: 1 } }}
+        >
+          <Box component="span" sx={{ mt: "1px", display: { xs: "none", sm: "inline" } }}>
+            {t("newProject")}
+          </Box>
+        </LinkButton>
 
         {/* 言語切替 */}
         <Tooltip title="Language">

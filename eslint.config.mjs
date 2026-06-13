@@ -13,6 +13,17 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "JSXAttribute[name.name='component'][value.expression.name='Link']",
+          "message": "Do not pass Next.js Link as a component prop directly to MUI components in Server Components. It causes serialization errors. Use LinkButton, LinkCardActionArea, etc. from @/components/ui/ instead."
+        }
+      ]
+    }
+  }
 ]);
 
 export default eslintConfig;
