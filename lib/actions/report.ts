@@ -1,19 +1,12 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { getDb } from "@/lib/db";
+import { getDb, getD1 } from "@/lib/db";
 import { reports, projects } from "@/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-
-function getD1(): D1Database {
-  // @ts-expect-error Cloudflare Workers env binding
-  const db = (process.env as unknown as { DB: D1Database }).DB;
-  if (!db) throw new Error("D1 binding not found");
-  return db;
-}
 
 export async function createReport(projectId: string, formData: FormData) {
   const session = await auth();
@@ -29,7 +22,8 @@ export async function createReport(projectId: string, formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const db = getDb(getD1());
+  const d1 = await getD1();
+  const db = getDb(d1);
   const id = createId();
 
   await db.insert(reports).values({
@@ -52,7 +46,8 @@ export async function updateReportStatus(
   const session = await auth();
   if (session?.user?.role !== "admin") throw new Error("Forbidden");
 
-  const db = getDb(getD1());
+  const d1 = await getD1();
+  const db = getDb(d1);
 
   await db
     .update(reports)
@@ -70,7 +65,8 @@ export async function unpublishProject(projectId: string) {
   const session = await auth();
   if (session?.user?.role !== "admin") throw new Error("Forbidden");
 
-  const db = getDb(getD1());
+  const d1 = await getD1();
+  const db = getDb(d1);
 
   await db
     .update(projects)

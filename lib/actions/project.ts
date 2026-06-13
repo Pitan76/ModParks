@@ -1,20 +1,13 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { getDb } from "@/lib/db";
+import { getDb, getD1 } from "@/lib/db";
 import { projects, projectTags, versions } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, like, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
-function getD1(): D1Database {
-  // @ts-expect-error Cloudflare Workers env binding
-  const db = (process.env as unknown as { DB: D1Database }).DB;
-  if (!db) throw new Error("D1 binding not found");
-  return db;
-}
 
 // ─── プロジェクト作成 ─────────────────────────────────────────────────────────
 
@@ -38,7 +31,8 @@ export async function createProject(formData: FormData) {
   }
 
   const { name, slug, description, type, license, sourceUrl, tags } = parsed.data;
-  const db = getDb(getD1());
+  const d1 = await getD1();
+  const db = getDb(d1);
   const id = createId();
 
   await db.insert(projects).values({
@@ -70,7 +64,8 @@ export async function updateProject(projectId: string, formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
-  const db = getDb(getD1());
+  const d1 = await getD1();
+  const db = getDb(d1);
 
   const project = await db
     .select()
@@ -133,7 +128,8 @@ export async function getProjects(params: {
   limit?: number;
   offset?: number;
 }) {
-  const db = getDb(getD1());
+  const d1 = await getD1();
+  const db = getDb(d1);
   const { q, type, limit = 20, offset = 0 } = params;
 
   const conditions = [eq(projects.status, "published")];

@@ -1,25 +1,19 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { getDb } from "@/lib/db";
+import { getDb, getD1 } from "@/lib/db";
 import { versions, projects } from "@/db/schema";
 import { createVersionSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-function getD1(): D1Database {
-  // @ts-expect-error Cloudflare Workers env binding
-  const db = (process.env as unknown as { DB: D1Database }).DB;
-  if (!db) throw new Error("D1 binding not found");
-  return db;
-}
-
 export async function createVersion(projectSlug: string, formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
-  const db = getDb(getD1());
+  const d1 = await getD1();
+  const db = getDb(d1);
 
   const project = await db
     .select()
