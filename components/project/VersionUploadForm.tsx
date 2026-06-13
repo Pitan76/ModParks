@@ -206,7 +206,7 @@ export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
                 選択中: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
               </Typography>
             )}
-            {error?.fileUrl && <Typography color="error" variant="caption" display="block" sx={{ mt: 1 }}>{error.fileUrl[0]}</Typography>}
+            {error?.fileUrl && <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>{error.fileUrl[0]}</Typography>}
           </Box>
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>

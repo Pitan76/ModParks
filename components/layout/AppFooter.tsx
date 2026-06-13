@@ -60,7 +60,7 @@ export default function AppFooter() {
 
         <Divider sx={{ my: 3 }} />
 
-        <Typography variant="caption" color="text.disabled" align="center" display="block">
+        <Typography variant="caption" color="text.disabled" align="center" sx={{ display: "block" }}>
           © {year} ModParks. MIT License.
         </Typography>
       </Container>
