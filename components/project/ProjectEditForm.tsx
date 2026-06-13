@@ -11,9 +11,6 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
-import InputAdornment from "@mui/material/InputAdornment";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProject } from "@/lib/actions/project";
@@ -34,8 +31,6 @@ interface ProjectEditFormProps {
 export default function ProjectEditForm({ project }: ProjectEditFormProps) {
   const router = useRouter();
   
-  const theme = useTheme();
-  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
 
@@ -82,16 +77,7 @@ export default function ProjectEditForm({ project }: ProjectEditFormProps) {
               error={!!error?.slug}
               helperText={
                 error?.slug?.[0] || 
-                (isSmUp 
-                  ? "半角英数字とハイフン(-)、アンダースコア(_)が使用可能です" 
-                  : "URL: https://modparks.pages.dev/projects/<スラッグ> (半角英数字、ハイフン、アンダースコアのみ)")
-              }
-              slotProps={
-                isSmUp ? {
-                  input: {
-                    startAdornment: <InputAdornment position="start">https://modparks.pages.dev/projects/</InputAdornment>,
-                  }
-                } : undefined
+                "URL: https://modparks.pages.dev/projects/<スラッグ> (半角英数字、ハイフン、アンダースコアのみ)"
               }
             />
           </Stack>
