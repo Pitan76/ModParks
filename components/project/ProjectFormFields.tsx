@@ -7,6 +7,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
+import ProjectIconUpload from "./ProjectIconUpload";
 
 export interface ProjectFormFieldsProps {
   error: { [key: string]: string[] } | null;
@@ -17,6 +18,7 @@ export interface ProjectFormFieldsProps {
     description?: string;
     license?: string;
     sourceUrl?: string | null;
+    iconUrl?: string | null;
   };
   children?: React.ReactNode;
 }
@@ -26,6 +28,8 @@ export default function ProjectFormFields({ error, project, children }: ProjectF
 
   return (
     <>
+      <ProjectIconUpload initialIconUrl={project?.iconUrl} projectSlug={project?.slug} />
+
       <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
         <TextField
           id="project-name"

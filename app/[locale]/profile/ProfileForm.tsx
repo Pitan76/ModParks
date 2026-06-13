@@ -13,6 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { useState, useRef } from "react";
 import { updateProfile } from "@/lib/actions/profile";
 import { useRouter } from "next/navigation";
+import { resizeImageFile } from "@/lib/utils/image";
 
 interface ProfileFormProps {
   initialData: {
@@ -47,13 +48,16 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
     setUploading(true);
     setMessage(null);
     try {
-      // 1. Presign URLの発行
+      // 1. 画像の自動リサイズ (最大400x400)
+      const resizedFile = await resizeImageFile(file, 400, 400);
+
+      // 2. Presign URLの発行
       const presignRes = await fetch("/api/upload/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileName: file.name,
-          contentType: file.type,
+          fileName: resizedFile.name,
+          contentType: resizedFile.type,
           type: "avatar"
         }),
       });
@@ -64,11 +68,11 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
       
       const { uploadUrl, publicUrl } = await presignRes.json();
 
-      // 2. R2へのアップロード
+      // 3. R2へのアップロード
       const uploadRes = await fetch(uploadUrl, {
         method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
+        headers: { "Content-Type": resizedFile.type },
+        body: resizedFile,
       });
       
       if (!uploadRes.ok) throw new Error("画像のアップロードに失敗しました");
