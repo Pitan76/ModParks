@@ -9,6 +9,7 @@ import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import Tooltip from "@mui/material/Tooltip";
 import { Link } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { formatCompactNumber } from "@/lib/utils/format";
@@ -153,9 +154,11 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                   />
                 ))}
                 {project.tags.length > (isGrid ? 2 : 3) && (
-                  <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5 }}>
-                    +{project.tags.length - (isGrid ? 2 : 3)}
-                  </Typography>
+                  <Tooltip title={project.tags.slice(isGrid ? 2 : 3).join(", ")} arrow placement="top">
+                    <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5, cursor: "help" }}>
+                      +{project.tags.length - (isGrid ? 2 : 3)}
+                    </Typography>
+                  </Tooltip>
                 )}
               </Box>
             )}
