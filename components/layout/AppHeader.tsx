@@ -114,7 +114,9 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
               startIcon={<AddIcon />}
               sx={{ ml: 1 }}
             >
-              {t("newProject")}
+              <Box component="span" sx={{ mt: "1px" }}>
+                {t("newProject")}
+              </Box>
             </LinkButton>
           )}
         </Box>
@@ -130,7 +132,9 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
             renderValue={(v) => (
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <LanguageIcon fontSize="small" />
-                <Typography variant="body2">{v.toUpperCase()}</Typography>
+                <Typography variant="body2" sx={{ mt: "1px" }}>
+                  {v.toUpperCase()}
+                </Typography>
               </Box>
             )}
             sx={{
@@ -178,7 +182,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
                 {t("profile")}
               </LinkMenuItem>
               <LinkMenuItem
-                href="/projects"
+                href="/projects?author=me"
                 onClick={handleMenuClose}
                 id="user-menu-my-projects"
               >
@@ -219,7 +223,9 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
               },
             }}
           >
-            {t("login")}
+            <Box component="span" sx={{ mt: "1px" }}>
+              {t("login")}
+            </Box>
           </LinkButton>
         )}
       </Toolbar>
