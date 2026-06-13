@@ -21,7 +21,7 @@ import semver from "semver";
 import { createVersion } from "@/lib/actions/version";
 import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
 
-const MC_VERSIONS = ["1.21.5", "1.21.4", "1.21.1", "1.20.6", "1.20.4", "1.20.1", "1.19.4"];
+import { MC_VERSIONS } from "@/lib/validations";
 
 /**
  * プロジェクトの新バージョン（ファイル）をアップロードするフォームコンポーネント。
