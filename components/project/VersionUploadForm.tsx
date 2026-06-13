@@ -19,6 +19,10 @@ import { createVersion } from "@/lib/actions/version";
 import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
 import { MC_VERSIONS } from "@/lib/validations";
 import { parseModJar } from "@/lib/utils/modParser";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
 
 /**
  * プロジェクトの新バージョン（ファイル）をアップロードするフォームコンポーネント。
@@ -27,9 +31,11 @@ import { parseModJar } from "@/lib/utils/modParser";
 export interface VersionUploadFormProps {
   /** バージョンを追加する対象のプロジェクトSlug */
   slug: string;
+  /** 関連付け可能なオープン状態のアイデア一覧 */
+  openIdeas: { id: string; title: string }[];
 }
 
-export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
+export default function VersionUploadForm({ slug, openIdeas }: VersionUploadFormProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
@@ -162,6 +168,23 @@ export default function VersionUploadForm({ slug }: VersionUploadFormProps) {
             )}
             {error?.fileUrl && <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>{error.fileUrl[0]}</Typography>}
           </Box>
+
+          <FormControl fullWidth>
+            <InputLabel>解決するアイデア (任意)</InputLabel>
+            <Select
+              name="ideaId"
+              label="解決するアイデア (任意)"
+              defaultValue=""
+              disabled={pending}
+            >
+              <MenuItem value="">なし</MenuItem>
+              {openIdeas.map((idea) => (
+                <MenuItem key={idea.id} value={idea.id}>
+                  {idea.title}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           <TextField
             id="version-number"

@@ -14,6 +14,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import FolderIcon from "@mui/icons-material/Folder";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import { usePathname, useRouter, Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -41,8 +42,9 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
   };
 
   const navItems = [
-    { label: t("home"), path: "/", id: "home", icon: <HomeIcon /> },
-    { label: t("projects"), path: "/projects", id: "projects", icon: <SearchIcon /> },
+    { id: "home", label: t("home"), path: "/", icon: <HomeIcon /> },
+    { id: "projects", label: t("projects"), path: "/projects", icon: <SearchIcon /> },
+    { id: "ideas", label: t("ideas"), path: "/ideas", icon: <LightbulbIcon /> },
   ];
 
   if (session?.user) {
