@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { getDb, getD1 } from "@/lib/db";
-import { projects, projectTags, versions } from "@/db/schema";
+import { projects, projectTags, versions, users } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, like, desc } from "drizzle-orm";
@@ -139,25 +139,88 @@ export async function updateProject(projectId: string, formData: FormData) {
 export async function getProjects(params: {
   q?:    string;
   type?: "mod" | "plugin";
+  authorId?: string;
   limit?: number;
   offset?: number;
 }) {
   const d1 = await getD1();
   const db = getDb(d1);
-  const { q, type, limit = 20, offset = 0 } = params;
+  const { q, type, authorId, limit = 20, offset = 0 } = params;
 
-  const conditions = [eq(projects.status, "published")];
-  if (type) conditions.push(eq(projects.type, type));
-  if (q)    conditions.push(like(projects.name, `%${q}%`));
+  const conditions = [];
+  if (authorId) {
+    conditions.push(eq(projects.authorId, authorId));
+  } else {
+    conditions.push(eq(projects.status, "published"));
+  }
+  
+  if (type && type !== "all" as any) conditions.push(eq(projects.type, type));
+  if (q) conditions.push(like(projects.name, `%${q}%`));
 
+  // プロジェクトと著者の情報をJOINして取得
   const rows = await db
-    .select()
+    .select({
+      project: projects,
+      author: {
+        username: users.username,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+      }
+    })
     .from(projects)
-    .where(and(...conditions))
+    .leftJoin(users, eq(projects.authorId, users.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(projects.createdAt))
     .limit(limit)
     .offset(offset)
     .all();
 
-  return rows;
+  // 各プロジェクトのタグを取得
+  const projectIds = rows.map((r) => r.project.id);
+  let tagsData: { projectId: string; tag: string }[] = [];
+  if (projectIds.length > 0) {
+    // IN句の代わりにORを使うか、あるいは1つずつ取得（今回は簡易的に全タグ取得してフィルタ）
+    // 本来は inArray() が使えますが、ここではシンプルに
+    const tagsRows = await db.select().from(projectTags).all();
+    tagsData = tagsRows.filter((t) => projectIds.includes(t.projectId));
+  }
+
+  return rows.map((row) => ({
+    ...row.project,
+    authorUsername: row.author?.username,
+    authorDisplayName: row.author?.displayName ?? row.author?.username,
+    authorAvatarUrl: row.author?.avatarUrl,
+    tags: tagsData.filter((t) => t.projectId === row.project.id).map((t) => t.tag),
+  }));
+}
+
+export async function getProjectBySlug(slug: string) {
+  const d1 = await getD1();
+  const db = getDb(d1);
+
+  const row = await db
+    .select({
+      project: projects,
+      author: {
+        username: users.username,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+      }
+    })
+    .from(projects)
+    .leftJoin(users, eq(projects.authorId, users.id))
+    .where(eq(projects.slug, slug))
+    .get();
+
+  if (!row) return null;
+
+  const tagsRows = await db.select().from(projectTags).where(eq(projectTags.projectId, row.project.id)).all();
+  const versionsRows = await db.select().from(versions).where(eq(versions.projectId, row.project.id)).orderBy(desc(versions.createdAt)).all();
+
+  return {
+    ...row.project,
+    author: row.author,
+    tags: tagsRows.map((t) => t.tag),
+    versions: versionsRows,
+  };
 }

@@ -70,9 +70,9 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
           <MenuIcon />
         </IconButton>
 
-        {/* ロゴ */}
+        {/* ロゴ (モバイルでのみ表示、デスクトップはサイドバーに表示) */}
         <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", gap: 1 }}>
             <Box
               sx={{
                 width:        32,
@@ -102,16 +102,8 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
         {/* スペーサー */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* デスクトップナビ */}
+        {/* デスクトップナビ（アクションのみ） */}
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, alignItems: "center" }}>
-          <LinkButton
-            href="/projects"
-            id="nav-projects"
-            color="inherit"
-            sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
-          >
-            {t("projects")}
-          </LinkButton>
 
           {session?.user && (
             <LinkButton

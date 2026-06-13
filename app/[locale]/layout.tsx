@@ -6,7 +6,10 @@ import { routing } from "@/i18n/routing";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import Box from "@mui/material/Box";
 import { auth } from "@/lib/auth";
-import AppHeader from "@/components/layout/AppHeader";
+import { getDb, getD1 } from "@/lib/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import AppLayout from "@/components/layout/AppLayout";
 import AppFooter from "@/components/layout/AppFooter";
 
 export const metadata: Metadata = {
@@ -41,25 +44,26 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const messages = await getMessages();
   const session  = await auth();
 
+  if (session?.user?.id) {
+    // 常に最新のプロフィール情報（特にアバター）を取得して上書き
+    const d1 = await getD1();
+    const db = getDb(d1);
+    const dbUser = await db.select().from(users).where(eq(users.id, session.user.id)).get();
+    if (dbUser) {
+      session.user.avatarUrl = dbUser.avatarUrl;
+      session.user.displayName = dbUser.displayName;
+    }
+  }
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
         <ThemeRegistry>
           <NextIntlClientProvider messages={messages}>
-            <Box
-              sx={{
-                minHeight:     "100vh",
-                display:       "flex",
-                flexDirection: "column",
-                bgcolor:       "background.default",
-              }}
-            >
-              <AppHeader session={session} />
-              <Box component="main" sx={{ flex: 1 }}>
-                {children}
-              </Box>
+            <AppLayout session={session}>
+              {children}
               <AppFooter />
-            </Box>
+            </AppLayout>
           </NextIntlClientProvider>
         </ThemeRegistry>
       </body>

@@ -20,48 +20,10 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import DownloadIcon from "@mui/icons-material/Download";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Link } from "@/i18n/routing";
+import { getProjectBySlug } from "@/lib/actions/project";
 
 interface ProjectDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
-}
-
-// ダミーデータ（DB接続後に置き換え）
-async function getProject(slug: string) {
-  const DUMMY: Record<string, object> = {
-    "example-fabric-mod": {
-      id: "1", slug: "example-fabric-mod", name: "ExampleFabricMod",
-      description: "Fabricで動作するサンプルMod。\n\n新しいブロックとアイテムを追加します。\n複数の鉱石や食べ物も実装されています。",
-      iconUrl: null, type: "mod", license: "MIT", sourceUrl: "https://github.com/example/example-fabric-mod",
-      downloads: 12400, status: "published",
-      tags: ["fabric", "1.21", "items", "blocks"],
-      author: { username: "exampledev", displayName: "Example Dev", avatarUrl: null },
-      versions: [
-        {
-          id: "v1", versionNumber: "1.2.0",
-          mcVersions: ["1.21.5", "1.21.4"],
-          loaders: ["fabric"],
-          changelog: "バグ修正と新アイテム追加。",
-          fileUrl: "https://files.example.com/example-fabric-mod-1.2.0.jar",
-          fileName: "example-fabric-mod-1.2.0.jar",
-          fileSize: 1024000,
-          downloads: 8000,
-          createdAt: new Date("2024-11-01"),
-        },
-        {
-          id: "v2", versionNumber: "1.1.0",
-          mcVersions: ["1.21"],
-          loaders: ["fabric", "quilt"],
-          changelog: "初回リリース。",
-          fileUrl: "https://files.example.com/example-fabric-mod-1.1.0.jar",
-          fileName: "example-fabric-mod-1.1.0.jar",
-          fileSize: 920000,
-          downloads: 4400,
-          createdAt: new Date("2024-09-01"),
-        },
-      ],
-    },
-  };
-  return DUMMY[slug] ?? null;
 }
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
@@ -69,7 +31,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   setRequestLocale(locale);
 
   const [project, session] = await Promise.all([
-    getProject(slug),
+    getProjectBySlug(slug),
     auth(),
   ]);
 
@@ -79,8 +41,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const p = project as any;
   const t = await getTranslations("Project");
 
-  // TODO: DB接続後は isOwner = session?.user?.id === p.authorId; に戻す
-  const canEdit = !!session?.user;
+  const isOwner = session?.user?.id === p.authorId;
+  const canEdit = isOwner;
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
