@@ -19,10 +19,6 @@ import { createVersion } from "@/lib/actions/version";
 import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
 import { MC_VERSIONS } from "@/lib/validations";
 import { parseModJar } from "@/lib/utils/modParser";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
 
 /**
  * プロジェクトの新バージョン（ファイル）をアップロードするフォームコンポーネント。

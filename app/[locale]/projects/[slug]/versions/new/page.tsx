@@ -4,14 +4,13 @@ import { getDb, getD1 } from "@/lib/db";
 import { ideas } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
-import { use } from "react";
 
 interface NewVersionPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default function NewVersionPage({ params }: NewVersionPageProps) {
-  const { slug } = use(params);
+export default async function NewVersionPage({ params }: NewVersionPageProps) {
+  const { slug } = await params;
 
   const d1 = await getD1();
   const db = getDb(d1);
