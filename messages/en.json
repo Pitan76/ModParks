@@ -56,11 +56,14 @@
       "license": "License",
       "sourceUrl": "Source Code URL (optional)",
       "tags": "Tags",
-      "status": "Status"
+      "status": "Status",
+      "slugRule": "Alphanumeric and hyphens only"
     },
     "create": {
       "title": "New Project",
-      "success": "Project created successfully"
+      "success": "Project created successfully",
+      "submit": "Create Project",
+      "creating": "Creating..."
     },
     "edit": {
       "title": "Edit Project",

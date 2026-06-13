@@ -14,10 +14,13 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createProject } from "@/lib/actions/project";
 
 export default function NewProjectPage() {
   const router = useRouter();
+  const t = useTranslations("Project");
+  const tCommon = useTranslations("Common");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
 
@@ -40,7 +43,7 @@ export default function NewProjectPage() {
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Typography variant="h4" fontWeight={800} sx={{ mb: 4 }}>
-        新規プロジェクト作成
+        {t("create.title")}
       </Typography>
 
       <Card>
@@ -50,7 +53,7 @@ export default function NewProjectPage() {
               <TextField
                 id="project-name"
                 name="name"
-                label="プロジェクト名"
+                label={t("fields.name")}
                 fullWidth
                 required
                 error={!!error?.name}
@@ -59,25 +62,25 @@ export default function NewProjectPage() {
               <TextField
                 id="project-slug"
                 name="slug"
-                label="スラッグ (例: my-mod)"
+                label={t("fields.slug")}
                 fullWidth
                 required
                 error={!!error?.slug}
-                helperText={error?.slug?.[0] || "半角英数字とハイフンのみ"}
+                helperText={error?.slug?.[0] || t("fields.slugRule")}
               />
             </Stack>
 
             <FormControl fullWidth required error={!!error?.type}>
-              <InputLabel id="project-type-label">プロジェクトタイプ</InputLabel>
+              <InputLabel id="project-type-label">{t("fields.type")}</InputLabel>
               <Select
                 labelId="project-type-label"
                 id="project-type"
                 name="type"
-                label="プロジェクトタイプ"
+                label={t("fields.type")}
                 defaultValue="mod"
               >
-                <MenuItem value="mod">Mod</MenuItem>
-                <MenuItem value="plugin">Plugin</MenuItem>
+                <MenuItem value="mod">{t("type.mod")}</MenuItem>
+                <MenuItem value="plugin">{t("type.plugin")}</MenuItem>
               </Select>
               {error?.type && <Typography color="error" variant="caption">{error.type[0]}</Typography>}
             </FormControl>
@@ -85,7 +88,7 @@ export default function NewProjectPage() {
             <TextField
               id="project-description"
               name="description"
-              label="説明"
+              label={t("fields.description")}
               multiline
               rows={5}
               fullWidth
@@ -98,7 +101,7 @@ export default function NewProjectPage() {
               <TextField
                 id="project-license"
                 name="license"
-                label="ライセンス"
+                label={t("fields.license")}
                 fullWidth
                 required
                 defaultValue="MIT"
@@ -108,7 +111,7 @@ export default function NewProjectPage() {
               <TextField
                 id="project-source"
                 name="sourceUrl"
-                label="ソースコードURL (任意)"
+                label={t("fields.sourceUrl")}
                 fullWidth
                 error={!!error?.sourceUrl}
                 helperText={error?.sourceUrl?.[0]}
@@ -117,10 +120,10 @@ export default function NewProjectPage() {
 
             <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
               <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
-                キャンセル
+                {tCommon("cancel")}
               </Button>
               <Button type="submit" variant="contained" size="large" disabled={pending}>
-                {pending ? "作成中..." : "プロジェクトを作成"}
+                {pending ? t("create.creating") : t("create.submit")}
               </Button>
             </Box>
           </Box>

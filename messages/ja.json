@@ -56,11 +56,14 @@
       "license": "ライセンス",
       "sourceUrl": "ソースコードURL（任意）",
       "tags": "タグ",
-      "status": "公開状態"
+      "status": "公開状態",
+      "slugRule": "半角英数字とハイフンのみ"
     },
     "create": {
       "title": "新規プロジェクト",
-      "success": "プロジェクトを作成しました"
+      "success": "プロジェクトを作成しました",
+      "submit": "プロジェクトを作成",
+      "creating": "作成中..."
     },
     "edit": {
       "title": "プロジェクト編集",
