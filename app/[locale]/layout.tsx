@@ -13,11 +13,10 @@ import AppFooter from "@/components/layout/AppFooter";
 
 export const metadata: Metadata = {
   title: {
-    default: "ModParks | Minecraft Mod & Plugin Platform",
+    default: "ModParks - Minecraft Mod & Plugin Platform",
     template: "%s | ModParks",
   },
-  description:
-    "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
+  description: "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
   keywords: ["Minecraft", "Mod", "Plugin", "Java Edition", "Fabric", "Forge", "Paper"],
   openGraph: {
     type:    "website",
