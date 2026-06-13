@@ -58,7 +58,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
           href="/ideas/new"
           variant="contained"
           startIcon={<AddIcon />}
-          sx={{ borderRadius: 8, px: 3 }}
+          sx={{ flexShrink: 0 }}
         >
           アイデアを投稿
         </LinkButton>
@@ -79,7 +79,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {idea.content}
                   </Typography>
-                  <Stack direction="row" alignItems="center" gap={3}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
                       <FavoriteIcon fontSize="small" />
                       <Typography variant="body2">{idea.likesCount}</Typography>
@@ -97,7 +97,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
                     <Typography variant="caption" color="text.disabled" sx={{ ml: "auto" }}>
                       {new Date(idea.createdAt!).toLocaleDateString()}
                     </Typography>
-                  </Stack>
+                  </Box>
                 </Box>
               </Box>
             </LinkCardActionArea>

@@ -99,16 +99,34 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
         {/* 新規プロジェクトボタン (全画面・未ログインでも表示) */}
         <LinkButton
           href="/projects/new"
-          id="nav-new-project"
+          id="nav-new-project-desktop"
           variant="contained"
           size="small"
           startIcon={<AddIcon />}
-          sx={{ ml: { xs: 0, md: 1 } }}
+          sx={{ ml: 1, display: { xs: "none", sm: "flex" } }}
         >
-          <Box component="span" sx={{ mt: "1px", display: { xs: "none", sm: "inline" } }}>
+          <Box component="span" sx={{ mt: "1px" }}>
             {t("newProject")}
           </Box>
         </LinkButton>
+
+        {/* スマホ向け: 正方形のアイコンボタン */}
+        <Box sx={{ display: { xs: "flex", sm: "none" }, ml: 0 }}>
+          <Link href="/projects/new" style={{ display: "flex", textDecoration: "none" }} id="nav-new-project-mobile">
+            <IconButton
+              size="small"
+              sx={{ 
+                bgcolor: "primary.main",
+                color: "primary.contrastText",
+                "&:hover": { bgcolor: "primary.dark" },
+                borderRadius: 1,
+                p: "6px"
+              }}
+            >
+              <AddIcon fontSize="small" />
+            </IconButton>
+          </Link>
+        </Box>
 
         {/* 言語切替 */}
         <Tooltip title="Language">
