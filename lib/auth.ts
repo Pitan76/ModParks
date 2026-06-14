@@ -54,12 +54,12 @@ export const authConfig = {
         if (passwordsMatch) {
           return {
             id: user.id,
-            name: user.name ?? undefined,
-            email: user.email ?? undefined,
-            image: user.image ?? undefined,
-            username: user.username ?? undefined,
-            displayName: user.displayName ?? undefined,
-            avatarUrl: user.avatarUrl ?? undefined,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            username: user.username,
+            displayName: user.displayName,
+            avatarUrl: user.avatarUrl,
             role: user.role,
           };
         }
@@ -92,8 +92,8 @@ export const authConfig = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        token.username = (user as any).username ?? "";
-        token.displayName = (user as any).displayName ?? "";
+        token.username = (user as any).username ?? null;
+        token.displayName = (user as any).displayName ?? null;
         token.avatarUrl = (user as any).avatarUrl ?? user.image ?? null;
         token.role = (user as any).role ?? "user";
       }
@@ -101,10 +101,9 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = (token.sub ?? token.id ?? "") as string;
-        session.user.username = (token.username ?? "") as string;
-        session.user.displayName = (token.displayName ?? "") as string;
-        // @ts-ignore: Drizzle Adapter側の拡張型とNextAuthの型マージでavatarUrlがstringになるため強制キャスト
+        session.user.id = (token.sub ?? token.id) as string;
+        session.user.username = (token.username ?? null) as string | null;
+        session.user.displayName = (token.displayName ?? null) as string | null;
         session.user.avatarUrl = (token.avatarUrl ?? null) as string | null;
         session.user.role = (token.role ?? "user") as string;
       }
