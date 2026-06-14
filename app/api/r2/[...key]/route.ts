@@ -9,8 +9,8 @@ export async function GET(
 
   let R2: R2Bucket;
   if (process.env.NODE_ENV === "development" && typeof process !== "undefined" && process.release?.name === "node") {
-    const wrangler = await import(/* webpackIgnore: true */ "wrangler");
-    const proxy = await wrangler.getPlatformProxy<{ R2: R2Bucket }>();
+    const { getCachedPlatformProxy } = await import("@/lib/proxy");
+    const proxy = await getCachedPlatformProxy();
     R2 = proxy.env.R2;
   } else {
     R2 = (process.env as any).R2;

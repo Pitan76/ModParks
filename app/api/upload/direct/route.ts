@@ -23,8 +23,8 @@ export async function PUT(req: NextRequest) {
   let R2: R2Bucket;
   if (process.env.NODE_ENV === "development" && typeof process !== "undefined" && process.release?.name === "node") {
     // 開発環境のWrangler Proxy経由でR2を取得
-    const wrangler = await import(/* webpackIgnore: true */ "wrangler");
-    const proxy = await wrangler.getPlatformProxy<{ R2: R2Bucket }>();
+    const { getCachedPlatformProxy } = await import("@/lib/proxy");
+    const proxy = await getCachedPlatformProxy();
     R2 = proxy.env.R2;
   } else {
     // Edgeランタイム / 本番環境

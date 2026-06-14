@@ -39,9 +39,8 @@ export async function getD1(): Promise<D1Database> {
     process.env.NEXT_RUNTIME === "nodejs"
   ) {
     if (!localD1Proxy) {
-      // Webpack (Edgeランタイム) がエラーを出さないように ignore する
-      const wrangler = await import(/* webpackIgnore: true */ "wrangler");
-      const proxy = await wrangler.getPlatformProxy<Env>();
+      const { getCachedPlatformProxy } = await import("./proxy");
+      const proxy = await getCachedPlatformProxy();
       localD1Proxy = proxy.env.DB;
     }
     if (!localD1Proxy) throw new Error("Local D1 proxy not found.");
