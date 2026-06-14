@@ -34,7 +34,7 @@ export async function GET(
       .where(eq(projects.id, version.projectId))
       .get();
 
-    if (!project || project.status !== "published") {
+    if (!project || project.status === "draft") {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
