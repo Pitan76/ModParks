@@ -174,7 +174,8 @@ export async function getProjects(params: {
   if (authorId) {
     conditions.push(eq(projects.authorId, authorId));
   } else {
-    conditions.push(eq(projects.status, "published"));
+    // 検索・一覧表示には「public」のみ表示（unlisted, private, draft は表示しない）
+    conditions.push(eq(projects.status, "public"));
   }
   
   // @ts-ignore

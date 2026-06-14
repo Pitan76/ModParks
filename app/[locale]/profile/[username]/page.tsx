@@ -13,6 +13,7 @@ import ProjectCard from "@/components/project/ProjectCard";
 import { getProjects } from "@/lib/actions/project";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
 import { setRequestLocale } from "next-intl/server";
+import { auth } from "@/lib/auth";
 import Alert from "@mui/material/Alert";
 
 interface PublicProfileProps {
@@ -48,12 +49,15 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     );
   }
 
+  const session = await auth();
+  const isOwner = session?.user?.id === user.id;
+
   // Fetch user projects and favorites
   const [allProjects, favoritedProjects] = await Promise.all([
     getProjects({ authorId: user.id }),
     getFavoriteProjects(user.id)
   ]);
-  const publishedProjects = allProjects.filter(p => p.status === "published");
+  const visibleProjects = allProjects.filter(p => isOwner ? true : p.status === "public");
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -93,9 +97,9 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         Projects
       </Typography>
       
-      {publishedProjects.length > 0 ? (
+      {visibleProjects.length > 0 ? (
         <Grid container spacing={2}>
-          {publishedProjects.map(p => (
+          {visibleProjects.map(p => (
             <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
               <ProjectCard project={p as any} layout="grid" />
             </Grid>

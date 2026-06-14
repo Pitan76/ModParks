@@ -112,7 +112,7 @@ export const projects = sqliteTable("projects", {
   type:        text("type", { enum: ["mod", "plugin"] }).notNull(),
   license:     text("license").notNull(),
   sourceUrl:   text("source_url"),
-  status:      text("status", { enum: ["draft", "published"] }).notNull().default("draft"),
+  status:      text("status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
   authorId:    text("author_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),

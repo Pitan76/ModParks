@@ -82,7 +82,7 @@ export const createProjectSchema = z.object({
 });
 
 export const updateProjectSchema = createProjectSchema.partial().extend({
-  status: z.enum(["draft", "published"]).optional(),
+  status: z.enum(["draft", "public", "unlisted", "private"]).optional(),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
