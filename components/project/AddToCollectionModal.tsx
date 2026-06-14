@@ -20,9 +20,9 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
 import { useTranslations } from "next-intl";
-import { getUserCollections, toggleProjectInCollection, createCollection } from "@/lib/actions/collection";
-import { getDatabase } from "@/lib/db";
+import { getUserCollectionsWithProjectStatus, toggleProjectInCollection, createCollection } from "@/lib/actions/collection";
 
 interface AddToCollectionModalProps {
   open: boolean;
@@ -32,7 +32,8 @@ interface AddToCollectionModalProps {
 }
 
 export default function AddToCollectionModal({ open, onClose, projectId, userId }: AddToCollectionModalProps) {
-  const t = useTranslations("Project"); // Will need "Collection" translations soon, but we'll use fallback for now
+  const t = useTranslations("Project"); // fallback translations
+  // Normally we would have translations for Collection, using fallback for now
   
   const [collections, setCollections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,17 +47,140 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
       setLoading(true);
       setCreating(false);
       setNewCollectionName("");
-      // Fetch collections
-      getUserCollections(userId, userId).then(data => {
-        // We also need to know which collections already contain this project.
-        // Wait, getUserCollections doesn't return items. We need an action to get user collections with "containsProject" boolean.
-        // Let's just fetch them and then we'll need to check. Actually, it's easier to just fetch `collectionItems` where projectId = projectId.
-        // Let's modify the component to fetch that, or we'll fetch via a specialized action.
+      getUserCollectionsWithProjectStatus(userId, projectId).then(data => {
+        setCollections(data);
+        setLoading(false);
+      }).catch(err => {
+        console.error(err);
+        setLoading(false);
       });
     }
   }, [open, userId, projectId]);
 
-  // Actually, let's create a specialized action for this inside `lib/actions/collection.ts` or just call an API.
-  // We'll write the logic later.
-  return null;
+  const handleToggle = (collectionId: string, currentStatus: boolean) => {
+    if (isPending) return;
+
+    // Optimistic UI
+    setCollections(prev => prev.map(c => c.id === collectionId ? { ...c, containsProject: !currentStatus } : c));
+
+    startTransition(async () => {
+      try {
+        await toggleProjectInCollection(collectionId, projectId);
+      } catch (err) {
+        console.error(err);
+        // Revert
+        setCollections(prev => prev.map(c => c.id === collectionId ? { ...c, containsProject: currentStatus } : c));
+        alert("Failed to update collection.");
+      }
+    });
+  };
+
+  const handleCreate = () => {
+    if (!newCollectionName.trim() || isPending) return;
+
+    startTransition(async () => {
+      try {
+        const result = await createCollection(newCollectionName.trim(), null, newCollectionVisibility);
+        if (result.success) {
+          // Immediately toggle the project in the new collection
+          await toggleProjectInCollection(result.id, projectId);
+          // Refresh list
+          const data = await getUserCollectionsWithProjectStatus(userId, projectId);
+          setCollections(data);
+          setCreating(false);
+          setNewCollectionName("");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to create collection.");
+      }
+    });
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitle sx={{ fontWeight: "bold" }}>リストに保存</DialogTitle>
+      <DialogContent dividers sx={{ p: 0 }}>
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <List sx={{ pt: 0, pb: 0 }}>
+            {collections.length === 0 && !creating && (
+              <ListItem>
+                <ListItemText primary="リストがありません" secondary="新しくリストを作成してください" />
+              </ListItem>
+            )}
+            {collections.map((c) => (
+              <ListItem key={c.id} disablePadding>
+                <ListItemButton role={undefined} onClick={() => handleToggle(c.id, c.containsProject)} dense disabled={isPending}>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      checked={c.containsProject}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={c.name} 
+                    secondary={c.visibility === "public" ? "公開" : c.visibility === "unlisted" ? "限定公開" : "非公開"} 
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        )}
+
+        {creating && (
+          <Box sx={{ p: 2, bgcolor: "background.default" }}>
+            <Typography variant="subtitle2" sx={{ mb: 2 }}>新しいリストを作成</Typography>
+            <TextField
+              label="名前"
+              size="small"
+              fullWidth
+              value={newCollectionName}
+              onChange={(e) => setNewCollectionName(e.target.value)}
+              sx={{ mb: 2 }}
+              disabled={isPending}
+            />
+            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+              <InputLabel>公開設定</InputLabel>
+              <Select
+                value={newCollectionVisibility}
+                label="公開設定"
+                onChange={(e) => setNewCollectionVisibility(e.target.value as any)}
+                disabled={isPending}
+              >
+                <MenuItem value="public">公開</MenuItem>
+                <MenuItem value="unlisted">限定公開</MenuItem>
+                <MenuItem value="private">非公開</MenuItem>
+              </Select>
+            </FormControl>
+            <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
+              <Button size="small" onClick={() => setCreating(false)} disabled={isPending}>
+                キャンセル
+              </Button>
+              <Button size="small" variant="contained" onClick={handleCreate} disabled={!newCollectionName.trim() || isPending}>
+                作成
+              </Button>
+            </Box>
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions sx={{ justifyContent: "space-between", px: 3, py: 2 }}>
+        {!creating ? (
+          <Button onClick={() => setCreating(true)} disabled={isPending}>
+            + 新しいリストを作成
+          </Button>
+        ) : (
+          <Box /> // Spacer
+        )}
+        <Button onClick={onClose} variant="outlined" color="inherit">
+          閉じる
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }

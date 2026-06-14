@@ -11,6 +11,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import { useTranslations, useFormatter } from "next-intl";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
+import AddToCollectionButton from "./AddToCollectionButton";
 
 /**
  * プロジェクト詳細のヘッダーおよび説明文を表示するコンポーネント
@@ -41,6 +42,8 @@ export interface ProjectDetailHeaderProps {
   favoritesCount: number;
   /** ログイン状態 */
   isLoggedIn: boolean;
+  /** ログインユーザーID（リスト追加等に使用） */
+  currentUserId?: string;
 }
 
 export default function ProjectDetailHeader({ 
@@ -48,7 +51,8 @@ export default function ProjectDetailHeader({
   canEdit, 
   isFavorited, 
   favoritesCount, 
-  isLoggedIn 
+  isLoggedIn,
+  currentUserId
 }: ProjectDetailHeaderProps) {
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
@@ -120,13 +124,20 @@ export default function ProjectDetailHeader({
         </Box>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <ProjectFavoriteButton
-            projectId={p.id}
-            initialCount={favoritesCount}
-            initialFavorited={isFavorited}
-            isLoggedIn={isLoggedIn}
-            variant="button"
-          />
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Box sx={{ flex: 1 }}>
+              <ProjectFavoriteButton
+                projectId={p.id}
+                initialCount={favoritesCount}
+                initialFavorited={isFavorited}
+                isLoggedIn={isLoggedIn}
+                variant="button"
+              />
+            </Box>
+            {isLoggedIn && currentUserId && (
+              <AddToCollectionButton projectId={p.id} userId={currentUserId} />
+            )}
+          </Box>
           {canEdit && (
             <>
               <LinkButton

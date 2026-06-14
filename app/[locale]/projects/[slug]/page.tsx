@@ -71,6 +71,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             project={p} 
             canEdit={canEdit} 
             isLoggedIn={!!session?.user}
+            currentUserId={session?.user?.id}
             isFavorited={isFavorited}
             favoritesCount={favoritesCount}
           />
