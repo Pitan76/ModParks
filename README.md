@@ -32,7 +32,7 @@
 
 ### 2. リポジトリのクローン
 ```bash
-git clone https://github.com/your-username/modparks.git
+git clone https://github.com/Pitan76/modparks.git
 cd modparks
 ```
 
