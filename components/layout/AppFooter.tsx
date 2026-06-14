@@ -54,7 +54,17 @@ export default function AppFooter() {
               sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}
             >
               <RssFeedIcon fontSize="small" />
-              RSS
+              RSS (新着)
+            </Link>
+            <Link
+              href="/feed-updated.xml"
+              target="_blank"
+              rel="noopener noreferrer"
+              id="footer-rss-updated"
+              sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <RssFeedIcon fontSize="small" />
+              RSS (更新)
             </Link>
             <Link
               href="https://github.com/Pitan76/modparks"
