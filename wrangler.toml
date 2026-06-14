@@ -1,15 +1,17 @@
 name = "modparks"
-pages_build_output_dir = ".vercel/output/static"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-[[env.production.d1_databases]]
+# メインワーカースクリプト（@opennextjs/cloudflare が生成）
+main = ".open-next/worker.js"
+
+[[d1_databases]]
 binding        = "DB"
 database_name  = "modparks-db"
 database_id = "7a0b941a-b8f4-47b7-97fb-428a126c96a2"
 migrations_dir = "drizzle"
 
-[[env.production.r2_buckets]]
+[[r2_buckets]]
 bucket_name = "modparks-storage"
 binding = "modparks_storage"
 # binding     = "R2"
@@ -17,10 +19,7 @@ binding = "modparks_storage"
 
 # ─── 環境変数 ─────────────────────────────────────────────────────────────────
 [vars]
-NEXTAUTH_URL       = "http://localhost:3000"
-NEXT_PUBLIC_APP_URL = "http://localhost:3000"
+NEXTAUTH_URL       = "https://modparks.pitan76.net"
+NEXT_PUBLIC_APP_URL = "https://modparks.pitan76.net"
 
-# ─── 本番環境 ─────────────────────────────────────────────────────────────────
-[env.production.vars]
-NEXTAUTH_URL        = "https://modparks.pages.dev"
-NEXT_PUBLIC_APP_URL = "https://modparks.pages.dev"
+
