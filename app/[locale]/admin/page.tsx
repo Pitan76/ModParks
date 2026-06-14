@@ -46,9 +46,9 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <Button variant="contained" component={Link} href="/admin/reports">
+                  <LinkButton variant="contained" href="/admin/reports">
                     {tAdmin("reports.viewList")}
-                  </Button>
+                  </LinkButton>
                 </Box>
               </Stack>
             </CardContent>

@@ -6,7 +6,7 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import EditIcon from "@mui/icons-material/Edit";
 import DownloadIcon from "@mui/icons-material/Download";
 import Button from "@mui/material/Button";
-import Link from "next/link";
+import LinkButton from "@/components/ui/LinkButton";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import { useTranslations } from "next-intl";
@@ -97,22 +97,20 @@ export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDeta
 
         {canEdit && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <Button
+            <LinkButton
               variant="outlined"
               startIcon={<EditIcon />}
-              component={Link}
               href={`/projects/${p.slug}/edit`}
             >
               {tCommon("edit")}
-            </Button>
-            <Button
+            </LinkButton>
+            <LinkButton
               variant="contained"
               startIcon={<AddIcon />}
-              component={Link}
               href={`/projects/${p.slug}/versions/new`}
             >
               {tProject("header.addVersion")}
-            </Button>
+            </LinkButton>
           </Box>
         )}
       </Box>

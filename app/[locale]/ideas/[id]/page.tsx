@@ -154,9 +154,9 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                       </Typography>
                     )}
                   </Box>
-                  <Button variant="outlined" size="small" component={Link} href={`/projects/${v.projectSlug}`}>
+                  <LinkButton variant="outlined" size="small" href={`/projects/${v.projectSlug}`}>
                     {tIdea("viewProject")}
-                  </Button>
+                  </LinkButton>
                 </CardContent>
               </Card>
             ))}

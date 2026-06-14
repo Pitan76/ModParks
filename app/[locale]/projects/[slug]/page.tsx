@@ -55,11 +55,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {t("versions")}
               </Typography>
-              {canEdit && (
-                <Button variant="contained" size="small" component={Link} href={`/projects/${p.slug}/versions/new`}>
-                  {t("header.addVersion")}
-                </Button>
-              )}
             </Box>
 
             {p.versions.length > 0 ? (

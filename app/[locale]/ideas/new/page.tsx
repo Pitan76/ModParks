@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createIdea } from "@/lib/actions/idea";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Link from "next/link";
+import LinkButton from "@/components/ui/LinkButton";
 import { useTranslations } from "next-intl";
 
 export default function NewIdeaPage() {
@@ -42,9 +42,9 @@ export default function NewIdeaPage() {
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Box sx={{ mb: 4 }}>
-        <Button startIcon={<ArrowBackIcon />} component={Link} href="/ideas" sx={{ mb: 2 }}>
+        <LinkButton startIcon={<ArrowBackIcon />} href="/ideas" sx={{ mb: 2 }}>
           {tIdea("backToList")}
-        </Button>
+        </LinkButton>
         <Typography variant="h4" sx={{ fontWeight: 800 }}>
           {tIdea("postIdeaTitle")}
         </Typography>
@@ -89,9 +89,8 @@ export default function NewIdeaPage() {
                 <Button
                   type="submit"
                   variant="contained"
-                  size="large"
                   disabled={pending}
-                  sx={{ px: 5, borderRadius: 8 }}
+                  sx={{ px: 5 }}
                 >
                   {pending ? tIdea("submitting") : tIdea("submitIdea")}
                 </Button>

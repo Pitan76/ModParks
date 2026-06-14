@@ -78,7 +78,7 @@ export default function ProjectEditForm({ project }: ProjectEditFormProps) {
             <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
               {t("cancel")}
             </Button>
-            <Button type="submit" variant="contained" size="large" disabled={pending}>
+            <Button type="submit" variant="contained" disabled={pending}>
               {pending ? t("saving") : t("save")}
             </Button>
           </Box>

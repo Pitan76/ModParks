@@ -49,13 +49,28 @@ export const theme = createTheme({
   components: {
     MuiButton: {
       defaultProps: {
-        size: "small",
+        size: "medium",
         disableElevation: true,
       },
       styleOverrides: {
         root: {
           textTransform: "none",
           fontWeight: 600,
+        },
+        sizeSmall: {
+          height: "32px",
+          padding: "4px 12px",
+          fontSize: "0.8125rem",
+        },
+        sizeMedium: {
+          height: "40px",
+          padding: "8px 16px",
+          fontSize: "0.875rem",
+        },
+        sizeLarge: {
+          height: "48px",
+          padding: "10px 22px",
+          fontSize: "0.9375rem",
         },
       },
     },

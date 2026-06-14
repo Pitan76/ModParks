@@ -168,7 +168,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             onChange={(e) => setBio(e.target.value)}
             sx={{ mb: 4 }}
           />
-          <Button type="submit" variant="contained" size="large">{t("profile.save")}</Button>
+          <Button type="submit" variant="contained">{t("profile.save")}</Button>
         </Box>
       )}
 
