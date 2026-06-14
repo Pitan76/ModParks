@@ -7,6 +7,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import Typography from "@mui/material/Typography";
 import { toggleProjectFavorite } from "@/lib/actions/favorite";
+import { useTranslations } from "next-intl";
 
 interface ProjectFavoriteButtonProps {
   projectId: string;
@@ -26,12 +27,12 @@ export default function ProjectFavoriteButton({
   const [isPending, startTransition] = useTransition();
   const [favorited, setFavorited] = useState(initialFavorited);
   const [count, setCount] = useState(initialCount);
+  const t = useTranslations("Project");
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!isLoggedIn) {
-      // ログインしていない場合はアラートやモーダルを出すことも可能
-      alert("お気に入り機能を使用するにはログインが必要です。");
+      alert(t("favorite.loginRequired"));
       return;
     }
 
@@ -45,7 +46,7 @@ export default function ProjectFavoriteButton({
         // 失敗したら元に戻す
         setFavorited(initialFavorited);
         setCount(initialCount);
-        alert(result.error);
+        alert(t("favorite.error"));
       } else {
         // 成功した場合、DB側の最新状態と同期する
         if (result.favorited !== undefined) {
@@ -90,7 +91,7 @@ export default function ProjectFavoriteButton({
         height: "40px",
       }}
     >
-      {favorited ? "お気に入り済み" : "お気に入り"}
+      {favorited ? t("favorite.favorited") : t("favorite.favorite")}
       {count > 0 && ` (${count})`}
     </Button>
   );

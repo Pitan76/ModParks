@@ -72,14 +72,6 @@
       "autoResizeNote": "※大きな画像は自動的に400x400にリサイズされます",
       "error": "アイコンのアップロードに失敗しました"
     },
-    "form": {
-      "status": "ステータス",
-      "published": "公開",
-      "draft": "非公開 (下書き)",
-      "cancel": "キャンセル",
-      "save": "保存",
-      "saving": "保存中..."
-    },
     "uploadForm": {
       "title": "プロジェクトアイコン (最大 400x400)",
       "select": "アイコンを選択",
@@ -131,6 +123,12 @@
       "cancel": "キャンセル",
       "save": "保存",
       "saving": "保存中..."
+    },
+    "favorite": {
+      "loginRequired": "お気に入り機能を使用するにはログインが必要です。",
+      "error": "お気に入りの操作に失敗しました。",
+      "favorite": "お気に入り",
+      "favorited": "お気に入り済み"
     }
   },
   "Version": {

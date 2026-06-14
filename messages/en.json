@@ -116,6 +116,12 @@
       "cancel": "Cancel",
       "save": "Save",
       "saving": "Saving..."
+    },
+    "favorite": {
+      "loginRequired": "You must be logged in to use the favorites feature.",
+      "error": "Failed to toggle favorite.",
+      "favorite": "Favorite",
+      "favorited": "Favorited"
     }
   },
   "Version": {
