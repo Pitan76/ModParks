@@ -12,8 +12,6 @@
 - **Cloudflare アカウント**（ダッシュボードにログインできること）
 - **GitHub アカウント**（GitHub OAuthアプリの作成に必要）
 
-npx wrangler pages project create modparks
-
 ---
 
 ## 2. Cloudflare D1 (データベース) のセットアップ
@@ -76,8 +74,8 @@ https://pub-2695d39dce7f4e15a14414ab174b3805.r2.dev
 2. **New OAuth App** をクリック
 3. 以下の情報を入力:
    - Application name: `ModParks` (任意)
-   - Homepage URL: `https://あなたのドメイン`
-   - Authorization callback URL: `https://あなたのドメイン/api/auth/callback/github`
+   - Homepage URL: `https://modparks.pitan76.net`
+   - Authorization callback URL: `https://modparks.pitan76.net/api/auth/callback/github`
 4. **Client ID** と **Client Secret** を取得し、控えておきます。
 
 ---
@@ -106,7 +104,7 @@ npx wrangler secret put AUTH_SECRET
 npx wrangler secret put NEXT_PUBLIC_BASE_URL
 npx wrangler secret put R2_PUBLIC_URL
 ```
-※ `NEXT_PUBLIC_BASE_URL` は `https://あなたのドメイン` です。
+※ `NEXT_PUBLIC_BASE_URL` は `https://modparks.pitan76.net` です。
 ※ `R2_PUBLIC_URL` は手順3で取得したパブリックアクセス用のURLです。
 
 ### 6-2. プロジェクトのビルドとデプロイ
