@@ -22,7 +22,7 @@ export async function GET() {
     })
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
-    .where(eq(projects.status, "published"))
+    .where(eq(projects.status, "public"))
     .orderBy(desc(projects.updatedAt))
     .limit(20);
 

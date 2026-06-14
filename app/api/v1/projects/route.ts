@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   const q = searchParams.get("q");
   const sort = searchParams.get("sort") || "downloads";
 
-  let conditions = [eq(projects.status, "published")];
+  let conditions = [eq(projects.status, "public")];
   if (type === "mod" || type === "plugin") {
     conditions.push(eq(projects.type, type as "mod" | "plugin"));
   }
