@@ -15,7 +15,6 @@ const d1 = typeof process !== "undefined" ? process.env.DB : undefined;
  * GitHub OAuthの設定と、セッション情報のカスタマイズを行います。
  */
 export const authConfig = {
-  adapter: d1 ? DrizzleAdapter(getDb(d1 as unknown as import("@cloudflare/workers-types").D1Database)) : undefined,
   providers: [
     GitHub({
       clientId:     process.env.AUTH_GITHUB_ID!,
@@ -116,8 +115,20 @@ export const authConfig = {
   session: { strategy: "jwt" },
 } satisfies NextAuthConfig;
 
-/**
- * NextAuthの初期化。
- * アプリケーション全体で使用する認証系の関数（サインイン、サインアウト、セッション取得等）を提供します。
- */
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
+  let adapter;
+  try {
+    const { getD1 } = await import("@/lib/db");
+    const d1 = await getD1();
+    if (d1) {
+      adapter = DrizzleAdapter(getDb(d1 as unknown as import("@cloudflare/workers-types").D1Database));
+    }
+  } catch (e) {
+    console.error("Failed to initialize D1 for NextAuth:", e);
+  }
+
+  return {
+    ...authConfig,
+    adapter,
+  };
+});
