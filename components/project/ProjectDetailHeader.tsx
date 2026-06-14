@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
-import ExtensionIcon from "@mui/icons-material/Extension";
+import EditableProjectIcon from "./EditableProjectIcon";
 import EditIcon from "@mui/icons-material/Edit";
 import DownloadIcon from "@mui/icons-material/Download";
 import Button from "@mui/material/Button";
@@ -62,17 +62,13 @@ export default function ProjectDetailHeader({
     <>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5, justifyContent: "space-between", mb: 3 }}>
         <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", flex: "1 1 300px" }}>
-          <Avatar
-            src={p.iconUrl ?? undefined}
-            alt={p.name}
-            variant="rounded"
-            sx={{
-              width: { xs: 60, sm: 80 }, height: { xs: 60, sm: 80 }, bgcolor: "primary.dark",
-              border: "2px solid", borderColor: "divider",
-            }}
-          >
-            <ExtensionIcon sx={{ fontSize: { xs: 30, sm: 40 } }} />
-          </Avatar>
+          <EditableProjectIcon 
+            projectId={p.id}
+            projectSlug={p.slug}
+            projectName={p.name}
+            initialIconUrl={p.iconUrl}
+            canEdit={canEdit}
+          />
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
@@ -150,7 +146,7 @@ export default function ProjectDetailHeader({
                 href={`/projects/${p.slug}/edit`}
                 sx={{ flex: { xs: 1, sm: "initial" } }}
               >
-                {tCommon("edit")}
+                {tProject("manage")}
               </LinkButton>
               <LinkButton
                 variant="contained"

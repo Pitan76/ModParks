@@ -91,6 +91,11 @@
       "title": "Edit Project",
       "success": "Project updated successfully"
     },
+    "manage": "Manage",
+    "managePage": {
+      "title": "Manage Project",
+      "success": "Project updated successfully"
+    },
     "sidebar": {
       "license": "License",
       "sourceCode": "Source Code",

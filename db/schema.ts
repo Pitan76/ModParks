@@ -229,6 +229,29 @@ export const projectTags = sqliteTable(
   })
 );
 
+// ─── Project Members ─────────────────────────────────────────────────────────
+
+export const projectMembers = sqliteTable(
+  "project_members",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["collaborator"] }).notNull().default("collaborator"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.projectId, t.userId] }),
+    projectIdx: index("project_members_project_idx").on(t.projectId),
+    userIdx: index("project_members_user_idx").on(t.userId),
+  })
+);
+
 // ─── Project Favorites ────────────────────────────────────────────────────────
 
 export const projectFavorites = sqliteTable(
@@ -404,3 +427,4 @@ export type Report      = typeof reports.$inferSelect;
 export type Idea        = typeof ideas.$inferSelect;
 export type IdeaComment = typeof ideaComments.$inferSelect;
 export type ApiKey      = typeof apiKeys.$inferSelect;
+export type ProjectMember = typeof projectMembers.$inferSelect;

@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projects, projectTags, users, versions } from "@/db/schema";
+import { projects, projectTags, projectMembers, users, versions } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, desc, and, like, inArray, sql } from "drizzle-orm";
@@ -87,7 +87,10 @@ export async function updateProject(slug: string, formData: FormData) {
     .get();
 
   if (!project) throw new Error("Project not found");
-  if (project.authorId !== session.user.id && session.user.role !== "admin") {
+
+  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
+  
+  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
     throw new Error("Forbidden");
   }
 
@@ -269,4 +272,48 @@ export async function getProjectBySlug(slug: string) {
     tags: tagsRows.map((t) => t.tag),
     versions: versionsRows,
   };
+}
+
+// ─── プロジェクトのアイコン更新 ───────────────────────────────────────────────
+
+export async function updateProjectIcon(projectId: string, iconUrl: string) {
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  if (!project) throw new Error("Not found");
+
+  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
+  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+    throw new Error("Forbidden");
+  }
+
+  await db.update(projects).set({ iconUrl, updatedAt: new Date() }).where(eq(projects.id, projectId));
+  revalidatePath(`/[locale]/projects/[slug]`, "page");
+  return { success: true };
+}
+
+// ─── オーナー権限の譲渡 ───────────────────────────────────────────────────────
+
+export async function transferOwnership(projectId: string, newOwnerId: string) {
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  if (!project) throw new Error("Not found");
+
+  if (project.authorId !== session.user.id && session.user.role !== "admin") {
+    throw new Error("Forbidden: Only owner can transfer ownership");
+  }
+
+  // Ensure new owner exists
+  const targetUser = await db.select().from(users).where(eq(users.id, newOwnerId)).get();
+  if (!targetUser) throw new Error("User not found");
+
+  // Transfer ownership
+  await db.update(projects).set({ authorId: newOwnerId, updatedAt: new Date() }).where(eq(projects.id, projectId));
+
+  // The new owner might have been a member, we can safely remove them from members if they are
+  await db.delete(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, newOwnerId)));
+
+  revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
+  return { success: true };
 }

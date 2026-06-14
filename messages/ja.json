@@ -98,6 +98,11 @@
       "title": "プロジェクト編集",
       "success": "プロジェクトを更新しました"
     },
+    "manage": "管理",
+    "managePage": {
+      "title": "プロジェクト管理",
+      "success": "プロジェクトを更新しました"
+    },
     "sidebar": {
       "license": "ライセンス",
       "sourceCode": "ソースコード",

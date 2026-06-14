@@ -62,6 +62,8 @@ bucket_name = "modparks-storage"
 ### パブリックアクセスの有効化（オプションですが推奨）
 Cloudflareダッシュボードの R2 設定から `modparks-storage` を選択し、「設定」タブから「R2.dev サブドメインを許可する」または「カスタムドメイン」を設定し、公開URLを取得します。
 
+https://pub-2695d39dce7f4e15a14414ab174b3805.r2.dev
+
 ---
 
 ## 4. GitHub OAuth アプリの作成 (認証用)
@@ -96,11 +98,11 @@ openssl rand -base64 32
 Wranglerを使って、本番環境のシークレット（環境変数）を設定します。
 
 ```bash
-npx wrangler pages secret put AUTH_GITHUB_ID
-npx wrangler pages secret put AUTH_GITHUB_SECRET
-npx wrangler pages secret put AUTH_SECRET
-npx wrangler pages secret put NEXT_PUBLIC_BASE_URL
-npx wrangler pages secret put R2_PUBLIC_URL
+npx wrangler pages secret put AUTH_GITHUB_ID --project-name modparks
+npx wrangler pages secret put AUTH_GITHUB_SECRET --project-name modparks
+npx wrangler pages secret put AUTH_SECRET --project-name modparks
+npx wrangler pages secret put NEXT_PUBLIC_BASE_URL --project-name modparks
+npx wrangler pages secret put R2_PUBLIC_URL --project-name modparks
 ```
 ※ `NEXT_PUBLIC_BASE_URL` は `https://あなたのドメイン` です。
 ※ `R2_PUBLIC_URL` は手順3で取得したパブリックアクセス用のURLです。

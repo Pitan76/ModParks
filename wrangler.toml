@@ -9,13 +9,15 @@ main = ".open-next/worker.js"
 [[d1_databases]]
 binding        = "DB"
 database_name  = "modparks-db"
-database_id    = "YOUR_D1_DATABASE_ID"   # wrangler d1 create modparks-db で取得
+database_id = "7a0b941a-b8f4-47b7-97fb-428a126c96a2"
 migrations_dir = "drizzle"
 
 # ─── R2 Buckets ───────────────────────────────────────────────────────────────
 [[r2_buckets]]
-binding     = "R2"
-bucket_name = "modparks-files"
+bucket_name = "modparks-storage"
+binding = "modparks_storage"
+# binding     = "R2"
+# bucket_name = "modparks-files"
 
 # ─── 環境変数 ─────────────────────────────────────────────────────────────────
 [vars]
