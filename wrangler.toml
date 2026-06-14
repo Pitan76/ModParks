@@ -4,6 +4,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # メインワーカースクリプト（@opennextjs/cloudflare が生成）
 main = ".open-next/worker.js"
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
 
 [[d1_databases]]
 binding        = "DB"
