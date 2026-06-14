@@ -251,6 +251,50 @@ export const projectFavorites = sqliteTable(
   })
 );
 
+// ─── Collections (Lists) ─────────────────────────────────────────────────────────
+
+export const collections = sqliteTable(
+  "collections",
+  {
+    id: text("id").primaryKey(), // cuid
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    visibility: text("visibility").notNull().default("public"), // public | unlisted | private
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    userIdx: index("collections_user_idx").on(t.userId),
+  })
+);
+
+export const collectionItems = sqliteTable(
+  "collection_items",
+  {
+    collectionId: text("collection_id")
+      .notNull()
+      .references(() => collections.id, { onDelete: "cascade" }),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    addedAt: integer("added_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.collectionId, t.projectId] }),
+    collectionIdx: index("collection_items_collection_idx").on(t.collectionId),
+    projectIdx: index("collection_items_project_idx").on(t.projectId),
+  })
+);
+
 // ─── Reports ──────────────────────────────────────────────────────────────────
 
 export const reports = sqliteTable("reports", {
