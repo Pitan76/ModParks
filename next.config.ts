@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
   // Cloudflare Workers (Edge Runtime) 向け設定
+  output: "standalone",
   experimental: {
     // Server Actions を有効化
   },
