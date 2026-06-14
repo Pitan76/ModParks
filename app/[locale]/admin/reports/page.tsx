@@ -9,8 +9,8 @@ import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/routing";
 import { unpublishProject, updateReportStatus, getReports } from "@/lib/actions/report";
 
 interface AdminReportsPageProps {
@@ -89,7 +89,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                   </Box>
 
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    {tAdmin("reports.reporter", { name: reporter.displayName ?? reporter.username })}
+                    {tAdmin("reports.reporter", { name: reporter.displayName ?? reporter.username ?? "Unknown" })}
                   </Typography>
 
                   {report.detail && (
@@ -112,8 +112,8 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
 
                 {/* 右: アクション */}
                 {report.status === "pending" && (
-                  <Stack spacing={1} alignItems="flex-end">
-                    <form action={updateReportStatus.bind(null, report.id, "resolved")}>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "flex-end" }}>
+                    <form action={updateReportStatus.bind(null, report.id, "resolved") as any}>
                       <Button
                         type="submit"
                         variant="outlined"
@@ -123,7 +123,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                         {tAdmin("reports.actions.resolve")}
                       </Button>
                     </form>
-                    <form action={unpublishProject.bind(null, project.id)}>
+                    <form action={unpublishProject.bind(null, project.id) as any}>
                       <Button
                         type="submit"
                         variant="contained"
@@ -133,7 +133,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                         {tAdmin("reports.actions.unpublish")}
                       </Button>
                     </form>
-                    <form action={updateReportStatus.bind(null, report.id, "dismissed")}>
+                    <form action={updateReportStatus.bind(null, report.id, "dismissed") as any}>
                       <Button
                         type="submit"
                         variant="text"
@@ -143,7 +143,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                         {tAdmin("reports.actions.dismiss")}
                       </Button>
                     </form>
-                  </Stack>
+                  </Box>
                 )}
               </Box>
             </CardContent>

@@ -49,7 +49,7 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
         throw new Error(t("iconUpload.error"));
       }
 
-      const { uploadUrl, publicUrl } = await presignRes.json();
+      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
 
       // 3. R2へのアップロード
       const uploadRes = await fetch(uploadUrl, {

@@ -13,7 +13,6 @@ export async function GET(
 
   try {
     // Cloudflare Workers バインディングから DB を取得
-    // @ts-expect-error Cloudflare Workers env
     const env = process.env as unknown as { DB: D1Database };
 
     if (!env.DB) {

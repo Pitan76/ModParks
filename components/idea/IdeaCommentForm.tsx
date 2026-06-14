@@ -23,7 +23,8 @@ export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
 
     const res = await createIdeaComment(ideaId, formData);
     if (res?.error) {
-      alert(res.error.server?.[0] || tCommon("error"));
+      const errMsg = "server" in res.error ? res.error.server?.[0] : undefined;
+      alert(errMsg || tCommon("error"));
     } else {
       setContent("");
     }
@@ -48,7 +49,8 @@ export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
           }
         }}
       />
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <Button 
           type="submit" 
           variant="contained" 

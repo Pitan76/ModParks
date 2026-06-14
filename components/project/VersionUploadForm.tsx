@@ -101,11 +101,11 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
       });
 
       if (!presignRes.ok) {
-        const d = await presignRes.json();
+        const d = (await presignRes.json()) as { error?: string };
         throw new Error(d.error || "Presign failed");
       }
 
-      const { uploadUrl, publicUrl } = await presignRes.json();
+      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
 
       const arrayBuffer = await file.arrayBuffer();
       const uploadRes = await fetch(uploadUrl, {

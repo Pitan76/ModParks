@@ -55,7 +55,8 @@ export async function createReport(projectId: string, formData: FormData) {
  */
 export async function updateReportStatus(
   reportId: string,
-  status: "resolved" | "dismissed"
+  status: "resolved" | "dismissed",
+  formData?: FormData
 ) {
   const session = await auth();
   if (session?.user?.role !== "admin") throw new Error("Forbidden");
@@ -81,7 +82,7 @@ export async function updateReportStatus(
  * @returns { success: boolean }
  * @throws Forbidden 管理者権限がない場合
  */
-export async function unpublishProject(projectId: string) {
+export async function unpublishProject(projectId: string, formData?: FormData) {
   const session = await auth();
   if (session?.user?.role !== "admin") throw new Error("Forbidden");
 

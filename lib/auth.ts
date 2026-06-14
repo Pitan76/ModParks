@@ -15,7 +15,7 @@ const d1 = typeof process !== "undefined" ? process.env.DB : undefined;
  * GitHub OAuthの設定と、セッション情報のカスタマイズを行います。
  */
 export const authConfig = {
-  adapter: d1 ? DrizzleAdapter(getDb(d1)) : undefined,
+  adapter: d1 ? DrizzleAdapter(getDb(d1 as unknown as import("@cloudflare/workers-types").D1Database)) : undefined,
   providers: [
     GitHub({
       clientId:     process.env.AUTH_GITHUB_ID!,

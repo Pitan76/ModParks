@@ -68,7 +68,7 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
         throw new Error(t("uploadError"));
       }
       
-      const { uploadUrl, publicUrl } = await presignRes.json();
+      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
 
       // 3. R2へのアップロード
       const uploadRes = await fetch(uploadUrl, {

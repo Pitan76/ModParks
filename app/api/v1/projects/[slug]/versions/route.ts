@@ -6,7 +6,7 @@ import { eq, desc } from "drizzle-orm";
 
 
 
-export async function GET(request: Request, { params }: { params: { slug: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const d1 = await getD1();
   const db = getDb(d1);
 
@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { slug: string
     return NextResponse.json({ error: auth.error }, { status: 401 });
   }
 
-  const slug = params.slug;
+  const { slug } = await params;
 
   const [project] = await db.select({ id: projects.id }).from(projects).where(eq(projects.slug, slug)).limit(1);
   
