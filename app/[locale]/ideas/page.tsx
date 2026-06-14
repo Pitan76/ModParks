@@ -12,7 +12,6 @@ import Chip from "@mui/material/Chip";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
 import AddIcon from "@mui/icons-material/Add";
-import Stack from "@mui/material/Stack";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import LinkButton from "@/components/ui/LinkButton";
 

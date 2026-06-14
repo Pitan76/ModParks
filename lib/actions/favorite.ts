@@ -26,13 +26,12 @@ export async function toggleProjectFavorite(projectId: string) {
       await db.insert(projectFavorites).values({ projectId, userId });
     }
 
-    revalidatePath(`/projects`);
-    revalidatePath(`/projects/${projectId}`); // Depending on slug vs id, but mostly we need to revalidate paths
-    // It's tricky to revalidate by slug if we only have projectId here, but we can revalidate the general layout or we could fetch the slug
+    revalidatePath("/[locale]/projects", "page");
+    revalidatePath("/[locale]/profile/[username]", "page");
+
     const project = await db.select({ slug: projects.slug }).from(projects).where(eq(projects.id, projectId)).get();
     if (project) {
-      revalidatePath(`/projects/${project.slug}`);
-      revalidatePath(`/[locale]/projects/${project.slug}`);
+      revalidatePath("/[locale]/projects/[slug]", "page");
     }
 
     return { success: true, favorited: !existing };

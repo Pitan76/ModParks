@@ -25,6 +25,7 @@ export default function ProjectFavoriteButton({
   variant = "button"
 }: ProjectFavoriteButtonProps) {
   const [isPending, startTransition] = useTransition();
+  const [isMutating, setIsMutating] = useState(false);
   const [favorited, setFavorited] = useState(initialFavorited);
   const [count, setCount] = useState(initialCount);
   const t = useTranslations("Project");
@@ -35,23 +36,30 @@ export default function ProjectFavoriteButton({
       alert(t("favorite.loginRequired"));
       return;
     }
+    if (isPending || isMutating) return;
+
+    setIsMutating(true);
 
     // 楽観的UI更新
     setFavorited((prev) => !prev);
     setCount((prev) => (favorited ? prev - 1 : prev + 1));
 
     startTransition(async () => {
-      const result = await toggleProjectFavorite(projectId);
-      if (result.error) {
-        // 失敗したら元に戻す
-        setFavorited(initialFavorited);
-        setCount(initialCount);
-        alert(t("favorite.error"));
-      } else {
-        // 成功した場合、DB側の最新状態と同期する
-        if (result.favorited !== undefined) {
-            setFavorited(result.favorited);
+      try {
+        const result = await toggleProjectFavorite(projectId);
+        if (result.error) {
+          // 失敗したら元に戻す
+          setFavorited(initialFavorited);
+          setCount(initialCount);
+          alert(t("favorite.error"));
+        } else {
+          // 成功した場合、DB側の最新状態と同期する
+          if (result.favorited !== undefined) {
+              setFavorited(result.favorited);
+          }
         }
+      } finally {
+        setIsMutating(false);
       }
     });
   };
@@ -60,7 +68,7 @@ export default function ProjectFavoriteButton({
     return (
       <IconButton 
         onClick={handleClick} 
-        disabled={isPending}
+        disabled={isPending || isMutating}
         color={favorited ? "primary" : "default"}
         sx={{ 
           transition: "transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
@@ -83,7 +91,7 @@ export default function ProjectFavoriteButton({
       color="primary"
       startIcon={favorited ? <BookmarkIcon /> : <BookmarkBorderIcon />}
       onClick={handleClick}
-      disabled={isPending}
+      disabled={isPending || isMutating}
       sx={{
         transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
         transform: favorited ? "scale(1.02)" : "scale(1)",
