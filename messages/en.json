@@ -25,6 +25,7 @@
     "myProjects": "Projects",
     "newProject": "New Project",
     "profile": "Profile",
+    "settings": "Settings",
     "admin": "Admin",
     "login": "Sign in",
     "logout": "Sign out"
@@ -313,5 +314,35 @@
     "permissions": "Permissions",
     "utility": "Utility",
     "qol": "QoL"
+  },
+  "Settings": {
+    "title": "Account Settings",
+    "profile": {
+      "title": "Profile",
+      "displayName": "Display Name",
+      "bio": "Bio",
+      "save": "Save",
+      "success": "Profile updated successfully"
+    },
+    "apiKeys": {
+      "title": "API Keys",
+      "description": "API keys allow external tools to access your account. For security reasons, keys are shown only once upon creation.",
+      "name": "Key Name",
+      "generate": "Generate New Key",
+      "delete": "Delete",
+      "lastUsed": "Last used",
+      "neverUsed": "Never used",
+      "copied": "Copied to clipboard",
+      "successGenerate": "New API key generated! Please copy and save it now, as it will not be shown again.",
+      "successDelete": "API key deleted"
+    },
+    "github": {
+      "title": "GitHub Connection",
+      "connected": "Connected",
+      "disconnected": "Not Connected",
+      "connect": "Connect GitHub",
+      "disconnect": "Disconnect",
+      "successDisconnect": "GitHub disconnected successfully"
+    }
   }
 }

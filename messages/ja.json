@@ -25,6 +25,7 @@
     "myProjects": "プロジェクト",
     "newProject": "新規プロジェクト",
     "profile": "プロフィール",
+    "settings": "設定",
     "admin": "管理",
     "login": "ログイン",
     "logout": "ログアウト"
@@ -316,5 +317,35 @@
     "permissions": "権限",
     "utility": "ユーティリティ",
     "qol": "QoL"
+  },
+  "Settings": {
+    "title": "アカウント設定",
+    "profile": {
+      "title": "プロフィール",
+      "displayName": "表示名",
+      "bio": "自己紹介",
+      "save": "保存する",
+      "success": "プロフィールを更新しました"
+    },
+    "apiKeys": {
+      "title": "APIキー",
+      "description": "APIキーを使用すると、外部ツールからアカウントにアクセスできます。セキュリティのため、キーは作成時に一度だけ表示されます。",
+      "name": "キーの名前",
+      "generate": "新しく生成する",
+      "delete": "削除",
+      "lastUsed": "最終利用",
+      "neverUsed": "未使用",
+      "copied": "コピーしました",
+      "successGenerate": "新しいAPIキーを生成しました！このキーは今しか表示されないため、必ずコピーして保存してください。",
+      "successDelete": "APIキーを削除しました"
+    },
+    "github": {
+      "title": "GitHub連携",
+      "connected": "連携済み",
+      "disconnected": "未連携",
+      "connect": "連携する",
+      "disconnect": "連携を解除する",
+      "successDisconnect": "GitHub連携を解除しました"
+    }
   }
 }

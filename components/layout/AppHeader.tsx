@@ -188,6 +188,14 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
               >
                 {t("myProjects")}
               </LinkMenuItem>
+              <MenuItem
+                component={Link}
+                href="/settings"
+                onClick={handleMenuClose}
+                sx={{ px: 2, py: 1.5 }}
+              >
+                {t("settings")}
+              </MenuItem>
               {session.user.role === "admin" && (
                 <LinkMenuItem
                   href="/admin"
