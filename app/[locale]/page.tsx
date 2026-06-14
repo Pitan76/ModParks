@@ -196,6 +196,31 @@ export default async function HomePage({ params }: HomePageProps) {
           ))}
         </Grid>
       </Container>
+
+      {/* ─── 最近更新されたプロジェクト ──────────────────────────────────────────── */}
+      <Container maxWidth="lg" sx={{ pb: 6 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            {t("updatedProjects")}
+          </Typography>
+          <LinkButton
+            href="/projects?sort=updated"
+            id="view-updated-btn"
+            endIcon={<ArrowForwardIcon />}
+            sx={{ color: "primary.main" }}
+          >
+            {t("viewAll")}
+          </LinkButton>
+        </Box>
+
+        <Grid container spacing={2}>
+          {[...DUMMY_PROJECTS].reverse().map((project) => (
+            <Grid key={`updated-${project.id}`} size={{ xs: 12, sm: 6, md: 4 }}>
+              <ProjectCard project={project} layout="grid" />
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
     </Box>
   );
 }
