@@ -9,7 +9,7 @@ import Button from "@mui/material/Button";
 import LinkButton from "@/components/ui/LinkButton";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
-import { useTranslations } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 
 /**
  * プロジェクト詳細のヘッダーおよび説明文を表示するコンポーネント
@@ -37,6 +37,7 @@ export interface ProjectDetailHeaderProps {
 export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDetailHeaderProps) {
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
+  const format = useFormatter();
 
   return (
     <>
@@ -83,13 +84,13 @@ export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDeta
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
               <AccessTimeIcon sx={{ fontSize: 14 }} />
               <Typography variant="caption">
-                {tProject("header.publishedAt", { date: new Date(p.createdAt).toLocaleDateString() })}
+                {tProject("header.publishedAt", { date: format.dateTime(new Date(p.createdAt), { dateStyle: "short" }) })}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
               <EditIcon sx={{ fontSize: 14 }} />
               <Typography variant="caption">
-                {tProject("header.updatedAt", { date: new Date(p.updatedAt).toLocaleDateString() })}
+                {tProject("header.updatedAt", { date: format.dateTime(new Date(p.updatedAt), { dateStyle: "short" }) })}
               </Typography>
             </Box>
           </Box>

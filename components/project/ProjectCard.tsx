@@ -13,7 +13,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { Link } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { formatCompactNumber } from "@/lib/utils/format";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations, useFormatter } from "next-intl";
 
 /**
  * プロジェクト一覧のカードに表示するデータの型定義
@@ -55,6 +55,7 @@ const TYPE_LABEL = {
 export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
   const locale = useLocale();
   const tTags = useTranslations("Tags");
+  const format = useFormatter();
   const isGrid = layout === "grid";
 
   const getTagLabel = (tag: string) => {
@@ -123,7 +124,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 by {project.authorDisplayName || project.authorUsername || "Unknown"}
               </Typography>
               <Typography variant="caption" color="text.disabled">
-                • {new Date(project.updatedAt).toLocaleDateString()}
+                • {format.dateTime(new Date(project.updatedAt), { dateStyle: "short" })}
               </Typography>
             </Box>
           </Box>

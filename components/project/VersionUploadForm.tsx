@@ -13,6 +13,10 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import CircularProgress from "@mui/material/CircularProgress";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import LinkIcon from "@mui/icons-material/Link";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
@@ -42,7 +46,9 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
   
   const [mcVersions, setMcVersions] = useState<string[]>([]);
   const [loaders, setLoaders] = useState<string[]>([]);
+  const [uploadMode, setUploadMode] = useState<"file" | "url">("file");
   const [file, setFile] = useState<File | null>(null);
+  const [externalUrl, setExternalUrl] = useState("");
   const [versionNumber, setVersionNumber] = useState("");
   const [parsing, setParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,7 +86,11 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
    */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!file) {
+    if (uploadMode === "file" && !file) {
+      setError({ fileUrl: [tVersion("uploadForm.error.fileRequired")] });
+      return;
+    }
+    if (uploadMode === "url" && !externalUrl) {
       setError({ fileUrl: [tVersion("uploadForm.error.fileRequired")] });
       return;
     }
@@ -89,42 +99,48 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
     setError(null);
 
     try {
-      const presignRes = await fetch("/api/upload/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          contentType: file.type || "application/java-archive",
-          type: "mod",
-          projectSlug: slug,
-        }),
-      });
-
-      if (!presignRes.ok) {
-        const d = (await presignRes.json()) as { error?: string };
-        throw new Error(d.error || "Presign failed");
-      }
-
-      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
-
-      const arrayBuffer = await file.arrayBuffer();
-      const uploadRes = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type || "application/java-archive" },
-        body: arrayBuffer,
-      });
-
-      if (!uploadRes.ok) {
-        throw new Error(tVersion("uploadForm.error.uploadFailed"));
-      }
-
       const formData = new FormData(e.currentTarget);
       mcVersions.forEach(v => formData.append("mcVersions", v));
       loaders.forEach(l => formData.append("loaders", l));
-      
-      formData.append("fileUrl", publicUrl);
-      formData.append("fileName", file.name);
-      formData.append("fileSize", file.size.toString());
+
+      if (uploadMode === "file" && file) {
+        const presignRes = await fetch("/api/upload/presign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: file.name,
+            contentType: file.type || "application/java-archive",
+            type: "mod",
+            projectSlug: slug,
+          }),
+        });
+
+        if (!presignRes.ok) {
+          const d = (await presignRes.json()) as { error?: string };
+          throw new Error(d.error || "Presign failed");
+        }
+
+        const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
+
+        const arrayBuffer = await file.arrayBuffer();
+        const uploadRes = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type || "application/java-archive" },
+          body: arrayBuffer,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error(tVersion("uploadForm.error.uploadFailed"));
+        }
+
+        formData.append("fileUrl", publicUrl);
+        formData.append("fileName", file.name);
+        formData.append("fileSize", file.size.toString());
+      } else {
+        // External URL
+        formData.append("fileUrl", externalUrl);
+        formData.append("fileName", externalUrl.split('/').pop() || "external-file");
+      }
 
       const result = await createVersion(slug, formData);
       
@@ -146,22 +162,58 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
     <Card>
       <CardContent sx={{ p: 4 }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Box sx={{ border: "1px dashed", borderColor: "divider", borderRadius: 1, p: 3, textAlign: "center", bgcolor: "background.paper" }}>
-            <Button variant="outlined" onClick={() => fileInputRef.current?.click()} disabled={pending || parsing}>
-              {tVersion("uploadForm.fileSelect")}
-              <input type="file" hidden accept=".jar,.zip" ref={fileInputRef} onChange={handleFileChange} />
-            </Button>
-            {parsing && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <CircularProgress size={16} /> {tVersion("uploadForm.parsingJar")}
-              </Typography>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+              {tVersion("uploadForm.uploadMode")}
+            </Typography>
+            <ToggleButtonGroup
+              color="primary"
+              value={uploadMode}
+              exclusive
+              onChange={(_, val) => { if (val) setUploadMode(val); setError(null); }}
+              aria-label="Upload Mode"
+              fullWidth
+              size="small"
+              sx={{ mb: 2 }}
+            >
+              <ToggleButton value="file" aria-label="Upload File">
+                <CloudUploadIcon sx={{ mr: 1, fontSize: 20 }} /> {tVersion("uploadForm.modeFile")}
+              </ToggleButton>
+              <ToggleButton value="url" aria-label="External URL">
+                <LinkIcon sx={{ mr: 1, fontSize: 20 }} /> {tVersion("uploadForm.modeUrl")}
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            {uploadMode === "file" ? (
+              <Box sx={{ border: "1px dashed", borderColor: "divider", borderRadius: 1, p: 3, textAlign: "center", bgcolor: "background.paper" }}>
+                <Button variant="outlined" onClick={() => fileInputRef.current?.click()} disabled={pending || parsing}>
+                  {tVersion("uploadForm.fileSelect")}
+                  <input type="file" hidden accept=".jar,.zip" ref={fileInputRef} onChange={handleFileChange} />
+                </Button>
+                {parsing && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", justifyContent: "center", mt: 1, gap: 1 }}>
+                    <CircularProgress size={16} /> {tVersion("uploadForm.parsingJar")}
+                  </Typography>
+                )}
+                {file && !parsing && (
+                  <Typography variant="caption" color="success.main" sx={{ display: "block", mt: 1 }}>
+                    {tVersion("uploadForm.selectedFile", { name: file.name, size: (file.size / 1024 / 1024).toFixed(2) })}
+                  </Typography>
+                )}
+                {error?.fileUrl && <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>{error.fileUrl[0]}</Typography>}
+              </Box>
+            ) : (
+              <TextField
+                name="externalUrl"
+                label={tVersion("uploadForm.externalUrl")}
+                value={externalUrl}
+                onChange={(e) => setExternalUrl(e.target.value)}
+                fullWidth
+                required
+                error={!!error?.fileUrl}
+                helperText={error?.fileUrl?.[0] || tVersion("uploadForm.externalUrlHelper")}
+              />
             )}
-            {file && !parsing && (
-              <Typography variant="caption" color="success.main">
-                {tVersion("uploadForm.selectedFile", { name: file.name, size: (file.size / 1024 / 1024).toFixed(2) })}
-              </Typography>
-            )}
-            {error?.fileUrl && <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>{error.fileUrl[0]}</Typography>}
           </Box>
 
           {openIdeas.length > 0 && (
@@ -265,7 +317,7 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
             <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
               {tCommon("cancel")}
             </Button>
-            <Button type="submit" variant="contained" disabled={pending || !file}>
+            <Button type="submit" variant="contained" disabled={pending || (uploadMode === "file" ? !file : !externalUrl)}>
               {pending ? <CircularProgress size={24} color="inherit" /> : tVersion("uploadForm.publish")}
             </Button>
           </Box>

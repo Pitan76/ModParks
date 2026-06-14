@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
@@ -38,6 +38,7 @@ interface SettingsClientProps {
 export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword }: SettingsClientProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
+  const format = useFormatter();
   const [tab, setTab] = useState(0);
 
   // Profile State
@@ -218,7 +219,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
                   <TableRow key={k.id}>
                     <TableCell>{k.name}</TableCell>
                     <TableCell>
-                      {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : t("apiKeys.neverUsed")}
+                      {k.lastUsedAt ? format.dateTime(new Date(k.lastUsedAt), { dateStyle: "short" }) : t("apiKeys.neverUsed")}
                     </TableCell>
                     <TableCell align="right">
                       <IconButton color="error" onClick={() => handleDeleteKey(k.id)}>

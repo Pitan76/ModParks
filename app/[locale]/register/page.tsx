@@ -8,10 +8,12 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import { Link } from "@/i18n/routing";
 import { registerUser } from "@/lib/actions/auth";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
@@ -22,6 +24,11 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const tAuth = useTranslations("Auth");
+  const locale = useLocale();
+
+  const handleGithubLogin = () => {
+    signIn("github", { callbackUrl: `/${locale}/projects` });
+  };
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
@@ -120,11 +127,22 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <Divider sx={{ my: 4 }}>
+        <Divider sx={{ my: 3 }}>
           <Typography variant="body2" color="text.disabled">{tAuth("or")}</Typography>
         </Divider>
 
-        <Box sx={{ mt: 3, textAlign: "center" }}>
+        <Button
+          variant="outlined"
+          fullWidth
+          size="large"
+          startIcon={<GitHubIcon />}
+          onClick={handleGithubLogin}
+          sx={{ py: 1.2 }}
+        >
+          {tAuth("register.registerWithGithub")}
+        </Button>
+
+        <Box sx={{ mt: 4, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
             {tAuth("register.alreadyHaveAccount")}{" "}
             <Link href="/login" style={{ color: "#38bdf8", textDecoration: "none" }}>
