@@ -15,6 +15,7 @@ export default function AddToCollectionButton({ projectId, userId }: { projectId
         color="inherit"
         startIcon={<PlaylistAddIcon />}
         onClick={() => setOpen(true)}
+        fullWidth
         sx={{ borderRadius: 2, height: "40px" }}
       >
         リストに保存

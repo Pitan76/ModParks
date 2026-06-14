@@ -60,20 +60,21 @@ export default function ProjectDetailHeader({
 
   return (
     <>
-      <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", mb: 3 }}>
-        <Avatar
-          src={p.iconUrl ?? undefined}
-          alt={p.name}
-          variant="rounded"
-          sx={{
-            width: 80, height: 80, bgcolor: "primary.dark",
-            border: "2px solid", borderColor: "divider",
-          }}
-        >
-          <ExtensionIcon sx={{ fontSize: 40 }} />
-        </Avatar>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5, justifyContent: "space-between", mb: 3 }}>
+        <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", flex: "1 1 300px" }}>
+          <Avatar
+            src={p.iconUrl ?? undefined}
+            alt={p.name}
+            variant="rounded"
+            sx={{
+              width: { xs: 60, sm: 80 }, height: { xs: 60, sm: 80 }, bgcolor: "primary.dark",
+              border: "2px solid", borderColor: "divider",
+            }}
+          >
+            <ExtensionIcon sx={{ fontSize: { xs: 30, sm: 40 } }} />
+          </Avatar>
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
             <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
               {p.name}
@@ -120,12 +121,13 @@ export default function ProjectDetailHeader({
                 {tProject("header.updatedAt", { date: format.dateTime(new Date(p.updatedAt), { dateStyle: "short" }) })}
               </Typography>
             </Box>
+            </Box>
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Box sx={{ flex: 1 }}>
+        <Box sx={{ display: "flex", flexDirection: { xs: "row", sm: "column" }, gap: 1, width: { xs: "100%", sm: "auto" }, flexWrap: "wrap" }}>
+          <Box sx={{ display: "flex", gap: 1, width: { xs: "100%", sm: "auto" } }}>
+            <Box sx={{ flex: { xs: 1, sm: "initial" } }}>
               <ProjectFavoriteButton
                 projectId={p.id}
                 initialCount={favoritesCount}
@@ -135,15 +137,18 @@ export default function ProjectDetailHeader({
               />
             </Box>
             {isLoggedIn && currentUserId && (
-              <AddToCollectionButton projectId={p.id} userId={currentUserId} />
+              <Box sx={{ flex: { xs: 1, sm: "initial" } }}>
+                <AddToCollectionButton projectId={p.id} userId={currentUserId} />
+              </Box>
             )}
           </Box>
           {canEdit && (
-            <>
+            <Box sx={{ display: "flex", gap: 1, width: { xs: "100%", sm: "auto" } }}>
               <LinkButton
                 variant="outlined"
                 startIcon={<EditIcon />}
                 href={`/projects/${p.slug}/edit`}
+                sx={{ flex: { xs: 1, sm: "initial" } }}
               >
                 {tCommon("edit")}
               </LinkButton>
@@ -151,10 +156,11 @@ export default function ProjectDetailHeader({
                 variant="contained"
                 startIcon={<AddIcon />}
                 href={`/projects/${p.slug}/versions/new`}
+                sx={{ flex: { xs: 1, sm: "initial" } }}
               >
                 {tProject("header.addVersion")}
               </LinkButton>
-            </>
+            </Box>
           )}
         </Box>
       </Box>
