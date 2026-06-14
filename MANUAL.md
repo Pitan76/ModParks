@@ -92,31 +92,29 @@ openssl rand -base64 32
 
 ---
 
-## 6. Cloudflare Pages へのデプロイ
+## 6. Cloudflare Workers へのデプロイ
 
 ### 6-1. 環境変数の設定
-Wranglerを使って、本番環境のシークレット（環境変数）を設定します。
+Wranglerを使って、本番環境のシークレット（環境変数）をWorkersプロジェクトに対して設定します。
 
 ```bash
-npx wrangler pages secret put AUTH_GITHUB_ID --project-name modparks
-npx wrangler pages secret put AUTH_GITHUB_SECRET --project-name modparks
-npx wrangler pages secret put AUTH_SECRET --project-name modparks
-npx wrangler pages secret put NEXT_PUBLIC_BASE_URL --project-name modparks
-npx wrangler pages secret put R2_PUBLIC_URL --project-name modparks
+npx wrangler secret put AUTH_GITHUB_ID
+npx wrangler secret put AUTH_GITHUB_SECRET
+npx wrangler secret put AUTH_SECRET
+npx wrangler secret put NEXT_PUBLIC_BASE_URL
+npx wrangler secret put R2_PUBLIC_URL
 ```
 ※ `NEXT_PUBLIC_BASE_URL` は `https://あなたのドメイン` です。
 ※ `R2_PUBLIC_URL` は手順3で取得したパブリックアクセス用のURLです。
 
 ### 6-2. プロジェクトのビルドとデプロイ
-Next.jsのビルドを行い、Cloudflare Pagesにデプロイします。
+OpenNextを用いてNext.jsのビルドを行い、Cloudflare Workersにデプロイします。
+
+npm install -D @opennextjs/cloudflare
 
 ```bash
-# プロジェクトをビルド（Cloudflare Pages用）
-npm run build
-
-# Cloudflare Pagesへデプロイ
-npm run deploy
-# または: npx wrangler pages deploy .vercel/output/static
+# ビルドとデプロイを実行（package.json に定義されたスクリプト）
+npm run cf:deploy
 ```
 
 ※ 初回デプロイ時はプロジェクト名の入力が求められます。`modparks` のように設定してください。
@@ -126,7 +124,7 @@ npm run deploy
 ## 7. トラブルシューティング
 
 ### ログイン後にリダイレクトが失敗する
-Cloudflare Pages のカスタムドメイン設定を行っている場合、GitHub OAuth の設定画面で `Authorization callback URL` が正しいカスタムドメイン（または Pages の提供する `xxx.pages.dev`）と完全に一致しているか確認してください。
+GitHub OAuth の設定画面で `Authorization callback URL` が正しいドメイン（`https://modparks.your-workers.dev/api/auth/callback/github` 等）と完全に一致しているか確認してください。
 
 ### 画像が表示されない、ダウンロードができない
 R2 のパブリックアクセス設定が正しく行われているか、環境変数の `R2_PUBLIC_URL` に末尾のスラッシュ（`/`）が入っていないか確認してください。
