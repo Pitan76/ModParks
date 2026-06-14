@@ -7,3 +7,6 @@ export const API_CONFIG = {
   /** 一覧APIの最大取得件数 */
   MAX_LIMIT: 50,
 } as const;
+
+/** サイトのベースURL */
+export const SITE_URL = "https://modparks.pages.dev";

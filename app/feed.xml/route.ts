@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { getDb, getD1 } from "@/lib/db";
+import { getDatabase } from "@/lib/db";
 import { projects, users } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-
-
+import { SITE_URL } from "@/lib/config";
 
 export async function GET() {
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const db = await getDatabase();
 
   const latestProjects = await db
     .select({
@@ -28,11 +26,9 @@ export async function GET() {
     .orderBy(desc(projects.updatedAt))
     .limit(20);
 
-  const siteUrl = "https://modparks.pages.dev";
-
   const itemsXml = latestProjects.map(project => {
     const authorName = project.author?.displayName || project.author?.username || "Unknown";
-    const projectUrl = `${siteUrl}/projects/${project.slug}`;
+    const projectUrl = `${SITE_URL}/projects/${project.slug}`;
     const pubDate = new Date(project.updatedAt).toUTCString();
 
     return `
@@ -50,11 +46,11 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>ModParks</title>
-    <link>${siteUrl}</link>
+    <link>${SITE_URL}</link>
     <description>Minecraft Java Edition向けのMod/Pluginプラットフォーム、新着および更新されたプロジェクト</description>
     <language>ja</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <atom:link href="${siteUrl}/feed.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml" />
     ${itemsXml}
   </channel>
 </rss>`;

@@ -53,3 +53,12 @@ export async function getD1(): Promise<D1Database> {
   if (!db) throw new Error("D1 binding not found in process.env");
   return db;
 }
+
+/**
+ * D1バインディングの取得と Drizzle ORM インスタンスの生成をまとめて行うヘルパー。
+ * Server Action やルートハンドラで `const db = await getDatabase();` の1行で利用できます。
+ */
+export async function getDatabase(): Promise<DrizzleD1Database<typeof schema>> {
+  const d1 = await getD1();
+  return getDb(d1);
+}
