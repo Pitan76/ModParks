@@ -20,8 +20,9 @@
   },
   "Nav": {
     "home": "Home",
-    "projects": "Projects",
-    "myProjects": "My Projects",
+    "projects": "Discover",
+    "ideas": "Ideas",
+    "myProjects": "Projects",
     "newProject": "New Project",
     "profile": "Profile",
     "admin": "Admin",
@@ -35,9 +36,9 @@
       "description": "ModParks is a Japan-based platform for Minecraft Java Edition Mods and Plugins.",
       "searchPlaceholder": "Search Mods & Plugins..."
     },
-    "newProjects": "New Projects",
+    "newProjects": "Newest",
     "viewAll": "View all",
-    "cta": "Submit Project"
+    "cta": "Submit"
   },
   "Project": {
     "type": {
@@ -71,7 +72,7 @@
       "description": "Discover various mods and plugins."
     },
     "myProjects": {
-      "title": "My Projects",
+      "title": "Projects",
       "description": "A list of mods and plugins you've created. (Drafts included)"
     },
     "create": {

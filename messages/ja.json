@@ -22,7 +22,7 @@
     "home": "ホーム",
     "projects": "探す",
     "ideas": "アイデア",
-    "myProjects": "マイプロジェクト",
+    "myProjects": "プロジェクト",
     "newProject": "新規プロジェクト",
     "profile": "プロフィール",
     "admin": "管理",
@@ -36,7 +36,7 @@
       "description": "ModParksは日本発のMinecraft Java Edition向けMod/Pluginプラットフォームです。",
       "searchPlaceholder": "MOD/プラグインを検索..."
     },
-    "newProjects": "新着プロジェクト",
+    "newProjects": "新着",
     "viewAll": "すべて見る",
     "cta": "投稿する"
   },
@@ -73,7 +73,7 @@
       "description": "様々なModやプラグインを見つけましょう。"
     },
     "myProjects": {
-      "title": "マイプロジェクト",
+      "title": "プロジェクト",
       "description": "あなたが作成したModやプラグインの一覧です。(下書きも表示されます)"
     },
     "create": {
