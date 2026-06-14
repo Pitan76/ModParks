@@ -27,7 +27,6 @@ export const metadata: Metadata = {
   alternates: {
     types: {
       "application/rss+xml": "https://modparks.pages.dev/feed.xml",
-      "application/rss+xml; title=\"Updated Projects\"": "https://modparks.pages.dev/feed-updated.xml",
     },
   },
 };

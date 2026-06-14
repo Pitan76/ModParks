@@ -16,6 +16,7 @@ export async function GET() {
       name: projects.name,
       description: projects.description,
       createdAt: projects.createdAt,
+      updatedAt: projects.updatedAt,
       author: {
         username: users.username,
         displayName: users.displayName,
@@ -24,7 +25,7 @@ export async function GET() {
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
     .where(eq(projects.status, "published"))
-    .orderBy(desc(projects.createdAt))
+    .orderBy(desc(projects.updatedAt))
     .limit(20);
 
   const siteUrl = "https://modparks.pages.dev";
@@ -32,7 +33,7 @@ export async function GET() {
   const itemsXml = latestProjects.map(project => {
     const authorName = project.author?.displayName || project.author?.username || "Unknown";
     const projectUrl = `${siteUrl}/projects/${project.slug}`;
-    const pubDate = new Date(project.createdAt).toUTCString();
+    const pubDate = new Date(project.updatedAt).toUTCString();
 
     return `
     <item>
@@ -48,9 +49,9 @@ export async function GET() {
   const rssFeed = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>ModParks - 新着プロジェクト</title>
+    <title>ModParks</title>
     <link>${siteUrl}</link>
-    <description>Minecraft Java Edition向けのMod/Pluginプラットフォーム</description>
+    <description>Minecraft Java Edition向けのMod/Pluginプラットフォーム、新着および更新されたプロジェクト</description>
     <language>ja</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${siteUrl}/feed.xml" rel="self" type="application/rss+xml" />
