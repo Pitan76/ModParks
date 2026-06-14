@@ -14,7 +14,7 @@ import ProjectIconUpload from "./ProjectIconUpload";
 
 const PREDEFINED_TAGS = [
   "fabric", "forge", "neoforge", "paper", "spigot", "quilt",
-  "items", "blocks", "commands", "permissions", "utility", "qol"
+  "items", "blocks", "commands", "permissions", "utility", "qol", "technology", "industry", "energy", "magic", "adventure", "biomes", "exploration", "optimization", "building", "worldgen", "cosmetic", "transport", "automation", "client", "server", "gameplay", "storage", "weapons", "armor", "food"
 ];
 
 export interface ProjectFormFieldsProps {
@@ -110,10 +110,9 @@ export default function ProjectFormFields({ error, project, children }: ProjectF
           const stringValues = newValue.map((v: any) => typeof v === "string" ? v : v.inputValue || "");
           setTags(stringValues.filter(Boolean));
         }}
-        // @ts-ignore - MUI's Autocomplete TS types sometimes fail to resolve renderTags when multiple and freeSolo are used together
-        renderTags={(value: readonly string[], getTagProps: any) =>
+        renderValue={(value: readonly string[], getItemProps: any) =>
           value.map((option: string, index: number) => {
-            const { key, ...tagProps } = getTagProps({ index });
+            const { key, ...tagProps } = getItemProps({ index });
             let label = option as string;
             try { label = tTags(option as any); } catch {}
             return <Chip variant="outlined" label={label} key={key} {...tagProps} />;
