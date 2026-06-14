@@ -12,6 +12,8 @@
 - **Cloudflare アカウント**（ダッシュボードにログインできること）
 - **GitHub アカウント**（GitHub OAuthアプリの作成に必要）
 
+npx wrangler pages project create modparks
+
 ---
 
 ## 2. Cloudflare D1 (データベース) のセットアップ
