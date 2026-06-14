@@ -4,7 +4,7 @@ import { projects, versions } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, desc } from "drizzle-orm";
 
-export const runtime = "edge";
+
 
 export async function GET(request: Request, { params }: { params: { slug: string } }) {
   const d1 = await getD1();

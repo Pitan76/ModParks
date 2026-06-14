@@ -5,7 +5,7 @@ import { validateApiKey } from "@/lib/api-auth";
 import { API_CONFIG } from "@/lib/config";
 import { eq, desc, and, inArray, like } from "drizzle-orm";
 
-export const runtime = "edge";
+
 
 export async function GET(request: Request) {
   const d1 = await getD1();

@@ -3,7 +3,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { projects, users } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
-export const runtime = "edge";
+
 
 export async function GET() {
   const d1 = await getD1();
