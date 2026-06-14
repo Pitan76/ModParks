@@ -66,6 +66,12 @@
       "status": "公開状態",
       "slugRule": "半角英数字とハイフンのみ"
     },
+    "iconUpload": {
+      "title": "プロジェクトアイコン (最大 400x400)",
+      "select": "アイコンを選択",
+      "autoResizeNote": "※大きな画像は自動的に400x400にリサイズされます",
+      "error": "アイコンのアップロードに失敗しました"
+    },
     "form": {
       "status": "ステータス",
       "published": "公開",

@@ -96,38 +96,38 @@ export default function ProjectFormFields({ error, project, children }: ProjectF
       />
 
       <Autocomplete
-        {...({
-          multiple: true,
-          freeSolo: true,
-          options: PREDEFINED_TAGS,
-          getOptionLabel: (option: string) => {
-            try {
-              return tTags(option);
-            } catch {
-              return option; // For custom tags
-            }
-          },
-          value: tags,
-          onChange: (_: any, newValue: string[]) => setTags(newValue),
-          renderTags: (value: readonly string[], getTagProps: any) =>
-            value.map((option: string, index: number) => {
-              const { key, ...tagProps } = getTagProps({ index });
-              let label = option;
-              try { label = tTags(option); } catch {}
-              return (
-                <Chip variant="outlined" label={label} key={key} {...tagProps} />
-              );
-            }),
-          renderInput: (params: any) => (
-            <TextField
-              {...params}
-              label={t("fields.tags")}
-              placeholder={t("fields.tags")}
-              error={!!error?.tags}
-              helperText={error?.tags?.[0]}
-            />
-          )
-        } as any)}
+        multiple
+        freeSolo
+        options={PREDEFINED_TAGS}
+        getOptionLabel={(option) => {
+          if (typeof option === "string") {
+            try { return tTags(option as any); } catch { return option; }
+          }
+          return (option as any).inputValue || "";
+        }}
+        value={tags}
+        onChange={(_, newValue) => {
+          const stringValues = newValue.map((v: any) => typeof v === "string" ? v : v.inputValue || "");
+          setTags(stringValues.filter(Boolean));
+        }}
+        // @ts-ignore - MUI's Autocomplete TS types sometimes fail to resolve renderTags when multiple and freeSolo are used together
+        renderTags={(value: readonly string[], getTagProps: any) =>
+          value.map((option: string, index: number) => {
+            const { key, ...tagProps } = getTagProps({ index });
+            let label = option as string;
+            try { label = tTags(option as any); } catch {}
+            return <Chip variant="outlined" label={label} key={key} {...tagProps} />;
+          })
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={t("fields.tags")}
+            placeholder={t("fields.tags")}
+            error={!!error?.tags}
+            helperText={error?.tags?.[0]}
+          />
+        )}
       />
       {tags.map((tag) => (
         <input type="hidden" name="tags" value={tag} key={`hidden-tag-${tag}`} />
