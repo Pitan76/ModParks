@@ -43,6 +43,13 @@
       "when": 1781366376320,
       "tag": "0005_rich_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1781405212221,
+      "tag": "0006_wide_retro_girl",
+      "breakpoints": true
     }
   ]
 }

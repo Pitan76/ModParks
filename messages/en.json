@@ -343,6 +343,33 @@
       "connect": "Connect GitHub",
       "disconnect": "Disconnect",
       "successDisconnect": "GitHub disconnected successfully"
+    },
+    "account": {
+      "title": "Account Management",
+      "changeId": "Change User ID",
+      "changeIdDesc": "If you change your ID, access from the previous ID will redirect to the new one, but older IDs will become available for others to claim.",
+      "currentId": "Current ID",
+      "newId": "New ID",
+      "changeEmail": "Change Email Address",
+      "currentEmail": "Current Email",
+      "newEmail": "New Email",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "deleteAccount": "Delete Account",
+      "deleteAccountDesc": "Deleting your account will place it in a soft-deleted state for 30 days before permanent removal. This action cannot be undone.",
+      "deleteAccountConfirm": "Are you sure you want to delete your account?",
+      "successId": "User ID changed successfully",
+      "successEmail": "Email address changed successfully",
+      "successPassword": "Password changed successfully",
+      "successDelete": "Account deletion complete",
+      "errorWrongPassword": "Current password is incorrect",
+      "errorIdTaken": "This ID is already taken",
+      "errorIdFormat": "ID can only contain letters, numbers, hyphens, and underscores",
+      "errorEmailTaken": "This email address is already in use",
+      "updateBtn": "Update",
+      "deleteBtn": "Delete Account"
     }
   }
 }

@@ -35,9 +35,15 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
         {t("title")}
       </Typography>
       <SettingsClient
-        user={{ displayName: userRecord?.displayName || "", bio: userRecord?.bio || "" }}
+        user={{
+          username: userRecord?.username || "",
+          displayName: userRecord?.displayName || "",
+          bio: userRecord?.bio || "",
+          email: userRecord?.email || ""
+        }}
         apiKeys={userApiKeys}
         isGitHubConnected={isGitHubConnected}
+        hasPassword={!!userRecord?.passwordHash}
       />
     </Container>
   );

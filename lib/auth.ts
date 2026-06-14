@@ -8,7 +8,6 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
-// @ts-expect-error D1 binding
 const d1 = typeof process !== "undefined" ? process.env.DB : undefined;
 
 /**
@@ -49,18 +48,18 @@ export const authConfig = {
         const db = getDb(d1);
         const user = await db.select().from(users).where(eq(users.email, credentials.email as string)).get();
 
-        if (!user || !user.passwordHash) return null;
+        if (!user || !user.passwordHash || user.deletedAt) return null;
 
         const passwordsMatch = await bcrypt.compare(credentials.password as string, user.passwordHash);
         if (passwordsMatch) {
           return {
             id: user.id,
-            name: user.name,
-            email: user.email,
-            image: user.image,
-            username: user.username,
-            displayName: user.displayName,
-            avatarUrl: user.avatarUrl,
+            name: user.name ?? undefined,
+            email: user.email ?? undefined,
+            image: user.image ?? undefined,
+            username: user.username ?? undefined,
+            displayName: user.displayName ?? undefined,
+            avatarUrl: user.avatarUrl ?? undefined,
             role: user.role,
           };
         }
@@ -69,23 +68,44 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (user?.email) {
+        const { getD1, getDb } = await import("@/lib/db");
+        const { users } = await import("@/db/schema");
+        const { eq } = await import("drizzle-orm");
+        const d1 = await getD1();
+        const db = getDb(d1);
+        const dbUser = await db.select().from(users).where(eq(users.email, user.email as string)).get();
+        
+        // 退会済みユーザーのログインを拒否
+        if (dbUser?.deletedAt) {
+          return false;
+        }
+
+        // GitHub連携時に githubUsername を更新
+        if (account?.provider === "github" && profile?.login) {
+          await db.update(users).set({ githubUsername: profile.login as string }).where(eq(users.email, user.email as string));
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        token.username = (user as any).username;
-        token.displayName = (user as any).displayName;
-        token.avatarUrl = (user as any).avatarUrl || user.image;
-        token.role = (user as any).role;
+        token.username = (user as any).username ?? "";
+        token.displayName = (user as any).displayName ?? "";
+        token.avatarUrl = (user as any).avatarUrl ?? user.image ?? null;
+        token.role = (user as any).role ?? "user";
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub ?? token.id as string;
-        session.user.username = token.username as string;
-        session.user.displayName = token.displayName as string;
-        session.user.avatarUrl = token.avatarUrl as string | null;
-        session.user.role = (token.role as string) ?? "user";
+        session.user.id = (token.sub ?? token.id ?? "") as string;
+        session.user.username = (token.username ?? "") as string;
+        session.user.displayName = (token.displayName ?? "") as string;
+        session.user.avatarUrl = (token.avatarUrl ?? null) as string | null;
+        session.user.role = (token.role ?? "user") as string;
       }
       return session;
     },

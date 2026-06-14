@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub } from "@/lib/actions/settings";
+import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -20,15 +20,22 @@ import TableRow from "@mui/material/TableRow";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { signIn } from "next-auth/react";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import Divider from "@mui/material/Divider";
+import { signIn, signOut } from "next-auth/react";
 
 interface SettingsClientProps {
-  user: { displayName: string, bio: string };
+  user: { username: string, displayName: string, bio: string, email: string };
   apiKeys: { id: string, name: string, createdAt: Date, lastUsedAt: Date | null }[];
   isGitHubConnected: boolean;
+  hasPassword?: boolean;
 }
 
-export default function SettingsClient({ user, apiKeys, isGitHubConnected }: SettingsClientProps) {
+export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword }: SettingsClientProps) {
   const t = useTranslations("Settings");
   const [tab, setTab] = useState(0);
 
@@ -44,6 +51,15 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected }: Set
 
   // GitHub State
   const [githubMsg, setGithubMsg] = useState("");
+
+  // Account State
+  const [username, setUsername] = useState(user.username);
+  const [email, setEmail] = useState(user.email);
+  const [oldPass, setOldPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [accMsg, setAccMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +92,51 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected }: Set
     setTimeout(() => setGithubMsg(""), 3000);
   };
 
+  const showAccMsg = (type: "success" | "error", key: string) => {
+    setAccMsg({ type, text: t(`account.${key}`) });
+    setTimeout(() => setAccMsg(null), 4000);
+  };
+
+  const handleUsernameChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username === user.username) return;
+    const res = await changeUsername(username);
+    if (res.error) showAccMsg("error", res.error);
+    else showAccMsg("success", "successId");
+  };
+
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email === user.email) return;
+    const res = await changeEmail(email);
+    if (res.error) showAccMsg("error", res.error);
+    else showAccMsg("success", "successEmail");
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPass !== confirmPass) {
+      // Need a key or just show string. I will use alert but better localization needed if expanding
+      return;
+    }
+    const res = await changePassword(oldPass, newPass);
+    if (res.error) showAccMsg("error", res.error);
+    else {
+      showAccMsg("success", "successPassword");
+      setOldPass("");
+      setNewPass("");
+      setConfirmPass("");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const res = await deleteAccount();
+    if (res.success) {
+      setDeleteOpen(false);
+      signOut({ callbackUrl: "/" });
+    }
+  };
+
   return (
     <Box>
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4 }}>
@@ -83,6 +144,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected }: Set
           <Tab label={t("profile.title")} />
           <Tab label={t("apiKeys.title")} />
           <Tab label={t("github.title")} />
+          <Tab label={t("account.title")} />
         </Tabs>
       </Box>
 
@@ -193,6 +255,69 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected }: Set
               {t("github.connect")}
             </Button>
           )}
+        </Box>
+      )}
+
+      {/* Account Settings */}
+      {tab === 3 && (
+        <Box>
+          {accMsg && <Alert severity={accMsg.type} sx={{ mb: 4 }}>{accMsg.text}</Alert>}
+
+          <Box component="form" onSubmit={handleUsernameChange} sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>{t("account.changeId")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.changeIdDesc")}</Typography>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField label={t("account.newId")} size="small" value={username} onChange={e => setUsername(e.target.value)} required />
+              <Button type="submit" variant="contained">{t("account.updateBtn")}</Button>
+            </Box>
+          </Box>
+          
+          <Divider sx={{ my: 4 }} />
+
+          <Box component="form" onSubmit={handleEmailChange} sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t("account.changeEmail")}</Typography>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField label={t("account.newEmail")} size="small" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+              <Button type="submit" variant="contained">{t("account.updateBtn")}</Button>
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 4 }} />
+
+          {hasPassword && (
+            <Box component="form" onSubmit={handlePasswordChange} sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>{t("account.changePassword")}</Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 300 }}>
+                <TextField label={t("account.currentPassword")} type="password" size="small" value={oldPass} onChange={e => setOldPass(e.target.value)} required />
+                <TextField label={t("account.newPassword")} type="password" size="small" value={newPass} onChange={e => setNewPass(e.target.value)} required />
+                <TextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} required />
+                <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start" }}>{t("account.updateBtn")}</Button>
+              </Box>
+            </Box>
+          )}
+
+          <Divider sx={{ my: 4 }} />
+
+          <Box>
+            <Typography variant="h6" color="error" sx={{ mb: 1 }}>{t("account.deleteAccount")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.deleteAccountDesc")}</Typography>
+            <Button variant="outlined" color="error" onClick={() => setDeleteOpen(true)}>
+              {t("account.deleteBtn")}
+            </Button>
+          </Box>
+
+          <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+            <DialogTitle>{t("account.deleteAccount")}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{t("account.deleteAccountConfirm")}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
+              <Button color="error" variant="contained" onClick={handleDeleteAccount}>
+                {t("account.deleteBtn")}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       )}
     </Box>

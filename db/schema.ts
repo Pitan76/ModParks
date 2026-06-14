@@ -29,6 +29,9 @@ export const users = sqliteTable("users", {
   avatarUrl:     text("avatar_url"),
   bio:           text("bio"),
   role:          text("role", { enum: ["user", "admin"] }).notNull().default("user"),
+  previousUsername: text("previous_username"),
+  githubUsername: text("github_username"),
+  deletedAt:     integer("deleted_at", { mode: "timestamp" }),
   createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),

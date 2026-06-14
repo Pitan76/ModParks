@@ -346,6 +346,33 @@
       "connect": "連携する",
       "disconnect": "連携を解除する",
       "successDisconnect": "GitHub連携を解除しました"
+    },
+    "account": {
+      "title": "アカウント管理",
+      "changeId": "ユーザーIDの変更",
+      "changeIdDesc": "IDを変更すると、旧IDからのアクセスは自動で新IDへリダイレクトされますが、それより古いIDは他のユーザーが取得できるようになります。",
+      "currentId": "現在のID",
+      "newId": "新しいID",
+      "changeEmail": "メールアドレスの変更",
+      "currentEmail": "現在のメールアドレス",
+      "newEmail": "新しいメールアドレス",
+      "changePassword": "パスワードの変更",
+      "currentPassword": "現在のパスワード",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "新しいパスワード（確認）",
+      "deleteAccount": "退会する",
+      "deleteAccountDesc": "退会するとアカウントは30日間論理削除状態になり、その後完全削除されます。この操作は取り消せません。",
+      "deleteAccountConfirm": "本当に退会しますか？",
+      "successId": "ユーザーIDを変更しました",
+      "successEmail": "メールアドレスを変更しました",
+      "successPassword": "パスワードを変更しました",
+      "successDelete": "退会処理が完了しました",
+      "errorWrongPassword": "現在のパスワードが間違っています",
+      "errorIdTaken": "そのIDはすでに使われています",
+      "errorIdFormat": "IDは半角英数字とハイフン、アンダースコアのみ使用できます",
+      "errorEmailTaken": "そのメールアドレスはすでに使われています",
+      "updateBtn": "更新する",
+      "deleteBtn": "退会する"
     }
   }
 }
