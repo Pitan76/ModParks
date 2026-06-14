@@ -161,11 +161,9 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 ))}
                 {project.tags.length > (isGrid ? 2 : 3) && (
                   <Tooltip title={project.tags.slice(isGrid ? 2 : 3).map(getTagLabel).join(", ")} arrow placement="top">
-                    <span>
-                      <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5, cursor: "help" }}>
-                        +{project.tags.length - (isGrid ? 2 : 3)}
-                      </Typography>
-                    </span>
+                    <Box component="span" sx={{ ml: 0.5, cursor: "help", color: "text.disabled", fontSize: "0.75rem" }}>
+                      +{project.tags.length - (isGrid ? 2 : 3)}
+                    </Box>
                   </Tooltip>
                 )}
               </Box>
