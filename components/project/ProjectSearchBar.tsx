@@ -43,23 +43,6 @@ export default function ProjectSearchBar({
 
   const isFirstRender = useRef(true);
 
-  // qのデバウンス処理
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQ(q);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [q]);
-
-  // 検索条件の更新
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    updateSearch(debouncedQ, type, sort, loader, mcVersion);
-  }, [debouncedQ, type, sort, loader, mcVersion, updateSearch]);
-
   const updateSearch = useCallback(
     (newQ: string, newType: string, newSort: string, newLoader: string, newMcVersion: string) => {
       const params = new URLSearchParams();
@@ -76,6 +59,23 @@ export default function ProjectSearchBar({
     },
     [pathname, router]
   );
+
+  // qのデバウンス処理
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQ(q);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [q]);
+
+  // 検索条件の更新
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    updateSearch(debouncedQ, type, sort, loader, mcVersion);
+  }, [debouncedQ, type, sort, loader, mcVersion, updateSearch]);
 
   return (
     <Box sx={{ mb: 4 }}>
