@@ -11,54 +11,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import ProjectCard from "@/components/project/ProjectCard";
 import { getLoaderInfo } from "@/lib/loaders";
 
-// ダミーデータ（後でDB接続に置き換え）
-const DUMMY_PROJECTS = [
-  {
-    id: "1",
-    slug: "example-fabric-mod",
-    name: "ExampleFabricMod",
-    description: "Fabricで動作するサンプルMod。新しいブロックとアイテムを追加します。",
-    iconUrl: null,
-    type: "mod" as const,
-    license: "MIT",
-    downloads: 12400,
-    tags: ["fabric", "1.21", "items", "blocks"],
-    authorUsername: "exampledev",
-    authorDisplayName: "Example Dev",
-    authorAvatarUrl: null,
-    updatedAt: new Date(),
-  },
-  {
-    id: "2",
-    slug: "example-paper-plugin",
-    name: "ExamplePaperPlugin",
-    description: "Paperサーバー向けプラグイン。コマンドと権限管理を拡張します。",
-    iconUrl: null,
-    type: "plugin" as const,
-    license: "Apache-2.0",
-    downloads: 8200,
-    tags: ["paper", "commands", "permissions"],
-    authorUsername: "plugindev",
-    authorDisplayName: "Plugin Dev",
-    authorAvatarUrl: null,
-    updatedAt: new Date(),
-  },
-  {
-    id: "3",
-    slug: "forge-utility-mod",
-    name: "ForgeUtilityMod",
-    description: "Forgeユーティリティ集。QOL改善のための便利な機能をまとめたMod。",
-    iconUrl: null,
-    type: "mod" as const,
-    license: "GPL-3.0",
-    downloads: 5600,
-    tags: ["forge", "utility", "qol"],
-    authorUsername: "forgedev",
-    authorDisplayName: "Forge Dev",
-    authorAvatarUrl: null,
-    updatedAt: new Date(),
-  },
-];
+import { getProjects } from "@/lib/actions/project";
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
@@ -70,6 +23,11 @@ export default async function HomePage({ params }: HomePageProps) {
 
   const t = await getTranslations("Home");
   const tc = await getTranslations("Common");
+
+  const [newProjects, updatedProjects] = await Promise.all([
+    getProjects({ sort: "newest", limit: 6 }),
+    getProjects({ sort: "updated", limit: 6 }),
+  ]);
 
   return (
     <Box>
@@ -187,7 +145,7 @@ export default async function HomePage({ params }: HomePageProps) {
         </Box>
 
         <Grid container spacing={2}>
-          {DUMMY_PROJECTS.map((project) => (
+          {newProjects.map((project) => (
             <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
               <ProjectCard project={project} layout="grid" />
             </Grid>
@@ -212,7 +170,7 @@ export default async function HomePage({ params }: HomePageProps) {
         </Box>
 
         <Grid container spacing={2}>
-          {[...DUMMY_PROJECTS].reverse().map((project) => (
+          {updatedProjects.map((project) => (
             <Grid key={`updated-${project.id}`} size={{ xs: 12, sm: 6, md: 4 }}>
               <ProjectCard project={project} layout="grid" />
             </Grid>

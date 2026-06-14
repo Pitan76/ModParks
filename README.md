@@ -1,446 +1,79 @@
-# ModParks 最小要件定義 (MVP)
-
-## 目的
-
-Minecraft Java Edition向けのMod・Pluginを簡単に公開・検索・ダウンロードできるサービスを提供する。
-
-
----
-
-## 対象ユーザー
-
-### 投稿者
-
-* 個人開発者
-* 学生開発者
-* OSS開発者
-
-### 利用者
-
-* Minecraftプレイヤー
-* サーバー運営者
-
----
-
-## 対応コンテンツ
-
-* Mod
-* Plugin
-
----
-
-## 対応Minecraft
-
-* Minecraft Java Edition
-
----
-
-## アカウント機能
-
-* GitHubログイン
-* ログアウト
-* プロフィール編集
-
----
-
-## プロジェクト機能
-
-### 作成
-
-入力項目
-
-* プロジェクト名
-* URLスラッグ
-* 説明
-* アイコン
-* タグ
-* ライセンス
-* ソースコードURL（任意）
-
-### 状態
-
-* 公開
-* 非公開
-
-### 編集
-
-* 情報更新
-* アイコン変更
-
----
-
-## バージョン機能
-
-### 登録
-
-入力項目
-
-* バージョン番号
-* Minecraftバージョン
-* ローダー
-* 更新内容
-
-### ダウンロード
-
-方式
-
-* ModParksへアップロード
-* 外部URL
-
-外部URL許可先
-
-* GitHub Releases
-* Modrinth
-* CurseForge
-
----
-
-## 検索機能
-
-* 名前検索
-
----
-
-## 閲覧機能
-
-プロジェクトページ
-
-表示項目
-
-* 名前
-* 説明
-* 作者
-* アイコン
-* バージョン一覧
-* ダウンロードリンク
-
----
-
-## 通報機能
-
-理由
-
-* 著作権侵害
-* マルウェア疑い
-* スパム
-* その他
-
----
-
-## 管理機能
-
-* 通報確認
-* プロジェクト非公開
-
----
-
-## 多言語
-
-内部設計のみ対応
-
-* 日本語
-* 英語
-
----
-
-## MVP達成条件
-
-ユーザーが
-
-1. GitHubでログイン
-2. ModまたはPluginを投稿
-3. 他ユーザーが検索
-4. ダウンロード
-
-できること。
-
----
-
-# ModParks 次の要件定義
-
-## ビジョン
-開発者だけでなく利用者も参加できる世界に（アイデアを利用者も投稿していく）
-開発者と利用者が互いに触れ合える場所づくり
-
-## アイデア機能
-アイデアを投稿できる機能
-
-## アイデアにいいねできる機能
-
-## アイデアにコメントできる機能
-
-## アイデアにバージョンを紐づける
-
-## こんなmodをつくってほしいと提案できる機能
-それにこたえて開発者がつくっていける機能とか
-
-
-# ModParks 最大要件定義 (理想形)
-
-## ビジョン
-
-Minecraftを中心に世界中のゲームMod文化を支えるプラットフォームになる。
-開発者だけでなく利用者も参加できる世界に（アイデアを利用者も投稿していく）
-
----
-
-## 対応コンテンツ
-
-* Mod
-* Plugin
-* Resource Pack
-* Data Pack
-* Shader
-* Modpack
-* World
-* Addon
-* Script
-* Tool
-
----
-
-## 対応ゲーム
-
-* Minecraft Java Edition
-* Minecraft Bedrock Edition
-
----
-
-## 多言語
-
-投稿
-
-* 日本語
-* 英語
-
-閲覧
-
-* AI翻訳対応
-
-対応例
-
-* 日本語
-* 英語
-* 中国語
-* 韓国語
-* ドイツ語
-* フランス語
-
----
-
-## AI機能
-
-### 翻訳
-
-説明文自動翻訳
-
-### タグ生成
-
-タグ自動提案
-
-### カテゴリ判定
-
-分類自動提案
-
-### 要約
-
-長文説明の要約
-
-### 不正検知
-
-スパム判定
-
----
-
-## Git連携
-
-* GitHub連携
-* GitLab連携
-
-### リリース同期
-
-GitHub Release
-
-↓
-
-ModParks Version自動作成
-
----
-
-## チュートリアル
-### 案内機能
-登録後にウェブサイトの使い方を案内する
-
-## API (v1)
-
-外部のMinecraftクライアントやランチャー、ツール連携のためのパブリックな REST API を提供しています。
-
-**共通仕様**:
-- ベースURL: `/api/v1`
-- 認証: 全てのエンドポイントでリクエストヘッダーに `Authorization: Bearer <API_KEY>` が必要です。
-
-### エンドポイント一覧
-
-#### 1. プロジェクト一覧取得
-`GET /api/v1/projects`
-- **概要**: 公開済みのプロジェクト一覧を取得します。
-- **クエリパラメータ**:
-  - `type` (任意): `mod` または `plugin`
-  - `q` (任意): 検索キーワード
-  - `sort` (任意): `downloads` (デフォルト), `updated`, `newest`
-  - `limit` (任意): 取得件数 (デフォルト 20, 最大 50)
-  - `offset` (任意): 取得開始位置 (デフォルト 0)
-
-#### 2. プロジェクト詳細取得
-`GET /api/v1/projects/[slug]`
-- **概要**: 指定したプロジェクト（スラッグ指定）の詳細情報とタグを取得します。
-
-#### 3. プロジェクトバージョン一覧取得
-`GET /api/v1/projects/[slug]/versions`
-- **概要**: 指定したプロジェクトの全てのバージョン情報やダウンロードURLを取得します。
-
-#### 4. アイデア一覧取得
-`GET /api/v1/ideas`
-- **概要**: ユーザーから投稿された現在募集中のアイデア一覧を取得します。
-- **クエリパラメータ**: `limit`, `offset` (プロジェクト一覧と同様)
-
----
-
-## ランチャー
-
-### ModParks Launcher
-
-機能
-
-* 検索
-* インストール
-* アップデート
-* Modpack管理
-
----
-
-## コミュニティ
-
-* コメント
-* レビュー
-* フォロー
-* お気に入り
-* 開発日記
-* Q&A
-
----
-
-## 開発者支援
-
-* ダウンロード統計
-* 利用者分析
-* CI/CD連携
-* Webhook
-
----
-
-## セキュリティ
-
-* ウイルススキャン
-* ファイルハッシュ
-* 署名検証
-* 著作権対応
-* 自動審査
-
----
-
-## 収益化
-
-* 広告
-* 寄付
-* サブスクリプション
-* スポンサー
-
----
-
-## 最終目標
-
-Minecraft向け日本発サービスとして、
-
-CurseForge と
-Modrinth の代替ではなく、
-
-「日本人開発者ならまずModParksに出す」
-
-という状態を目指す。
-
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## ローカル開発のセットアップ (Getting Started)
-
-このプロジェクトは Next.js と Cloudflare D1 (SQLite) を使用しています。
-ローカル開発でデータベース機能（ログイン・登録・プロジェクト作成など）をテストするには、以下の手順でセットアップを行ってください。
-
-### 1. 依存関係のインストール
-
+# ModParks
+
+**ModParks** は、Minecraft Java Edition 向けの Mod および Plugin プラットフォームです。
+日本発のプラットフォームとして、開発者とプレイヤーがより円滑に作品を共有し、コミュニケーションできる場を提供することを目的としています。
+
+## 特徴 (Features)
+
+- **プロジェクトの公開と探索**: ModやPluginを検索、発見、ダウンロード。
+- **バージョン管理**: バージョンごとのJar/Zipファイルのアップロード（Cloudflare R2対応）または外部URL（GitHub Releases, Modrinth, CurseForge 等）へのリンク機能。
+- **多言語対応 (i18n)**: 日本語と英語の表示切り替え（`next-intl` による実装）。
+- **認証**: GitHub アカウントを用いたセキュアなログイン（Auth.js / NextAuth）。
+- **アイデアボード**: ユーザーが「こんなModが欲しい！」を投稿・議論し、実現されたプロジェクトと紐付けられる機能。
+- **通報システム**: ガイドライン違反のプロジェクトを管理者に報告する機能。
+- **ダークモード対応**: OSの設定に連動するモダンなダークモード / ライトモード対応。
+
+## 技術スタック (Tech Stack)
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router, v15)
+- **Language**: TypeScript
+- **Styling / UI**: [Material-UI (MUI v6)](https://mui.com/)
+- **Database**: [Cloudflare D1](https://developers.cloudflare.com/d1/)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Storage**: [Cloudflare R2](https://developers.cloudflare.com/r2/)
+- **Authentication**: [Auth.js (NextAuth v5)](https://authjs.dev/)
+- **i18n**: [next-intl](https://next-intl-docs.vercel.app/)
+
+## ローカル開発環境のセットアップ (Getting Started)
+
+### 1. 前提条件
+- Node.js (v20以上)
+- npm, yarn, または pnpm
+
+### 2. リポジトリのクローン
+```bash
+git clone https://github.com/your-username/modparks.git
+cd modparks
+```
+
+### 3. パッケージのインストール
 ```bash
 npm install
 ```
 
-### 2. ローカルデータベースの準備
+### 4. 環境変数の設定
+プロジェクトルートにある `.env.local.example` を参考に、`.env.local` を作成してください。
+```env
+# 例: .env.local
+AUTH_SECRET="your-auth-secret" # 任意のランダムな文字列
+AUTH_GITHUB_ID="your-github-client-id"
+AUTH_GITHUB_SECRET="your-github-client-secret"
+```
 
-Cloudflare D1 のローカル用テーブルを作成します。
-
+### 5. データベースのセットアップ（ローカルD1）
+ローカル開発用の D1 データベースにマイグレーションを適用します。
 ```bash
-# データベーススキーマの生成
 npm run db:generate
-
-# ローカルデータベースへのマイグレーション適用
 npm run db:migrate:local
 ```
 
-### 3. 環境変数の設定
-
-プロジェクトルートに `.env.local` ファイルを作成し、以下の内容を記述してください。（GitHub ログインを使用しない場合は任意のダミー値で構いません）
-
-```env
-# ログイン後のリダイレクト先や NextAuth のベース URL
-NEXTAUTH_URL="http://localhost:3000"
-
-# (オプション) GitHub ログイン機能のテスト用
-# AUTH_GITHUB_ID="your_github_client_id"
-# AUTH_GITHUB_SECRET="your_github_client_secret"
-
-# NextAuth のセッション暗号化キー (適当なランダム文字列)
-AUTH_SECRET="secret"
-```
-
-### 4. 開発サーバーの起動
-
+### 6. 開発サーバーの起動
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-起動後、ブラウザで [http://localhost:3000](http://localhost:3000) を開いてください。
-※ ローカル開発環境では、Wrangler の `getPlatformProxy()` を用いて D1 データベースのバインディングを自動的にシミュレートしています。そのため、特別なプロキシサーバーを別途立ち上げる必要はありません。
+ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスして確認してください。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+*注意: ローカル開発環境では `wrangler.getPlatformProxy` のキャッシュ機構 (`lib/proxy.ts`) によって、Next.jsのホットリロード時にも重いプロキシインスタンスの再起動が防がれ、軽快に動作するよう設計されています。*
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## フォルダ構成
 
-## Learn More
+- `app/`: Next.js App Router (ルーティング, Server Components)
+- `components/`: 再利用可能なReactコンポーネント (UI, フォーム等)
+- `db/`: Drizzle ORM のスキーマ定義 (`schema.ts`)
+- `lib/`: データベース接続 (`db.ts`), APIクライアント, アクション群, バリデーション等
+- `messages/`: `next-intl` 向けの翻訳ファイル (`ja.json`, `en.json`)
 
-To learn more about Next.js, take a look at the following resources:
+## ライセンス (License)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+このプロジェクトは [MIT License](LICENSE) の元に公開されています。
