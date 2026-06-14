@@ -12,9 +12,11 @@ import Grid from "@mui/material/Grid";
 import ProjectCard from "@/components/project/ProjectCard";
 import { getProjects } from "@/lib/actions/project";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
+import { getUserCollections } from "@/lib/actions/collection";
 import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import Alert from "@mui/material/Alert";
+import Chip from "@mui/material/Chip";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -53,9 +55,10 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
   const isOwner = session?.user?.id === user.id;
 
   // Fetch user projects and favorites
-  const [allProjects, favoritedProjects] = await Promise.all([
+  const [allProjects, favoritedProjects, userCollections] = await Promise.all([
     getProjects({ authorId: user.id }),
-    getFavoriteProjects(user.id)
+    getFavoriteProjects(user.id),
+    getUserCollections(user.id, session?.user?.id)
   ]);
   const visibleProjects = allProjects.filter(p => isOwner ? true : p.status === "public");
 
@@ -108,6 +111,59 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>
           まだ公開されているプロジェクトはありません。
+        </Alert>
+      )}
+
+      <Typography variant="h5" sx={{ fontWeight: 700, mt: 6, mb: 3 }}>
+        Lists
+      </Typography>
+
+      {userCollections.length > 0 ? (
+        <Grid container spacing={2}>
+          {userCollections.map(c => (
+            <Grid key={c.id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <Box
+                component={Link}
+                href={`/lists/${c.id}`}
+                sx={{
+                  display: "block",
+                  p: 3,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  textDecoration: "none",
+                  color: "inherit",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    borderColor: "primary.main",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                    transform: "translateY(-2px)"
+                  }
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                    {c.name}
+                  </Typography>
+                  <Chip 
+                    label={c.visibility === "public" ? "公開" : c.visibility === "unlisted" ? "限定公開" : "非公開"} 
+                    size="small"
+                    variant="outlined"
+                    color={c.visibility === "public" ? "primary" : "default"}
+                  />
+                </Box>
+                {c.description && (
+                  <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                    {c.description}
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          まだリストは作成されていません。
         </Alert>
       )}
 
