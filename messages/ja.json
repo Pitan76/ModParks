@@ -58,13 +58,23 @@
       "description": "説明",
       "icon": "アイコン",
       "type": "種類",
-      "license": "ライセンス",
-      "sourceUrl": "ソースコードURL (任意)",
-      "tags": "タグ",
+      "license": "ライセンス (例: MIT)",
+      "sourceUrl": "ソースコードのURL (任意)",
+      "tags": "タグ (自由入力・選択)",
+      "mcVersions": "対応するMinecraftのバージョン",
+      "loaders": "対応するModローダー",
       "status": "公開状態",
       "slugRule": "半角英数字とハイフンのみ"
     },
-    "iconUpload": {
+    "form": {
+      "status": "ステータス",
+      "published": "公開",
+      "draft": "非公開 (下書き)",
+      "cancel": "キャンセル",
+      "save": "保存",
+      "saving": "保存中..."
+    },
+    "uploadForm": {
       "title": "プロジェクトアイコン (最大 400x400)",
       "select": "アイコンを選択",
       "autoResizeNote": "※大きな画像は自動的に400x400にリサイズされます",

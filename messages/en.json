@@ -57,9 +57,11 @@
       "description": "Description",
       "icon": "Icon",
       "type": "Type",
-      "license": "License",
+      "license": "License (e.g. MIT)",
       "sourceUrl": "Source Code URL (optional)",
       "tags": "Tags",
+      "mcVersions": "Minecraft Versions",
+      "loaders": "Mod Loaders",
       "status": "Status",
       "slugRule": "Alphanumeric and hyphens only"
     },

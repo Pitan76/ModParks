@@ -170,7 +170,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             onChange={(e) => setBio(e.target.value)}
             sx={{ mb: 4 }}
           />
-          <Button type="submit" variant="contained">{t("profile.save")}</Button>
+          <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("profile.save")}</Button>
         </Box>
       )}
 
@@ -202,7 +202,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
               onChange={(e) => setNewKeyName(e.target.value)}
               required
             />
-            <Button type="submit" variant="contained">{t("apiKeys.generate")}</Button>
+            <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("apiKeys.generate")}</Button>
           </Box>
 
           <TableContainer component={Paper} variant="outlined">
@@ -270,7 +270,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.changeIdDesc")}</Typography>
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField label={t("account.newId")} size="small" value={username} onChange={e => setUsername(e.target.value)} required />
-              <Button type="submit" variant="contained">{t("account.updateBtn")}</Button>
+              <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("account.updateBtn")}</Button>
             </Box>
           </Box>
           
@@ -280,7 +280,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             <Typography variant="h6" sx={{ mb: 2 }}>{t("account.changeEmail")}</Typography>
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField label={t("account.newEmail")} size="small" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-              <Button type="submit" variant="contained">{t("account.updateBtn")}</Button>
+              <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("account.updateBtn")}</Button>
             </Box>
           </Box>
 
@@ -293,7 +293,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
                 <TextField label={t("account.currentPassword")} type="password" size="small" value={oldPass} onChange={e => setOldPass(e.target.value)} required />
                 <TextField label={t("account.newPassword")} type="password" size="small" value={newPass} onChange={e => setNewPass(e.target.value)} required />
                 <TextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} required />
-                <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start" }}>{t("account.updateBtn")}</Button>
+                <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", height: 40 }}>{t("account.updateBtn")}</Button>
               </Box>
             </Box>
           )}
