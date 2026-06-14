@@ -285,7 +285,9 @@
     "noResults": "No results found",
     "filters": {
       "type": "Type",
-      "all": "All"
+      "all": "All",
+      "mod": "Mod",
+      "plugin": "Plugin"
     },
     "sort": {
       "label": "Sort By",

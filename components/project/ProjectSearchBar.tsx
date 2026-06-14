@@ -93,8 +93,8 @@ export default function ProjectSearchBar({
           size="small"
         >
           <ToggleButton value="all"    id="filter-all">    {t("filters.all")}  </ToggleButton>
-          <ToggleButton value="mod"    id="filter-mod">    Mod     </ToggleButton>
-          <ToggleButton value="plugin" id="filter-plugin"> Plugin  </ToggleButton>
+          <ToggleButton value="mod"    id="filter-mod">    {t("filters.mod")}     </ToggleButton>
+          <ToggleButton value="plugin" id="filter-plugin"> {t("filters.plugin")}  </ToggleButton>
         </ToggleButtonGroup>
 
         <FormControl size="small" sx={{ minWidth: 120 }}>

@@ -24,6 +24,11 @@ export const metadata: Metadata = {
     url:     "https://modparks.pages.dev",
     siteName: "ModParks",
   },
+  alternates: {
+    types: {
+      "application/rss+xml": "https://modparks.pages.dev/feed.xml",
+    },
+  },
 };
 
 interface LocaleLayoutProps {

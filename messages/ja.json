@@ -288,7 +288,9 @@
     "noResults": "見つかりませんでした",
     "filters": {
       "type": "種類",
-      "all": "すべて"
+      "all": "すべて",
+      "mod": "MOD",
+      "plugin": "プラグイン"
     },
     "sort": {
       "label": "並び順",
