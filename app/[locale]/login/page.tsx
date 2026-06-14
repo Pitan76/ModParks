@@ -12,7 +12,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import { Link } from "@/i18n/routing";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -22,6 +22,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tAuth = useTranslations("Auth");
+  const locale = useLocale();
 
   const registered = searchParams.get("registered") === "true";
 
@@ -40,13 +41,13 @@ export default function LoginPage() {
       setError(tAuth("login.error.invalidCredentials"));
       setLoading(false);
     } else {
-      router.push("/ja/projects");
+      router.push(`/${locale}/projects`);
       router.refresh();
     }
   }
 
   const handleGithubLogin = () => {
-    signIn("github", { callbackUrl: "/ja/projects" });
+    signIn("github", { callbackUrl: `/${locale}/projects` });
   };
 
   return (

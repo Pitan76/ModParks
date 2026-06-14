@@ -2,7 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getDb, getD1 } from "@/lib/db";
+import { getDatabase } from "@/lib/db";
 import { users, apiKeys, accounts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import SettingsClient from "@/components/settings/SettingsClient";
@@ -20,8 +20,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
 
   const t = await getTranslations("Settings");
 
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const db = await getDatabase();
 
   const userRecord = await db.select().from(users).where(eq(users.id, session.user.id)).get();
   const userApiKeys = await db.select().from(apiKeys).where(eq(apiKeys.userId, session.user.id));

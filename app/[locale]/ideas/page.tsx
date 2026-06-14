@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
-import { getDb, getD1 } from "@/lib/db";
+import { getDatabase } from "@/lib/db";
 import { ideas, users, ideaLikes, ideaComments } from "@/db/schema";
 import { eq, sql, desc } from "drizzle-orm";
 import Container from "@mui/material/Container";
@@ -22,8 +22,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
   const t = await getTranslations("Home");
   const tIdea = await getTranslations("Idea");
 
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const db = await getDatabase();
 
   // Fetch ideas with author, like count, and comment count
   const allIdeas = await db

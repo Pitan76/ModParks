@@ -33,6 +33,9 @@ export const theme = createTheme({
       primary: "#f8fafc",
       secondary: "#94a3b8",
     },
+    surface: {
+      main: "#1e293b",
+    },
   },
   typography: {
     fontFamily: roboto.style.fontFamily,
@@ -56,6 +59,7 @@ export const theme = createTheme({
         root: {
           textTransform: "none",
           fontWeight: 600,
+          transition: "all 0.2s ease-in-out",
         },
         sizeSmall: {
           height: "32px",
@@ -84,6 +88,28 @@ export const theme = createTheme({
           background:   "#1e293b",
           border:       "1px solid #334155",
           borderRadius: 4,
+          transition:   "all 0.2s ease-in-out",
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          transition: "all 0.2s ease-in-out",
+        },
+      },
+    },
+    MuiLink: {
+      defaultProps: {
+        color: "primary.light",
+      },
+      styleOverrides: {
+        root: {
+          textDecoration: "none",
+          transition: "color 0.2s ease-in-out",
+          "&:hover": {
+            textDecoration: "underline",
+          },
         },
       },
     },

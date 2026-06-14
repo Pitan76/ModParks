@@ -37,6 +37,7 @@ interface SettingsClientProps {
 
 export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword }: SettingsClientProps) {
   const t = useTranslations("Settings");
+  const tCommon = useTranslations("Common");
   const [tab, setTab] = useState(0);
 
   // Profile State
@@ -116,7 +117,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPass !== confirmPass) {
-      // Need a key or just show string. I will use alert but better localization needed if expanding
+      showAccMsg("error", "passwordMismatch");
       return;
     }
     const res = await changePassword(oldPass, newPass);
@@ -229,7 +230,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
                 {apiKeys.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={3} align="center" sx={{ py: 3, color: "text.secondary" }}>
-                      No API keys found
+                      {t("apiKeys.noKeys")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -312,7 +313,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
               <DialogContentText>{t("account.deleteAccountConfirm")}</DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
+              <Button onClick={() => setDeleteOpen(false)}>{tCommon("cancel")}</Button>
               <Button color="error" variant="contained" onClick={handleDeleteAccount}>
                 {t("account.deleteBtn")}
               </Button>

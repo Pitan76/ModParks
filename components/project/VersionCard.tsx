@@ -7,9 +7,8 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { getLoaderInfo } from "@/lib/loaders";
+import { useLocale, useTranslations } from "next-intl";
 
 /**
  * バージョン一覧の各カードに表示するデータの型定義
@@ -42,6 +41,9 @@ function formatBytes(bytes: number): string {
  * ダウンロードボタン、対応MCバージョン、ローダー等を整理して表示します。
  */
 export default function VersionCard({ version, projectSlug }: VersionCardProps) {
+  const locale = useLocale();
+  const t = useTranslations("Project");
+
   const date = new Date(
     typeof version.createdAt === "number"
       ? version.createdAt * 1000
@@ -124,8 +126,8 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
             <Stack direction="row" spacing={1.5} sx={{ mt: 1 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <CalendarTodayIcon sx={{ fontSize: 12, color: "text.disabled" }} />
-                <Typography variant="caption" color="text.disabled">
-                  {date.toLocaleDateString("ja-JP")}
+                <Typography variant="caption" color="text.disabled" suppressHydrationWarning>
+                  {date.toLocaleDateString(locale)}
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -139,12 +141,6 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
                   {formatBytes(version.fileSize)}
                 </Typography>
               )}
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <AccessTimeIcon sx={{ fontSize: 16 }} />
-                <Typography variant="caption">
-                  {new Date(version.createdAt).toLocaleDateString()}
-                </Typography>
-              </Box>
             </Stack>
           </Box>
 
@@ -158,7 +154,7 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
               href={`/api/download/${version.id}`}
               sx={{ whiteSpace: "nowrap" }}
             >
-              Download
+              {t("download")}
             </Button>
           </Box>
         </Box>

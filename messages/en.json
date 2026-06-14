@@ -106,7 +106,15 @@
     "uploadNewVersion": "Upload New Version",
     "author": "Author",
     "download": "Download",
-    "report": "Report"
+    "report": "Report",
+    "form": {
+      "status": "Status",
+      "published": "Published",
+      "draft": "Draft",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving..."
+    }
   },
   "Version": {
     "fields": {
@@ -334,7 +342,8 @@
       "neverUsed": "Never used",
       "copied": "Copied to clipboard",
       "successGenerate": "New API key generated! Please copy and save it now, as it will not be shown again.",
-      "successDelete": "API key deleted"
+      "successDelete": "API key deleted",
+      "noKeys": "No API keys found"
     },
     "github": {
       "title": "GitHub Connection",
@@ -369,7 +378,8 @@
       "errorIdFormat": "ID can only contain letters, numbers, hyphens, and underscores",
       "errorEmailTaken": "This email address is already in use",
       "updateBtn": "Update",
-      "deleteBtn": "Delete Account"
+      "deleteBtn": "Delete Account",
+      "passwordMismatch": "New passwords do not match"
     }
   }
 }

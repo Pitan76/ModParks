@@ -12,7 +12,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { useTranslations } from "next-intl";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState, useTransition, useEffect, useRef } from "react";
 
 interface ProjectSearchBarProps {
   initialQ?: string;
@@ -35,10 +35,30 @@ export default function ProjectSearchBar({
   const [, startTransition] = useTransition();
 
   const [q, setQ] = useState(initialQ);
+  const [debouncedQ, setDebouncedQ] = useState(initialQ);
   const [type, setType] = useState(initialType || "all");
   const [sort, setSort] = useState(initialSort || "updated");
   const [loader, setLoader] = useState(initialLoader || "all");
   const [mcVersion, setMcVersion] = useState(initialMcVersion || "all");
+
+  const isFirstRender = useRef(true);
+
+  // qのデバウンス処理
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQ(q);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [q]);
+
+  // 検索条件の更新
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    updateSearch(debouncedQ, type, sort, loader, mcVersion);
+  }, [debouncedQ, type, sort, loader, mcVersion, updateSearch]);
 
   const updateSearch = useCallback(
     (newQ: string, newType: string, newSort: string, newLoader: string, newMcVersion: string) => {
@@ -66,7 +86,6 @@ export default function ProjectSearchBar({
         value={q}
         onChange={(e) => {
           setQ(e.target.value);
-          updateSearch(e.target.value, type, sort, loader, mcVersion);
         }}
         slotProps={{
           input: {
@@ -88,7 +107,6 @@ export default function ProjectSearchBar({
           onChange={(_, v) => {
             if (!v) return;
             setType(v);
-            updateSearch(q, v, sort, loader, mcVersion);
           }}
           size="small"
         >
@@ -105,7 +123,6 @@ export default function ProjectSearchBar({
             label={t("sort.label")}
             onChange={(e) => {
               setSort(e.target.value);
-              updateSearch(q, type, e.target.value, loader, mcVersion);
             }}
           >
             <MenuItem value="updated">{t("sort.updated")}</MenuItem>
@@ -122,7 +139,6 @@ export default function ProjectSearchBar({
             label={t("loader.label")}
             onChange={(e) => {
               setLoader(e.target.value);
-              updateSearch(q, type, sort, e.target.value, mcVersion);
             }}
           >
             <MenuItem value="all">{t("filters.all")}</MenuItem>
