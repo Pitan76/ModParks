@@ -22,6 +22,7 @@ export interface ProjectDetailHeaderProps {
     name: string;
     slug: string;
     type: string;
+    status: string;
     description: string;
     iconUrl?: string | null;
     downloads: number;
@@ -78,6 +79,14 @@ export default function ProjectDetailHeader({
               color={p.type === "mod" ? "primary" : "secondary"}
               size="small"
             />
+            {p.status !== "public" && (
+              <Chip
+                label={tProject(`status.${p.status}`)}
+                color="warning"
+                size="small"
+                variant="outlined"
+              />
+            )}
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>

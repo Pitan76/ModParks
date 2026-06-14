@@ -37,6 +37,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   if (!project) notFound();
 
+  const isOwner = session?.user?.id === project.authorId;
+
+  // private や draft の場合は作者以外には 404 を返す
+  if (!isOwner && (project.status === "private" || project.status === "draft")) {
+    notFound();
+  }
+
   const db = await getDatabase();
   const [favoritesData, userFavoriteData] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(projectFavorites).where(eq(projectFavorites.projectId, project.id)).get(),
@@ -52,7 +59,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const p = project as any;
   const t = await getTranslations("Project");
 
-  const isOwner = session?.user?.id === p.authorId;
   const canEdit = isOwner;
 
   return (
