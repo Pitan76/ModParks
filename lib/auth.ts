@@ -104,6 +104,7 @@ export const authConfig = {
         session.user.id = (token.sub ?? token.id ?? "") as string;
         session.user.username = (token.username ?? "") as string;
         session.user.displayName = (token.displayName ?? "") as string;
+        // @ts-ignore: Drizzle Adapter側の拡張型とNextAuthの型マージでavatarUrlがstringになるため強制キャスト
         session.user.avatarUrl = (token.avatarUrl ?? null) as string | null;
         session.user.role = (token.role ?? "user") as string;
       }
