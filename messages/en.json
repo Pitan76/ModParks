@@ -140,7 +140,12 @@
       "resolveIdea": "Resolve Idea (optional)",
       "none": "None",
       "versionNumberPlaceholder": "Version Number (e.g. 1.0.0)",
-      "publish": "Publish Version"
+      "publish": "Publish Version",
+      "uploadMode": "Upload Mode",
+      "modeFile": "Upload File",
+      "modeUrl": "Provide External URL",
+      "externalUrl": "Download URL",
+      "externalUrlHelper": "You can use GitHub Releases, Modrinth, or CurseForge URLs"
     },
     "loaders": {
       "fabric": "Fabric",

@@ -3,12 +3,14 @@
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
 import { createVersionSchema } from "@/lib/validations";
+import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action
+ * ファイルアップロード方式と外部URL方式の両方に対応
  * @param projectSlug 対象プロジェクトのSlug
  * @param formData フォームデータ (versionNumber, mcVersions, loaders, changelog, fileUrl, fileName 等)
  * @returns { success: boolean, versionId: string } または { error: Record<string, string[]> }
@@ -44,7 +46,13 @@ export async function createVersion(projectSlug: string, formData: FormData) {
   const fileName = formData.get("fileName") as string;
 
   if (!fileUrl || !fileName) {
-    return { error: { fileUrl: ["ファイルをアップロードしてください"] } };
+    return { error: { fileUrl: ["ファイルをアップロードするか、外部URLを入力してください"] } };
+  }
+
+  // 外部URLの場合はドメインのホワイトリスト検証
+  const isExternal = fileUrl.startsWith("http") && !fileUrl.includes(process.env.R2_PUBLIC_URL || "__r2__");
+  if (isExternal && !isAllowedExternalUrl(fileUrl)) {
+    return { error: { fileUrl: ["許可されていないドメインのURLです。GitHub, Modrinth, CurseForge のURLを使用してください。"] } };
   }
 
   const id = createId();

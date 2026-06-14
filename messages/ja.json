@@ -141,7 +141,12 @@
       "resolveIdea": "解決するアイデア (任意)",
       "none": "なし",
       "versionNumberPlaceholder": "バージョン番号 (例: 1.0.0)",
-      "publish": "バージョンを公開"
+      "publish": "バージョンを公開",
+      "uploadMode": "アップロード方式",
+      "modeFile": "ファイルをアップロード",
+      "modeUrl": "外部URLを指定",
+      "externalUrl": "ダウンロードURL",
+      "externalUrlHelper": "GitHub Releases, Modrinth, CurseForge のURLが使用できます"
     },
     "loaders": {
       "fabric": "Fabric",

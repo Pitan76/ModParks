@@ -1,9 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getDatabase } from "@/lib/db";
+import { versions, projects } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 /** GET /api/download/[versionId]
  * - ダウンロードカウントをインクリメント
- * - R2 のファイル URL にリダイレクト
+ * - R2 のファイル URL または外部URLにリダイレクト
  */
 export async function GET(
   req: NextRequest,
@@ -12,21 +14,7 @@ export async function GET(
   const { versionId } = await params;
 
   try {
-    // Cloudflare Workers バインディングから DB を取得
-    const env = process.env as unknown as { DB: D1Database };
-
-    if (!env.DB) {
-      return NextResponse.json(
-        { error: "Database not available" },
-        { status: 503 }
-      );
-    }
-
-    const { getDb } = await import("@/lib/db");
-    const { versions, projects } = await import("@/db/schema");
-    const { eq } = await import("drizzle-orm");
-
-    const db = getDb(env.DB);
+    const db = await getDatabase();
 
     // バージョンを取得
     const version = await db
@@ -64,7 +52,7 @@ export async function GET(
         .run(),
     ]);
 
-    // R2 ファイルへリダイレクト
+    // 外部URLの場合はそのままリダイレクト、R2の場合はプレフィックスを付加
     const fileUrl = version.fileUrl.startsWith("http")
       ? version.fileUrl
       : `${process.env.R2_PUBLIC_URL}/${version.fileUrl}`;

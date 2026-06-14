@@ -107,6 +107,32 @@ export const createVersionSchema = z.object({
 
 export type CreateVersionInput = z.infer<typeof createVersionSchema>;
 
+// ─── External URL ──────────────────────────────────────────────────────────────
+
+/** 外部URLとして許可するドメインのリスト */
+export const ALLOWED_EXTERNAL_DOMAINS = [
+  "github.com",
+  "modrinth.com",
+  "curseforge.com",
+  "cdn.modrinth.com",
+  "mediafilez.forgecdn.net",
+  "edge.forgecdn.net",
+] as const;
+
+/**
+ * 外部URLが許可されたドメインのものかチェックする
+ */
+export function isAllowedExternalUrl(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname;
+    return ALLOWED_EXTERNAL_DOMAINS.some(
+      (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
+    );
+  } catch {
+    return false;
+  }
+}
+
 // ─── Report Schema ─────────────────────────────────────────────────────────────
 
 export const REPORT_REASONS = ["copyright", "malware", "spam", "other"] as const;
