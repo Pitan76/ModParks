@@ -151,7 +151,7 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
               variant="contained"
               size="small"
               startIcon={<DownloadIcon />}
-              href={`/api/download/${version.id}`}
+              href={`/api/download?versionId=${version.id}`}
               sx={{ whiteSpace: "nowrap" }}
             >
               {t("download")}

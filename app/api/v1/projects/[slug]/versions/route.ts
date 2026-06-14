@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     createdAt: v.createdAt,
     loaders: JSON.parse(v.loaders),
     mcVersions: JSON.parse(v.mcVersions),
-    downloadUrl: `/api/download/${v.id}`
+    downloadUrl: `/api/download?versionId=${v.id}`
   }));
 
   return NextResponse.json({ data });

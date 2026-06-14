@@ -7,11 +7,9 @@ import { eq } from "drizzle-orm";
  * - ダウンロードカウントをインクリメント
  * - R2 のファイル URL または外部URLにリダイレクト
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ versionId: string }> }
-) {
-  const { versionId } = await params;
+export async function GET(req: NextRequest) {
+  const versionId = req.nextUrl.searchParams.get("versionId");
+  if (!versionId) return NextResponse.json({ error: "Missing versionId" }, { status: 400 });
 
   try {
     const db = await getDatabase();
