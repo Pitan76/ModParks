@@ -10,6 +10,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import { useTranslations, useFormatter } from "next-intl";
+import ProjectFavoriteButton from "./ProjectFavoriteButton";
 
 /**
  * プロジェクト詳細のヘッダーおよび説明文を表示するコンポーネント
@@ -17,6 +18,7 @@ import { useTranslations, useFormatter } from "next-intl";
 export interface ProjectDetailHeaderProps {
   /** 対象プロジェクトの情報 */
   project: {
+    id: string;
     name: string;
     slug: string;
     type: string;
@@ -32,9 +34,21 @@ export interface ProjectDetailHeaderProps {
   };
   /** ユーザーがこのプロジェクトの編集権限を持っているか */
   canEdit: boolean;
+  /** ユーザーがお気に入り登録しているか */
+  isFavorited: boolean;
+  /** プロジェクトのお気に入り総数 */
+  favoritesCount: number;
+  /** ログイン状態 */
+  isLoggedIn: boolean;
 }
 
-export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDetailHeaderProps) {
+export default function ProjectDetailHeader({ 
+  project: p, 
+  canEdit, 
+  isFavorited, 
+  favoritesCount, 
+  isLoggedIn 
+}: ProjectDetailHeaderProps) {
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
   const format = useFormatter();
@@ -96,24 +110,33 @@ export default function ProjectDetailHeader({ project: p, canEdit }: ProjectDeta
           </Box>
         </Box>
 
-        {canEdit && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <LinkButton
-              variant="outlined"
-              startIcon={<EditIcon />}
-              href={`/projects/${p.slug}/edit`}
-            >
-              {tCommon("edit")}
-            </LinkButton>
-            <LinkButton
-              variant="contained"
-              startIcon={<AddIcon />}
-              href={`/projects/${p.slug}/versions/new`}
-            >
-              {tProject("header.addVersion")}
-            </LinkButton>
-          </Box>
-        )}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <ProjectFavoriteButton
+            projectId={p.id}
+            initialCount={favoritesCount}
+            initialFavorited={isFavorited}
+            isLoggedIn={isLoggedIn}
+            variant="button"
+          />
+          {canEdit && (
+            <>
+              <LinkButton
+                variant="outlined"
+                startIcon={<EditIcon />}
+                href={`/projects/${p.slug}/edit`}
+              >
+                {tCommon("edit")}
+              </LinkButton>
+              <LinkButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                href={`/projects/${p.slug}/versions/new`}
+              >
+                {tProject("header.addVersion")}
+              </LinkButton>
+            </>
+          )}
+        </Box>
       </Box>
 
       <Box

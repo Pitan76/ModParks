@@ -11,6 +11,7 @@ import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import ProjectCard from "@/components/project/ProjectCard";
 import { getProjects } from "@/lib/actions/project";
+import { getFavoriteProjects } from "@/lib/actions/favorite";
 import { setRequestLocale } from "next-intl/server";
 import Alert from "@mui/material/Alert";
 
@@ -47,8 +48,11 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     );
   }
 
-  // Fetch user projects
-  const allProjects = await getProjects({ authorId: user.id });
+  // Fetch user projects and favorites
+  const [allProjects, favoritedProjects] = await Promise.all([
+    getProjects({ authorId: user.id }),
+    getFavoriteProjects(user.id)
+  ]);
   const publishedProjects = allProjects.filter(p => p.status === "published");
 
   return (
@@ -100,6 +104,24 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>
           まだ公開されているプロジェクトはありません。
+        </Alert>
+      )}
+
+      <Typography variant="h5" sx={{ fontWeight: 700, mt: 6, mb: 3 }}>
+        Favorites
+      </Typography>
+      
+      {favoritedProjects.length > 0 ? (
+        <Grid container spacing={2}>
+          {favoritedProjects.map(p => (
+            <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <ProjectCard project={p as any} layout="grid" />
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          まだお気に入りに登録したプロジェクトはありません。
         </Alert>
       )}
     </Container>

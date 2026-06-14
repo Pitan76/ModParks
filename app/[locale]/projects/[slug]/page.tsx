@@ -11,6 +11,9 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
+import { getDatabase } from "@/lib/db";
+import { projectFavorites } from "@/db/schema";
+import { eq, and, sql } from "drizzle-orm";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Link } from "@/i18n/routing";
 import LinkButton from "@/components/ui/LinkButton";
@@ -34,6 +37,17 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   if (!project) notFound();
 
+  const db = await getDatabase();
+  const [favoritesData, userFavoriteData] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(projectFavorites).where(eq(projectFavorites.projectId, project.id)).get(),
+    session?.user?.id ? db.select().from(projectFavorites).where(and(eq(projectFavorites.projectId, project.id), eq(projectFavorites.userId, session.user.id))).get() : null
+  ]);
+
+  const favoritesCount = favoritesData?.count || 0;
+  const isFavorited = !!userFavoriteData;
+
+  if (!project) notFound();
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = project as any;
   const t = await getTranslations("Project");
@@ -47,7 +61,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         {/* ─── 左カラム: プロジェクト情報 ──────────────────────────────── */}
         <Grid size={{ xs: 12, md: 8 }}>
           
-          <ProjectDetailHeader project={p} canEdit={canEdit} />
+          <ProjectDetailHeader 
+            project={p} 
+            canEdit={canEdit} 
+            isLoggedIn={!!session?.user}
+            isFavorited={isFavorited}
+            favoritesCount={favoritesCount}
+          />
 
           {/* バージョン一覧 */}
           <Box>

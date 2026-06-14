@@ -229,6 +229,28 @@ export const projectTags = sqliteTable(
   })
 );
 
+// ─── Project Favorites ────────────────────────────────────────────────────────
+
+export const projectFavorites = sqliteTable(
+  "project_favorites",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.projectId, t.userId] }),
+    projectIdx: index("project_favorites_project_idx").on(t.projectId),
+    userIdx: index("project_favorites_user_idx").on(t.userId),
+  })
+);
+
 // ─── Reports ──────────────────────────────────────────────────────────────────
 
 export const reports = sqliteTable("reports", {
