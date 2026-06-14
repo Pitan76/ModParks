@@ -5,6 +5,7 @@ import Link from "@mui/material/Link";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import RssFeedIcon from "@mui/icons-material/RssFeed";
 
 export default function AppFooter() {
   const year = new Date().getFullYear();
@@ -45,6 +46,16 @@ export default function AppFooter() {
 
           {/* リンク */}
           <Stack direction="row" spacing={3} sx={{ alignItems: "center" }}>
+            <Link
+              href="/feed.xml"
+              target="_blank"
+              rel="noopener noreferrer"
+              id="footer-rss"
+              sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <RssFeedIcon fontSize="small" />
+              RSS
+            </Link>
             <Link
               href="https://github.com/Pitan76/modparks"
               target="_blank"

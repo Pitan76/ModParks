@@ -36,8 +36,7 @@ export async function getD1(): Promise<D1Database> {
   // 開発環境かつ Node.js ランタイムの場合のみ Wrangler の Proxy を利用
   if (
     process.env.NODE_ENV === "development" &&
-    typeof process !== "undefined" &&
-    process.release?.name === "node"
+    process.env.NEXT_RUNTIME === "nodejs"
   ) {
     if (!localD1Proxy) {
       // Webpack (Edgeランタイム) がエラーを出さないように ignore する
