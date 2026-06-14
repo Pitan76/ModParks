@@ -97,6 +97,28 @@ export async function getUserCollections(targetUserId: string, viewerId?: string
   });
 }
 
+export async function getUserCollectionsWithProjectStatus(userId: string, projectId: string) {
+  const db = await getDatabase();
+  const userCollections = await db.select().from(collections).where(eq(collections.userId, userId)).orderBy(desc(collections.createdAt)).all();
+  
+  if (userCollections.length === 0) return [];
+
+  const collectionIds = userCollections.map(c => c.id);
+  const items = await db.select().from(collectionItems).where(
+    and(
+      inArray(collectionItems.collectionId, collectionIds),
+      eq(collectionItems.projectId, projectId)
+    )
+  ).all();
+
+  const itemSet = new Set(items.map(i => i.collectionId));
+
+  return userCollections.map(c => ({
+    ...c,
+    containsProject: itemSet.has(c.id)
+  }));
+}
+
 export async function getCollectionById(id: string) {
   const db = await getDatabase();
 
