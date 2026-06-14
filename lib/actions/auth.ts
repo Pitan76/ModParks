@@ -1,6 +1,6 @@
 "use server";
 
-import { getDb, getD1 } from "@/lib/db";
+import { getDatabase } from "@/lib/db";
 import { users } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -20,8 +20,7 @@ export async function registerUser(formData: FormData) {
     return { error: "passwordLength" };
   }
 
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const db = await getDatabase();
 
   // 重複チェック
   const existingUser = await db

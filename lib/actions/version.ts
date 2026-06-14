@@ -1,7 +1,6 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { getDb, getD1 } from "@/lib/db";
+import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
 import { createVersionSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -18,11 +17,7 @@ import { revalidatePath } from "next/cache";
  * @throws Error プロジェクトが見つからない場合
  */
 export async function createVersion(projectSlug: string, formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const { db, userId } = await getAuthenticatedDb();
 
   const project = await db
     .select()
@@ -31,7 +26,7 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     .get();
 
   if (!project) throw new Error("Project not found");
-  if (project.authorId !== session.user.id) throw new Error("Forbidden");
+  if (project.authorId !== userId) throw new Error("Forbidden");
 
   const raw = {
     versionNumber: formData.get("versionNumber"),

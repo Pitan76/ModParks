@@ -2,6 +2,23 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Image from "next/image";
 
+/** ローダーアイコンの共通スタイル */
+const LOADER_ICON_STYLE = { objectFit: "contain" as const, borderRadius: "2px" };
+const LOADER_ICON_SIZE = 18;
+
+/** ローダーアイコンのヘルパーコンポーネント */
+function LoaderIcon({ name }: { name: string }) {
+  return (
+    <Image
+      src={`/icons/loaders/${name}.png`}
+      alt={name.charAt(0).toUpperCase() + name.slice(1)}
+      width={LOADER_ICON_SIZE}
+      height={LOADER_ICON_SIZE}
+      style={LOADER_ICON_STYLE}
+    />
+  );
+}
+
 export interface LoaderInfo {
   id: string;
   name: string;
@@ -9,62 +26,25 @@ export interface LoaderInfo {
   icon?: React.ReactElement;
 }
 
-export const LOADERS_MAP: Record<string, LoaderInfo> = {
-  fabric: {
-    id: "fabric",
-    name: "Fabric",
-    color: "primary",
-    icon: <Image src="/icons/loaders/fabric.png" alt="Fabric" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-  forge: {
-    id: "forge",
-    name: "Forge",
-    color: "warning",
-    icon: <Image src="/icons/loaders/forge.png" alt="Forge" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-  neoforge: {
-    id: "neoforge",
-    name: "NeoForge",
-    color: "warning",
-    icon: <Image src="/icons/loaders/neoforge.png" alt="NeoForge" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-  quilt: {
-    id: "quilt",
-    name: "Quilt",
-    color: "secondary",
-    icon: <Image src="/icons/loaders/quilt.png" alt="Quilt" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-  spigot: {
-    id: "spigot",
-    name: "Spigot",
-    color: "default",
-    icon: <Image src="/icons/loaders/spigot.png" alt="Spigot" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-  paper: {
-    id: "paper",
-    name: "Paper",
-    color: "default",
-    icon: <Image src="/icons/loaders/paper.png" alt="Paper" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-  purpur: {
-    id: "purpur",
-    name: "Purpur",
-    color: "default",
-    icon: <Image src="/icons/loaders/purpur.png" alt="Purpur" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-  velocity: {
-    id: "velocity",
-    name: "Velocity",
-    color: "info",
-    icon: <Image src="/icons/loaders/velocity.png" alt="Velocity" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-  waterfall: {
-    id: "waterfall",
-    name: "Waterfall",
-    color: "info",
-    icon: <Image src="/icons/loaders/waterfall.png" alt="Waterfall" width={18} height={18} style={{ objectFit: "contain", borderRadius: "2px" }} />,
-  },
-};
+/** ローダー定義データ（アイコンは遅延生成） */
+const LOADERS_DATA: { id: string; name: string; color: LoaderInfo["color"] }[] = [
+  { id: "fabric",    name: "Fabric",    color: "primary"   },
+  { id: "forge",     name: "Forge",     color: "warning"   },
+  { id: "neoforge",  name: "NeoForge",  color: "warning"   },
+  { id: "quilt",     name: "Quilt",     color: "secondary" },
+  { id: "spigot",    name: "Spigot",    color: "default"   },
+  { id: "paper",     name: "Paper",     color: "default"   },
+  { id: "purpur",    name: "Purpur",    color: "default"   },
+  { id: "velocity",  name: "Velocity",  color: "info"      },
+  { id: "waterfall", name: "Waterfall", color: "info"      },
+];
+
+export const LOADERS_MAP: Record<string, LoaderInfo> = Object.fromEntries(
+  LOADERS_DATA.map(({ id, name, color }) => [
+    id,
+    { id, name, color, icon: <LoaderIcon name={id} /> },
+  ])
+);
 
 export const AVAILABLE_LOADERS = Object.keys(LOADERS_MAP);
 
@@ -74,6 +54,6 @@ export const getLoaderInfo = (id: string): LoaderInfo => {
     id, 
     name: id.charAt(0).toUpperCase() + id.slice(1), 
     color: "default", 
-    icon: <Box sx={{ width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: "bold", bgcolor: "divider", borderRadius: "2px" }}>{id.charAt(0).toUpperCase()}</Box>
+    icon: <Box sx={{ width: LOADER_ICON_SIZE, height: LOADER_ICON_SIZE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: "bold", bgcolor: "divider", borderRadius: "2px" }}>{id.charAt(0).toUpperCase()}</Box>
   };
 };

@@ -1,11 +1,11 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { getDb, getD1 } from "@/lib/db";
+import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
+import { getDatabase } from "@/lib/db";
 import { reports, projects, users } from "@/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -16,8 +16,7 @@ import { revalidatePath } from "next/cache";
  * @throws Unauthorized ログインしていない場合
  */
 export async function createReport(projectId: string, formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const { db, userId } = await getAuthenticatedDb();
 
   const raw = {
     reason: formData.get("reason"),
@@ -29,15 +28,13 @@ export async function createReport(projectId: string, formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const d1 = await getD1();
-  const db = getDb(d1);
   const id = createId();
 
   await db.insert(reports).values({
     id,
     reason:     parsed.data.reason,
     detail:     parsed.data.detail || null,
-    reporterId: session.user.id,
+    reporterId: userId,
     projectId,
   }).run();
 
@@ -58,11 +55,7 @@ export async function updateReportStatus(
   status: "resolved" | "dismissed",
   formData?: FormData
 ) {
-  const session = await auth();
-  if (session?.user?.role !== "admin") throw new Error("Forbidden");
-
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const { db } = await getAdminDb();
 
   await db
     .update(reports)
@@ -83,11 +76,7 @@ export async function updateReportStatus(
  * @throws Forbidden 管理者権限がない場合
  */
 export async function unpublishProject(projectId: string, formData?: FormData) {
-  const session = await auth();
-  if (session?.user?.role !== "admin") throw new Error("Forbidden");
-
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const { db } = await getAdminDb();
 
   await db
     .update(projects)
@@ -108,13 +97,9 @@ export async function unpublishProject(projectId: string, formData?: FormData) {
  * @throws Forbidden 管理者権限がない場合
  */
 export async function getReports() {
-  const session = await auth();
-  if (session?.user?.role !== "admin") throw new Error("Forbidden");
+  const { db } = await getAdminDb();
 
-  const d1 = await getD1();
-  const db = getDb(d1);
-
-  const rows = await db
+  return await db
     .select({
       report: reports,
       project: {
@@ -130,10 +115,6 @@ export async function getReports() {
     .from(reports)
     .innerJoin(projects, eq(reports.projectId, projects.id))
     .innerJoin(users, eq(reports.reporterId, users.id))
-    .orderBy(reports.createdAt)
+    .orderBy(desc(reports.createdAt))
     .all();
-
-  // 最新が上に来るように新しい順にしたい場合は orderBy(desc(reports.createdAt)) が良いが、未対応を優先したい場合は保留中を先に。
-  // 今回は一旦そのまま新しい順にします。
-  return rows.sort((a, b) => new Date(b.report.createdAt).getTime() - new Date(a.report.createdAt).getTime());
 }

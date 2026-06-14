@@ -21,6 +21,16 @@ import { useTranslations } from "next-intl";
 
 export const SIDEBAR_WIDTH = 260;
 
+/**
+ * サイドバーのナビゲーションアイテムが選択状態かどうかを判定する。
+ * "projects" と "myProjects" はパスが同じ /projects なので、クエリパラメータで区別する。
+ */
+function getIsSelected(itemId: string, itemPath: string, pathname: string, isMyProjects: boolean): boolean {
+  if (itemId === "projects")   return pathname === "/projects" && !isMyProjects;
+  if (itemId === "myProjects") return pathname === "/projects" && isMyProjects;
+  return pathname === itemPath;
+}
+
 import type { Session } from "next-auth";
 
 interface AppSidebarProps {
@@ -80,10 +90,7 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
       <Divider />
       <List sx={{ px: 1, py: 2 }}>
         {navItems.map((item) => {
-          const isSelected = 
-            (item.id === "projects" && pathname === "/projects" && !isMyProjects) ||
-            (item.id === "myProjects" && pathname === "/projects" && isMyProjects) ||
-            (item.id !== "projects" && item.id !== "myProjects" && pathname === item.path);
+          const isSelected = getIsSelected(item.id, item.path, pathname, isMyProjects);
 
           return (
             <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>

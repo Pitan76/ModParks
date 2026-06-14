@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { getDb, getD1 } from "@/lib/db";
+import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { getDatabase } from "@/lib/db";
 import { projects, projectTags, users, versions } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -18,8 +18,7 @@ import { redirect } from "next/navigation";
  * @throws Unauthorized ログインしていない場合
  */
 export async function createProject(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const { db, session } = await getAuthenticatedDb();
 
   const raw = {
     name:        formData.get("name"),
@@ -37,8 +36,6 @@ export async function createProject(formData: FormData) {
   }
 
   const { name, slug, description, type, license, sourceUrl, tags } = parsed.data;
-  const d1 = await getD1();
-  const db = getDb(d1);
   const id = createId();
 
   // スラッグの重複チェック
@@ -81,11 +78,7 @@ export async function createProject(formData: FormData) {
  * @throws Forbidden プロジェクトの作者ではない、または管理者権限がない場合
  */
 export async function updateProject(slug: string, formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const { db, session } = await getAuthenticatedDb();
 
   const project = await db
     .select()
@@ -174,8 +167,7 @@ export async function getProjects(params: {
   loader?: string;
   mcVersion?: string;
 }) {
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const db = await getDatabase();
   const { q, type, authorId, limit = 20, offset = 0, sort = "updated", loader, mcVersion } = params;
 
   const conditions = [];
@@ -249,8 +241,7 @@ export async function getProjects(params: {
  * @returns プロジェクトの詳細データ（作者情報やバージョン情報を含む）。存在しない場合は null。
  */
 export async function getProjectBySlug(slug: string) {
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const db = await getDatabase();
 
   const row = await db
     .select({

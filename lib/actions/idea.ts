@@ -1,18 +1,16 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { getDb, getD1 } from "@/lib/db";
-import { ideas, ideaLikes, ideaComments, users } from "@/db/schema";
+import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { ideas, ideaLikes, ideaComments } from "@/db/schema";
 import { createIdeaSchema, createIdeaCommentSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, and, desc, count } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 // ─── アイデア作成 ─────────────────────────────────────────────────────────────
 
 export async function createIdea(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const { db, userId } = await getAuthenticatedDb();
 
   const raw = {
     title:   formData.get("title"),
@@ -25,8 +23,6 @@ export async function createIdea(formData: FormData) {
   }
 
   const { title, content } = parsed.data;
-  const d1 = await getD1();
-  const db = getDb(d1);
   const id = createId();
 
   try {
@@ -34,7 +30,7 @@ export async function createIdea(formData: FormData) {
       id,
       title,
       content,
-      authorId: session.user.id,
+      authorId: userId,
       status: "open",
     });
     
@@ -49,12 +45,7 @@ export async function createIdea(formData: FormData) {
 // ─── いいねのトグル ─────────────────────────────────────────────────────────
 
 export async function toggleIdeaLike(ideaId: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-
-  const d1 = await getD1();
-  const db = getDb(d1);
-  const userId = session.user.id;
+  const { db, userId } = await getAuthenticatedDb();
 
   try {
     const existing = await db
@@ -81,8 +72,7 @@ export async function toggleIdeaLike(ideaId: string) {
 // ─── コメント作成 ─────────────────────────────────────────────────────────────
 
 export async function createIdeaComment(ideaId: string, formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const { db, userId } = await getAuthenticatedDb();
 
   const raw = {
     content: formData.get("content"),
@@ -94,8 +84,6 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
   }
 
   const { content } = parsed.data;
-  const d1 = await getD1();
-  const db = getDb(d1);
   const id = createId();
 
   try {
@@ -103,7 +91,7 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
       id,
       ideaId,
       content,
-      authorId: session.user.id,
+      authorId: userId,
     });
 
     revalidatePath(`/ideas/${ideaId}`);
