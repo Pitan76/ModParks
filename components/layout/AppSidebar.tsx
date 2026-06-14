@@ -44,7 +44,7 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isMyProjects = searchParams.get("author") === "me";
+  const isMyProjects = searchParams?.get("author") === "me";
 
   const handleNavigation = (path: string) => {
     router.push(path);

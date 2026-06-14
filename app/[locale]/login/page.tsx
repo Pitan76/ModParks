@@ -24,7 +24,7 @@ export default function LoginPage() {
   const tAuth = useTranslations("Auth");
   const locale = useLocale();
 
-  const registered = searchParams.get("registered") === "true";
+  const registered = searchParams?.get("registered") === "true";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
