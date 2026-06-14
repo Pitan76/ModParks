@@ -48,7 +48,9 @@
       "plugin": "Plugin"
     },
     "status": {
-      "published": "Published",
+      "public": "Public",
+      "unlisted": "Unlisted",
+      "private": "Private",
       "draft": "Draft"
     },
     "fields": {
@@ -111,7 +113,9 @@
     "report": "Report",
     "form": {
       "status": "Status",
-      "published": "Published",
+      "public": "Public",
+      "unlisted": "Unlisted (Link sharing)",
+      "private": "Private",
       "draft": "Draft",
       "cancel": "Cancel",
       "save": "Save",

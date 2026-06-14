@@ -68,7 +68,9 @@ export default function ProjectEditForm({ project }: ProjectEditFormProps) {
                 label={t("status")}
                 defaultValue={project.status}
               >
-                <MenuItem value="published">{t("published")}</MenuItem>
+                <MenuItem value="public">{t("public")}</MenuItem>
+                <MenuItem value="unlisted">{t("unlisted")}</MenuItem>
+                <MenuItem value="private">{t("private")}</MenuItem>
                 <MenuItem value="draft">{t("draft")}</MenuItem>
               </Select>
             </FormControl>
