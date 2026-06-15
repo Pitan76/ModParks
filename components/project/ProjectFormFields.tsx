@@ -98,6 +98,7 @@ export default function ProjectFormFields({ error, project, children }: ProjectF
       <Autocomplete
         multiple
         freeSolo
+        disableCloseOnSelect
         options={PREDEFINED_TAGS}
         getOptionLabel={(option) => {
           if (typeof option === "string") {
