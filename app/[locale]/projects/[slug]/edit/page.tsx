@@ -7,8 +7,12 @@ import { getProjectBySlug } from "@/lib/actions/project";
 import ProjectEditForm from "@/components/project/ProjectEditForm";
 import ProjectMembersManager from "@/components/project/ProjectMembersManager";
 import ProjectOwnershipTransfer from "@/components/project/ProjectOwnershipTransfer";
+import ProjectVersionsManager from "@/components/project/ProjectVersionsManager";
+import ProjectEditClient from "@/components/project/ProjectEditClient";
 import { getProjectMembers } from "@/lib/actions/member";
-import Box from "@mui/material/Box";
+import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { versions } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 
 interface EditProjectPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -40,31 +44,34 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   const t = await getTranslations("Project");
 
+  const { db } = await getAuthenticatedDb();
+  const projectVersions = await db
+    .select()
+    .from(versions)
+    .where(eq(versions.projectId, project.id))
+    .orderBy(desc(versions.createdAt))
+    .all();
+
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 800,  mb: 4  }}>
+      <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 4 }}>
         {t("managePage.title")}
       </Typography>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-            基本情報
-          </Typography>
-          <ProjectEditForm project={project} />
-        </Box>
-
-        <ProjectMembersManager 
-          projectId={project.id} 
-          members={members} 
-          isOwner={isOwner} 
-          currentUserId={session.user.id} 
-        />
-
-        {isOwner && (
-          <ProjectOwnershipTransfer projectId={project.id} />
-        )}
-      </Box>
+      <ProjectEditClient
+        isOwner={isOwner}
+        basicInfoForm={<ProjectEditForm project={project} />}
+        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} />}
+        membersManager={
+          <ProjectMembersManager 
+            projectId={project.id} 
+            members={members} 
+            isOwner={isOwner} 
+            currentUserId={session.user.id} 
+          />
+        }
+        ownershipTransfer={<ProjectOwnershipTransfer projectId={project.id} />}
+      />
     </Container>
   );
 }

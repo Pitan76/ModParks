@@ -62,7 +62,7 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     versionNumber: parsed.data.versionNumber,
     mcVersions:    JSON.stringify(parsed.data.mcVersions),
     loaders:       JSON.stringify(parsed.data.loaders),
-    changelog:     parsed.data.changelog,
+    changelog:     parsed.data.changelog || "",
     fileUrl,
     fileName,
     fileSize:      formData.get("fileSize") ? Number(formData.get("fileSize")) : null,
@@ -106,4 +106,60 @@ export async function createVersion(projectSlug: string, formData: FormData) {
   }
 
   return { success: true, versionId: id };
+}
+
+/**
+ * プロジェクトのバージョン（ファイル）を削除する Server Action
+ * @param versionId 削除対象のバージョンID
+ * @param projectSlug プロジェクトのSlug（権限チェックおよびリバリデーション用）
+ * @returns { success: boolean } または { error: string }
+ */
+export async function deleteVersion(versionId: string, projectSlug: string) {
+  const { db, userId } = await getAuthenticatedDb();
+
+  const project = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.slug, projectSlug))
+    .get();
+
+  if (!project) return { error: "Project not found" };
+
+  // 権限チェック: オーナー、メンバー、または管理者のみ削除可能
+  let isAuthorized = false;
+  if (project.authorId === userId) {
+    isAuthorized = true;
+  } else {
+    // 管理者チェック
+    const { users, projectMembers } = await import("@/db/schema");
+    const userRecord = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
+    if (userRecord?.role === "admin") {
+      isAuthorized = true;
+    } else {
+      // メンバーチェック
+      const memberRecord = await db.select().from(projectMembers).where(eq(projectMembers.projectId, project.id)).all();
+      if (memberRecord.some(m => m.userId === userId)) {
+        isAuthorized = true;
+      }
+    }
+  }
+
+  if (!isAuthorized) return { error: "Forbidden" };
+
+  const version = await db
+    .select()
+    .from(versions)
+    .where(eq(versions.id, versionId))
+    .get();
+
+  if (!version) return { error: "Version not found" };
+
+  // TODO: 必要に応じて R2 ストレージからファイルを削除する処理をここに追加 (deleteFromR2 など)
+  
+  await db.delete(versions).where(eq(versions.id, versionId)).run();
+
+  revalidatePath(`/projects/${projectSlug}`);
+  revalidatePath(`/projects/${projectSlug}/edit`);
+
+  return { success: true };
 }

@@ -102,7 +102,7 @@ export const createVersionSchema = z.object({
   loaders: z
     .array(z.enum(LOADERS))
     .min(1, "ローダーを1つ以上選択してください"),
-  changelog: z.string().min(1, "更新内容を入力してください").max(10000),
+  changelog: z.string().max(10000).optional().or(z.literal("")),
 });
 
 export type CreateVersionInput = z.infer<typeof createVersionSchema>;
