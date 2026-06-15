@@ -8,6 +8,8 @@ import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkIcon from "@mui/icons-material/Link";
+import XIcon from "@mui/icons-material/X";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import ProjectCard from "@/components/project/ProjectCard";
@@ -24,6 +26,18 @@ import { Link as RoutingLink } from "@/i18n/routing";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
+}
+
+function getLinkIcon(url: string) {
+  try {
+    const hostname = new URL(url).hostname;
+    if (hostname.includes("x.com") || hostname.includes("twitter.com")) return <XIcon fontSize="small" />;
+    if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return <YouTubeIcon fontSize="small" />;
+    if (hostname.includes("github.com")) return <GitHubIcon fontSize="small" />;
+  } catch (e) {
+    // Ignore invalid URL
+  }
+  return <LinkIcon fontSize="small" />;
 }
 
 export async function generateMetadata({ params }: PublicProfileProps) {
@@ -156,7 +170,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
                       rel="noopener noreferrer"
                       sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, color: "text.primary" }}
                     >
-                      <LinkIcon fontSize="small" />
+                      {getLinkIcon(link.url)}
                       {link.title || link.url}
                     </Link>
                   ))}

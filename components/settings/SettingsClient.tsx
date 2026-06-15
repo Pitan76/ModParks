@@ -291,11 +291,11 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
           />
 
           <Divider sx={{ my: 4 }} />
-          <Typography variant="h6" sx={{ mb: 2 }}>カスタムリンク</Typography>
+          <Typography variant="h6" sx={{ mb: 2 }}>{t("profile.customLinks")}</Typography>
           {links.map((link, idx) => (
             <Box key={idx} sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>
               <TextField
-                label="タイトル"
+                label={t("profile.linkTitle")}
                 size="small"
                 value={link.title}
                 onChange={e => handleLinkChange(idx, "title", e.target.value)}
@@ -314,7 +314,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             </Box>
           ))}
           <Button startIcon={<AddIcon />} variant="outlined" size="small" onClick={handleAddLink} sx={{ mb: 4 }}>
-            リンクを追加
+            {t("profile.addLink")}
           </Button>
 
           <Button type="submit" variant="contained" sx={{ height: 40, display: "block" }}>{t("profile.save")}</Button>
@@ -328,13 +328,13 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
           {accMsg && <Alert severity={accMsg.type} sx={{ mb: 4 }}>{accMsg.text}</Alert>}
 
           <Box sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>言語設定 (Language)</Typography>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t("account.language")}</Typography>
             <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel id="locale-select-label">言語</InputLabel>
+              <InputLabel id="locale-select-label">{t("account.languageLabel")}</InputLabel>
               <Select
                 labelId="locale-select-label"
                 value={locale}
-                label="言語"
+                label={t("account.languageLabel")}
                 onChange={e => setLocale(e.target.value)}
               >
                 <MenuItem value="ja">🇯🇵 日本語</MenuItem>
@@ -342,7 +342,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
               </Select>
             </FormControl>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              変更を適用するには、プロフィールタブの「保存」ボタンを押してください。
+              {t("account.languageWarning")}
             </Typography>
           </Box>
           <Divider sx={{ my: 4 }} />
