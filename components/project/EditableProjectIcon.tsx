@@ -99,8 +99,8 @@ export default function EditableProjectIcon({ projectId, projectSlug, projectNam
         alt={projectName}
         variant="rounded"
         sx={{
-          width: { xs: 60, sm: 80 }, height: { xs: 60, sm: 80 }, bgcolor: "primary.dark",
-          border: "2px solid", borderColor: "divider",
+          width: { xs: 60, sm: 80 }, height: { xs: 60, sm: 80 },
+          border: "1px solid", borderColor: "divider",
           opacity: uploading ? 0.5 : 1,
         }}
       >
