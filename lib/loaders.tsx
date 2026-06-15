@@ -6,18 +6,23 @@ import Image from "next/image";
 const LOADER_ICON_STYLE = { objectFit: "contain" as const, borderRadius: "2px" };
 const LOADER_ICON_SIZE = 18;
 
-/** ローダーアイコンのヘルパーコンポーネント */
-function LoaderIcon({ name }: { name: string }) {
-  return (
-    <Image
-      src={`/icons/loaders/${name}.png`}
-      alt={name.charAt(0).toUpperCase() + name.slice(1)}
-      width={LOADER_ICON_SIZE}
-      height={LOADER_ICON_SIZE}
-      style={LOADER_ICON_STYLE}
-    />
-  );
-}
+const LoaderIcon = React.forwardRef<HTMLSpanElement, any>(
+  ({ name, className, style, ...props }, ref) => {
+    return (
+      <Box component="span" className={className} sx={{ display: "flex", ...style }} ref={ref} {...props}>
+        <Image
+          src={`/icons/loaders/${name}.png`}
+          alt={name.charAt(0).toUpperCase() + name.slice(1)}
+          width={LOADER_ICON_SIZE}
+          height={LOADER_ICON_SIZE}
+          style={LOADER_ICON_STYLE}
+          unoptimized
+        />
+      </Box>
+    );
+  }
+);
+LoaderIcon.displayName = "LoaderIcon";
 
 export interface LoaderInfo {
   id: string;
