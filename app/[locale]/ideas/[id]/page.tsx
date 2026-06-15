@@ -23,7 +23,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
   const { id, locale } = await params;
   setRequestLocale(locale);
   const tIdea = await getTranslations("Idea");
-  const tCommon = await getTranslations("Common");
+  const tNav = await getTranslations("Nav");
   const session = await auth();
 
   const d1 = await getD1();
@@ -97,7 +97,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
           </LinkButton>
           <span>/</span>
           <LinkButton href="/ideas" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
-            {tCommon("ideas")}
+            {tNav("ideas")}
           </LinkButton>
           <span>/</span>
           <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>

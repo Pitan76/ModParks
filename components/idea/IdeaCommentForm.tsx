@@ -32,7 +32,7 @@ export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <TextField
         fullWidth
         multiline
