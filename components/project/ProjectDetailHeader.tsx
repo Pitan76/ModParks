@@ -179,11 +179,7 @@ export default function ProjectDetailHeader({
 
       <Box
         sx={{
-          bgcolor: "background.paper",
-          border:  "1px solid",
-          borderColor: "divider",
-          borderRadius: 2,
-          p: 3,
+          p: 1,
           mb: 3,
           "& pre": { whiteSpace: "pre-wrap", fontFamily: "inherit" },
         }}

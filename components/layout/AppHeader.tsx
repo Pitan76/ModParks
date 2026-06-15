@@ -80,7 +80,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
             <Typography
               variant="h6"
               component="span"
-              sx={{ fontWeight: 800, letterSpacing: "-0.5px", color: "#f8fafc" }}
+              sx={{ fontWeight: 800, letterSpacing: "-0.5px", color: "text.primary" }}
             >
               ModParks
             </Typography>
@@ -127,7 +127,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
 
         {/* テーマ切替 */}
         <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"}>
-          <IconButton onClick={toggleColorMode} color="inherit" size="small" sx={{ mr: 0.5 }}>
+          <IconButton onClick={toggleColorMode} color="inherit" size="small" sx={{ mr: 0.5, display: { xs: "none", md: "flex" } }}>
             {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
         </Tooltip>
@@ -149,6 +149,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
               </Box>
             )}
             sx={{
+              display: { xs: "none", md: "flex" },
               color:        "text.secondary",
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
               "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
