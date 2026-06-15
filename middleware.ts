@@ -18,7 +18,7 @@ const PROTECTED_PATTERNS = [
 /** 管理者のみのパスパターン */
 const ADMIN_PATTERNS = [/^\/[a-z]{2}\/admin/];
 
-export default auth(async (req: NextRequest & { auth: { user?: { role?: string } } | null }) => {
+const authMiddleware = auth(async (req: NextRequest & { auth: { user?: { role?: string } } | null }) => {
   const { pathname } = req.nextUrl;
 
   // 認証チェック
@@ -38,6 +38,11 @@ export default auth(async (req: NextRequest & { auth: { user?: { role?: string }
   return intlMiddleware(req);
 });
 
+// OpenNext/Cloudflare Workers では名前付きエクスポート `middleware` が必須
+export const middleware = authMiddleware;
+export default authMiddleware;
+
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)" ],
 };
+
