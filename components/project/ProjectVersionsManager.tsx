@@ -21,7 +21,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { AutocompleteRenderGetTagProps } from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import { useState } from "react";
@@ -244,7 +244,8 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
               renderInput={(params) => (
                 <TextField {...params} label="対応ローダー" required={editLoaders.length === 0} error={!!editError?.loaders} helperText={editError?.loaders?.[0]} />
               )}
-              renderTags={(val, getTagProps) => val.map((id, idx) => {
+              // @ts-expect-error MUI typing issue with renderTags signature resolution
+              renderTags={(val: string[], getTagProps: AutocompleteRenderGetTagProps) => val.map((id, idx) => {
                 const { key, ...tagProps } = getTagProps({ index: idx });
                 return <Chip key={key} label={getLoaderInfo(id).name} size="small" {...tagProps} />;
               })}
