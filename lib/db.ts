@@ -51,12 +51,16 @@ export async function getD1(): Promise<D1Database> {
   return db;
 }
 
+let cachedDb: DrizzleD1Database<typeof schema> | null = null;
+
 /**
  * D1バインディングの取得と Drizzle ORM インスタンスの生成をまとめて行うヘルパー。
  * Server Action やルートハンドラで `const db = await getDatabase();` の1行で利用できます。
  */
 export async function getDatabase(): Promise<DrizzleD1Database<typeof schema>> {
+  if (cachedDb) return cachedDb;
   const d1 = await getD1();
-  return getDb(d1);
+  cachedDb = getDb(d1);
+  return cachedDb;
 }
 

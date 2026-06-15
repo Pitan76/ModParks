@@ -42,9 +42,8 @@ export const authConfig = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const { getD1 } = await import("@/lib/db");
-        const d1 = await getD1();
-        const db = getDb(d1);
+        const { getDatabase } = await import("@/lib/db");
+        const db = await getDatabase();
         const user = await db.select().from(users).where(eq(users.email, credentials.email as string)).get();
 
         if (!user || !user.passwordHash || user.deletedAt) return null;
@@ -69,11 +68,10 @@ export const authConfig = {
   callbacks: {
     async signIn({ user, account, profile }) {
       if (user?.email) {
-        const { getD1, getDb } = await import("@/lib/db");
+        const { getDatabase } = await import("@/lib/db");
         const { users } = await import("@/db/schema");
         const { eq } = await import("drizzle-orm");
-        const d1 = await getD1();
-        const db = getDb(d1);
+        const db = await getDatabase();
         const dbUser = await db.select().from(users).where(eq(users.email, user.email as string)).get();
         
         // 退会済みユーザーのログインを拒否
@@ -118,11 +116,11 @@ export const authConfig = {
 export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
   let adapter;
   try {
-    const { getD1 } = await import("@/lib/db");
-    const d1 = await getD1();
-    if (d1) {
+    const { getDatabase } = await import("@/lib/db");
+    const db = await getDatabase();
+    if (db) {
       adapter = DrizzleAdapter(
-        getDb(d1 as unknown as import("@cloudflare/workers-types").D1Database),
+        db,
         {
           usersTable: schema.users as any,
           accountsTable: schema.accounts as any,

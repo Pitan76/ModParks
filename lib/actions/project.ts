@@ -205,23 +205,31 @@ export async function getProjects(params: {
   if (sort === "downloads") orderByExpr = desc(projects.downloads);
   if (sort === "newest") orderByExpr = desc(projects.createdAt);
 
-  // プロジェクトと著者の情報をJOINして取得
-  const rows = await db
-    .select({
-      project: projects,
-      author: {
-        username: users.username,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
-      }
-    })
-    .from(projects)
-    .leftJoin(users, eq(projects.authorId, users.id))
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(orderByExpr)
-    .limit(limit)
-    .offset(offset)
-    .all();
+  let rows;
+  try {
+    // プロジェクトと著者の情報をJOINして取得
+    rows = await db
+      .select({
+        project: projects,
+        author: {
+          username: users.username,
+          displayName: users.displayName,
+          avatarUrl: users.avatarUrl,
+        }
+      })
+      .from(projects)
+      .leftJoin(users, eq(projects.authorId, users.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(orderByExpr)
+      .limit(limit)
+      .offset(offset)
+      .all();
+  } catch (err: any) {
+    console.error("D1 getProjects Error:");
+    console.error("Message:", err.message);
+    if (err.cause) console.error("Cause:", err.cause);
+    throw err;
+  }
 
   // 各プロジェクトのタグを取得
   const projectIds = rows.map((r) => r.project.id);

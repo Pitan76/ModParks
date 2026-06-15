@@ -1,10 +1,9 @@
-import { getDb, getD1 } from "@/lib/db";
+import { getDatabase } from "@/lib/db";
 import { apiKeys } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function validateApiKey(request: Request) {
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const db = await getDatabase();
 
   const authHeader = request.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
