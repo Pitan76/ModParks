@@ -47,17 +47,9 @@ export async function getD1(): Promise<D1Database> {
     return localD1Proxy;
   }
 
-  // 本番環境（Cloudflare Workers/Pages）では getCloudflareContext() を使用する
-  let db: D1Database | undefined;
-  try {
-    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-    const { env } = await getCloudflareContext({ async: true });
-    db = (env as unknown as Env).DB;
-  } catch (e) {
-    db = (process.env as unknown as Env).DB;
-  }
-  
-  if (!db) throw new Error("D1 binding not found in getCloudflareContext or process.env");
+  // 本番環境（Cloudflare Workers/Pages）では process.env にバインディングが渡される
+  const db = (process.env as unknown as Env).DB;
+  if (!db) throw new Error("D1 binding not found in process.env");
   return db;
 }
 
