@@ -88,6 +88,13 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         </Typography>
       </Box>
 
+      {errorMsg && (
+        <Box sx={{ p: 4, mb: 4, bgcolor: "error.main", color: "error.contrastText", borderRadius: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>エラーが発生しました</Typography>
+          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>{errorMsg}</Typography>
+        </Box>
+      )}
+
       {/* プロジェクト一覧 */}
       {filtered.length > 0 ? (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
