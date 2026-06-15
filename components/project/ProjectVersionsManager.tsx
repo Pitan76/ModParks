@@ -237,7 +237,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
 
             <Autocomplete
               multiple
-              options={AVAILABLE_LOADERS.map(l => l.id)}
+              options={AVAILABLE_LOADERS}
               getOptionLabel={(id) => getLoaderInfo(id).name}
               value={editLoaders}
               onChange={(_, val) => setEditLoaders(val)}
