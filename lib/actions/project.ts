@@ -77,13 +77,13 @@ export async function createProject(formData: FormData) {
  * @throws Unauthorized ログインしていない場合
  * @throws Forbidden プロジェクトの作者ではない、または管理者権限がない場合
  */
-export async function updateProject(slug: string, formData: FormData) {
+export async function updateProject(projectId: string, formData: FormData) {
   const { db, session } = await getAuthenticatedDb();
 
   const project = await db
     .select()
     .from(projects)
-    .where(eq(projects.slug, slug))
+    .where(eq(projects.id, projectId))
     .get();
 
   if (!project) throw new Error("Project not found");
