@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import LinkIcon from "@mui/icons-material/Link";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import ProjectCard from "@/components/project/ProjectCard";
@@ -141,7 +142,32 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
             </Typography>
           )}
 
-          {user.githubUsername && (
+          {user.links && (() => {
+            try {
+              const parsedLinks = JSON.parse(user.links);
+              if (!Array.isArray(parsedLinks) || parsedLinks.length === 0) return null;
+              return (
+                <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 2 }}>
+                  {parsedLinks.map((link: any, i: number) => (
+                    <Link
+                      key={i}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, color: "text.primary" }}
+                    >
+                      <LinkIcon fontSize="small" />
+                      {link.title || link.url}
+                    </Link>
+                  ))}
+                </Box>
+              );
+            } catch {
+              return null;
+            }
+          })()}
+
+          {user.githubUsername && user.showGithubLink && (
             <Box sx={{ mt: 1 }}>
               <Link
                 href={`https://github.com/${user.githubUsername}`}

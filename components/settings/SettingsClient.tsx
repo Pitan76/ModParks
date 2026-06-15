@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useTranslations, useFormatter } from "next-intl";
-import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settings";
+import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, toggleGithubVisibility, changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
 import TabbedPanel from "@/components/ui/TabbedPanel";
 import Typography from "@mui/material/Typography";
@@ -34,11 +34,13 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import { signIn, signOut } from "next-auth/react";
 import { resizeImageFile } from "@/lib/utils/image";
 
 interface SettingsClientProps {
-  user: { username: string, displayName: string, bio: string, email: string, avatarUrl: string, links: string, locale: string };
+  user: { username: string, displayName: string, bio: string, email: string, avatarUrl: string, links: string, locale: string, showGithubLink: boolean };
   apiKeys: { id: string, name: string, createdAt: Date, lastUsedAt: Date | null }[];
   isGitHubConnected: boolean;
   hasPassword?: boolean;
@@ -73,6 +75,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
 
   // GitHub State
   const [githubMsg, setGithubMsg] = useState("");
+  const [showGithubLink, setShowGithubLink] = useState(user.showGithubLink);
 
   // Account State
   const [username, setUsername] = useState(user.username);
@@ -171,6 +174,12 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     await disconnectGitHub();
     setGithubMsg(t("github.successDisconnect"));
     setTimeout(() => setGithubMsg(""), 3000);
+  };
+
+  const handleToggleGithubVisibility = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.checked;
+    setShowGithubLink(val);
+    await toggleGithubVisibility(val);
   };
 
   const showAccMsg = (type: "success" | "error", key: string) => {
@@ -471,9 +480,15 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             Status: <strong>{isGitHubConnected ? t("github.connected") : t("github.disconnected")}</strong>
           </Typography>
           {isGitHubConnected ? (
-            <Button variant="outlined" color="error" onClick={handleDisconnect}>
-              {t("github.disconnect")}
-            </Button>
+            <Box>
+              <Button variant="outlined" color="error" onClick={handleDisconnect} sx={{ mb: 3, display: "block" }}>
+                {t("github.disconnect")}
+              </Button>
+              <FormControlLabel
+                control={<Switch checked={showGithubLink} onChange={handleToggleGithubVisibility} />}
+                label="プロフィールページにGitHubリンクを表示する"
+              />
+            </Box>
           ) : (
             <Button variant="contained" onClick={() => signIn("github")}>
               {t("github.connect")}

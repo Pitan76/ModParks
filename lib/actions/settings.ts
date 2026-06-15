@@ -56,6 +56,16 @@ export async function disconnectGitHub() {
   return { success: true };
 }
 
+export async function toggleGithubVisibility(show: boolean) {
+  const { db, userId } = await getAuthenticatedDb();
+
+  await db.update(users).set({ showGithubLink: show }).where(eq(users.id, userId));
+
+  revalidatePath("/settings");
+  revalidatePath("/profile");
+  return { success: true };
+}
+
 export async function changeUsername(newId: string) {
   const { db, userId } = await getAuthenticatedDb();
 
