@@ -4,6 +4,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import ThemeRegistry from "@/components/ThemeRegistry";
+import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getDb, getD1 } from "@/lib/db";
 import { users } from "@/db/schema";
@@ -76,11 +77,14 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     }
   }
 
+  const cookieStore = await cookies();
+  const themeMode = (cookieStore.get("theme_mode")?.value as "light" | "dark") || "dark";
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
         {userLocale && <LocaleSyncer userLocale={userLocale} />}
-        <ThemeRegistry>
+        <ThemeRegistry initialMode={themeMode}>
           <NextIntlClientProvider messages={messages}>
             <AppLayout session={session}>
               {children}
