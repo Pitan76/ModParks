@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import TabbedPanel from "@/components/ui/TabbedPanel";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -39,7 +38,6 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const format = useFormatter();
-  const [tab, setTab] = useState(0);
 
   // Profile State
   const [displayName, setDisplayName] = useState(user.displayName);
@@ -139,19 +137,10 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     }
   };
 
-  return (
-    <Box>
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4 }}>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)}>
-          <Tab label={t("profile.title")} />
-          <Tab label={t("apiKeys.title")} />
-          <Tab label={t("github.title")} />
-          <Tab label={t("account.title")} />
-        </Tabs>
-      </Box>
-
-      {/* Profile Settings */}
-      {tab === 0 && (
+  const tabs = [
+    {
+      label: t("profile.title"),
+      content: (
         <Box component="form" onSubmit={handleProfileSubmit}>
           {profileMsg && <Alert severity="success" sx={{ mb: 3 }}>{profileMsg}</Alert>}
           <TextField
@@ -172,10 +161,11 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
           />
           <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("profile.save")}</Button>
         </Box>
-      )}
-
-      {/* API Keys Settings */}
-      {tab === 1 && (
+      )
+    },
+    {
+      label: t("apiKeys.title"),
+      content: (
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             {t("apiKeys.description")}
@@ -239,10 +229,11 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             </Table>
           </TableContainer>
         </Box>
-      )}
-
-      {/* GitHub Integration */}
-      {tab === 2 && (
+      )
+    },
+    {
+      label: t("github.title"),
+      content: (
         <Box>
           {githubMsg && <Alert severity="success" sx={{ mb: 3 }}>{githubMsg}</Alert>}
           <Typography variant="body1" sx={{ mb: 3 }}>
@@ -258,10 +249,11 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             </Button>
           )}
         </Box>
-      )}
-
-      {/* Account Settings */}
-      {tab === 3 && (
+      )
+    },
+    {
+      label: t("account.title"),
+      content: (
         <Box>
           {accMsg && <Alert severity={accMsg.type} sx={{ mb: 4 }}>{accMsg.text}</Alert>}
 
@@ -321,7 +313,9 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             </DialogActions>
           </Dialog>
         </Box>
-      )}
-    </Box>
-  );
+      )
+    }
+  ];
+
+  return <TabbedPanel items={tabs} />;
 }
