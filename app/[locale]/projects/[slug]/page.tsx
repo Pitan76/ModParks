@@ -26,6 +26,44 @@ interface ProjectDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
+export async function generateMetadata({ params }: ProjectDetailPageProps) {
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
+
+  if (!project) {
+    return { title: "Not Found | ModParks" };
+  }
+
+  const title = `${project.name} | ModParks`;
+  const description = project.description || "Minecraft Java Edition向けのMod/Plugin";
+  const imageUrl = project.iconUrl || "https://modparks.pages.dev/icon.png";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: `https://modparks.pages.dev/projects/${project.slug}`,
+      images: [
+        {
+          url: imageUrl,
+          width: 512,
+          height: 512,
+          alt: `${project.name} Icon`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
+
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
