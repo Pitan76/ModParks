@@ -8,6 +8,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import LinkButton from "@/components/ui/LinkButton";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
+import HomeIcon from "@mui/icons-material/Home";
 import { useTranslations, useFormatter } from "next-intl";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
 import AddToCollectionButton from "./AddToCollectionButton";
@@ -63,7 +64,7 @@ export default function ProjectDetailHeader({
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary" }}>
           <LinkButton href="/" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
-            {tCommon("home")}
+            <HomeIcon fontSize="small" />
           </LinkButton>
           <span>/</span>
           <LinkButton href="/projects" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
