@@ -36,8 +36,9 @@ export interface ProjectVersionsManagerProps {
   versions: ProjectVersion[];
 }
 
-export default function ProjectVersionsManager({ projectSlug, versions }: ProjectVersionsManagerProps) {
+export default function ProjectVersionsManager({ projectSlug, versions: initialVersions }: ProjectVersionsManagerProps) {
   const format = useFormatter();
+  const [localVersions, setLocalVersions] = useState(initialVersions);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -52,6 +53,7 @@ export default function ProjectVersionsManager({ projectSlug, versions }: Projec
       if (res.error) {
         setErrorMsg(res.error);
       } else {
+        setLocalVersions(prev => prev.filter(v => v.id !== deleteId));
         setDeleteId(null);
       }
     } catch (err: any) {
@@ -81,7 +83,7 @@ export default function ProjectVersionsManager({ projectSlug, versions }: Projec
             </TableRow>
           </TableHead>
           <TableBody>
-            {versions.map((v) => {
+            {localVersions.map((v) => {
               const mcvs = JSON.parse(v.mcVersions) as string[];
               return (
                 <TableRow key={v.id}>
@@ -99,7 +101,7 @@ export default function ProjectVersionsManager({ projectSlug, versions }: Projec
                 </TableRow>
               );
             })}
-            {versions.length === 0 && (
+            {localVersions.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
                   バージョンがありません。
