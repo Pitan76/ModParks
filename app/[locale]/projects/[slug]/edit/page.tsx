@@ -11,8 +11,8 @@ import ProjectVersionsManager from "@/components/project/ProjectVersionsManager"
 import ProjectEditClient from "@/components/project/ProjectEditClient";
 import { getProjectMembers } from "@/lib/actions/member";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { versions } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { versions, ideas } from "@/db/schema";
+import { eq, desc, inArray } from "drizzle-orm";
 
 interface EditProjectPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -52,6 +52,12 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     .orderBy(desc(versions.createdAt))
     .all();
 
+  const openIdeas = await db
+    .select({ id: ideas.id, title: ideas.title })
+    .from(ideas)
+    .where(inArray(ideas.status, ["open", "in_progress"]))
+    .all();
+
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 4 }}>
@@ -61,7 +67,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       <ProjectEditClient
         isOwner={isOwner}
         basicInfoForm={<ProjectEditForm project={project} />}
-        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} />}
+        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} />}
         membersManager={
           <ProjectMembersManager 
             projectId={project.id} 
