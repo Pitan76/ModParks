@@ -51,9 +51,10 @@ export async function GET(req: NextRequest) {
     ]);
 
     // 外部URLの場合はそのままリダイレクト、R2の場合はプレフィックスを付加
+    const { getR2PublicUrl } = await import("@/lib/r2");
     const fileUrl = version.fileUrl.startsWith("http")
       ? version.fileUrl
-      : `${process.env.R2_PUBLIC_URL}/${version.fileUrl}`;
+      : getR2PublicUrl(version.fileUrl);
 
     return NextResponse.redirect(fileUrl, { status: 302 });
   } catch (error) {

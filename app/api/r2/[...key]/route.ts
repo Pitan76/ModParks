@@ -13,10 +13,10 @@ export async function GET(
   if (process.env.NODE_ENV === "development" && typeof process !== "undefined" && process.release?.name === "node") {
     const { getCachedPlatformProxy } = await import("@/lib/proxy");
     const proxy = await getCachedPlatformProxy();
-    R2 = proxy.env.R2;
+    R2 = proxy.env.modparks_storage;
   } else {
     const { env } = await getCloudflareContext({ async: true });
-    R2 = (env as unknown as Env).R2;
+    R2 = (env as unknown as Env).modparks_storage;
   }
 
   if (!R2) {

@@ -27,11 +27,11 @@ export async function PUT(req: NextRequest) {
     // 開発環境のWrangler Proxy経由でR2を取得
     const { getCachedPlatformProxy } = await import("@/lib/proxy");
     const proxy = await getCachedPlatformProxy();
-    R2 = proxy.env.R2;
+    R2 = proxy.env.modparks_storage;
   } else {
     // Edgeランタイム / 本番環境
     const { env } = await getCloudflareContext({ async: true });
-    R2 = (env as unknown as Env).R2;
+    R2 = (env as unknown as Env).modparks_storage;
   }
 
   if (!R2) {
