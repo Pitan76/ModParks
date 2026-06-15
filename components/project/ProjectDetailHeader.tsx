@@ -30,6 +30,7 @@ export interface ProjectDetailHeaderProps {
     createdAt: Date;
     updatedAt: Date;
     author: {
+      username: string;
       displayName: string;
       avatarUrl?: string | null;
     };
@@ -91,10 +92,25 @@ export default function ProjectDetailHeader({
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-            <Avatar src={p.author.avatarUrl ?? undefined} sx={{ width: 22, height: 22 }} />
-            <Typography variant="body2" color="text.secondary">
-              {p.author.displayName}
-            </Typography>
+            <LinkButton
+              href={`/profile/${p.author.username}`}
+              variant="text"
+              sx={{ 
+                p: 0, 
+                minWidth: "auto", 
+                textTransform: "none", 
+                color: "text.secondary", 
+                display: "flex", 
+                alignItems: "center", 
+                gap: 1,
+                "&:hover": { color: "primary.main", bgcolor: "transparent" }
+              }}
+            >
+              <Avatar src={p.author.avatarUrl ?? undefined} sx={{ width: 22, height: 22 }} />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {p.author.displayName}
+              </Typography>
+            </LinkButton>
             <Typography variant="body2" color="text.disabled">·</Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <DownloadIcon sx={{ fontSize: 14, color: "text.disabled" }} />
