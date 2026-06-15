@@ -250,9 +250,10 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
           <Autocomplete
             multiple
             disableCloseOnSelect
-            options={MC_VERSIONS}
+            options={MC_VERSIONS as unknown as string[]}
             value={mcVersions}
             onChange={(_, newValue) => setMcVersions(newValue)}
+            // @ts-expect-error MUI typing issue with renderTags signature resolution
             renderTags={(value: string[], getTagProps: AutocompleteRenderGetTagProps) =>
               value.map((option: string, index: number) => {
                 const { key, ...tagProps } = getTagProps({ index });
@@ -290,7 +291,8 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
                 </li>
               );
             }}
-            renderTags={(value: readonly string[], getTagProps: AutocompleteRenderGetTagProps) =>
+            // @ts-expect-error MUI typing issue with renderTags signature resolution
+            renderTags={(value: string[], getTagProps: AutocompleteRenderGetTagProps) =>
               value.map((option: string, index: number) => {
                 const info = getLoaderInfo(option);
                 const { key, ...tagProps } = getTagProps({ index });

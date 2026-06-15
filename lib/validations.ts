@@ -11,7 +11,7 @@ const LOADERS = [
   "purpur",
   "velocity",
   "waterfall",
-] as string[];
+] as const;
 
 const MC_VERSIONS = [
   "26.1.2", "26.1.1", "26.1",
@@ -39,7 +39,7 @@ const MC_VERSIONS = [
   "1.1.2", "1.1",
   "1.0.1", "1.0",
   "Beta 1.8.1", "Beta 1.8", "Beta 1.7.3", "Beta 1.7", "Beta 1.6.6", "Beta 1.6.4"
-] as string[];
+] as const;
 
 const LICENSES = [
   "MIT",
@@ -55,7 +55,7 @@ const LICENSES = [
   "CC-BY-SA-4.0",
   "Unlicense",
   "Proprietary",
-] as string[];
+] as const;
 
 export const CONTENT_TYPES = ["mod", "plugin"] as const;
 export type ContentType = (typeof CONTENT_TYPES)[number];
