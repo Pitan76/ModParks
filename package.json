@@ -12,7 +12,8 @@
     "db:migrate:local": "wrangler d1 migrations apply modparks-db --local",
     "db:studio": "drizzle-kit studio",
     "cf:dev": "wrangler dev",
-    "cf:deploy": "opennextjs-cloudflare build && wrangler deploy"
+    "cf:deploy": "opennextjs-cloudflare build && wrangler deploy",
+    "sync2local": "rm -rf .wrangler/state/v3/d1 && CI=true wrangler d1 migrations apply modparks-db --local && wrangler d1 export modparks-db --remote --output=remote_data.sql --no-schema -y && wrangler d1 execute modparks-db --local --command=\"DELETE FROM d1_migrations\" -y && wrangler d1 execute modparks-db --local --file=remote_data.sql -y && rm remote_data.sql"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",
