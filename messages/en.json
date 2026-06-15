@@ -201,6 +201,20 @@
     }
   },
   "Profile": {
+    "title": "Edit Profile",
+    "displayName": "Display Name",
+    "bio": "Bio",
+    "bioHelper": "Will be displayed on your public profile",
+    "saving": "Saving...",
+    "save": "Save",
+    "uploadError": "Failed to prepare upload",
+    "uploadFailed": "Failed to upload icon",
+    "updateSuccess": "Profile updated successfully",
+    "githubLinked": "GitHub Linked",
+    "githubNotLinked": "GitHub Not Linked",
+    "error": {
+      "displayNameRequired": "Display Name is required"
+    },
     "accountDeleted": "This account has been deleted",
     "projects": "Projects",
     "noProjects": "No public projects yet.",
