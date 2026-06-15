@@ -10,6 +10,7 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import AppLayout from "@/components/layout/AppLayout";
 import AppFooter from "@/components/layout/AppFooter";
+import LocaleSyncer from "@/components/layout/LocaleSyncer";
 
 export const metadata: Metadata = {
   title: {
@@ -61,6 +62,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const messages = await getMessages();
   const session  = await auth();
 
+  let userLocale = null;
   if (session?.user?.id) {
     // 常に最新のプロフィール情報（特にアバター）を取得して上書き
     const d1 = await getD1();
@@ -69,12 +71,15 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     if (dbUser) {
       session.user.avatarUrl = dbUser.avatarUrl;
       session.user.displayName = dbUser.displayName ?? "";
+      session.user.username = dbUser.username;
+      userLocale = dbUser.locale;
     }
   }
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
+        {userLocale && <LocaleSyncer userLocale={userLocale} />}
         <ThemeRegistry>
           <NextIntlClientProvider messages={messages}>
             <AppLayout session={session}>

@@ -175,7 +175,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
               anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             >
               <LinkMenuItem
-                href="/profile"
+                href={`/profile/${session.user.username}`}
                 onClick={handleMenuClose}
                 id="user-menu-profile"
               >

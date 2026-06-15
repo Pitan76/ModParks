@@ -7,12 +7,15 @@ import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 
-export async function updateProfile(data: { displayName: string, bio: string }) {
+export async function updateProfile(data: { displayName: string, bio: string, avatarUrl: string, links: string, locale: "ja" | "en" }) {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(users).set({
     displayName: data.displayName,
-    bio: data.bio
+    bio: data.bio,
+    avatarUrl: data.avatarUrl || null,
+    links: data.links,
+    locale: data.locale,
   }).where(eq(users.id, userId));
 
   revalidatePath("/settings");

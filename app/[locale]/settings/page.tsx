@@ -38,7 +38,10 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
           username: userRecord?.username || "",
           displayName: userRecord?.displayName || "",
           bio: userRecord?.bio || "",
-          email: userRecord?.email || ""
+          email: userRecord?.email || "",
+          avatarUrl: userRecord?.avatarUrl || "",
+          links: userRecord?.links || "[]",
+          locale: userRecord?.locale || "ja",
         }}
         apiKeys={userApiKeys}
         isGitHubConnected={isGitHubConnected}

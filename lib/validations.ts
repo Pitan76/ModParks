@@ -78,6 +78,7 @@ export const createProjectSchema = z.object({
   type:        z.enum(CONTENT_TYPES),
   license:     z.enum(LICENSES),
   sourceUrl:   z.string().url("有効なURLを入力してください").optional().or(z.literal("")),
+  links:       z.string().optional().or(z.literal("")),
   tags:        z.array(z.string().max(32)).max(10, "タグは10個まで"),
 });
 

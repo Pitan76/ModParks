@@ -71,6 +71,13 @@
       "when": 1781448442176,
       "tag": "0009_silky_sinister_six",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1781498515136,
+      "tag": "0010_aberrant_ken_ellis",
+      "breakpoints": true
     }
   ]
 }

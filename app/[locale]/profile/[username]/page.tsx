@@ -17,6 +17,9 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import Alert from "@mui/material/Alert";
 import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import EditIcon from "@mui/icons-material/Edit";
+import { Link as RoutingLink } from "@/i18n/routing";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -108,13 +111,29 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 6 }}>
         <Avatar src={user.avatarUrl || ""} sx={{ width: 100, height: 100 }} />
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800 }}>
-            {user.displayName || user.username}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-            @{user.username}
-          </Typography>
+        <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                {user.displayName || user.username}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                @{user.username}
+              </Typography>
+            </Box>
+            
+            {isOwner && (
+              <Button
+                component={RoutingLink}
+                href="/settings?tab=profile"
+                variant="outlined"
+                startIcon={<EditIcon />}
+                size="small"
+              >
+                プロフィール編集
+              </Button>
+            )}
+          </Box>
           
           {user.bio && (
             <Typography variant="body1" sx={{ mt: 1, whiteSpace: "pre-wrap" }}>

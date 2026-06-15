@@ -29,6 +29,8 @@ export const users = sqliteTable("users", {
   avatarUrl:     text("avatar_url"),
   bio:           text("bio"),
   role:          text("role", { enum: ["user", "admin"] }).notNull().default("user"),
+  locale:        text("locale", { enum: ["ja", "en"] }).notNull().default("ja"),
+  links:         text("links"),
   previousUsername: text("previous_username"),
   githubUsername: text("github_username"),
   deletedAt:     integer("deleted_at", { mode: "timestamp" }),
@@ -112,6 +114,7 @@ export const projects = sqliteTable("projects", {
   type:        text("type", { enum: ["mod", "plugin"] }).notNull(),
   license:     text("license").notNull(),
   sourceUrl:   text("source_url"),
+  links:       text("links"),
   status:      text("status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
   authorId:    text("author_id")
     .notNull()
