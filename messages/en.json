@@ -65,7 +65,14 @@
       "mcVersions": "Minecraft Versions",
       "loaders": "Mod Loaders",
       "status": "Status",
-      "slugRule": "Alphanumeric and hyphens only"
+      "slugRule": "Alphanumeric and hyphens only",
+      "customLinks": {
+        "title": "Custom Links",
+        "linkTitle": "Title",
+        "url": "URL",
+        "delete": "Delete",
+        "addLink": "Add Link"
+      }
     },
     "iconUpload": {
       "title": "Project Icon (Max 400x400)",

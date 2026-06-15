@@ -172,28 +172,28 @@ export default function ProjectFormFields({ error, project, children }: ProjectF
         />
       </Stack>
 
-      <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>カスタムリンク</Typography>
+      <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.customLinks.title")}</Typography>
       {links.map((link, idx) => (
         <Stack direction="row" spacing={2} key={idx} sx={{ alignItems: "center" }}>
           <TextField
-            label="タイトル"
+            label={t("fields.customLinks.linkTitle")}
             size="small"
             value={link.title}
             onChange={e => handleLinkChange(idx, "title", e.target.value)}
             sx={{ width: 150 }}
           />
           <TextField
-            label="URL"
+            label={t("fields.customLinks.url")}
             size="small"
             value={link.url}
             onChange={e => handleLinkChange(idx, "url", e.target.value)}
             sx={{ flex: 1 }}
           />
-          <Chip label="削除" color="error" variant="outlined" onClick={() => handleRemoveLink(idx)} sx={{ cursor: "pointer" }} />
+          <Chip label={t("fields.customLinks.delete")} color="error" variant="outlined" onClick={() => handleRemoveLink(idx)} sx={{ cursor: "pointer" }} />
         </Stack>
       ))}
       <Box>
-        <Chip label="リンクを追加" color="primary" variant="outlined" onClick={handleAddLink} sx={{ cursor: "pointer" }} />
+        <Chip label={t("fields.customLinks.addLink")} color="primary" variant="outlined" onClick={handleAddLink} sx={{ cursor: "pointer" }} />
       </Box>
       <input type="hidden" name="links" value={JSON.stringify(links)} />
     </>

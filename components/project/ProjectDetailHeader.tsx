@@ -5,7 +5,6 @@ import Avatar from "@mui/material/Avatar";
 import EditableProjectIcon from "./EditableProjectIcon";
 import EditIcon from "@mui/icons-material/Edit";
 import DownloadIcon from "@mui/icons-material/Download";
-import Button from "@mui/material/Button";
 import LinkButton from "@/components/ui/LinkButton";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
