@@ -9,4 +9,4 @@ export const API_CONFIG = {
 } as const;
 
 /** サイトのベースURL */
-export const SITE_URL = "https://modparks.pages.dev";
+export const SITE_URL = "https://modparks.pitan76.net";

@@ -26,6 +26,7 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
 import { Link as RoutingLink } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/config";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -58,7 +59,7 @@ export async function generateMetadata({ params }: PublicProfileProps) {
 
   const title = `${user.displayName || user.username} (@${user.username}) | ModParks`;
   const description = user.bio || `${user.displayName || user.username} のプロフィールページです。`;
-  const imageUrl = user.avatarUrl || "https://modparks.pages.dev/icon.png";
+  const imageUrl = user.avatarUrl || SITE_URL + "/icon.png";
 
   return {
     title,
@@ -67,7 +68,7 @@ export async function generateMetadata({ params }: PublicProfileProps) {
       title,
       description,
       type: "profile",
-      url: `https://modparks.pages.dev/profile/${user.username}`,
+      url: SITE_URL + `/profile/${user.username}`,
       images: [
         {
           url: imageUrl,

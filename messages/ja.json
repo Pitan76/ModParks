@@ -58,7 +58,7 @@
     "fields": {
       "name": "プロジェクト名",
       "slug": "スラッグ",
-      "slugHelper": "URL: https://modparks.pages.dev/projects/<スラッグ> (半角英数字、ハイフン、アンダースコアのみ)",
+      "slugHelper": "URL: https://modparks.pitan76.net/projects/<スラッグ> (半角英数字、ハイフン、アンダースコアのみ)",
       "description": "説明",
       "icon": "アイコン",
       "type": "種類",

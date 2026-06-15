@@ -2,11 +2,6 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
-import Stack from "@mui/material/Stack";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
@@ -14,13 +9,11 @@ import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { projectFavorites } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import UploadIcon from "@mui/icons-material/Upload";
-import { Link } from "@/i18n/routing";
-import LinkButton from "@/components/ui/LinkButton";
 import { getProjectBySlug } from "@/lib/actions/project";
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
+import { SITE_URL } from "@/lib/config";
 
 interface ProjectDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -36,7 +29,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
 
   const title = `${project.name} | ModParks`;
   const description = project.description || "Minecraft Java Edition向けのMod/Plugin";
-  const imageUrl = project.iconUrl || "https://modparks.pages.dev/icon.png";
+  const imageUrl = project.iconUrl || SITE_URL + "/icon.png";
 
   return {
     title,
@@ -45,7 +38,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
       title,
       description,
       type: "article",
-      url: `https://modparks.pages.dev/projects/${project.slug}`,
+      url: SITE_URL + `/projects/${project.slug}`,
       images: [
         {
           url: imageUrl,

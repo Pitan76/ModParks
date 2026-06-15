@@ -12,6 +12,7 @@ import { eq } from "drizzle-orm";
 import AppLayout from "@/components/layout/AppLayout";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: {
@@ -23,11 +24,11 @@ export const metadata: Metadata = {
   openGraph: {
     type:    "website",
     locale:  "ja_JP",
-    url:     "https://modparks.pages.dev",
+    url:     SITE_URL,
     siteName: "ModParks",
     images: [
       {
-        url: "https://modparks.pages.dev/icon.png",
+        url: SITE_URL + "/icon.png",
         width: 512,
         height: 512,
         alt: "ModParks Logo",
@@ -38,11 +39,11 @@ export const metadata: Metadata = {
     card: "summary",
     title: "ModParks - Minecraft Mod & Plugin Platform",
     description: "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
-    images: ["https://modparks.pages.dev/icon.png"],
+    images: [SITE_URL + "/icon.png"],
   },
   alternates: {
     types: {
-      "application/rss+xml": "https://modparks.pages.dev/feed.xml",
+      "application/rss+xml": SITE_URL + "/feed.xml",
     },
   },
 };
