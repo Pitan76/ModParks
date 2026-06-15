@@ -22,7 +22,8 @@ import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition, useEffect, useRef } from "react";
-import { LOADERS, MC_VERSIONS } from "@/lib/validations";
+import { LOADERS, MC_VERSIONS, PREDEFINED_TAGS } from "@/lib/validations";
+import { getLoaderInfo } from "@/lib/loaders";
 
 interface ProjectSearchBarProps {
   initialQ?: string;
@@ -43,6 +44,7 @@ export default function ProjectSearchBar({
 }: ProjectSearchBarProps) {
   const t       = useTranslations("Search");
   const tCommon = useTranslations("Common");
+  const tTags   = useTranslations("Tags");
   const router  = useRouter();
   const pathname = usePathname();
   const [, startTransition] = useTransition();
@@ -58,6 +60,11 @@ export default function ProjectSearchBar({
   const [appliedLoaders, setAppliedLoaders] = useState<string[]>(initialLoaders);
   const [appliedMcVersions, setAppliedMcVersions] = useState<string[]>(initialMcVersions);
   const [appliedTags, setAppliedTags] = useState<string[]>(initialTags);
+
+  const MAJOR_TAGS = [
+    "Adventure", "Magic", "Tech", "Utility", "World Gen", 
+    "Optimization", "Decoration", "Library", "Minigame", "Economy"
+  ];
 
   // Dialog internal state (not applied until "Apply" is clicked)
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -104,7 +111,6 @@ export default function ProjectSearchBar({
   }, [debouncedQ, types, appliedSort, appliedLoaders, appliedMcVersions, appliedTags, updateSearch]);
 
   const handleOpenAdvanced = () => {
-    setTempSort(appliedSort);
     setTempLoaders(appliedLoaders);
     setTempMcVersions(appliedMcVersions);
     setTempTags(appliedTags);
@@ -112,7 +118,6 @@ export default function ProjectSearchBar({
   };
 
   const handleApplyAdvanced = () => {
-    setAppliedSort(tempSort);
     setAppliedLoaders(tempLoaders);
     setAppliedMcVersions(tempMcVersions);
     setAppliedTags(tempTags);
@@ -160,6 +165,20 @@ export default function ProjectSearchBar({
           <ToggleButton value="mod" id="filter-mod">{t("filters.mod")}</ToggleButton>
           <ToggleButton value="plugin" id="filter-plugin">{t("filters.plugin")}</ToggleButton>
         </ToggleButtonGroup>
+
+        <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel id="sort-select-label-main">{t("sort.label")}</InputLabel>
+          <Select
+            labelId="sort-select-label-main"
+            value={appliedSort}
+            label={t("sort.label")}
+            onChange={(e) => setAppliedSort(e.target.value)}
+          >
+            <MenuItem value="updated">{t("sort.updated")}</MenuItem>
+            <MenuItem value="downloads">{t("sort.downloads")}</MenuItem>
+            <MenuItem value="newest">{t("sort.newest")}</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
 
       {/* Advanced Search Dialog */}
@@ -167,29 +186,35 @@ export default function ProjectSearchBar({
         <DialogTitle>{t("advancedSearch")}</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
           
-          <FormControl size="small" fullWidth sx={{ mt: 1 }}>
-            <InputLabel id="sort-select-label">{t("sort.label")}</InputLabel>
-            <Select
-              labelId="sort-select-label"
-              value={tempSort}
-              label={t("sort.label")}
-              onChange={(e) => setTempSort(e.target.value)}
-            >
-              <MenuItem value="updated">{t("sort.updated")}</MenuItem>
-              <MenuItem value="downloads">{t("sort.downloads")}</MenuItem>
-              <MenuItem value="newest">{t("sort.newest")}</MenuItem>
-            </Select>
-          </FormControl>
-
           <Autocomplete
             multiple
             options={LOADERS as unknown as string[]}
             value={tempLoaders}
             onChange={(_, val) => setTempLoaders(val)}
             renderInput={(params) => <TextField {...params} label={t("platforms")} size="small" />}
+            renderOption={(props, option) => {
+              const info = getLoaderInfo(option);
+              const { key, ...otherProps } = props;
+              return (
+                <li key={key} {...otherProps} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {info.icon && <Box sx={{ display: "flex", alignItems: "center", color: `${info.color}.main` }}>{info.icon}</Box>}
+                  {info.name}
+                </li>
+              );
+            }}
             renderTags={(val, getTagProps) => val.map((option, idx) => {
+              const info = getLoaderInfo(option);
               const { key, ...tagProps } = getTagProps({ index: idx });
-              return <Chip key={key} label={option} size="small" {...tagProps} />;
+              return (
+                <Chip 
+                  key={key} 
+                  label={info.name} 
+                  size="small" 
+                  color={info.color as any}
+                  icon={info.icon}
+                  {...tagProps} 
+                />
+              );
             })}
           />
 
@@ -208,13 +233,21 @@ export default function ProjectSearchBar({
           <Autocomplete
             multiple
             freeSolo
-            options={[] as string[]}
+            options={PREDEFINED_TAGS as unknown as string[]}
             value={tempTags}
             onChange={(_, val) => setTempTags(val)}
             renderInput={(params) => <TextField {...params} label={t("tags")} size="small" />}
+            renderOption={(props, option) => {
+              const { key, ...otherProps } = props;
+              let label = option;
+              try { label = tTags(option as any); } catch {}
+              return <li key={key} {...otherProps}>{label}</li>;
+            }}
             renderTags={(val, getTagProps) => val.map((option, idx) => {
               const { key, ...tagProps } = getTagProps({ index: idx });
-              return <Chip key={key} label={option} size="small" {...tagProps} />;
+              let label = option;
+              try { label = tTags(option as any); } catch {}
+              return <Chip key={key} label={label} size="small" {...tagProps} />;
             })}
           />
 

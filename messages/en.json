@@ -63,7 +63,7 @@
       "type": "Type",
       "license": "License (e.g. MIT)",
       "sourceUrl": "Source Code URL (optional)",
-      "tags": "Tags",
+      "tags": "Tags (Type/Select)",
       "mcVersions": "Minecraft Versions",
       "loaders": "Mod Loaders",
       "status": "Status",
@@ -75,6 +75,11 @@
         "delete": "Delete",
         "addLink": "Add Link"
       }
+    },
+    "table": {
+      "version": "Version",
+      "platformMcVersion": "Platform / MC Version",
+      "sizeDownloadDate": "Size / DLs / Date"
     },
     "iconUpload": {
       "title": "Project Icon (Max 400x400)",
@@ -340,7 +345,7 @@
     "advancedSearch": "Advanced Search",
     "platforms": "Platforms / Loaders",
     "mcVersions": "MC Versions",
-    "tags": "Tags (Type and Enter)",
+    "tags": "Tags (Type/Select)",
     "apply": "Apply",
     "filters": {
       "type": "Type",

@@ -63,6 +63,10 @@ export type Loader = (typeof LOADERS)[number];
 export type McVersion = (typeof MC_VERSIONS)[number];
 export type License = (typeof LICENSES)[number];
 
+export const PREDEFINED_TAGS = [
+  "items", "blocks", "commands", "permissions", "utility", "qol", "technology", "industry", "energy", "magic", "adventure", "biomes", "exploration", "optimization", "building", "worldgen", "cosmetic", "transport", "automation", "client", "server", "gameplay", "storage", "weapons", "armor", "food"
+] as const;
+
 export { LOADERS, MC_VERSIONS, LICENSES };
 
 // ─── Project Schema ────────────────────────────────────────────────────────────

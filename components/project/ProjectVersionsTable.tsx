@@ -49,9 +49,9 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
       <Table sx={{ minWidth: 650 }}>
         <TableHead>
           <TableRow>
-            <TableCell>バージョン</TableCell>
-            <TableCell>プラットフォーム / MCバージョン</TableCell>
-            <TableCell>サイズ / ダウンロード / 日付</TableCell>
+            <TableCell>{t("table.version")}</TableCell>
+            <TableCell>{t("table.platformMcVersion")}</TableCell>
+            <TableCell>{t("table.sizeDownloadDate")}</TableCell>
             <TableCell align="right"></TableCell>
           </TableRow>
         </TableHead>

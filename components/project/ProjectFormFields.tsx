@@ -13,10 +13,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
 
-const PREDEFINED_TAGS = [
-  "fabric", "forge", "neoforge", "paper", "spigot", "quilt",
-  "items", "blocks", "commands", "permissions", "utility", "qol", "technology", "industry", "energy", "magic", "adventure", "biomes", "exploration", "optimization", "building", "worldgen", "cosmetic", "transport", "automation", "client", "server", "gameplay", "storage", "weapons", "armor", "food"
-];
+import { PREDEFINED_TAGS } from "@/lib/validations";
 
 export interface ProjectFormFieldsProps {
   error: { [key: string]: string[] } | null;

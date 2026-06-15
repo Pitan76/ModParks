@@ -64,7 +64,7 @@
       "type": "種類",
       "license": "ライセンス (例: MIT)",
       "sourceUrl": "ソースコードのURL (任意)",
-      "tags": "タグ (自由入力・選択)",
+      "tags": "タグ (入力/選択)",
       "mcVersions": "対応するMinecraftのバージョン",
       "loaders": "対応するModローダー",
       "status": "公開状態",
@@ -76,6 +76,11 @@
         "delete": "削除",
         "addLink": "リンクを追加"
       }
+    },
+    "table": {
+      "version": "バージョン",
+      "platformMcVersion": "プラットフォーム / MCバージョン",
+      "sizeDownloadDate": "サイズ / DL / 日付"
     },
     "iconUpload": {
       "title": "プロジェクトアイコン (最大 400x400)",
@@ -349,7 +354,7 @@
     "advancedSearch": "高度な検索",
     "platforms": "対応プラットフォーム",
     "mcVersions": "対応MCバージョン",
-    "tags": "タグ (入力してEnter)",
+    "tags": "タグ (入力/選択)",
     "apply": "適用",
     "filters": {
       "type": "種類",
