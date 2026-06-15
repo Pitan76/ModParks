@@ -9,6 +9,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { useState } from "react";
+import type { SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createIdea } from "@/lib/actions/idea";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -21,7 +22,7 @@ export default function NewIdeaPage() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPending(true);
     setError(null);
