@@ -12,6 +12,7 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HomeIcon from "@mui/icons-material/Home";
 import LinkButton from "@/components/ui/LinkButton";
 import { Link } from "@/i18n/routing";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
@@ -22,6 +23,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
   const { id, locale } = await params;
   setRequestLocale(locale);
   const tIdea = await getTranslations("Idea");
+  const tCommon = await getTranslations("Common");
   const session = await auth();
 
   const d1 = await getD1();
@@ -89,9 +91,19 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Box sx={{ mb: 3 }}>
-        <LinkButton href="/ideas" variant="text" color="inherit" startIcon={<ArrowBackIcon />}>
-          {tIdea("backToIdeas")}
-        </LinkButton>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary" }}>
+          <LinkButton href="/" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
+            <HomeIcon fontSize="small" />
+          </LinkButton>
+          <span>/</span>
+          <LinkButton href="/ideas" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
+            {tCommon("ideas")}
+          </LinkButton>
+          <span>/</span>
+          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>
+            {ideaData.title}
+          </Typography>
+        </Box>
       </Box>
 
       {/* Idea Content */}

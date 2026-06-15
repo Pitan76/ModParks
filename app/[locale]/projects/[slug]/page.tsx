@@ -20,7 +20,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import { getProjectBySlug } from "@/lib/actions/project";
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
-import VersionCard from "@/components/project/VersionCard";
+import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 
 interface ProjectDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -123,9 +123,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </Box>
 
             {p.versions.length > 0 ? (
-              p.versions.map((v: any) => (
-                <VersionCard key={v.id} version={v} projectSlug={slug} />
-              ))
+              <ProjectVersionsTable versions={p.versions} projectSlug={slug} />
             ) : (
               <Typography color="text.secondary">{t("noVersions")}</Typography>
             )}
