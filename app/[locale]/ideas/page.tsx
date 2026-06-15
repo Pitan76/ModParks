@@ -65,7 +65,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {allIdeas.map((idea) => (
-          <Card key={idea.id} variant="outlined" sx={{ borderRadius: 3, transition: "0.2s", "&:hover": { borderColor: "primary.main" } }}>
+          <Card key={idea.id} variant="outlined" sx={{ transition: "0.2s", "&:hover": { borderColor: "primary.main" } }}>
             <LinkCardActionArea href={`/ideas/${idea.id}`} sx={{ p: 3 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Avatar src={idea.authorAvatar || undefined} sx={{ width: 48, height: 48 }}>

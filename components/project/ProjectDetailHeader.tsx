@@ -60,6 +60,22 @@ export default function ProjectDetailHeader({
 
   return (
     <>
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary" }}>
+          <LinkButton href="/" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
+            {tCommon("home")}
+          </LinkButton>
+          <span>/</span>
+          <LinkButton href="/projects" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
+            {tCommon("projects")}
+          </LinkButton>
+          <span>/</span>
+          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>
+            {p.name}
+          </Typography>
+        </Box>
+      </Box>
+
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5, justifyContent: "space-between", mb: 3 }}>
         <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", flex: "1 1 300px" }}>
           <EditableProjectIcon 

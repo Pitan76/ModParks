@@ -1,6 +1,8 @@
 {
   "Common": {
     "appName": "ModParks",
+    "home": "Home",
+    "projects": "Projects",
     "loading": "Loading...",
     "error": "An error occurred",
     "save": "Save",
@@ -239,6 +241,7 @@
       "in_progress": "In Progress",
       "resolved": "Resolved"
     },
+    "backToIdeas": "Back to Ideas",
     "noIdeas": "No ideas yet",
     "postFirstIdea": "Post your \"I want this Mod!\" idea!",
     "backToList": "Back to Ideas",

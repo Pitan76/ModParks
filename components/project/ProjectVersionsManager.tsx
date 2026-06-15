@@ -199,8 +199,8 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteId(null)} disabled={pending}>{tCommon("cancel")}</Button>
-          <Button color="error" variant="contained" onClick={handleDelete} disabled={pending}>
+          <Button onClick={() => setDeleteId(null)} disabled={pending} variant="text">{tCommon("cancel")}</Button>
+          <Button color="error" variant="text" onClick={handleDelete} disabled={pending}>
             削除する
           </Button>
         </DialogActions>
@@ -263,8 +263,8 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setEditTarget(null)} disabled={pending}>{tCommon("cancel")}</Button>
-            <Button type="submit" variant="contained" disabled={pending}>保存</Button>
+            <Button onClick={() => setEditTarget(null)} disabled={pending} variant="text">{tCommon("cancel")}</Button>
+            <Button type="submit" variant="text" disabled={pending}>保存</Button>
           </DialogActions>
         </form>
       </Dialog>

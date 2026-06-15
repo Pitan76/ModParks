@@ -44,7 +44,7 @@ export default function IdeaLikeButton({ ideaId, initialLiked, initialCount, isL
       onClick={handleToggle}
       disabled={!isLoggedIn || isPending}
       sx={{ 
-        borderRadius: 8, 
+        borderRadius: 2, 
         px: 2,
         textTransform: "none",
         fontWeight: "bold",

@@ -55,7 +55,7 @@ export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
           type="submit" 
           variant="contained" 
           disabled={pending || !content.trim()}
-          sx={{ borderRadius: 8, px: 3 }}
+          sx={{ borderRadius: 2, px: 3 }}
         >
           {tCommon("submit")}
         </Button>

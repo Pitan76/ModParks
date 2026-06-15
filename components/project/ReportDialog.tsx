@@ -99,14 +99,14 @@ export default function ReportDialog({ projectId }: ReportDialogProps) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button id="report-cancel" onClick={() => setOpen(false)}>
+          <Button id="report-cancel" onClick={() => setOpen(false)} variant="text">
             {t("cancel")}
           </Button>
           {!success && (
             <Button
               id="report-submit"
               onClick={handleSubmit}
-              variant="contained"
+              variant="text"
               color="error"
               disabled={pending}
             >
