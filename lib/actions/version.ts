@@ -5,7 +5,7 @@ import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersi
 import { createVersionSchema } from "@/lib/validations";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -106,6 +106,52 @@ export async function createVersion(projectSlug: string, formData: FormData) {
   }
 
   return { success: true, versionId: id };
+}
+
+/**
+ * プロジェクトのバージョン情報を更新する Server Action
+ */
+export async function updateVersion(versionId: string, projectSlug: string, formData: FormData) {
+  const { db, userId } = await getAuthenticatedDb();
+
+  const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
+  if (!project) throw new Error("Project not found");
+
+  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId))).get();
+  if (project.authorId !== userId && !member) throw new Error("Forbidden");
+
+  const raw = {
+    versionNumber: formData.get("versionNumber"),
+    mcVersions:    formData.getAll("mcVersions"),
+    loaders:       formData.getAll("loaders"),
+    changelog:     formData.get("changelog"),
+  };
+
+  const parsed = createVersionSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
+  }
+
+  await db.update(versions).set({
+    versionNumber: parsed.data.versionNumber,
+    mcVersions:    JSON.stringify(parsed.data.mcVersions),
+    loaders:       JSON.stringify(parsed.data.loaders),
+    changelog:     parsed.data.changelog || "",
+  }).where(eq(versions.id, versionId)).run();
+
+  // Loader と mcVersion のテーブルも更新
+  await db.delete(versionLoaders).where(eq(versionLoaders.versionId, versionId)).run();
+  if (parsed.data.loaders.length > 0) {
+    await db.insert(versionLoaders).values(parsed.data.loaders.map(loader => ({ versionId, loader }))).run();
+  }
+
+  await db.delete(versionMcVersions).where(eq(versionMcVersions.versionId, versionId)).run();
+  if (parsed.data.mcVersions.length > 0) {
+    await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId, mcVersion: mc }))).run();
+  }
+
+  revalidatePath(`/projects/${projectSlug}`);
+  return { success: true };
 }
 
 /**
