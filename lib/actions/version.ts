@@ -157,8 +157,5 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
   
   await db.delete(versions).where(eq(versions.id, versionId)).run();
 
-  revalidatePath(`/projects/${projectSlug}`);
-  revalidatePath(`/projects/${projectSlug}/edit`);
-
   return { success: true };
 }
