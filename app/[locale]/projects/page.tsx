@@ -14,12 +14,12 @@ import { Link } from "@/i18n/routing";
 
 interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; type?: string; author?: string; sort?: string; loader?: string; mcVersion?: string }>;
+  searchParams: Promise<{ q?: string; types?: string; author?: string; sort?: string; loaders?: string; mcVersions?: string; tags?: string }>;
 }
 
 export default async function ProjectsPage({ params, searchParams }: ProjectsPageProps) {
   const { locale } = await params;
-  const { q, type, author, sort, loader, mcVersion } = await searchParams;
+  const { q, types, author, sort, loaders, mcVersions, tags } = await searchParams;
   setRequestLocale(locale);
 
   const tSearch = await getTranslations("Search");
@@ -29,14 +29,20 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   // /projects?author=me の場合は自分のプロジェクトのみ（下書き含む）を取得
   const authorId = author === "me" && session?.user?.id ? session.user.id : undefined;
 
+  const typesArr = types ? types.split(",") : ["mod", "plugin"];
+  const loadersArr = loaders ? loaders.split(",") : undefined;
+  const mcVersionsArr = mcVersions ? mcVersions.split(",") : undefined;
+  const tagsArr = tags ? tags.split(",") : undefined;
+
   // フィルタリング
   const filtered = await getProjects({
     q,
-    type: type as "mod" | "plugin" | "all",
+    types: typesArr,
     authorId,
     sort: sort as any,
-    loader,
-    mcVersion,
+    loaders: loadersArr,
+    mcVersions: mcVersionsArr,
+    tags: tagsArr,
   });
 
   return (
@@ -69,10 +75,11 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       {/* 検索バー */}
       <ProjectSearchBar 
         initialQ={q} 
-        initialType={type} 
+        initialTypes={typesArr} 
         initialSort={sort}
-        initialLoader={loader}
-        initialMcVersion={mcVersion}
+        initialLoaders={loadersArr || []}
+        initialMcVersions={mcVersionsArr || []}
+        initialTags={tagsArr || []}
       />
 
       {/* 件数表示 */}

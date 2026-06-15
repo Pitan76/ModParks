@@ -5,7 +5,7 @@ import { getDatabase } from "@/lib/db";
 import { projects, projectTags, projectMembers, users, versions } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, desc, and, like, inArray, sql } from "drizzle-orm";
+import { eq, desc, and, like, inArray, sql, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -166,16 +166,17 @@ export async function updateProject(projectId: string, formData: FormData) {
  */
 export async function getProjects(params: {
   q?:    string;
-  type?: "mod" | "plugin" | "all";
+  types?: string[];
   authorId?: string;
   limit?: number;
   offset?: number;
   sort?: "downloads" | "newest" | "updated";
-  loader?: string;
-  mcVersion?: string;
+  loaders?: string[];
+  mcVersions?: string[];
+  tags?: string[];
 }) {
   const db = await getDatabase();
-  const { q, type, authorId, limit = 20, offset = 0, sort = "updated", loader, mcVersion } = params;
+  const { q, types, authorId, limit = 20, offset = 0, sort = "updated", loaders, mcVersions, tags } = params;
 
   const conditions = [];
   if (authorId) {
@@ -185,19 +186,36 @@ export async function getProjects(params: {
     conditions.push(eq(projects.status, "public"));
   }
   
-  // @ts-ignore
-  if (type && type !== "all") conditions.push(eq(projects.type, type));
-  if (q) conditions.push(like(projects.name, `%${q}%`));
+  if (types && types.length > 0) {
+    conditions.push(inArray(projects.type, types as ("mod" | "plugin")[]));
+  }
 
-  if (loader && loader !== "all") {
+  if (q) {
     conditions.push(
-      sql`${projects.id} IN (SELECT project_id FROM versions WHERE id IN (SELECT version_id FROM version_loaders WHERE loader = ${loader}))`
+      or(
+        like(projects.name, `%${q}%`),
+        like(projects.description, `%${q}%`),
+        like(users.username, `%${q}%`),
+        like(users.displayName, `%${q}%`)
+      )
     );
   }
 
-  if (mcVersion && mcVersion !== "all") {
+  if (loaders && loaders.length > 0) {
     conditions.push(
-      sql`${projects.id} IN (SELECT project_id FROM versions WHERE id IN (SELECT version_id FROM version_mc_versions WHERE mc_version = ${mcVersion}))`
+      sql`${projects.id} IN (SELECT project_id FROM versions WHERE id IN (SELECT version_id FROM version_loaders WHERE ${inArray(sql`loader`, loaders)}))`
+    );
+  }
+
+  if (mcVersions && mcVersions.length > 0) {
+    conditions.push(
+      sql`${projects.id} IN (SELECT project_id FROM versions WHERE id IN (SELECT version_id FROM version_mc_versions WHERE ${inArray(sql`mc_version`, mcVersions)}))`
+    );
+  }
+
+  if (tags && tags.length > 0) {
+    conditions.push(
+      sql`${projects.id} IN (SELECT project_id FROM project_tags WHERE ${inArray(sql`tag`, tags)})`
     );
   }
 

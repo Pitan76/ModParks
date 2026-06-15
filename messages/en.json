@@ -334,9 +334,14 @@
     }
   },
   "Search": {
-    "placeholder": "Search Mods & Plugins...",
+    "placeholder": "Search projects...",
     "results": "{count} projects found",
-    "noResults": "No results found",
+    "noResults": "No projects found.",
+    "advancedSearch": "Advanced Search",
+    "platforms": "Platforms / Loaders",
+    "mcVersions": "MC Versions",
+    "tags": "Tags (Type and Enter)",
+    "apply": "Apply",
     "filters": {
       "type": "Type",
       "all": "All",
