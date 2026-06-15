@@ -8,7 +8,6 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
-const d1 = typeof process !== "undefined" ? process.env.DB : undefined;
 
 /**
  * NextAuthの認証設定オブジェクト。

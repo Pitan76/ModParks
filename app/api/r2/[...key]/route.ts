@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type { Env } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
@@ -13,7 +15,8 @@ export async function GET(
     const proxy = await getCachedPlatformProxy();
     R2 = proxy.env.R2;
   } else {
-    R2 = (process.env as any).R2;
+    const { env } = await getCloudflareContext({ async: true });
+    R2 = (env as unknown as Env).R2;
   }
 
   if (!R2) {

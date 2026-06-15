@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { uploadToR2 } from "@/lib/r2";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type { Env } from "@/lib/db";
 
 /** PUT /api/upload/direct
  * 開発環境向けの R2 への直接アップロードエンドポイント
@@ -28,7 +30,8 @@ export async function PUT(req: NextRequest) {
     R2 = proxy.env.R2;
   } else {
     // Edgeランタイム / 本番環境
-    R2 = (process.env as any).R2;
+    const { env } = await getCloudflareContext({ async: true });
+    R2 = (env as unknown as Env).R2;
   }
 
   if (!R2) {

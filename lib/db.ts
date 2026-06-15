@@ -1,11 +1,13 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "@/db/schema";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 /** Cloudflare Workers バインディングの型 */
 export interface Env {
   DB: D1Database;
   R2: R2Bucket;
+  modparks_storage: R2Bucket;
   AUTH_SECRET: string;
   AUTH_GITHUB_ID: string;
   AUTH_GITHUB_SECRET: string;
@@ -23,14 +25,9 @@ export function getDb(d1: D1Database): DrizzleD1Database<typeof schema> {
 let localD1Proxy: D1Database | null = null;
 
 /**
- * 実行環境（本番/エッジ）またはローカル環境（Next dev）に応じた D1 バインディングを取得する。
- * ローカル開発時は Wrangler の Platform Proxy を使用します。
- */
-/**
  * Cloudflare D1データベースのバインディングを動的に取得します。
  * 開発環境 (development) の場合は wrangler proxy を経由して D1 を取得し、
- * 本番環境では環境変数 (`process.env.DB`) から取得します。
- * @returns {Promise<D1Database>} 取得したD1データベースのインスタンス
+ * 本番環境では getCloudflareContext() から取得します。
  */
 export async function getD1(): Promise<D1Database> {
   // 開発環境かつ Node.js ランタイムの場合のみ Wrangler の Proxy を利用
@@ -47,9 +44,10 @@ export async function getD1(): Promise<D1Database> {
     return localD1Proxy;
   }
 
-  // 本番環境（Cloudflare Workers/Pages）では process.env にバインディングが渡される
-  const db = (process.env as unknown as Env).DB;
-  if (!db) throw new Error("D1 binding not found in process.env");
+  // 本番環境（Cloudflare Workers）では getCloudflareContext() でバインディングを取得
+  const { env } = await getCloudflareContext({ async: true });
+  const db = (env as unknown as Env).DB;
+  if (!db) throw new Error("D1 binding not found in CloudflareContext");
   return db;
 }
 
@@ -61,3 +59,4 @@ export async function getDatabase(): Promise<DrizzleD1Database<typeof schema>> {
   const d1 = await getD1();
   return getDb(d1);
 }
+
