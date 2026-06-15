@@ -253,7 +253,7 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
             options={MC_VERSIONS}
             value={mcVersions}
             onChange={(_, newValue) => setMcVersions(newValue)}
-            renderTags={(value: readonly string[], getTagProps: AutocompleteRenderGetTagProps) =>
+            renderTags={(value: string[], getTagProps: AutocompleteRenderGetTagProps) =>
               value.map((option: string, index: number) => {
                 const { key, ...tagProps } = getTagProps({ index });
                 return (
