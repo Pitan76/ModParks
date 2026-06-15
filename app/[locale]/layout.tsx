@@ -64,15 +64,20 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const session  = await auth();
 
   let userLocale = null;
+  let layoutError = null;
   if (session?.user?.id) {
-    // 常に最新のプロフィール情報（特にアバター）を取得して上書き
-    const db = await getDatabase();
-    const dbUser = await db.select().from(users).where(eq(users.id, session.user.id)).get();
-    if (dbUser) {
-      session.user.avatarUrl = dbUser.avatarUrl;
-      session.user.displayName = dbUser.displayName ?? "";
-      session.user.username = dbUser.username;
-      userLocale = dbUser.locale;
+    try {
+      // 常に最新のプロフィール情報（特にアバター）を取得して上書き
+      const db = await getDatabase();
+      const dbUser = await db.select().from(users).where(eq(users.id, session.user.id)).get();
+      if (dbUser) {
+        session.user.avatarUrl = dbUser.avatarUrl;
+        session.user.displayName = dbUser.displayName ?? "";
+        session.user.username = dbUser.username;
+        userLocale = dbUser.locale;
+      }
+    } catch (err: any) {
+      layoutError = err.message || String(err);
     }
   }
 
@@ -82,6 +87,11 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
+        {layoutError && (
+          <div style={{ padding: '20px', background: 'red', color: 'white', fontWeight: 'bold' }}>
+            [Layout Error] {layoutError}
+          </div>
+        )}
         {userLocale && <LocaleSyncer userLocale={userLocale} />}
         <ThemeRegistry initialMode={themeMode}>
           <NextIntlClientProvider messages={messages}>
