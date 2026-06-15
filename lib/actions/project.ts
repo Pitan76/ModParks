@@ -227,8 +227,13 @@ export async function getProjects(params: {
   } catch (err: any) {
     console.error("D1 getProjects Error:");
     console.error("Message:", err.message);
-    if (err.cause) console.error("Cause:", err.cause);
-    throw err;
+    let causeMessage = "Unknown";
+    if (err.cause) {
+      console.error("Cause:", err.cause);
+      causeMessage = err.cause instanceof Error ? err.cause.message : String(err.cause);
+    }
+    // Drizzleのデフォルトメッセージは "Failed query: ..." だけなので、本当の原因を文字列に含める
+    throw new Error(`[D1 Error Details] ${causeMessage} || Original: ${err.message}`);
   }
 
   // 各プロジェクトのタグを取得
