@@ -30,14 +30,20 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const authorId = author === "me" && session?.user?.id ? session.user.id : undefined;
 
   // フィルタリング
-  const filtered = await getProjects({
-    q,
-    type: type as "mod" | "plugin" | "all",
-    authorId,
-    sort: sort as any,
-    loader,
-    mcVersion,
-  });
+  let filtered: any[] = [];
+  let errorMsg = null;
+  try {
+    filtered = await getProjects({
+      q,
+      type: type as "mod" | "plugin" | "all",
+      authorId,
+      sort: sort as any,
+      loader,
+      mcVersion,
+    });
+  } catch (err: any) {
+    errorMsg = err.message || String(err);
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
