@@ -15,11 +15,14 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
 import LanguageIcon from "@mui/icons-material/Language";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter, Link } from "@/i18n/routing";
 import LinkButton from "@/components/ui/LinkButton";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
+import { useColorMode } from "@/components/ThemeRegistry";
 
 import type { Session } from "next-auth";
 
@@ -33,6 +36,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
   const locale   = useLocale();
   const pathname = usePathname();
   const router   = useRouter();
+  const { mode, toggleColorMode } = useColorMode();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -120,6 +124,13 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
             </IconButton>
           </Link>
         </Box>
+
+        {/* テーマ切替 */}
+        <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"}>
+          <IconButton onClick={toggleColorMode} color="inherit" size="small" sx={{ mr: 0.5 }}>
+            {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+          </IconButton>
+        </Tooltip>
 
         {/* 言語切替 */}
         <Tooltip title="Language">
