@@ -9,8 +9,24 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import ReportIcon from "@mui/icons-material/Report";
 import GavelIcon from "@mui/icons-material/Gavel";
 import CodeIcon from "@mui/icons-material/Code";
+import LinkIcon from "@mui/icons-material/Link";
+import XIcon from "@mui/icons-material/X";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import LanguageIcon from "@mui/icons-material/Language";
 import { useTranslations } from "next-intl";
 import ReportDialog from "@/components/project/ReportDialog";
+
+// Simple mapping for custom links
+const getLinkIcon = (url: string) => {
+  try {
+    const hostname = new URL(url).hostname;
+    if (hostname.includes("discord.com") || hostname.includes("discord.gg")) return <img src="/discord-icon.svg" alt="Discord" style={{width: 20, height: 20}} />; // We might not have MUI discord icon, just use Link for now or text
+    if (hostname.includes("x.com") || hostname.includes("twitter.com")) return <XIcon />;
+    if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return <YouTubeIcon color="error" />;
+    if (hostname.includes("github.com")) return <GitHubIcon />;
+  } catch {}
+  return <LanguageIcon />;
+};
 
 /**
  * プロジェクト詳細のサイドバーを表示するコンポーネント
@@ -21,6 +37,7 @@ export interface ProjectSidebarProps {
     id: string;
     license: string;
     sourceUrl?: string | null;
+    links?: string | null;
     tags: string[];
   };
   /** ログイン済みか (通報ボタンの表示判定用) */
@@ -82,6 +99,39 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
           </Button>
         </Box>
       )}
+
+      {/* カスタムリンク */}
+      {(() => {
+        let links: {title: string, url: string}[] = [];
+        try { links = JSON.parse(p.links || "[]"); } catch {}
+        if (links.length === 0) return null;
+        
+        return (
+          <Box sx={{ mb: 2, mt: p.sourceUrl ? 2 : 0 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <LinkIcon fontSize="small" color="action" />
+              リンク
+            </Typography>
+            <Stack spacing={1}>
+              {links.map((l, idx) => (
+                <Button
+                  key={idx}
+                  href={l.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  startIcon={getLinkIcon(l.url)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  sx={{ justifyContent: "flex-start", color: "text.primary", borderColor: "divider" }}
+                >
+                  {l.title}
+                </Button>
+              ))}
+            </Stack>
+          </Box>
+        );
+      })()}
 
       {/* タグ */}
       {p.tags.length > 0 && (

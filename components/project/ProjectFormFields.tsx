@@ -8,6 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
+import Box from "@mui/material/Box";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
@@ -26,6 +27,7 @@ export interface ProjectFormFieldsProps {
     description?: string;
     license?: string;
     sourceUrl?: string | null;
+    links?: string | null;
     iconUrl?: string | null;
     tags?: string[];
   };
@@ -36,6 +38,21 @@ export default function ProjectFormFields({ error, project, children }: ProjectF
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
+  
+  let initialLinks = [];
+  try {
+    initialLinks = JSON.parse(project?.links || "[]");
+    if (!Array.isArray(initialLinks)) initialLinks = [];
+  } catch(e) {}
+  const [links, setLinks] = useState<{ title: string, url: string }[]>(initialLinks);
+
+  const handleAddLink = () => setLinks([...links, { title: "", url: "" }]);
+  const handleRemoveLink = (idx: number) => setLinks(links.filter((_, i) => i !== idx));
+  const handleLinkChange = (idx: number, field: "title" | "url", val: string) => {
+    const newLinks = [...links];
+    newLinks[idx][field] = val;
+    setLinks(newLinks);
+  };
 
   return (
     <>
@@ -154,6 +171,31 @@ export default function ProjectFormFields({ error, project, children }: ProjectF
           helperText={error?.sourceUrl?.[0]}
         />
       </Stack>
+
+      <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>カスタムリンク</Typography>
+      {links.map((link, idx) => (
+        <Stack direction="row" spacing={2} key={idx} sx={{ alignItems: "center" }}>
+          <TextField
+            label="タイトル"
+            size="small"
+            value={link.title}
+            onChange={e => handleLinkChange(idx, "title", e.target.value)}
+            sx={{ width: 150 }}
+          />
+          <TextField
+            label="URL"
+            size="small"
+            value={link.url}
+            onChange={e => handleLinkChange(idx, "url", e.target.value)}
+            sx={{ flex: 1 }}
+          />
+          <Chip label="削除" color="error" variant="outlined" onClick={() => handleRemoveLink(idx)} sx={{ cursor: "pointer" }} />
+        </Stack>
+      ))}
+      <Box>
+        <Chip label="リンクを追加" color="primary" variant="outlined" onClick={handleAddLink} sx={{ cursor: "pointer" }} />
+      </Box>
+      <input type="hidden" name="links" value={JSON.stringify(links)} />
     </>
   );
 }
