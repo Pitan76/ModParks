@@ -71,61 +71,79 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
             p: 2, 
             display: "flex", 
             flexDirection: isGrid ? "column" : { xs: "column", sm: "row" }, 
-            alignItems: isGrid ? "flex-start" : { xs: "flex-start", sm: "center" }, 
+            alignItems: isGrid ? "stretch" : { xs: "stretch", sm: "center" }, 
             gap: 2,
             height: "100%"
           }}
         >
-          {/* アイコン */}
-          <Avatar
-            src={project.iconUrl ?? undefined}
-            alt={project.name}
-            variant="rounded"
-            sx={{
-              width: 48,
-              height: 48,
-              bgcolor: "primary.dark",
-              flexShrink: 0,
-            }}
-          >
-            <ExtensionIcon />
-          </Avatar>
-
-          {/* メイン情報（タイトル・説明・作者） */}
-          <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5, width: "100%" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                {project.name}
-              </Typography>
-              <Chip
-                label={TYPE_LABEL[project.type]}
-                color={TYPE_COLOR[project.type]}
-                size="small"
-                sx={{ height: 20, fontSize: "0.65rem" }}
-              />
-            </Box>
-            
-            <Typography
-              variant="body2"
-              color="text.secondary"
+          {/* Top Section: Icon + Main Info (Always row, wrap if extremely narrow) */}
+          <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2, alignItems: "flex-start", flex: isGrid ? "none" : { xs: "none", sm: 1 }, minWidth: 0 }}>
+            {/* アイコン */}
+            <Avatar
+              src={project.iconUrl ?? undefined}
+              alt={project.name}
+              variant="rounded"
               sx={{
-                display: "-webkit-box",
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-                lineHeight: 1.4,
+                width: 48,
+                height: 48,
+                bgcolor: "primary.dark",
+                flexShrink: 0,
               }}
             >
-              {project.description}
-            </Typography>
+              <ExtensionIcon />
+            </Avatar>
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-              <Typography variant="caption" color="text.secondary">
-                by {project.authorDisplayName || project.authorUsername || "Unknown"}
+            {/* メイン情報（タイトル・説明・作者） */}
+            <Box sx={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 0.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", minWidth: 0 }}>
+                <Typography 
+                  variant="subtitle1" 
+                  component="h3" 
+                  title={project.name}
+                  sx={{ 
+                    fontWeight: 600, 
+                    lineHeight: 1.2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    minWidth: 0
+                  }}
+                >
+                  {project.name}
+                </Typography>
+                <Chip
+                  label={TYPE_LABEL[project.type]}
+                  color={TYPE_COLOR[project.type]}
+                  size="small"
+                  sx={{ height: 20, fontSize: "0.65rem", flexShrink: 0 }}
+                />
+              </Box>
+              
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: isGrid ? 2 : { xs: 2, sm: 1 },
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  lineHeight: 1.4,
+                  mt: 0.5,
+                  wordBreak: "break-all",
+                  overflowWrap: "break-word"
+                }}
+              >
+                {project.description}
               </Typography>
-              <Typography variant="caption" color="text.disabled">
-                • {format.dateTime(new Date(project.updatedAt), { dateStyle: "short" })}
-              </Typography>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
+                <Typography variant="caption" color="text.secondary">
+                  by {project.authorDisplayName || project.authorUsername || "Unknown"}
+                </Typography>
+                <Typography variant="caption" color="text.disabled">
+                  • {format.dateTime(new Date(project.updatedAt), { dateStyle: "short" })}
+                </Typography>
+              </Box>
             </Box>
           </Box>
 
@@ -136,10 +154,10 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               flexDirection: isGrid ? "row" : { xs: "row", sm: "column" }, 
               alignItems: isGrid ? "center" : { xs: "center", sm: "flex-end" }, 
               justifyContent: isGrid ? "space-between" : "flex-start",
-              width: isGrid ? "100%" : "auto",
+              width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
               gap: isGrid ? 2 : { xs: 2, sm: 0.5 }, 
               flexShrink: 0,
-              mt: isGrid ? "auto" : 0
+              mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
@@ -162,8 +180,10 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 ))}
                 {project.tags.length > (isGrid ? 2 : 3) && (
                   <Tooltip title={project.tags.slice(isGrid ? 2 : 3).map(getTagLabel).join(", ")} arrow placement="top">
-                    <span style={{ marginLeft: "4px", cursor: "help", color: "#64748b", fontSize: "0.75rem" }}>
-                      +{project.tags.length - (isGrid ? 2 : 3)}
+                    <span>
+                      <Box component="span" sx={{ ml: 0.5, cursor: "help", color: "text.disabled", fontSize: "0.75rem" }}>
+                        +{project.tags.length - (isGrid ? 2 : 3)}
+                      </Box>
                     </span>
                   </Tooltip>
                 )}

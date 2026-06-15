@@ -75,7 +75,7 @@ export default async function HomePage({ params }: HomePageProps) {
             <Typography
               variant="h6"
               color="text.secondary"
-              sx={{ mb: 5, fontWeight: 400, lineHeight: 1.6 }}
+              sx={{ mb: 5, fontWeight: 400, lineHeight: 1.6, px: { xs: 2, sm: 4 } }}
             >
               {t("hero.description")}
             </Typography>
