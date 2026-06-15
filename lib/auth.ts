@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { getDb } from "@/lib/db";
+import * as schema from "@/db/schema";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -120,7 +121,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
     const { getD1 } = await import("@/lib/db");
     const d1 = await getD1();
     if (d1) {
-      adapter = DrizzleAdapter(getDb(d1 as unknown as import("@cloudflare/workers-types").D1Database));
+      adapter = DrizzleAdapter(
+        getDb(d1 as unknown as import("@cloudflare/workers-types").D1Database),
+        {
+          usersTable: schema.users as any,
+          accountsTable: schema.accounts as any,
+          sessionsTable: schema.sessions as any,
+          verificationTokensTable: schema.verificationTokens as any,
+        }
+      );
     }
   } catch (e) {
     console.error("Failed to initialize D1 for NextAuth:", e);

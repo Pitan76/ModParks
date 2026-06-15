@@ -22,7 +22,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   setRequestLocale(locale);
 
   const session = await auth();
-  if (!session?.user?.id) redirect("/api/auth/signin");
+  if (!session?.user?.id) redirect(`/api/auth/signin?callbackUrl=/${locale}/profile`);
 
   const d1 = await getD1();
   const db = getDb(d1);
