@@ -7,11 +7,7 @@ import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
+import Autocomplete, { AutocompleteRenderGetTagProps } from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -100,6 +96,12 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
 
     try {
       const formData = new FormData(e.currentTarget);
+      
+      // SelectやAutocompleteのデフォルトのHidden Inputによって値が不正なカンマ区切りになるのを防ぐため、
+      // 既存の値を一度削除してから手動で追加し直します
+      formData.delete("mcVersions");
+      formData.delete("loaders");
+      
       mcVersions.forEach(v => formData.append("mcVersions", v));
       loaders.forEach(l => formData.append("loaders", l));
 
@@ -217,21 +219,21 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
           </Box>
 
           {openIdeas.length > 0 && (
-            <FormControl fullWidth size="small">
-              <InputLabel>{tVersion("uploadForm.resolveIdea")}</InputLabel>
-              <Select
-                name="ideaId"
-                label={tVersion("uploadForm.resolveIdea")}
-                defaultValue=""
-              >
-                <MenuItem value="">{tVersion("uploadForm.none")}</MenuItem>
-                {openIdeas.map(idea => (
-                <MenuItem key={idea.id} value={idea.id}>
-                  {idea.title}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+            <Autocomplete
+              options={openIdeas}
+              getOptionLabel={(option) => option.title}
+              onChange={(_, newValue) => {
+                // To keep compatibility with form submission, we can use a hidden input or name property.
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  name="ideaId"
+                  label={tVersion("uploadForm.resolveIdea")}
+                  placeholder={tVersion("uploadForm.none")}
+                />
+              )}
+            />
           )}
 
           <TextField
@@ -245,62 +247,76 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
             helperText={error?.versionNumber?.[0]}
           />
 
-          <FormControl fullWidth required error={!!error?.mcVersions} size="small">
-            <InputLabel id="mc-versions-label">{tVersion("fields.mcVersions")}</InputLabel>
-            <Select
-              labelId="mc-versions-label"
-              name="mcVersions"
-              multiple
-              value={mcVersions}
-              onChange={(e) => setMcVersions(typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value)}
-              input={<OutlinedInput label={tVersion("fields.mcVersions")} />}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} size="small" />
-                  ))}
-                </Box>
-              )}
-            >
-              {MC_VERSIONS.map((v) => (
-                <MenuItem key={v} value={v}>{v}</MenuItem>
-              ))}
-            </Select>
-            {error?.mcVersions && <Typography color="error" variant="caption">{error.mcVersions[0]}</Typography>}
-          </FormControl>
-
-          <FormControl fullWidth required error={!!error?.loaders} size="small">
-            <InputLabel id="loaders-label">{tVersion("fields.loaders")}</InputLabel>
-            <Select
-              labelId="loaders-label"
-              name="loaders"
-              multiple
-              value={loaders}
-              onChange={(e) => setLoaders(typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value)}
-              input={<OutlinedInput label={tVersion("fields.loaders")} />}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => {
-                    const info = getLoaderInfo(value);
-                    return <Chip key={value} label={info.name} size="small" icon={info.icon} color={info.color} />;
-                  })}
-                </Box>
-              )}
-            >
-              {AVAILABLE_LOADERS.map((l) => {
-                const info = getLoaderInfo(l);
+          <Autocomplete
+            multiple
+            disableCloseOnSelect
+            options={MC_VERSIONS}
+            value={mcVersions}
+            onChange={(_, newValue) => setMcVersions(newValue)}
+            renderTags={(value: readonly string[], getTagProps: AutocompleteRenderGetTagProps) =>
+              value.map((option: string, index: number) => {
+                const { key, ...tagProps } = getTagProps({ index });
                 return (
-                  <MenuItem key={l} value={l}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      {info.icon}
-                      {info.name}
-                    </Box>
-                  </MenuItem>
+                  <Chip variant="outlined" label={option} size="small" {...tagProps} key={key} />
                 );
-              })}
-            </Select>
-            {error?.loaders && <Typography color="error" variant="caption">{error.loaders[0]}</Typography>}
-          </FormControl>
+              })
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={tVersion("fields.mcVersions")}
+                error={!!error?.mcVersions}
+                helperText={error?.mcVersions?.[0]}
+                required={mcVersions.length === 0}
+              />
+            )}
+          />
+
+          <Autocomplete
+            multiple
+            disableCloseOnSelect
+            options={AVAILABLE_LOADERS}
+            getOptionLabel={(option: string) => getLoaderInfo(option).name}
+            value={loaders}
+            onChange={(_, newValue) => setLoaders(newValue)}
+            renderOption={(props: React.HTMLAttributes<HTMLLIElement>, option: string) => {
+              const info = getLoaderInfo(option);
+              return (
+                <li {...props} key={option}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    {info.icon}
+                    {info.name}
+                  </Box>
+                </li>
+              );
+            }}
+            renderTags={(value: readonly string[], getTagProps: AutocompleteRenderGetTagProps) =>
+              value.map((option: string, index: number) => {
+                const info = getLoaderInfo(option);
+                const { key, ...tagProps } = getTagProps({ index });
+                return (
+                  <Chip
+                    variant="outlined"
+                    label={info.name}
+                    size="small"
+                    icon={info.icon}
+                    color={info.color}
+                    {...tagProps}
+                    key={key}
+                  />
+                );
+              })
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={tVersion("fields.loaders")}
+                error={!!error?.loaders}
+                helperText={error?.loaders?.[0]}
+                required={loaders.length === 0}
+              />
+            )}
+          />
 
           <TextField
             name="changelog"
