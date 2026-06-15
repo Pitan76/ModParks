@@ -408,7 +408,10 @@
       "displayName": "表示名",
       "bio": "自己紹介",
       "save": "保存する",
-      "success": "プロフィールを更新しました"
+      "success": "プロフィールを更新しました",
+      "customLinks": "カスタムリンク",
+      "linkTitle": "タイトル",
+      "addLink": "リンクを追加"
     },
     "apiKeys": {
       "title": "APIキー",
@@ -429,7 +432,11 @@
       "disconnected": "未連携",
       "connect": "連携する",
       "disconnect": "連携を解除する",
-      "successDisconnect": "GitHub連携を解除しました"
+      "successDisconnect": "GitHub連携を解除しました",
+      "status": "ステータス",
+      "showLink": "プロフィールページにGitHubリンクを表示する",
+      "successShow": "プロフィールにGitHubリンクを表示します。",
+      "successHide": "プロフィールからGitHubリンクを非表示にしました。"
     },
     "account": {
       "title": "アカウント管理",

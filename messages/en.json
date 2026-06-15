@@ -420,7 +420,11 @@
       "disconnected": "Not Connected",
       "connect": "Connect GitHub",
       "disconnect": "Disconnect",
-      "successDisconnect": "GitHub disconnected successfully"
+      "successDisconnect": "GitHub disconnected successfully",
+      "status": "Status",
+      "showLink": "Show GitHub link on profile page",
+      "successShow": "GitHub link is now visible on your profile.",
+      "successHide": "GitHub link is now hidden from your profile."
     },
     "account": {
       "title": "Account Management",
