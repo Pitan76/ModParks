@@ -180,7 +180,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     const val = e.target.checked;
     setShowGithubLink(val);
     await toggleGithubVisibility(val);
-    setGithubMsg(val ? "プロフィールにGitHubリンクを表示します。" : "プロフィールからGitHubリンクを非表示にしました。");
+    setGithubMsg(val ? t("github.successShow") : t("github.successHide"));
     setTimeout(() => setGithubMsg(""), 3000);
   };
 
@@ -479,7 +479,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
         <Box>
           {githubMsg && <Alert severity="success" sx={{ mb: 3 }}>{githubMsg}</Alert>}
           <Typography variant="body1" sx={{ mb: 3 }}>
-            ステータス: <strong>{isGitHubConnected ? t("github.connected") : t("github.disconnected")}</strong>
+            {t("github.status")}: <strong>{isGitHubConnected ? t("github.connected") : t("github.disconnected")}</strong>
           </Typography>
           {isGitHubConnected ? (
             <Box>
@@ -488,7 +488,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
               </Button>
               <FormControlLabel
                 control={<Switch checked={showGithubLink} onChange={handleToggleGithubVisibility} />}
-                label="プロフィールページにGitHubリンクを表示する"
+                label={t("github.showLink")}
               />
             </Box>
           ) : (
