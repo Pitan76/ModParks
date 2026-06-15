@@ -57,6 +57,7 @@
     },
     "fields": {
       "name": "Project Name",
+      "edit": "Edit",
       "slug": "URL Slug",
       "description": "Description",
       "icon": "Icon",

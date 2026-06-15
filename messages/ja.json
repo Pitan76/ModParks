@@ -213,6 +213,7 @@
   },
   "Profile": {
     "title": "プロフィール編集",
+    "edit": "編集",
     "displayName": "表示名",
     "bio": "自己紹介",
     "bioHelper": "公開プロフィールに表示されます",
