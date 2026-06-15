@@ -94,7 +94,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
             </Avatar>
 
             {/* メイン情報（タイトル・説明・作者） */}
-            <Box sx={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Box sx={{ flex: 1, minWidth: 120, display: "flex", flexDirection: "column", gap: 0.5 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", minWidth: 0 }}>
                 <Typography 
                   variant="subtitle1" 
