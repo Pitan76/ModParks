@@ -24,20 +24,10 @@ export default async function HomePage({ params }: HomePageProps) {
   const t = await getTranslations("Home");
   const tc = await getTranslations("Common");
 
-  let newProjects: any[] = [];
-  let updatedProjects: any[] = [];
-  let errorMsg: string | null = null;
-  
-  try {
-    const results = await Promise.all([
-      getProjects({ sort: "newest", limit: 6 }),
-      getProjects({ sort: "updated", limit: 6 }),
-    ]);
-    newProjects = results[0];
-    updatedProjects = results[1];
-  } catch (err: any) {
-    errorMsg = err.message || String(err);
-  }
+  const [newProjects, updatedProjects] = await Promise.all([
+    getProjects({ sort: "newest", limit: 6 }),
+    getProjects({ sort: "updated", limit: 6 }),
+  ]);
 
   return (
     <Box>
@@ -140,12 +130,6 @@ export default async function HomePage({ params }: HomePageProps) {
 
       {/* ─── 新着プロジェクト ──────────────────────────────────────────── */}
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        {errorMsg && (
-          <Box sx={{ p: 4, mb: 4, bgcolor: "error.main", color: "error.contrastText", borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>エラーが発生しました</Typography>
-            <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>{errorMsg}</Typography>
-          </Box>
-        )}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
             {t("newProjects")}
