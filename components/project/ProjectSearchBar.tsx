@@ -254,7 +254,7 @@ export default function ProjectSearchBar({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAdvancedOpen(false)} variant="text">{tCommon("cancel")}</Button>
-          <Button onClick={handleApplyAdvanced} variant="contained" color="primary">{t("apply")}</Button>
+          <Button onClick={handleApplyAdvanced} variant="text" color="primary" sx={{ fontWeight: "bold" }}>{t("apply")}</Button>
         </DialogActions>
       </Dialog>
     </Box>
