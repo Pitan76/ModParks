@@ -7,19 +7,26 @@ export async function GET(req: NextRequest) {
   try {
     const d1 = await getD1();
     
+    // Execute the exact query that is failing
+    const query = `select "projects"."id", "projects"."slug", "projects"."name", "projects"."description", "projects"."icon_url", "projects"."type", "projects"."license", "projects"."source_url", "projects"."links", "projects"."status", "projects"."author_id", "projects"."downloads", "projects"."created_at", "projects"."updated_at", "users"."username", "users"."display_name", "users"."avatar_url" from "projects" left join "users" on "projects"."author_id" = "users"."id" where "projects"."status" = ? order by "projects"."created_at" desc limit ?`;
+    
+    let result = null;
+    let queryError = null;
+    try {
+      result = await d1.prepare(query).bind("public", 6).all();
+    } catch (e: any) {
+      queryError = { message: e.message, cause: e.cause };
+    }
+
     // sqlite_master からテーブル定義を取得
     const usersSchema = await d1.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'").first<{ sql: string }>();
     const projectsSchema = await d1.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='projects'").first<{ sql: string }>();
-    
-    // 存在するカラムの一覧を取得
-    const usersInfo = await d1.prepare("PRAGMA table_info(users)").all();
-    const projectsInfo = await d1.prepare("PRAGMA table_info(projects)").all();
 
     return NextResponse.json({
+      queryResult: result,
+      queryError,
       usersSchema: usersSchema?.sql,
       projectsSchema: projectsSchema?.sql,
-      usersColumns: usersInfo.results,
-      projectsColumns: projectsInfo.results,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message, stack: err.stack }, { status: 500 });
