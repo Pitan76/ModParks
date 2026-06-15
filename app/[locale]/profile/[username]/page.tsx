@@ -13,7 +13,7 @@ import ProjectCard from "@/components/project/ProjectCard";
 import { getProjects } from "@/lib/actions/project";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
 import { getUserCollections } from "@/lib/actions/collection";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import Alert from "@mui/material/Alert";
 import Chip from "@mui/material/Chip";
@@ -22,9 +22,51 @@ interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
 }
 
+export async function generateMetadata({ params }: PublicProfileProps) {
+  const { username } = await params;
+  const d1 = await getD1();
+  const db = getDb(d1);
+  const user = await db.select().from(users).where(eq(users.username, username)).get();
+
+  if (!user || user.deletedAt) {
+    return { title: "Not Found | ModParks" };
+  }
+
+  const title = `${user.displayName || user.username} (@${user.username}) | ModParks`;
+  const description = user.bio || `${user.displayName || user.username} のプロフィールページです。`;
+  const imageUrl = user.avatarUrl || "https://modparks.pages.dev/icon.png";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      url: `https://modparks.pages.dev/profile/${user.username}`,
+      images: [
+        {
+          url: imageUrl,
+          width: 256,
+          height: 256,
+          alt: `${user.username} Avatar`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
+
 export default async function PublicProfilePage({ params }: PublicProfileProps) {
   const { locale, username } = await params;
   setRequestLocale(locale);
+
+  const t = await getTranslations("Profile");
 
   const d1 = await getD1();
   const db = getDb(d1);
@@ -45,7 +87,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     return (
       <Container maxWidth="md" sx={{ py: 10, textAlign: "center" }}>
         <Typography variant="h5" color="text.secondary">
-          このアカウントは削除されました
+          {t("accountDeleted")}
         </Typography>
       </Container>
     );
@@ -97,7 +139,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
       </Box>
 
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
-        Projects
+        {t("projects")}
       </Typography>
       
       {visibleProjects.length > 0 ? (
@@ -110,12 +152,12 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         </Grid>
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>
-          まだ公開されているプロジェクトはありません。
+          {t("noProjects")}
         </Alert>
       )}
 
       <Typography variant="h5" sx={{ fontWeight: 700, mt: 6, mb: 3 }}>
-        Lists
+        {t("lists")}
       </Typography>
 
       {userCollections.length > 0 ? (
@@ -146,7 +188,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
                     {c.name}
                   </Typography>
                   <Chip 
-                    label={c.visibility === "public" ? "公開" : c.visibility === "unlisted" ? "限定公開" : "非公開"} 
+                    label={t(`visibility.${c.visibility}`)} 
                     size="small"
                     variant="outlined"
                     color={c.visibility === "public" ? "primary" : "default"}
@@ -163,12 +205,12 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         </Grid>
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>
-          まだリストは作成されていません。
+          {t("noLists")}
         </Alert>
       )}
 
       <Typography variant="h5" sx={{ fontWeight: 700, mt: 6, mb: 3 }}>
-        Favorites
+        {t("favorites")}
       </Typography>
       
       {favoritedProjects.length > 0 ? (
@@ -181,7 +223,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         </Grid>
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>
-          まだお気に入りに登録したプロジェクトはありません。
+          {t("noFavorites")}
         </Alert>
       )}
     </Container>

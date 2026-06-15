@@ -23,6 +23,20 @@ export const metadata: Metadata = {
     locale:  "ja_JP",
     url:     "https://modparks.pages.dev",
     siteName: "ModParks",
+    images: [
+      {
+        url: "https://modparks.pages.dev/icon.png",
+        width: 512,
+        height: 512,
+        alt: "ModParks Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "ModParks - Minecraft Mod & Plugin Platform",
+    description: "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
+    images: ["https://modparks.pages.dev/icon.png"],
   },
   alternates: {
     types: {

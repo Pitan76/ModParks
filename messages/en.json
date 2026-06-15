@@ -194,20 +194,18 @@
     }
   },
   "Profile": {
-    "title": "Edit Profile",
-    "displayName": "Display Name",
-    "bio": "Bio",
-    "updateSuccess": "Profile updated successfully",
-    "githubLinked": "Linked with GitHub account",
-    "githubNotLinked": "GitHub not linked",
-    "bioHelper": "Max 500 characters",
-    "saving": "Saving...",
-    "save": "Save",
-    "uploadError": "Failed to prepare upload",
-    "uploadFailed": "Failed to upload image",
-    "error": {
-      "displayNameRequired": "Display Name is required"
-    }
+    "accountDeleted": "This account has been deleted",
+    "projects": "Projects",
+    "noProjects": "No public projects yet.",
+    "lists": "Lists",
+    "visibility": {
+      "public": "Public",
+      "unlisted": "Unlisted",
+      "private": "Private"
+    },
+    "noLists": "No lists created yet.",
+    "favorites": "Favorites",
+    "noFavorites": "No favorite projects yet."
   },
   "Idea": {
     "addCommentPlaceholder": "Add a comment...",

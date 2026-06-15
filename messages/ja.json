@@ -198,20 +198,18 @@
     "success": "通報しました。確認後に対応いたします。"
   },
   "Profile": {
-    "title": "プロフィール編集",
-    "displayName": "表示名",
-    "bio": "自己紹介",
-    "updateSuccess": "プロフィールを更新しました",
-    "githubLinked": "GitHub アカウントで連携済",
-    "githubNotLinked": "GitHub 未連携",
-    "bioHelper": "500文字以内",
-    "saving": "保存中...",
-    "save": "保存",
-    "uploadError": "アップロードの準備に失敗しました",
-    "uploadFailed": "画像のアップロードに失敗しました",
-    "error": {
-      "displayNameRequired": "表示名は必須です"
-    }
+    "accountDeleted": "このアカウントは削除されました",
+    "projects": "プロジェクト",
+    "noProjects": "まだ公開されているプロジェクトはありません。",
+    "lists": "リスト",
+    "visibility": {
+      "public": "公開",
+      "unlisted": "限定公開",
+      "private": "非公開"
+    },
+    "noLists": "まだリストは作成されていません。",
+    "favorites": "お気に入り",
+    "noFavorites": "まだお気に入りに登録したプロジェクトはありません。"
   },
   "Idea": {
     "addCommentPlaceholder": "コメントを追加...",
