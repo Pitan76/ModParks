@@ -9,33 +9,60 @@ export const roboto = Roboto({
   display: "swap",
 });
 
-/** ModParks テーマ — Minecraft をイメージした青・水色メインのダークテーマ */
-export const theme = createTheme({
+export const getAppTheme = (mode: "light" | "dark") => createTheme({
   palette: {
-    mode: "dark",
-    primary: {
-      main: "#3b82f6", // シンプルなブルー
-      light: "#60a5fa",
-      dark: "#2563eb",
-      contrastText: "#ffffff",
-    },
-    secondary: {
-      main: "#10b981", // シンプルなグリーン
-      light: "#34d399",
-      dark: "#059669",
-      contrastText: "#ffffff",
-    },
-    background: {
-      default: "#0f172a", // ダークネイビー
-      paper: "#1e293b",   // 少し明るいネイビー
-    },
-    text: {
-      primary: "#f8fafc",
-      secondary: "#94a3b8",
-    },
-    surface: {
-      main: "#1e293b",
-    },
+    mode,
+    ...(mode === "light"
+      ? {
+          primary: {
+            main: "#2563eb",
+            light: "#3b82f6",
+            dark: "#1d4ed8",
+            contrastText: "#ffffff",
+          },
+          secondary: {
+            main: "#059669",
+            light: "#10b981",
+            dark: "#047857",
+            contrastText: "#ffffff",
+          },
+          background: {
+            default: "#f8fafc",
+            paper: "#ffffff",
+          },
+          text: {
+            primary: "#0f172a",
+            secondary: "#475569",
+          },
+          surface: {
+            main: "#ffffff",
+          },
+        }
+      : {
+          primary: {
+            main: "#3b82f6",
+            light: "#60a5fa",
+            dark: "#2563eb",
+            contrastText: "#ffffff",
+          },
+          secondary: {
+            main: "#10b981",
+            light: "#34d399",
+            dark: "#059669",
+            contrastText: "#ffffff",
+          },
+          background: {
+            default: "#0f172a",
+            paper: "#1e293b",
+          },
+          text: {
+            primary: "#f8fafc",
+            secondary: "#94a3b8",
+          },
+          surface: {
+            main: "#1e293b",
+          },
+        }),
   },
   typography: {
     fontFamily: roboto.style.fontFamily,
@@ -47,7 +74,7 @@ export const theme = createTheme({
     h6: { fontWeight: 500 },
   },
   shape: {
-    borderRadius: 4, // 10万規模向けにシャープで高密度なデザインに変更
+    borderRadius: 4,
   },
   components: {
     MuiButton: {
@@ -85,8 +112,8 @@ export const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          background:   "#1e293b",
-          border:       "1px solid #334155",
+          background: mode === "light" ? "#ffffff" : "#1e293b",
+          border: mode === "light" ? "1px solid #e2e8f0" : "1px solid #334155",
           borderRadius: 4,
           transition:   "all 0.2s ease-in-out",
         },
@@ -101,7 +128,7 @@ export const theme = createTheme({
     },
     MuiLink: {
       defaultProps: {
-        color: "primary.light",
+        color: mode === "light" ? "primary.main" : "primary.light",
       },
       styleOverrides: {
         root: {
@@ -125,13 +152,6 @@ export const theme = createTheme({
       defaultProps: {
         size: "small",
       },
-      styleOverrides: {
-        root: {
-          "& .MuiOutlinedInput-root": {
-            "& fieldset": { borderColor: "#334155" },
-          },
-        },
-      },
     },
     MuiFormControl: {
       defaultProps: {
@@ -146,9 +166,10 @@ export const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background:  "rgba(15, 23, 42, 0.75)",
+          background: mode === "light" ? "rgba(255, 255, 255, 0.85)" : "rgba(15, 23, 42, 0.75)",
+          color: mode === "light" ? "#0f172a" : "#f8fafc",
           backdropFilter: "blur(8px)",
-          borderBottom: "1px solid #334155",
+          borderBottom: mode === "light" ? "1px solid #e2e8f0" : "1px solid #334155",
           backgroundImage: "none",
         },
       },
@@ -156,15 +177,15 @@ export const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: "rgba(15, 23, 42, 0.75)",
+          background: mode === "light" ? "rgba(255, 255, 255, 0.85)" : "rgba(15, 23, 42, 0.75)",
           backdropFilter: "blur(8px)",
-          borderRight: "1px solid #334155",
+          borderRight: mode === "light" ? "1px solid #e2e8f0" : "1px solid #334155",
         },
       },
     },
     MuiDivider: {
       styleOverrides: {
-        root: { borderColor: "#334155" },
+        root: { borderColor: mode === "light" ? "#e2e8f0" : "#334155" },
       },
     },
   },
@@ -180,4 +201,4 @@ declare module "@mui/material/styles" {
   }
 }
 
-export default theme;
+

@@ -352,8 +352,8 @@
     "results": "{count} 件のプロジェクト",
     "noResults": "プロジェクトが見つかりませんでした。",
     "advancedSearch": "高度な検索",
-    "platforms": "対応プラットフォーム",
-    "mcVersions": "対応MCバージョン",
+    "platforms": "プラットフォーム",
+    "mcVersions": "MCバージョン",
     "tags": "タグ (入力/選択)",
     "apply": "適用",
     "filters": {
