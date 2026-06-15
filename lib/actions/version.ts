@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
+import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions, users, projectMembers } from "@/db/schema";
 import { createVersionSchema } from "@/lib/validations";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -131,7 +131,6 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
     isAuthorized = true;
   } else {
     // 管理者チェック
-    const { users, projectMembers } = await import("@/db/schema");
     const userRecord = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
     if (userRecord?.role === "admin") {
       isAuthorized = true;
