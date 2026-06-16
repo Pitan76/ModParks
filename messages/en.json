@@ -516,6 +516,24 @@
       "successShow": "GitHub link is now visible on your profile.",
       "successHide": "GitHub link is now hidden from your profile."
     },
+    "security": {
+      "title": "Security",
+      "twoFactorAuth": "Two-Factor Authentication (2FA)",
+      "twoFactorDesc": "Enhances your account security.",
+      "twoFactorEnabled": "2FA is enabled",
+      "twoFactorDisabled": "2FA is disabled",
+      "enableTwoFactor": "Enable",
+      "disableTwoFactor": "Disable",
+      "twoFactorSetupTitle": "Set up 2-Factor Authentication",
+      "twoFactorSetupDesc": "Scan the following QR code with an authenticator app (e.g., Google Authenticator, Authy) and enter the 6-digit code shown.",
+      "verifyAndEnable": "Verify & Enable",
+      "verificationCode": "6-digit code",
+      "invalidCode": "Invalid verification code",
+      "passkeys": "Passkeys (WebAuthn)",
+      "passkeysDesc": "Login using biometrics (fingerprint, face ID) or security keys.",
+      "registerPasskey": "Register Passkey",
+      "noPasskeys": "No passkeys registered"
+    },
     "account": {
       "title": "Account Management",
       "changeId": "Change User ID",

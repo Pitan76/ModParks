@@ -525,6 +525,24 @@
       "successShow": "プロフィールにGitHubリンクを表示します。",
       "successHide": "プロフィールからGitHubリンクを非表示にしました。"
     },
+    "security": {
+      "title": "セキュリティ",
+      "twoFactorAuth": "2段階認証 (2FA)",
+      "twoFactorDesc": "アカウントのセキュリティを強化します。",
+      "twoFactorEnabled": "2段階認証は有効です",
+      "twoFactorDisabled": "2段階認証は無効です",
+      "enableTwoFactor": "有効にする",
+      "disableTwoFactor": "無効にする",
+      "twoFactorSetupTitle": "2段階認証のセットアップ",
+      "twoFactorSetupDesc": "認証アプリ（Google Authenticator, Authy等）で以下のQRコードをスキャンし、表示された6桁のコードを入力してください。",
+      "verifyAndEnable": "認証して有効化",
+      "verificationCode": "6桁の認証コード",
+      "invalidCode": "認証コードが間違っています",
+      "passkeys": "パスキー (WebAuthn)",
+      "passkeysDesc": "生体認証（指紋、顔認証）やセキュリティキーを使用してログインします。",
+      "registerPasskey": "パスキーを登録",
+      "noPasskeys": "登録されているパスキーはありません"
+    },
     "account": {
       "title": "アカウント管理",
       "changeId": "ユーザーIDの変更",
