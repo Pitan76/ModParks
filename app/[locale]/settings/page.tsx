@@ -49,6 +49,8 @@ export default async function SettingsPage({ params, searchParams }: { params: P
         isGitHubConnected={isGitHubConnected}
         hasPassword={!!userRecord?.passwordHash}
         twoFactorEnabled={!!userRecord?.twoFactorEnabled}
+        defaultProjectStatus={userRecord?.defaultProjectStatus || "draft"}
+        defaultLicense={userRecord?.defaultLicense || "All Rights Reserved"}
         error={resolvedSearchParams.error as string | undefined}
       />
     </Container>

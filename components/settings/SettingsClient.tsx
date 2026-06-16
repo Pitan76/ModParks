@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useTranslations, useFormatter } from "next-intl";
-import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, toggleGithubVisibility, changeUsername, changeEmail, changePassword, deleteAccount, generateTotpSecret, verifyAndEnableTotp, disableTotp } from "@/lib/actions/settings";
+import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, toggleGithubVisibility, changeUsername, changeEmail, changePassword, deleteAccount, generateTotpSecret, verifyAndEnableTotp, disableTotp, updatePostingSettings } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
 import { QRCodeSVG } from "qrcode.react";
 import TabbedPanel from "@/components/ui/TabbedPanel";
@@ -46,10 +46,12 @@ interface SettingsClientProps {
   isGitHubConnected: boolean;
   hasPassword?: boolean;
   twoFactorEnabled?: boolean;
+  defaultProjectStatus?: string;
+  defaultLicense?: string;
   error?: string;
 }
 
-export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, twoFactorEnabled, error }: SettingsClientProps) {
+export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, twoFactorEnabled, defaultProjectStatus, defaultLicense, error }: SettingsClientProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const format = useFormatter();
@@ -103,6 +105,11 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   const [disableTotpOpen, setDisableTotpOpen] = useState(false);
   const [disableTotpPasswordOrToken, setDisableTotpPasswordOrToken] = useState("");
   const [twoFactorMsg, setTwoFactorMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
+
+  // Posting State
+  const [postingStatus, setPostingStatus] = useState(defaultProjectStatus || "draft");
+  const [postingLicense, setPostingLicense] = useState(defaultLicense || "All Rights Reserved");
+  const [postingMsg, setPostingMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
 
   // ---------- Profile Handlers ----------
   const handleAvatarClick = () => {
@@ -281,6 +288,13 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     setDisableTotpPasswordOrToken("");
     setTwoFactorMsg({ type: "success", text: t("profile.success") });
     setTimeout(() => setTwoFactorMsg(null), 3000);
+  };
+
+  const handlePostingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await updatePostingSettings(postingStatus as any, postingLicense);
+    setPostingMsg({ type: "success", text: t("posting.successUpdate") });
+    setTimeout(() => setPostingMsg(null), 3000);
   };
 
   const tabs = [
@@ -636,6 +650,43 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
               {t("github.connect")}
             </Button>
           )}
+        </Box>
+      )
+    },
+    {
+      label: t("posting.title"),
+      content: (
+        <Box component="form" onSubmit={handlePostingSubmit}>
+          {postingMsg && <Alert severity={postingMsg.type} sx={{ mb: 3 }}>{postingMsg.text}</Alert>}
+
+          <Typography variant="h6" sx={{ mb: 1 }}>{t("posting.defaultProjectStatus")}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("posting.defaultProjectStatusDesc")}</Typography>
+          <FormControl fullWidth sx={{ mb: 4, maxWidth: 300 }}>
+            <Select
+              size="small"
+              value={postingStatus}
+              onChange={e => setPostingStatus(e.target.value)}
+            >
+              <MenuItem value="draft">{t("posting.statusDraft")}</MenuItem>
+              <MenuItem value="public">{t("posting.statusPublic")}</MenuItem>
+              <MenuItem value="unlisted">{t("posting.statusUnlisted")}</MenuItem>
+              <MenuItem value="private">{t("posting.statusPrivate")}</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Typography variant="h6" sx={{ mb: 1 }}>{t("posting.defaultLicense")}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("posting.defaultLicenseDesc")}</Typography>
+          <TextField
+            fullWidth
+            size="small"
+            value={postingLicense}
+            onChange={e => setPostingLicense(e.target.value)}
+            sx={{ mb: 4, maxWidth: 300 }}
+          />
+
+          <Button type="submit" variant="contained" sx={{ display: "block" }}>
+            {t("profile.save")}
+          </Button>
         </Box>
       )
     }
