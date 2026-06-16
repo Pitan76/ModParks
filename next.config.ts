@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     // Server Actions を有効化
+    optimizePackageImports: ["@mui/icons-material", "@mui/material"],
   },
   images: {
     // GitHub アバター & R2 ファイルを許可
