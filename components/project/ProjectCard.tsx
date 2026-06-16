@@ -89,7 +89,6 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               sx={{
                 width: 48,
                 height: 48,
-                bgcolor: "primary.dark",
                 flexShrink: 0,
               }}
             >
