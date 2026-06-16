@@ -51,6 +51,7 @@ export interface ProjectVersionsManagerProps {
 export default function ProjectVersionsManager({ projectSlug, versions: initialVersions, openIdeas }: ProjectVersionsManagerProps) {
   const format = useFormatter();
   const tCommon = useTranslations("Common");
+  const t = useTranslations("Version");
   const [localVersions, setLocalVersions] = useState(initialVersions);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<ProjectVersion | null>(null);
@@ -136,10 +137,10 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="body2" color="text.secondary">
-          アップロードされたバージョン（ファイル）の一覧と管理を行います。
+          {t("manager.description")}
         </Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setUploadOpen(true)}>
-          バージョンを追加
+          {t("manager.addVersion")}
         </Button>
       </Box>
 
@@ -149,11 +150,11 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>バージョン</TableCell>
-              <TableCell>対応MC</TableCell>
-              <TableCell>DL数</TableCell>
-              <TableCell>日時</TableCell>
-              <TableCell align="right">操作</TableCell>
+              <TableCell>{t("manager.columns.version")}</TableCell>
+              <TableCell>{t("manager.columns.mc")}</TableCell>
+              <TableCell>{t("manager.columns.downloads")}</TableCell>
+              <TableCell>{t("manager.columns.date")}</TableCell>
+              <TableCell align="right">{t("manager.columns.actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -182,7 +183,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
             {localVersions.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
-                  バージョンがありません。
+                  {t("manager.noVersions")}
                 </TableCell>
               </TableRow>
             )}
@@ -192,16 +193,16 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
 
       {/* Delete Dialog */}
       <Dialog open={!!deleteId} onClose={() => !pending && setDeleteId(null)}>
-        <DialogTitle>バージョンを削除しますか？</DialogTitle>
+        <DialogTitle>{t("manager.deleteTitle")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            この操作は取り消せません。削除するとユーザーはこのバージョンをダウンロードできなくなります。
+            {t("manager.deleteConfirm")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteId(null)} disabled={pending} variant="text">{tCommon("cancel")}</Button>
           <Button color="error" variant="text" onClick={handleDelete} disabled={pending}>
-            削除する
+            {tCommon("delete")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -209,12 +210,12 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
       {/* Edit Dialog */}
       <Dialog open={!!editTarget} onClose={() => !pending && setEditTarget(null)} maxWidth="sm" fullWidth>
         <form onSubmit={handleEditSubmit}>
-          <DialogTitle>バージョンの編集</DialogTitle>
+          <DialogTitle>{t("manager.editTitle")}</DialogTitle>
           <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
             {editError?.server && <Alert severity="error">{editError.server[0]}</Alert>}
             
             <TextField
-              label="バージョン番号"
+              label={t("fields.versionNumber")}
               value={editNumber}
               onChange={e => setEditNumber(e.target.value)}
               fullWidth
@@ -231,7 +232,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
               value={editMc}
               onChange={(_, val) => setEditMc(val)}
               renderInput={(params) => (
-                <TextField {...params} label="対応Minecraftバージョン" required={editMc.length === 0} error={!!editError?.mcVersions} helperText={editError?.mcVersions?.[0]} />
+                <TextField {...params} label={t("fields.mcVersions")} required={editMc.length === 0} error={!!editError?.mcVersions} helperText={editError?.mcVersions?.[0]} />
               )}
             />
 
@@ -242,7 +243,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
               value={editLoaders}
               onChange={(_, val) => setEditLoaders(val)}
               renderInput={(params) => (
-                <TextField {...params} label="対応ローダー" required={editLoaders.length === 0} error={!!editError?.loaders} helperText={editError?.loaders?.[0]} />
+                <TextField {...params} label={t("fields.loaders")} required={editLoaders.length === 0} error={!!editError?.loaders} helperText={editError?.loaders?.[0]} />
               )}
               // @ts-expect-error MUI typing issue with renderTags signature resolution
               renderTags={(val: string[], getTagProps: AutocompleteRenderGetTagProps) => val.map((id, idx) => {
@@ -252,7 +253,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
             />
 
             <TextField
-              label="変更履歴"
+              label={t("fields.changelog")}
               value={editChangelog}
               onChange={e => setEditChangelog(e.target.value)}
               fullWidth
@@ -264,21 +265,21 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setEditTarget(null)} disabled={pending} variant="text">{tCommon("cancel")}</Button>
-            <Button type="submit" variant="text" disabled={pending}>保存</Button>
+            <Button type="submit" variant="text" disabled={pending}>{tCommon("save")}</Button>
           </DialogActions>
         </form>
       </Dialog>
 
       {/* Upload Dialog */}
       <Dialog open={uploadOpen} onClose={() => setUploadOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>新しいバージョンをアップロード</DialogTitle>
+        <DialogTitle>{t("manager.uploadTitle")}</DialogTitle>
         <DialogContent sx={{ pb: 0 }}>
           <Box sx={{ mt: 2 }}>
             <VersionUploadForm slug={projectSlug} openIdeas={openIdeas} />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setUploadOpen(false)}>閉じる</Button>
+          <Button onClick={() => setUploadOpen(false)}>{tCommon("close")}</Button>
         </DialogActions>
       </Dialog>
     </Box>

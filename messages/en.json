@@ -157,6 +157,22 @@
     }
   },
   "Version": {
+    "manager": {
+      "description": "Manage and list uploaded versions (files).",
+      "addVersion": "Add Version",
+      "columns": {
+        "version": "Version",
+        "mc": "MC Versions",
+        "downloads": "Downloads",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "noVersions": "No versions available.",
+      "deleteTitle": "Delete this version?",
+      "deleteConfirm": "This action cannot be undone. Users will no longer be able to download this version.",
+      "editTitle": "Edit Version",
+      "uploadTitle": "Upload New Version"
+    },
     "fields": {
       "versionNumber": "Version Number",
       "mcVersions": "Minecraft Versions",

@@ -163,11 +163,27 @@
     }
   },
   "Version": {
+    "manager": {
+      "description": "アップロードされたバージョン（ファイル）の一覧と管理を行います。",
+      "addVersion": "バージョンを追加",
+      "columns": {
+        "version": "バージョン",
+        "mc": "MCバージョン",
+        "downloads": "DL数",
+        "date": "日時",
+        "actions": "操作"
+      },
+      "noVersions": "バージョンがありません。",
+      "deleteTitle": "バージョンを削除しますか？",
+      "deleteConfirm": "この操作は取り消せません。削除するとユーザーはこのバージョンをダウンロードできなくなります。",
+      "editTitle": "バージョンの編集",
+      "uploadTitle": "新しいバージョンをアップロード"
+    },
     "fields": {
       "versionNumber": "バージョン番号",
-      "mcVersions": "対応Minecraftバージョン",
+      "mcVersions": "MCバージョン",
       "loaders": "プラットフォーム",
-      "changelog": "更新内容",
+      "changelog": "変更履歴",
       "file": "ファイル"
     },
     "create": {
