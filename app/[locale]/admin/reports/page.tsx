@@ -47,7 +47,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 5 }}>
+    <Box>
       <Typography variant="h4" sx={{ fontWeight: 800,  mb: 4  }}>
         {tAdmin("reports.listTitle")}
       </Typography>
@@ -150,6 +150,6 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
           </Card>
         ))}
       </Stack>
-    </Container>
+    </Box>
   );
 }

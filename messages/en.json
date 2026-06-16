@@ -338,6 +338,34 @@
   },
   "Admin": {
     "title": "Admin Dashboard",
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "reports": "Reports",
+      "config": "Config"
+    },
+    "users": {
+      "title": "User Management",
+      "user": "User",
+      "email": "Email",
+      "joined": "Joined",
+      "role": "Role",
+      "roleUser": "User",
+      "roleAdmin": "Admin",
+      "successUpdate": "Role updated successfully"
+    },
+    "config": {
+      "title": "System Configuration",
+      "general": "General Settings",
+      "siteName": "Site Name",
+      "siteDesc": "Site Description",
+      "saveBtn": "Save Changes",
+      "tagsManagement": "Tags Management",
+      "tagsDesc": "Manage predefined tags available for projects.",
+      "newTag": "New Tag Name",
+      "addTag": "Add Tag",
+      "tagsPlaceholder": "Currently, tags are defined statically in the codebase. This interface is a placeholder for when tags are migrated to the database."
+    },
     "reports": {
       "title": "Report Management",
       "description": "Review and process user reports",

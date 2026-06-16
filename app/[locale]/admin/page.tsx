@@ -28,14 +28,14 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
   const tAdmin = await getTranslations("Admin");
 
   return (
-    <Container maxWidth="lg" sx={{ py: 5 }}>
+    <Box>
       <Typography variant="h4" sx={{ fontWeight: 800,  mb: 4  }}>
         {tAdmin("title")}
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <Card id="admin-reports-card">
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card>
             <CardContent>
               <Stack spacing={2}>
                 <FlagIcon sx={{ fontSize: 40, color: "error.main" }} />
@@ -54,7 +54,28 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
             </CardContent>
           </Card>
         </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card>
+            <CardContent>
+              <Stack spacing={2}>
+                <AssessmentIcon sx={{ fontSize: 40, color: "primary.main" }} />
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{tAdmin("config.title")}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {tAdmin("config.tagsDesc")}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <LinkButton variant="outlined" href="/admin/config">
+                    {tAdmin("sidebar.config")}
+                  </LinkButton>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
-    </Container>
+    </Box>
   );
 }

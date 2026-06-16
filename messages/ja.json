@@ -347,6 +347,34 @@
   },
   "Admin": {
     "title": "管理ダッシュボード",
+    "sidebar": {
+      "dashboard": "ダッシュボード",
+      "users": "ユーザー管理",
+      "reports": "通報管理",
+      "config": "システム設定"
+    },
+    "users": {
+      "title": "ユーザー管理",
+      "user": "ユーザー",
+      "email": "メールアドレス",
+      "joined": "登録日",
+      "role": "権限",
+      "roleUser": "一般",
+      "roleAdmin": "管理者",
+      "successUpdate": "権限を変更しました"
+    },
+    "config": {
+      "title": "システム設定",
+      "general": "一般設定",
+      "siteName": "サイト名",
+      "siteDesc": "サイト説明",
+      "saveBtn": "変更を保存",
+      "tagsManagement": "タグ管理",
+      "tagsDesc": "プロジェクトで使用可能なタグを管理します。",
+      "newTag": "新しいタグ名",
+      "addTag": "タグを追加",
+      "tagsPlaceholder": "現在タグはソースコード内に静的に定義されています。このUIは将来データベースへ移行した際のための仮画面です。"
+    },
     "reports": {
       "title": "通報管理",
       "description": "ユーザーからの通報を確認・処理します",
