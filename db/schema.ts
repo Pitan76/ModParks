@@ -37,6 +37,8 @@ export const users = sqliteTable("users", {
   twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).notNull().default(false),
   twoFactorSecret: text("two_factor_secret"),
   deletedAt:     integer("deleted_at", { mode: "timestamp" }),
+  defaultProjectStatus: text("default_project_status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
+  defaultLicense: text("default_license").notNull().default("All Rights Reserved"),
   createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),

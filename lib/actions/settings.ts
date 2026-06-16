@@ -255,3 +255,15 @@ export async function disableTotp(passwordOrToken: string) {
   revalidatePath("/settings");
   return { success: true };
 }
+
+export async function updatePostingSettings(status: "draft" | "public" | "unlisted" | "private", license: string) {
+  const { db, userId } = await getAuthenticatedDb();
+
+  await db.update(users).set({
+    defaultProjectStatus: status,
+    defaultLicense: license,
+  }).where(eq(users.id, userId));
+
+  revalidatePath("/settings");
+  return { success: true };
+}

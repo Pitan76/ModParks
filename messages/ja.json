@@ -537,8 +537,20 @@
       "successDisconnect": "GitHub連携を解除しました",
       "status": "ステータス",
       "showLink": "プロフィールページにGitHubリンクを表示する",
-      "successShow": "プロフィールにGitHubリンクを表示します。",
-      "successHide": "プロフィールからGitHubリンクを非表示にしました。"
+      "successShow": "GitHubリンクを表示しました",
+      "successHide": "GitHubリンクを非表示にしました"
+    },
+    "posting": {
+      "title": "投稿設定",
+      "defaultProjectStatus": "プロジェクトのデフォルト公開状態",
+      "defaultProjectStatusDesc": "新規プロジェクトを作成したときの初期ステータスです。",
+      "defaultLicense": "デフォルトのライセンス",
+      "defaultLicenseDesc": "新規プロジェクトを作成したときに最初に入力されるライセンスです。",
+      "statusDraft": "下書き",
+      "statusPublic": "公開",
+      "statusUnlisted": "限定公開",
+      "statusPrivate": "非公開",
+      "successUpdate": "投稿設定を更新しました。"
     },
     "security": {
       "title": "セキュリティ",

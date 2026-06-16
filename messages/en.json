@@ -527,9 +527,21 @@
       "disconnect": "Disconnect",
       "successDisconnect": "GitHub disconnected successfully",
       "status": "Status",
-      "showLink": "Show GitHub link on profile page",
-      "successShow": "GitHub link is now visible on your profile.",
-      "successHide": "GitHub link is now hidden from your profile."
+      "showLink": "Show GitHub link on profile",
+      "successShow": "GitHub link is now visible",
+      "successHide": "GitHub link is now hidden"
+    },
+    "posting": {
+      "title": "Posting Settings",
+      "defaultProjectStatus": "Default Project Status",
+      "defaultProjectStatusDesc": "The initial status when you create a new project.",
+      "defaultLicense": "Default License",
+      "defaultLicenseDesc": "The default license that will be pre-filled when creating a new project.",
+      "statusDraft": "Draft",
+      "statusPublic": "Public",
+      "statusUnlisted": "Unlisted",
+      "statusPrivate": "Private",
+      "successUpdate": "Posting settings updated successfully."
     },
     "security": {
       "title": "Security",
