@@ -102,12 +102,17 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
         name="description"
         label={t("fields.description")}
         multiline
-        rows={5}
+        minRows={10}
         fullWidth
         required
         defaultValue={project?.description}
         error={!!error?.description}
         helperText={error?.description?.[0]}
+        sx={{
+          "& textarea": {
+            resize: "vertical !important",
+          }
+        }}
       />
 
       <Autocomplete
