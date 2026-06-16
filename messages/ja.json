@@ -311,7 +311,7 @@
       "loggingIn": "ログイン中...",
       "loginWithGithub": "GitHub でログイン",
       "loginWithEmail": "マジックリンクでログイン",
-      "sendLink": "リンクを送信",
+      "sendLink": "送信",
       "noAccount": "アカウントをお持ちでないですか？ ",
       "registerLink": "新規登録",
       "error": {
