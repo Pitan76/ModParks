@@ -12,22 +12,10 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Autocomplete from "@mui/material/Autocomplete";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition, useEffect, useRef } from "react";
-import { LOADERS, MC_VERSIONS, PREDEFINED_TAGS } from "@/lib/validations";
-import { getLoaderInfo } from "@/lib/loaders";
+import AdvancedSearchDialog, { AdvancedSearchFilters } from "./AdvancedSearchDialog";
 
 interface ProjectSearchBarProps {
   initialQ?: string;
@@ -54,10 +42,8 @@ export default function ProjectSearchBar({
   initialIncludeTags = true,
   initialIncludeAuthor = true
 }: ProjectSearchBarProps) {
-  const t       = useTranslations("Search");
-  const tCommon = useTranslations("Common");
-  const tTags   = useTranslations("Tags");
-  const router  = useRouter();
+  const t = useTranslations("Search");
+  const router = useRouter();
   const pathname = usePathname();
   const [, startTransition] = useTransition();
 
@@ -66,54 +52,41 @@ export default function ProjectSearchBar({
   
   // Real-time state for UI outside dialog
   const [types, setTypes] = useState<string[]>(initialTypes);
-
-  // Applied advanced state (what's actually in the URL)
   const [appliedSort, setAppliedSort] = useState(initialSort);
-  const [appliedLoaders, setAppliedLoaders] = useState<string[]>(initialLoaders);
-  const [appliedMcVersions, setAppliedMcVersions] = useState<string[]>(initialMcVersions);
-  const [appliedTags, setAppliedTags] = useState<string[]>(initialTags);
-  const [appliedSearchMode, setAppliedSearchMode] = useState(initialSearchMode);
-  const [appliedIncludeDesc, setAppliedIncludeDesc] = useState(initialIncludeDesc);
-  const [appliedIncludeTags, setAppliedIncludeTags] = useState(initialIncludeTags);
-  const [appliedIncludeAuthor, setAppliedIncludeAuthor] = useState(initialIncludeAuthor);
 
-  const MAJOR_TAGS = [
-    "Adventure", "Magic", "Tech", "Utility", "World Gen", 
-    "Optimization", "Decoration", "Library", "Minigame", "Economy"
-  ];
+  // Advanced search filters state
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>({
+    loaders: initialLoaders,
+    mcVersions: initialMcVersions,
+    tags: initialTags,
+    searchMode: initialSearchMode,
+    includeDesc: initialIncludeDesc,
+    includeTags: initialIncludeTags,
+    includeAuthor: initialIncludeAuthor,
+  });
 
-  // Dialog internal state (not applied until "Apply" is clicked)
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [tempSort, setTempSort] = useState(initialSort);
-  const [tempLoaders, setTempLoaders] = useState<string[]>(initialLoaders);
-  const [tempMcVersions, setTempMcVersions] = useState<string[]>(initialMcVersions);
-  const [tempTags, setTempTags] = useState<string[]>(initialTags);
-  const [tempSearchMode, setTempSearchMode] = useState(initialSearchMode);
-  const [tempIncludeDesc, setTempIncludeDesc] = useState(initialIncludeDesc);
-  const [tempIncludeTags, setTempIncludeTags] = useState(initialIncludeTags);
-  const [tempIncludeAuthor, setTempIncludeAuthor] = useState(initialIncludeAuthor);
-
   const isFirstRender = useRef(true);
 
   const updateSearch = useCallback(
-    (newQ: string, newTypes: string[], newSort: string, newLoaders: string[], newMcVersions: string[], newTags: string[], 
-     sMode: string, iDesc: boolean, iTags: boolean, iAuthor: boolean) => {
+    (newQ: string, newTypes: string[], newSort: string, filters: AdvancedSearchFilters) => {
       const params = new URLSearchParams();
       if (newQ) params.set("q", newQ);
       if (newTypes.length > 0 && newTypes.length < 2) params.set("types", newTypes.join(","));
       if (newSort && newSort !== "updated") params.set("sort", newSort);
-      if (newLoaders.length > 0) params.set("loaders", newLoaders.join(","));
-      if (newMcVersions.length > 0) params.set("mcVersions", newMcVersions.join(","));
-      if (newTags.length > 0) params.set("tags", newTags.join(","));
       
-      if (sMode !== "OR") params.set("searchMode", sMode);
-      if (!iDesc) params.set("includeDesc", "false");
-      if (!iTags) params.set("includeTags", "false");
-      if (!iAuthor) params.set("includeAuthor", "false");
+      if (filters.loaders.length > 0) params.set("loaders", filters.loaders.join(","));
+      if (filters.mcVersions.length > 0) params.set("mcVersions", filters.mcVersions.join(","));
+      if (filters.tags.length > 0) params.set("tags", filters.tags.join(","));
+      
+      if (filters.searchMode !== "OR") params.set("searchMode", filters.searchMode);
+      if (!filters.includeDesc) params.set("includeDesc", "false");
+      if (!filters.includeTags) params.set("includeTags", "false");
+      if (!filters.includeAuthor) params.set("includeAuthor", "false");
       
       const qs = params.toString();
       startTransition(() => {
-        router.push(`${pathname}${qs ? `?${qs}` : ""}`);
+        router.push(`${pathname}${qs ? \`?\${qs}\` : ""}`);
       });
     },
     [pathname, router]
@@ -133,30 +106,18 @@ export default function ProjectSearchBar({
       isFirstRender.current = false;
       return;
     }
-    updateSearch(debouncedQ, types, appliedSort, appliedLoaders, appliedMcVersions, appliedTags, appliedSearchMode, appliedIncludeDesc, appliedIncludeTags, appliedIncludeAuthor);
-  }, [debouncedQ, types, appliedSort, appliedLoaders, appliedMcVersions, appliedTags, appliedSearchMode, appliedIncludeDesc, appliedIncludeTags, appliedIncludeAuthor, updateSearch]);
+    updateSearch(debouncedQ, types, appliedSort, advancedFilters);
+  }, [debouncedQ, types, appliedSort, advancedFilters, updateSearch]);
 
-  const handleOpenAdvanced = () => {
-    setTempLoaders(appliedLoaders);
-    setTempMcVersions(appliedMcVersions);
-    setTempTags(appliedTags);
-    setTempSearchMode(appliedSearchMode);
-    setTempIncludeDesc(appliedIncludeDesc);
-    setTempIncludeTags(appliedIncludeTags);
-    setTempIncludeAuthor(appliedIncludeAuthor);
-    setAdvancedOpen(true);
-  };
-
-  const handleApplyAdvanced = () => {
-    setAppliedLoaders(tempLoaders);
-    setAppliedMcVersions(tempMcVersions);
-    setAppliedTags(tempTags);
-    setAppliedSearchMode(tempSearchMode);
-    setAppliedIncludeDesc(tempIncludeDesc);
-    setAppliedIncludeTags(tempIncludeTags);
-    setAppliedIncludeAuthor(tempIncludeAuthor);
-    setAdvancedOpen(false);
-  };
+  const isAdvancedActive = 
+    advancedFilters.loaders.length > 0 || 
+    advancedFilters.mcVersions.length > 0 || 
+    advancedFilters.tags.length > 0 || 
+    appliedSort !== "updated" || 
+    advancedFilters.searchMode !== "OR" || 
+    !advancedFilters.includeDesc || 
+    !advancedFilters.includeTags || 
+    !advancedFilters.includeAuthor;
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -178,8 +139,8 @@ export default function ProjectSearchBar({
           }}
         />
         <IconButton 
-          onClick={handleOpenAdvanced} 
-          color={(appliedLoaders.length > 0 || appliedMcVersions.length > 0 || appliedTags.length > 0 || appliedSort !== "updated" || appliedSearchMode !== "OR" || !appliedIncludeDesc || !appliedIncludeTags || !appliedIncludeAuthor) ? "primary" : "default"}
+          onClick={() => setAdvancedOpen(true)} 
+          color={isAdvancedActive ? "primary" : "default"}
           sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}
         >
           <TuneIcon />
@@ -215,113 +176,15 @@ export default function ProjectSearchBar({
         </FormControl>
       </Box>
 
-      {/* Advanced Search Dialog */}
-      <Dialog open={advancedOpen} onClose={() => setAdvancedOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{t("advancedSearch")}</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
-          
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">{t("keywordOptions")}</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-              <ToggleButtonGroup
-                value={tempSearchMode}
-                exclusive
-                onChange={(_, v) => { if (v) setTempSearchMode(v); }}
-                size="small"
-              >
-                <ToggleButton value="OR">OR</ToggleButton>
-                <ToggleButton value="AND">AND</ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
-              <FormControlLabel
-                control={<Switch size="small" checked={tempIncludeDesc} onChange={e => setTempIncludeDesc(e.target.checked)} />}
-                label={<Typography variant="body2">{t("includeDesc")}</Typography>}
-              />
-              <FormControlLabel
-                control={<Switch size="small" checked={tempIncludeTags} onChange={e => setTempIncludeTags(e.target.checked)} />}
-                label={<Typography variant="body2">{t("includeTags")}</Typography>}
-              />
-              <FormControlLabel
-                control={<Switch size="small" checked={tempIncludeAuthor} onChange={e => setTempIncludeAuthor(e.target.checked)} />}
-                label={<Typography variant="body2">{t("includeAuthor")}</Typography>}
-              />
-            </Box>
-          </Box>
-          
-          <Divider />
-          
-          <Autocomplete
-            multiple
-            options={LOADERS as unknown as string[]}
-            value={tempLoaders}
-            onChange={(_, val) => setTempLoaders(val)}
-            renderInput={(params) => <TextField {...params} label={t("platforms")} size="small" />}
-            renderOption={(props, option) => {
-              const info = getLoaderInfo(option);
-              const { key, ...otherProps } = props;
-              return (
-                <li key={key} {...otherProps} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {info.icon && <Box sx={{ display: "flex", alignItems: "center", color: `${info.color}.main` }}>{info.icon}</Box>}
-                  {info.name}
-                </li>
-              );
-            }}
-            renderTags={(val, getTagProps) => val.map((option, idx) => {
-              const info = getLoaderInfo(option);
-              const { key, ...tagProps } = getTagProps({ index: idx });
-              return (
-                <Chip 
-                  key={key} 
-                  label={info.name} 
-                  size="small" 
-                  color={info.color as any}
-                  icon={info.icon}
-                  {...tagProps} 
-                />
-              );
-            })}
-          />
-
-          <Autocomplete
-            multiple
-            options={MC_VERSIONS as unknown as string[]}
-            value={tempMcVersions}
-            onChange={(_, val) => setTempMcVersions(val)}
-            renderInput={(params) => <TextField {...params} label={t("mcVersions")} size="small" />}
-            renderTags={(val, getTagProps) => val.map((option, idx) => {
-              const { key, ...tagProps } = getTagProps({ index: idx });
-              return <Chip key={key} label={option} size="small" {...tagProps} />;
-            })}
-          />
-
-          <Autocomplete
-            multiple
-            freeSolo
-            options={PREDEFINED_TAGS as unknown as string[]}
-            value={tempTags}
-            onChange={(_, val) => setTempTags(val)}
-            renderInput={(params) => <TextField {...params} label={t("tags")} size="small" />}
-            renderOption={(props, option) => {
-              const { key, ...otherProps } = props;
-              let label = option;
-              try { label = tTags(option as any); } catch {}
-              return <li key={key} {...otherProps}>{label}</li>;
-            }}
-            renderTags={(val, getTagProps) => val.map((option, idx) => {
-              const { key, ...tagProps } = getTagProps({ index: idx });
-              let label = option;
-              try { label = tTags(option as any); } catch {}
-              return <Chip key={key} label={label} size="small" {...tagProps} />;
-            })}
-          />
-
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setAdvancedOpen(false)} variant="text">{tCommon("cancel")}</Button>
-          <Button onClick={handleApplyAdvanced} variant="text" color="primary" sx={{ fontWeight: "bold" }}>{t("apply")}</Button>
-        </DialogActions>
-      </Dialog>
+      <AdvancedSearchDialog
+        open={advancedOpen}
+        onClose={() => setAdvancedOpen(false)}
+        initialFilters={advancedFilters}
+        onApply={(filters) => {
+          setAdvancedFilters(filters);
+          setAdvancedOpen(false);
+        }}
+      />
     </Box>
   );
 }
