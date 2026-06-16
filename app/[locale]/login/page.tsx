@@ -220,10 +220,10 @@ export default function LoginPage() {
               />
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 3 }}>
-              <Button onClick={() => setShowTwoFactor(false)} disabled={loading}>
+              <Button onClick={() => setShowTwoFactor(false)} disabled={loading} color="inherit">
                 {tAuth("login.cancel") || "Cancel"}
               </Button>
-              <Button type="submit" variant="contained" disabled={loading || !token}>
+              <Button type="submit" disabled={loading || !token}>
                 {tAuth("login.verify") || "Verify"}
               </Button>
             </DialogActions>
