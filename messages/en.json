@@ -342,6 +342,7 @@
       "dashboard": "Dashboard",
       "users": "Users",
       "projects": "Projects",
+      "ideas": "Ideas",
       "reports": "Reports",
       "config": "Config"
     },
@@ -365,6 +366,17 @@
       "noProjects": "No projects found.",
       "deleteConfirm": "Are you sure you want to completely delete this project? This action cannot be undone and will delete all associated versions and files.",
       "successDelete": "Project successfully deleted"
+    },
+    "ideas": {
+      "title": "Idea Management",
+      "titleName": "Title",
+      "status": "Status",
+      "author": "Author",
+      "created": "Created",
+      "actions": "Actions",
+      "noIdeas": "No ideas found.",
+      "deleteConfirm": "Are you sure you want to completely delete this idea? This action cannot be undone and will delete all associated comments.",
+      "successDelete": "Idea successfully deleted"
     },
     "config": {
       "title": "System Configuration",

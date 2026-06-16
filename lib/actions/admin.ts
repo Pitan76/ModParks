@@ -40,3 +40,13 @@ export async function adminDeleteProject(projectId: string) {
   revalidatePath("/projects");
   return { success: true };
 }
+
+export async function adminDeleteIdea(ideaId: string) {
+  const { db } = await getAdminDb();
+  const { ideas } = await import("@/db/schema");
+  
+  await db.delete(ideas).where(eq(ideas.id, ideaId));
+  revalidatePath("/admin/ideas");
+  revalidatePath("/ideas");
+  return { success: true };
+}

@@ -507,5 +507,10 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     }
   ];
 
-  return <TabbedPanel items={tabs} />;
+  return (
+    <Box>
+      {globalError && <Alert severity="error" sx={{ mb: 4 }}>{globalError}</Alert>}
+      <TabbedPanel items={tabs} />
+    </Box>
+  );
 }
