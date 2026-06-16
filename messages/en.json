@@ -493,7 +493,10 @@
       "errorEmailTaken": "This email address is already in use",
       "updateBtn": "Update",
       "deleteBtn": "Delete Account",
-      "passwordMismatch": "New passwords do not match"
+      "passwordMismatch": "New passwords do not match",
+      "setPassword": "Set Password",
+      "setBtn": "Set Password",
+      "successSetPassword": "Password has been set"
     }
   }
 }

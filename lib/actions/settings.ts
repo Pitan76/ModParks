@@ -117,14 +117,16 @@ export async function changePassword(oldPass: string, newPass: string) {
   const { db, userId } = await getAuthenticatedDb();
 
   const user = await db.select().from(users).where(eq(users.id, userId)).get();
-  if (!user?.passwordHash) return { error: "No password set" };
-
-  const match = await bcrypt.compare(oldPass, user.passwordHash);
-  if (!match) return { error: "errorWrongPassword" };
+  
+  if (user?.passwordHash) {
+    const match = await bcrypt.compare(oldPass, user.passwordHash);
+    if (!match) return { error: "errorWrongPassword" };
+  }
 
   const hashed = await bcrypt.hash(newPass, 10);
   await db.update(users).set({ passwordHash: hashed }).where(eq(users.id, userId));
 
+  revalidatePath("/settings");
   return { success: true };
 }
 

@@ -64,7 +64,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
   };
 
   return (
-    <Card id={`project-card-${project.slug}`} sx={{ height: "100%" }}>
+    <Card id={`project-card-${project.slug}`} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
       <LinkCardActionArea href={`/projects/${project.slug}`} sx={{ height: "100%" }}>
         <CardContent 
           sx={{ 

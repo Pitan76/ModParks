@@ -502,7 +502,10 @@
       "errorEmailTaken": "そのメールアドレスはすでに使われています",
       "updateBtn": "更新する",
       "deleteBtn": "退会する",
-      "passwordMismatch": "新しいパスワードが一致しません"
+      "passwordMismatch": "新しいパスワードが一致しません",
+      "setPassword": "パスワードの設定",
+      "setBtn": "設定する",
+      "successSetPassword": "パスワードを設定しました"
     }
   }
 }

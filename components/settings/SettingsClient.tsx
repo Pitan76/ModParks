@@ -214,7 +214,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     const res = await changePassword(oldPass, newPass);
     if (res.error) showAccMsg("error", res.error);
     else {
-      showAccMsg("success", "successPassword");
+      showAccMsg("success", hasPassword ? "successPassword" : "successSetPassword");
       setOldPass("");
       setNewPass("");
       setConfirmPass("");
@@ -368,17 +368,17 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
 
           <Divider sx={{ my: 4 }} />
 
-          {hasPassword && (
-            <Box component="form" onSubmit={handlePasswordChange} sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>{t("account.changePassword")}</Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 300 }}>
+          <Box component="form" onSubmit={handlePasswordChange} sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>{hasPassword ? t("account.changePassword") : t("account.setPassword")}</Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 300 }}>
+              {hasPassword && (
                 <TextField label={t("account.currentPassword")} type="password" size="small" value={oldPass} onChange={e => setOldPass(e.target.value)} required />
-                <TextField label={t("account.newPassword")} type="password" size="small" value={newPass} onChange={e => setNewPass(e.target.value)} required />
-                <TextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} required />
-                <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", height: 40 }}>{t("account.updateBtn")}</Button>
-              </Box>
+              )}
+              <TextField label={t("account.newPassword")} type="password" size="small" value={newPass} onChange={e => setNewPass(e.target.value)} required />
+              <TextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} required />
+              <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", height: 40 }}>{hasPassword ? t("account.updateBtn") : t("account.setBtn")}</Button>
             </Box>
-          )}
+          </Box>
 
           <Divider sx={{ my: 4 }} />
 
