@@ -8,7 +8,7 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { createProject } from "@/lib/actions/project";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 
@@ -16,6 +16,7 @@ export default function NewProjectForm({ availableTags }: { availableTags: any[]
   const router = useRouter();
   const t = useTranslations("Project");
   const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
 
@@ -26,11 +27,30 @@ export default function NewProjectForm({ availableTags }: { availableTags: any[]
 
     const formData = new FormData(e.currentTarget);
     
-    // Server Action呼び出し
-    const result = await createProject(formData);
-    
-    if (result && result.error) {
-      setError(result.error as { [key: string]: string[] });
+    // API呼び出しに変更（CloudflareのServer Action + next-intlバグ回避のため）
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await res.json();
+      
+      if (!res.ok) {
+        if (result.error) {
+          setError(result.error as { [key: string]: string[] });
+        } else {
+          console.error(result);
+          setError({ _form: ["Failed to create project"] });
+        }
+        setPending(false);
+      } else {
+        // 成功したらリダイレクト
+        router.push(`/${locale}/projects/${result.slug}`);
+        router.refresh();
+      }
+    } catch (err) {
+      console.error(err);
+      setError({ _form: ["An unexpected error occurred"] });
       setPending(false);
     }
   };

@@ -1,0 +1,68 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { projects, projectTags } from "@/db/schema";
+import { createProjectSchema } from "@/lib/validations";
+import { createId } from "@paralleldrive/cuid2";
+import { eq } from "drizzle-orm";
+
+export async function POST(req: NextRequest) {
+  try {
+    const { db, session } = await getAuthenticatedDb();
+    
+    // Auth.js may redirect to login if unauthorized, but getAuthenticatedDb throws Error
+    // We should catch it and return 401
+    
+    const formData = await req.formData();
+    const raw = {
+      name:        formData.get("name"),
+      slug:        formData.get("slug"),
+      description: formData.get("description"),
+      type:        formData.get("type"),
+      license:     formData.get("license"),
+      sourceUrl:   formData.get("sourceUrl"),
+      links:       formData.get("links"),
+      tags:        formData.getAll("tags"),
+    };
+
+    const parsed = createProjectSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 });
+    }
+
+    const { name, slug, description, type, license, sourceUrl, links, tags } = parsed.data;
+    const id = createId();
+
+    const existingProject = await db.select().from(projects).where(eq(projects.slug, slug)).get();
+    if (existingProject) {
+      return NextResponse.json({ error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } }, { status: 400 });
+    }
+
+    await db.insert(projects).values({
+      id,
+      slug,
+      name,
+      description,
+      type,
+      license,
+      sourceUrl:  sourceUrl || null,
+      links:      links || null,
+      iconUrl:    formData.get("iconUrl") as string | null,
+      authorId:   session.user.id,
+      status:     "draft",
+    }).run();
+
+    if (tags.length > 0) {
+      await db.insert(projectTags).values(
+        tags.map((tag) => ({ projectId: id, tag }))
+      ).run();
+    }
+
+    return NextResponse.json({ success: true, slug });
+  } catch (err: any) {
+    if (err.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("API /projects Error:", err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
