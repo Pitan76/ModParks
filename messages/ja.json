@@ -229,6 +229,7 @@
     },
     "accountDeleted": "このアカウントは削除されました",
     "projects": "プロジェクト",
+    "manage": "管理",
     "noProjects": "まだ公開されているプロジェクトはありません。",
     "lists": "リスト",
     "visibility": {

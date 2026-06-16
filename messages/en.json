@@ -225,6 +225,7 @@
     },
     "accountDeleted": "This account has been deleted",
     "projects": "Projects",
+    "manage": "Manage",
     "noProjects": "No public projects yet.",
     "lists": "Lists",
     "visibility": {

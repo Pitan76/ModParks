@@ -202,9 +202,21 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         </Box>
       </Box>
 
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
-        {t("projects")}
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0 }}>
+          {t("projects")}
+        </Typography>
+        {isOwner && (
+          <Button
+            component={RoutingLink}
+            href="/projects?author=me"
+            variant="outlined"
+            size="small"
+          >
+            {t("manage")}
+          </Button>
+        )}
+      </Box>
       
       {visibleProjects.length > 0 ? (
         <Grid container spacing={2}>
