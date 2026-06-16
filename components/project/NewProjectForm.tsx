@@ -12,7 +12,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { createProject } from "@/lib/actions/project";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 
-export default function NewProjectForm({ availableTags }: { availableTags: any[] }) {
+export default function NewProjectForm({ availableTags, defaultLicense }: { availableTags: any[], defaultLicense?: string }) {
   const router = useRouter();
   const t = useTranslations("Project");
   const tCommon = useTranslations("Common");
@@ -64,7 +64,7 @@ export default function NewProjectForm({ availableTags }: { availableTags: any[]
       <Card>
         <CardContent sx={{ p: 4 }}>
           <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <ProjectFormFields error={error} availableTags={availableTags} />
+            <ProjectFormFields error={error} availableTags={availableTags} defaultLicense={defaultLicense} />
 
             <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
               <Button variant="outlined" onClick={() => router.back()} disabled={pending}>

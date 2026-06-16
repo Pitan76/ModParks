@@ -29,10 +29,11 @@ export interface ProjectFormFieldsProps {
     tags?: string[];
   };
   availableTags?: { slug: string; name: string }[];
+  defaultLicense?: string;
   children?: React.ReactNode;
 }
 
-export default function ProjectFormFields({ error, project, availableTags = [], children }: ProjectFormFieldsProps) {
+export default function ProjectFormFields({ error, project, availableTags = [], defaultLicense, children }: ProjectFormFieldsProps) {
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
@@ -168,7 +169,7 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           id="project-license"
           freeSolo
           options={["MIT", "Apache-2.0", "GPL-3.0", "LGPL-3.0", "All Rights Reserved", "CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"]}
-          defaultValue={project?.license || "MIT"}
+          defaultValue={project?.license || defaultLicense || "MIT"}
           fullWidth
           renderInput={(params) => (
             <TextField
