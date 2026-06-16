@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import Box from "@mui/material/Box";
+import { usePathname } from "next/navigation";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";
+import AdminSidebar from "./AdminSidebar";
 import AppHeader from "./AppHeader";
 
 import type { Session } from "next-auth";
@@ -15,14 +17,18 @@ export default function AppLayout({
   session: Session | null;
 }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const pathname = usePathname() || "";
+  const isAdminPage = pathname.includes("/admin");
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const SidebarComponent = isAdminPage ? AdminSidebar : AppSidebar;
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <AppSidebar
+      <SidebarComponent
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
         session={session}
