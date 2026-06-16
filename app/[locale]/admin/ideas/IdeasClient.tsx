@@ -62,7 +62,7 @@ export default function IdeasClient({ ideas }: { ideas: AdminIdea[] }) {
               return (
                 <TableRow key={idea.id}>
                   <TableCell>
-                    <Typography variant="body2" fontWeight="bold">
+                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
                       {idea.title}
                     </Typography>
                   </TableCell>

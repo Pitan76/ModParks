@@ -1,6 +1,6 @@
 import { getDatabase } from "@/lib/db";
 import { users, userProfiles } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import UsersClient from "./UsersClient";
 import { getTranslations, setRequestLocale } from "next-intl/server";

@@ -136,6 +136,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
               </li>
             );
           }}
+          // @ts-ignore
           renderTags={(val: any[], getTagProps) => val.map((option, idx) => {
             const slug = typeof option === "string" ? option : option.slug;
             const name = typeof option === "string" ? option : option.name;
@@ -195,6 +196,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
             const { key, ...otherProps } = props;
             return <li key={key} {...otherProps}>{label}</li>;
           }}
+          // @ts-ignore
           renderTags={(val: any[], getTagProps) => val.map((option, idx) => {
             const slug = typeof option === "string" ? option : option.slug;
             const foundObj = availableTags.find(tObj => tObj.slug === slug);
