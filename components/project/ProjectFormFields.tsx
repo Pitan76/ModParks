@@ -116,6 +116,11 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
         disableCloseOnSelect
         options={availableTags}
         getOptionLabel={(option) => {
+          const slug = typeof option === "string" ? option : option.slug;
+          try {
+            const translated = tTags(slug as any);
+            if (translated && !translated.includes(".")) return translated;
+          } catch {}
           if (typeof option === "string") return option;
           return option.name || option.slug || "";
         }}
@@ -132,7 +137,10 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
             const { key, ...tagProps } = getItemProps({ index });
             const foundObj = availableTags.find((tObj) => tObj.slug === optionSlug);
             let label = foundObj ? foundObj.name : optionSlug;
-            try { if(!foundObj) label = tTags(optionSlug as any); } catch {}
+            try { 
+              const translated = tTags(optionSlug as any);
+              if (translated && !translated.includes(".")) label = translated;
+            } catch {}
             return <Chip variant="outlined" label={label} key={key} {...tagProps} />;
           })
         }

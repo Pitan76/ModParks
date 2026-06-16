@@ -170,6 +170,11 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           freeSolo
           options={availableTags}
           getOptionLabel={(option) => {
+            const slug = typeof option === "string" ? option : option.slug;
+            try {
+              const translated = tTags(slug as any);
+              if (translated && !translated.includes(".")) return translated;
+            } catch {}
             if (typeof option === "string") return option;
             return option.name || option.slug || "";
           }}
@@ -179,7 +184,10 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           renderOption={(props, option: any) => {
             const slug = typeof option === "string" ? option : option.slug;
             let label = typeof option === "string" ? option : option.name;
-            try { if (typeof option === "string") label = tTags(option as any); } catch {}
+            try {
+              const translated = tTags(slug as any);
+              if (translated && !translated.includes(".")) label = translated;
+            } catch {}
             const { key, ...otherProps } = props;
             return <li key={key} {...otherProps}>{label}</li>;
           }}
@@ -187,7 +195,10 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
             const slug = typeof option === "string" ? option : option.slug;
             const foundObj = availableTags.find(tObj => tObj.slug === slug);
             let label = foundObj ? foundObj.name : slug;
-            try { if (!foundObj) label = tTags(slug as any); } catch {}
+            try { 
+              const translated = tTags(slug as any);
+              if (translated && !translated.includes(".")) label = translated;
+            } catch {}
             const { key, ...tagProps } = getTagProps({ index: idx });
             return <Chip key={key} label={label} size="small" {...tagProps} />;
           })}
