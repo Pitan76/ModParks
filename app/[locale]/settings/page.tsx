@@ -42,7 +42,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
           avatarUrl: userRecord?.avatarUrl || "",
           links: userRecord?.links || "[]",
           locale: userRecord?.locale || "ja",
-          showGithubLink: userRecord?.showGithubLink ?? true,
+          showGithubLink: (userRecord?.custom as Record<string, any>)?.showGithubLink ?? true,
         }}
         apiKeys={userApiKeys}
         isGitHubConnected={isGitHubConnected}

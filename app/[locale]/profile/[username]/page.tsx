@@ -186,7 +186,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
             }
           })()}
 
-          {user.githubUsername && user.showGithubLink && (
+          {user.githubUsername && ((user.custom as Record<string, any>)?.showGithubLink ?? true) && (
             <Box sx={{ mt: 1 }}>
               <Link
                 href={`https://github.com/${user.githubUsername}`}

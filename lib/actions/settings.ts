@@ -59,7 +59,13 @@ export async function disconnectGitHub() {
 export async function toggleGithubVisibility(show: boolean) {
   const { db, userId } = await getAuthenticatedDb();
 
-  await db.update(users).set({ showGithubLink: show }).where(eq(users.id, userId));
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+  if (!user) return { error: "User not found" };
+
+  const customObj = (user.custom as Record<string, any>) || {};
+  customObj.showGithubLink = show;
+
+  await db.update(users).set({ custom: customObj }).where(eq(users.id, userId));
 
   revalidatePath("/settings");
   revalidatePath("/profile");
