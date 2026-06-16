@@ -11,6 +11,10 @@ export async function registerUser(formData: FormData) {
   const displayName = formData.get("displayName") as string;
   const email       = formData.get("email") as string;
   const password    = formData.get("password") as string;
+  
+  const { checkRateLimit } = await import("@/lib/rate-limit");
+  const rlRes = await checkRateLimit("register", 10, 5 * 60 * 1000);
+  if (!rlRes.success) return { error: "TOO_MANY_REQUESTS" };
 
   if (!username || !displayName || !email || !password) {
     return { error: "allFieldsRequired" };
@@ -38,7 +42,7 @@ export async function registerUser(formData: FormData) {
     }
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, 12);
   const id = createId();
 
   await db.insert(users).values({

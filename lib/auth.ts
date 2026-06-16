@@ -42,6 +42,9 @@ export const authConfig = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+        const { checkRateLimit } = await import("@/lib/rate-limit");
+        const rlRes = await checkRateLimit("login", 10, 5 * 60 * 1000);
+        if (!rlRes.success) throw new Error("TOO_MANY_REQUESTS");
 
         const { getDatabase } = await import("@/lib/db");
         const db = await getDatabase();

@@ -9,6 +9,13 @@ export async function GET(
   const { key: keyArray } = await params;
   const key = keyArray.join("/");
 
+  // M-1: Only allow specific prefixes for public access
+  const allowedPrefixes = ["avatar/", "icon/", "mod/"];
+  const isAllowed = allowedPrefixes.some(prefix => key.startsWith(prefix));
+  if (!isAllowed) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   let R2: R2Bucket;
   if (process.env.NODE_ENV === "development" && typeof process !== "undefined" && process.release?.name === "node") {
     const { getCachedPlatformProxy } = await import("@/lib/proxy");

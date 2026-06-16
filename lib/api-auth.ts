@@ -12,10 +12,16 @@ export async function validateApiKey(request: Request) {
 
   const key = authHeader.split(" ")[1];
   
+  const encoder = new TextEncoder();
+  const data = encoder.encode(key);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashedKey = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  
   const [apiKeyRecord] = await db
     .select()
     .from(apiKeys)
-    .where(eq(apiKeys.key, key))
+    .where(eq(apiKeys.key, hashedKey))
     .limit(1);
 
   if (!apiKeyRecord) {

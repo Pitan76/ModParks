@@ -15,12 +15,19 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const body = (await request.json()) as { displayName?: string; bio?: string };
-    const { displayName, bio } = body;
+    const { updateProfileSchema } = await import("@/lib/validations");
+    const body = await request.json();
+    
+    const parsed = updateProfileSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Validation Error", details: parsed.error.flatten().fieldErrors }, { status: 400 });
+    }
+    
+    const { displayName, bio } = parsed.data;
 
     const updates: Partial<typeof users.$inferInsert> = {};
-    if (typeof displayName === "string") updates.displayName = displayName;
-    if (typeof bio === "string") updates.bio = bio;
+    if (displayName !== undefined) updates.displayName = displayName;
+    if (bio !== undefined) updates.bio = bio;
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });

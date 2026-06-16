@@ -488,3 +488,10 @@ export const authenticators = sqliteTable(
   })
 );
 
+export const rateLimits = sqliteTable("rate_limits", {
+  id: text("id").primaryKey(), // e.g. "ip:192.168.1.1:login"
+  count: integer("count").notNull().default(1),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+});
+
+

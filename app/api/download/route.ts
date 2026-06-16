@@ -36,19 +36,24 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // ダウンロードカウントをインクリメント
-    await Promise.all([
-      db
-        .update(versions)
-        .set({ downloads: version.downloads + 1 })
-        .where(eq(versions.id, versionId))
-        .run(),
-      db
-        .update(projects)
-        .set({ downloads: project.downloads + 1 })
-        .where(eq(projects.id, project.id))
-        .run(),
-    ]);
+    // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）
+    const { checkRateLimit } = await import("@/lib/rate-limit");
+    const rlRes = await checkRateLimit(`download:${versionId}`, 1, 10 * 60 * 1000);
+    
+    if (rlRes.success) {
+      await Promise.all([
+        db
+          .update(versions)
+          .set({ downloads: version.downloads + 1 })
+          .where(eq(versions.id, versionId))
+          .run(),
+        db
+          .update(projects)
+          .set({ downloads: project.downloads + 1 })
+          .where(eq(projects.id, project.id))
+          .run(),
+      ]);
+    }
 
     // 外部URLの場合はそのままリダイレクト、R2の場合はプレフィックスを付加
     const { getR2PublicUrl } = await import("@/lib/r2");

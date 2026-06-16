@@ -28,7 +28,9 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     .get();
 
   if (!project) throw new Error("Project not found");
-  if (project.authorId !== userId) throw new Error("Forbidden");
+  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId))).get();
+  const userRecord = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
+  if (project.authorId !== userId && !member && userRecord?.role !== "admin") throw new Error("Forbidden");
 
   const raw = {
     versionNumber: formData.get("versionNumber"),
@@ -118,7 +120,8 @@ export async function updateVersion(versionId: string, projectSlug: string, form
   if (!project) throw new Error("Project not found");
 
   const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId))).get();
-  if (project.authorId !== userId && !member) throw new Error("Forbidden");
+  const userRecord = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
+  if (project.authorId !== userId && !member && userRecord?.role !== "admin") throw new Error("Forbidden");
 
   const raw = {
     versionNumber: formData.get("versionNumber"),

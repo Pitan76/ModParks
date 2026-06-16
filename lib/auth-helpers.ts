@@ -18,6 +18,9 @@ export async function getAuthenticatedDb() {
  */
 export async function getAdminDb() {
   const { db, session, userId } = await getAuthenticatedDb();
-  if (session.user.role !== "admin") throw new Error("Forbidden");
+  const { users } = await import("@/db/schema");
+  const { eq } = await import("drizzle-orm");
+  const user = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
+  if (user?.role !== "admin") throw new Error("Forbidden");
   return { db, session, userId };
 }

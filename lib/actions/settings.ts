@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { users, apiKeys, accounts } from "@/db/schema";
+import { users, apiKeys, accounts, rateLimits } from "@/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
@@ -26,16 +26,22 @@ export async function updateProfile(data: { displayName: string, bio: string, av
 export async function generateApiKey(name: string) {
   const { db, userId } = await getAuthenticatedDb();
 
-  const keyStr = "mp_" + crypto.randomUUID().replace(/-/g, "");
+  const rawKey = "mp_" + crypto.randomUUID().replace(/-/g, "");
+  
+  const encoder = new TextEncoder();
+  const data = encoder.encode(rawKey);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashedKey = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
   await db.insert(apiKeys).values({
-    key: keyStr,
+    key: hashedKey,
     name: name,
     userId: userId,
   });
 
   revalidatePath("/settings");
-  return { success: true, key: keyStr };
+  return { success: true, key: rawKey };
 }
 
 export async function deleteApiKey(id: string) {
@@ -89,6 +95,20 @@ export async function changeUsername(newId: string) {
     return { error: "errorIdTaken" };
   }
 
+  // M-4: 30 days cooldown for username changes
+  const rateLimitId = `username_change:${userId}`;
+  const now = Date.now();
+  const rlRecord = await db.select().from(rateLimits).where(eq(rateLimits.id, rateLimitId)).get();
+  if (rlRecord && rlRecord.expiresAt.getTime() > now) {
+    return { error: "errorRateLimit" }; // Need to add translation or just fail
+  }
+
+  if (rlRecord) {
+    await db.update(rateLimits).set({ expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000) }).where(eq(rateLimits.id, rateLimitId));
+  } else {
+    await db.insert(rateLimits).values({ id: rateLimitId, expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000) });
+  }
+
   const currentUser = await db.select().from(users).where(eq(users.id, userId)).get();
   
   await db.update(users).set({
@@ -100,8 +120,16 @@ export async function changeUsername(newId: string) {
   return { success: true };
 }
 
-export async function changeEmail(newEmail: string) {
+export async function changeEmail(newEmail: string, password?: string) {
   const { db, userId } = await getAuthenticatedDb();
+
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+  
+  if (user?.passwordHash) {
+    if (!password) return { error: "errorWrongPassword" };
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) return { error: "errorWrongPassword" };
+  }
 
   const existing = await db.select().from(users).where(eq(users.email, newEmail)).get();
   if (existing) {
@@ -113,7 +141,7 @@ export async function changeEmail(newEmail: string) {
   return { success: true };
 }
 
-export async function changePassword(oldPass: string, newPass: string) {
+export async function changePassword(oldPass: string, newPass: string, totpToken?: string) {
   const { db, userId } = await getAuthenticatedDb();
 
   const user = await db.select().from(users).where(eq(users.id, userId)).get();
@@ -123,7 +151,15 @@ export async function changePassword(oldPass: string, newPass: string) {
     if (!match) return { error: "errorWrongPassword" };
   }
 
-  const hashed = await bcrypt.hash(newPass, 10);
+  if (user?.twoFactorEnabled && user?.twoFactorSecret) {
+    if (!totpToken) return { error: "INVALID_CODE" };
+    const { TOTP } = await import("otpauth");
+    const totp = new TOTP({ secret: user.twoFactorSecret });
+    const delta = totp.validate({ token: totpToken, window: 1 });
+    if (delta === null) return { error: "INVALID_CODE" };
+  }
+
+  const hashed = await bcrypt.hash(newPass, 12);
   await db.update(users).set({ passwordHash: hashed }).where(eq(users.id, userId));
 
   revalidatePath("/settings");
@@ -138,7 +174,7 @@ export async function deleteAccount() {
 }
 
 export async function generateTotpSecret() {
-  const { db, session } = await getAuthenticatedDb();
+  const { db, session, userId } = await getAuthenticatedDb();
   const { TOTP, Secret } = await import("otpauth");
 
   const secret = new Secret();
@@ -151,14 +187,25 @@ export async function generateTotpSecret() {
     secret,
   });
 
-  return { secret: secret.base32, uri: totp.toString() };
+  await db.update(users).set({ twoFactorSecret: secret.base32 }).where(eq(users.id, userId));
+
+  return { uri: totp.toString() };
 }
 
-export async function verifyAndEnableTotp(secretBase32: string, token: string) {
+export async function verifyAndEnableTotp(token: string) {
   const { db, userId } = await getAuthenticatedDb();
   const { TOTP } = await import("otpauth");
 
-  const totp = new TOTP({ secret: secretBase32 });
+  const { checkRateLimit } = await import("@/lib/rate-limit");
+  const rlRes = await checkRateLimit("2fa_verify", 10, 5 * 60 * 1000);
+  if (!rlRes.success) return { error: "TOO_MANY_REQUESTS" };
+
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+  if (!user || !user.twoFactorSecret) {
+    return { error: "NO_SETUP" };
+  }
+
+  const totp = new TOTP({ secret: user.twoFactorSecret });
   const delta = totp.validate({ token, window: 1 });
 
   if (delta === null) {
@@ -167,15 +214,39 @@ export async function verifyAndEnableTotp(secretBase32: string, token: string) {
 
   await db.update(users).set({
     twoFactorEnabled: true,
-    twoFactorSecret: secretBase32,
   }).where(eq(users.id, userId));
 
   revalidatePath("/settings");
   return { success: true };
 }
 
-export async function disableTotp() {
+export async function disableTotp(passwordOrToken: string) {
   const { db, userId } = await getAuthenticatedDb();
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+  
+  if (!user || !user.twoFactorEnabled) return { success: true };
+
+  let isAuthorized = false;
+
+  // Check password if exists
+  if (user.passwordHash) {
+    isAuthorized = await bcrypt.compare(passwordOrToken, user.passwordHash);
+  }
+  
+  // If password failed or doesn't exist, check TOTP token
+  if (!isAuthorized && user.twoFactorSecret) {
+    const { TOTP } = await import("otpauth");
+    const totp = new TOTP({ secret: user.twoFactorSecret });
+    const delta = totp.validate({ token: passwordOrToken, window: 1 });
+    if (delta !== null) {
+      isAuthorized = true;
+    }
+  }
+
+  if (!isAuthorized) {
+    return { error: "UNAUTHORIZED" };
+  }
+
   await db.update(users).set({
     twoFactorEnabled: false,
     twoFactorSecret: null,

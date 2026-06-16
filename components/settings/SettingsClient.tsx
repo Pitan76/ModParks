@@ -97,8 +97,11 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   // 2FA State
   const [is2FAEnabled, setIs2FAEnabled] = useState(!!twoFactorEnabled);
   const [totpSetupUri, setTotpSetupUri] = useState("");
-  const [totpSecret, setTotpSecret] = useState("");
   const [totpToken, setTotpToken] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [passwordTotpToken, setPasswordTotpToken] = useState("");
+  const [disableTotpOpen, setDisableTotpOpen] = useState(false);
+  const [disableTotpPasswordOrToken, setDisableTotpPasswordOrToken] = useState("");
   const [twoFactorMsg, setTwoFactorMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
 
   // ---------- Profile Handlers ----------
@@ -215,7 +218,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   const handleEmailChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email === user.email) return;
-    const res = await changeEmail(email);
+    const res = await changeEmail(email, emailPassword);
     if (res.error) showAccMsg("error", res.error);
     else showAccMsg("success", "successEmail");
   };
@@ -226,13 +229,14 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
       showAccMsg("error", "passwordMismatch");
       return;
     }
-    const res = await changePassword(oldPass, newPass);
+    const res = await changePassword(oldPass, newPass, passwordTotpToken);
     if (res.error) showAccMsg("error", res.error);
     else {
       showAccMsg("success", hasPassword ? "successPassword" : "successSetPassword");
       setOldPass("");
       setNewPass("");
       setConfirmPass("");
+      setPasswordTotpToken("");
     }
   };
 
@@ -246,7 +250,6 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
 
   const handleSetupTotp = async () => {
     const res = await generateTotpSecret();
-    setTotpSecret(res.secret);
     setTotpSetupUri(res.uri);
     setTwoFactorMsg(null);
     setTotpToken("");
@@ -255,13 +258,12 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   const handleVerifyTotp = async () => {
     setTwoFactorMsg(null);
     if (!totpToken) return;
-    const res = await verifyAndEnableTotp(totpSecret, totpToken);
+    const res = await verifyAndEnableTotp(totpToken);
     if (res.error) {
       setTwoFactorMsg({ type: "error", text: t("security.invalidCode") });
     } else {
       setIs2FAEnabled(true);
       setTotpSetupUri("");
-      setTotpSecret("");
       setTotpToken("");
       setTwoFactorMsg({ type: "success", text: t("profile.success") });
       setTimeout(() => setTwoFactorMsg(null), 3000);
@@ -269,8 +271,14 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   };
 
   const handleDisableTotp = async () => {
-    await disableTotp();
+    const res = await disableTotp(disableTotpPasswordOrToken);
+    if (res.error) {
+      setTwoFactorMsg({ type: "error", text: t("security.invalidCode") });
+      return;
+    }
+    setDisableTotpOpen(false);
     setIs2FAEnabled(false);
+    setDisableTotpPasswordOrToken("");
     setTwoFactorMsg({ type: "success", text: t("profile.success") });
     setTimeout(() => setTwoFactorMsg(null), 3000);
   };
@@ -408,6 +416,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             <Typography variant="h6" sx={{ mb: 2 }}>{t("account.changeEmail")}</Typography>
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField label={t("account.newEmail")} size="small" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+              {hasPassword && <TextField label={t("account.currentPassword")} type="password" size="small" value={emailPassword} onChange={e => setEmailPassword(e.target.value)} required />}
               <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("account.updateBtn")}</Button>
             </Box>
           </Box>
@@ -422,6 +431,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
               )}
               <TextField label={t("account.newPassword")} type="password" size="small" value={newPass} onChange={e => setNewPass(e.target.value)} required />
               <TextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} required />
+              {is2FAEnabled && <TextField label={t("security.verificationCode")} type="text" size="small" value={passwordTotpToken} onChange={e => setPasswordTotpToken(e.target.value)} required />}
               <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", height: 40 }}>{hasPassword ? t("account.updateBtn") : t("account.setBtn")}</Button>
             </Box>
           </Box>
@@ -468,9 +478,24 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             </Typography>
 
             {is2FAEnabled ? (
-              <Button variant="outlined" color="error" onClick={handleDisableTotp}>
-                {t("security.disableTwoFactor")}
-              </Button>
+              <>
+                <Button variant="outlined" color="error" onClick={() => setDisableTotpOpen(true)}>
+                  {t("security.disableTwoFactor")}
+                </Button>
+                <Dialog open={disableTotpOpen} onClose={() => setDisableTotpOpen(false)}>
+                  <DialogTitle>{t("security.disableTwoFactor")}</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText sx={{ mb: 2 }}>{t("account.currentPassword")}</DialogContentText>
+                    <TextField fullWidth type="password" size="small" value={disableTotpPasswordOrToken} onChange={e => setDisableTotpPasswordOrToken(e.target.value)} />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={() => setDisableTotpOpen(false)}>{tCommon("cancel")}</Button>
+                    <Button color="error" variant="contained" onClick={handleDisableTotp}>
+                      {t("security.disableTwoFactor")}
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </>
             ) : (
               !totpSetupUri ? (
                 <Button variant="contained" onClick={handleSetupTotp}>
