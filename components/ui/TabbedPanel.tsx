@@ -30,8 +30,8 @@ export default function TabbedPanel({ items, defaultTab = 0 }: TabbedPanelProps)
   const safeActiveTab = activeTab >= visibleItems.length ? 0 : activeTab;
 
   return (
-    <Box>
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4 }}>
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4, maxWidth: "100%" }}>
         <Tabs
           value={safeActiveTab}
           onChange={(_, newValue) => setActiveTab(newValue)}

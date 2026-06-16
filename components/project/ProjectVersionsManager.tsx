@@ -143,7 +143,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
   };
 
   return (
-    <Box>
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="body2" color="text.secondary">
           {t("manager.description")}
@@ -155,7 +155,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
 
       {errorMsg && <Alert severity="error" sx={{ mb: 3 }}>{errorMsg}</Alert>}
 
-      <TableContainer component={Paper} variant="outlined" sx={{ width: "100%", overflowX: "auto" }}>
+      <TableContainer component={Paper} variant="outlined" sx={{ width: "100%", maxWidth: "100%", overflowX: "auto" }}>
         <Table size="small" sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>

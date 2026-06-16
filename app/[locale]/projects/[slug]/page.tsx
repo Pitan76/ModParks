@@ -100,7 +100,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     <Container maxWidth="lg" sx={{ py: 5 }}>
       <Grid container spacing={4}>
         {/* ─── 左カラム: プロジェクト情報 ──────────────────────────────── */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid size={{ xs: 12, md: 8 }} sx={{ minWidth: 0, maxWidth: "100%" }}>
           
           <ProjectDetailHeader 
             project={p} 

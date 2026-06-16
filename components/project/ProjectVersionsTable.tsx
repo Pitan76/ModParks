@@ -54,7 +54,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
   }, [versions]);
 
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ mb: 2, width: "100%", overflowX: "auto" }}>
+    <TableContainer component={Paper} variant="outlined" sx={{ mb: 2, width: "100%", maxWidth: "100%", overflowX: "auto" }}>
       <Table sx={{ minWidth: 650 }}>
         <TableHead>
           <TableRow>
