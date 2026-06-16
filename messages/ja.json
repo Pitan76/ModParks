@@ -319,7 +319,9 @@
         "invalidTwoFactor": "2段階認証コードが間違っています"
       },
       "twoFactorDesc": "認証アプリで生成された6桁のコードを入力してください。",
-      "verify": "認証する"
+      "verify": "認証する",
+      "twoFactorRequired": "2段階認証",
+      "cancel": "キャンセル"
     },
     "register": {
       "title": "新規登録",
@@ -346,7 +348,8 @@
       "displayNameHelper": "サイト上に表示される名前です",
       "email": "メールアドレス",
       "password": "パスワード",
-      "passwordWithRule": "パスワード (8文字以上)"
+      "passwordWithRule": "パスワード (8文字以上)",
+      "twoFactorToken": "2FA トークン"
     },
     "or": "または",
     "error": {

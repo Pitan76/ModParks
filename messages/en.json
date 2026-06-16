@@ -310,7 +310,9 @@
         "invalidTwoFactor": "Invalid 2FA code"
       },
       "twoFactorDesc": "Enter the 6-digit code from your authenticator app.",
-      "verify": "Verify"
+      "verify": "Verify",
+      "twoFactorRequired": "Two-Factor Authentication",
+      "cancel": "Cancel"
     },
     "register": {
       "title": "Register",
@@ -337,7 +339,8 @@
       "displayNameHelper": "The name displayed on the site",
       "email": "Email Address",
       "password": "Password",
-      "passwordWithRule": "Password (8+ chars)"
+      "passwordWithRule": "Password (8+ characters)",
+      "twoFactorToken": "2FA Token"
     },
     "or": "or",
     "error": {
