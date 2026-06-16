@@ -18,4 +18,25 @@ export async function updateUserRole(targetUserId: string, newRole: "user" | "ad
   return { success: true };
 }
 
+export async function deleteUser(targetUserId: string) {
+  const { db, session } = await getAdminDb();
 
+  if (targetUserId === session.user.id) {
+    throw new Error("Cannot delete yourself");
+  }
+
+  // Soft delete by setting deletedAt
+  await db.update(users).set({ deletedAt: new Date() }).where(eq(users.id, targetUserId));
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
+export async function adminDeleteProject(projectId: string) {
+  const { db } = await getAdminDb();
+  const { projects } = await import("@/db/schema");
+  
+  await db.delete(projects).where(eq(projects.id, projectId));
+  revalidatePath("/admin/projects");
+  revalidatePath("/projects");
+  return { success: true };
+}

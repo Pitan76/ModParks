@@ -341,6 +341,7 @@
     "sidebar": {
       "dashboard": "Dashboard",
       "users": "Users",
+      "projects": "Projects",
       "reports": "Reports",
       "config": "Config"
     },
@@ -353,6 +354,17 @@
       "roleUser": "User",
       "roleAdmin": "Admin",
       "successUpdate": "Role updated successfully"
+    },
+    "projects": {
+      "title": "Project Management",
+      "projectName": "Project Name",
+      "slug": "Slug",
+      "author": "Author",
+      "created": "Created",
+      "actions": "Actions",
+      "noProjects": "No projects found.",
+      "deleteConfirm": "Are you sure you want to completely delete this project? This action cannot be undone and will delete all associated versions and files.",
+      "successDelete": "Project successfully deleted"
     },
     "config": {
       "title": "System Configuration",

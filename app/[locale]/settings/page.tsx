@@ -9,8 +9,9 @@ import SettingsClient from "@/components/settings/SettingsClient";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 
-export default async function SettingsPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function SettingsPage({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
   setRequestLocale(locale);
 
   const session = await auth();
@@ -47,6 +48,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
         apiKeys={userApiKeys}
         isGitHubConnected={isGitHubConnected}
         hasPassword={!!userRecord?.passwordHash}
+        error={resolvedSearchParams.error as string | undefined}
       />
     </Container>
   );

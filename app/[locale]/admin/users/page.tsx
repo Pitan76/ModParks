@@ -11,7 +11,8 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
   const tAdmin = await getTranslations("Admin.users");
 
   const db = await getDatabase();
-  const allUsers = await db.select().from(users).orderBy(desc(users.createdAt)).all();
+  const { isNull } = await import("drizzle-orm");
+  const allUsers = await db.select().from(users).where(isNull(users.deletedAt)).orderBy(desc(users.createdAt)).all();
 
   return (
     <>

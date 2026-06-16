@@ -14,10 +14,13 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
-import { updateUserRole } from "@/lib/actions/admin";
+import { updateUserRole, deleteUser } from "@/lib/actions/admin";
+import Button from "@mui/material/Button";
+import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from "@mui/material/IconButton";
 import { useTranslations } from "next-intl";
 
-interface User {
+export interface User {
   id: string;
   username: string | null;
   displayName: string | null;
@@ -26,7 +29,6 @@ interface User {
   role: string;
   createdAt: Date | number;
 }
-
 export default function UsersClient({ users }: { users: User[] }) {
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const tAdmin = useTranslations("Admin.users");
@@ -35,6 +37,17 @@ export default function UsersClient({ users }: { users: User[] }) {
     try {
       await updateUserRole(userId, newRole);
       setMsg({ type: "success", text: tAdmin("successUpdate", { role: newRole === "admin" ? tAdmin("roleAdmin") : tAdmin("roleUser") }) });
+    } catch (err: any) {
+      setMsg({ type: "error", text: err.message });
+    }
+    setTimeout(() => setMsg(null), 3000);
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to delete this user? This cannot be undone.")) return;
+    try {
+      await deleteUser(userId);
+      setMsg({ type: "success", text: "User successfully deleted" });
     } catch (err: any) {
       setMsg({ type: "error", text: err.message });
     }
@@ -52,6 +65,7 @@ export default function UsersClient({ users }: { users: User[] }) {
               <TableCell>{tAdmin("email")}</TableCell>
               <TableCell>{tAdmin("joined")}</TableCell>
               <TableCell>{tAdmin("role")}</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -84,6 +98,11 @@ export default function UsersClient({ users }: { users: User[] }) {
                       <MenuItem value="user">{tAdmin("roleUser")}</MenuItem>
                       <MenuItem value="admin">{tAdmin("roleAdmin")}</MenuItem>
                     </Select>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton color="error" onClick={() => handleDeleteUser(user.id)}>
+                      <DeleteIcon />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               );

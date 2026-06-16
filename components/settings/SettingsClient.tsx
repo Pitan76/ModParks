@@ -44,12 +44,18 @@ interface SettingsClientProps {
   apiKeys: { id: string, name: string, createdAt: Date, lastUsedAt: Date | null }[];
   isGitHubConnected: boolean;
   hasPassword?: boolean;
+  error?: string;
 }
 
-export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword }: SettingsClientProps) {
+export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, error }: SettingsClientProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const format = useFormatter();
+
+  // Show global error (like admin_password_required)
+  const globalError = error === "admin_password_required" 
+    ? "管理画面にアクセスするにはセキュリティのためパスワードを設定してください。" 
+    : error;
 
   // Profile State
   const [displayName, setDisplayName] = useState(user.displayName);

@@ -27,10 +27,10 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
   const project = await getProjectBySlug(slug);
 
   if (!project) {
-    return { title: "Not Found | ModParks" };
+    return { title: "Not Found" };
   }
 
-  const title = `${project.name} | ModParks`;
+  const title = `${project.name}`;
   const description = project.description || "Minecraft Java Edition向けのMod/Plugin";
   const imageUrl = project.iconUrl || SITE_URL + "/icon.png";
 
