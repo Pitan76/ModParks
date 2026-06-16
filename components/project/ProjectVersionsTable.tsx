@@ -15,6 +15,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { getLoaderInfo } from "@/lib/loaders";
+import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 interface ProjectVersionsTableProps {
@@ -42,7 +43,15 @@ function formatBytes(bytes: number): string {
 export default function ProjectVersionsTable({ versions, projectSlug }: ProjectVersionsTableProps) {
   const locale = useLocale();
   const t = useTranslations("Project");
-  const tCommon = useTranslations("Common"); // Assuming standard terms exist or fallback
+
+  const parsedVersions = useMemo(() => {
+    return versions.map((version) => ({
+      ...version,
+      date: new Date(typeof version.createdAt === "number" ? version.createdAt * 1000 : version.createdAt),
+      parsedLoaders: Array.isArray(version.loaders) ? version.loaders : (JSON.parse(version.loaders || "[]") as string[]),
+      parsedMcVersions: Array.isArray(version.mcVersions) ? version.mcVersions : (JSON.parse(version.mcVersions || "[]") as string[]),
+    }));
+  }, [versions]);
 
   return (
     <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
@@ -56,21 +65,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
           </TableRow>
         </TableHead>
         <TableBody>
-          {versions.map((version) => {
-            const date = new Date(
-              typeof version.createdAt === "number"
-                ? version.createdAt * 1000
-                : version.createdAt
-            );
-
-            const parsedLoaders = Array.isArray(version.loaders)
-              ? version.loaders
-              : (JSON.parse(version.loaders || "[]") as string[]);
-
-            const parsedMcVersions = Array.isArray(version.mcVersions)
-              ? version.mcVersions
-              : (JSON.parse(version.mcVersions || "[]") as string[]);
-
+          {parsedVersions.map((version) => {
             return (
               <TableRow key={version.id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                 <TableCell>
@@ -96,7 +91,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
                 </TableCell>
                 <TableCell>
                   <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 0.5 }}>
-                    {parsedLoaders.map((l) => {
+                    {version.parsedLoaders.map((l) => {
                       const info = getLoaderInfo(l);
                       return (
                         <Chip
@@ -110,7 +105,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
                     })}
                   </Box>
                   <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                    {parsedMcVersions.map((mc) => (
+                    {version.parsedMcVersions.map((mc) => (
                       <Chip
                         key={mc}
                         label={mc}
@@ -126,7 +121,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                       <CalendarTodayIcon sx={{ fontSize: 14, color: "text.disabled" }} />
                       <Typography variant="caption" color="text.disabled" suppressHydrationWarning>
-                        {date.toLocaleDateString(locale)}
+                        {version.date.toLocaleDateString(locale)}
                       </Typography>
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>

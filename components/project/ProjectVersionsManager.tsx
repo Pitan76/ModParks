@@ -24,7 +24,7 @@ import TextField from "@mui/material/TextField";
 import Autocomplete, { AutocompleteRenderGetTagProps } from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { SyntheticEvent } from "react";
 import { deleteVersion, updateVersion } from "@/lib/actions/version";
 import { useFormatter, useTranslations } from "next-intl";
@@ -59,6 +59,14 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
   const [pending, setPending] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [editError, setEditError] = useState<{ [key: string]: string[] } | null>(null);
+
+  const parsedVersions = useMemo(() => {
+    return localVersions.map(v => {
+      let mcvs: string[] = [];
+      try { mcvs = JSON.parse(v.mcVersions) as string[]; } catch {}
+      return { ...v, parsedMcVersions: mcvs, date: new Date(v.createdAt) };
+    });
+  }, [localVersions]);
 
   // Edit State
   const [editNumber, setEditNumber] = useState("");
@@ -158,16 +166,14 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
             </TableRow>
           </TableHead>
           <TableBody>
-            {localVersions.map((v) => {
-              let mcvs: string[] = [];
-              try { mcvs = JSON.parse(v.mcVersions) as string[]; } catch {}
+            {parsedVersions.map((v) => {
               return (
                 <TableRow key={v.id}>
                   <TableCell sx={{ fontWeight: "bold" }}>{v.versionNumber}</TableCell>
-                  <TableCell>{mcvs.join(", ")}</TableCell>
+                  <TableCell>{v.parsedMcVersions.join(", ")}</TableCell>
                   <TableCell>{v.downloads}</TableCell>
                   <TableCell>
-                    {format.dateTime(new Date(v.createdAt), { dateStyle: "short", timeStyle: "short" })}
+                    {format.dateTime(v.date, { dateStyle: "short", timeStyle: "short" })}
                   </TableCell>
                   <TableCell align="right">
                     <IconButton color="primary" onClick={() => openEdit(v)}>
