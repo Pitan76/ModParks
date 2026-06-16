@@ -144,9 +144,12 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
             {p.tags.map((tag: string) => (
               <Chip
                 key={tag}
+                component={Link}
+                href={`/projects?tags=${encodeURIComponent(tag)}`}
                 label={getTagLabel(tag)}
                 size="small"
                 variant="outlined"
+                clickable
                 sx={{ borderColor: "divider", color: "text.secondary" }}
               />
             ))}
