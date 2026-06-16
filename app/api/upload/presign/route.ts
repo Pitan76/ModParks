@@ -29,6 +29,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing projectSlug" }, { status: 400 });
   }
 
+  if (type !== "avatar") {
+    const { getDatabase } = await import("@/lib/db");
+    const { projects, projectMembers } = await import("@/db/schema");
+    const { eq, and } = await import("drizzle-orm");
+    const db = await getDatabase();
+    const project = await db.select().from(projects).where(eq(projects.slug, projectSlug!)).get();
+    
+    if (!project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
+    if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden: You don't have permission to upload to this project" }, { status: 403 });
+    }
+  }
+
   // ファイルタイプ検証
   const ALLOWED_MOD_TYPES  = ["application/java-archive", "application/zip", "application/octet-stream"];
   const ALLOWED_ICON_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
