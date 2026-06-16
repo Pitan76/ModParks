@@ -22,7 +22,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
   const searchParams = useSearchParams();
   const pathname = usePathname();
   
-  const tabParam = searchParams.get("tab");
+  const tabParam = searchParams?.get("tab") || null;
   
   const getTabFromParam = (param: string | null) => {
     if (param === "files") return 1;
@@ -44,7 +44,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
     
     setTab(newValue);
     
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || "");
     if (newValue === 1) {
       params.set("tab", "files");
     } else if (newValue === 2) {
