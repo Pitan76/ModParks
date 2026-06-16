@@ -4,6 +4,22 @@ This document describes the public REST API endpoints available in ModParks.
 
 All API endpoints are prefixed with `/api/v1`.
 
+## Authentication
+
+Public endpoints for reading data (such as getting a project or fetching versions) **do not** require authentication and can be accessed without an API key.
+
+However, certain private or rate-limited endpoints may require an API key to be passed in the `Authorization` header as a Bearer token.
+
+- **Header:** `Authorization: Bearer <your_api_key>`
+- **Example:** `Authorization: Bearer mp_a2d0example`
+
+If a protected endpoint receives a request without a valid header, it will return a `401 Unauthorized` error:
+```json
+{
+  "error": "Missing or invalid Authorization header"
+}
+```
+
 ---
 
 ## Projects API

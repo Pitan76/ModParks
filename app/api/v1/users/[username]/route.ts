@@ -9,10 +9,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
   const d1 = await getD1();
   const db = getDb(d1);
 
-  const auth = await validateApiKey(request);
-  if (!auth.valid) {
-    return NextResponse.json({ error: auth.error }, { status: 401 });
-  }
+
 
   const { username } = await params;
 

@@ -1,18 +1,15 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { projects, users, projectTags } from "@/db/schema";
+import { projects, users, projectTags, projectMembers } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { ApiProject } from "@/types/api";
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const d1 = await getD1();
   const db = getDb(d1);
 
-  const auth = await validateApiKey(request);
-  if (!auth.valid) {
-    return NextResponse.json({ error: auth.error }, { status: 401 });
-  }
+
 
   const { slug } = await params;
 
@@ -28,6 +25,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       downloads: projects.downloads,
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
+      status: projects.status,
+      authorId: projects.authorId,
       author: {
         username: users.username,
         displayName: users.displayName,
@@ -41,6 +40,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
+
+  if (project.status !== "public") {
+    const auth = await validateApiKey(request);
+    if (!auth.valid) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+    
+    if (project.authorId !== auth.user.id) {
+      const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, auth.user.id))).limit(1);
+      if (member.length === 0) {
+        return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      }
+    }
   }
 
   const tags = await db.select().from(projectTags).where(eq(projectTags.projectId, project.id));
