@@ -5,7 +5,7 @@ import { routing } from "./i18n/routing";
 // 非同期初期化のため proxy エクスポートとして機能しないため、
 // i18n ルーティングのみを proxy で処理し、
 // 認証チェックはページ/レイアウト側で行う
-export const proxy = createMiddleware(routing);
+export const middleware = createMiddleware(routing);
 
 export const config = {
   matcher: ["/((?!api|_next|_vercel|.*\\..*).*)" ],
