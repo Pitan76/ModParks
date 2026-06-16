@@ -360,6 +360,10 @@
       "downloads": "Most Downloaded",
       "newest": "Newest"
     },
+    "keywordOptions": "Keyword Search Options",
+    "includeDesc": "Include Description",
+    "includeTags": "Include Tags",
+    "includeAuthor": "Include Author Name",
     "loader": {
       "label": "Platform"
     }

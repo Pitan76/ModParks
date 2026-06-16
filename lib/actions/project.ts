@@ -174,9 +174,17 @@ export async function getProjects(params: {
   loaders?: string[];
   mcVersions?: string[];
   tags?: string[];
+  searchMode?: "AND" | "OR";
+  includeDesc?: boolean;
+  includeTags?: boolean;
+  includeAuthor?: boolean;
 }) {
   const db = await getDatabase();
-  const { q, types, authorId, limit = 20, offset = 0, sort = "updated", loaders, mcVersions, tags } = params;
+  const { 
+    q, types, authorId, limit = 20, offset = 0, sort = "updated", 
+    loaders, mcVersions, tags,
+    searchMode = "OR", includeDesc = true, includeTags = true, includeAuthor = true
+  } = params;
 
   const conditions = [];
   if (authorId) {
@@ -191,14 +199,29 @@ export async function getProjects(params: {
   }
 
   if (q) {
-    conditions.push(
-      or(
-        like(projects.name, `%${q}%`),
-        like(projects.description, `%${q}%`),
-        like(users.username, `%${q}%`),
-        like(users.displayName, `%${q}%`)
-      )
-    );
+    const keywords = q.trim().split(/\s+/).filter(Boolean);
+    if (keywords.length > 0) {
+      const keywordConditions = keywords.map(kw => {
+        const kwConds = [like(projects.name, `%${kw}%`)];
+        if (includeDesc) {
+          kwConds.push(like(projects.description, `%${kw}%`));
+        }
+        if (includeAuthor) {
+          kwConds.push(like(users.username, `%${kw}%`));
+          kwConds.push(like(users.displayName, `%${kw}%`));
+        }
+        if (includeTags) {
+          kwConds.push(sql`${projects.id} IN (SELECT project_id FROM project_tags WHERE tag LIKE ${`%${kw}%`})`);
+        }
+        return or(...kwConds);
+      });
+
+      if (searchMode === "AND") {
+        conditions.push(and(...keywordConditions)!);
+      } else {
+        conditions.push(or(...keywordConditions)!);
+      }
+    }
   }
 
   if (loaders && loaders.length > 0) {

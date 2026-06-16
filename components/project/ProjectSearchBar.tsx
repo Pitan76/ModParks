@@ -12,6 +12,10 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -32,6 +36,10 @@ interface ProjectSearchBarProps {
   initialLoaders?: string[];
   initialMcVersions?: string[];
   initialTags?: string[];
+  initialSearchMode?: string;
+  initialIncludeDesc?: boolean;
+  initialIncludeTags?: boolean;
+  initialIncludeAuthor?: boolean;
 }
 
 export default function ProjectSearchBar({ 
@@ -40,7 +48,11 @@ export default function ProjectSearchBar({
   initialSort = "updated",
   initialLoaders = [],
   initialMcVersions = [],
-  initialTags = []
+  initialTags = [],
+  initialSearchMode = "OR",
+  initialIncludeDesc = true,
+  initialIncludeTags = true,
+  initialIncludeAuthor = true
 }: ProjectSearchBarProps) {
   const t       = useTranslations("Search");
   const tCommon = useTranslations("Common");
@@ -60,6 +72,10 @@ export default function ProjectSearchBar({
   const [appliedLoaders, setAppliedLoaders] = useState<string[]>(initialLoaders);
   const [appliedMcVersions, setAppliedMcVersions] = useState<string[]>(initialMcVersions);
   const [appliedTags, setAppliedTags] = useState<string[]>(initialTags);
+  const [appliedSearchMode, setAppliedSearchMode] = useState(initialSearchMode);
+  const [appliedIncludeDesc, setAppliedIncludeDesc] = useState(initialIncludeDesc);
+  const [appliedIncludeTags, setAppliedIncludeTags] = useState(initialIncludeTags);
+  const [appliedIncludeAuthor, setAppliedIncludeAuthor] = useState(initialIncludeAuthor);
 
   const MAJOR_TAGS = [
     "Adventure", "Magic", "Tech", "Utility", "World Gen", 
@@ -72,11 +88,16 @@ export default function ProjectSearchBar({
   const [tempLoaders, setTempLoaders] = useState<string[]>(initialLoaders);
   const [tempMcVersions, setTempMcVersions] = useState<string[]>(initialMcVersions);
   const [tempTags, setTempTags] = useState<string[]>(initialTags);
+  const [tempSearchMode, setTempSearchMode] = useState(initialSearchMode);
+  const [tempIncludeDesc, setTempIncludeDesc] = useState(initialIncludeDesc);
+  const [tempIncludeTags, setTempIncludeTags] = useState(initialIncludeTags);
+  const [tempIncludeAuthor, setTempIncludeAuthor] = useState(initialIncludeAuthor);
 
   const isFirstRender = useRef(true);
 
   const updateSearch = useCallback(
-    (newQ: string, newTypes: string[], newSort: string, newLoaders: string[], newMcVersions: string[], newTags: string[]) => {
+    (newQ: string, newTypes: string[], newSort: string, newLoaders: string[], newMcVersions: string[], newTags: string[], 
+     sMode: string, iDesc: boolean, iTags: boolean, iAuthor: boolean) => {
       const params = new URLSearchParams();
       if (newQ) params.set("q", newQ);
       if (newTypes.length > 0 && newTypes.length < 2) params.set("types", newTypes.join(","));
@@ -84,6 +105,11 @@ export default function ProjectSearchBar({
       if (newLoaders.length > 0) params.set("loaders", newLoaders.join(","));
       if (newMcVersions.length > 0) params.set("mcVersions", newMcVersions.join(","));
       if (newTags.length > 0) params.set("tags", newTags.join(","));
+      
+      if (sMode !== "OR") params.set("searchMode", sMode);
+      if (!iDesc) params.set("includeDesc", "false");
+      if (!iTags) params.set("includeTags", "false");
+      if (!iAuthor) params.set("includeAuthor", "false");
       
       const qs = params.toString();
       startTransition(() => {
@@ -107,13 +133,17 @@ export default function ProjectSearchBar({
       isFirstRender.current = false;
       return;
     }
-    updateSearch(debouncedQ, types, appliedSort, appliedLoaders, appliedMcVersions, appliedTags);
-  }, [debouncedQ, types, appliedSort, appliedLoaders, appliedMcVersions, appliedTags, updateSearch]);
+    updateSearch(debouncedQ, types, appliedSort, appliedLoaders, appliedMcVersions, appliedTags, appliedSearchMode, appliedIncludeDesc, appliedIncludeTags, appliedIncludeAuthor);
+  }, [debouncedQ, types, appliedSort, appliedLoaders, appliedMcVersions, appliedTags, appliedSearchMode, appliedIncludeDesc, appliedIncludeTags, appliedIncludeAuthor, updateSearch]);
 
   const handleOpenAdvanced = () => {
     setTempLoaders(appliedLoaders);
     setTempMcVersions(appliedMcVersions);
     setTempTags(appliedTags);
+    setTempSearchMode(appliedSearchMode);
+    setTempIncludeDesc(appliedIncludeDesc);
+    setTempIncludeTags(appliedIncludeTags);
+    setTempIncludeAuthor(appliedIncludeAuthor);
     setAdvancedOpen(true);
   };
 
@@ -121,6 +151,10 @@ export default function ProjectSearchBar({
     setAppliedLoaders(tempLoaders);
     setAppliedMcVersions(tempMcVersions);
     setAppliedTags(tempTags);
+    setAppliedSearchMode(tempSearchMode);
+    setAppliedIncludeDesc(tempIncludeDesc);
+    setAppliedIncludeTags(tempIncludeTags);
+    setAppliedIncludeAuthor(tempIncludeAuthor);
     setAdvancedOpen(false);
   };
 
@@ -145,7 +179,7 @@ export default function ProjectSearchBar({
         />
         <IconButton 
           onClick={handleOpenAdvanced} 
-          color={(appliedLoaders.length > 0 || appliedMcVersions.length > 0 || appliedTags.length > 0 || appliedSort !== "updated") ? "primary" : "default"}
+          color={(appliedLoaders.length > 0 || appliedMcVersions.length > 0 || appliedTags.length > 0 || appliedSort !== "updated" || appliedSearchMode !== "OR" || !appliedIncludeDesc || !appliedIncludeTags || !appliedIncludeAuthor) ? "primary" : "default"}
           sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}
         >
           <TuneIcon />
@@ -185,6 +219,37 @@ export default function ProjectSearchBar({
       <Dialog open={advancedOpen} onClose={() => setAdvancedOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{t("advancedSearch")}</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
+          
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Typography variant="subtitle2" color="text.secondary">{t("keywordOptions")}</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+              <ToggleButtonGroup
+                value={tempSearchMode}
+                exclusive
+                onChange={(_, v) => { if (v) setTempSearchMode(v); }}
+                size="small"
+              >
+                <ToggleButton value="OR">OR</ToggleButton>
+                <ToggleButton value="AND">AND</ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+              <FormControlLabel
+                control={<Switch size="small" checked={tempIncludeDesc} onChange={e => setTempIncludeDesc(e.target.checked)} />}
+                label={<Typography variant="body2">{t("includeDesc")}</Typography>}
+              />
+              <FormControlLabel
+                control={<Switch size="small" checked={tempIncludeTags} onChange={e => setTempIncludeTags(e.target.checked)} />}
+                label={<Typography variant="body2">{t("includeTags")}</Typography>}
+              />
+              <FormControlLabel
+                control={<Switch size="small" checked={tempIncludeAuthor} onChange={e => setTempIncludeAuthor(e.target.checked)} />}
+                label={<Typography variant="body2">{t("includeAuthor")}</Typography>}
+              />
+            </Box>
+          </Box>
+          
+          <Divider />
           
           <Autocomplete
             multiple

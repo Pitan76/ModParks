@@ -369,6 +369,10 @@
       "downloads": "ダウンロード順",
       "newest": "新着順"
     },
+    "keywordOptions": "キーワード検索オプション",
+    "includeDesc": "説明文を含める",
+    "includeTags": "タグを含める",
+    "includeAuthor": "作者名を含める",
     "loader": {
       "label": "プラットフォーム"
     }

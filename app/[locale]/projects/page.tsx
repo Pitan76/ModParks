@@ -14,12 +14,18 @@ import { Link } from "@/i18n/routing";
 
 interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; types?: string; author?: string; sort?: string; loaders?: string; mcVersions?: string; tags?: string }>;
+  searchParams: Promise<{ 
+    q?: string; types?: string; author?: string; sort?: string; loaders?: string; mcVersions?: string; tags?: string;
+    searchMode?: string; includeDesc?: string; includeTags?: string; includeAuthor?: string;
+  }>;
 }
 
 export default async function ProjectsPage({ params, searchParams }: ProjectsPageProps) {
   const { locale } = await params;
-  const { q, types, author, sort, loaders, mcVersions, tags } = await searchParams;
+  const { 
+    q, types, author, sort, loaders, mcVersions, tags,
+    searchMode, includeDesc, includeTags, includeAuthor
+  } = await searchParams;
   setRequestLocale(locale);
 
   const tSearch = await getTranslations("Search");
@@ -34,6 +40,11 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const mcVersionsArr = mcVersions ? mcVersions.split(",") : undefined;
   const tagsArr = tags ? tags.split(",") : undefined;
 
+  const isIncludeDesc = includeDesc !== "false";
+  const isIncludeTags = includeTags !== "false";
+  const isIncludeAuthor = includeAuthor !== "false";
+  const sm = searchMode === "AND" ? "AND" : "OR";
+
   // フィルタリング
   const filtered = await getProjects({
     q,
@@ -43,6 +54,10 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     loaders: loadersArr,
     mcVersions: mcVersionsArr,
     tags: tagsArr,
+    searchMode: sm,
+    includeDesc: isIncludeDesc,
+    includeTags: isIncludeTags,
+    includeAuthor: isIncludeAuthor,
   });
 
   return (
@@ -80,6 +95,10 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         initialLoaders={loadersArr || []}
         initialMcVersions={mcVersionsArr || []}
         initialTags={tagsArr || []}
+        initialSearchMode={sm}
+        initialIncludeDesc={isIncludeDesc}
+        initialIncludeTags={isIncludeTags}
+        initialIncludeAuthor={isIncludeAuthor}
       />
 
       {/* 件数表示 */}
