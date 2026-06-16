@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { projects, users } from "@/db/schema";
+import { projects, users, userProfiles } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { SITE_URL } from "@/lib/config";
 
@@ -16,12 +16,13 @@ export async function GET() {
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
       author: {
-        username: users.username,
-        displayName: users.displayName,
+        username: userProfiles.username,
+        displayName: userProfiles.displayName,
       }
     })
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(projects.status, "public"))
     .orderBy(desc(projects.updatedAt))
     .limit(20);

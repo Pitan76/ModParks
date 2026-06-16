@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { users } from "@/db/schema";
+import { users, userProfiles } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq } from "drizzle-orm";
 import { ApiUser } from "@/types/api";
@@ -15,14 +15,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 
   const [user] = await db
     .select({
-      username: users.username,
-      displayName: users.displayName,
-      avatarUrl: users.avatarUrl,
-      bio: users.bio,
-      githubUsername: users.githubUsername,
+      username: userProfiles.username,
+      displayName: userProfiles.displayName,
+      avatarUrl: userProfiles.avatarUrl,
+      bio: userProfiles.bio,
+      githubUsername: userProfiles.githubUsername,
     })
     .from(users)
-    .where(eq(users.username, username))
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .where(eq(userProfiles.username, username))
     .limit(1);
 
   if (!user || !user.username) {
