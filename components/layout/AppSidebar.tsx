@@ -18,6 +18,10 @@ import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import LanguageIcon from "@mui/icons-material/Language";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PeopleIcon from "@mui/icons-material/People";
+import ReportIcon from "@mui/icons-material/Report";
+import SettingsIcon from "@mui/icons-material/Settings";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
@@ -49,6 +53,7 @@ interface AppSidebarProps {
 
 export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSidebarProps) {
   const t = useTranslations("Nav");
+  const tAdmin = useTranslations("Admin");
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -65,18 +70,31 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
     onMobileClose(); // モバイル時はメニューを閉じる
   };
 
-  const navItems = [
-    { id: "home", label: t("home"), path: "/", icon: <HomeIcon /> },
-    { id: "projects", label: t("projects"), path: "/projects", icon: <SearchIcon /> },
-    { id: "ideas", label: t("ideas"), path: "/ideas", icon: <LightbulbIcon /> },
-  ];
+  const isAdminPage = pathname.includes("/admin");
 
-  if (session?.user) {
-    navItems.push({ label: t("myProjects"), path: "/projects?author=me", id: "myProjects", icon: <FolderIcon /> });
-    navItems.push({ label: t("profile"), path: `/profile/${session.user.username}`, id: "profile", icon: <AccountCircleIcon /> });
+  let navItems: any[] = [];
 
-    if (session.user.role === "admin") {
-      navItems.push({ label: t("admin"), path: "/admin", id: "admin", icon: <AdminPanelSettingsIcon /> });
+  if (isAdminPage && session?.user?.role === "admin") {
+    navItems = [
+      { id: "admin-home", label: tAdmin("sidebar.dashboard"), path: "/admin", icon: <DashboardIcon /> },
+      { id: "admin-users", label: tAdmin("sidebar.users"), path: "/admin/users", icon: <PeopleIcon /> },
+      { id: "admin-reports", label: tAdmin("sidebar.reports"), path: "/admin/reports", icon: <ReportIcon /> },
+      { id: "admin-config", label: tAdmin("sidebar.config"), path: "/admin/config", icon: <SettingsIcon /> },
+    ];
+  } else {
+    navItems = [
+      { id: "home", label: t("home"), path: "/", icon: <HomeIcon /> },
+      { id: "projects", label: t("projects"), path: "/projects", icon: <SearchIcon /> },
+      { id: "ideas", label: t("ideas"), path: "/ideas", icon: <LightbulbIcon /> },
+    ];
+
+    if (session?.user) {
+      navItems.push({ label: t("myProjects"), path: "/projects?author=me", id: "myProjects", icon: <FolderIcon /> });
+      navItems.push({ label: t("profile"), path: `/profile/${session.user.username}`, id: "profile", icon: <AccountCircleIcon /> });
+
+      if (session.user.role === "admin") {
+        navItems.push({ label: t("admin"), path: "/admin", id: "admin", icon: <AdminPanelSettingsIcon /> });
+      }
     }
   }
 
