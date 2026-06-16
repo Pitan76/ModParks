@@ -39,6 +39,8 @@ function getLinkIcon(url: string) {
     if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return <YouTubeIcon fontSize="small" />;
     if (hostname.includes("instagram.com")) return <InstagramIcon fontSize="small" />;
     if (hostname.includes("github.com")) return <GitHubIcon fontSize="small" />;
+    if (hostname.includes("curseforge.com")) return <Box component="img" src="https://www.curseforge.com/favicon.ico" sx={{ width: 16, height: 16, mr: 0.5 }} />;
+    if (hostname.includes("modrinth.com")) return <Box component="img" src="https://modrinth.com/favicon.ico" sx={{ width: 16, height: 16, mr: 0.5 }} />;
   } catch (e) {
     // Ignore invalid URL
   }
