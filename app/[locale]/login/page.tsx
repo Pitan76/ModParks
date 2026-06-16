@@ -80,9 +80,6 @@ export default function LoginPage() {
         <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }} align="center" color="primary.main">
           {tAuth("login.title")}
         </Typography>
-        <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
-          {tAuth("login.welcomeBack")}
-        </Typography>
 
         {registered && <Alert severity="success" sx={{ mb: 3 }}>{tAuth("login.registrationComplete")}</Alert>}
         {error && !showTwoFactor && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}

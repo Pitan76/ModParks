@@ -306,7 +306,6 @@
   "Auth": {
     "login": {
       "title": "ログイン",
-      "welcomeBack": "お帰りなさい！",
       "registrationComplete": "登録が完了しました。ログインしてください。",
       "loggingIn": "ログイン中...",
       "loginWithGithub": "GitHub でログイン",
