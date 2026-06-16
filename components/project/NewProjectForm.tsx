@@ -33,7 +33,7 @@ export default function NewProjectForm({ availableTags, defaultLicense }: { avai
         method: "POST",
         body: formData,
       });
-      const result = await res.json();
+      const result = (await res.json()) as { error?: any, slug?: string };
       
       if (!res.ok) {
         if (result.error) {
