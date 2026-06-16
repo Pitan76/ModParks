@@ -77,3 +77,8 @@ npm run dev
 ## ライセンス (License)
 
 このプロジェクトは [MIT License](LICENSE) の元に公開されています。
+
+## タスク
+- マークダウン対応
+- APIのドキュメント作成
+- Modrinth、CurseForgeとの連携
