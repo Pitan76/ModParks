@@ -10,7 +10,6 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkIcon from "@mui/icons-material/Link";
 import XIcon from "@mui/icons-material/X";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import DiscordIcon from "@mui/icons-material/Discord";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Link from "@mui/material/Link";
@@ -40,7 +39,6 @@ function getLinkIcon(url: string) {
     if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return <YouTubeIcon fontSize="small" />;
     if (hostname.includes("instagram.com")) return <InstagramIcon fontSize="small" />;
     if (hostname.includes("github.com")) return <GitHubIcon fontSize="small" />;
-    if (hostname.includes("discord.gg") || hostname.includes("discord.com")) return <DiscordIcon fontSize="small" />;
   } catch (e) {
     // Ignore invalid URL
   }
