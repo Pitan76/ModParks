@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { projects, users, projectTags, projectMembers } from "@/db/schema";
+import { projects, users, userProfiles, projectTags, projectMembers } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, and } from "drizzle-orm";
 import { ApiProject } from "@/types/api";
@@ -28,13 +28,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       status: projects.status,
       authorId: projects.authorId,
       author: {
-        username: users.username,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        username: userProfiles.username,
+        displayName: userProfiles.displayName,
+        avatarUrl: userProfiles.avatarUrl,
       }
     })
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(projects.slug, slug))
     .limit(1);
 
@@ -48,8 +49,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
     
-    if (project.authorId !== auth.user.id) {
-      const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, auth.user.id))).limit(1);
+    if (project.authorId !== auth.userId) {
+      const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, auth.userId))).limit(1);
       if (member.length === 0) {
         return NextResponse.json({ error: "Project not found" }, { status: 404 });
       }

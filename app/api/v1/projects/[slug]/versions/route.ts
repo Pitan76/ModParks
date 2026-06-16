@@ -25,8 +25,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
     
-    if (project.authorId !== auth.user.id) {
-      const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, auth.user.id))).limit(1);
+    if (project.authorId !== auth.userId) {
+      const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, auth.userId))).limit(1);
       if (member.length === 0) {
         return NextResponse.json({ error: "Project not found" }, { status: 404 });
       }

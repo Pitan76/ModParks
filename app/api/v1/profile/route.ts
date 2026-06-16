@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { users } from "@/db/schema";
+import { users, userProfiles } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq } from "drizzle-orm";
 
@@ -25,7 +25,7 @@ export async function PUT(request: Request) {
     
     const { displayName, bio } = parsed.data;
 
-    const updates: Partial<typeof users.$inferInsert> = {};
+    const updates: Partial<typeof userProfiles.$inferInsert> = {};
     if (displayName !== undefined) updates.displayName = displayName;
     if (bio !== undefined) updates.bio = bio;
 
@@ -33,7 +33,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
 
-    await db.update(users).set(updates).where(eq(users.id, auth.userId));
+    await db.update(userProfiles).set(updates).where(eq(userProfiles.userId, auth.userId));
 
     return NextResponse.json({ success: true, updated: updates });
   } catch (error) {

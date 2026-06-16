@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { projects, users, projectTags } from "@/db/schema";
+import { projects, users, userProfiles, projectTags } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { API_CONFIG } from "@/lib/config";
 import { eq, desc, and, inArray, like } from "drizzle-orm";
@@ -53,13 +53,14 @@ export async function GET(request: Request) {
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
       author: {
-        username: users.username,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        username: userProfiles.username,
+        displayName: userProfiles.displayName,
+        avatarUrl: userProfiles.avatarUrl,
       }
     })
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(and(...conditions))
     .orderBy(orderBy)
     .limit(limit)
