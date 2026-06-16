@@ -33,7 +33,7 @@ export const users = sqliteTable("users", {
   links:         text("links"),
   previousUsername: text("previous_username"),
   githubUsername: text("github_username"),
-  showGithubLink: integer("show_github_link", { mode: "boolean" }).notNull().default(true),
+  custom:        text("custom", { mode: "json" }),
   deletedAt:     integer("deleted_at", { mode: "timestamp" }),
   createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
