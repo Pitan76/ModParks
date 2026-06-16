@@ -14,6 +14,8 @@ import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 import ProjectTabsManager from "@/components/project/ProjectTabsManager";
+import LinkButton from "@/components/ui/LinkButton";
+import AddIcon from "@mui/icons-material/Add";
 import { SITE_URL } from "@/lib/config";
 
 interface ProjectDetailPageProps {
@@ -129,6 +131,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     {t("versions")}
                   </Typography>
+                  {canEdit && (
+                    <LinkButton
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      href={`/projects/${p.slug}/versions/new`}
+                    >
+                      {t("header.addVersion")}
+                    </LinkButton>
+                  )}
                 </Box>
 
                 {p.versions.length > 0 ? (

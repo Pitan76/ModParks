@@ -170,26 +170,6 @@ export default function ProjectDetailHeader({
               </Box>
             )}
           </Box>
-          {canEdit && (
-            <Box sx={{ display: "flex", gap: 1, width: { xs: "100%", sm: "auto" } }}>
-              <LinkButton
-                variant="outlined"
-                startIcon={<EditIcon />}
-                href={`/projects/${p.slug}/edit`}
-                sx={{ flex: { xs: 1, sm: "initial" } }}
-              >
-                {tProject("manage")}
-              </LinkButton>
-              <LinkButton
-                variant="contained"
-                startIcon={<AddIcon />}
-                href={`/projects/${p.slug}/versions/new`}
-                sx={{ flex: { xs: 1, sm: "initial" } }}
-              >
-                {tProject("header.addVersion")}
-              </LinkButton>
-            </Box>
-          )}
         </Box>
       </Box>
     </>
