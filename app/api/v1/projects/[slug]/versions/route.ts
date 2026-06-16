@@ -3,8 +3,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { projects, versions } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, desc } from "drizzle-orm";
-
-
+import { ApiVersion } from "@/types/api";
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const d1 = await getD1();
@@ -29,16 +28,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     .where(eq(versions.projectId, project.id))
     .orderBy(desc(versions.createdAt));
 
-  const data = results.map(v => ({
+  const data: ApiVersion[] = results.map(v => ({
     id: v.id,
     versionNumber: v.versionNumber,
     changelog: v.changelog,
     fileSize: v.fileSize,
+    fileSha256: v.fileSha256,
+    fileName: v.fileName,
     downloads: v.downloads,
-    createdAt: v.createdAt,
+    createdAt: v.createdAt ? new Date(v.createdAt).getTime() : 0,
     loaders: JSON.parse(v.loaders),
     mcVersions: JSON.parse(v.mcVersions),
-    downloadUrl: `/api/download?versionId=${v.id}`
+    fileUrl: `/api/download?versionId=${v.id}`
   }));
 
   return NextResponse.json({ data });

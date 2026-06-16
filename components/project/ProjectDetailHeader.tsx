@@ -192,18 +192,6 @@ export default function ProjectDetailHeader({
           )}
         </Box>
       </Box>
-
-      <Box
-        sx={{
-          p: 1,
-          mb: 3,
-          "& pre": { whiteSpace: "pre-wrap", fontFamily: "inherit" },
-        }}
-      >
-        <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
-          {p.description}
-        </Typography>
-      </Box>
     </>
   );
 }

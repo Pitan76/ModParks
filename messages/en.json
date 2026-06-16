@@ -146,6 +146,14 @@
       "error": "Failed to toggle favorite.",
       "favorite": "Favorite",
       "favorited": "Favorited"
+    },
+    "tabs": {
+      "description": "Description",
+      "files": "Files",
+      "dependencies": "Dependencies",
+      "manage": "Manage",
+      "underConstruction": "Under Construction",
+      "dependenciesDesc": "Dependencies feature is currently under development."
     }
   },
   "Version": {

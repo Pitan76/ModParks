@@ -4,8 +4,7 @@ import { ideas, users } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { API_CONFIG } from "@/lib/config";
 import { eq, desc } from "drizzle-orm";
-
-
+import { ApiIdea, PaginatedResponse } from "@/types/api";
 
 export async function GET(request: Request) {
   const d1 = await getD1();
@@ -30,9 +29,11 @@ export async function GET(request: Request) {
       content: ideas.content,
       status: ideas.status,
       createdAt: ideas.createdAt,
+      updatedAt: ideas.updatedAt,
       author: {
         username: users.username,
         displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
       }
     })
     .from(ideas)
@@ -41,12 +42,28 @@ export async function GET(request: Request) {
     .limit(limit)
     .offset(offset);
 
-  return NextResponse.json({
-    data: results,
+  const data: ApiIdea[] = results.map(i => ({
+    id: i.id,
+    title: i.title,
+    content: i.content,
+    status: i.status as "open" | "in_progress" | "fulfilled",
+    createdAt: i.createdAt ? new Date(i.createdAt).getTime() : 0,
+    updatedAt: i.updatedAt ? new Date(i.updatedAt).getTime() : 0,
+    author: {
+      username: i.author?.username || "unknown",
+      displayName: i.author?.displayName || null,
+      avatarUrl: i.author?.avatarUrl || null,
+    }
+  }));
+
+  const response: PaginatedResponse<ApiIdea> = {
+    data,
     meta: {
       limit,
       offset,
-      count: results.length
+      count: data.length
     }
-  });
+  };
+
+  return NextResponse.json(response);
 }

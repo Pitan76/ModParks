@@ -4,8 +4,7 @@ import { projects, users, projectTags } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { API_CONFIG } from "@/lib/config";
 import { eq, desc, and, inArray, like } from "drizzle-orm";
-
-
+import { ApiProject, PaginatedResponse } from "@/types/api";
 
 export async function GET(request: Request) {
   const d1 = await getD1();
@@ -59,6 +58,7 @@ export async function GET(request: Request) {
       author: {
         username: users.username,
         displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
       }
     })
     .from(projects)
@@ -78,17 +78,33 @@ export async function GET(request: Request) {
     });
   }
 
-  const data = results.map(p => ({
-    ...p,
+  const data: ApiProject[] = results.map(p => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    description: p.description,
+    iconUrl: p.iconUrl,
+    type: p.type as "mod" | "plugin",
+    license: p.license,
+    downloads: p.downloads,
+    createdAt: p.createdAt ? new Date(p.createdAt).getTime() : 0,
+    updatedAt: p.updatedAt ? new Date(p.updatedAt).getTime() : 0,
+    author: {
+      username: p.author?.username || "unknown",
+      displayName: p.author?.displayName || null,
+      avatarUrl: p.author?.avatarUrl || null,
+    },
     tags: tagsMap[p.id] || []
   }));
 
-  return NextResponse.json({
+  const response: PaginatedResponse<ApiProject> = {
     data,
     meta: {
       limit,
       offset,
       count: data.length
     }
-  });
+  };
+
+  return NextResponse.json(response);
 }

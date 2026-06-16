@@ -152,6 +152,14 @@
       "error": "お気に入りの操作に失敗しました。",
       "favorite": "お気に入り",
       "favorited": "お気に入り済み"
+    },
+    "tabs": {
+      "description": "説明",
+      "files": "ファイル",
+      "dependencies": "依存関係",
+      "manage": "管理",
+      "underConstruction": "工事中",
+      "dependenciesDesc": "依存関係機能は現在開発中です。"
     }
   },
   "Version": {

@@ -86,7 +86,7 @@ export default function ProjectSearchBar({
       
       const qs = params.toString();
       startTransition(() => {
-        router.push(`${pathname}${qs ? \`?\${qs}\` : ""}`);
+        router.push(`${pathname}${qs ? `?${qs}` : ""}`);
       });
     },
     [pathname, router]

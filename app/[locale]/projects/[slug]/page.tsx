@@ -13,6 +13,7 @@ import { getProjectBySlug } from "@/lib/actions/project";
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
+import ProjectTabsManager from "@/components/project/ProjectTabsManager";
 import { SITE_URL } from "@/lib/config";
 
 interface ProjectDetailPageProps {
@@ -107,20 +108,37 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             favoritesCount={favoritesCount}
           />
 
-          {/* バージョン一覧 */}
-          <Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {t("versions")}
-              </Typography>
-            </Box>
+          <ProjectTabsManager 
+            canEdit={canEdit}
+            manageHref={`/projects/${p.slug}/edit`}
+            descriptionContent={
+              <Box
+                sx={{
+                  p: 1,
+                  "& pre": { whiteSpace: "pre-wrap", fontFamily: "inherit" },
+                }}
+              >
+                <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
+                  {p.description}
+                </Typography>
+              </Box>
+            }
+            filesContent={
+              <Box>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    {t("versions")}
+                  </Typography>
+                </Box>
 
-            {p.versions.length > 0 ? (
-              <ProjectVersionsTable versions={p.versions} projectSlug={slug} />
-            ) : (
-              <Typography color="text.secondary">{t("noVersions")}</Typography>
-            )}
-          </Box>
+                {p.versions.length > 0 ? (
+                  <ProjectVersionsTable versions={p.versions} projectSlug={slug} />
+                ) : (
+                  <Typography color="text.secondary">{t("noVersions")}</Typography>
+                )}
+              </Box>
+            }
+          />
         </Grid>
 
         {/* ─── 右カラム: サイドバー ─────────────────────────────────────── */}
