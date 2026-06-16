@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projects, projectTags, projectMembers, users, versions } from "@/db/schema";
+import { projects, projectTags, projectMembers, users, userProfiles, versions } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, desc, and, like, inArray, sql, or } from "drizzle-orm";
@@ -207,8 +207,8 @@ export async function getProjects(params: {
           kwConds.push(like(projects.description, `%${kw}%`));
         }
         if (includeAuthor) {
-          kwConds.push(like(users.username, `%${kw}%`));
-          kwConds.push(like(users.displayName, `%${kw}%`));
+          kwConds.push(like(userProfiles.username, `%${kw}%`));
+          kwConds.push(like(userProfiles.displayName, `%${kw}%`));
         }
         if (includeTags) {
           kwConds.push(sql`${projects.id} IN (SELECT project_id FROM project_tags WHERE tag LIKE ${`%${kw}%`})`);
@@ -253,13 +253,14 @@ export async function getProjects(params: {
       .select({
         project: projects,
         author: {
-          username: users.username,
-          displayName: users.displayName,
-          avatarUrl: users.avatarUrl,
+          username: userProfiles.username,
+          displayName: userProfiles.displayName,
+          avatarUrl: userProfiles.avatarUrl,
         }
       })
       .from(projects)
       .leftJoin(users, eq(projects.authorId, users.id))
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(orderByExpr)
       .limit(limit)
@@ -304,13 +305,14 @@ export async function getProjectBySlug(slug: string) {
     .select({
       project: projects,
       author: {
-        username: users.username,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        username: userProfiles.username,
+        displayName: userProfiles.displayName,
+        avatarUrl: userProfiles.avatarUrl,
       }
     })
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(projects.slug, slug))
     .get();
 

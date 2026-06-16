@@ -6,7 +6,7 @@ import type { NextAuthConfig } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { getDb } from "@/lib/db";
 import * as schema from "@/db/schema";
-import { users } from "@/db/schema";
+import { users, userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
@@ -60,12 +60,20 @@ export const authConfig = {
 
           const { getDatabase } = await import("@/lib/db");
           const db = await getDatabase();
-          const user = await db.select().from(users).where(eq(users.email, credentials.email as string)).get();
+          const { users, userProfiles } = await import("@/db/schema");
+          const record = await db.select()
+            .from(users)
+            .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+            .where(eq(users.email, credentials.email as string))
+            .get();
 
-          if (!user) {
+          if (!record?.users) {
             console.log("[Auth] User not found:", credentials.email);
             return null;
           }
+          const user = record.users;
+          const profile = record.user_profiles;
+
           if (!user.passwordHash) {
             console.log("[Auth] User has no passwordHash:", credentials.email);
             return null;
@@ -106,9 +114,9 @@ export const authConfig = {
             name: user.name,
             email: user.email,
             image: user.image,
-            username: user.username,
-            displayName: user.displayName,
-            avatarUrl: user.avatarUrl,
+            username: profile?.username,
+            displayName: profile?.displayName,
+            avatarUrl: profile?.avatarUrl,
             role: user.role,
           };
         } catch (e: any) {
@@ -133,8 +141,15 @@ export const authConfig = {
         }
 
         // GitHub連携時に githubUsername を更新
-        if (account?.provider === "github" && profile?.login) {
-          await db.update(users).set({ githubUsername: profile.login as string }).where(eq(users.email, user.email as string));
+        if (account?.provider === "github" && profile?.login && dbUser) {
+          await db.insert(userProfiles).values({
+            userId: dbUser.id,
+            username: dbUser.id,
+            githubUsername: profile.login as string,
+          }).onConflictDoUpdate({
+            target: userProfiles.userId,
+            set: { githubUsername: profile.login as string }
+          });
         }
       }
       return true;

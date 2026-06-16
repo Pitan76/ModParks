@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { users, apiKeys, accounts, rateLimits } from "@/db/schema";
+import { users, userProfiles, userSettings, apiKeys, accounts, rateLimits } from "@/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
@@ -10,13 +10,16 @@ import bcrypt from "bcryptjs";
 export async function updateProfile(data: { displayName: string, bio: string, avatarUrl: string, links: string, locale: "ja" | "en" }) {
   const { db, userId } = await getAuthenticatedDb();
 
-  await db.update(users).set({
+  await db.update(userProfiles).set({
     displayName: data.displayName,
     bio: data.bio,
     avatarUrl: data.avatarUrl || null,
     links: data.links,
+  }).where(eq(userProfiles.userId, userId));
+
+  await db.update(userSettings).set({
     locale: data.locale,
-  }).where(eq(users.id, userId));
+  }).where(eq(userSettings.userId, userId));
 
   revalidatePath("/settings");
   revalidatePath("/profile");
@@ -65,13 +68,13 @@ export async function disconnectGitHub() {
 export async function toggleGithubVisibility(show: boolean) {
   const { db, userId } = await getAuthenticatedDb();
 
-  const user = await db.select().from(users).where(eq(users.id, userId)).get();
-  if (!user) return { error: "User not found" };
+  const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
+  if (!settings) return { error: "Settings not found" };
 
-  const customObj = (user.custom as Record<string, any>) || {};
+  const customObj = (settings.custom as Record<string, any>) || {};
   customObj.showGithubLink = show;
 
-  await db.update(users).set({ custom: customObj }).where(eq(users.id, userId));
+  await db.update(userSettings).set({ custom: customObj }).where(eq(userSettings.userId, userId));
 
   revalidatePath("/settings");
   revalidatePath("/profile");
@@ -87,8 +90,8 @@ export async function changeUsername(newId: string) {
   }
 
   // Check if taken
-  const existing = await db.select().from(users).where(
-    or(eq(users.username, newId), eq(users.previousUsername, newId))
+  const existing = await db.select().from(userProfiles).where(
+    or(eq(userProfiles.username, newId), eq(userProfiles.previousUsername, newId))
   ).get();
 
   if (existing) {
@@ -109,12 +112,12 @@ export async function changeUsername(newId: string) {
     await db.insert(rateLimits).values({ id: rateLimitId, expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000) });
   }
 
-  const currentUser = await db.select().from(users).where(eq(users.id, userId)).get();
+  const currentProfile = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).get();
   
-  await db.update(users).set({
+  await db.update(userProfiles).set({
     username: newId,
-    previousUsername: currentUser?.username || null
-  }).where(eq(users.id, userId));
+    previousUsername: currentProfile?.username || null
+  }).where(eq(userProfiles.userId, userId));
 
   revalidatePath("/settings");
   return { success: true };
@@ -259,10 +262,10 @@ export async function disableTotp(passwordOrToken: string) {
 export async function updatePostingSettings(status: "draft" | "public" | "unlisted" | "private", license: string) {
   const { db, userId } = await getAuthenticatedDb();
 
-  await db.update(users).set({
+  await db.update(userSettings).set({
     defaultProjectStatus: status,
     defaultLicense: license,
-  }).where(eq(users.id, userId));
+  }).where(eq(userSettings.userId, userId));
 
   revalidatePath("/settings");
   return { success: true };

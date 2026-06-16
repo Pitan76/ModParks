@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { reports, projects, users } from "@/db/schema";
+import { reports, projects, users, userProfiles } from "@/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, desc } from "drizzle-orm";
@@ -108,13 +108,14 @@ export async function getReports() {
         name: projects.name,
       },
       reporter: {
-        username: users.username,
-        displayName: users.displayName,
+        username: userProfiles.username,
+        displayName: userProfiles.displayName,
       }
     })
     .from(reports)
     .innerJoin(projects, eq(reports.projectId, projects.id))
     .innerJoin(users, eq(reports.reporterId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .orderBy(desc(reports.createdAt))
     .all();
 }

@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { users } from "@/db/schema";
+import { users, userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -17,15 +17,16 @@ export async function updateProfile(formData: FormData) {
   }
 
   await db
-    .update(users)
+    .update(userProfiles)
     .set({
       displayName,
-      name: displayName,
       bio: bio || null,
       avatarUrl: avatarUrl || null,
     })
-    .where(eq(users.id, userId))
+    .where(eq(userProfiles.userId, userId))
     .run();
+    
+  await db.update(users).set({ name: displayName }).where(eq(users.id, userId)).run();
 
   revalidatePath("/profile");
   return { success: true };

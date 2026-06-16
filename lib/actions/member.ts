@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projects, projectMembers, users } from "@/db/schema";
+import { projects, projectMembers, users, userProfiles } from "@/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -18,21 +18,24 @@ export async function getProjectMembers(projectId: string) {
 
   const owner = await db.select({
     id: users.id,
-    username: users.username,
-    displayName: users.displayName,
-    avatarUrl: users.avatarUrl,
-  }).from(users).where(eq(users.id, project.authorId)).get();
+    username: userProfiles.username,
+    displayName: userProfiles.displayName,
+    avatarUrl: userProfiles.avatarUrl,
+  }).from(users)
+  .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+  .where(eq(users.id, project.authorId)).get();
 
   // メンバー取得
   const members = await db.select({
     id: users.id,
-    username: users.username,
-    displayName: users.displayName,
-    avatarUrl: users.avatarUrl,
+    username: userProfiles.username,
+    displayName: userProfiles.displayName,
+    avatarUrl: userProfiles.avatarUrl,
     role: projectMembers.role,
   })
   .from(projectMembers)
   .innerJoin(users, eq(projectMembers.userId, users.id))
+  .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
   .where(eq(projectMembers.projectId, projectId))
   .all();
 
@@ -61,10 +64,11 @@ export async function addProjectMember(projectId: string, username: string) {
   }
 
   // 追加対象ユーザーを探す
-  const targetUser = await db.select().from(users).where(eq(users.username, username)).get();
-  if (!targetUser) {
+  const targetProfile = await db.select().from(userProfiles).where(eq(userProfiles.username, username)).get();
+  if (!targetProfile) {
     return { error: "ユーザーが見つかりません" };
   }
+  const targetUser = { id: targetProfile.userId };
 
   if (targetUser.id === project.authorId) {
     return { error: "既にオーナーです" };
