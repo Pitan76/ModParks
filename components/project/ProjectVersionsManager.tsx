@@ -252,7 +252,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
             />
 
             <TextField
-              label="チェンジログ"
+              label="変更履歴"
               value={editChangelog}
               onChange={e => setEditChangelog(e.target.value)}
               fullWidth
