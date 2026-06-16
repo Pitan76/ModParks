@@ -7,7 +7,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
-import Avatar from "@mui/material/Avatar";
+
 import Chip from "@mui/material/Chip";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
@@ -68,9 +68,6 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
           <Card key={idea.id} variant="outlined" sx={{ transition: "0.2s", "&:hover": { borderColor: "primary.main" } }}>
             <LinkCardActionArea href={`/ideas/${idea.id}`} sx={{ p: 3 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
-                <Avatar src={idea.authorAvatar || undefined} sx={{ width: 48, height: 48 }}>
-                  {idea.authorName?.[0] || "U"}
-                </Avatar>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
                     {idea.title}
