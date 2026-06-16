@@ -38,6 +38,7 @@ export const authConfig = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        token: { label: "2FA Token", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
@@ -50,6 +51,18 @@ export const authConfig = {
 
         const passwordsMatch = await bcrypt.compare(credentials.password as string, user.passwordHash);
         if (passwordsMatch) {
+          if (user.twoFactorEnabled) {
+            if (!credentials.token) {
+              throw new Error("2FA_REQUIRED");
+            }
+            const { TOTP } = await import("otpauth");
+            const totp = new TOTP({ secret: user.twoFactorSecret as string });
+            const delta = totp.validate({ token: credentials.token as string, window: 1 });
+            if (delta === null) {
+              throw new Error("INVALID_2FA_TOKEN");
+            }
+          }
+
           return {
             id: user.id,
             name: user.name,
