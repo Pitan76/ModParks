@@ -132,16 +132,16 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           });
           setTags(stringValues.filter(Boolean));
         }}
-        renderValue={(value: readonly string[], getItemProps: any) =>
-          value.map((optionSlug: string, index: number) => {
-            const { key, ...tagProps } = getItemProps({ index });
+        renderTags={(tagValue: readonly any[], getTagProps) =>
+          tagValue.map((option, index) => {
+            const optionSlug = typeof option === "string" ? option : (option.slug || option.inputValue);
             const foundObj = availableTags.find((tObj) => tObj.slug === optionSlug);
             let label = foundObj ? foundObj.name : optionSlug;
             try { 
               const translated = tTags(optionSlug as any);
               if (translated && !translated.includes(".")) label = translated;
             } catch {}
-            return <Chip variant="outlined" label={label} key={key} {...tagProps} />;
+            return <Chip variant="outlined" label={label} {...getTagProps({ index })} key={`tag-${index}`} />;
           })
         }
         renderInput={(params) => (
@@ -159,15 +159,22 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
       ))}
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-        <TextField
+        <Autocomplete
           id="project-license"
-          name="license"
-          label={t("fields.license")}
-          fullWidth
-          required
+          freeSolo
+          options={["MIT", "Apache-2.0", "GPL-3.0", "LGPL-3.0", "All Rights Reserved", "CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"]}
           defaultValue={project?.license || "MIT"}
-          error={!!error?.license}
-          helperText={error?.license?.[0]}
+          fullWidth
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              name="license"
+              label={t("fields.license")}
+              required
+              error={!!error?.license}
+              helperText={error?.license?.[0]}
+            />
+          )}
         />
         <TextField
           id="project-source"

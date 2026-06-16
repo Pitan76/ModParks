@@ -1,12 +1,30 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { getDatabase } from "@/lib/db";
 import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions, users, projectMembers } from "@/db/schema";
 import { createVersionSchema } from "@/lib/validations";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+
+/**
+ * IDを指定してバージョン詳細を取得する
+ */
+export async function getVersionById(versionId: string) {
+  const db = await getDatabase();
+  
+  const version = await db
+    .select()
+    .from(versions)
+    .where(eq(versions.id, versionId))
+    .get();
+
+  if (!version) return null;
+
+  return version;
+}
 
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action
