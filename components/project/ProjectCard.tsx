@@ -1,3 +1,5 @@
+"use client";
+
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActionArea from "@mui/material/CardActionArea";
@@ -10,7 +12,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Tooltip from "@mui/material/Tooltip";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { formatCompactNumber } from "@/lib/utils/format";
 import { useLocale, useTranslations, useFormatter } from "next-intl";
@@ -56,6 +58,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
   const locale = useLocale();
   const tTags = useTranslations("Tags");
   const format = useFormatter();
+  const router = useRouter();
   const isGrid = layout === "grid";
 
   const getTagLabel = (tag: string) => {
@@ -175,6 +178,12 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                     label={getTagLabel(tag)}
                     size="small"
                     variant="outlined"
+                    clickable
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      router.push(`/projects?tags=${encodeURIComponent(tag)}`);
+                    }}
                     sx={{ height: 18, fontSize: "0.6rem", borderColor: "divider" }}
                   />
                 ))}
