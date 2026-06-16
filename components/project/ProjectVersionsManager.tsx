@@ -255,7 +255,8 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
               renderInput={(params) => (
                 <TextField {...params} label={t("fields.loaders")} required={editLoaders.length === 0} error={!!editError?.loaders} helperText={editError?.loaders?.[0]} />
               )}
-              renderTags={(val: any[], getTagProps) => val.map((option, idx) => {
+              // @ts-ignore
+              renderTags={(val: any[], getTagProps: any) => val.map((option, idx) => {
                 const slug = typeof option === "string" ? option : option.slug;
                 const name = typeof option === "string" ? option : option.name;
                 const info = getLoaderInfo(slug);

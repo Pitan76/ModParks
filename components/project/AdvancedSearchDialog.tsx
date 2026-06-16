@@ -159,7 +159,8 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           value={tempMcVersions}
           onChange={(_, val) => setTempMcVersions(val)}
           renderInput={(params) => <TextField {...params} label={t("mcVersions")} size="small" />}
-          renderTags={(val, getTagProps) => val.map((option, idx) => {
+          // @ts-ignore
+          renderTags={(val: any, getTagProps: any) => val.map((option: any, idx: any) => {
             const { key, ...tagProps } = getTagProps({ index: idx });
             return <Chip key={key} label={option} size="small" {...tagProps} />;
           })}

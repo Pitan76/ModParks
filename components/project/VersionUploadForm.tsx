@@ -297,8 +297,8 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
                 </li>
               );
             }}
-            renderTags={(val: any[], getTagProps) =>
-              val.map((option, index: number) => {
+            // @ts-ignore
+            renderTags={(val: any[], getTagProps: any) => val.map((option, index: number) => {
                 const slug = typeof option === "string" ? option : option.slug;
                 const name = typeof option === "string" ? option : option.name;
                 const info = getLoaderInfo(slug);

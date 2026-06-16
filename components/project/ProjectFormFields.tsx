@@ -138,7 +138,8 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           });
           setTags(stringValues.filter(Boolean));
         }}
-        renderTags={(tagValue: readonly any[], getTagProps) =>
+        // @ts-ignore
+        renderTags={(tagValue: readonly any[], getTagProps: any) =>
           tagValue.map((option, index) => {
             const optionSlug = typeof option === "string" ? option : (option.slug || option.inputValue);
             const foundObj = availableTags.find((tObj) => tObj.slug === optionSlug);
