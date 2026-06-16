@@ -91,10 +91,6 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
     if (session?.user) {
       navItems.push({ label: t("myProjects"), path: "/projects?author=me", id: "myProjects", icon: <FolderIcon /> });
       navItems.push({ label: t("profile"), path: `/profile/${session.user.username}`, id: "profile", icon: <AccountCircleIcon /> });
-
-      if (session.user.role === "admin") {
-        navItems.push({ label: t("admin"), path: "/admin", id: "admin", icon: <AdminPanelSettingsIcon /> });
-      }
     }
   }
 
