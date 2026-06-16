@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
-import { Link as RoutingLink } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 interface ProjectTabsManagerProps {
@@ -17,6 +17,7 @@ interface ProjectTabsManagerProps {
 
 export default function ProjectTabsManager({ descriptionContent, filesContent, manageHref, canEdit }: ProjectTabsManagerProps) {
   const t = useTranslations("Project");
+  const router = useRouter();
   const [tab, setTab] = useState(0);
 
   return (
@@ -25,8 +26,10 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
         <Tabs 
           value={tab} 
           onChange={(e, newValue) => {
-            // Tab 3 is Manage, which redirects, so we don't set it as active state
-            if (newValue !== 3) {
+            // Tab 3 is Manage, which redirects
+            if (newValue === 3) {
+              router.push(manageHref);
+            } else {
               setTab(newValue);
             }
           }}
@@ -39,8 +42,6 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
           {canEdit && (
             <Tab 
               label={t("tabs.manage")} 
-              component={RoutingLink} 
-              href={manageHref} 
               value={3}
             />
           )}
