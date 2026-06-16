@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projectFavorites, projects, users, projectTags } from "@/db/schema";
+import { projectFavorites, projects, users, userProfiles, projectTags } from "@/db/schema";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -51,15 +51,16 @@ export async function getFavoriteProjects(userId: string) {
     .select({
       project: projects,
       author: {
-        username: users.username,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        username: userProfiles.username,
+        displayName: userProfiles.displayName,
+        avatarUrl: userProfiles.avatarUrl,
       },
       favoritedAt: projectFavorites.createdAt
     })
     .from(projectFavorites)
     .innerJoin(projects, eq(projectFavorites.projectId, projects.id))
     .leftJoin(users, eq(projects.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(projectFavorites.userId, userId))
     .orderBy(desc(projectFavorites.createdAt))
     .all();

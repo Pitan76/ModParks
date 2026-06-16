@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { collections, collectionItems, projects, users } from "@/db/schema";
+import { collections, collectionItems, projects, users, userProfiles } from "@/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -125,12 +125,13 @@ export async function getCollectionById(id: string) {
   const collectionRow = await db.select({
     collection: collections,
     author: {
-      username: users.username,
-      displayName: users.displayName,
-      avatarUrl: users.avatarUrl,
+      username: userProfiles.username,
+      displayName: userProfiles.displayName,
+      avatarUrl: userProfiles.avatarUrl,
     }
   }).from(collections)
     .leftJoin(users, eq(collections.userId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(collections.id, id))
     .get();
 
@@ -139,15 +140,16 @@ export async function getCollectionById(id: string) {
   const items = await db.select({
     project: projects,
     author: {
-      username: users.username,
-      displayName: users.displayName,
-      avatarUrl: users.avatarUrl,
+      username: userProfiles.username,
+      displayName: userProfiles.displayName,
+      avatarUrl: userProfiles.avatarUrl,
     },
     addedAt: collectionItems.addedAt
   })
   .from(collectionItems)
   .innerJoin(projects, eq(collectionItems.projectId, projects.id))
   .leftJoin(users, eq(projects.authorId, users.id))
+  .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
   .where(eq(collectionItems.collectionId, id))
   .orderBy(desc(collectionItems.addedAt))
   .all();

@@ -1,8 +1,8 @@
 "use server";
 
 import { getDatabase } from "@/lib/db";
-import { users, verificationTokens } from "@/db/schema";
-import { eq, and, or } from "drizzle-orm";
+import { users, userProfiles, userSettings, verificationTokens } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { createId } from "@paralleldrive/cuid2";
 import { SITE_URL } from "@/lib/config";
@@ -98,19 +98,24 @@ export async function registerUser(formData: FormData) {
   }
 
   // 重複チェック
-  const existingUser = await db
+  const existingEmail = await db
     .select()
     .from(users)
-    .where(or(eq(users.email, email), eq(users.username, username)))
+    .where(eq(users.email, email))
     .get();
 
-  if (existingUser) {
-    if (existingUser.email === email) {
-      return { error: "emailTaken" };
-    }
-    if (existingUser.username === username) {
-      return { error: "usernameTaken" };
-    }
+  if (existingEmail) {
+    return { error: "emailTaken" };
+  }
+
+  const existingProfile = await db
+    .select()
+    .from(userProfiles)
+    .where(eq(userProfiles.username, username))
+    .get();
+    
+  if (existingProfile) {
+    return { error: "usernameTaken" };
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
@@ -118,13 +123,21 @@ export async function registerUser(formData: FormData) {
 
   await db.insert(users).values({
     id,
-    username,
-    displayName,
     name: displayName,
     email,
     emailVerified: new Date(),
     passwordHash,
     role: "user",
+  }).run();
+
+  await db.insert(userProfiles).values({
+    userId: id,
+    username,
+    displayName,
+  }).run();
+
+  await db.insert(userSettings).values({
+    userId: id,
   }).run();
 
   // Consume token
