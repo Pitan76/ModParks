@@ -34,6 +34,8 @@ export const users = sqliteTable("users", {
   previousUsername: text("previous_username"),
   githubUsername: text("github_username"),
   custom:        text("custom", { mode: "json" }),
+  twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).notNull().default(false),
+  twoFactorSecret: text("two_factor_secret"),
   deletedAt:     integer("deleted_at", { mode: "timestamp" }),
   createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -460,3 +462,29 @@ export type ApiKey      = typeof apiKeys.$inferSelect;
 export type ProjectMember = typeof projectMembers.$inferSelect;
 export type Tag         = typeof tags.$inferSelect;
 export type Platform    = typeof platforms.$inferSelect;
+
+// ─── Authenticators (WebAuthn / Passkeys) ───────────────────────────────────
+
+export const authenticators = sqliteTable(
+  "authenticator",
+  {
+    credentialID: text("credentialID").notNull().unique(),
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    providerAccountId: text("providerAccountId").notNull(),
+    credentialPublicKey: text("credentialPublicKey").notNull(),
+    counter: integer("counter").notNull(),
+    credentialDeviceType: text("credentialDeviceType").notNull(),
+    credentialBackedUp: integer("credentialBackedUp", {
+      mode: "boolean",
+    }).notNull(),
+    transports: text("transports"),
+  },
+  (authenticator) => ({
+    compositePK: primaryKey({
+      columns: [authenticator.userId, authenticator.credentialID],
+    }),
+  })
+);
+
