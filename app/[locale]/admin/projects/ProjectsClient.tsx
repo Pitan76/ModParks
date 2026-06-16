@@ -61,7 +61,7 @@ export default function ProjectsClient({ projects }: { projects: AdminProject[] 
               return (
                 <TableRow key={project.id}>
                   <TableCell>
-                    <Typography variant="body2" fontWeight="bold">
+                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
                       {project.name}
                     </Typography>
                   </TableCell>

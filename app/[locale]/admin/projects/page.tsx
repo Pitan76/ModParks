@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { projects, users } from "@/db/schema";
+import { projects, users, userProfiles } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -17,11 +17,12 @@ export default async function AdminProjectsPage({ params }: { params: Promise<{ 
       name: projects.name,
       slug: projects.slug,
       createdAt: projects.createdAt,
-      authorUsername: users.username,
-      authorDisplayName: users.displayName,
+      authorUsername: userProfiles.username,
+      authorDisplayName: userProfiles.displayName,
     })
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .orderBy(desc(projects.createdAt))
     .all();
 

@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { ideas, users } from "@/db/schema";
+import { ideas, users, userProfiles } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -17,11 +17,12 @@ export default async function AdminIdeasPage({ params }: { params: Promise<{ loc
       title: ideas.title,
       status: ideas.status,
       createdAt: ideas.createdAt,
-      authorUsername: users.username,
-      authorDisplayName: users.displayName,
+      authorUsername: userProfiles.username,
+      authorDisplayName: userProfiles.displayName,
     })
     .from(ideas)
     .leftJoin(users, eq(ideas.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .orderBy(desc(ideas.createdAt))
     .all();
 

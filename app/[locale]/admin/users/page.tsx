@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { users } from "@/db/schema";
+import { users, userProfiles } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import UsersClient from "./UsersClient";
@@ -12,7 +12,16 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
 
   const db = await getDatabase();
   const { isNull } = await import("drizzle-orm");
-  const allUsers = await db.select().from(users).where(isNull(users.deletedAt)).orderBy(desc(users.createdAt)).all();
+  const allUsers = await db.select({
+      id: users.id,
+      username: userProfiles.username,
+      displayName: userProfiles.displayName,
+      avatarUrl: userProfiles.avatarUrl,
+      email: users.email,
+      role: users.role,
+      createdAt: users.createdAt,
+      deletedAt: users.deletedAt
+  }).from(users).leftJoin(userProfiles, eq(users.id, userProfiles.userId)).where(isNull(users.deletedAt)).orderBy(desc(users.createdAt)).all() as any[];
 
   return (
     <>

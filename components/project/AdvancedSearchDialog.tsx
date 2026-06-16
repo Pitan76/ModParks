@@ -113,6 +113,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         
         <Divider />
         
+        {/* @ts-ignore */}
         <Autocomplete
           multiple
           options={availablePlatforms}
@@ -153,6 +154,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           })}
         />
 
+        {/* @ts-ignore */}
         <Autocomplete
           multiple
           options={MC_VERSIONS as unknown as string[]}
@@ -166,6 +168,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           })}
         />
 
+        {/* @ts-ignore */}
         <Autocomplete
           multiple
           freeSolo

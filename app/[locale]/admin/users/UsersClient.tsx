@@ -77,7 +77,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Avatar src={user.avatarUrl || undefined} sx={{ width: 32, height: 32 }} />
                       <Box>
-                        <Typography variant="body2" fontWeight="bold">
+                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
                           {user.displayName || user.username}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">

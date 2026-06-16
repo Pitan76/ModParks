@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getDb, getD1 } from "@/lib/db";
-import { users, userProfiles } from "@/db/schema";
+import { users, userProfiles, userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -110,9 +110,12 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
       bio: userProfiles.bio,
       links: userProfiles.links,
       githubUsername: userProfiles.githubUsername,
-      custom: userProfiles.custom,
+      custom: userSettings.custom,
       deletedAt: users.deletedAt,
-  }).from(users).innerJoin(userProfiles, eq(users.id, userProfiles.userId)).where(eq(userProfiles.username, username)).get();
+  }).from(users)
+  .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+  .leftJoin(userSettings, eq(users.id, userSettings.userId))
+  .where(eq(userProfiles.username, username)).get();
 
   // If not found, check previousUsername
   if (!user) {

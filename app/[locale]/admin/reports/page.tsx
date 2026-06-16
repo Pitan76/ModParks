@@ -89,7 +89,7 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
                   </Box>
 
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    {tAdmin("reports.reporter", { name: reporter.displayName ?? reporter.username ?? "Unknown" })}
+                    {tAdmin("reports.reporter", { name: reporter?.displayName ?? reporter?.username ?? "Unknown" })}
                   </Typography>
 
                   {report.detail && (

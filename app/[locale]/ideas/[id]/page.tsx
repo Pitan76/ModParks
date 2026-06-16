@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getDb, getD1 } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { ideas, ideaLikes, ideaComments, users, versions, versionIdeas, projects } from "@/db/schema";
+import { ideas, ideaLikes, ideaComments, users, userProfiles, versions, versionIdeas, projects } from "@/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
@@ -38,11 +38,12 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       status: ideas.status,
       createdAt: ideas.createdAt,
       authorId: users.id,
-      authorName: users.displayName,
-      authorAvatar: users.avatarUrl,
+      authorName: userProfiles.displayName,
+      authorAvatar: userProfiles.avatarUrl,
     })
     .from(ideas)
     .innerJoin(users, eq(ideas.authorId, users.id))
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(ideas.id, id))
     .get();
 
@@ -63,11 +64,12 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       id: ideaComments.id,
       content: ideaComments.content,
       createdAt: ideaComments.createdAt,
-      authorName: users.displayName,
-      authorAvatar: users.avatarUrl,
+      authorName: userProfiles.displayName,
+      authorAvatar: userProfiles.avatarUrl,
     })
     .from(ideaComments)
     .innerJoin(users, eq(ideaComments.authorId, users.id))
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(ideaComments.ideaId, id))
     .orderBy(desc(ideaComments.createdAt))
     .all();
