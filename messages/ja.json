@@ -326,6 +326,12 @@
       "welcome": "ModParksへようこそ！",
       "registering": "登録中...",
       "registerWithGithub": "GitHub で登録",
+      "sendVerificationEmail": "確認メールを送信",
+      "checkYourEmail": "確認メールを送信しました。メール内のリンクから登録を完了してください。",
+      "completeRegistration": "登録を完了する",
+      "invalidToken": "無効なトークン、または有効期限切れです。",
+      "sending": "送信中...",
+      "emailDesc": "登録するためのリンクをメールで送信します。",
       "alreadyHaveAccount": "すでにアカウントをお持ちですか？ ",
       "loginLink": "ログイン",
       "error": {

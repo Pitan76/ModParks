@@ -10,19 +10,15 @@ import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { Link } from "@/i18n/routing";
-import { registerUser } from "@/lib/actions/auth";
+import { sendRegistrationEmail } from "@/lib/actions/auth";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const router = useRouter();
   const tAuth = useTranslations("Auth");
   const locale = useLocale();
 
@@ -30,26 +26,33 @@ export default function RegisterPage() {
     signIn("github", { callbackUrl: `/${locale}/projects` });
   };
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess(false);
 
-    if (password.length < 8) {
-      setError(tAuth("error.passwordLength"));
+    if (!email) {
+      setError(tAuth("error.allFieldsRequired"));
       setLoading(false);
       return;
     }
 
     try {
-      const res = await registerUser(formData);
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("locale", locale);
+
+      const res = await sendRegistrationEmail(formData);
       if (res?.error) {
         setError(res.error ? tAuth(`error.${res.error}`) : tAuth("register.error.registrationFailed"));
-        setLoading(false);
       } else {
-        router.push("/login?registered=true");
+        setSuccess(true);
+        setEmail(""); // Clear email
       }
     } catch (err) {
       setError(tAuth("register.error.registrationFailed"));
+    } finally {
       setLoading(false);
     }
   }
@@ -73,59 +76,37 @@ export default function RegisterPage() {
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mb: 3 }}>{tAuth("register.checkYourEmail") || "Verification email sent. Please check your inbox."}</Alert>}
 
-        <form action={handleSubmit}>
-          <TextField
-            name="username"
-            label={tAuth("fields.username")}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            fullWidth
-            required
-            margin="normal"
-            helperText={tAuth("fields.usernameHelper")}
-          />
-          <TextField
-            name="displayName"
-            label={tAuth("fields.displayName")}
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            fullWidth
-            required
-            margin="normal"
-            helperText={tAuth("fields.displayNameHelper")}
-          />
-          <TextField
-            name="email"
-            label={tAuth("fields.email")}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            fullWidth
-            required
-            margin="normal"
-          />
-          <TextField
-            name="password"
-            label={tAuth("fields.passwordWithRule")}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            fullWidth
-            required
-            margin="normal"
-          />
+        {!success && (
+          <form onSubmit={handleSubmit}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {tAuth("register.emailDesc") || "Enter your email to verify and complete registration."}
+            </Typography>
+            
+            <TextField
+              name="email"
+              label={tAuth("fields.email")}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              required
+              margin="normal"
+              disabled={loading}
+            />
 
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            disabled={loading}
-            sx={{ mt: 4, py: 1.5, fontSize: "1rem" }}
-          >
-            {loading ? tAuth("register.registering") : tAuth("register.title")}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={loading || !email}
+              sx={{ mt: 2, py: 1.5, fontSize: "1rem" }}
+            >
+              {loading ? tAuth("register.sending") || "Sending..." : tAuth("register.sendVerificationEmail") || "Send Verification Email"}
+            </Button>
+          </form>
+        )}
 
         <Divider sx={{ my: 3 }}>
           <Typography variant="body2" color="text.disabled">{tAuth("or")}</Typography>
@@ -137,7 +118,7 @@ export default function RegisterPage() {
           size="large"
           startIcon={<GitHubIcon />}
           onClick={handleGithubLogin}
-          sx={{ py: 1.2 }}
+          sx={{ py: 1.2, mb: 2 }}
         >
           {tAuth("register.registerWithGithub")}
         </Button>

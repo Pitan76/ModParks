@@ -1,22 +1,81 @@
 "use server";
 
 import { getDatabase } from "@/lib/db";
-import { users } from "@/db/schema";
-import { eq, or } from "drizzle-orm";
+import { users, verificationTokens } from "@/db/schema";
+import { eq, and, or } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { createId } from "@paralleldrive/cuid2";
+import { SITE_URL } from "@/lib/config";
+
+export async function sendRegistrationEmail(formData: FormData) {
+  const email = formData.get("email") as string;
+  const locale = (formData.get("locale") as string) || "ja";
+
+  const { checkRateLimit } = await import("@/lib/rate-limit");
+  const rlRes = await checkRateLimit("register", 5, 15 * 60 * 1000); // 5 times per 15 min
+  if (!rlRes.success) return { error: "TOO_MANY_REQUESTS" };
+
+  if (!email) return { error: "emailRequired" };
+
+  const db = await getDatabase();
+  const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
+  if (existingUser) return { error: "emailTaken" };
+
+  // Generate a random token
+  const token = createId() + createId();
+  const identifier = `register:${email}`;
+  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  // Insert or update token
+  await db.delete(verificationTokens).where(eq(verificationTokens.identifier, identifier)).run();
+  await db.insert(verificationTokens).values({ identifier, token, expires }).run();
+
+  // Send Email using Resend
+  const link = `${SITE_URL}/${locale}/register/complete?token=${token}&email=${encodeURIComponent(email)}`;
+  
+  const subject = locale === "ja" ? "【ModParks】ご登録を完了してください" : "Complete your ModParks registration";
+  const html = locale === "ja" 
+    ? `<p>ModParksへのご登録ありがとうございます。</p><p>以下のリンクをクリックして、ユーザー名とパスワードを設定して登録を完了してください：</p><p><a href="${link}">${link}</a></p><p>このリンクは24時間有効です。</p>`
+    : `<p>Thank you for registering on ModParks.</p><p>Please click the link below to set your username and password and complete your registration:</p><p><a href="${link}">${link}</a></p><p>This link is valid for 24 hours.</p>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.AUTH_RESEND_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "ModParks <no-reply@modparks.pitan76.net>",
+        to: email,
+        subject,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      console.error("Resend API error:", await res.text());
+      return { error: "emailSendFailed" };
+    }
+  } catch (e) {
+    console.error("Failed to send email:", e);
+    return { error: "emailSendFailed" };
+  }
+
+  return { success: true };
+}
 
 export async function registerUser(formData: FormData) {
   const username    = formData.get("username") as string;
   const displayName = formData.get("displayName") as string;
   const email       = formData.get("email") as string;
   const password    = formData.get("password") as string;
+  const token       = formData.get("token") as string;
   
   const { checkRateLimit } = await import("@/lib/rate-limit");
-  const rlRes = await checkRateLimit("register", 10, 5 * 60 * 1000);
+  const rlRes = await checkRateLimit("register_complete", 10, 5 * 60 * 1000);
   if (!rlRes.success) return { error: "TOO_MANY_REQUESTS" };
 
-  if (!username || !displayName || !email || !password) {
+  if (!username || !displayName || !email || !password || !token) {
     return { error: "allFieldsRequired" };
   }
 
@@ -25,6 +84,18 @@ export async function registerUser(formData: FormData) {
   }
 
   const db = await getDatabase();
+
+  // Validate token
+  const identifier = `register:${email}`;
+  const validToken = await db
+    .select()
+    .from(verificationTokens)
+    .where(and(eq(verificationTokens.identifier, identifier), eq(verificationTokens.token, token)))
+    .get();
+
+  if (!validToken || new Date(validToken.expires) < new Date()) {
+    return { error: "invalidToken" };
+  }
 
   // 重複チェック
   const existingUser = await db
@@ -51,9 +122,13 @@ export async function registerUser(formData: FormData) {
     displayName,
     name: displayName,
     email,
+    emailVerified: new Date(),
     passwordHash,
     role: "user",
   }).run();
+
+  // Consume token
+  await db.delete(verificationTokens).where(eq(verificationTokens.identifier, identifier)).run();
 
   return { success: true };
 }

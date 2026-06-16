@@ -317,6 +317,12 @@
       "welcome": "Welcome to ModParks!",
       "registering": "Registering...",
       "registerWithGithub": "Register with GitHub",
+      "sendVerificationEmail": "Send Verification Email",
+      "checkYourEmail": "Verification email sent. Please click the link to complete registration.",
+      "completeRegistration": "Complete Registration",
+      "invalidToken": "Invalid or expired token.",
+      "sending": "Sending...",
+      "emailDesc": "Enter your email to verify and complete registration.",
       "alreadyHaveAccount": "Already have an account? ",
       "loginLink": "Log in",
       "error": {
