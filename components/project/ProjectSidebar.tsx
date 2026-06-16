@@ -143,16 +143,15 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
             {p.tags.map((tag: string) => (
-              <Chip
-                key={tag}
-                component={Link}
-                href={`/projects?tags=${encodeURIComponent(tag)}`}
-                label={getTagLabel(tag)}
-                size="small"
-                variant="outlined"
-                clickable
-                sx={{ borderColor: "divider", color: "text.secondary" }}
-              />
+              <Link key={tag} href={`/projects?tags=${encodeURIComponent(tag)}`} style={{ textDecoration: "none" }}>
+                <Chip
+                  label={getTagLabel(tag)}
+                  size="small"
+                  variant="outlined"
+                  clickable
+                  sx={{ borderColor: "divider", color: "text.secondary", cursor: "pointer" }}
+                />
+              </Link>
             ))}
           </Stack>
         </Box>

@@ -19,6 +19,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Link } from "@/i18n/routing";
 import { getLoaderInfo } from "@/lib/loaders";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
+import LinkButton from "@/components/ui/LinkButton";
 import { SITE_URL } from "@/lib/config";
 
 interface VersionDetailPageProps {
@@ -104,14 +105,13 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
       </Breadcrumbs>
 
       <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
-        <Button
-          component={Link}
+        <LinkButton
           href={`/projects/${project.slug}?tab=files`}
           startIcon={<ArrowBackIcon />}
           sx={{ mr: 2, color: "text.secondary" }}
         >
           {t("back")}
-        </Button>
+        </LinkButton>
       </Box>
 
       <Card variant="outlined" sx={{ mb: 4 }}>
