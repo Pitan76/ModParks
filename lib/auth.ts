@@ -82,14 +82,22 @@ export const authConfig = {
           }
 
           if (user.twoFactorEnabled) {
-            if (!credentials.token) {
-              throw new Error("2FA_REQUIRED");
+            if (!credentials.token || credentials.token === "undefined") {
+              const { CredentialsSignin } = await import("next-auth");
+              class TwoFactorRequiredError extends CredentialsSignin {
+                code = "2FA_REQUIRED";
+              }
+              throw new TwoFactorRequiredError();
             }
             const { TOTP } = await import("otpauth");
             const totp = new TOTP({ secret: user.twoFactorSecret as string });
             const delta = totp.validate({ token: credentials.token as string, window: 1 });
             if (delta === null) {
-              throw new Error("INVALID_2FA_TOKEN");
+              const { CredentialsSignin } = await import("next-auth");
+              class InvalidTwoFactorError extends CredentialsSignin {
+                code = "INVALID_2FA_TOKEN";
+              }
+              throw new InvalidTwoFactorError();
             }
           }
 
