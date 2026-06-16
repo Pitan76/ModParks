@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
 
-import { PREDEFINED_TAGS } from "@/lib/validations";
+
 
 export interface ProjectFormFieldsProps {
   error: { [key: string]: string[] } | null;
@@ -28,10 +28,11 @@ export interface ProjectFormFieldsProps {
     iconUrl?: string | null;
     tags?: string[];
   };
+  availableTags?: { slug: string; name: string }[];
   children?: React.ReactNode;
 }
 
-export default function ProjectFormFields({ error, project, children }: ProjectFormFieldsProps) {
+export default function ProjectFormFields({ error, project, availableTags = [], children }: ProjectFormFieldsProps) {
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
@@ -113,23 +114,25 @@ export default function ProjectFormFields({ error, project, children }: ProjectF
         multiple
         freeSolo
         disableCloseOnSelect
-        options={PREDEFINED_TAGS}
+        options={availableTags}
         getOptionLabel={(option) => {
-          if (typeof option === "string") {
-            try { return tTags(option as any); } catch { return option; }
-          }
-          return (option as any).inputValue || "";
+          if (typeof option === "string") return option;
+          return option.name || option.slug || "";
         }}
         value={tags}
         onChange={(_, newValue) => {
-          const stringValues = newValue.map((v: any) => typeof v === "string" ? v : v.inputValue || "");
+          const stringValues = newValue.map((v: any) => {
+            if (typeof v === "string") return v;
+            return v.slug || v.inputValue || "";
+          });
           setTags(stringValues.filter(Boolean));
         }}
         renderValue={(value: readonly string[], getItemProps: any) =>
-          value.map((option: string, index: number) => {
+          value.map((optionSlug: string, index: number) => {
             const { key, ...tagProps } = getItemProps({ index });
-            let label = option as string;
-            try { label = tTags(option as any); } catch {}
+            const foundObj = availableTags.find((tObj) => tObj.slug === optionSlug);
+            let label = foundObj ? foundObj.name : optionSlug;
+            try { if(!foundObj) label = tTags(optionSlug as any); } catch {}
             return <Chip variant="outlined" label={label} key={key} {...tagProps} />;
           })
         }

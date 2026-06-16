@@ -46,9 +46,10 @@ export interface ProjectVersionsManagerProps {
   projectSlug: string;
   versions: ProjectVersion[];
   openIdeas: { id: string; title: string }[];
+  availablePlatforms?: { slug: string; name: string }[];
 }
 
-export default function ProjectVersionsManager({ projectSlug, versions: initialVersions, openIdeas }: ProjectVersionsManagerProps) {
+export default function ProjectVersionsManager({ projectSlug, versions: initialVersions, openIdeas, availablePlatforms = [] }: ProjectVersionsManagerProps) {
   const format = useFormatter();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Version");
@@ -244,17 +245,31 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
 
             <Autocomplete
               multiple
-              options={AVAILABLE_LOADERS}
-              getOptionLabel={(id) => getLoaderInfo(id).name}
-              value={editLoaders}
-              onChange={(_, val) => setEditLoaders(val)}
+              options={availablePlatforms}
+              getOptionLabel={(option) => {
+                if (typeof option === "string") return option;
+                return option.name || option.slug || "";
+              }}
+              value={availablePlatforms.filter(p => editLoaders.includes(p.slug)) as any}
+              onChange={(_, val: any[]) => setEditLoaders(val.map(v => typeof v === "string" ? v : v.slug))}
               renderInput={(params) => (
                 <TextField {...params} label={t("fields.loaders")} required={editLoaders.length === 0} error={!!editError?.loaders} helperText={editError?.loaders?.[0]} />
               )}
-              // @ts-expect-error MUI typing issue with renderTags signature resolution
-              renderTags={(val: string[], getTagProps: AutocompleteRenderGetTagProps) => val.map((id, idx) => {
+              renderTags={(val: any[], getTagProps) => val.map((option, idx) => {
+                const slug = typeof option === "string" ? option : option.slug;
+                const name = typeof option === "string" ? option : option.name;
+                const info = getLoaderInfo(slug);
                 const { key, ...tagProps } = getTagProps({ index: idx });
-                return <Chip key={key} label={getLoaderInfo(id).name} size="small" {...tagProps} />;
+                return (
+                  <Chip 
+                    key={key} 
+                    label={name} 
+                    size="small" 
+                    color={info.color as any}
+                    icon={info.icon}
+                    {...tagProps} 
+                  />
+                );
               })}
             />
 
@@ -281,7 +296,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
         <DialogTitle>{t("manager.uploadTitle")}</DialogTitle>
         <DialogContent sx={{ pb: 0 }}>
           <Box sx={{ mt: 2 }}>
-            <VersionUploadForm slug={projectSlug} openIdeas={openIdeas} />
+            <VersionUploadForm slug={projectSlug} openIdeas={openIdeas} availablePlatforms={availablePlatforms} />
           </Box>
         </DialogContent>
         <DialogActions>

@@ -27,9 +27,10 @@ interface ProjectEditFormProps {
     sourceUrl?: string | null;
     status: string;
   };
+  availableTags?: { slug: string; name: string }[];
 }
 
-export default function ProjectEditForm({ project }: ProjectEditFormProps) {
+export default function ProjectEditForm({ project, availableTags = [] }: ProjectEditFormProps) {
   const router = useRouter();
   const t = useTranslations("Project.form");
   
@@ -58,7 +59,7 @@ export default function ProjectEditForm({ project }: ProjectEditFormProps) {
     <Card>
       <CardContent sx={{ p: 4 }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <ProjectFormFields error={error} project={project as any}>
+          <ProjectFormFields error={error} project={project as any} availableTags={availableTags}>
             <FormControl fullWidth required>
               <InputLabel id="project-status-label">{t("status")}</InputLabel>
               <Select

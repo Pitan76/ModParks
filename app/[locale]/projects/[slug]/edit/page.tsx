@@ -58,6 +58,10 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     .where(inArray(ideas.status, ["open", "in_progress"]))
     .all();
 
+  const { tags: tagsTable, platforms: platformsTable } = await import("@/db/schema");
+  const availableTags = await db.select({ slug: tagsTable.slug, name: tagsTable.name }).from(tagsTable).all();
+  const availablePlatforms = await db.select({ slug: platformsTable.slug, name: platformsTable.name }).from(platformsTable).all();
+
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 4 }}>
@@ -66,8 +70,8 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
       <ProjectEditClient
         isOwner={isOwner}
-        basicInfoForm={<ProjectEditForm project={project} />}
-        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} />}
+        basicInfoForm={<ProjectEditForm project={project} availableTags={availableTags} />}
+        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} />}
         membersManager={
           <ProjectMembersManager 
             projectId={project.id} 

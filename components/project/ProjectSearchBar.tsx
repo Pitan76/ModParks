@@ -28,6 +28,8 @@ interface ProjectSearchBarProps {
   initialIncludeDesc?: boolean;
   initialIncludeTags?: boolean;
   initialIncludeAuthor?: boolean;
+  availableTags?: { slug: string; name: string }[];
+  availablePlatforms?: { slug: string; name: string }[];
 }
 
 export default function ProjectSearchBar({ 
@@ -40,7 +42,9 @@ export default function ProjectSearchBar({
   initialSearchMode = "OR",
   initialIncludeDesc = true,
   initialIncludeTags = true,
-  initialIncludeAuthor = true
+  initialIncludeAuthor = true,
+  availableTags = [],
+  availablePlatforms = []
 }: ProjectSearchBarProps) {
   const t = useTranslations("Search");
   const router = useRouter();
@@ -180,6 +184,8 @@ export default function ProjectSearchBar({
         open={advancedOpen}
         onClose={() => setAdvancedOpen(false)}
         initialFilters={advancedFilters}
+        availableTags={availableTags}
+        availablePlatforms={availablePlatforms}
         onApply={(filters) => {
           setAdvancedFilters(filters);
           setAdvancedOpen(false);

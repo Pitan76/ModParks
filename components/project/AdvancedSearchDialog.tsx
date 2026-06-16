@@ -16,7 +16,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { useTranslations } from "next-intl";
-import { LOADERS, MC_VERSIONS, PREDEFINED_TAGS } from "@/lib/validations";
+import { MC_VERSIONS } from "@/lib/validations";
 import { getLoaderInfo } from "@/lib/loaders";
 import { useState, useEffect } from "react";
 
@@ -35,9 +35,11 @@ interface AdvancedSearchDialogProps {
   onClose: () => void;
   onApply: (filters: AdvancedSearchFilters) => void;
   initialFilters: AdvancedSearchFilters;
+  availableTags?: { slug: string; name: string }[];
+  availablePlatforms?: { slug: string; name: string }[];
 }
 
-export default function AdvancedSearchDialog({ open, onClose, onApply, initialFilters }: AdvancedSearchDialogProps) {
+export default function AdvancedSearchDialog({ open, onClose, onApply, initialFilters, availableTags = [], availablePlatforms = [] }: AdvancedSearchDialogProps) {
   const t = useTranslations("Search");
   const tCommon = useTranslations("Common");
   const tTags = useTranslations("Tags");
@@ -113,27 +115,35 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         
         <Autocomplete
           multiple
-          options={LOADERS as unknown as string[]}
-          value={tempLoaders}
-          onChange={(_, val) => setTempLoaders(val)}
+          options={availablePlatforms}
+          getOptionLabel={(option) => {
+            if (typeof option === "string") return option;
+            return option.name || option.slug || "";
+          }}
+          value={availablePlatforms.filter(p => tempLoaders.includes(p.slug)) as any}
+          onChange={(_, val: any[]) => setTempLoaders(val.map(v => typeof v === "string" ? v : v.slug))}
           renderInput={(params) => <TextField {...params} label={t("platforms")} size="small" />}
-          renderOption={(props, option) => {
-            const info = getLoaderInfo(option);
+          renderOption={(props, option: any) => {
+            const slug = typeof option === "string" ? option : option.slug;
+            const name = typeof option === "string" ? option : option.name;
+            const info = getLoaderInfo(slug);
             const { key, ...otherProps } = props;
             return (
               <li key={key} {...otherProps} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 {info.icon && <Box sx={{ display: "flex", alignItems: "center", color: `${info.color}.main` }}>{info.icon}</Box>}
-                {info.name}
+                {name}
               </li>
             );
           }}
-          renderTags={(val, getTagProps) => val.map((option, idx) => {
-            const info = getLoaderInfo(option);
+          renderTags={(val: any[], getTagProps) => val.map((option, idx) => {
+            const slug = typeof option === "string" ? option : option.slug;
+            const name = typeof option === "string" ? option : option.name;
+            const info = getLoaderInfo(slug);
             const { key, ...tagProps } = getTagProps({ index: idx });
             return (
               <Chip 
                 key={key} 
-                label={info.name} 
+                label={name} 
                 size="small" 
                 color={info.color as any}
                 icon={info.icon}
@@ -158,20 +168,27 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         <Autocomplete
           multiple
           freeSolo
-          options={PREDEFINED_TAGS as unknown as string[]}
-          value={tempTags}
-          onChange={(_, val) => setTempTags(val)}
+          options={availableTags}
+          getOptionLabel={(option) => {
+            if (typeof option === "string") return option;
+            return option.name || option.slug || "";
+          }}
+          value={tempTags as any}
+          onChange={(_, val: any[]) => setTempTags(val.map(v => typeof v === "string" ? v : v.slug || v.inputValue || ""))}
           renderInput={(params) => <TextField {...params} label={t("tags")} size="small" />}
-          renderOption={(props, option) => {
+          renderOption={(props, option: any) => {
+            const slug = typeof option === "string" ? option : option.slug;
+            let label = typeof option === "string" ? option : option.name;
+            try { if (typeof option === "string") label = tTags(option as any); } catch {}
             const { key, ...otherProps } = props;
-            let label = option;
-            try { label = tTags(option as any); } catch {}
             return <li key={key} {...otherProps}>{label}</li>;
           }}
-          renderTags={(val, getTagProps) => val.map((option, idx) => {
+          renderTags={(val: any[], getTagProps) => val.map((option, idx) => {
+            const slug = typeof option === "string" ? option : option.slug;
+            const foundObj = availableTags.find(tObj => tObj.slug === slug);
+            let label = foundObj ? foundObj.name : slug;
+            try { if (!foundObj) label = tTags(slug as any); } catch {}
             const { key, ...tagProps } = getTagProps({ index: idx });
-            let label = option;
-            try { label = tTags(option as any); } catch {}
             return <Chip key={key} label={label} size="small" {...tagProps} />;
           })}
         />

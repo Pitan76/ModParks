@@ -16,7 +16,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
-import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
+import { getLoaderInfo } from "@/lib/loaders";
 import { MC_VERSIONS } from "@/lib/validations";
 import { parseModJar } from "@/lib/utils/modParser";
 
@@ -31,9 +31,10 @@ export interface VersionUploadFormProps {
   slug: string;
   /** 関連付け可能なオープン状態のアイデア一覧 */
   openIdeas: { id: string; title: string }[];
+  availablePlatforms?: { slug: string; name: string }[];
 }
 
-export default function VersionUploadForm({ slug, openIdeas }: VersionUploadFormProps) {
+export default function VersionUploadForm({ slug, openIdeas, availablePlatforms = [] }: VersionUploadFormProps) {
   const router = useRouter();
   const tVersion = useTranslations("Version");
   const tCommon = useTranslations("Common");
@@ -276,30 +277,36 @@ export default function VersionUploadForm({ slug, openIdeas }: VersionUploadForm
           <Autocomplete
             multiple
             disableCloseOnSelect
-            options={AVAILABLE_LOADERS}
-            getOptionLabel={(option: string) => getLoaderInfo(option).name}
-            value={loaders}
-            onChange={(_, newValue) => setLoaders(newValue)}
-            renderOption={(props: React.HTMLAttributes<HTMLLIElement>, option: string) => {
-              const info = getLoaderInfo(option);
+            options={availablePlatforms}
+            getOptionLabel={(option) => {
+              if (typeof option === "string") return option;
+              return option.name || option.slug || "";
+            }}
+            value={availablePlatforms.filter(p => loaders.includes(p.slug)) as any}
+            onChange={(_, newValue: any[]) => setLoaders(newValue.map(v => typeof v === "string" ? v : v.slug))}
+            renderOption={(props: React.HTMLAttributes<HTMLLIElement>, option: any) => {
+              const slug = typeof option === "string" ? option : option.slug;
+              const name = typeof option === "string" ? option : option.name;
+              const info = getLoaderInfo(slug);
               return (
-                <li {...props} key={option}>
+                <li {...props} key={slug}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     {info.icon}
-                    {info.name}
+                    {name}
                   </Box>
                 </li>
               );
             }}
-            // @ts-expect-error MUI typing issue with renderTags signature resolution
-            renderTags={(value: string[], getTagProps: AutocompleteRenderGetTagProps) =>
-              value.map((option: string, index: number) => {
-                const info = getLoaderInfo(option);
+            renderTags={(val: any[], getTagProps) =>
+              val.map((option, index: number) => {
+                const slug = typeof option === "string" ? option : option.slug;
+                const name = typeof option === "string" ? option : option.name;
+                const info = getLoaderInfo(slug);
                 const { key, ...tagProps } = getTagProps({ index });
                 return (
                   <Chip
                     variant="outlined"
-                    label={info.name}
+                    label={name}
                     size="small"
                     icon={info.icon}
                     color={info.color}

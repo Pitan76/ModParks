@@ -1,17 +1,5 @@
 import { z } from "zod";
 
-const LOADERS = [
-  "fabric",
-  "forge",
-  "neoforge",
-  "quilt",
-  "paper",
-  "spigot",
-  "bukkit",
-  "purpur",
-  "velocity",
-  "waterfall",
-] as const;
 
 const MC_VERSIONS = [
   "26.1.2", "26.1.1", "26.1",
@@ -59,15 +47,11 @@ const LICENSES = [
 
 export const CONTENT_TYPES = ["mod", "plugin"] as const;
 export type ContentType = (typeof CONTENT_TYPES)[number];
-export type Loader = (typeof LOADERS)[number];
+export type Loader = string;
 export type McVersion = (typeof MC_VERSIONS)[number];
 export type License = (typeof LICENSES)[number];
 
-export const PREDEFINED_TAGS = [
-  "items", "blocks", "commands", "permissions", "utility", "qol", "technology", "industry", "energy", "magic", "adventure", "biomes", "exploration", "optimization", "building", "worldgen", "cosmetic", "transport", "automation", "client", "server", "gameplay", "storage", "weapons", "armor", "food"
-] as const;
-
-export { LOADERS, MC_VERSIONS, LICENSES };
+export { MC_VERSIONS, LICENSES };
 
 // ─── Project Schema ────────────────────────────────────────────────────────────
 
@@ -105,7 +89,7 @@ export const createVersionSchema = z.object({
     .array(z.enum(MC_VERSIONS))
     .min(1, "Minecraftバージョンを1つ以上選択してください"),
   loaders: z
-    .array(z.enum(LOADERS))
+    .array(z.string())
     .min(1, "ローダーを1つ以上選択してください"),
   changelog: z.string().max(10000).optional().or(z.literal("")),
 });
