@@ -45,19 +45,42 @@ export const authConfig = {
         token: { label: "2FA Token", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-        const { checkRateLimit } = await import("@/lib/rate-limit");
-        const rlRes = await checkRateLimit("login", 10, 5 * 60 * 1000);
-        if (!rlRes.success) throw new Error("TOO_MANY_REQUESTS");
+        if (!credentials?.email || !credentials?.password) {
+          console.log("[Auth] Missing credentials");
+          return null;
+        }
+        
+        try {
+          const { checkRateLimit } = await import("@/lib/rate-limit");
+          const rlRes = await checkRateLimit("login", 10, 5 * 60 * 1000);
+          if (!rlRes.success) {
+            console.log("[Auth] Rate limited");
+            throw new Error("TOO_MANY_REQUESTS");
+          }
 
-        const { getDatabase } = await import("@/lib/db");
-        const db = await getDatabase();
-        const user = await db.select().from(users).where(eq(users.email, credentials.email as string)).get();
+          const { getDatabase } = await import("@/lib/db");
+          const db = await getDatabase();
+          const user = await db.select().from(users).where(eq(users.email, credentials.email as string)).get();
 
-        if (!user || !user.passwordHash || user.deletedAt) return null;
+          if (!user) {
+            console.log("[Auth] User not found:", credentials.email);
+            return null;
+          }
+          if (!user.passwordHash) {
+            console.log("[Auth] User has no passwordHash:", credentials.email);
+            return null;
+          }
+          if (user.deletedAt) {
+            console.log("[Auth] User is deleted:", credentials.email);
+            return null;
+          }
 
-        const passwordsMatch = await bcrypt.compare(credentials.password as string, user.passwordHash);
-        if (passwordsMatch) {
+          const passwordsMatch = await bcrypt.compare(credentials.password as string, user.passwordHash);
+          if (!passwordsMatch) {
+            console.log("[Auth] Password mismatch for user:", credentials.email);
+            return null;
+          }
+
           if (user.twoFactorEnabled) {
             if (!credentials.token) {
               throw new Error("2FA_REQUIRED");
@@ -80,8 +103,10 @@ export const authConfig = {
             avatarUrl: user.avatarUrl,
             role: user.role,
           };
+        } catch (e: any) {
+          console.error("[Auth] Error in authorize:", e);
+          throw e;
         }
-        return null;
       },
     }),
   ],
