@@ -15,6 +15,7 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import LanguageIcon from "@mui/icons-material/Language";
 import { useTranslations } from "next-intl";
 import ReportDialog from "@/components/project/ReportDialog";
+import { Link } from "@/i18n/routing";
 
 // Simple mapping for custom links
 const getLinkIcon = (url: string) => {
