@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } }, { status: 400 });
     }
 
-    const { users } = await import("@/db/schema");
-    const userRecord = await db.select().from(users).where(eq(users.id, session.user.id)).get();
-    const status = (userRecord?.defaultProjectStatus as any) || "draft";
+    const { userSettings } = await import("@/db/schema");
+    const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
+    const status = (settingsRecord?.defaultProjectStatus as any) || "draft";
 
     await db.insert(projects).values({
       id,

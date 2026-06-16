@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getDatabase } from "@/lib/db";
-import { users, apiKeys, accounts } from "@/db/schema";
+import { users, userProfiles, userSettings, apiKeys, accounts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import SettingsClient from "@/components/settings/SettingsClient";
 import Container from "@mui/material/Container";
@@ -24,6 +24,8 @@ export default async function SettingsPage({ params, searchParams }: { params: P
   const db = await getDatabase();
 
   const userRecord = await db.select().from(users).where(eq(users.id, session.user.id)).get();
+  const profileRecord = await db.select().from(userProfiles).where(eq(userProfiles.userId, session.user.id)).get();
+  const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
   const userApiKeys = await db.select().from(apiKeys).where(eq(apiKeys.userId, session.user.id));
   const userAccounts = await db.select().from(accounts).where(eq(accounts.userId, session.user.id));
 
@@ -36,21 +38,21 @@ export default async function SettingsPage({ params, searchParams }: { params: P
       </Typography>
       <SettingsClient
         user={{
-          username: userRecord?.username || "",
-          displayName: userRecord?.displayName || "",
-          bio: userRecord?.bio || "",
+          username: profileRecord?.username || "",
+          displayName: profileRecord?.displayName || "",
+          bio: profileRecord?.bio || "",
           email: userRecord?.email || "",
-          avatarUrl: userRecord?.avatarUrl || "",
-          links: userRecord?.links || "[]",
-          locale: userRecord?.locale || "ja",
-          showGithubLink: (userRecord?.custom as Record<string, any>)?.showGithubLink ?? true,
+          avatarUrl: profileRecord?.avatarUrl || "",
+          links: profileRecord?.links || "[]",
+          locale: settingsRecord?.locale || "ja",
+          showGithubLink: (settingsRecord?.custom as Record<string, any>)?.showGithubLink ?? true,
         }}
         apiKeys={userApiKeys}
         isGitHubConnected={isGitHubConnected}
         hasPassword={!!userRecord?.passwordHash}
         twoFactorEnabled={!!userRecord?.twoFactorEnabled}
-        defaultProjectStatus={userRecord?.defaultProjectStatus || "draft"}
-        defaultLicense={userRecord?.defaultLicense || "All Rights Reserved"}
+        defaultProjectStatus={settingsRecord?.defaultProjectStatus || "draft"}
+        defaultLicense={settingsRecord?.defaultLicense || "All Rights Reserved"}
         error={resolvedSearchParams.error as string | undefined}
       />
     </Container>
