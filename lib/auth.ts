@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
+import Resend from "next-auth/providers/resend";
 import type { NextAuthConfig } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { getDb } from "@/lib/db";
@@ -16,6 +17,9 @@ import bcrypt from "bcryptjs";
  */
 export const authConfig = {
   providers: [
+    Resend({
+      from: "no-reply@modparks.pitan76.net",
+    }),
     GitHub({
       clientId:     process.env.AUTH_GITHUB_ID!,
       clientSecret: process.env.AUTH_GITHUB_SECRET!,

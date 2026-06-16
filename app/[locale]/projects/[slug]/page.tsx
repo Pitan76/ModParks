@@ -15,6 +15,7 @@ import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 import ProjectTabsManager from "@/components/project/ProjectTabsManager";
 import LinkButton from "@/components/ui/LinkButton";
+import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import AddIcon from "@mui/icons-material/Add";
 import { SITE_URL } from "@/lib/config";
 
@@ -114,15 +115,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             canEdit={canEdit}
             manageHref={`/projects/${p.slug}/edit`}
             descriptionContent={
-              <Box
-                sx={{
-                  p: 1,
-                  "& pre": { whiteSpace: "pre-wrap", fontFamily: "inherit" },
-                }}
-              >
-                <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
-                  {p.description}
-                </Typography>
+              <Box sx={{ p: 1 }}>
+                <MarkdownRenderer content={p.description || ""} />
               </Box>
             }
             filesContent={

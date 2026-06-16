@@ -155,8 +155,8 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
 
       {errorMsg && <Alert severity="error" sx={{ mb: 3 }}>{errorMsg}</Alert>}
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table>
+      <TableContainer component={Paper} variant="outlined" sx={{ width: "100%", overflowX: "auto" }}>
+        <Table size="small" sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
               <TableCell>{t("manager.columns.version")}</TableCell>

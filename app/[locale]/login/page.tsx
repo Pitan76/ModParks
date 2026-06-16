@@ -145,10 +145,40 @@ export default function LoginPage() {
           size="large"
           startIcon={<GitHubIcon />}
           onClick={handleGithubLogin}
-          sx={{ py: 1.2 }}
+          sx={{ py: 1.2, mb: 2 }}
         >
           {tAuth("login.loginWithGithub")}
         </Button>
+
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          setLoading(true);
+          signIn("resend", { email, callbackUrl: `/${locale}/projects` });
+        }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1, mt: 1 }}>
+            {tAuth("login.loginWithEmail") || "Log in with Magic Link"}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <TextField
+              name="magicEmail"
+              label={tAuth("fields.email")}
+              type="email"
+              size="small"
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+            />
+            <Button
+              type="submit"
+              variant="outlined"
+              disabled={loading || !email}
+              sx={{ whiteSpace: "nowrap" }}
+            >
+              Send Link
+            </Button>
+          </Box>
+        </form>
 
         <Box sx={{ mt: 4, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
