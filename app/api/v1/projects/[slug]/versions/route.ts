@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   if (project.status !== "public") {
     const auth = await validateApiKey(request);
-    if (!auth.valid) {
+    if (!auth.valid || !auth.userId) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
     

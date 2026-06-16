@@ -7,7 +7,7 @@ import ThemeRegistry from "@/components/ThemeRegistry";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { users } from "@/db/schema";
+import { users, userProfiles, userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import AppLayout from "@/components/layout/AppLayout";
 import AppFooter from "@/components/layout/AppFooter";
@@ -68,7 +68,16 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   if (session?.user?.id) {
     // 常に最新のプロフィール情報（特にアバター）を取得して上書き
     const db = await getDatabase();
-    const dbUser = await db.select().from(users).where(eq(users.id, session.user.id)).get();
+    const dbUser = await db.select({
+      avatarUrl: userProfiles.avatarUrl,
+      displayName: userProfiles.displayName,
+      username: userProfiles.username,
+      locale: userSettings.locale
+    }).from(users)
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .innerJoin(userSettings, eq(users.id, userSettings.userId))
+    .where(eq(users.id, session.user.id)).get();
+    
     if (dbUser) {
       session.user.avatarUrl = dbUser.avatarUrl;
       session.user.displayName = dbUser.displayName ?? "";

@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
 import { getDatabase } from "@/lib/db";
-import { ideas, users, ideaLikes, ideaComments } from "@/db/schema";
+import { ideas, users, userProfiles, ideaLikes, ideaComments } from "@/db/schema";
 import { eq, sql, desc } from "drizzle-orm";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -32,13 +32,14 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
       status: ideas.status,
       createdAt: ideas.createdAt,
       authorId: users.id,
-      authorName: users.displayName,
-      authorAvatar: users.avatarUrl,
+      authorName: userProfiles.displayName,
+      authorAvatar: userProfiles.avatarUrl,
       likesCount: sql<number>`(SELECT count(*) FROM ${ideaLikes} WHERE ${ideaLikes.ideaId} = ${ideas.id})`,
       commentsCount: sql<number>`(SELECT count(*) FROM ${ideaComments} WHERE ${ideaComments.ideaId} = ${ideas.id})`,
     })
     .from(ideas)
     .innerJoin(users, eq(ideas.authorId, users.id))
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
     .orderBy(desc(ideas.createdAt))
     .all();
 
