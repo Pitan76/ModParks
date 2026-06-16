@@ -48,6 +48,7 @@ export default async function SettingsPage({ params, searchParams }: { params: P
         apiKeys={userApiKeys}
         isGitHubConnected={isGitHubConnected}
         hasPassword={!!userRecord?.passwordHash}
+        twoFactorEnabled={!!userRecord?.twoFactorEnabled}
         error={resolvedSearchParams.error as string | undefined}
       />
     </Container>

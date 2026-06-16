@@ -246,6 +246,8 @@
     "uploadError": "アップロード準備に失敗しました",
     "uploadFailed": "アップロードに失敗しました",
     "updateSuccess": "プロフィールを更新しました",
+    "githubLink": "GitHubリンク",
+    "twoFactorToken": "認証コード",
     "githubLinked": "GitHub連携済み",
     "githubNotLinked": "GitHub未連携",
     "error": {
@@ -311,8 +313,11 @@
       "noAccount": "アカウントをお持ちでないですか？ ",
       "registerLink": "新規登録",
       "error": {
-        "invalidCredentials": "メールアドレスまたはパスワードが間違っています。"
-      }
+        "invalidCredentials": "メールアドレスまたはパスワードが間違っています",
+        "invalidTwoFactor": "2段階認証コードが間違っています"
+      },
+      "twoFactorDesc": "認証アプリで生成された6桁のコードを入力してください。",
+      "verify": "認証する"
     },
     "register": {
       "title": "新規登録",

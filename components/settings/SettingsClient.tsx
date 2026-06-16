@@ -2,8 +2,9 @@
 
 import { useState, useRef } from "react";
 import { useTranslations, useFormatter } from "next-intl";
-import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, toggleGithubVisibility, changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settings";
+import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, toggleGithubVisibility, changeUsername, changeEmail, changePassword, deleteAccount, generateTotpSecret, verifyAndEnableTotp, disableTotp } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
+import { QRCodeSVG } from "qrcode.react";
 import TabbedPanel from "@/components/ui/TabbedPanel";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -44,10 +45,11 @@ interface SettingsClientProps {
   apiKeys: { id: string, name: string, createdAt: Date, lastUsedAt: Date | null }[];
   isGitHubConnected: boolean;
   hasPassword?: boolean;
+  twoFactorEnabled?: boolean;
   error?: string;
 }
 
-export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, error }: SettingsClientProps) {
+export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, twoFactorEnabled, error }: SettingsClientProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const format = useFormatter();
@@ -91,6 +93,13 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   const [confirmPass, setConfirmPass] = useState("");
   const [accMsg, setAccMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  // 2FA State
+  const [is2FAEnabled, setIs2FAEnabled] = useState(!!twoFactorEnabled);
+  const [totpSetupUri, setTotpSetupUri] = useState("");
+  const [totpSecret, setTotpSecret] = useState("");
+  const [totpToken, setTotpToken] = useState("");
+  const [twoFactorMsg, setTwoFactorMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
 
   // ---------- Profile Handlers ----------
   const handleAvatarClick = () => {
@@ -233,6 +242,37 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
       setDeleteOpen(false);
       signOut({ callbackUrl: "/" });
     }
+  };
+
+  const handleSetupTotp = async () => {
+    const res = await generateTotpSecret();
+    setTotpSecret(res.secret);
+    setTotpSetupUri(res.uri);
+    setTwoFactorMsg(null);
+    setTotpToken("");
+  };
+
+  const handleVerifyTotp = async () => {
+    setTwoFactorMsg(null);
+    if (!totpToken) return;
+    const res = await verifyAndEnableTotp(totpSecret, totpToken);
+    if (res.error) {
+      setTwoFactorMsg({ type: "error", text: t("security.invalidCode") });
+    } else {
+      setIs2FAEnabled(true);
+      setTotpSetupUri("");
+      setTotpSecret("");
+      setTotpToken("");
+      setTwoFactorMsg({ type: "success", text: t("profile.success") });
+      setTimeout(() => setTwoFactorMsg(null), 3000);
+    }
+  };
+
+  const handleDisableTotp = async () => {
+    await disableTotp();
+    setIs2FAEnabled(false);
+    setTwoFactorMsg({ type: "success", text: t("profile.success") });
+    setTimeout(() => setTwoFactorMsg(null), 3000);
   };
 
   const tabs = [

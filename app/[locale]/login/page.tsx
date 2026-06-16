@@ -24,6 +24,9 @@ export default function LoginPage() {
   const tAuth = useTranslations("Auth");
   const locale = useLocale();
 
+  const [token, setToken] = useState("");
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
+
   const registered = searchParams?.get("registered") === "true";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -34,11 +37,19 @@ export default function LoginPage() {
     const res = await signIn("credentials", {
       email,
       password,
+      token: showTwoFactor ? token : undefined,
       redirect: false,
     });
 
     if (res?.error) {
-      setError(tAuth("login.error.invalidCredentials"));
+      if (res.error.includes("2FA_REQUIRED")) {
+        setShowTwoFactor(true);
+        setError("");
+      } else if (res.error.includes("INVALID_2FA_TOKEN")) {
+        setError(tAuth("login.error.invalidTwoFactor"));
+      } else {
+        setError(tAuth("login.error.invalidCredentials"));
+      }
       setLoading(false);
     } else {
       router.push(`/${locale}/projects`);
@@ -65,35 +76,52 @@ export default function LoginPage() {
           {tAuth("login.title")}
         </Typography>
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
-          {tAuth("login.welcomeBack")}
+          {showTwoFactor ? tAuth("login.twoFactorDesc") : tAuth("login.welcomeBack")}
         </Typography>
 
         {registered && <Alert severity="success" sx={{ mb: 3 }}>{tAuth("login.registrationComplete")}</Alert>}
         {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
         <form onSubmit={handleSubmit}>
-          <TextField
-            name="email"
-            label={tAuth("fields.email")}
-            type="email"
-            fullWidth
-            required
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-          />
-          <TextField
-            name="password"
-            label={tAuth("fields.password")}
-            type="password"
-            fullWidth
-            required
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-          />
+          {!showTwoFactor ? (
+            <>
+              <TextField
+                name="email"
+                label={tAuth("fields.email")}
+                type="email"
+                fullWidth
+                required
+                margin="normal"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+              />
+              <TextField
+                name="password"
+                label={tAuth("fields.password")}
+                type="password"
+                fullWidth
+                required
+                margin="normal"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
+            </>
+          ) : (
+            <TextField
+              name="token"
+              label={tAuth("fields.twoFactorToken") || "2FA Token"}
+              type="text"
+              fullWidth
+              required
+              margin="normal"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              disabled={loading}
+              autoFocus
+            />
+          )}
 
           <Button
             type="submit"
@@ -103,7 +131,7 @@ export default function LoginPage() {
             disabled={loading}
             sx={{ mt: 3, py: 1.5, fontSize: "1rem" }}
           >
-            {loading ? tAuth("login.loggingIn") : tAuth("login.title")}
+            {loading ? tAuth("login.loggingIn") : (showTwoFactor ? tAuth("login.verify") || "Verify" : tAuth("login.title"))}
           </Button>
         </form>
 

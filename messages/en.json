@@ -240,9 +240,11 @@
     "saving": "Saving...",
     "save": "Save",
     "uploadError": "Failed to prepare upload",
-    "uploadFailed": "Failed to upload icon",
+    "uploadFailed": "Upload failed",
     "updateSuccess": "Profile updated successfully",
-    "githubLinked": "GitHub Linked",
+    "githubLink": "GitHub Link",
+    "twoFactorToken": "2FA Code",
+    "githubLinked": "GitHub Connected",
     "githubNotLinked": "GitHub Not Linked",
     "error": {
       "displayNameRequired": "Display Name is required"
@@ -302,8 +304,11 @@
       "noAccount": "Don't have an account? ",
       "registerLink": "Register",
       "error": {
-        "invalidCredentials": "Invalid email or password."
-      }
+        "invalidCredentials": "Invalid email or password",
+        "invalidTwoFactor": "Invalid 2FA code"
+      },
+      "twoFactorDesc": "Enter the 6-digit code from your authenticator app.",
+      "verify": "Verify"
     },
     "register": {
       "title": "Register",

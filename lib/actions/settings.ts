@@ -133,7 +133,54 @@ export async function changePassword(oldPass: string, newPass: string) {
 export async function deleteAccount() {
   const { db, userId } = await getAuthenticatedDb();
 
-  await db.update(users).set({ deletedAt: new Date() }).where(eq(users.id, userId));
+  const res = await db.update(users).set({ deletedAt: new Date() }).where(eq(users.id, userId)).returning();
+  return { success: true };
+}
 
+export async function generateTotpSecret() {
+  const { db, session } = await getAuthenticatedDb();
+  const { TOTP, Secret } = await import("otpauth");
+
+  const secret = new Secret();
+  const totp = new TOTP({
+    issuer: "ModParks",
+    label: session.user.email || session.user.username || "User",
+    algorithm: "SHA1",
+    digits: 6,
+    period: 30,
+    secret,
+  });
+
+  return { secret: secret.base32, uri: totp.toString() };
+}
+
+export async function verifyAndEnableTotp(secretBase32: string, token: string) {
+  const { db, userId } = await getAuthenticatedDb();
+  const { TOTP } = await import("otpauth");
+
+  const totp = new TOTP({ secret: secretBase32 });
+  const delta = totp.validate({ token, window: 1 });
+
+  if (delta === null) {
+    return { error: "INVALID_CODE" };
+  }
+
+  await db.update(users).set({
+    twoFactorEnabled: true,
+    twoFactorSecret: secretBase32,
+  }).where(eq(users.id, userId));
+
+  revalidatePath("/settings");
+  return { success: true };
+}
+
+export async function disableTotp() {
+  const { db, userId } = await getAuthenticatedDb();
+  await db.update(users).set({
+    twoFactorEnabled: false,
+    twoFactorSecret: null,
+  }).where(eq(users.id, userId));
+
+  revalidatePath("/settings");
   return { success: true };
 }
