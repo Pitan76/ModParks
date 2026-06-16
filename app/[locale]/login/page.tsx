@@ -39,6 +39,30 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
+    // 1. If 2FA dialog is not open yet, we must check if the user has 2FA enabled
+    if (!showTwoFactor) {
+      try {
+        const checkRes = await fetch("/api/auth/check-2fa", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        
+        if (checkRes.ok) {
+          const body = (await checkRes.json()) as { twoFactorEnabled?: boolean };
+          if (body.twoFactorEnabled) {
+            // User has 2FA enabled, open the dialog and wait for token
+            setShowTwoFactor(true);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check 2FA status:", err);
+      }
+    }
+
+    // 2. Actually perform the login (with or without token)
     const res = await signIn("credentials", {
       email,
       password,
@@ -47,10 +71,10 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      if (res.error.includes("2FA_REQUIRED")) {
+      if (res.error.includes("2FA_REQUIRED") || res.error === "TwoFactorRequiredError" || res.error === "b4") {
         setShowTwoFactor(true);
         setError("");
-      } else if (res.error.includes("INVALID_2FA_TOKEN")) {
+      } else if (res.error.includes("INVALID_2FA_TOKEN") || res.error === "InvalidTwoFactorError") {
         setError(tAuth("login.error.invalidTwoFactor"));
       } else {
         setError(tAuth("login.error.invalidCredentials"));
