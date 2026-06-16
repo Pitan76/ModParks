@@ -21,27 +21,43 @@ export const users = sqliteTable("users", {
   emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
   image:         text("image"),
   
-  // Custom ModParks fields
+  // Core & Security fields
   passwordHash:  text("password_hash"),
   githubId:      text("github_id").unique(),
-  username:      text("username").unique(),
-  displayName:   text("display_name"),
-  avatarUrl:     text("avatar_url"),
-  bio:           text("bio"),
   role:          text("role", { enum: ["user", "admin"] }).notNull().default("user"),
-  locale:        text("locale", { enum: ["ja", "en"] }).notNull().default("ja"),
-  links:         text("links"),
-  previousUsername: text("previous_username"),
-  githubUsername: text("github_username"),
-  custom:        text("custom", { mode: "json" }),
   twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).notNull().default(false),
   twoFactorSecret: text("two_factor_secret"),
   deletedAt:     integer("deleted_at", { mode: "timestamp" }),
-  defaultProjectStatus: text("default_project_status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
-  defaultLicense: text("default_license").notNull().default("All Rights Reserved"),
   createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
+});
+
+// ─── User Profiles ─────────────────────────────────────────────────────────────
+
+export const userProfiles = sqliteTable("user_profiles", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  username:      text("username").unique().notNull(),
+  displayName:   text("display_name"),
+  avatarUrl:     text("avatar_url"),
+  bio:           text("bio"),
+  links:         text("links"),
+  previousUsername: text("previous_username"),
+  githubUsername: text("github_username"),
+});
+
+// ─── User Settings ─────────────────────────────────────────────────────────────
+
+export const userSettings = sqliteTable("user_settings", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  locale:        text("locale", { enum: ["ja", "en"] }).notNull().default("ja"),
+  defaultProjectStatus: text("default_project_status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
+  defaultLicense: text("default_license").notNull().default("All Rights Reserved"),
+  custom:        text("custom", { mode: "json" }),
 });
 
 export const accounts = sqliteTable(
@@ -455,6 +471,8 @@ export const platforms = sqliteTable("platforms", {
 // ─── Type Exports ─────────────────────────────────────────────────────────────
 
 export type User        = typeof users.$inferSelect;
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type UserSettings = typeof userSettings.$inferSelect;
 export type Project     = typeof projects.$inferSelect;
 export type Version     = typeof versions.$inferSelect;
 export type Report      = typeof reports.$inferSelect;
