@@ -452,6 +452,75 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
       )
     },
     {
+      label: t("security.title"),
+      content: (
+        <Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            {t("security.twoFactorDesc")}
+          </Typography>
+
+          {twoFactorMsg && <Alert severity={twoFactorMsg.type} sx={{ mb: 3 }}>{twoFactorMsg.text}</Alert>}
+
+          <Box sx={{ p: 3, border: "1px solid", borderColor: "divider", borderRadius: 2, mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>{t("security.twoFactorAuth")}</Typography>
+            <Typography variant="body2" sx={{ mb: 3 }} color={is2FAEnabled ? "success.main" : "text.secondary"}>
+              {is2FAEnabled ? t("security.twoFactorEnabled") : t("security.twoFactorDisabled")}
+            </Typography>
+
+            {is2FAEnabled ? (
+              <Button variant="outlined" color="error" onClick={handleDisableTotp}>
+                {t("security.disableTwoFactor")}
+              </Button>
+            ) : (
+              !totpSetupUri ? (
+                <Button variant="contained" onClick={handleSetupTotp}>
+                  {t("security.enableTwoFactor")}
+                </Button>
+              ) : (
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>{t("security.twoFactorSetupTitle")}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {t("security.twoFactorSetupDesc")}
+                  </Typography>
+                  <Box sx={{ bgcolor: "white", p: 2, display: "inline-block", borderRadius: 1, mb: 3 }}>
+                    <QRCodeSVG value={totpSetupUri} size={200} />
+                  </Box>
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                      label={t("security.verificationCode")}
+                      size="small"
+                      value={totpToken}
+                      onChange={e => setTotpToken(e.target.value)}
+                    />
+                    <Button variant="contained" onClick={handleVerifyTotp} disabled={!totpToken}>
+                      {t("security.verifyAndEnable")}
+                    </Button>
+                  </Box>
+                </Box>
+              )
+            )}
+          </Box>
+
+          <Divider sx={{ my: 4 }} />
+
+          <Box sx={{ p: 3, border: "1px solid", borderColor: "divider", borderRadius: 2, mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>{t("security.passkeys")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {t("security.passkeysDesc")}
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: "italic" }}>
+              {t("security.noPasskeys")}
+            </Typography>
+
+            <Button variant="outlined" disabled>
+              {t("security.registerPasskey")}
+            </Button>
+          </Box>
+        </Box>
+      )
+    },
+    {
       label: t("apiKeys.title"),
       content: (
         <Box>
