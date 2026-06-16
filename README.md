@@ -82,3 +82,4 @@ npm run dev
 - マークダウン対応
 - APIのドキュメント作成
 - Modrinth、CurseForgeとの連携
+- メール認証の実装
