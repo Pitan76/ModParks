@@ -30,19 +30,23 @@ export async function POST(req: NextRequest) {
   }
 
   if (type !== "avatar") {
-    const { getDatabase } = await import("@/lib/db");
-    const { projects, projectMembers } = await import("@/db/schema");
-    const { eq, and } = await import("drizzle-orm");
-    const db = await getDatabase();
-    const project = await db.select().from(projects).where(eq(projects.slug, projectSlug!)).get();
-    
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    if (projectSlug === "new-project") {
+      // プロジェクト新規作成時はDBチェックをスキップする
+    } else {
+      const { getDatabase } = await import("@/lib/db");
+      const { projects, projectMembers } = await import("@/db/schema");
+      const { eq, and } = await import("drizzle-orm");
+      const db = await getDatabase();
+      const project = await db.select().from(projects).where(eq(projects.slug, projectSlug!)).get();
+      
+      if (!project) {
+        return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      }
 
-    const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-    if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden: You don't have permission to upload to this project" }, { status: 403 });
+      const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
+      if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+        return NextResponse.json({ error: "Forbidden: You don't have permission to upload to this project" }, { status: 403 });
+      }
     }
   }
 
