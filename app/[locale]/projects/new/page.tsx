@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { tags as tagsSchema, users } from "@/db/schema";
+import { tags as tagsSchema, userSettings } from "@/db/schema";
 import NewProjectForm from "@/components/project/NewProjectForm";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
@@ -11,9 +11,9 @@ export default async function NewProjectPage() {
   const session = await auth();
   let defaultLicense = "All Rights Reserved";
   if (session?.user?.id) {
-    const userRecord = await db.select().from(users).where(eq(users.id, session.user.id)).get();
-    if (userRecord?.defaultLicense) {
-      defaultLicense = userRecord.defaultLicense;
+    const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
+    if (settingsRecord?.defaultLicense) {
+      defaultLicense = settingsRecord.defaultLicense;
     }
   }
 

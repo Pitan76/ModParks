@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { getDb, getD1 } from "@/lib/db";
-import { users, accounts } from "@/db/schema";
+import { users, userProfiles, accounts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import ProfileForm from "./ProfileForm";
 
@@ -26,7 +26,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const d1 = await getD1();
   const db = getDb(d1);
-  const user = await db.select().from(users).where(eq(users.id, session.user.id)).get();
+  const user = await db.select({
+      displayName: userProfiles.displayName,
+      bio: userProfiles.bio,
+      avatarUrl: userProfiles.avatarUrl,
+      username: userProfiles.username,
+      image: users.image
+  }).from(users).innerJoin(userProfiles, eq(users.id, userProfiles.userId)).where(eq(users.id, session.user.id)).get();
   if (!user) redirect("/api/auth/signin");
 
   const linkedAccounts = await db.select().from(accounts).where(eq(accounts.userId, session.user.id)).all();

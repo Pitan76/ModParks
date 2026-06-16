@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getDb, getD1 } from "@/lib/db";
-import { users } from "@/db/schema";
+import { users, userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -51,7 +51,13 @@ export async function generateMetadata({ params }: PublicProfileProps) {
   const { username } = await params;
   const d1 = await getD1();
   const db = getDb(d1);
-  const user = await db.select().from(users).where(eq(users.username, username)).get();
+  const user = await db.select({
+    username: userProfiles.username,
+    displayName: userProfiles.displayName,
+    bio: userProfiles.bio,
+    avatarUrl: userProfiles.avatarUrl,
+    deletedAt: users.deletedAt
+  }).from(users).innerJoin(userProfiles, eq(users.id, userProfiles.userId)).where(eq(userProfiles.username, username)).get();
 
   if (!user || user.deletedAt) {
     return { title: "Not Found | ModParks" };
@@ -96,11 +102,21 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
   const d1 = await getD1();
   const db = getDb(d1);
 
-  let user = await db.select().from(users).where(eq(users.username, username)).get();
+  let user = await db.select({
+      id: users.id,
+      username: userProfiles.username,
+      displayName: userProfiles.displayName,
+      avatarUrl: userProfiles.avatarUrl,
+      bio: userProfiles.bio,
+      links: userProfiles.links,
+      githubUsername: userProfiles.githubUsername,
+      custom: userProfiles.custom,
+      deletedAt: users.deletedAt,
+  }).from(users).innerJoin(userProfiles, eq(users.id, userProfiles.userId)).where(eq(userProfiles.username, username)).get();
 
   // If not found, check previousUsername
   if (!user) {
-    const prevUser = await db.select().from(users).where(eq(users.previousUsername, username)).get();
+    const prevUser = await db.select({ username: userProfiles.username }).from(userProfiles).where(eq(userProfiles.previousUsername, username)).get();
     if (prevUser && prevUser.username) {
       redirect(`/${locale}/profile/${prevUser.username}`);
     }
