@@ -37,6 +37,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } }, { status: 400 });
     }
 
+    const { users } = await import("@/db/schema");
+    const userRecord = await db.select().from(users).where(eq(users.id, session.user.id)).get();
+    const status = (userRecord?.defaultProjectStatus as any) || "draft";
+
     await db.insert(projects).values({
       id,
       slug,
@@ -48,7 +52,7 @@ export async function POST(req: NextRequest) {
       links:      links || null,
       iconUrl:    formData.get("iconUrl") as string | null,
       authorId:   session.user.id,
-      status:     "draft",
+      status:     status,
     }).run();
 
     if (tags.length > 0) {
