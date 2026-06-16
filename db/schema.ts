@@ -422,6 +422,32 @@ export const versionIdeas = sqliteTable(
   })
 );
 
+// ─── Tags & Platforms ────────────────────────────────────────────────────────
+
+export const tags = sqliteTable("tags", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  slug: text("slug").unique().notNull(),
+  description: text("description"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+export const platforms = sqliteTable("platforms", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  slug: text("slug").unique().notNull(),
+  iconUrl: text("icon_url"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // ─── Type Exports ─────────────────────────────────────────────────────────────
 
 export type User        = typeof users.$inferSelect;
@@ -432,3 +458,5 @@ export type Idea        = typeof ideas.$inferSelect;
 export type IdeaComment = typeof ideaComments.$inferSelect;
 export type ApiKey      = typeof apiKeys.$inferSelect;
 export type ProjectMember = typeof projectMembers.$inferSelect;
+export type Tag         = typeof tags.$inferSelect;
+export type Platform    = typeof platforms.$inferSelect;

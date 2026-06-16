@@ -219,9 +219,10 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
               )}
               <Divider />
               <MenuItem
-                component="a"
-                href="/api/auth/signout"
-                onClick={handleMenuClose}
+                onClick={() => {
+                  handleMenuClose();
+                  import("next-auth/react").then(({ signOut }) => signOut({ callbackUrl: "/" }));
+                }}
                 id="user-menu-signout"
               >
                 {t("logout")}

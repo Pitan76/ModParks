@@ -207,14 +207,14 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
           {t("projects")}
         </Typography>
         {isOwner && (
-          <Button
-            component={RoutingLink}
-            href="/projects?author=me"
-            variant="outlined"
-            size="small"
-          >
-            {t("manage")}
-          </Button>
+          <RoutingLink href="/projects?author=me" style={{ textDecoration: "none" }}>
+            <Button
+              variant="outlined"
+              size="small"
+            >
+              {t("manage")}
+            </Button>
+          </RoutingLink>
         )}
       </Box>
       
