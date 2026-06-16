@@ -310,6 +310,8 @@
       "registrationComplete": "登録が完了しました。ログインしてください。",
       "loggingIn": "ログイン中...",
       "loginWithGithub": "GitHub でログイン",
+      "loginWithEmail": "マジックリンクでログイン",
+      "sendLink": "リンクを送信",
       "noAccount": "アカウントをお持ちでないですか？ ",
       "registerLink": "新規登録",
       "error": {

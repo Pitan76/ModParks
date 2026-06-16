@@ -301,6 +301,8 @@
       "registrationComplete": "Registration complete. Please log in.",
       "loggingIn": "Logging in...",
       "loginWithGithub": "Log in with GitHub",
+      "loginWithEmail": "Log in with Magic Link",
+      "sendLink": "Send Link",
       "noAccount": "Don't have an account? ",
       "registerLink": "Register",
       "error": {

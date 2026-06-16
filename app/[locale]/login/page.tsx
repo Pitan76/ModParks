@@ -175,7 +175,7 @@ export default function LoginPage() {
               disabled={loading || !email}
               sx={{ whiteSpace: "nowrap" }}
             >
-              Send Link
+              {tAuth("login.sendLink") || "Send Link"}
             </Button>
           </Box>
         </form>
