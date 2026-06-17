@@ -25,6 +25,8 @@ const getLinkIcon = (url: string) => {
     if (hostname.includes("x.com") || hostname.includes("twitter.com")) return <XIcon />;
     if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return <YouTubeIcon color="error" />;
     if (hostname.includes("github.com")) return <GitHubIcon />;
+    if (hostname.includes("modrinth.com")) return <img src="https://modrinth.com/favicon.ico" alt="Modrinth" style={{width: 16, height: 16}} />;
+    if (hostname.includes("curseforge.com")) return <img src="https://www.curseforge.com/favicon.ico" alt="CurseForge" style={{width: 16, height: 16}} />;
   } catch {}
   return <LanguageIcon />;
 };

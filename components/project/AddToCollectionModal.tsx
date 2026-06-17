@@ -171,21 +171,17 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
       </DialogContent>
       <DialogActions sx={{ justifyContent: "space-between", px: 3, py: 2 }}>
         <Button onClick={onClose} variant="text" color="inherit">
-          キャンセル
+          閉じる
         </Button>
-        <Button 
-          variant="text"
-          onClick={() => {
-            if (newCollectionName.trim()) {
-              handleCreate();
-            } else {
-              onClose();
-            }
-          }}
-          disabled={isPending}
-        >
-          {newCollectionName.trim() ? "新しく作成" : "完了"}
-        </Button>
+        {!creating && (
+          <Button 
+            variant="text"
+            onClick={() => setCreating(true)}
+            disabled={isPending}
+          >
+            新しくリストを作成
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

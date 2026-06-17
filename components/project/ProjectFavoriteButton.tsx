@@ -6,7 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import Typography from "@mui/material/Typography";
-import { toggleProjectFavorite } from "@/lib/actions/favorite";
+import { toggleProjectFavorite, toggleCookieFavorite } from "@/lib/actions/favorite";
 import { useTranslations } from "next-intl";
 
 interface ProjectFavoriteButtonProps {
@@ -32,10 +32,6 @@ export default function ProjectFavoriteButton({
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!isLoggedIn) {
-      alert(t("favorite.loginRequired"));
-      return;
-    }
     if (isPending || isMutating) return;
 
     setIsMutating(true);
@@ -46,7 +42,7 @@ export default function ProjectFavoriteButton({
 
     startTransition(async () => {
       try {
-        const result = await toggleProjectFavorite(projectId);
+        const result = isLoggedIn ? await toggleProjectFavorite(projectId) : await toggleCookieFavorite(projectId);
         if (result.error) {
           // 失敗したら元に戻す
           setFavorited(initialFavorited);

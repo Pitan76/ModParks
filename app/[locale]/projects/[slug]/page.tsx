@@ -4,6 +4,7 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
+import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
@@ -86,7 +87,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   ]);
 
   const favoritesCount = favoritesData?.count || 0;
-  const isFavorited = !!userFavoriteData;
+
+  const cookieStore = await cookies();
+  const favCookie = cookieStore.get("favorites")?.value;
+  let cookieFavorites: string[] = [];
+  if (favCookie) {
+    try { cookieFavorites = JSON.parse(favCookie); } catch {}
+  }
+
+  const isFavorited = session?.user?.id ? !!userFavoriteData : cookieFavorites.includes(project.id);
 
   if (!project) notFound();
 
