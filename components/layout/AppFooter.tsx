@@ -1,3 +1,5 @@
+"use client";
+
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -7,7 +9,6 @@ import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import RssFeedIcon from "@mui/icons-material/RssFeed";
 import { Link as NextLink } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
 
 export default function AppFooter() {
   const year = new Date().getFullYear();
