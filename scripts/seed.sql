@@ -24,7 +24,8 @@ INSERT OR IGNORE INTO tags (id, name, slug) VALUES
 ('tag_storage', 'Storage', 'storage'),
 ('tag_weapons', 'Weapons', 'weapons'),
 ('tag_armor', 'Armor', 'armor'),
-('tag_food', 'Food', 'food');
+('tag_food', 'Food', 'food'),
+('tag_library', 'Library', 'library');
 
 INSERT OR IGNORE INTO platforms (id, name, slug) VALUES 
 ('plat_fabric', 'Fabric', 'fabric'),
