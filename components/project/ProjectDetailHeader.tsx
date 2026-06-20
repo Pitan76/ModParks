@@ -68,9 +68,10 @@ export default function ProjectDetailHeader({
   const locale = useLocale();
 
   const localDownloads = p.downloads || 0;
-  const modrinthDl = p.modrinthDownloads || 0;
-  const curseforgeDl = p.curseforgeDownloads || 0;
-  const totalDownloads = localDownloads + modrinthDl + curseforgeDl;
+  const extDl = (p.externalDownloads as Record<string, number> | undefined) || {};
+  const modrinthDl = extDl.modrinth || 0;
+  const curseforgeDl = extDl.curseforge || 0;
+  const totalDownloads = p.totalDownloads || localDownloads + modrinthDl + curseforgeDl;
 
   const modparksLabel = tProject("stats.modparks");
   let tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`;
