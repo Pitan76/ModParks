@@ -557,15 +557,25 @@
     },
     "posting": {
       "title": "投稿設定",
-      "defaultProjectStatus": "プロジェクトのデフォルト公開状態",
-      "defaultProjectStatusDesc": "新規プロジェクトを作成したときの初期ステータスです。",
-      "defaultLicense": "デフォルトのライセンス",
-      "defaultLicenseDesc": "新規プロジェクトを作成したときに最初に入力されるライセンスです。",
+      "defaultProjectStatus": "デフォルトの公開状態",
+      "defaultProjectStatusDesc": "新しく作成するプロジェクトの初期公開状態を設定します。",
       "statusDraft": "下書き",
       "statusPublic": "公開",
       "statusUnlisted": "限定公開",
       "statusPrivate": "非公開",
-      "successUpdate": "投稿設定を更新しました。"
+      "defaultLicense": "デフォルトのライセンス",
+      "defaultLicenseDesc": "新しく作成するプロジェクトの初期ライセンスを設定します。",
+      "successUpdate": "投稿設定を更新しました"
+    },
+    "integration": {
+      "title": "外部連携",
+      "modrinth": "Modrinth連携",
+      "modrinthDesc": "ModrinthのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。",
+      "curseforge": "CurseForge連携",
+      "curseforgeDesc": "CurseForgeのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。"
+    },
+    "errors": {
+      "adminPasswordRequired": "管理画面にアクセスするにはセキュリティのためパスワードを設定してください。"
     },
     "security": {
       "title": "セキュリティ",

@@ -548,15 +548,25 @@
     },
     "posting": {
       "title": "Posting Settings",
-      "defaultProjectStatus": "Default Project Status",
-      "defaultProjectStatusDesc": "The initial status when you create a new project.",
-      "defaultLicense": "Default License",
-      "defaultLicenseDesc": "The default license that will be pre-filled when creating a new project.",
+      "defaultProjectStatus": "Default Visibility",
+      "defaultProjectStatusDesc": "Set the initial visibility status for newly created projects.",
       "statusDraft": "Draft",
       "statusPublic": "Public",
       "statusUnlisted": "Unlisted",
       "statusPrivate": "Private",
-      "successUpdate": "Posting settings updated successfully."
+      "defaultLicense": "Default License",
+      "defaultLicenseDesc": "Set the initial license for newly created projects.",
+      "successUpdate": "Posting settings updated successfully"
+    },
+    "integration": {
+      "title": "External Integrations",
+      "modrinth": "Modrinth Integration",
+      "modrinthDesc": "Setting a Modrinth API key allows you to import and sync projects.",
+      "curseforge": "CurseForge Integration",
+      "curseforgeDesc": "Setting a CurseForge API key allows you to import and sync projects."
+    },
+    "errors": {
+      "adminPasswordRequired": "For security reasons, please set a password to access the admin panel."
     },
     "security": {
       "title": "Security",
