@@ -375,6 +375,9 @@ export async function getUserProjectStats(authorId: string) {
   const result = await db
     .select({
       totalProjects: sql<number>`count(*)`,
+      nativeDownloads: sql<number>`sum(${projects.downloads})`,
+      modrinthDownloads: sql<number>`sum(COALESCE(${projects.modrinthDownloads}, 0))`,
+      curseforgeDownloads: sql<number>`sum(COALESCE(${projects.curseforgeDownloads}, 0))`,
       totalDownloads: sql<number>`sum(${projects.downloads} + COALESCE(${projects.externalDownloads}, 0) + COALESCE(${projects.modrinthDownloads}, 0) + COALESCE(${projects.curseforgeDownloads}, 0))`
     })
     .from(projects)
@@ -384,6 +387,9 @@ export async function getUserProjectStats(authorId: string) {
   return {
     totalProjects: result?.totalProjects || 0,
     totalDownloads: result?.totalDownloads || 0,
+    nativeDownloads: result?.nativeDownloads || 0,
+    modrinthDownloads: result?.modrinthDownloads || 0,
+    curseforgeDownloads: result?.curseforgeDownloads || 0,
   };
 }
 

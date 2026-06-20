@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Pagination from "@mui/material/Pagination";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -17,6 +18,7 @@ export default function PaginationControls({ totalCount, currentPage, currentLim
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const t = useTranslations("Common");
 
   const totalPages = Math.max(1, Math.ceil(totalCount / currentLimit));
 
@@ -48,7 +50,7 @@ export default function PaginationControls({ totalCount, currentPage, currentLim
         color="primary" 
       />
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Typography variant="body2" color="text.secondary">表示件数:</Typography>
+        <Typography variant="body2" color="text.secondary">{t("itemsPerPage")}:</Typography>
         <Select
           size="small"
           value={currentLimit}

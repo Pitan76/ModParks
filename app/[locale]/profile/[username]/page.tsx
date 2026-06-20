@@ -32,6 +32,7 @@ import FollowUserButton from "@/components/user/FollowUserButton";
 import CollectionCard from "@/components/list/CollectionCard";
 import { formatCompactNumber } from "@/lib/utils/format";
 import PaginationControls from "@/components/ui/PaginationControls";
+import Tooltip from "@mui/material/Tooltip";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -109,6 +110,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
   const offset = (page - 1) * limit;
 
   const t = await getTranslations("Profile");
+  const tCommon = await getTranslations("Common");
 
   const d1 = await getD1();
   const db = getDb(d1);
@@ -166,7 +168,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
   }
 
   // Fetch user projects and favorites
-  const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, { totalProjects, totalDownloads }] = await Promise.all([
+  const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, { totalProjects, totalDownloads, nativeDownloads, modrinthDownloads, curseforgeDownloads }] = await Promise.all([
     getProjects({ authorId: user.id, limit, offset }),
     getFavoriteProjects(user.id),
     getUserCollections(user.id, session?.user?.id),
@@ -205,13 +207,17 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
               <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
                 <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{displayTotalProjects}</Box> Projects
+                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{displayTotalProjects}</Box> {tCommon("projects")}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>
-                    {formatCompactNumber(totalDownloads, locale)}
-                  </Box> Downloads
-                </Typography>
+                
+                <Tooltip title={`ModParks: ${formatCompactNumber(nativeDownloads, locale)}, Modrinth: ${formatCompactNumber(modrinthDownloads, locale)}, CurseForge: ${formatCompactNumber(curseforgeDownloads, locale)}`} arrow placement="top">
+                  <Typography variant="body2" color="text.secondary" sx={{ cursor: "pointer", borderBottom: "1px dotted", borderColor: "divider" }}>
+                    <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>
+                      {formatCompactNumber(totalDownloads, locale)}
+                    </Box> {tCommon("downloads")}
+                  </Typography>
+                </Tooltip>
+
                 <Typography variant="body2" color="text.secondary">
                   <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> Followers
                 </Typography>

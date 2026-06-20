@@ -19,7 +19,8 @@
     "back": "Back",
     "next": "Next",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "itemsPerPage": "Items per page"
   },
   "Nav": {
     "home": "Home",
