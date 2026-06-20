@@ -180,12 +180,12 @@ export default function ProjectDetailHeader({
                 initialCount={favoritesCount}
                 initialFavorited={isFavorited}
                 isLoggedIn={isLoggedIn}
-                variant="button"
+                variant="icon"
               />
             </Box>
             {isLoggedIn && currentUserId && (
               <Box sx={{ flex: { xs: 1, sm: "initial" } }}>
-                <AddToCollectionButton projectId={p.id} userId={currentUserId} />
+                <AddToCollectionButton projectId={p.id} userId={currentUserId} variant="icon" />
               </Box>
             )}
           </Box>
