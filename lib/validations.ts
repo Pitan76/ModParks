@@ -64,7 +64,7 @@ export const createProjectSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "小文字英数字とハイフンのみ"),
   description: z.string().min(10, "10文字以上").max(2000, "2000文字以内"),
   type:        z.enum(CONTENT_TYPES),
-  license:     z.enum(LICENSES),
+  license:     z.string().min(1, "ライセンスを入力してください").max(64, "64文字以内"),
   sourceUrl:   z.string().url("有効なURLを入力してください").optional().or(z.literal("")),
   links:       z.string().optional().or(z.literal("")),
   tags:        z.array(z.string().max(32)).max(10, "タグは10個まで"),

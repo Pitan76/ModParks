@@ -42,9 +42,16 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
     setImporting(true);
     setImportError("");
     try {
-      const res = await fetch(`/api/v1/projects/import?platform=${importPlatform}&id=${importId}`);
+      const res = await fetch(`/api/v1/projects/import?platform=${importPlatform}&id=${encodeURIComponent(importId)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Import failed");
+      
+      if (data.projectUrl) {
+        data.links = JSON.stringify([
+          { title: importPlatform === "modrinth" ? "Modrinth" : "CurseForge", url: data.projectUrl }
+        ]);
+      }
+
       setImportData(data);
       setFormKey(k => k + 1);
     } catch (err: any) {
@@ -115,7 +122,7 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
                 </Select>
               </FormControl>
               <TextField 
-                label={importPlatform === "modrinth" ? "Project ID / Slug" : "Project ID"} 
+                label={importPlatform === "modrinth" ? "Project ID / Slug / URL" : "Project ID / Slug / URL"} 
                 size="small" 
                 value={importId} 
                 onChange={(e) => setImportId(e.target.value)} 

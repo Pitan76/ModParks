@@ -13,10 +13,26 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const platform = searchParams.get("platform"); // "modrinth" | "curseforge"
-    const targetId = searchParams.get("id");
+    let targetId = searchParams.get("id");
 
     if (!platform || !targetId) {
       return NextResponse.json({ error: "Platform and ID are required" }, { status: 400 });
+    }
+
+    let projectUrl = "";
+    if (targetId.startsWith("http")) {
+      projectUrl = targetId;
+      try {
+        const url = new URL(targetId);
+        const pathParts = url.pathname.split("/").filter(Boolean);
+        if (platform === "modrinth") {
+          if (pathParts.length >= 2) targetId = pathParts[1];
+        } else if (platform === "curseforge") {
+          if (pathParts.length >= 3) targetId = pathParts[pathParts.length - 1];
+        }
+      } catch (e) {
+        // ignore
+      }
     }
 
     const db = await getDatabase();
@@ -32,6 +48,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Failed to fetch from Modrinth" }, { status: res.status });
       }
       const data = (await res.json()) as any;
+      if (!projectUrl) projectUrl = `https://modrinth.com/mod/${data.slug}`;
       return NextResponse.json({
         name: data.title,
         description: data.description,
@@ -42,20 +59,37 @@ export async function GET(request: Request) {
         issueTrackerUrl: data.issues_url || "",
         externalDownloads: data.downloads || 0,
         modrinthId: data.id,
+        projectUrl,
       });
     } else if (platform === "curseforge") {
       const cfApiKey = settings?.curseforgeApiKey;
       if (!cfApiKey) {
         return NextResponse.json({ error: "CurseForge API Key is not set in settings" }, { status: 400 });
       }
-      const res = await fetch(`https://api.curseforge.com/v1/mods/${targetId}`, {
-        headers: { "x-api-key": cfApiKey, "Accept": "application/json" },
-      });
-      if (!res.ok) {
-        return NextResponse.json({ error: "Failed to fetch from CurseForge" }, { status: res.status });
+      let mod = null;
+      if (!/^\d+$/.test(targetId)) {
+        const searchRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&slug=${targetId}`, {
+          headers: { "x-api-key": cfApiKey, "Accept": "application/json" },
+        });
+        if (!searchRes.ok) return NextResponse.json({ error: "Failed to search CurseForge" }, { status: searchRes.status });
+        const searchData = (await searchRes.json()) as any;
+        if (!searchData.data || searchData.data.length === 0) {
+          return NextResponse.json({ error: "CurseForge project not found by slug" }, { status: 404 });
+        }
+        mod = searchData.data[0];
+      } else {
+        const res = await fetch(`https://api.curseforge.com/v1/mods/${targetId}`, {
+          headers: { "x-api-key": cfApiKey, "Accept": "application/json" },
+        });
+        if (!res.ok) {
+          return NextResponse.json({ error: "Failed to fetch from CurseForge" }, { status: res.status });
+        }
+        const data = (await res.json()) as any;
+        mod = data.data;
       }
-      const data = (await res.json()) as any;
-      const mod = data.data;
+
+      if (!projectUrl) projectUrl = `https://www.curseforge.com/minecraft/mc-mods/${mod.slug}`;
+
       return NextResponse.json({
         name: mod.name,
         description: mod.summary,
@@ -66,6 +100,7 @@ export async function GET(request: Request) {
         issueTrackerUrl: mod.links?.issuesUrl || "",
         externalDownloads: mod.downloadCount || 0,
         curseforgeId: mod.id.toString(),
+        projectUrl,
       });
     }
 
