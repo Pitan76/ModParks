@@ -156,16 +156,16 @@ export default function ProjectDetailHeader({
             </Tooltip>
           </Box>
           
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, flexWrap: "wrap" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
               <AccessTimeIcon sx={{ fontSize: 14 }} />
-              <Typography variant="caption">
+              <Typography variant="caption" sx={{ whiteSpace: "nowrap" }}>
                 {tProject("header.publishedAt", { date: format.dateTime(new Date(p.createdAt), { dateStyle: "short" }) })}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
               <EditIcon sx={{ fontSize: 14 }} />
-              <Typography variant="caption">
+              <Typography variant="caption" sx={{ whiteSpace: "nowrap" }}>
                 {tProject("header.updatedAt", { date: format.dateTime(new Date(p.updatedAt), { dateStyle: "short" }) })}
               </Typography>
             </Box>

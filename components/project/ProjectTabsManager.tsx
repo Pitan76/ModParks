@@ -77,6 +77,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons="auto"
+          allowScrollButtonsMobile
         >
           <Tab label={t("tabs.description")} value={0} />
           <Tab label={t("tabs.files")} value={1} />
