@@ -28,6 +28,7 @@ export interface AdvancedSearchFilters {
   includeDesc: boolean;
   includeTags: boolean;
   includeAuthor: boolean;
+  includeExtDl: boolean;
 }
 
 interface AdvancedSearchDialogProps {
@@ -51,6 +52,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
   const [tempIncludeDesc, setTempIncludeDesc] = useState(initialFilters.includeDesc);
   const [tempIncludeTags, setTempIncludeTags] = useState(initialFilters.includeTags);
   const [tempIncludeAuthor, setTempIncludeAuthor] = useState(initialFilters.includeAuthor);
+  const [tempIncludeExtDl, setTempIncludeExtDl] = useState(initialFilters.includeExtDl);
 
   // Sync local state when dialog opens
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
       setTempIncludeDesc(initialFilters.includeDesc);
       setTempIncludeTags(initialFilters.includeTags);
       setTempIncludeAuthor(initialFilters.includeAuthor);
+      setTempIncludeExtDl(initialFilters.includeExtDl);
     }
   }, [open, initialFilters]);
 
@@ -74,6 +77,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
       includeDesc: tempIncludeDesc,
       includeTags: tempIncludeTags,
       includeAuthor: tempIncludeAuthor,
+      includeExtDl: tempIncludeExtDl,
     });
   };
 
@@ -107,6 +111,10 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
             <FormControlLabel
               control={<Switch size="small" checked={tempIncludeAuthor} onChange={e => setTempIncludeAuthor(e.target.checked)} />}
               label={<Typography variant="body2">{t("includeAuthor")}</Typography>}
+            />
+            <FormControlLabel
+              control={<Switch size="small" checked={tempIncludeExtDl} onChange={e => setTempIncludeExtDl(e.target.checked)} />}
+              label={<Typography variant="body2">外部DL数を合算してソート</Typography>}
             />
           </Box>
         </Box>

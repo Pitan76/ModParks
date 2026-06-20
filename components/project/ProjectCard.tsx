@@ -30,6 +30,9 @@ export interface ProjectCardProps {
     type:        "mod" | "plugin";
     license:     string;
     downloads:   number;
+    externalDownloads?: number;
+    modrinthId?: string | null;
+    curseforgeId?: string | null;
     tags:        string[];
     authorUsername?: string | null;
     authorDisplayName?: string | null;
@@ -68,6 +71,16 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
 
   // Ensure tags is always an array to avoid undefined errors
   const safeTags: string[] = project.tags ?? [];
+
+  const localDownloads = project.downloads || 0;
+  const extDownloads = project.externalDownloads || 0;
+  const totalDownloads = localDownloads + extDownloads;
+
+  let extLabel = "External";
+  if (project.modrinthId && !project.curseforgeId) extLabel = "Modrinth";
+  else if (!project.modrinthId && project.curseforgeId) extLabel = "CurseForge";
+
+  const tooltipText = `ModParks: ${formatCompactNumber(localDownloads, locale)}, ${extLabel}: ${formatCompactNumber(extDownloads, locale)}`;
 
   return (
     <Card id={`project-card-${project.slug}`} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
@@ -165,12 +178,14 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
-              <DownloadIcon sx={{ fontSize: "1rem" }} />
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {formatCompactNumber(project.downloads, locale)}
-              </Typography>
-            </Box>
+            <Tooltip title={extDownloads > 0 ? tooltipText : `ModParks: ${formatCompactNumber(localDownloads, locale)}`} arrow placement="top">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary", cursor: "help" }}>
+                <DownloadIcon sx={{ fontSize: "1rem" }} />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {formatCompactNumber(totalDownloads, locale)}
+                </Typography>
+              </Box>
+            </Tooltip>
             
             {safeTags.length > 0 && (
               <Box sx={{ display: "flex", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>

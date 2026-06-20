@@ -16,7 +16,7 @@ interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
   searchParams: Promise<{ 
     q?: string; types?: string; author?: string; sort?: string; loaders?: string; mcVersions?: string; tags?: string;
-    searchMode?: string; includeDesc?: string; includeTags?: string; includeAuthor?: string;
+    searchMode?: string; includeDesc?: string; includeTags?: string; includeAuthor?: string; includeExtDl?: string;
   }>;
 }
 
@@ -24,7 +24,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const { locale } = await params;
   const { 
     q, types, author, sort, loaders, mcVersions, tags,
-    searchMode, includeDesc, includeTags, includeAuthor
+    searchMode, includeDesc, includeTags, includeAuthor, includeExtDl
   } = await searchParams;
   setRequestLocale(locale);
 
@@ -43,6 +43,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const isIncludeDesc = includeDesc !== "false";
   const isIncludeTags = includeTags !== "false";
   const isIncludeAuthor = includeAuthor !== "false";
+  const isIncludeExtDl = includeExtDl === "true";
   const sm = searchMode === "AND" ? "AND" : "OR";
 
   // フィルタリング
@@ -58,6 +59,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     includeDesc: isIncludeDesc,
     includeTags: isIncludeTags,
     includeAuthor: isIncludeAuthor,
+    includeExtDl: isIncludeExtDl,
   });
 
   const { getDatabase } = await import("@/lib/db");
@@ -105,6 +107,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         initialIncludeDesc={isIncludeDesc}
         initialIncludeTags={isIncludeTags}
         initialIncludeAuthor={isIncludeAuthor}
+        initialIncludeExtDl={isIncludeExtDl}
         availableTags={availableTags}
         availablePlatforms={availablePlatforms}
       />

@@ -178,12 +178,14 @@ export async function getProjects(params: {
   includeDesc?: boolean;
   includeTags?: boolean;
   includeAuthor?: boolean;
+  includeExtDl?: boolean;
 }) {
   const db = await getDatabase();
   const { 
     q, types, authorId, limit = 20, offset = 0, sort = "updated", 
     loaders, mcVersions, tags,
-    searchMode = "OR", includeDesc = true, includeTags = true, includeAuthor = true
+    searchMode = "OR", includeDesc = true, includeTags = true, includeAuthor = true,
+    includeExtDl = false
   } = params;
 
   const conditions = [];
@@ -243,7 +245,13 @@ export async function getProjects(params: {
   }
 
   let orderByExpr = desc(projects.updatedAt);
-  if (sort === "downloads") orderByExpr = desc(projects.downloads);
+  if (sort === "downloads") {
+    if (includeExtDl) {
+      orderByExpr = desc(sql`${projects.downloads} + COALESCE(${projects.externalDownloads}, 0)`);
+    } else {
+      orderByExpr = desc(projects.downloads);
+    }
+  }
   if (sort === "newest") orderByExpr = desc(projects.createdAt);
 
   let rows;

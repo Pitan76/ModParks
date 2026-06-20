@@ -28,6 +28,7 @@ interface ProjectSearchBarProps {
   initialIncludeDesc?: boolean;
   initialIncludeTags?: boolean;
   initialIncludeAuthor?: boolean;
+  initialIncludeExtDl?: boolean;
   availableTags?: { slug: string; name: string }[];
   availablePlatforms?: { slug: string; name: string }[];
 }
@@ -43,6 +44,7 @@ export default function ProjectSearchBar({
   initialIncludeDesc = true,
   initialIncludeTags = true,
   initialIncludeAuthor = true,
+  initialIncludeExtDl = false,
   availableTags = [],
   availablePlatforms = []
 }: ProjectSearchBarProps) {
@@ -67,6 +69,7 @@ export default function ProjectSearchBar({
     includeDesc: initialIncludeDesc,
     includeTags: initialIncludeTags,
     includeAuthor: initialIncludeAuthor,
+    includeExtDl: initialIncludeExtDl,
   });
 
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -87,6 +90,7 @@ export default function ProjectSearchBar({
       if (!filters.includeDesc) params.set("includeDesc", "false");
       if (!filters.includeTags) params.set("includeTags", "false");
       if (!filters.includeAuthor) params.set("includeAuthor", "false");
+      if (filters.includeExtDl) params.set("includeExtDl", "true");
       
       const qs = params.toString();
       startTransition(() => {
@@ -121,7 +125,8 @@ export default function ProjectSearchBar({
     advancedFilters.searchMode !== "OR" || 
     !advancedFilters.includeDesc || 
     !advancedFilters.includeTags || 
-    !advancedFilters.includeAuthor;
+    !advancedFilters.includeAuthor ||
+    advancedFilters.includeExtDl;
 
   return (
     <Box sx={{ mb: 4 }}>
