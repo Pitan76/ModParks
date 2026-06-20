@@ -140,9 +140,16 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
               initialLiked={initialLiked} 
               isLoggedIn={!!session} 
             />
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-              {tIdea("statusLabel", { status: ideaData.status === "open" ? tIdea("status.open") : ideaData.status === "in_progress" ? tIdea("status.in_progress") : tIdea("status.resolved") })}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              {session?.user && ideaData.status !== "fulfilled" && (
+                <LinkButton variant="contained" size="small" href={`/projects/new?ideaId=${id}`}>
+                  プロジェクトを作成
+                </LinkButton>
+              )}
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                {tIdea("statusLabel", { status: ideaData.status === "open" ? tIdea("status.open") : ideaData.status === "in_progress" ? tIdea("status.in_progress") : tIdea("status.resolved") })}
+              </Typography>
+            </Box>
           </Box>
         </CardContent>
       </Card>

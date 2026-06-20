@@ -37,9 +37,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } }, { status: 400 });
     }
 
-    const { userSettings } = await import("@/db/schema");
+    const { userSettings, ideas } = await import("@/db/schema");
     const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
     const status = (settingsRecord?.defaultProjectStatus as any) || "draft";
+    const commentsEnabled = settingsRecord?.defaultCommentsEnabled ?? false;
+
+    const modrinthId = formData.get("modrinthId") as string | null;
+    const curseforgeId = formData.get("curseforgeId") as string | null;
+    const issueTrackerUrl = formData.get("issueTrackerUrl") as string | null;
+    const extDlStr = formData.get("externalDownloads") as string | null;
+    const externalDownloads = extDlStr ? parseInt(extDlStr, 10) : 0;
+    const ideaId = formData.get("ideaId") as string | null;
 
     await db.insert(projects).values({
       id,
@@ -53,7 +61,17 @@ export async function POST(req: NextRequest) {
       iconUrl:    formData.get("iconUrl") as string | null,
       authorId:   session.user.id,
       status:     status,
+      modrinthId,
+      curseforgeId,
+      issueTrackerUrl,
+      externalDownloads,
+      commentsEnabled,
+      sourceIdeaId: ideaId,
     }).run();
+
+    if (ideaId) {
+      await db.update(ideas).set({ status: "fulfilled", updatedAt: new Date() }).where(eq(ideas.id, ideaId)).run();
+    }
 
     if (tags.length > 0) {
       await db.insert(projectTags).values(
