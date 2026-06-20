@@ -21,7 +21,7 @@ export default function PaginationControls({ totalCount, currentPage, currentLim
   const totalPages = Math.max(1, Math.ceil(totalCount / currentLimit));
 
   const createQueryString = (name: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
     params.set(name, value);
     if (name === "limit") {
       params.set("page", "1"); // Reset to page 1 when limit changes

@@ -12,9 +12,10 @@ export interface ImportedProject {
   slug: string;
   description: string;
   type: "mod" | "plugin";
-  license: string;
+  license?: string;
   sourceUrl?: string;
   issueTrackerUrl?: string;
+  websiteUrl?: string;
   iconUrl?: string;
 }
 
@@ -45,10 +46,11 @@ export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
     name: p.title,
     slug: p.slug,
     description: p.description,
-    type: p.project_type === "mod" ? "mod" : "plugin",
-    license: p.license?.id || "All Rights Reserved",
+    type: p.project_type === "mod" ? "mod" : p.project_type === "plugin" ? "plugin" : "mod",
+    license: p.license?.name,
     sourceUrl: p.source_url,
     issueTrackerUrl: p.issues_url,
+    websiteUrl: `https://modrinth.com/mod/${p.slug}`,
     iconUrl: p.icon_url,
   }));
 }
@@ -91,7 +93,7 @@ export async function fetchCurseForgeProjects(): Promise<ImportedProject[]> {
   
   if (!projRes.ok) {
     const errorText = await projRes.text();
-    console.error("CurseForge API Error:", projRes.status, errorText);
+    console.error("CurseForge API Error:", projectRes.status, errorText);
     throw new Error(`Failed to fetch CurseForge projects. Status: ${projRes.status}`);
   }
   const resData = (await projRes.json()) as { data: any[] };
@@ -106,12 +108,17 @@ export async function fetchCurseForgeProjects(): Promise<ImportedProject[]> {
     license: "All Rights Reserved", // CF doesn't expose license easily in search
     sourceUrl: p.links?.sourceUrl,
     issueTrackerUrl: p.links?.issuesUrl,
+    websiteUrl: p.links?.websiteUrl,
     iconUrl: p.logo?.url,
   }));
 }
 
-export async function importProjects(selectedProjects: ImportedProject[], source: "modrinth" | "curseforge") {
+/**
+ * バッチインポートを実行する Server Action
+ */
+export async function importProjects(selectedProjects: ImportedProject[], source: "modrinth" | "curseforge", addExternalLink: boolean = true) {
   const { db, session } = await getAuthenticatedDb();
+  if (!selectedProjects.length) return { success: true, importedCount: 0 };
 
   let importedCount = 0;
 
@@ -119,15 +126,24 @@ export async function importProjects(selectedProjects: ImportedProject[], source
     const existing = await db.select().from(projects).where(eq(projects.slug, p.slug)).get();
     if (existing) continue;
 
+    let linksJson = "[]";
+    if (addExternalLink && p.websiteUrl) {
+      linksJson = JSON.stringify([{
+        title: source === "modrinth" ? "Modrinth" : "CurseForge",
+        url: p.websiteUrl
+      }]);
+    }
+
     await db.insert(projects).values({
       id: createId(),
       slug: p.slug,
       name: p.name,
-      description: p.description,
+      description: p.description || "",
       type: p.type,
-      license: p.license,
+      license: p.license || "All Rights Reserved",
       sourceUrl: p.sourceUrl || null,
       issueTrackerUrl: p.issueTrackerUrl || null,
+      links: linksJson,
       iconUrl: p.iconUrl || null,
       modrinthId: source === "modrinth" ? p.id : null,
       curseforgeId: source === "curseforge" ? p.id : null,

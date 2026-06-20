@@ -33,6 +33,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [addExternalLink, setAddExternalLink] = useState(true);
 
   const handleFetch = async (targetSource: "modrinth" | "curseforge") => {
     setLoading(true);
@@ -73,7 +74,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
     setError(null);
     try {
       const toImport = projects.filter(p => selected.has(p.id));
-      const res = await importProjects(toImport, source);
+      const res = await importProjects(toImport, source, addExternalLink);
       
       if (res.success) {
         setSuccessMsg(`Successfully imported ${res.importedCount} projects.`);
@@ -163,6 +164,18 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
               </TableBody>
             </Table>
           </TableContainer>
+
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+              <input 
+                type="checkbox" 
+                checked={addExternalLink} 
+                onChange={(e) => setAddExternalLink(e.target.checked)} 
+                style={{ marginRight: 8, transform: "scale(1.2)" }}
+              />
+              <Typography variant="body2">元のページのリンクを外部リンクとして追加する</Typography>
+            </label>
+          </Box>
 
           <Button 
             variant="contained" 
