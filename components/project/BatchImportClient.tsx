@@ -16,16 +16,18 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import { fetchModrinthProjects, importProjectsFromModrinth } from "@/lib/actions/import";
+import { fetchModrinthProjects, importProjectsFromModrinth, fetchCurseForgeProjects, importProjectsFromCurseForge } from "@/lib/actions/import";
 
 interface BatchImportClientProps {
   hasModrinthKey: boolean;
   hasCurseForgeKey: boolean;
+  hasCurseForgeAuthor: boolean;
 }
 
-export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey }: BatchImportClientProps) {
+export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeAuthor }: BatchImportClientProps) {
   const router = useRouter();
   const [projects, setProjects] = useState<any[]>([]);
+  const [source, setSource] = useState<"modrinth" | "curseforge">("modrinth");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -39,9 +41,26 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey }: 
     try {
       const fetched = await fetchModrinthProjects();
       setProjects(fetched);
+      setSource("modrinth");
       setSelected(new Set(fetched.map((p: any) => p.id)));
     } catch (err: any) {
       setError(err.message || "Failed to fetch Modrinth projects");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFetchCurseForge = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      const fetched = await fetchCurseForgeProjects();
+      setProjects(fetched);
+      setSource("curseforge");
+      setSelected(new Set(fetched.map((p: any) => p.id)));
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch CurseForge projects");
     } finally {
       setLoading(false);
     }
@@ -68,7 +87,13 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey }: 
     setError(null);
     try {
       const toImport = projects.filter(p => selected.has(p.id));
-      const res = await importProjectsFromModrinth(toImport);
+      let res;
+      if (source === "modrinth") {
+        res = await importProjectsFromModrinth(toImport);
+      } else {
+        res = await importProjectsFromCurseForge(toImport);
+      }
+      
       if (res.success) {
         setSuccessMsg(`Successfully imported ${res.importedCount} projects.`);
         setProjects([]);
@@ -90,19 +115,37 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey }: 
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
       {successMsg && <Alert severity="success" sx={{ mb: 3 }}>{successMsg}</Alert>}
 
-      <Box sx={{ mb: 4, display: "flex", gap: 2 }}>
-        <Button 
-          variant="contained" 
-          onClick={handleFetchModrinth} 
-          disabled={!hasModrinthKey || loading || importing}
-        >
-          {loading ? <CircularProgress size={24} /> : "Modrinthから取得"}
-        </Button>
-        {!hasModrinthKey && (
-          <Typography variant="body2" color="text.secondary" sx={{ alignSelf: "center" }}>
-            ※アカウント設定でAPIキーを登録してください
-          </Typography>
-        )}
+      <Box sx={{ mb: 4, display: "flex", gap: 2, flexDirection: "column" }}>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Button 
+            variant="contained" 
+            onClick={handleFetchModrinth} 
+            disabled={!hasModrinthKey || loading || importing}
+            sx={{ width: 250 }}
+          >
+            {loading && source === "modrinth" ? <CircularProgress size={24} /> : "Modrinthから取得"}
+          </Button>
+          {!hasModrinthKey && (
+            <Typography variant="body2" color="text.secondary">
+              ※アカウント設定でAPIキーを登録してください
+            </Typography>
+          )}
+        </Box>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Button 
+            variant="contained" 
+            onClick={handleFetchCurseForge} 
+            disabled={!hasCurseForgeKey || !hasCurseForgeAuthor || loading || importing}
+            sx={{ width: 250 }}
+          >
+            {loading && source === "curseforge" ? <CircularProgress size={24} /> : "CurseForgeから取得"}
+          </Button>
+          {(!hasCurseForgeKey || !hasCurseForgeAuthor) && (
+            <Typography variant="body2" color="text.secondary">
+              ※アカウント設定でAPIキーとAuthor IDを登録してください
+            </Typography>
+          )}
+        </Box>
       </Box>
 
       {projects.length > 0 && (
