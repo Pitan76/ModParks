@@ -79,6 +79,14 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
+          sx={{
+            '& .MuiTab-root': {
+              minWidth: { xs: 'auto', sm: 90 },
+              px: { xs: 1.5, sm: 2 },
+              fontSize: { xs: '0.85rem', sm: '0.875rem' },
+              whiteSpace: 'nowrap'
+            }
+          }}
         >
           <Tab label={t("tabs.description")} value={0} />
           <Tab label={t("tabs.files")} value={1} />
