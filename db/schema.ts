@@ -267,6 +267,23 @@ export const projectTags = sqliteTable(
   })
 );
 
+// ─── Project Dependencies ───────────────────────────────────────────────────────
+
+export const projectDependencies = sqliteTable(
+  "project_dependencies",
+  {
+    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    targetProjectId: text("target_project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    dependencyType: text("dependency_type").notNull().default("required"), // required, optional, incompatible, embedded
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    projectIdx: index("project_deps_project_idx").on(t.projectId),
+    targetIdx: index("project_deps_target_idx").on(t.targetProjectId),
+  })
+);
+
 // ─── Project Members ─────────────────────────────────────────────────────────
 
 export const projectMembers = sqliteTable(
@@ -496,6 +513,7 @@ export type Idea        = typeof ideas.$inferSelect;
 export type IdeaComment = typeof ideaComments.$inferSelect;
 export type ApiKey      = typeof apiKeys.$inferSelect;
 export type ProjectMember = typeof projectMembers.$inferSelect;
+export type ProjectDependency = typeof projectDependencies.$inferSelect;
 export type Tag         = typeof tags.$inferSelect;
 export type Platform    = typeof platforms.$inferSelect;
 
