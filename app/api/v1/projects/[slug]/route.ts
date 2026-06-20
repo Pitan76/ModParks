@@ -3,7 +3,8 @@ import { getDb, getD1 } from "@/lib/db";
 import { projects, users, userProfiles, projectTags, projectMembers } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, and } from "drizzle-orm";
-import { ApiProject } from "@/types/api";
+import { ApiProjectDetail } from "@/types/api";
+import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const d1 = await getD1();
@@ -23,6 +24,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       type: projects.type,
       license: projects.license,
       downloads: projects.downloads,
+      modrinthDownloads: projects.modrinthDownloads,
+      curseforgeDownloads: projects.curseforgeDownloads,
+      externalDownloads: projects.externalDownloads,
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
       status: projects.status,
@@ -59,7 +63,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   const tags = await db.select().from(projectTags).where(eq(projectTags.projectId, project.id));
 
-  const data: ApiProject = {
+  const [dependencies, dependents] = await Promise.all([
+    getProjectDependencies(project.id),
+    getProjectDependents(project.id),
+  ]);
+
+  const data: ApiProjectDetail = {
     id: project.id,
     slug: project.slug,
     name: project.name,
@@ -67,7 +76,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     iconUrl: project.iconUrl,
     type: project.type as "mod" | "plugin",
     license: project.license,
-    downloads: project.downloads,
+    downloads: project.downloads + (project.externalDownloads || 0),
+    nativeDownloads: project.downloads,
+    modrinthDownloads: project.modrinthDownloads || 0,
+    curseforgeDownloads: project.curseforgeDownloads || 0,
     createdAt: project.createdAt ? new Date(project.createdAt).getTime() : 0,
     updatedAt: project.updatedAt ? new Date(project.updatedAt).getTime() : 0,
     author: {
@@ -75,7 +87,27 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       displayName: project.author?.displayName || null,
       avatarUrl: project.author?.avatarUrl || null,
     },
-    tags: tags.map(t => t.tag)
+    tags: tags.map(t => t.tag),
+    dependencies: dependencies.map(d => ({
+      id: d.id,
+      dependencyType: d.dependencyType,
+      project: {
+        id: d.project.id,
+        slug: d.project.slug,
+        name: d.project.name,
+        iconUrl: d.project.iconUrl
+      }
+    })),
+    dependents: dependents.map(d => ({
+      id: d.id,
+      dependencyType: d.dependencyType,
+      project: {
+        id: d.project.id,
+        slug: d.project.slug,
+        name: d.project.name,
+        iconUrl: d.project.iconUrl
+      }
+    }))
   };
 
   return NextResponse.json({ data });
