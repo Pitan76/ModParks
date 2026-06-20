@@ -53,6 +53,8 @@ export default async function SettingsPage({ params, searchParams }: { params: P
         twoFactorEnabled={!!userRecord?.twoFactorEnabled}
         defaultProjectStatus={settingsRecord?.defaultProjectStatus || "draft"}
         defaultLicense={settingsRecord?.defaultLicense || "All Rights Reserved"}
+        modrinthApiKey={settingsRecord?.modrinthApiKey || ""}
+        curseforgeApiKey={settingsRecord?.curseforgeApiKey || ""}
         error={resolvedSearchParams.error as string | undefined}
       />
     </Container>

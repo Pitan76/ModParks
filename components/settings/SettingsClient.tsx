@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useTranslations, useFormatter } from "next-intl";
-import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, toggleGithubVisibility, changeUsername, changeEmail, changePassword, deleteAccount, generateTotpSecret, verifyAndEnableTotp, disableTotp, updatePostingSettings } from "@/lib/actions/settings";
+import { updateProfile, generateApiKey, deleteApiKey, disconnectGitHub, toggleGithubVisibility, changeUsername, changeEmail, changePassword, deleteAccount, generateTotpSecret, verifyAndEnableTotp, disableTotp, updatePostingSettings, updateIntegrations } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
 import { QRCodeSVG } from "qrcode.react";
 import TabbedPanel from "@/components/ui/TabbedPanel";
@@ -48,10 +48,12 @@ interface SettingsClientProps {
   twoFactorEnabled?: boolean;
   defaultProjectStatus?: string;
   defaultLicense?: string;
+  modrinthApiKey?: string;
+  curseforgeApiKey?: string;
   error?: string;
 }
 
-export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, twoFactorEnabled, defaultProjectStatus, defaultLicense, error }: SettingsClientProps) {
+export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, twoFactorEnabled, defaultProjectStatus, defaultLicense, modrinthApiKey, curseforgeApiKey, error }: SettingsClientProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const format = useFormatter();
@@ -110,6 +112,11 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   const [postingStatus, setPostingStatus] = useState(defaultProjectStatus || "draft");
   const [postingLicense, setPostingLicense] = useState(defaultLicense || "All Rights Reserved");
   const [postingMsg, setPostingMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
+
+  // Integrations State
+  const [modrinthKey, setModrinthKey] = useState(modrinthApiKey || "");
+  const [curseforgeKey, setCurseforgeKey] = useState(curseforgeApiKey || "");
+  const [integrationMsg, setIntegrationMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
 
   // ---------- Profile Handlers ----------
   const handleAvatarClick = () => {
@@ -295,6 +302,13 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     await updatePostingSettings(postingStatus as any, postingLicense);
     setPostingMsg({ type: "success", text: t("posting.successUpdate") });
     setTimeout(() => setPostingMsg(null), 3000);
+  };
+
+  const handleIntegrationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await updateIntegrations(modrinthKey, curseforgeKey);
+    setIntegrationMsg({ type: "success", text: tCommon("saved") || "保存しました" });
+    setTimeout(() => setIntegrationMsg(null), 3000);
   };
 
   const tabs = [
@@ -682,6 +696,42 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             value={postingLicense}
             onChange={e => setPostingLicense(e.target.value)}
             sx={{ mb: 4, maxWidth: 300 }}
+          />
+
+          <Button type="submit" variant="contained" sx={{ display: "block" }}>
+            {t("profile.save")}
+          </Button>
+        </Box>
+      )
+    },
+    {
+      label: "外部連携",
+      content: (
+        <Box component="form" onSubmit={handleIntegrationSubmit}>
+          {integrationMsg && <Alert severity={integrationMsg.type} sx={{ mb: 3 }}>{integrationMsg.text}</Alert>}
+
+          <Typography variant="h6" sx={{ mb: 1 }}>Modrinth連携</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>ModrinthのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。</Typography>
+          <TextField
+            fullWidth
+            label="Modrinth API Key"
+            size="small"
+            type="password"
+            value={modrinthKey}
+            onChange={e => setModrinthKey(e.target.value)}
+            sx={{ mb: 4, maxWidth: 400 }}
+          />
+
+          <Typography variant="h6" sx={{ mb: 1 }}>CurseForge連携</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>CurseForgeのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。</Typography>
+          <TextField
+            fullWidth
+            label="CurseForge API Key"
+            size="small"
+            type="password"
+            value={curseforgeKey}
+            onChange={e => setCurseforgeKey(e.target.value)}
+            sx={{ mb: 4, maxWidth: 400 }}
           />
 
           <Button type="submit" variant="contained" sx={{ display: "block" }}>

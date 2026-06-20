@@ -270,3 +270,15 @@ export async function updatePostingSettings(status: "draft" | "public" | "unlist
   revalidatePath("/settings");
   return { success: true };
 }
+
+export async function updateIntegrations(modrinthKey: string, curseforgeKey: string) {
+  const { db, userId } = await getAuthenticatedDb();
+
+  await db.update(userSettings).set({
+    modrinthApiKey: modrinthKey || null,
+    curseforgeApiKey: curseforgeKey || null,
+  }).where(eq(userSettings.userId, userId));
+
+  revalidatePath("/settings");
+  return { success: true };
+}
