@@ -72,3 +72,68 @@ export async function importProjectsFromModrinth(selectedProjects: any[]) {
   revalidatePath("/projects");
   return { success: true, importedCount };
 }
+
+export async function fetchCurseForgeProjects() {
+  const { db, session } = await getAuthenticatedDb();
+  
+  const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
+  if (!settings?.curseforgeApiKey) {
+    throw new Error("CurseForge API key is not configured.");
+  }
+  if (!settings?.curseforgeAuthorId) {
+    throw new Error("CurseForge Author ID is not configured.");
+  }
+
+  // Get user projects from CurseForge
+  // gameId 432 is Minecraft
+  const projRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&authorId=${settings.curseforgeAuthorId}`, {
+    headers: { "x-api-key": settings.curseforgeApiKey, "Accept": "application/json", "User-Agent": "ModParks/1.0" }
+  });
+  
+  if (!projRes.ok) throw new Error("Failed to fetch CurseForge projects.");
+  const resData = (await projRes.json()) as any;
+  const projectsData = resData.data as any[];
+
+  return projectsData.map((p: any) => ({
+    id: p.id.toString(),
+    name: p.name,
+    slug: p.slug,
+    description: p.summary,
+    type: p.classId === 6 ? "mod" : p.classId === 17 ? "mod" : "plugin", // Simplified, 6 is Mods
+    license: "All Rights Reserved", // CF doesn't expose license easily in search
+    sourceUrl: p.links?.sourceUrl,
+    issueTrackerUrl: p.links?.issuesUrl,
+    iconUrl: p.logo?.url,
+  }));
+}
+
+export async function importProjectsFromCurseForge(selectedProjects: any[]) {
+  const { db, session } = await getAuthenticatedDb();
+
+  let importedCount = 0;
+
+  for (const p of selectedProjects) {
+    const existing = await db.select().from(projects).where(eq(projects.slug, p.slug)).get();
+    if (existing) continue;
+
+    await db.insert(projects).values({
+      id: createId(),
+      slug: p.slug,
+      name: p.name,
+      description: p.description,
+      type: p.type,
+      license: p.license,
+      sourceUrl: p.sourceUrl || null,
+      issueTrackerUrl: p.issueTrackerUrl || null,
+      iconUrl: p.iconUrl || null,
+      curseforgeId: p.id,
+      authorId: session.user.id,
+      status: "draft",
+    }).run();
+
+    importedCount++;
+  }
+
+  revalidatePath("/projects");
+  return { success: true, importedCount };
+}
