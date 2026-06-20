@@ -96,7 +96,7 @@ export default function ProjectDetailHeader({
       </Box>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5, justifyContent: "space-between", mb: 3 }}>
-        <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", flex: "1 1 300px" }}>
+        <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", flex: "1 1 300px", minWidth: 0 }}>
           <EditableProjectIcon 
             projectId={p.id}
             projectSlug={p.slug}
@@ -107,7 +107,7 @@ export default function ProjectDetailHeader({
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 800, wordBreak: "break-word", overflowWrap: "anywhere" }}>
               {p.name}
             </Typography>
             <Chip

@@ -35,6 +35,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           overflowX: "auto",
           border: "1px solid",
           borderColor: "divider",
+          maxWidth: "100%",
         },
         "& code": {
           bgcolor: "action.hover",
@@ -43,11 +44,13 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           borderRadius: 0.5,
           fontFamily: "monospace",
           fontSize: "0.875em",
+          wordBreak: "break-all",
         },
         "& pre code": {
           bgcolor: "transparent",
           p: 0,
           border: "none",
+          wordBreak: "normal",
         },
         "& table": {
           width: "100%",
