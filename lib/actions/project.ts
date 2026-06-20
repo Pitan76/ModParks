@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projects, projectTags, projectMembers, users, userProfiles, versions } from "@/db/schema";
+import { projects, projectTags, projectMembers, users, userProfiles, versions, userSettings } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, desc, and, like, inArray, sql, or } from "drizzle-orm";
