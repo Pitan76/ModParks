@@ -20,7 +20,8 @@
     "next": "Next",
     "yes": "Yes",
     "no": "No",
-    "itemsPerPage": "Items per page"
+    "itemsPerPage": "Items per page",
+    "downloads": "Downloads"
   },
   "Nav": {
     "home": "Home",

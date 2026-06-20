@@ -20,7 +20,8 @@
     "next": "次へ",
     "yes": "はい",
     "no": "いいえ",
-    "itemsPerPage": "表示件数"
+    "itemsPerPage": "表示件数",
+    "downloads": "ダウンロード"
   },
   "Nav": {
     "home": "ホーム",
