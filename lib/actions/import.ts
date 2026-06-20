@@ -70,7 +70,11 @@ export async function fetchCurseForgeProjects(): Promise<ImportedProject[]> {
     headers: { "x-api-key": settings.curseforgeApiKey, "Accept": "application/json", "User-Agent": "ModParks/1.0" }
   });
   
-  if (!projRes.ok) throw new Error("Failed to fetch CurseForge projects.");
+  if (!projRes.ok) {
+    const errorText = await projRes.text();
+    console.error("CurseForge API Error:", projRes.status, errorText);
+    throw new Error(`Failed to fetch CurseForge projects. Status: ${projRes.status}`);
+  }
   const resData = (await projRes.json()) as { data: any[] };
   const projectsData = resData.data;
 
