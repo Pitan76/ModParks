@@ -30,9 +30,8 @@ export interface ProjectCardProps {
     type:        "mod" | "plugin";
     license:     string;
     downloads:   number;
-    externalDownloads?: number;
-    modrinthDownloads?: number;
-    curseforgeDownloads?: number;
+    totalDownloads: number;
+    externalDownloads?: Record<string, number> | null;
     modrinthId?: string | null;
     curseforgeId?: string | null;
     tags:        string[];
@@ -76,11 +75,10 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
   const safeTags: string[] = project.tags ?? [];
 
   const localDownloads = project.downloads || 0;
-  const extDownloads = project.externalDownloads || 0;
-  const totalDownloads = localDownloads + extDownloads;
-  
-  const modrinthDl = project.modrinthDownloads || 0;
-  const curseforgeDl = project.curseforgeDownloads || 0;
+  const extDl = (project.externalDownloads as Record<string, number> | undefined) || {};
+  const modrinthDl = extDl.modrinth || 0;
+  const curseforgeDl = extDl.curseforge || 0;
+  const totalDownloads = project.totalDownloads || localDownloads + modrinthDl + curseforgeDl;
 
   const modparksLabel = tProject("stats.modparks");
   let tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`;
@@ -88,12 +86,11 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
   if (modrinthDl > 0) tooltipText += `, Modrinth: ${formatCompactNumber(modrinthDl, locale)}`;
   if (curseforgeDl > 0) tooltipText += `, CurseForge: ${formatCompactNumber(curseforgeDl, locale)}`;
 
-  // 古いデータで、合算のみ存在するケースのフォールバック
-  if (modrinthDl === 0 && curseforgeDl === 0 && extDownloads > 0) {
+  if (modrinthDl === 0 && curseforgeDl === 0 && (extDl.native || 0) > 0) {
     let extLabel = tProject("stats.external");
     if (project.modrinthId && !project.curseforgeId) extLabel = "Modrinth";
     else if (!project.modrinthId && project.curseforgeId) extLabel = "CurseForge";
-    tooltipText += `, ${extLabel}: ${formatCompactNumber(extDownloads, locale)}`;
+    tooltipText += `, ${extLabel}: ${formatCompactNumber(extDl.native || 0, locale)}`;
   }
 
   return (
@@ -192,7 +189,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
             }}
           >
-            <Tooltip title={extDownloads > 0 ? tooltipText : `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`} arrow placement="top">
+            <Tooltip title={Object.keys(extDl).length > 0 ? tooltipText : `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`} arrow placement="top">
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary", cursor: "help" }}>
                 <DownloadIcon sx={{ fontSize: "1rem" }} />
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
