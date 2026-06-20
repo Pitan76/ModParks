@@ -144,7 +144,16 @@ export async function updateProject(projectId: string, formData: FormData) {
     }
   }
 
+  // 自動同期
+  try {
+    await syncExternalProjectData(project.id);
+  } catch (e) {
+    // ignore
+  }
+
   revalidatePath(`/projects/${fields.slug ?? project.slug}`);
+  revalidatePath(`/projects/${fields.slug ?? project.slug}/edit`);
+  revalidatePath("/projects");
   return { success: true };
 }
 
@@ -379,4 +388,54 @@ export async function transferOwnership(projectId: string, newOwnerId: string) {
 
   revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
   return { success: true };
+}
+
+export async function syncExternalProjectData(projectId: string) {
+  const { db, session } = await getAuthenticatedDb();
+  
+  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  if (!project) throw new Error("Project not found");
+
+  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
+  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+    throw new Error("Forbidden");
+  }
+
+  const settings = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, session.user.id) });
+  
+  let newExtDl = 0;
+  
+  if (project.modrinthId) {
+    try {
+      const res = await fetch(`https://api.modrinth.com/v2/project/${project.modrinthId}`, {
+        headers: settings?.modrinthApiKey ? { Authorization: settings.modrinthApiKey } : {},
+      });
+      if (res.ok) {
+        const data = await res.json() as any;
+        newExtDl += (data.downloads || 0);
+      }
+    } catch(e) {}
+  }
+  
+  if (project.curseforgeId) {
+    try {
+      const cfApiKey = settings?.curseforgeApiKey;
+      if (cfApiKey) {
+        const res = await fetch(`https://api.curseforge.com/v1/mods/${project.curseforgeId}`, {
+          headers: { "x-api-key": cfApiKey, "Accept": "application/json" }
+        });
+        if (res.ok) {
+          const data = await res.json() as any;
+          newExtDl += (data.data?.downloadCount || 0);
+        }
+      }
+    } catch(e) {}
+  }
+
+  if (newExtDl > 0) {
+    await db.update(projects).set({ externalDownloads: newExtDl }).where(eq(projects.id, project.id)).run();
+  }
+  
+  revalidatePath(`/projects/${project.slug}`);
+  return { success: true, externalDownloads: newExtDl };
 }

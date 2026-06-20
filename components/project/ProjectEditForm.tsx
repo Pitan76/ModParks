@@ -13,8 +13,11 @@ import FormControl from "@mui/material/FormControl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { updateProject } from "@/lib/actions/project";
+import { updateProject, syncExternalProjectData } from "@/lib/actions/project";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
+import SyncIcon from "@mui/icons-material/Sync";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 interface ProjectEditFormProps {
   project: {
@@ -33,9 +36,24 @@ interface ProjectEditFormProps {
 export default function ProjectEditForm({ project, availableTags = [] }: ProjectEditFormProps) {
   const router = useRouter();
   const t = useTranslations("Project.form");
+  const tManage = useTranslations("Project.managePage");
   
   const [pending, setPending] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [toast, setToast] = useState<{ message: string; severity: "success" | "error" } | null>(null);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      await syncExternalProjectData(project.id);
+      setToast({ message: tManage("syncSuccess"), severity: "success" });
+    } catch (e) {
+      setToast({ message: tManage("syncError"), severity: "error" });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,16 +95,34 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
             </FormControl>
           </ProjectFormFields>
 
-          <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
-              {t("cancel")}
+          <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
+            <Button 
+              variant="text" 
+              color="primary" 
+              startIcon={<SyncIcon />} 
+              onClick={handleSync} 
+              disabled={syncing || pending}
+            >
+              {syncing ? tManage("syncing") : tManage("sync")}
             </Button>
-            <Button type="submit" variant="contained" disabled={pending}>
-              {pending ? t("saving") : t("save")}
-            </Button>
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
+                {t("cancel")}
+              </Button>
+              <Button type="submit" variant="contained" disabled={pending}>
+                {pending ? t("saving") : t("save")}
+              </Button>
+            </Box>
           </Box>
         </Box>
       </CardContent>
+
+      <Snackbar open={!!toast} autoHideDuration={6000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setToast(null)} severity={toast?.severity} sx={{ width: '100%' }}>
+          {toast?.message}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 }
