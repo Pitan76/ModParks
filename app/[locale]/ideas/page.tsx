@@ -2,7 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
 import { getDatabase } from "@/lib/db";
 import { ideas, users, userProfiles, ideaLikes, ideaComments } from "@/db/schema";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, or } from "drizzle-orm";
+import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -22,6 +23,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
   const tIdea = await getTranslations("Idea");
 
   const db = await getDatabase();
+  const session = await auth();
 
   // Fetch ideas with author, like count, and comment count
   const allIdeas = await db
@@ -40,6 +42,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
     .from(ideas)
     .innerJoin(users, eq(ideas.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .where(or(eq(ideas.visibility, "public"), eq(ideas.authorId, session?.user?.id || "")))
     .orderBy(desc(ideas.createdAt))
     .all();
 

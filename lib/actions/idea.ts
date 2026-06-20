@@ -13,8 +13,9 @@ export async function createIdea(formData: FormData) {
   const { db, userId } = await getAuthenticatedDb();
 
   const raw = {
-    title:   formData.get("title"),
-    content: formData.get("content"),
+    title:      formData.get("title"),
+    content:    formData.get("content"),
+    visibility: formData.get("visibility"),
   };
 
   const parsed = createIdeaSchema.safeParse(raw);
@@ -22,7 +23,7 @@ export async function createIdea(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { title, content } = parsed.data;
+  const { title, content, visibility } = parsed.data;
   const id = createId();
 
   try {
@@ -32,6 +33,7 @@ export async function createIdea(formData: FormData) {
       content,
       authorId: userId,
       status: "open",
+      visibility: visibility || "public",
     });
     
     revalidatePath("/ideas");

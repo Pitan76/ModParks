@@ -8,6 +8,10 @@ import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -85,6 +89,21 @@ export default function NewIdeaPage() {
                 helperText={error?.content?.[0] || tIdea("fields.contentPlaceholder")}
                 disabled={pending}
               />
+
+              <FormControl fullWidth size="small">
+                <InputLabel>公開範囲</InputLabel>
+                <Select
+                  name="visibility"
+                  label="公開範囲"
+                  defaultValue="public"
+                  disabled={pending}
+                >
+                  <MenuItem value="public">公開 (誰でも閲覧可能)</MenuItem>
+                  <MenuItem value="unlisted">限定公開 (リンクを知っている人のみ閲覧可能)</MenuItem>
+                  <MenuItem value="private">非公開 (自分のみ閲覧可能)</MenuItem>
+                  <MenuItem value="draft">下書き</MenuItem>
+                </Select>
+              </FormControl>
 
               <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 2 }}>
                 <Button

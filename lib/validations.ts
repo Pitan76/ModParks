@@ -146,8 +146,9 @@ export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 // ─── Idea Schema ─────────────────────────────────────────────────────────────
 
 export const createIdeaSchema = z.object({
-  title:   z.string().min(3, "3文字以上").max(100, "100文字以内"),
-  content: z.string().min(10, "10文字以上").max(5000, "5000文字以内"),
+  title:      z.string().min(3, "3文字以上").max(100, "100文字以内"),
+  content:    z.string().min(10, "10文字以上").max(5000, "5000文字以内"),
+  visibility: z.enum(["draft", "public", "unlisted", "private"]).optional().default("public"),
 });
 
 export const createIdeaCommentSchema = z.object({
