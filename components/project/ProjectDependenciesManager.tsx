@@ -96,7 +96,7 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
             value={targetSlug}
             onChange={(e) => setTargetSlug(e.target.value)}
             size="small"
-            sx={{ flex: 1, minWidth: 200 }}
+            sx={{ flex: "1 1 200px" }}
           />
         ) : (
           <>
@@ -105,18 +105,18 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
               value={extName}
               onChange={(e) => setExtName(e.target.value)}
               size="small"
-              sx={{ flex: 1, minWidth: 150 }}
+              sx={{ flex: "1 1 120px" }}
             />
             <TextField
               label="URL (e.g. https://modrinth.com/...)"
               value={extUrl}
               onChange={(e) => setExtUrl(e.target.value)}
               size="small"
-              sx={{ flex: 2, minWidth: 250 }}
+              sx={{ flex: "2 1 200px" }}
             />
           </>
         )}
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+        <FormControl size="small" sx={{ flex: "1 1 120px" }}>
           <InputLabel>{t("type")}</InputLabel>
           <Select
             value={depType}
