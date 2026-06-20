@@ -40,7 +40,12 @@ Fetches public details of a specific project by its slug.
     "type": "mod",
     "license": "MIT",
     "sourceUrl": "https://github.com/...",
-    "downloads": 1500,
+    "downloads": {
+      "total": 1500,
+      "native": 500,
+      "modrinth": 800,
+      "curseforge": 200
+    },
     "createdAt": "2026-01-01T00:00:00Z",
     "updatedAt": "2026-06-01T00:00:00Z",
     "author": {
