@@ -21,10 +21,10 @@ import { fetchModrinthProjects, fetchCurseForgeProjects, importProjects, Importe
 interface BatchImportClientProps {
   hasModrinthKey: boolean;
   hasCurseForgeKey: boolean;
-  hasCurseForgeAuthor: boolean;
+  hasCurseForgeProject: boolean;
 }
 
-export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeAuthor }: BatchImportClientProps) {
+export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProject }: BatchImportClientProps) {
   const router = useRouter();
   const [projects, setProjects] = useState<ImportedProject[]>([]);
   const [source, setSource] = useState<"modrinth" | "curseforge">("modrinth");
@@ -108,9 +108,9 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
           {
             id: "curseforge" as const,
             label: "CurseForgeから取得",
-            disabled: !hasCurseForgeKey || !hasCurseForgeAuthor || loading || importing,
-            warning: "※アカウント設定でAPIキーとAuthor IDを登録してください",
-            showWarning: !hasCurseForgeKey || !hasCurseForgeAuthor,
+            disabled: !hasCurseForgeKey || !hasCurseForgeProject || loading || importing,
+            warning: "※アカウント設定でAPIキーとProject IDを登録してください",
+            showWarning: !hasCurseForgeKey || !hasCurseForgeProject,
           }
         ].map((config) => (
           <Box key={config.id} sx={{ display: "flex", gap: 2, alignItems: "center" }}>

@@ -61,6 +61,7 @@ export const userSettings = sqliteTable("user_settings", {
   modrinthApiKey: text("modrinth_api_key"),
   curseforgeApiKey: text("curseforge_api_key"),
   curseforgeAuthorId: text("curseforge_author_id"),
+  curseforgeProjectId: text("curseforge_project_id"),
   defaultCommentsEnabled: integer("default_comments_enabled", { mode: "boolean" }).notNull().default(false),
 });
 

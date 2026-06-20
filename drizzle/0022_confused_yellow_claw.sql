@@ -1,0 +1,1 @@
+ALTER TABLE `user_settings` ADD `curseforge_project_id` text;

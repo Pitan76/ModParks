@@ -271,13 +271,13 @@ export async function updatePostingSettings(status: "draft" | "public" | "unlist
   return { success: true };
 }
 
-export async function updateIntegrations(modrinthKey: string, curseforgeKey: string, curseforgeAuthorId: string) {
+export async function updateIntegrations(modrinthKey: string, curseforgeKey: string, curseforgeProjectId: string) {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userSettings).set({
     modrinthApiKey: modrinthKey || null,
     curseforgeApiKey: curseforgeKey || null,
-    curseforgeAuthorId: curseforgeAuthorId || null,
+    curseforgeProjectId: curseforgeProjectId || null,
   }).where(eq(userSettings.userId, userId));
 
   revalidatePath("/settings");

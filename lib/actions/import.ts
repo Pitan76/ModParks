@@ -60,13 +60,32 @@ export async function fetchCurseForgeProjects(): Promise<ImportedProject[]> {
   if (!settings?.curseforgeApiKey) {
     throw new Error("CurseForge API key is not configured.");
   }
-  if (!settings?.curseforgeAuthorId) {
-    throw new Error("CurseForge Author ID is not configured.");
+  if (!settings?.curseforgeProjectId) {
+    throw new Error("CurseForge Project ID is not configured.");
   }
 
-  // Get user projects from CurseForge
+  // 1. Fetch the project to get the authorId
+  const projectRes = await fetch(`https://api.curseforge.com/v1/mods/${settings.curseforgeProjectId}`, {
+    headers: { "x-api-key": settings.curseforgeApiKey, "Accept": "application/json", "User-Agent": "ModParks/1.0" }
+  });
+
+  if (!projectRes.ok) {
+    const errorText = await projectRes.text();
+    console.error("CurseForge Project Fetch Error:", projectRes.status, errorText);
+    throw new Error(`Failed to fetch the specified CurseForge project. Status: ${projectRes.status}`);
+  }
+
+  const projectData = await projectRes.json() as any;
+  const authors = projectData.data.authors;
+  if (!authors || authors.length === 0) {
+    throw new Error("No authors found for the specified CurseForge project.");
+  }
+  // Assume the first author is the main author
+  const authorId = authors[0].id;
+
+  // 2. Get user projects from CurseForge using the resolved authorId
   // gameId 432 is Minecraft
-  const projRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&authorId=${settings.curseforgeAuthorId}`, {
+  const projRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&authorId=${authorId}`, {
     headers: { "x-api-key": settings.curseforgeApiKey, "Accept": "application/json", "User-Agent": "ModParks/1.0" }
   });
   

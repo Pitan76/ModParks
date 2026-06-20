@@ -50,11 +50,11 @@ interface SettingsClientProps {
   defaultLicense?: string;
   modrinthApiKey?: string;
   curseforgeApiKey?: string;
-  curseforgeAuthorId?: string;
+  curseforgeProjectId?: string;
   error?: string;
 }
 
-export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, twoFactorEnabled, defaultProjectStatus, defaultLicense, modrinthApiKey, curseforgeApiKey, curseforgeAuthorId, error }: SettingsClientProps) {
+export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPassword, twoFactorEnabled, defaultProjectStatus, defaultLicense, modrinthApiKey, curseforgeApiKey, curseforgeProjectId, error }: SettingsClientProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const format = useFormatter();
@@ -117,7 +117,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   // Integrations State
   const [modrinthKey, setModrinthKey] = useState(modrinthApiKey || "");
   const [curseforgeKey, setCurseforgeKey] = useState(curseforgeApiKey || "");
-  const [curseforgeAuthor, setCurseforgeAuthor] = useState(curseforgeAuthorId || "");
+  const [curseforgeProject, setCurseforgeProject] = useState(curseforgeProjectId || "");
   const [integrationMsg, setIntegrationMsg] = useState<{ type: "success" | "error", text: string } | null>(null);
 
   // ---------- Profile Handlers ----------
@@ -308,7 +308,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
 
   const handleIntegrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateIntegrations(modrinthKey, curseforgeKey, curseforgeAuthor);
+    await updateIntegrations(modrinthKey, curseforgeKey, curseforgeProject);
     setIntegrationMsg({ type: "success", text: tCommon("saved") || "保存しました" });
     setTimeout(() => setIntegrationMsg(null), 3000);
   };
@@ -713,12 +713,12 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             />
             <TextField
               fullWidth
-              label="CurseForge Author ID"
+              label="CurseForge Project ID"
               size="small"
               type="text"
-              value={curseforgeAuthor}
-              onChange={e => setCurseforgeAuthor(e.target.value)}
-              helperText="CurseForgeからの一括インポートに使用します"
+              value={curseforgeProject}
+              onChange={e => setCurseforgeProject(e.target.value)}
+              helperText="CurseForgeからの一括インポートに使用します（ご自身のModのIDを1つだけ入力してください）"
               sx={{ mb: 4, maxWidth: 400 }}
             />
 
