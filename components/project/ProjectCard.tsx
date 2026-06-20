@@ -31,6 +31,8 @@ export interface ProjectCardProps {
     license:     string;
     downloads:   number;
     externalDownloads?: number;
+    modrinthDownloads?: number;
+    curseforgeDownloads?: number;
     modrinthId?: string | null;
     curseforgeId?: string | null;
     tags:        string[];
@@ -76,13 +78,23 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
   const localDownloads = project.downloads || 0;
   const extDownloads = project.externalDownloads || 0;
   const totalDownloads = localDownloads + extDownloads;
-
-  let extLabel = tProject("stats.external");
-  if (project.modrinthId && !project.curseforgeId) extLabel = "Modrinth";
-  else if (!project.modrinthId && project.curseforgeId) extLabel = "CurseForge";
+  
+  const modrinthDl = project.modrinthDownloads || 0;
+  const curseforgeDl = project.curseforgeDownloads || 0;
 
   const modparksLabel = tProject("stats.modparks");
-  const tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}, ${extLabel}: ${formatCompactNumber(extDownloads, locale)}`;
+  let tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`;
+  
+  if (modrinthDl > 0) tooltipText += `, Modrinth: ${formatCompactNumber(modrinthDl, locale)}`;
+  if (curseforgeDl > 0) tooltipText += `, CurseForge: ${formatCompactNumber(curseforgeDl, locale)}`;
+
+  // 古いデータで、合算のみ存在するケースのフォールバック
+  if (modrinthDl === 0 && curseforgeDl === 0 && extDownloads > 0) {
+    let extLabel = tProject("stats.external");
+    if (project.modrinthId && !project.curseforgeId) extLabel = "Modrinth";
+    else if (!project.modrinthId && project.curseforgeId) extLabel = "CurseForge";
+    tooltipText += `, ${extLabel}: ${formatCompactNumber(extDownloads, locale)}`;
+  }
 
   return (
     <Card id={`project-card-${project.slug}`} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
