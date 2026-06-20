@@ -117,42 +117,42 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
             }
           }}
         >
-          <Tab label="新規作成" />
-          <Tab label="外部インポート" />
+          <Tab label={t("create.tabs.normal")} />
+          <Tab label={t("create.tabs.import")} />
         </Tabs>
       </Box>
 
       {tabIndex === 1 && (
         <Card sx={{ mb: 4, bgcolor: "background.default" }}>
           <CardContent>
-            <Typography variant="h6" sx={{ mb: 2 }}>外部プロジェクトからデータを取得</Typography>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t("create.import.title")}</Typography>
             <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
               <FormControl size="small" sx={{ flex: "1 1 120px" }}>
-                <InputLabel>Platform</InputLabel>
-                <Select value={importPlatform} label="Platform" onChange={(e) => setImportPlatform(e.target.value as any)}>
+                <InputLabel>{t("create.import.platform")}</InputLabel>
+                <Select value={importPlatform} label={t("create.import.platform")} onChange={(e) => setImportPlatform(e.target.value as any)}>
                   <MenuItem value="modrinth">Modrinth</MenuItem>
                   <MenuItem value="curseforge">CurseForge</MenuItem>
                 </Select>
               </FormControl>
               <TextField 
-                label="Project ID / Slug / URL" 
+                label={t("create.import.idLabel")} 
                 size="small" 
                 value={importId} 
                 onChange={(e) => setImportId(e.target.value)} 
                 sx={{ flex: "2 1 200px" }}
               />
               <Button variant="contained" onClick={handleImport} disabled={importing || !importId} sx={{ flex: "1 1 auto" }}>
-                {importing ? <CircularProgress size={24} /> : "データ取得"}
+                {importing ? <CircularProgress size={24} /> : t("create.import.fetchData")}
               </Button>
             </Box>
             {importPlatform === "modrinth" && !hasModrinthKey && (
-              <Alert severity="warning" sx={{ mt: 2 }}>ModrinthのAPIキーが設定されていません。非公開プロジェクトを取得するにはアカウント設定からAPIキーを登録してください。</Alert>
+              <Alert severity="warning" sx={{ mt: 2 }}>{t("create.import.modrinthKeyWarning")}</Alert>
             )}
             {importPlatform === "curseforge" && !hasCurseForgeKey && (
-              <Alert severity="warning" sx={{ mt: 2 }}>CurseForgeのAPIキーが設定されていません。取得に失敗する場合はアカウント設定からAPIキーを登録してください。</Alert>
+              <Alert severity="warning" sx={{ mt: 2 }}>{t("create.import.curseforgeKeyWarning")}</Alert>
             )}
             {importError && <Alert severity="error" sx={{ mt: 2 }}>{importError}</Alert>}
-            {importData && <Alert severity="success" sx={{ mt: 2 }}>データを取得しました。フォームに反映されました。</Alert>}
+            {importData && <Alert severity="success" sx={{ mt: 2 }}>{t("create.import.fetchSuccess")}</Alert>}
           </CardContent>
         </Card>
       )}

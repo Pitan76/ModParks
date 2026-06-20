@@ -469,6 +469,7 @@
     "results": "{count} projects found",
     "noResults": "No projects found.",
     "advancedSearch": "Advanced Search",
+    "author": "Author",
     "platforms": "Platforms / Loaders",
     "mcVersions": "MC Versions",
     "tags": "Tags (Type/Select)",
