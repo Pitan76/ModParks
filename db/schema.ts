@@ -157,7 +157,7 @@ export const projects = sqliteTable("projects", {
   curseforgeId: text("curseforge_id"),
   issueTrackerUrl: text("issue_tracker_url"),
   totalDownloads: integer("total_downloads").notNull().default(0),
-  externalDownloads: text("external_downloads", { mode: "json" }).$type<Record<string, number>>().notNull().default('{}'),
+  externalDownloads: text("external_downloads", { mode: "json" }).$type<Record<string, number>>().notNull().default({}),
   commentsEnabled: integer("comments_enabled", { mode: "boolean" }).notNull().default(false),
   sourceIdeaId: text("source_idea_id"),
 }, (table) => ({
@@ -273,7 +273,9 @@ export const projectDependencies = sqliteTable(
   {
     id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
     projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-    targetProjectId: text("target_project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    targetProjectId: text("target_project_id").references(() => projects.id, { onDelete: "cascade" }),
+    externalUrl: text("external_url"),
+    externalName: text("external_name"),
     dependencyType: text("dependency_type").notNull().default("required"), // required, optional, incompatible, embedded
     createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
   },

@@ -15,6 +15,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import ProjectCard from "@/components/project/ProjectCard";
+import ProfileSortSelect from "@/components/profile/ProfileSortSelect";
 import { getProjects } from "@/lib/actions/project";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
 import { getUserCollections } from "@/lib/actions/collection";
@@ -167,9 +168,11 @@ export default async function PublicProfilePage({ params, searchParams }: Public
     }
   }
 
+  const sort = (resolvedSearchParams.sort as string) || "updated";
+  
   // Fetch user projects and favorites
   const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, { totalProjects, totalDownloads, nativeDownloads, modrinthDownloads, curseforgeDownloads }] = await Promise.all([
-    getProjects({ authorId: user.id, limit, offset, calculateTotal: true }),
+    getProjects({ authorId: user.id, limit, offset, sort: sort as any, calculateTotal: true }),
     getFavoriteProjects(user.id),
     getUserCollections(user.id, session?.user?.id),
     import("@/lib/actions/project").then(m => m.getUserProjectStats(user.id))
@@ -292,16 +295,20 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 0 }}>
           {t("projects")}
         </Typography>
-        {isOwner && (
-          <RoutingLink href="/projects?author=me" style={{ textDecoration: "none" }}>
-            <Button
-              variant="outlined"
-              size="small"
-            >
-              {t("manage")}
-            </Button>
-          </RoutingLink>
-        )}
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <ProfileSortSelect />
+          {isOwner && (
+            <RoutingLink href="/projects?author=me" style={{ textDecoration: "none" }}>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ height: '100%' }}
+              >
+                {t("manage")}
+              </Button>
+            </RoutingLink>
+          )}
+        </Box>
       </Box>
 
       {visibleProjects.length > 0 ? (
