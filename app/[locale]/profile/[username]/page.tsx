@@ -189,7 +189,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         <Box sx={{ flex: 1 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
                 {user.displayName || user.username}
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
