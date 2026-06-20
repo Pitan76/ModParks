@@ -14,10 +14,7 @@ export interface ApiProject {
   iconUrl: string | null;
   type: "mod" | "plugin";
   license: string;
-  downloads: number;
-  nativeDownloads: number;
-  modrinthDownloads: number;
-  curseforgeDownloads: number;
+  downloads: Record<string, number>;
   createdAt: number;
   updatedAt: number;
   author: ApiUser;

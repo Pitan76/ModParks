@@ -24,8 +24,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       type: projects.type,
       license: projects.license,
       downloads: projects.downloads,
-      modrinthDownloads: projects.modrinthDownloads,
-      curseforgeDownloads: projects.curseforgeDownloads,
+      totalDownloads: projects.totalDownloads,
       externalDownloads: projects.externalDownloads,
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
@@ -76,10 +75,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     iconUrl: project.iconUrl,
     type: project.type as "mod" | "plugin",
     license: project.license,
-    downloads: project.downloads + (project.externalDownloads || 0),
-    nativeDownloads: project.downloads,
-    modrinthDownloads: project.modrinthDownloads || 0,
-    curseforgeDownloads: project.curseforgeDownloads || 0,
+    downloads: {
+      total: project.totalDownloads,
+      native: project.downloads,
+      ...(project.externalDownloads as Record<string, number>)
+    },
     createdAt: project.createdAt ? new Date(project.createdAt).getTime() : 0,
     updatedAt: project.updatedAt ? new Date(project.updatedAt).getTime() : 0,
     author: {
