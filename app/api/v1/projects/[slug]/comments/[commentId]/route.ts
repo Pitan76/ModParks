@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { projectComments } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { projectComments, projects, projectMembers } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ slug: string, commentId: string }> }) {
   try {
@@ -15,7 +15,16 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ s
     const comment = await db.select().from(projectComments).where(eq(projectComments.id, commentId)).get();
     if (!comment) return NextResponse.json({ error: "Comment not found" }, { status: 404 });
 
-    if (comment.authorId !== session.user.id && session.user.role !== "admin") {
+    const project = await db.select().from(projects).where(eq(projects.id, comment.projectId)).get();
+    const isProjectOwner = project?.authorId === session.user.id;
+    const isProjectMember = !!(await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, comment.projectId), eq(projectMembers.userId, session.user.id))).get());
+
+    if (
+      comment.authorId !== session.user.id &&
+      !isProjectOwner &&
+      !isProjectMember &&
+      session.user.role !== "admin"
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

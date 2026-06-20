@@ -60,7 +60,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
 
   // Show global error (like admin_password_required)
   const globalError = error === "admin_password_required" 
-    ? "管理画面にアクセスするにはセキュリティのためパスワードを設定してください。" 
+    ? t("errors.adminPasswordRequired") 
     : error;
 
   // Profile State
@@ -705,13 +705,13 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
       )
     },
     {
-      label: "外部連携",
+      label: t("integration.title"),
       content: (
         <Box component="form" onSubmit={handleIntegrationSubmit}>
           {integrationMsg && <Alert severity={integrationMsg.type} sx={{ mb: 3 }}>{integrationMsg.text}</Alert>}
 
-          <Typography variant="h6" sx={{ mb: 1 }}>Modrinth連携</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>ModrinthのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。</Typography>
+          <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.modrinth")}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.modrinthDesc")}</Typography>
           <TextField
             fullWidth
             label="Modrinth API Key"
@@ -722,8 +722,8 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             sx={{ mb: 4, maxWidth: 400 }}
           />
 
-          <Typography variant="h6" sx={{ mb: 1 }}>CurseForge連携</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>CurseForgeのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。</Typography>
+          <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.curseforgeDesc")}</Typography>
           <TextField
             fullWidth
             label="CurseForge API Key"
