@@ -26,6 +26,8 @@ export interface ProjectFormFieldsProps {
     sourceUrl?: string | null;
     links?: string | null;
     iconUrl?: string | null;
+    modrinthId?: string | null;
+    curseforgeId?: string | null;
     tags?: string[];
   };
   availableTags?: { slug: string; name: string }[];
@@ -191,6 +193,28 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           defaultValue={project?.sourceUrl || ""}
           error={!!error?.sourceUrl}
           helperText={error?.sourceUrl?.[0]}
+        />
+      </Stack>
+
+      <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.externalConnectionsTitle")}</Typography>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
+        <TextField
+          id="project-modrinth"
+          name="modrinthId"
+          label={t("fields.modrinthId")}
+          fullWidth
+          defaultValue={project?.modrinthId || ""}
+          error={!!error?.modrinthId}
+          helperText={error?.modrinthId?.[0]}
+        />
+        <TextField
+          id="project-curseforge"
+          name="curseforgeId"
+          label={t("fields.curseforgeId")}
+          fullWidth
+          defaultValue={project?.curseforgeId || ""}
+          error={!!error?.curseforgeId}
+          helperText={error?.curseforgeId?.[0]}
         />
       </Stack>
 

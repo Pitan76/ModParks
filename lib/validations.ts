@@ -78,6 +78,8 @@ export const createProjectSchema = z.object({
   license:     z.string().min(1, "ライセンスを入力してください").max(64, "64文字以内"),
   sourceUrl:   z.string().url("有効なURLを入力してください").optional().or(z.literal("")),
   links:       z.string().optional().or(z.literal("")),
+  modrinthId:  z.string().optional().nullable(),
+  curseforgeId: z.string().optional().nullable(),
   tags:        z.array(z.string().max(32)).max(10, "タグは10個まで"),
 });
 
