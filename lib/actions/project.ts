@@ -264,7 +264,7 @@ export async function getProjects(params: {
   let orderByExpr = desc(projects.updatedAt);
   if (sort === "downloads") {
     if (includeExtDl) {
-      orderByExpr = desc(sql`${projects.downloads} + COALESCE(${projects.externalDownloads}, 0)`);
+      orderByExpr = desc(projects.totalDownloads);
     } else {
       orderByExpr = desc(projects.downloads);
     }
@@ -393,20 +393,36 @@ export async function getUserProjectStats(authorId: string) {
     .select({
       totalProjects: sql<number>`count(*)`,
       nativeDownloads: sql<number>`sum(${projects.downloads})`,
-      modrinthDownloads: sql<number>`sum(COALESCE(${projects.modrinthDownloads}, 0))`,
-      curseforgeDownloads: sql<number>`sum(COALESCE(${projects.curseforgeDownloads}, 0))`,
-      totalDownloads: sql<number>`sum(${projects.downloads} + COALESCE(${projects.externalDownloads}, 0) + COALESCE(${projects.modrinthDownloads}, 0) + COALESCE(${projects.curseforgeDownloads}, 0))`
+      totalDownloads: sql<number>`sum(${projects.totalDownloads})`,
     })
     .from(projects)
     .where(and(eq(projects.authorId, authorId), eq(projects.status, "public")))
     .get();
 
+  // JSONカラムはSQLのSUMが困難なため、外部ダウンロード数の内訳はJavaScriptで計算する
+  const userProjects = await db
+    .select({ externalDownloads: projects.externalDownloads })
+    .from(projects)
+    .where(and(eq(projects.authorId, authorId), eq(projects.status, "public")))
+    .all();
+
+  let modrinthDownloads = 0;
+  let curseforgeDownloads = 0;
+
+  for (const p of userProjects) {
+    if (p.externalDownloads) {
+      const ext = p.externalDownloads as Record<string, number>;
+      modrinthDownloads += ext.modrinth || 0;
+      curseforgeDownloads += ext.curseforge || 0;
+    }
+  }
+
   return {
     totalProjects: result?.totalProjects || 0,
     totalDownloads: result?.totalDownloads || 0,
     nativeDownloads: result?.nativeDownloads || 0,
-    modrinthDownloads: result?.modrinthDownloads || 0,
-    curseforgeDownloads: result?.curseforgeDownloads || 0,
+    modrinthDownloads,
+    curseforgeDownloads,
   };
 }
 
@@ -604,10 +620,13 @@ export async function syncExternalProjectData(projectId: string) {
   }
 
   if (newExtDl > 0) {
+    const extObj: Record<string, number> = {};
+    if (modrinthDl > 0) extObj.modrinth = modrinthDl;
+    if (curseforgeDl > 0) extObj.curseforge = curseforgeDl;
+    
     await db.update(projects).set({ 
-      externalDownloads: newExtDl,
-      modrinthDownloads: modrinthDl,
-      curseforgeDownloads: curseforgeDl
+      externalDownloads: extObj,
+      totalDownloads: project.downloads + newExtDl
     }).where(eq(projects.id, project.id)).run();
   }
   

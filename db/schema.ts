@@ -156,9 +156,8 @@ export const projects = sqliteTable("projects", {
   modrinthId:  text("modrinth_id"),
   curseforgeId: text("curseforge_id"),
   issueTrackerUrl: text("issue_tracker_url"),
-  externalDownloads: integer("external_downloads").notNull().default(0),
-  modrinthDownloads: integer("modrinth_downloads").notNull().default(0),
-  curseforgeDownloads: integer("curseforge_downloads").notNull().default(0),
+  totalDownloads: integer("total_downloads").notNull().default(0),
+  externalDownloads: text("external_downloads", { mode: "json" }).$type<Record<string, number>>().notNull().default('{}'),
   commentsEnabled: integer("comments_enabled", { mode: "boolean" }).notNull().default(false),
   sourceIdeaId: text("source_idea_id"),
 }, (table) => ({
