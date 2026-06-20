@@ -57,17 +57,20 @@ export async function getProjectDependents(projectId: string) {
 }
 
 /**
- * プロジェクトに依存関係を追加する
+ * プロジェクトに依存関係を追加する（Slugで指定）
  */
-export async function addProjectDependency(projectId: string, targetProjectId: string, dependencyType: DependencyType) {
+export async function addProjectDependencyBySlug(projectId: string, targetSlug: string, dependencyType: DependencyType) {
   const { db, session } = await getAuthenticatedDb();
-
-  if (projectId === targetProjectId) {
-    throw new Error("Cannot depend on itself");
-  }
 
   const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
   if (!project) throw new Error("Project not found");
+
+  const targetProject = await db.select().from(projects).where(eq(projects.slug, targetSlug)).get();
+  if (!targetProject) throw new Error("Target project not found");
+
+  if (projectId === targetProject.id) {
+    throw new Error("Cannot depend on itself");
+  }
 
   const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
   if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
@@ -77,7 +80,7 @@ export async function addProjectDependency(projectId: string, targetProjectId: s
   const existing = await db
     .select()
     .from(projectDependencies)
-    .where(and(eq(projectDependencies.projectId, projectId), eq(projectDependencies.targetProjectId, targetProjectId)))
+    .where(and(eq(projectDependencies.projectId, projectId), eq(projectDependencies.targetProjectId, targetProject.id)))
     .get();
 
   if (existing) {
@@ -86,14 +89,16 @@ export async function addProjectDependency(projectId: string, targetProjectId: s
 
   await db.insert(projectDependencies).values({
     projectId,
-    targetProjectId,
+    targetProjectId: targetProject.id,
     dependencyType,
   }).run();
 
   revalidatePath(`/projects/${project.slug}/dependencies`);
-  revalidatePath(`/projects/${project.slug}/edit/dependencies`);
+  revalidatePath(`/projects/${project.slug}/edit`);
   return { success: true };
 }
+
+
 
 /**
  * プロジェクトの依存関係を削除する
