@@ -84,14 +84,20 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
   return (
     <Box>
       <Typography variant="h6" gutterBottom>{t("add")}</Typography>
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2, maxWidth: "100%" }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2, width: "100%", overflow: "hidden" }}>
         <Tabs 
           value={tab} 
           onChange={(_, v) => setTab(v)} 
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
-          sx={{ maxWidth: "100%" }}
+          sx={{ 
+            maxWidth: { xs: 'calc(100vw - 32px)', sm: '100%' },
+            '& .MuiTab-root': {
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }
+          }}
         >
           <Tab label="ModParks Project" />
           <Tab label="External URL" />

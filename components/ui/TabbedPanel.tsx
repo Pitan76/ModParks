@@ -36,10 +36,10 @@ export default function TabbedPanel({ items, defaultTab = 0 }: TabbedPanelProps)
           value={safeActiveTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
           variant="scrollable"
-          scrollButtons={true}
+          scrollButtons="auto"
           allowScrollButtonsMobile
           sx={{
-            maxWidth: '100%',
+            maxWidth: { xs: 'calc(100vw - 32px)', sm: '100%' },
             '& .MuiTab-root': {
               whiteSpace: 'nowrap',
               flexShrink: 0,
