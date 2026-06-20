@@ -30,6 +30,8 @@ export interface ProjectDetailHeaderProps {
     iconUrl?: string | null;
     downloads: number;
     externalDownloads?: number;
+    modrinthDownloads?: number;
+    curseforgeDownloads?: number;
     modrinthId?: string | null;
     curseforgeId?: string | null;
     createdAt: Date;
@@ -66,15 +68,14 @@ export default function ProjectDetailHeader({
   const locale = useLocale();
 
   const localDownloads = p.downloads || 0;
-  const extDownloads = p.externalDownloads || 0;
-  const totalDownloads = localDownloads + extDownloads;
-
-  let extLabel = tProject("stats.external");
-  if (p.modrinthId && !p.curseforgeId) extLabel = "Modrinth";
-  else if (!p.modrinthId && p.curseforgeId) extLabel = "CurseForge";
+  const modrinthDl = p.modrinthDownloads || 0;
+  const curseforgeDl = p.curseforgeDownloads || 0;
+  const totalDownloads = localDownloads + modrinthDl + curseforgeDl;
 
   const modparksLabel = tProject("stats.modparks");
-  const tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}, ${extLabel}: ${formatCompactNumber(extDownloads, locale)}`;
+  let tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`;
+  if (modrinthDl > 0) tooltipText += `, Modrinth: ${formatCompactNumber(modrinthDl, locale)}`;
+  if (curseforgeDl > 0) tooltipText += `, CurseForge: ${formatCompactNumber(curseforgeDl, locale)}`;
 
   return (
     <>
@@ -145,7 +146,7 @@ export default function ProjectDetailHeader({
               </Typography>
             </LinkButton>
             <Typography variant="body2" color="text.disabled">·</Typography>
-            <Tooltip title={extDownloads > 0 ? tooltipText : `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`} arrow placement="top">
+            <Tooltip title={tooltipText} arrow placement="top">
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, cursor: "help" }}>
                 <DownloadIcon sx={{ fontSize: 14, color: "text.disabled" }} />
                 <Typography variant="body2" color="text.disabled">

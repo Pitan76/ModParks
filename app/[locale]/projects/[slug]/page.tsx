@@ -107,7 +107,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const canEdit = isOwner;
 
   // ダウンロード数の合算 (ローカル + 外部)
-  p.totalDownloads = (p.downloads || 0) + (p.externalDownloads || 0);
+  p.totalDownloads = (p.downloads || 0) + (p.modrinthDownloads || 0) + (p.curseforgeDownloads || 0);
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
