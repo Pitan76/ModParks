@@ -30,7 +30,7 @@ export async function getProjectDependencies(projectId: string) {
   return deps.map((d) => ({
     id: d.id,
     dependencyType: d.dependencyType as DependencyType,
-    project: d.targetProject ? d.targetProject : { slug: d.id, name: d.externalName || "Unknown External" },
+    project: d.targetProject ? d.targetProject : { id: d.id, slug: d.id, name: d.externalName || "Unknown External", iconUrl: null },
     externalUrl: d.externalUrl,
     externalName: d.externalName,
   }));
