@@ -21,7 +21,9 @@
     "yes": "Yes",
     "no": "No",
     "itemsPerPage": "Items per page",
-    "downloads": "Downloads"
+    "downloads": "Downloads",
+    "followers": "Followers",
+    "following": "Following"
   },
   "Nav": {
     "home": "Home",

@@ -219,10 +219,10 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                 </Tooltip>
 
                 <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> Followers
+                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> {tCommon("followers")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followingCount}</Box> Following
+                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followingCount}</Box> {tCommon("following")}
                 </Typography>
               </Box>
             </Box>

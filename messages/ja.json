@@ -21,7 +21,9 @@
     "yes": "はい",
     "no": "いいえ",
     "itemsPerPage": "表示件数",
-    "downloads": "ダウンロード"
+    "downloads": "ダウンロード",
+    "followers": "フォロワー",
+    "following": "フォロー中"
   },
   "Nav": {
     "home": "ホーム",
