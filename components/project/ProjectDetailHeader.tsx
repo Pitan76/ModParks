@@ -29,9 +29,8 @@ export interface ProjectDetailHeaderProps {
     description: string;
     iconUrl?: string | null;
     downloads: number;
-    externalDownloads?: number;
-    modrinthDownloads?: number;
-    curseforgeDownloads?: number;
+    totalDownloads: number;
+    externalDownloads?: Record<string, number> | null;
     modrinthId?: string | null;
     curseforgeId?: string | null;
     createdAt: Date;
