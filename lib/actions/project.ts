@@ -423,7 +423,24 @@ export async function syncExternalProjectData(projectId: string) {
     try {
       const cfApiKey = settings?.curseforgeApiKey;
       if (cfApiKey) {
-        const res = await fetch(`https://api.curseforge.com/v1/mods/${project.curseforgeId}`, {
+        let targetCfId = project.curseforgeId;
+        
+        // Slugの場合は検索してIDを取得
+        if (!/^\d+$/.test(targetCfId)) {
+          const searchRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&slug=${targetCfId}`, {
+            headers: { "x-api-key": cfApiKey, "Accept": "application/json" }
+          });
+          if (searchRes.ok) {
+            const searchData = await searchRes.json() as any;
+            if (searchData.data && searchData.data.length > 0) {
+              targetCfId = searchData.data[0].id.toString();
+              // Slugを実際のIDに変換してDBに保存しておく
+              await db.update(projects).set({ curseforgeId: targetCfId }).where(eq(projects.id, project.id)).run();
+            }
+          }
+        }
+
+        const res = await fetch(`https://api.curseforge.com/v1/mods/${targetCfId}`, {
           headers: { "x-api-key": cfApiKey, "Accept": "application/json" }
         });
         if (res.ok) {
