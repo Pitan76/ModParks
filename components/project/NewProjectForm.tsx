@@ -107,9 +107,10 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
           value={tabIndex} 
           onChange={(_, val) => setTabIndex(val)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={true}
           allowScrollButtonsMobile
           sx={{
+            maxWidth: '100%',
             '& .MuiTab-root': {
               whiteSpace: 'nowrap',
               flexShrink: 0,
