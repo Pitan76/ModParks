@@ -151,9 +151,14 @@
       "description": "Description",
       "files": "Files",
       "dependencies": "Dependencies",
+      "issues": "Issues",
       "manage": "Manage",
       "underConstruction": "Under Construction",
       "dependenciesDesc": "Dependencies feature is currently under development."
+    },
+    "stats": {
+      "modparks": "ModParks",
+      "external": "External"
     }
   },
   "Version": {
@@ -456,6 +461,7 @@
     "includeDesc": "Include Description",
     "includeTags": "Include Tags",
     "includeAuthor": "Include Author Name",
+    "includeExtDl": "Include External DLs in Sort",
     "loader": {
       "label": "Platform"
     }

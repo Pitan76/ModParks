@@ -60,6 +60,7 @@ const TYPE_LABEL = {
 export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
   const locale = useLocale();
   const tTags = useTranslations("Tags");
+  const tProject = useTranslations("Project");
   const format = useFormatter();
   const router = useRouter();
   const isGrid = layout === "grid";
@@ -76,11 +77,12 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
   const extDownloads = project.externalDownloads || 0;
   const totalDownloads = localDownloads + extDownloads;
 
-  let extLabel = "External";
+  let extLabel = tProject("stats.external");
   if (project.modrinthId && !project.curseforgeId) extLabel = "Modrinth";
   else if (!project.modrinthId && project.curseforgeId) extLabel = "CurseForge";
 
-  const tooltipText = `ModParks: ${formatCompactNumber(localDownloads, locale)}, ${extLabel}: ${formatCompactNumber(extDownloads, locale)}`;
+  const modparksLabel = tProject("stats.modparks");
+  const tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}, ${extLabel}: ${formatCompactNumber(extDownloads, locale)}`;
 
   return (
     <Card id={`project-card-${project.slug}`} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
@@ -178,7 +180,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
             }}
           >
-            <Tooltip title={extDownloads > 0 ? tooltipText : `ModParks: ${formatCompactNumber(localDownloads, locale)}`} arrow placement="top">
+            <Tooltip title={extDownloads > 0 ? tooltipText : `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`} arrow placement="top">
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary", cursor: "help" }}>
                 <DownloadIcon sx={{ fontSize: "1rem" }} />
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>

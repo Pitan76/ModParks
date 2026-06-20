@@ -157,9 +157,14 @@
       "description": "説明",
       "files": "ファイル",
       "dependencies": "依存関係",
+      "issues": "Issues",
       "manage": "管理",
       "underConstruction": "工事中",
       "dependenciesDesc": "依存関係機能は現在開発中です。"
+    },
+    "stats": {
+      "modparks": "ModParks",
+      "external": "外部"
     }
   },
   "Version": {
@@ -465,6 +470,7 @@
     "includeDesc": "説明文を含める",
     "includeTags": "タグを含める",
     "includeAuthor": "作者名を含める",
+    "includeExtDl": "外部DL数を合算してソート",
     "loader": {
       "label": "プラットフォーム"
     }

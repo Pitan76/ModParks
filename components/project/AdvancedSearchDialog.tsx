@@ -114,7 +114,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
             />
             <FormControlLabel
               control={<Switch size="small" checked={tempIncludeExtDl} onChange={e => setTempIncludeExtDl(e.target.checked)} />}
-              label={<Typography variant="body2">外部DL数を合算してソート</Typography>}
+              label={<Typography variant="body2">{t("includeExtDl")}</Typography>}
             />
           </Box>
         </Box>

@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useRouter } from "@/i18n/routing";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -82,9 +83,9 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
           <Tab label={t("tabs.dependencies")} value={2} />
           {issueTrackerUrl && (
             <Tab 
-              label="Issues" 
+              label={t("tabs.issues")}
               value={4}
-              icon={<span className="material-icons" style={{ fontSize: '1rem', marginRight: '4px' }}>open_in_new</span>}
+              icon={<OpenInNewIcon sx={{ fontSize: '1rem', ml: 0.5 }} />}
               iconPosition="end"
             />
           )}
