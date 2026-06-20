@@ -29,6 +29,7 @@ import { SITE_URL } from "@/lib/config";
 import { userFollows } from "@/db/schema";
 import { and, sql } from "drizzle-orm";
 import FollowUserButton from "@/components/user/FollowUserButton";
+import CollectionCard from "@/components/list/CollectionCard";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -300,42 +301,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         <Grid container spacing={2}>
           {userCollections.map(c => (
             <Grid key={c.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <RoutingLink
-                href={`/lists/${c.id}`}
-                style={{ textDecoration: "none", color: "inherit", display: "block" }}
-              >
-                <Box
-                  sx={{
-                    p: 3,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 2,
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      borderColor: "primary.main",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                      transform: "translateY(-2px)"
-                    }
-                  }}
-                >
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                    {c.name}
-                  </Typography>
-                  <Chip 
-                    label={t(`visibility.${c.visibility}`)} 
-                    size="small"
-                    variant="outlined"
-                    color={c.visibility === "public" ? "primary" : "default"}
-                  />
-                </Box>
-                {c.description && (
-                  <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {c.description}
-                  </Typography>
-                )}
-                </Box>
-              </RoutingLink>
+              <CollectionCard collection={c as any} />
             </Grid>
           ))}
         </Grid>
