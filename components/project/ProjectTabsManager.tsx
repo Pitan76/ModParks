@@ -81,10 +81,8 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
           allowScrollButtonsMobile
           sx={{
             '& .MuiTab-root': {
-              minWidth: { xs: 'auto', sm: 90 },
-              px: { xs: 1.5, sm: 2 },
-              fontSize: { xs: '0.85rem', sm: '0.875rem' },
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
             }
           }}
         >

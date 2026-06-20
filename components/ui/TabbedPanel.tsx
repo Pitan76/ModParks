@@ -37,6 +37,13 @@ export default function TabbedPanel({ items, defaultTab = 0 }: TabbedPanelProps)
           onChange={(_, newValue) => setActiveTab(newValue)}
           variant="scrollable"
           scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{
+            '& .MuiTab-root': {
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }
+          }}
         >
           {visibleItems.map((item, index) => (
             <Tab key={index} label={item.label} />
