@@ -166,11 +166,27 @@
       "issues": "Issues",
       "manage": "Manage",
       "underConstruction": "Under Construction",
-      "dependenciesDesc": "Dependencies feature is currently under development."
+      "dependenciesDesc": "Manage project dependencies here."
     },
     "stats": {
       "modparks": "ModParks",
       "external": "External"
+    },
+    "dependencies": {
+      "add": "Add Dependency",
+      "targetSlug": "Target Project Slug (e.g. mod-abc)",
+      "type": "Type",
+      "required": "Required",
+      "optional": "Optional",
+      "incompatible": "Incompatible",
+      "embedded": "Embedded",
+      "current": "Current Dependencies",
+      "noDependencies": "No dependencies.",
+      "addSuccess": "Dependency added.",
+      "addError": "Failed to add dependency.",
+      "removeSuccess": "Dependency removed.",
+      "dependents": "Dependents",
+      "noDependents": "No projects depend on this project."
     }
   },
   "Version": {

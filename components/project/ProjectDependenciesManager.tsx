@@ -18,6 +18,8 @@ import Alert from "@mui/material/Alert";
 import { addProjectDependencyBySlug, removeProjectDependency, DependencyType } from "@/lib/actions/dependency";
 import { useRouter } from "@/i18n/routing";
 
+import { useTranslations } from "next-intl";
+
 export interface ProjectDependenciesManagerProps {
   projectId: string;
   dependencies: {
@@ -33,6 +35,7 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; severity: "success" | "error" } | null>(null);
   const router = useRouter();
+  const t = useTranslations("Project.dependencies");
 
   const handleAdd = async () => {
     if (!targetSlug) return;
@@ -40,14 +43,14 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
     try {
       const res = await addProjectDependencyBySlug(projectId, targetSlug, depType);
       if (res.error) {
-        setToast({ message: "追加に失敗しました", severity: "error" });
+        setToast({ message: t("addError"), severity: "error" });
       } else {
-        setToast({ message: "依存関係を追加しました", severity: "success" });
+        setToast({ message: t("addSuccess"), severity: "success" });
         setTargetSlug("");
         router.refresh();
       }
     } catch (e: any) {
-      setToast({ message: e.message || "追加に失敗しました", severity: "error" });
+      setToast({ message: e.message || t("addError"), severity: "error" });
     }
     setLoading(false);
   };
@@ -56,50 +59,50 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
     setLoading(true);
     try {
       await removeProjectDependency(depId);
-      enqueueSnackbar("依存関係を削除しました", { variant: "success" });
+      setToast({ message: t("removeSuccess"), severity: "success" });
       router.refresh();
     } catch (e: any) {
-      enqueueSnackbar(e.message, { variant: "error" });
+      setToast({ message: e.message, severity: "error" });
     }
     setLoading(false);
   };
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>依存関係の追加</Typography>
+      <Typography variant="h6" gutterBottom>{t("add")}</Typography>
       <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "center" }}>
         <TextField
-          label="対象プロジェクトのスラッグ (例: mod-abc)"
+          label={t("targetSlug")}
           value={targetSlug}
           onChange={(e) => setTargetSlug(e.target.value)}
           size="small"
           fullWidth
         />
         <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>タイプ</InputLabel>
+          <InputLabel>{t("type")}</InputLabel>
           <Select
             value={depType}
-            label="タイプ"
+            label={t("type")}
             onChange={(e) => setDepType(e.target.value as DependencyType)}
           >
-            <MenuItem value="required">Required (必須)</MenuItem>
-            <MenuItem value="optional">Optional (任意)</MenuItem>
-            <MenuItem value="incompatible">Incompatible (競合)</MenuItem>
-            <MenuItem value="embedded">Embedded (同梱)</MenuItem>
+            <MenuItem value="required">{t("required")}</MenuItem>
+            <MenuItem value="optional">{t("optional")}</MenuItem>
+            <MenuItem value="incompatible">{t("incompatible")}</MenuItem>
+            <MenuItem value="embedded">{t("embedded")}</MenuItem>
           </Select>
         </FormControl>
         <Button variant="contained" onClick={handleAdd} disabled={loading || !targetSlug}>
-          追加
+          {t("add")}
         </Button>
       </Box>
 
-      <Typography variant="h6" gutterBottom>現在の依存関係</Typography>
+      <Typography variant="h6" gutterBottom>{t("current")}</Typography>
       <List>
         {dependencies.map((dep) => (
           <ListItem key={dep.id} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, mb: 1 }}>
             <ListItemText 
               primary={dep.project.name} 
-              secondary={`Type: ${dep.dependencyType} | Slug: ${dep.project.slug}`} 
+              secondary={`${t("type")}: ${t(dep.dependencyType)} | Slug: ${dep.project.slug}`} 
             />
             <ListItemSecondaryAction>
               <IconButton edge="end" onClick={() => handleRemove(dep.id)} disabled={loading}>
@@ -109,9 +112,14 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
           </ListItem>
         ))}
         {dependencies.length === 0 && (
-          <Typography color="text.secondary">依存関係はありません。</Typography>
+          <Typography color="text.secondary">{t("noDependencies")}</Typography>
         )}
       </List>
+      <Snackbar open={!!toast} autoHideDuration={6000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setToast(null)} severity={toast?.severity || "info"} sx={{ width: '100%' }}>
+          {toast?.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

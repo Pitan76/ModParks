@@ -172,11 +172,27 @@
       "issues": "問題報告",
       "manage": "管理",
       "underConstruction": "工事中",
-      "dependenciesDesc": "依存関係機能は現在開発中です。"
+      "dependenciesDesc": "プロジェクトの依存関係を管理します。"
     },
     "stats": {
       "modparks": "ModParks",
       "external": "外部"
+    },
+    "dependencies": {
+      "add": "依存関係を追加",
+      "targetSlug": "対象プロジェクトのスラッグ (例: mod-abc)",
+      "type": "タイプ",
+      "required": "必須 (Required)",
+      "optional": "任意 (Optional)",
+      "incompatible": "競合 (Incompatible)",
+      "embedded": "同梱 (Embedded)",
+      "current": "現在の依存関係",
+      "noDependencies": "依存関係はありません。",
+      "addSuccess": "依存関係を追加しました。",
+      "addError": "依存関係の追加に失敗しました。",
+      "removeSuccess": "依存関係を削除しました。",
+      "dependents": "依存されているプロジェクト",
+      "noDependents": "このプロジェクトに依存しているプロジェクトはありません。"
     }
   },
   "Version": {

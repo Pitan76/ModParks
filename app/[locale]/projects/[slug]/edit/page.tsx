@@ -9,7 +9,9 @@ import ProjectMembersManager from "@/components/project/ProjectMembersManager";
 import ProjectOwnershipTransfer from "@/components/project/ProjectOwnershipTransfer";
 import ProjectVersionsManager from "@/components/project/ProjectVersionsManager";
 import ProjectEditClient from "@/components/project/ProjectEditClient";
+import ProjectDependenciesManager from "@/components/project/ProjectDependenciesManager";
 import { getProjectMembers } from "@/lib/actions/member";
+import { getProjectDependencies } from "@/lib/actions/dependency";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { versions, ideas } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
@@ -62,6 +64,8 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     .where(inArray(ideas.status, ["open", "in_progress"]))
     .all();
 
+  const dependencies = await getProjectDependencies(project.id);
+
   const { tags: tagsTable, platforms: platformsTable } = await import("@/db/schema");
   const availableTags = await db.select({ slug: tagsTable.slug, name: tagsTable.name }).from(tagsTable).all();
   const availablePlatforms = await db.select({ slug: platformsTable.slug, name: platformsTable.name }).from(platformsTable).all();
@@ -83,6 +87,9 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
             isOwner={isOwner} 
             currentUserId={session.user.id} 
           />
+        }
+        dependenciesManager={
+          <ProjectDependenciesManager projectId={project.id} dependencies={dependencies} />
         }
         ownershipTransfer={<ProjectOwnershipTransfer projectId={project.id} />}
       />

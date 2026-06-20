@@ -58,11 +58,11 @@ export default function ProjectDependencies({ dependencies, dependents }: Projec
   return (
     <Box>
       <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-        Dependencies
+        {t("dependencies.current")}
       </Typography>
       
       {dependencies.length === 0 ? (
-        <Typography color="text.secondary" sx={{ mb: 4 }}>This project has no dependencies.</Typography>
+        <Typography color="text.secondary" sx={{ mb: 4 }}>{t("dependencies.noDependencies")}</Typography>
       ) : (
         <List sx={{ mb: 4, bgcolor: "background.paper", borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
           {dependencies.map((dep, i) => (
@@ -81,18 +81,18 @@ export default function ProjectDependencies({ dependencies, dependents }: Projec
               <ListItemText 
                 primary={dep.project.name}
               />
-              <Chip size="small" label={getDepLabel(dep.dependencyType)} color={getDepColor(dep.dependencyType) as any} />
+              <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={getDepColor(dep.dependencyType) as any} />
             </ListItem>
           ))}
         </List>
       )}
 
       <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-        Dependents
+        {t("dependencies.dependents")}
       </Typography>
       
       {dependents.length === 0 ? (
-        <Typography color="text.secondary">No projects depend on this project.</Typography>
+        <Typography color="text.secondary">{t("dependencies.noDependents")}</Typography>
       ) : (
         <List sx={{ bgcolor: "background.paper", borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
           {dependents.map((dep, i) => (
@@ -111,7 +111,7 @@ export default function ProjectDependencies({ dependencies, dependents }: Projec
               <ListItemText 
                 primary={dep.project.name}
               />
-              <Chip size="small" label={getDepLabel(dep.dependencyType)} color={getDepColor(dep.dependencyType) as any} />
+              <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={getDepColor(dep.dependencyType) as any} />
             </ListItem>
           ))}
         </List>
