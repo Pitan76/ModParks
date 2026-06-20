@@ -84,6 +84,13 @@ export const createProjectSchema = z.object({
 });
 
 export const updateProjectSchema = createProjectSchema.partial().extend({
+  slug: z
+    .string()
+    .min(3)
+    .max(64)
+    .regex(/^[a-z0-9-]+$/, "小文字英数字とハイフンのみ")
+    .optional(),
+  issueTrackerUrl: z.string().url("有効なURLを入力してください").optional().or(z.literal("")).nullable(),
   status: z.enum(["draft", "public", "unlisted", "private"]).optional(),
 });
 

@@ -641,32 +641,7 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
         </Box>
       )
     },
-    {
-      label: t("github.title"),
-      content: (
-        <Box>
-          {githubMsg && <Alert severity="success" sx={{ mb: 3 }}>{githubMsg}</Alert>}
-          <Typography variant="body1" sx={{ mb: 3 }}>
-            {t("github.status")}: <strong>{isGitHubConnected ? t("github.connected") : t("github.disconnected")}</strong>
-          </Typography>
-          {isGitHubConnected ? (
-            <Box>
-              <Button variant="outlined" color="error" onClick={handleDisconnect} sx={{ mb: 3, display: "block" }}>
-                {t("github.disconnect")}
-              </Button>
-              <FormControlLabel
-                control={<Switch checked={showGithubLink} onChange={handleToggleGithubVisibility} />}
-                label={t("github.showLink")}
-              />
-            </Box>
-          ) : (
-            <Button variant="contained" onClick={() => signIn("github")}>
-              {t("github.connect")}
-            </Button>
-          )}
-        </Box>
-      )
-    },
+
     {
       label: t("posting.title"),
       content: (
@@ -707,36 +682,61 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     {
       label: t("integration.title"),
       content: (
-        <Box component="form" onSubmit={handleIntegrationSubmit}>
-          {integrationMsg && <Alert severity={integrationMsg.type} sx={{ mb: 3 }}>{integrationMsg.text}</Alert>}
+        <Box>
+          <Box component="form" onSubmit={handleIntegrationSubmit}>
+            {integrationMsg && <Alert severity={integrationMsg.type} sx={{ mb: 3 }}>{integrationMsg.text}</Alert>}
 
-          <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.modrinth")}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.modrinthDesc")}</Typography>
-          <TextField
-            fullWidth
-            label="Modrinth API Key"
-            size="small"
-            type="password"
-            value={modrinthKey}
-            onChange={e => setModrinthKey(e.target.value)}
-            sx={{ mb: 4, maxWidth: 400 }}
-          />
+            <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.modrinth")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.modrinthDesc")}</Typography>
+            <TextField
+              fullWidth
+              label="Modrinth API Key"
+              size="small"
+              type="password"
+              value={modrinthKey}
+              onChange={e => setModrinthKey(e.target.value)}
+              sx={{ mb: 4, maxWidth: 400 }}
+            />
 
-          <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.curseforgeDesc")}</Typography>
-          <TextField
-            fullWidth
-            label="CurseForge API Key"
-            size="small"
-            type="password"
-            value={curseforgeKey}
-            onChange={e => setCurseforgeKey(e.target.value)}
-            sx={{ mb: 4, maxWidth: 400 }}
-          />
+            <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.curseforgeDesc")}</Typography>
+            <TextField
+              fullWidth
+              label="CurseForge API Key"
+              size="small"
+              type="password"
+              value={curseforgeKey}
+              onChange={e => setCurseforgeKey(e.target.value)}
+              sx={{ mb: 4, maxWidth: 400 }}
+            />
 
-          <Button type="submit" variant="contained" sx={{ display: "block" }}>
-            {t("profile.save")}
-          </Button>
+            <Button type="submit" variant="contained" sx={{ display: "block", mb: 4 }}>
+              {t("profile.save")}
+            </Button>
+          </Box>
+          
+          <Divider sx={{ my: 4 }} />
+          
+          <Typography variant="h6" sx={{ mb: 1 }}>{t("github.title")}</Typography>
+          {githubMsg && <Alert severity="success" sx={{ mb: 3 }}>{githubMsg}</Alert>}
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            {t("github.status")}: <strong>{isGitHubConnected ? t("github.connected") : t("github.disconnected")}</strong>
+          </Typography>
+          {isGitHubConnected ? (
+            <Box>
+              <Button variant="outlined" color="error" onClick={handleDisconnect} sx={{ mb: 3, display: "block" }}>
+                {t("github.disconnect")}
+              </Button>
+              <FormControlLabel
+                control={<Switch checked={showGithubLink} onChange={handleToggleGithubVisibility} />}
+                label={t("github.showLink")}
+              />
+            </Box>
+          ) : (
+            <Button variant="contained" onClick={() => signIn("github")}>
+              {t("github.connect")}
+            </Button>
+          )}
         </Box>
       )
     }

@@ -7,7 +7,7 @@ export function formatCompactNumber(n: number, locale: string): string {
   if (locale === "ja") {
     if (n >= 10_000) {
       const man = n / 10_000;
-      return `${Number.isInteger(man) ? man : man.toFixed(1)}万`;
+      return `${Number.isInteger(man) ? man : man.toFixed(1)}\u2060万`;
     }
     return new Intl.NumberFormat("ja-JP").format(n);
   } else {

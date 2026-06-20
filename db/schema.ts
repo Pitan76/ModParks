@@ -132,6 +132,7 @@ export const apiKeys = sqliteTable("api_keys", {
 export const projects = sqliteTable("projects", {
   id:          text("id").primaryKey(),
   slug:        text("slug").unique().notNull(),
+  previousSlug: text("previous_slug").unique(),
   name:        text("name").notNull(),
   description: text("description").notNull(),
   iconUrl:     text("icon_url"),

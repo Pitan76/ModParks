@@ -107,6 +107,7 @@ export async function updateProject(projectId: string, formData: FormData) {
     status:      formData.get("status"),
     modrinthId:  formData.get("modrinthId") || null,
     curseforgeId: formData.get("curseforgeId") || null,
+    issueTrackerUrl: formData.get("issueTrackerUrl") || null,
     tags:        formData.getAll("tags"),
   };
 
@@ -117,22 +118,26 @@ export async function updateProject(projectId: string, formData: FormData) {
 
   const { tags, ...fields } = parsed.data;
 
-  // スラッグが変更された場合の重複チェック
+  // スラッグが変更された場合の重複チェックとpreviousSlugの更新
+  let previousSlugToSet: string | undefined = undefined;
   if (fields.slug && fields.slug !== project.slug) {
     const existingSlug = await db.select().from(projects).where(eq(projects.slug, fields.slug)).get();
     if (existingSlug) {
       return { error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } };
     }
+    previousSlugToSet = project.slug; // 古いslugを退避
   }
 
   await db
     .update(projects)
     .set({
       ...fields,
+      issueTrackerUrl: fields.issueTrackerUrl !== undefined ? fields.issueTrackerUrl : project.issueTrackerUrl,
       sourceUrl: fields.sourceUrl || null,
       links: fields.links || null,
       iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
       updatedAt: new Date(),
+      ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {})
     })
     .where(eq(projects.id, project.id))
     .run();

@@ -194,6 +194,15 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           error={!!error?.sourceUrl}
           helperText={error?.sourceUrl?.[0]}
         />
+        <TextField
+          id="project-issue-tracker"
+          name="issueTrackerUrl"
+          label="Issue Tracker URL"
+          fullWidth
+          defaultValue={(project as any)?.issueTrackerUrl || ""}
+          error={!!error?.issueTrackerUrl}
+          helperText={error?.issueTrackerUrl?.[0]}
+        />
       </Stack>
 
       <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.externalConnectionsTitle")}</Typography>
