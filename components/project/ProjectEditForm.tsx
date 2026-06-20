@@ -48,8 +48,12 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
     try {
       await syncExternalProjectData(project.id);
       setToast({ message: tManage("syncSuccess"), severity: "success" });
-    } catch (e) {
-      setToast({ message: tManage("syncError"), severity: "error" });
+    } catch (e: any) {
+      if (e.message?.includes("CF_API_KEY_MISSING")) {
+        setToast({ message: t("apiKeyMissing"), severity: "error" });
+      } else {
+        setToast({ message: tManage("syncError"), severity: "error" });
+      }
     } finally {
       setSyncing(false);
     }

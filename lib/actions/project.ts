@@ -430,29 +430,44 @@ export async function syncExternalProjectData(projectId: string) {
         
         // Slugの場合は検索してIDを取得
         if (!/^\d+$/.test(targetCfId)) {
-          const searchRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&slug=${targetCfId}`, {
+          const searchRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&classId=6&slug=${targetCfId}`, {
             headers: { "x-api-key": cfApiKey, "Accept": "application/json" }
           });
           if (searchRes.ok) {
             const searchData = await searchRes.json() as any;
             if (searchData.data && searchData.data.length > 0) {
               targetCfId = searchData.data[0].id.toString();
+              console.log(`[CF Sync] Resolved slug ${project.curseforgeId} to ID ${targetCfId}`);
               // Slugを実際のIDに変換してDBに保存しておく
               await db.update(projects).set({ curseforgeId: targetCfId }).where(eq(projects.id, project.id)).run();
+            } else {
+              console.error(`[CF Sync] Slug ${targetCfId} not found in search.`);
             }
+          } else {
+            console.error(`[CF Sync] Search API failed with status ${searchRes.status}`);
           }
         }
 
+        console.log(`[CF Sync] Fetching data for ID ${targetCfId}`);
         const res = await fetch(`https://api.curseforge.com/v1/mods/${targetCfId}`, {
           headers: { "x-api-key": cfApiKey, "Accept": "application/json" }
         });
         if (res.ok) {
           const data = await res.json() as any;
           curseforgeDl = (data.data?.downloadCount || 0);
+          console.log(`[CF Sync] Fetched downloads: ${curseforgeDl}`);
           newExtDl += curseforgeDl;
+        } else {
+          console.error(`[CF Sync] Mod API failed with status ${res.status}`);
         }
+      } else {
+        console.error(`[CF Sync] API key is missing.`);
+        throw new Error("CF_API_KEY_MISSING");
       }
-    } catch(e) {}
+    } catch(e) {
+      console.error(`[CF Sync] Exception:`, e);
+      throw e;
+    }
   }
 
   if (newExtDl > 0) {
