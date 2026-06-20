@@ -21,6 +21,7 @@ import { getLoaderInfo } from "@/lib/loaders";
 import { useState, useEffect } from "react";
 
 export interface AdvancedSearchFilters {
+  author?: string;
   loaders: string[];
   mcVersions: string[];
   tags: string[];
@@ -45,6 +46,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
   const tCommon = useTranslations("Common");
   const tTags = useTranslations("Tags");
 
+  const [tempAuthor, setTempAuthor] = useState<string>(initialFilters.author || "");
   const [tempLoaders, setTempLoaders] = useState<string[]>(initialFilters.loaders);
   const [tempMcVersions, setTempMcVersions] = useState<string[]>(initialFilters.mcVersions);
   const [tempTags, setTempTags] = useState<string[]>(initialFilters.tags);
@@ -57,6 +59,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
   // Sync local state when dialog opens
   useEffect(() => {
     if (open) {
+      setTempAuthor(initialFilters.author || "");
       setTempLoaders(initialFilters.loaders);
       setTempMcVersions(initialFilters.mcVersions);
       setTempTags(initialFilters.tags);
@@ -70,6 +73,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
 
   const handleApply = () => {
     onApply({
+      author: tempAuthor,
       loaders: tempLoaders,
       mcVersions: tempMcVersions,
       tags: tempTags,
@@ -120,6 +124,15 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         </Box>
         
         <Divider />
+
+        <TextField
+          label={t("author") || "Author (Username)"}
+          size="small"
+          value={tempAuthor}
+          onChange={(e) => setTempAuthor(e.target.value)}
+          placeholder="e.g. pitan76"
+          fullWidth
+        />
         
         {/* @ts-ignore */}
         <Autocomplete

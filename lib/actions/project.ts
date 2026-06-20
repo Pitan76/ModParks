@@ -184,6 +184,7 @@ export async function getProjects(params: {
   q?:    string;
   types?: string[];
   authorId?: string;
+  authorUsername?: string;
   limit?: number;
   offset?: number;
   sort?: "downloads" | "newest" | "updated";
@@ -199,7 +200,7 @@ export async function getProjects(params: {
 }) {
   const db = await getDatabase();
   const { 
-    q, types, authorId, limit = 20, offset = 0, sort = "updated", 
+    q, types, authorId, authorUsername, limit = 20, offset = 0, sort = "updated", 
     loaders, mcVersions, tags,
     searchMode = "OR", includeDesc = true, includeTags = true, includeAuthor = true,
     includeExtDl = false, calculateTotal = false
@@ -208,6 +209,9 @@ export async function getProjects(params: {
   const conditions = [];
   if (authorId) {
     conditions.push(eq(projects.authorId, authorId));
+  } else if (authorUsername) {
+    conditions.push(eq(userProfiles.username, authorUsername));
+    conditions.push(eq(projects.status, "public"));
   } else {
     // 検索・一覧表示には「public」のみ表示（unlisted, private, draft は表示しない）
     conditions.push(eq(projects.status, "public"));

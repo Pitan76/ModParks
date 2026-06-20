@@ -19,6 +19,7 @@ import AdvancedSearchDialog, { AdvancedSearchFilters } from "./AdvancedSearchDia
 
 interface ProjectSearchBarProps {
   initialQ?: string;
+  initialAuthor?: string;
   initialTypes?: string[];
   initialSort?: string;
   initialLoaders?: string[];
@@ -35,6 +36,7 @@ interface ProjectSearchBarProps {
 
 export default function ProjectSearchBar({ 
   initialQ = "", 
+  initialAuthor = "",
   initialTypes = ["mod", "plugin"],
   initialSort = "updated",
   initialLoaders = [],
@@ -62,6 +64,7 @@ export default function ProjectSearchBar({
 
   // Advanced search filters state
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>({
+    author: initialAuthor,
     loaders: initialLoaders,
     mcVersions: initialMcVersions,
     tags: initialTags,
@@ -79,6 +82,7 @@ export default function ProjectSearchBar({
     (newQ: string, newTypes: string[], newSort: string, filters: AdvancedSearchFilters) => {
       const params = new URLSearchParams();
       if (newQ) params.set("q", newQ);
+      if (filters.author) params.set("author", filters.author);
       if (newTypes.length > 0 && newTypes.length < 2) params.set("types", newTypes.join(","));
       if (newSort && newSort !== "updated") params.set("sort", newSort);
       
@@ -118,6 +122,7 @@ export default function ProjectSearchBar({
   }, [debouncedQ, types, appliedSort, advancedFilters, updateSearch]);
 
   const isAdvancedActive = 
+    !!advancedFilters.author ||
     advancedFilters.loaders.length > 0 || 
     advancedFilters.mcVersions.length > 0 || 
     advancedFilters.tags.length > 0 || 

@@ -35,8 +35,8 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const tProject = await getTranslations("Project");
   const session = await auth();
 
-  // /projects?author=me の場合は自分のプロジェクトのみ（下書き含む）を取得
   const authorId = author === "me" && session?.user?.id ? session.user.id : undefined;
+  const authorUsername = author !== "me" && author ? author : undefined;
 
   const typesArr = types ? types.split(",") : ["mod", "plugin"];
   const loadersArr = loaders ? loaders.split(",") : undefined;
@@ -58,6 +58,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     q,
     types: typesArr,
     authorId,
+    authorUsername,
     sort: sort as any,
     loaders: loadersArr,
     mcVersions: mcVersionsArr,
@@ -109,6 +110,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       {/* 検索バー */}
       <ProjectSearchBar 
         initialQ={q} 
+        initialAuthor={author}
         initialTypes={typesArr} 
         initialSort={sort}
         initialLoaders={loadersArr || []}
