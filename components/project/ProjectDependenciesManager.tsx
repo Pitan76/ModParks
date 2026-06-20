@@ -84,10 +84,19 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
   return (
     <Box>
       <Typography variant="h6" gutterBottom>{t("add")}</Typography>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-        <Tab label="ModParks Project" />
-        <Tab label="External URL" />
-      </Tabs>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2, maxWidth: "100%" }}>
+        <Tabs 
+          value={tab} 
+          onChange={(_, v) => setTab(v)} 
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{ maxWidth: "100%" }}
+        >
+          <Tab label="ModParks Project" />
+          <Tab label="External URL" />
+        </Tabs>
+      </Box>
       
       <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "flex-end", flexWrap: "wrap" }}>
         {tab === 0 ? (
