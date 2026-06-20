@@ -50,6 +50,9 @@ export async function GET(request: Request) {
       type: projects.type,
       license: projects.license,
       downloads: projects.downloads,
+      modrinthDownloads: projects.modrinthDownloads,
+      curseforgeDownloads: projects.curseforgeDownloads,
+      externalDownloads: projects.externalDownloads,
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
       author: {
@@ -84,7 +87,10 @@ export async function GET(request: Request) {
     iconUrl: p.iconUrl,
     type: p.type as "mod" | "plugin",
     license: p.license,
-    downloads: p.downloads,
+    downloads: p.downloads + (p.externalDownloads || 0),
+    nativeDownloads: p.downloads,
+    modrinthDownloads: p.modrinthDownloads || 0,
+    curseforgeDownloads: p.curseforgeDownloads || 0,
     createdAt: p.createdAt ? new Date(p.createdAt).getTime() : 0,
     updatedAt: p.updatedAt ? new Date(p.updatedAt).getTime() : 0,
     author: {
