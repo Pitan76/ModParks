@@ -427,8 +427,9 @@ export async function syncExternalProjectData(projectId: string) {
   
   if (project.curseforgeId) {
     try {
-      const cfApiKey = settings?.curseforgeApiKey || process.env.CURSEFORGE_API_KEY;
-      if (cfApiKey) {
+      const rawCfApiKey = settings?.curseforgeApiKey || process.env.CURSEFORGE_API_KEY;
+      if (rawCfApiKey) {
+        const cfApiKey = rawCfApiKey.trim();
         let targetCfId = project.curseforgeId;
         
         // Slugの場合は検索してIDを取得
@@ -453,6 +454,8 @@ export async function syncExternalProjectData(projectId: string) {
             }
           } else {
             console.error(`[CF Sync] Search API failed with status ${searchRes.status}`);
+            const errText = await searchRes.text().catch(() => "");
+            console.error(`[CF Sync] Search Response: ${errText}`);
             throw new Error("CF_SEARCH_API_FAILED");
           }
         }
@@ -472,6 +475,8 @@ export async function syncExternalProjectData(projectId: string) {
           newExtDl += curseforgeDl;
         } else {
           console.error(`[CF Sync] Mod API failed with status ${res.status}`);
+          const errText = await res.text().catch(() => "");
+          console.error(`[CF Sync] Mod API Response: ${errText}`);
           throw new Error("CF_MOD_API_FAILED");
         }
       } else {
