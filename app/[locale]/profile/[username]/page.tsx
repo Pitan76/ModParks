@@ -26,6 +26,9 @@ import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
 import { Link as RoutingLink } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/config";
+import { userFollows } from "@/db/schema";
+import { and, sql } from "drizzle-orm";
+import FollowUserButton from "@/components/user/FollowUserButton";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -140,6 +143,20 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
   const session = await auth();
   const isOwner = session?.user?.id === user.id;
 
+  const followersData = await db.select({ count: sql<number>`count(*)` }).from(userFollows).where(eq(userFollows.followingId, user.id)).get();
+  const followersCount = followersData?.count || 0;
+
+  const followingData = await db.select({ count: sql<number>`count(*)` }).from(userFollows).where(eq(userFollows.followerId, user.id)).get();
+  const followingCount = followingData?.count || 0;
+
+  let isFollowing = false;
+  if (session?.user?.id && !isOwner) {
+    const followRecord = await db.select().from(userFollows).where(and(eq(userFollows.followerId, session.user.id), eq(userFollows.followingId, user.id))).get();
+    if (followRecord) {
+      isFollowing = true;
+    }
+  }
+
   // Fetch user projects and favorites
   const [allProjects, favoritedProjects, userCollections] = await Promise.all([
     getProjects({ authorId: user.id }),
@@ -161,6 +178,28 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
               <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
                 @{user.username}
               </Typography>
+
+              {!isOwner && (
+                <Box sx={{ mt: 2 }}>
+                  <FollowUserButton 
+                    targetUsername={user.username} 
+                    initialIsFollowing={isFollowing} 
+                    initialFollowersCount={followersCount}
+                    initialFollowingCount={followingCount}
+                    isLoggedIn={!!session?.user} 
+                  />
+                </Box>
+              )}
+              {isOwner && (
+                <Box sx={{ mt: 1, display: "flex", gap: 3 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> Followers
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followingCount}</Box> Following
+                  </Typography>
+                </Box>
+              )}
             </Box>
             
             {isOwner && (
