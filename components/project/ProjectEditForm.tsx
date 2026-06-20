@@ -49,7 +49,10 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
       await syncExternalProjectData(project.id);
       setToast({ message: tManage("syncSuccess"), severity: "success" });
     } catch (e: any) {
-      if (e.message?.includes("CF_API_KEY_MISSING")) {
+      if (e.message?.includes("Failed to find Server Action") || e.message?.includes("UnrecognizedActionError")) {
+        setToast({ message: "新しいバージョンが反映されました。ページを更新しています...", severity: "info" });
+        setTimeout(() => window.location.reload(), 1500);
+      } else if (e.message?.includes("CF_API_KEY_MISSING")) {
         setToast({ message: t("apiKeyMissing"), severity: "error" });
       } else if (e.message?.includes("CF_SLUG_NOT_FOUND")) {
         setToast({ message: "CurseForgeで指定されたSlugが見つかりませんでした。正しいか確認してください。", severity: "error" });
@@ -85,10 +88,17 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
           router.push(`/projects/${formData.get("slug")}`);
           success = true;
         }
-      } catch (err) {
+      } catch (err: any) {
         retries++;
         console.error(`Save attempt ${retries} failed:`, err);
         
+        if (err?.message?.includes("Failed to find Server Action") || err?.message?.includes("UnrecognizedActionError")) {
+          setToast({ message: "新しいバージョンが反映されました。ページを更新しています...", severity: "info" });
+          setPending(false);
+          setTimeout(() => window.location.reload(), 1500);
+          return;
+        }
+
         if (retries >= maxRetries) {
           setToast({ message: `通信エラーが発生しました（${maxRetries}回再試行失敗）。少し時間を置いてからやり直してください。`, severity: "error" });
           setPending(false);

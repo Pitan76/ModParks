@@ -480,8 +480,28 @@ export async function syncExternalProjectData(projectId: string) {
           throw new Error("CF_MOD_API_FAILED");
         }
       } else {
-        console.error(`[CF Sync] API key is missing.`);
-        throw new Error("CF_API_KEY_MISSING");
+        // APIキーがない場合のフォールバック（CFWidget API）
+        console.log(`[CF Sync] API key is missing. Trying CFWidget fallback...`);
+        let targetCfId = project.curseforgeId;
+        
+        if (/^\d+$/.test(targetCfId)) {
+          const cfwRes = await fetch(`https://api.cfwidget.com/${targetCfId}`, {
+            headers: { "User-Agent": "ModParks/1.0 (modparks.pitan76.net)" }
+          });
+          if (cfwRes.ok) {
+            const cfwData = await cfwRes.json() as any;
+            curseforgeDl = (cfwData.downloads?.total || 0);
+            newExtDl += curseforgeDl;
+            console.log(`[CF Sync] Fallback: Fetched via CFWidget: ${curseforgeDl}`);
+          } else {
+            console.error(`[CF Sync] CFWidget API failed with status ${cfwRes.status}`);
+            throw new Error("CF_API_KEY_MISSING");
+          }
+        } else {
+          // Slugのみの場合はCFWidgetで引けないためエラー
+          console.error(`[CF Sync] Cannot use CFWidget with slug: ${targetCfId}`);
+          throw new Error("CF_API_KEY_MISSING");
+        }
       }
     } catch(e) {
       console.error(`[CF Sync] Exception:`, e);
