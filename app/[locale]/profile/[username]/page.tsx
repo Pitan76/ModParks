@@ -169,7 +169,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
   // Fetch user projects and favorites
   const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, { totalProjects, totalDownloads, nativeDownloads, modrinthDownloads, curseforgeDownloads }] = await Promise.all([
-    getProjects({ authorId: user.id, limit, offset }),
+    getProjects({ authorId: user.id, limit, offset, calculateTotal: true }),
     getFavoriteProjects(user.id),
     getUserCollections(user.id, session?.user?.id),
     import("@/lib/actions/project").then(m => m.getUserProjectStats(user.id))

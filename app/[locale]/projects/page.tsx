@@ -69,6 +69,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     includeExtDl: isIncludeExtDl,
     limit,
     offset,
+    calculateTotal: true,
   });
 
   const { getDatabase } = await import("@/lib/db");

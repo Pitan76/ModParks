@@ -195,13 +195,14 @@ export async function getProjects(params: {
   includeTags?: boolean;
   includeAuthor?: boolean;
   includeExtDl?: boolean;
+  calculateTotal?: boolean;
 }) {
   const db = await getDatabase();
   const { 
     q, types, authorId, limit = 20, offset = 0, sort = "updated", 
     loaders, mcVersions, tags,
     searchMode = "OR", includeDesc = true, includeTags = true, includeAuthor = true,
-    includeExtDl = false
+    includeExtDl = false, calculateTotal = false
   } = params;
 
   const conditions = [];
@@ -273,14 +274,16 @@ export async function getProjects(params: {
   let rows;
   let totalCount = 0;
   try {
-    const countResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(projects)
-      .leftJoin(users, eq(projects.authorId, users.id))
-      .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .get();
-    totalCount = countResult?.count || 0;
+    if (calculateTotal) {
+      const countResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(projects)
+        .leftJoin(users, eq(projects.authorId, users.id))
+        .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .get();
+      totalCount = countResult?.count || 0;
+    }
 
     // プロジェクトと著者の情報をJOINして取得
     rows = await db
@@ -311,11 +314,25 @@ export async function getProjects(params: {
   const projectIds = rows.map((r) => r.project.id);
   let tagsData: { projectId: string; tag: string }[] = [];
   if (projectIds.length > 0) {
-    tagsData = await db
-      .select()
-      .from(projectTags)
-      .where(inArray(projectTags.projectId, projectIds))
-      .all();
+    // SQlite chunking to avoid too many variables limit
+    const chunkSize = 100;
+    for (let i = 0; i < projectIds.length; i += chunkSize) {
+      const chunk = projectIds.slice(i, i + chunkSize);
+      const chunkTags = await db
+        .select()
+        .from(projectTags)
+        .where(inArray(projectTags.projectId, chunk))
+        .all();
+      tagsData = tagsData.concat(chunkTags);
+    }
+  }
+
+  const tagsMap = new Map<string, string[]>();
+  for (const t of tagsData) {
+    if (!tagsMap.has(t.projectId)) {
+      tagsMap.set(t.projectId, []);
+    }
+    tagsMap.get(t.projectId)!.push(t.tag);
   }
 
   const data = rows.map((row) => ({
@@ -323,7 +340,7 @@ export async function getProjects(params: {
     authorUsername: row.author?.username,
     authorDisplayName: row.author?.displayName ?? row.author?.username,
     authorAvatarUrl: row.author?.avatarUrl,
-    tags: tagsData.filter((t) => t.projectId === row.project.id).map((t) => t.tag),
+    tags: tagsMap.get(row.project.id) || [],
   }));
 
   return { data, totalCount };
