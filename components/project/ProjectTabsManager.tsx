@@ -14,9 +14,10 @@ interface ProjectTabsManagerProps {
   filesContent: React.ReactNode;
   manageHref: string;
   canEdit: boolean;
+  issueTrackerUrl?: string | null;
 }
 
-export default function ProjectTabsManager({ descriptionContent, filesContent, manageHref, canEdit }: ProjectTabsManagerProps) {
+export default function ProjectTabsManager({ descriptionContent, filesContent, manageHref, canEdit, issueTrackerUrl }: ProjectTabsManagerProps) {
   const t = useTranslations("Project");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,6 +40,13 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue === 3) {
       router.push(manageHref);
+      return;
+    }
+
+    if (newValue === 4) {
+      if (issueTrackerUrl) {
+        window.open(issueTrackerUrl, "_blank", "noopener,noreferrer");
+      }
       return;
     }
     
@@ -72,6 +80,14 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
           <Tab label={t("tabs.description")} value={0} />
           <Tab label={t("tabs.files")} value={1} />
           <Tab label={t("tabs.dependencies")} value={2} />
+          {issueTrackerUrl && (
+            <Tab 
+              label="Issues" 
+              value={4}
+              icon={<span className="material-icons" style={{ fontSize: '1rem', marginRight: '4px' }}>open_in_new</span>}
+              iconPosition="end"
+            />
+          )}
           {canEdit && (
             <Tab 
               label={t("tabs.manage")} 

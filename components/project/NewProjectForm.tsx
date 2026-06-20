@@ -43,7 +43,7 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
     setImportError("");
     try {
       const res = await fetch(`/api/v1/projects/import?platform=${importPlatform}&id=${encodeURIComponent(importId)}`);
-      const data = await res.json();
+      const data = (await res.json()) as any;
       if (!res.ok) throw new Error(data.error || "Import failed");
       
       if (data.projectUrl) {

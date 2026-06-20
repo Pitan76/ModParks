@@ -106,6 +106,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   const canEdit = isOwner;
 
+  // ダウンロード数の合算 (ローカル + 外部)
+  p.totalDownloads = (p.downloads || 0) + (p.externalDownloads || 0);
+  // ProjectDetailHeaderなどが downloads を参照している場合のため上書き
+  p.downloads = p.totalDownloads;
+
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
       <Grid container spacing={4}>
@@ -124,6 +129,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           <ProjectTabsManager 
             canEdit={canEdit}
             manageHref={`/projects/${p.slug}/edit`}
+            issueTrackerUrl={p.issueTrackerUrl}
             descriptionContent={
               <Box sx={{ p: 1 }}>
                 <MarkdownRenderer content={p.description || ""} />
