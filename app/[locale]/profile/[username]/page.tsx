@@ -116,19 +116,19 @@ export default async function PublicProfilePage({ params, searchParams }: Public
   const db = getDb(d1);
 
   let user = await db.select({
-      id: users.id,
-      username: userProfiles.username,
-      displayName: userProfiles.displayName,
-      avatarUrl: userProfiles.avatarUrl,
-      bio: userProfiles.bio,
-      links: userProfiles.links,
-      githubUsername: userProfiles.githubUsername,
-      custom: userSettings.custom,
-      deletedAt: users.deletedAt,
+    id: users.id,
+    username: userProfiles.username,
+    displayName: userProfiles.displayName,
+    avatarUrl: userProfiles.avatarUrl,
+    bio: userProfiles.bio,
+    links: userProfiles.links,
+    githubUsername: userProfiles.githubUsername,
+    custom: userSettings.custom,
+    deletedAt: users.deletedAt,
   }).from(users)
-  .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-  .leftJoin(userSettings, eq(users.id, userSettings.userId))
-  .where(eq(userProfiles.username, username)).get();
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .leftJoin(userSettings, eq(users.id, userSettings.userId))
+    .where(eq(userProfiles.username, username)).get();
 
   // If not found, check previousUsername
   if (!user) {
@@ -175,7 +175,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
     import("@/lib/actions/project").then(m => m.getUserProjectStats(user.id))
   ]);
   const visibleProjects = allProjects.filter(p => isOwner ? true : p.status === "public");
-  
+
   // If owner, totalProjects can be totalCount from DB, else use public stats
   const displayTotalProjects = isOwner ? totalCount : totalProjects;
 
@@ -195,12 +195,12 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
               {!isOwner && (
                 <Box sx={{ mt: 2 }}>
-                  <FollowUserButton 
-                    targetUsername={user.username} 
-                    initialIsFollowing={isFollowing} 
+                  <FollowUserButton
+                    targetUsername={user.username}
+                    initialIsFollowing={isFollowing}
                     initialFollowersCount={followersCount}
                     initialFollowingCount={followingCount}
-                    isLoggedIn={!!session?.user} 
+                    isLoggedIn={!!session?.user}
                   />
                 </Box>
               )}
@@ -209,7 +209,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                 <Typography variant="body2" color="text.secondary">
                   <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{displayTotalProjects}</Box> {tCommon("projects")}
                 </Typography>
-                
+
                 <Tooltip title={`ModParks: ${formatCompactNumber(nativeDownloads, locale)}, Modrinth: ${formatCompactNumber(modrinthDownloads, locale)}, CurseForge: ${formatCompactNumber(curseforgeDownloads, locale)}`} arrow placement="top">
                   <Typography variant="body2" color="text.secondary" sx={{ cursor: "pointer", borderBottom: "1px dotted", borderColor: "divider" }}>
                     <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>
@@ -226,20 +226,21 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                 </Typography>
               </Box>
             </Box>
-            
+
             {isOwner && (
-              <RoutingLink href="/settings?tab=profile" style={{ textDecoration: "none" }}>
+              <RoutingLink href="/settings?tab=profile" style={{ textDecoration: "none", flexShrink: 0 }}>
                 <Button
                   variant="outlined"
                   startIcon={<EditIcon />}
                   size="small"
+                  sx={{ whiteSpace: "nowrap" }}
                 >
                   {t("edit")}
                 </Button>
               </RoutingLink>
             )}
           </Box>
-          
+
           {user.bio && (
             <Typography variant="body1" sx={{ mt: 1, whiteSpace: "pre-wrap" }}>
               {user.bio}
@@ -302,7 +303,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
           </RoutingLink>
         )}
       </Box>
-      
+
       {visibleProjects.length > 0 ? (
         <>
           <Grid container spacing={2}>
@@ -312,7 +313,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
               </Grid>
             ))}
           </Grid>
-          
+
           <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
         </>
       ) : (
@@ -342,7 +343,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
       <Typography variant="h5" sx={{ fontWeight: 700, mt: 6, mb: 3 }}>
         {t("favorites")}
       </Typography>
-      
+
       {favoritedProjects.length > 0 ? (
         <Grid container spacing={2}>
           {favoritedProjects.map(p => (
