@@ -107,18 +107,18 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
           value={tabIndex} 
           onChange={(_, val) => setTabIndex(val)}
           variant="scrollable"
-          scrollButtons={true}
+          scrollButtons="auto"
           allowScrollButtonsMobile
           sx={{
-            maxWidth: '100%',
+            maxWidth: { xs: 'calc(100vw - 32px)', sm: '100%' },
             '& .MuiTab-root': {
               whiteSpace: 'nowrap',
               flexShrink: 0,
             }
           }}
         >
-          <Tab label="通常作成" />
-          <Tab label="外部からインポート" />
+          <Tab label="新規作成" />
+          <Tab label="外部インポート" />
         </Tabs>
       </Box>
 
@@ -126,8 +126,8 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
         <Card sx={{ mb: 4, bgcolor: "background.default" }}>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2 }}>外部プロジェクトからデータを取得</Typography>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              <FormControl size="small" sx={{ minWidth: 150 }}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+              <FormControl size="small" sx={{ flex: "1 1 120px" }}>
                 <InputLabel>Platform</InputLabel>
                 <Select value={importPlatform} label="Platform" onChange={(e) => setImportPlatform(e.target.value as any)}>
                   <MenuItem value="modrinth">Modrinth</MenuItem>
@@ -135,13 +135,13 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
                 </Select>
               </FormControl>
               <TextField 
-                label={importPlatform === "modrinth" ? "Project ID / Slug / URL" : "Project ID / Slug / URL"} 
+                label="Project ID / Slug / URL" 
                 size="small" 
                 value={importId} 
                 onChange={(e) => setImportId(e.target.value)} 
-                sx={{ flex: 1 }}
+                sx={{ flex: "2 1 200px" }}
               />
-              <Button variant="contained" onClick={handleImport} disabled={importing || !importId}>
+              <Button variant="contained" onClick={handleImport} disabled={importing || !importId} sx={{ flex: "1 1 auto" }}>
                 {importing ? <CircularProgress size={24} /> : "データ取得"}
               </Button>
             </Box>
