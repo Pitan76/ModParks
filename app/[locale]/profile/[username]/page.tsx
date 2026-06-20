@@ -97,7 +97,14 @@ export async function generateMetadata({ params }: PublicProfileProps) {
       card: "summary",
       title,
       description,
-      images: [imageUrl],
+      images: [
+        {
+          url: imageUrl,
+          width: 256,
+          height: 256,
+          alt: `${user.username} Avatar`,
+        },
+      ],
     },
   };
 }

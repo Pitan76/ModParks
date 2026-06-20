@@ -20,6 +20,7 @@ import LocaleSyncer from "@/components/layout/LocaleSyncer";
 import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "ModParks - Minecraft Mod & Plugin Platform",
     template: "%s | ModParks",
@@ -44,7 +45,14 @@ export const metadata: Metadata = {
     card: "summary",
     title: "ModParks - Minecraft Mod & Plugin Platform",
     description: "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
-    images: [SITE_URL + "/icon.png"],
+    images: [
+      {
+        url: SITE_URL + "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "ModParks Logo",
+      },
+    ],
   },
   alternates: {
     types: {

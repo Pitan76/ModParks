@@ -60,7 +60,14 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
       card: "summary",
       title,
       description,
-      images: [imageUrl],
+      images: [
+        {
+          url: imageUrl,
+          width: 512,
+          height: 512,
+          alt: `${project.name} Icon`,
+        },
+      ],
     },
   };
 }
