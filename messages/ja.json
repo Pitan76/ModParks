@@ -169,7 +169,7 @@
       "description": "説明",
       "files": "ファイル",
       "dependencies": "依存関係",
-      "issues": "問題",
+      "issues": "問題報告",
       "manage": "管理",
       "underConstruction": "工事中",
       "dependenciesDesc": "依存関係機能は現在開発中です。"
