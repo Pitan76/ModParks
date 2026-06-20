@@ -30,6 +30,7 @@ import { userFollows } from "@/db/schema";
 import { and, sql } from "drizzle-orm";
 import FollowUserButton from "@/components/user/FollowUserButton";
 import CollectionCard from "@/components/list/CollectionCard";
+import { formatCompactNumber } from "@/lib/utils/format";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -191,16 +192,26 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
                   />
                 </Box>
               )}
-              {isOwner && (
-                <Box sx={{ mt: 1, display: "flex", gap: 3 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> Followers
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followingCount}</Box> Following
-                  </Typography>
-                </Box>
-              )}
+
+              <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
+                <Typography variant="body2" color="text.secondary">
+                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{visibleProjects.length}</Box> Projects
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>
+                    {formatCompactNumber(
+                      visibleProjects.reduce((acc, p) => acc + (p.downloads || 0) + (p.externalDownloads || 0) + (p.modrinthDownloads || 0) + (p.curseforgeDownloads || 0), 0),
+                      locale
+                    )}
+                  </Box> Downloads
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> Followers
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followingCount}</Box> Following
+                </Typography>
+              </Box>
             </Box>
             
             {isOwner && (
