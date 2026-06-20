@@ -412,7 +412,10 @@ export async function syncExternalProjectData(projectId: string) {
   if (project.modrinthId) {
     try {
       const res = await fetch(`https://api.modrinth.com/v2/project/${project.modrinthId}`, {
-        headers: settings?.modrinthApiKey ? { Authorization: settings.modrinthApiKey } : {},
+        headers: {
+          "User-Agent": "ModParks/1.0 (modparks.pitan76.net)",
+          ...(settings?.modrinthApiKey ? { Authorization: settings.modrinthApiKey } : {})
+        },
       });
       if (res.ok) {
         const data = await res.json() as any;
@@ -430,8 +433,12 @@ export async function syncExternalProjectData(projectId: string) {
         
         // Slugの場合は検索してIDを取得
         if (!/^\d+$/.test(targetCfId)) {
-          const searchRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&classId=6&slug=${targetCfId}`, {
-            headers: { "x-api-key": cfApiKey, "Accept": "application/json" }
+          const searchRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&slug=${targetCfId}`, {
+            headers: { 
+              "x-api-key": cfApiKey, 
+              "Accept": "application/json",
+              "User-Agent": "ModParks/1.0 (modparks.pitan76.net)"
+            }
           });
           if (searchRes.ok) {
             const searchData = await searchRes.json() as any;
@@ -442,15 +449,21 @@ export async function syncExternalProjectData(projectId: string) {
               await db.update(projects).set({ curseforgeId: targetCfId }).where(eq(projects.id, project.id)).run();
             } else {
               console.error(`[CF Sync] Slug ${targetCfId} not found in search.`);
+              throw new Error("CF_SLUG_NOT_FOUND");
             }
           } else {
             console.error(`[CF Sync] Search API failed with status ${searchRes.status}`);
+            throw new Error("CF_SEARCH_API_FAILED");
           }
         }
 
         console.log(`[CF Sync] Fetching data for ID ${targetCfId}`);
         const res = await fetch(`https://api.curseforge.com/v1/mods/${targetCfId}`, {
-          headers: { "x-api-key": cfApiKey, "Accept": "application/json" }
+          headers: { 
+            "x-api-key": cfApiKey, 
+            "Accept": "application/json",
+            "User-Agent": "ModParks/1.0 (modparks.pitan76.net)"
+          }
         });
         if (res.ok) {
           const data = await res.json() as any;
@@ -459,6 +472,7 @@ export async function syncExternalProjectData(projectId: string) {
           newExtDl += curseforgeDl;
         } else {
           console.error(`[CF Sync] Mod API failed with status ${res.status}`);
+          throw new Error("CF_MOD_API_FAILED");
         }
       } else {
         console.error(`[CF Sync] API key is missing.`);

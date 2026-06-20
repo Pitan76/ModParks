@@ -51,6 +51,8 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
     } catch (e: any) {
       if (e.message?.includes("CF_API_KEY_MISSING")) {
         setToast({ message: t("apiKeyMissing"), severity: "error" });
+      } else if (e.message?.includes("CF_SLUG_NOT_FOUND")) {
+        setToast({ message: "CurseForgeで指定されたSlugが見つかりませんでした。正しいか確認してください。", severity: "error" });
       } else {
         setToast({ message: tManage("syncError"), severity: "error" });
       }
