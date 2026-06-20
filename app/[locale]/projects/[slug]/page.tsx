@@ -15,6 +15,7 @@ import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 import ProjectTabsManager from "@/components/project/ProjectTabsManager";
+import ProjectComments from "@/components/project/ProjectComments";
 import LinkButton from "@/components/ui/LinkButton";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import AddIcon from "@mui/icons-material/Add";
@@ -153,6 +154,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </Box>
             }
           />
+
+          {p.commentsEnabled && (
+            <ProjectComments 
+              projectSlug={p.slug} 
+              isLoggedIn={!!session?.user} 
+              currentUserId={session?.user?.id} 
+            />
+          )}
         </Grid>
 
         {/* ─── 右カラム: サイドバー ─────────────────────────────────────── */}

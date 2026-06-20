@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       if (!res.ok) {
         return NextResponse.json({ error: "Failed to fetch from Modrinth" }, { status: res.status });
       }
-      const data = await res.json();
+      const data = (await res.json()) as any;
       return NextResponse.json({
         name: data.title,
         description: data.description,
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
       if (!res.ok) {
         return NextResponse.json({ error: "Failed to fetch from CurseForge" }, { status: res.status });
       }
-      const data = await res.json();
+      const data = (await res.json()) as any;
       const mod = data.data;
       return NextResponse.json({
         name: mod.name,

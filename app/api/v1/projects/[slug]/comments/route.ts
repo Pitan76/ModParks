@@ -43,7 +43,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { slug } = await params;
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { content } = body;
 
     if (!content || typeof content !== "string" || content.trim().length === 0) {
