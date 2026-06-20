@@ -77,10 +77,10 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
           value={tab} 
           onChange={handleTabChange}
           variant="scrollable"
-          scrollButtons={true}
+          scrollButtons="auto"
           allowScrollButtonsMobile
           sx={{
-            maxWidth: '100%',
+            maxWidth: { xs: 'calc(100vw - 32px)', sm: '100%' },
             '& .MuiTab-root': {
               whiteSpace: 'nowrap',
               flexShrink: 0,
