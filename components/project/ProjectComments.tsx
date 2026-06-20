@@ -31,7 +31,7 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
     try {
       const res = await fetch(`/api/v1/projects/${projectSlug}/comments`);
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as Comment[];
         setComments(data);
       }
     } catch (err) {
