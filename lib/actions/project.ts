@@ -105,6 +105,8 @@ export async function updateProject(projectId: string, formData: FormData) {
     sourceUrl:   formData.get("sourceUrl"),
     links:       formData.get("links"),
     status:      formData.get("status"),
+    modrinthId:  formData.get("modrinthId") || null,
+    curseforgeId: formData.get("curseforgeId") || null,
     tags:        formData.getAll("tags"),
   };
 

@@ -108,8 +108,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   // ダウンロード数の合算 (ローカル + 外部)
   p.totalDownloads = (p.downloads || 0) + (p.externalDownloads || 0);
-  // ProjectDetailHeaderなどが downloads を参照している場合のため上書き
-  p.downloads = p.totalDownloads;
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
