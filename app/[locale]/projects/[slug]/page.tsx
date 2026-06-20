@@ -73,6 +73,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   ]);
 
   if (!project) notFound();
+  
+  if (project.redirectSlug) {
+    const { redirect } = await import("next/navigation");
+    redirect(`/${locale}/projects/${project.redirectSlug}`);
+  }
 
   const isOwner = session?.user?.id === project.authorId;
 

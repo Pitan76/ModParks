@@ -337,7 +337,7 @@ export async function getProjectBySlug(slug: string) {
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
     .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(projects.slug, slug))
+    .where(or(eq(projects.slug, slug), eq(projects.previousSlug, slug)))
     .get();
 
   if (!row) return null;
@@ -350,6 +350,7 @@ export async function getProjectBySlug(slug: string) {
     author: row.author,
     tags: tagsRows.map((t) => t.tag),
     versions: versionsRows,
+    redirectSlug: row.project.slug !== slug ? row.project.slug : undefined,
   };
 }
 

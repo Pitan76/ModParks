@@ -33,6 +33,10 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     notFound();
   }
 
+  if (project.redirectSlug) {
+    redirect(`/${locale}/projects/${project.redirectSlug}/edit`);
+  }
+
   const members = await getProjectMembers(project.id);
   const isOwner = project.authorId === session.user.id;
   const isMember = members.some(m => m.id === session.user.id);
