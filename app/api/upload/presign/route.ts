@@ -51,10 +51,18 @@ export async function POST(req: NextRequest) {
   }
 
   // ファイルタイプ検証
-  const ALLOWED_MOD_TYPES  = ["application/java-archive", "application/zip", "application/octet-stream"];
+  const ALLOWED_MOD_TYPES  = [
+    "application/java-archive",
+    "application/x-java-archive",
+    "application/zip",
+    "application/x-zip-compressed",
+    "application/octet-stream"
+  ];
   const ALLOWED_ICON_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
-  if (type === "mod" && !ALLOWED_MOD_TYPES.includes(contentType)) {
+  const isAllowedModExtension = fileName.endsWith(".jar") || fileName.endsWith(".zip");
+
+  if (type === "mod" && !ALLOWED_MOD_TYPES.includes(contentType) && !isAllowedModExtension) {
     return NextResponse.json({ error: "Invalid file type for mod" }, { status: 400 });
   }
   if ((type === "icon" || type === "avatar") && !ALLOWED_ICON_TYPES.includes(contentType)) {
