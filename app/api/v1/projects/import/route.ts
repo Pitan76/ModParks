@@ -4,6 +4,36 @@ import { getDatabase } from "@/lib/db";
 import { userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+function normalizeLicense(rawLicense: string | undefined | null): string {
+  if (!rawLicense) return "All Rights Reserved";
+  
+  const lower = rawLicense.toLowerCase();
+  
+  if (lower.includes("mit")) return "MIT";
+  if (lower.includes("apache") && lower.includes("2")) return "Apache-2.0";
+  if (lower.includes("apache")) return "Apache-2.0";
+  if (lower.includes("gpl") && lower.includes("3") && lower.includes("lesser")) return "LGPL-3.0-or-later";
+  if (lower.includes("gpl") && lower.includes("3") && lower.includes("affero")) return "AGPL-3.0-or-later";
+  if (lower.includes("gpl") && lower.includes("3")) return "GPL-3.0-or-later";
+  if (lower.includes("gpl") && lower.includes("2") && lower.includes("lesser")) return "LGPL-2.1-or-later";
+  if (lower.includes("gpl") && lower.includes("2")) return "GPL-2.0-or-later";
+  if (lower.includes("mpl") || lower.includes("mozilla")) return "MPL-2.0";
+  if (lower.includes("cc0") || lower.includes("public domain")) return "CC0-1.0";
+  if (lower.includes("cc-by-nc-nd")) return "CC-BY-NC-ND-4.0";
+  if (lower.includes("cc-by-nc-sa")) return "CC-BY-NC-SA-4.0";
+  if (lower.includes("cc-by-sa")) return "CC-BY-SA-4.0";
+  if (lower.includes("cc-by-nc")) return "CC-BY-NC-4.0";
+  if (lower.includes("cc-by-nd")) return "CC-BY-ND-4.0";
+  if (lower.includes("cc-by")) return "CC-BY-4.0";
+  if (lower.includes("creative commons")) return "CC-BY-4.0";
+  if (lower.includes("bsd") && lower.includes("3")) return "BSD-3-Clause";
+  if (lower.includes("bsd") && lower.includes("2")) return "BSD-2-Clause";
+  if (lower.includes("wtfpl")) return "WTFPL";
+  if (lower.includes("unlicense")) return "Unlicense";
+  
+  return rawLicense;
+}
+
 export async function GET(request: Request) {
   try {
     const session = await auth();
@@ -54,7 +84,7 @@ export async function GET(request: Request) {
         description: data.description,
         iconUrl: data.icon_url,
         type: data.project_type === "mod" ? "mod" : "plugin",
-        license: data.license?.name || "All Rights Reserved",
+        license: normalizeLicense(data.license?.name),
         sourceUrl: data.source_url || "",
         issueTrackerUrl: data.issues_url || "",
         externalDownloads: data.downloads || 0,
