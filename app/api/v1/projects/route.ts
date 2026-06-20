@@ -49,11 +49,9 @@ export async function GET(request: Request) {
       iconUrl: projects.iconUrl,
       type: projects.type,
       license: projects.license,
-      downloads: {
-        total: projects.totalDownloads,
-        native: projects.downloads,
-        ...(projects.externalDownloads as Record<string, number>)
-      },
+      downloads: projects.downloads,
+      totalDownloads: projects.totalDownloads,
+      externalDownloads: projects.externalDownloads,
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
       author: {
@@ -100,7 +98,7 @@ export async function GET(request: Request) {
       displayName: p.author?.displayName || null,
       avatarUrl: p.author?.avatarUrl || null,
     },
-    tags: tagsMap[p.id] || []
+    tags: p.id ? (tagsMap[p.id] || []) : []
   }));
 
   const response: PaginatedResponse<ApiProject> = {
