@@ -19,16 +19,20 @@ export async function getProjectDependencies(projectId: string) {
       id: projectDependencies.id,
       dependencyType: projectDependencies.dependencyType,
       targetProject: projects,
+      externalUrl: projectDependencies.externalUrl,
+      externalName: projectDependencies.externalName,
     })
     .from(projectDependencies)
-    .innerJoin(projects, eq(projectDependencies.targetProjectId, projects.id))
+    .leftJoin(projects, eq(projectDependencies.targetProjectId, projects.id))
     .where(eq(projectDependencies.projectId, projectId))
     .all();
 
   return deps.map((d) => ({
     id: d.id,
     dependencyType: d.dependencyType as DependencyType,
-    project: d.targetProject,
+    project: d.targetProject ? d.targetProject : { slug: d.id, name: d.externalName || "Unknown External" },
+    externalUrl: d.externalUrl,
+    externalName: d.externalName,
   }));
 }
 
@@ -90,6 +94,29 @@ export async function addProjectDependencyBySlug(projectId: string, targetSlug: 
   await db.insert(projectDependencies).values({
     projectId,
     targetProjectId: targetProject.id,
+    dependencyType,
+  }).run();
+
+  revalidatePath(`/projects/${project.slug}/dependencies`);
+  revalidatePath(`/projects/${project.slug}/edit`);
+  return { success: true };
+}
+
+export async function addExternalProjectDependency(projectId: string, externalName: string, externalUrl: string, dependencyType: DependencyType) {
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  if (!project) throw new Error("Project not found");
+
+  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
+  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+    throw new Error("Forbidden");
+  }
+
+  await db.insert(projectDependencies).values({
+    projectId,
+    externalName,
+    externalUrl,
     dependencyType,
   }).run();
 
