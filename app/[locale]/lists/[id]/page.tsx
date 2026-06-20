@@ -9,6 +9,7 @@ import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import ProjectCard from "@/components/project/ProjectCard";
+import ListActions from "@/components/list/ListActions";
 import { setRequestLocale } from "next-intl/server";
 
 interface ListDetailPageProps {
@@ -39,21 +40,37 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Box sx={{ mb: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
-          <Typography variant="h3" sx={{ fontWeight: 800 }}>
-            {collection.name}
-          </Typography>
-          <Chip 
-            label={collection.visibility === "public" ? "公開" : collection.visibility === "unlisted" ? "限定公開" : "非公開"} 
-            color={collection.visibility === "public" ? "primary" : "default"}
-            size="small"
-          />
+          {collection.iconUrl && (
+            <Avatar src={collection.iconUrl} variant="rounded" sx={{ width: 64, height: 64, mr: 1, boxShadow: 1 }} />
+          )}
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography variant="h3" sx={{ fontWeight: 800 }}>
+                {collection.name}
+              </Typography>
+              <Chip 
+                label={collection.visibility === "public" ? "公開" : collection.visibility === "unlisted" ? "限定公開" : "非公開"} 
+                color={collection.visibility === "public" ? "primary" : "default"}
+                size="small"
+              />
+            </Box>
+            <Box sx={{ mt: 1 }}>
+              <ListActions isOwner={isOwner} collection={collection} />
+            </Box>
+          </Box>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
           <Typography variant="body2" color="text.secondary">Created by</Typography>
-          <Avatar src={collection.author?.avatarUrl || ""} sx={{ width: 24, height: 24 }} />
-          <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-            {collection.author?.displayName || collection.author?.username}
-          </Typography>
+          <Box 
+            component="a" 
+            href={`/${locale}/profile/${collection.author?.username}`}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', color: 'inherit', '&:hover': { textDecoration: 'underline' } }}
+          >
+            <Avatar src={collection.author?.avatarUrl || ""} sx={{ width: 24, height: 24 }} />
+            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+              {collection.author?.displayName || collection.author?.username}
+            </Typography>
+          </Box>
         </Box>
         {collection.description && (
           <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", color: "text.secondary" }}>
