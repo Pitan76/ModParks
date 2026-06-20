@@ -1,3 +1,5 @@
+"use client";
+
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -6,6 +8,7 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import RssFeedIcon from "@mui/icons-material/RssFeed";
+import { Link as NextLink } from "@/i18n/routing";
 
 export default function AppFooter() {
   const year = new Date().getFullYear();
@@ -45,7 +48,21 @@ export default function AppFooter() {
           </Box>
 
           {/* リンク */}
-          <Stack direction="row" spacing={3} sx={{ alignItems: "center" }}>
+          <Stack direction="row" spacing={3} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+            <Link
+              component={NextLink}
+              href="/terms"
+              sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+            >
+              利用規約
+            </Link>
+            <Link
+              component={NextLink}
+              href="/privacy"
+              sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+            >
+              プライバシーポリシー
+            </Link>
             <Link
               href="/feed.xml"
               target="_blank"

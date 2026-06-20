@@ -5,6 +5,7 @@ import { getDatabase } from "@/lib/db";
 import { projectFavorites, projects, users, userProfiles, projectTags } from "@/db/schema";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 // ─── お気に入りのトグル ─────────────────────────────────────────────────────────
 
@@ -83,4 +84,30 @@ export async function getFavoriteProjects(userId: string) {
     tags: tagsData.filter((t) => t.projectId === row.project.id).map((t) => t.tag),
     favoritedAt: row.favoritedAt
   }));
+}
+
+// ─── クッキーによるお気に入り (非ログイン時) ──────────────────────────────────────
+
+export async function toggleCookieFavorite(projectId: string) {
+  const cookieStore = await cookies();
+  const favCookie = cookieStore.get("favorites")?.value;
+  let favorites: string[] = [];
+  if (favCookie) {
+    try { favorites = JSON.parse(favCookie); } catch {}
+  }
+
+  let favorited = false;
+  if (favorites.includes(projectId)) {
+    favorites = favorites.filter(id => id !== projectId);
+  } else {
+    favorites.push(projectId);
+    favorited = true;
+  }
+
+  cookieStore.set("favorites", JSON.stringify(favorites), { path: "/", maxAge: 60 * 60 * 24 * 365 }); // 1 year
+  
+  revalidatePath("/[locale]/projects", "page");
+  revalidatePath("/[locale]/projects/[slug]", "page");
+
+  return { success: true, favorited };
 }

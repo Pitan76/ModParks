@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { collections, collectionItems, projects, users, userProfiles } from "@/db/schema";
+import { collections, collectionItems, projects, users, userProfiles, projectTags } from "@/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -119,7 +119,7 @@ export async function getUserCollectionsWithProjectStatus(userId: string, projec
   }));
 }
 
-export async function getCollectionById(id: string) {
+export async function getCollectionById(id: string, viewerId?: string) {
   const db = await getDatabase();
 
   const collectionRow = await db.select({
@@ -135,8 +135,9 @@ export async function getCollectionById(id: string) {
     .where(eq(collections.id, id))
     .get();
 
-  if (!collectionRow) return null;
+  if (!collectionRow || (collectionRow.collection.visibility === "private" && collectionRow.collection.userId !== viewerId)) return null;
 
+  // Fetch the basic project info for items in this collection
   const items = await db.select({
     project: projects,
     author: {
@@ -144,25 +145,43 @@ export async function getCollectionById(id: string) {
       displayName: userProfiles.displayName,
       avatarUrl: userProfiles.avatarUrl,
     },
-    addedAt: collectionItems.addedAt
+    addedAt: collectionItems.addedAt,
   })
-  .from(collectionItems)
-  .innerJoin(projects, eq(collectionItems.projectId, projects.id))
-  .leftJoin(users, eq(projects.authorId, users.id))
-  .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-  .where(eq(collectionItems.collectionId, id))
-  .orderBy(desc(collectionItems.addedAt))
-  .all();
+    .from(collectionItems)
+    .innerJoin(projects, eq(collectionItems.projectId, projects.id))
+    .leftJoin(users, eq(projects.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .where(eq(collectionItems.collectionId, id))
+    .orderBy(desc(collectionItems.addedAt))
+    .all();
+
+  // ---- Gather tags for each project -------------------------------------
+  // Collect all project IDs from the items we just fetched.
+  const projectIds = items.map(i => i.project.id);
+  // Pull tags (projectId, tag) for those projects.
+  const tagRows = await db
+    .select({ projectId: projectTags.projectId, tag: projectTags.tag })
+    .from(projectTags)
+    .where(inArray(projectTags.projectId, projectIds))
+    .all();
+  // Build a map of projectId → string[]
+  const tagsMap: Record<string, string[]> = {};
+  tagRows.forEach(row => {
+    if (!tagsMap[row.projectId]) tagsMap[row.projectId] = [];
+    tagsMap[row.projectId].push(row.tag);
+  });
 
   return {
     ...collectionRow.collection,
     author: collectionRow.author,
+    // Map each item, attaching the gathered tags (or an empty array)
     items: items.map(item => ({
       ...item.project,
+      tags: tagsMap[item.project.id] ?? [],
       authorUsername: item.author?.username,
       authorDisplayName: item.author?.displayName ?? item.author?.username,
       authorAvatarUrl: item.author?.avatarUrl,
-      addedAt: item.addedAt
-    }))
+      addedAt: item.addedAt,
+    })),
   };
 }

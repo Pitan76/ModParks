@@ -66,6 +66,9 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
     return tTags.has(key as any) ? tTags(key as any) : tag;
   };
 
+  // Ensure tags is always an array to avoid undefined errors
+  const safeTags: string[] = project.tags ?? [];
+
   return (
     <Card id={`project-card-${project.slug}`} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
       <LinkCardActionArea href={`/projects/${project.slug}`} sx={{ height: "100%" }}>
@@ -169,9 +172,9 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               </Typography>
             </Box>
             
-            {project.tags.length > 0 && (
+            {safeTags.length > 0 && (
               <Box sx={{ display: "flex", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                {project.tags.slice(0, isGrid ? 2 : 3).map((tag) => (
+                {safeTags.slice(0, isGrid ? 2 : 3).map((tag) => (
                   <Chip
                     key={tag}
                     label={getTagLabel(tag)}
@@ -186,11 +189,11 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                     sx={{ height: 18, fontSize: "0.6rem", borderColor: "divider" }}
                   />
                 ))}
-                {project.tags.length > (isGrid ? 2 : 3) && (
-                  <Tooltip title={project.tags.slice(isGrid ? 2 : 3).map(getTagLabel).join(", ")} arrow placement="top">
+                {safeTags.length > (isGrid ? 2 : 3) && (
+                  <Tooltip title={safeTags.slice(isGrid ? 2 : 3).map(getTagLabel).join(", ")} arrow placement="top">
                     <span>
                       <Box component="span" sx={{ ml: 0.5, cursor: "help", color: "text.disabled", fontSize: "0.75rem" }}>
-                        +{project.tags.length - (isGrid ? 2 : 3)}
+                        +{safeTags.length - (isGrid ? 2 : 3)}
                       </Box>
                     </span>
                   </Tooltip>
