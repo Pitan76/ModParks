@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
           .run(),
         db
           .update(projects)
-          .set({ downloads: project.downloads + 1 })
+          .set({ downloads: project.downloads + 1, totalDownloads: project.totalDownloads + 1 })
           .where(eq(projects.id, project.id))
           .run(),
       ]);
