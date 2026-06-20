@@ -406,6 +406,8 @@ export async function syncExternalProjectData(projectId: string) {
   const settings = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, session.user.id) });
   
   let newExtDl = 0;
+  let modrinthDl = 0;
+  let curseforgeDl = 0;
   
   if (project.modrinthId) {
     try {
@@ -414,14 +416,15 @@ export async function syncExternalProjectData(projectId: string) {
       });
       if (res.ok) {
         const data = await res.json() as any;
-        newExtDl += (data.downloads || 0);
+        modrinthDl = (data.downloads || 0);
+        newExtDl += modrinthDl;
       }
     } catch(e) {}
   }
   
   if (project.curseforgeId) {
     try {
-      const cfApiKey = settings?.curseforgeApiKey;
+      const cfApiKey = settings?.curseforgeApiKey || process.env.CURSEFORGE_API_KEY;
       if (cfApiKey) {
         let targetCfId = project.curseforgeId;
         
@@ -445,14 +448,19 @@ export async function syncExternalProjectData(projectId: string) {
         });
         if (res.ok) {
           const data = await res.json() as any;
-          newExtDl += (data.data?.downloadCount || 0);
+          curseforgeDl = (data.data?.downloadCount || 0);
+          newExtDl += curseforgeDl;
         }
       }
     } catch(e) {}
   }
 
   if (newExtDl > 0) {
-    await db.update(projects).set({ externalDownloads: newExtDl }).where(eq(projects.id, project.id)).run();
+    await db.update(projects).set({ 
+      externalDownloads: newExtDl,
+      modrinthDownloads: modrinthDl,
+      curseforgeDownloads: curseforgeDl
+    }).where(eq(projects.id, project.id)).run();
   }
   
   revalidatePath(`/projects/${project.slug}`);
