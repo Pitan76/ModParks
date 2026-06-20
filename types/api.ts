@@ -15,6 +15,9 @@ export interface ApiProject {
   type: "mod" | "plugin";
   license: string;
   downloads: number;
+  nativeDownloads: number;
+  modrinthDownloads: number;
+  curseforgeDownloads: number;
   createdAt: number;
   updatedAt: number;
   author: ApiUser;
@@ -52,4 +55,21 @@ export interface PaginatedResponse<T> {
     offset: number;
     count: number;
   };
+}
+
+export interface ApiDependency {
+  id: string;
+  dependencyType: "required" | "optional" | "incompatible" | "embedded";
+  project: {
+    id: string;
+    slug: string;
+    name: string;
+    iconUrl: string | null;
+  };
+}
+
+export interface ApiProjectDetail extends ApiProject {
+  versions: ApiVersion[];
+  dependencies: ApiDependency[];
+  dependents: ApiDependency[];
 }

@@ -13,6 +13,8 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { addProjectDependencyBySlug, removeProjectDependency, DependencyType } from "@/lib/actions/dependency";
@@ -41,14 +43,10 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
     if (!targetSlug) return;
     setLoading(true);
     try {
-      const res = await addProjectDependencyBySlug(projectId, targetSlug, depType);
-      if (res.error) {
-        setToast({ message: t("addError"), severity: "error" });
-      } else {
-        setToast({ message: t("addSuccess"), severity: "success" });
-        setTargetSlug("");
-        router.refresh();
-      }
+      await addProjectDependencyBySlug(projectId, targetSlug, depType);
+      setToast({ message: t("addSuccess"), severity: "success" });
+      setTargetSlug("");
+      router.refresh();
     } catch (e: any) {
       setToast({ message: e.message || t("addError"), severity: "error" });
     }
