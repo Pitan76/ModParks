@@ -55,6 +55,7 @@ export default async function SettingsPage({ params, searchParams }: { params: P
         defaultLicense={settingsRecord?.defaultLicense || "All Rights Reserved"}
         modrinthApiKey={settingsRecord?.modrinthApiKey || ""}
         curseforgeApiKey={settingsRecord?.curseforgeApiKey || ""}
+        curseforgeAuthorId={settingsRecord?.curseforgeAuthorId || ""}
         error={resolvedSearchParams.error as string | undefined}
       />
     </Container>
