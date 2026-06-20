@@ -84,14 +84,23 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         </Box>
         
         {author === "me" && (
-          <LinkButton
-            href="/projects/new"
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ flexShrink: 0 }}
-          >
-            {tProject("newProject")}
-          </LinkButton>
+          <Box sx={{ display: "flex", gap: 2, flexShrink: 0 }}>
+            <LinkButton
+              href="/projects/import"
+              variant="outlined"
+              sx={{ flexShrink: 0 }}
+            >
+              一括インポート
+            </LinkButton>
+            <LinkButton
+              href="/projects/new"
+              variant="contained"
+              startIcon={<AddIcon />}
+              sx={{ flexShrink: 0 }}
+            >
+              {tProject("newProject")}
+            </LinkButton>
+          </Box>
         )}
       </Box>
 
