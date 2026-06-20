@@ -103,7 +103,19 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
       </Typography>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4 }}>
-        <Tabs value={tabIndex} onChange={(_, val) => setTabIndex(val)}>
+        <Tabs 
+          value={tabIndex} 
+          onChange={(_, val) => setTabIndex(val)}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{
+            '& .MuiTab-root': {
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }
+          }}
+        >
           <Tab label="通常作成" />
           <Tab label="外部からインポート" />
         </Tabs>
