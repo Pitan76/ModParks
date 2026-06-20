@@ -69,10 +69,10 @@ export async function generateMetadata({ params }: PublicProfileProps) {
   }).from(users).innerJoin(userProfiles, eq(users.id, userProfiles.userId)).where(eq(userProfiles.username, username)).get();
 
   if (!user || user.deletedAt) {
-    return { title: "Not Found | ModParks" };
+    return { title: "Not Found" };
   }
 
-  const title = `${user.displayName || user.username} (@${user.username}) | ModParks`;
+  const title = `${user.displayName || user.username} (@${user.username})`;
   const description = user.bio || `${user.displayName || user.username} のプロフィールページです。`;
   const imageUrl = user.avatarUrl || SITE_URL + "/icon.png";
 
