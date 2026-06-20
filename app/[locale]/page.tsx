@@ -24,7 +24,7 @@ export default async function HomePage({ params }: HomePageProps) {
   const t = await getTranslations("Home");
   const tc = await getTranslations("Common");
 
-  const [newProjects, updatedProjects] = await Promise.all([
+  const [{ data: newProjects }, { data: updatedProjects }] = await Promise.all([
     getProjects({ sort: "newest", limit: 6 }),
     getProjects({ sort: "updated", limit: 6 }),
   ]);

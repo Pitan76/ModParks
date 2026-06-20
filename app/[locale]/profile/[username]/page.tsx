@@ -31,9 +31,11 @@ import { and, sql } from "drizzle-orm";
 import FollowUserButton from "@/components/user/FollowUserButton";
 import CollectionCard from "@/components/list/CollectionCard";
 import { formatCompactNumber } from "@/lib/utils/format";
+import PaginationControls from "@/components/ui/PaginationControls";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 function getLinkIcon(url: string) {
@@ -98,9 +100,13 @@ export async function generateMetadata({ params }: PublicProfileProps) {
   };
 }
 
-export default async function PublicProfilePage({ params }: PublicProfileProps) {
+export default async function PublicProfilePage({ params, searchParams }: PublicProfileProps) {
   const { locale, username } = await params;
   setRequestLocale(locale);
+  const resolvedSearchParams = await searchParams;
+  const page = parseInt(resolvedSearchParams.page as string) || 1;
+  const limit = Math.min(Math.max(parseInt(resolvedSearchParams.limit as string) || 20, 10), 80);
+  const offset = (page - 1) * limit;
 
   const t = await getTranslations("Profile");
 
@@ -160,12 +166,16 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
   }
 
   // Fetch user projects and favorites
-  const [allProjects, favoritedProjects, userCollections] = await Promise.all([
-    getProjects({ authorId: user.id }),
+  const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, { totalProjects, totalDownloads }] = await Promise.all([
+    getProjects({ authorId: user.id, limit, offset }),
     getFavoriteProjects(user.id),
-    getUserCollections(user.id, session?.user?.id)
+    getUserCollections(user.id, session?.user?.id),
+    import("@/lib/actions/project").then(m => m.getUserProjectStats(user.id))
   ]);
   const visibleProjects = allProjects.filter(p => isOwner ? true : p.status === "public");
+  
+  // If owner, totalProjects can be totalCount from DB, else use public stats
+  const displayTotalProjects = isOwner ? totalCount : totalProjects;
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -195,14 +205,11 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
 
               <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
                 <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{visibleProjects.length}</Box> Projects
+                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{displayTotalProjects}</Box> Projects
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>
-                    {formatCompactNumber(
-                      visibleProjects.reduce((acc, p) => acc + (p.downloads || 0) + (p.externalDownloads || 0) + (p.modrinthDownloads || 0) + (p.curseforgeDownloads || 0), 0),
-                      locale
-                    )}
+                    {formatCompactNumber(totalDownloads, locale)}
                   </Box> Downloads
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -291,13 +298,17 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
       </Box>
       
       {visibleProjects.length > 0 ? (
-        <Grid container spacing={2}>
-          {visibleProjects.map(p => (
-            <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={p as any} layout="grid" />
-            </Grid>
-          ))}
-        </Grid>
+        <>
+          <Grid container spacing={2}>
+            {visibleProjects.map(p => (
+              <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <ProjectCard project={p as any} layout="grid" />
+              </Grid>
+            ))}
+          </Grid>
+          
+          <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
+        </>
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>
           {t("noProjects")}

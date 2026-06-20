@@ -271,7 +271,17 @@ export async function getProjects(params: {
   if (sort === "newest") orderByExpr = desc(projects.createdAt);
 
   let rows;
+  let totalCount = 0;
   try {
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(projects)
+      .leftJoin(users, eq(projects.authorId, users.id))
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .get();
+    totalCount = countResult?.count || 0;
+
     // プロジェクトと著者の情報をJOINして取得
     rows = await db
       .select({
@@ -308,13 +318,15 @@ export async function getProjects(params: {
       .all();
   }
 
-  return rows.map((row) => ({
+  const data = rows.map((row) => ({
     ...row.project,
     authorUsername: row.author?.username,
     authorDisplayName: row.author?.displayName ?? row.author?.username,
     authorAvatarUrl: row.author?.avatarUrl,
     tags: tagsData.filter((t) => t.projectId === row.project.id).map((t) => t.tag),
   }));
+
+  return { data, totalCount };
 }
 
 /**
@@ -351,6 +363,27 @@ export async function getProjectBySlug(slug: string) {
     tags: tagsRows.map((t) => t.tag),
     versions: versionsRows,
     redirectSlug: row.project.slug !== slug ? row.project.slug : undefined,
+  };
+}
+
+/**
+ * ユーザーの全公開プロジェクトの総数と総ダウンロード数を取得する Server Action
+ */
+export async function getUserProjectStats(authorId: string) {
+  const db = await getDatabase();
+  
+  const result = await db
+    .select({
+      totalProjects: sql<number>`count(*)`,
+      totalDownloads: sql<number>`sum(${projects.downloads} + COALESCE(${projects.externalDownloads}, 0) + COALESCE(${projects.modrinthDownloads}, 0) + COALESCE(${projects.curseforgeDownloads}, 0))`
+    })
+    .from(projects)
+    .where(and(eq(projects.authorId, authorId), eq(projects.status, "public")))
+    .get();
+
+  return {
+    totalProjects: result?.totalProjects || 0,
+    totalDownloads: result?.totalDownloads || 0,
   };
 }
 
@@ -395,6 +428,38 @@ export async function transferOwnership(projectId: string, newOwnerId: string) {
   await db.delete(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, newOwnerId)));
 
   revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
+  return { success: true };
+}
+
+// ─── 一括操作（ステータス変更・削除） ──────────────────────────────────────────
+
+export async function batchUpdateProjectStatus(projectIds: string[], status: "public" | "unlisted" | "private" | "draft") {
+  const { db, session } = await getAuthenticatedDb();
+  if (!projectIds.length) return { success: true };
+
+  // TODO: adminの場合は作者チェックをスキップするなどの処理
+  const isOwnerCondition = eq(projects.authorId, session.user.id);
+  const conditions = session.user.role === "admin" ? inArray(projects.id, projectIds) : and(inArray(projects.id, projectIds), isOwnerCondition);
+
+  await db.update(projects).set({ status, updatedAt: new Date() }).where(conditions).run();
+  
+  revalidatePath("/projects");
+  revalidatePath("/projects/manage");
+  return { success: true };
+}
+
+export async function batchDeleteProjects(projectIds: string[]) {
+  const { db, session } = await getAuthenticatedDb();
+  if (!projectIds.length) return { success: true };
+
+  const isOwnerCondition = eq(projects.authorId, session.user.id);
+  const conditions = session.user.role === "admin" ? inArray(projects.id, projectIds) : and(inArray(projects.id, projectIds), isOwnerCondition);
+
+  // プロジェクトを削除（関連データも外部キー制約等でカスケード削除されるか、必要なら手動削除）
+  await db.delete(projects).where(conditions).run();
+
+  revalidatePath("/projects");
+  revalidatePath("/projects/manage");
   return { success: true };
 }
 

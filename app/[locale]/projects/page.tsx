@@ -11,12 +11,14 @@ import ProjectSearchBar from "@/components/project/ProjectSearchBar";
 import { getProjects } from "@/lib/actions/project";
 import { auth } from "@/lib/auth";
 import { Link } from "@/i18n/routing";
+import PaginationControls from "@/components/ui/PaginationControls";
 
 interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
   searchParams: Promise<{ 
     q?: string; types?: string; author?: string; sort?: string; loaders?: string; mcVersions?: string; tags?: string;
     searchMode?: string; includeDesc?: string; includeTags?: string; includeAuthor?: string; includeExtDl?: string;
+    page?: string; limit?: string;
   }>;
 }
 
@@ -24,7 +26,8 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const { locale } = await params;
   const { 
     q, types, author, sort, loaders, mcVersions, tags,
-    searchMode, includeDesc, includeTags, includeAuthor, includeExtDl
+    searchMode, includeDesc, includeTags, includeAuthor, includeExtDl,
+    page: pageStr, limit: limitStr
   } = await searchParams;
   setRequestLocale(locale);
 
@@ -46,8 +49,12 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const isIncludeExtDl = includeExtDl === "true";
   const sm = searchMode === "AND" ? "AND" : "OR";
 
+  const page = parseInt(pageStr as string) || 1;
+  const limit = Math.min(Math.max(parseInt(limitStr as string) || 20, 10), 80);
+  const offset = (page - 1) * limit;
+
   // フィルタリング
-  const filtered = await getProjects({
+  const { data: filtered, totalCount } = await getProjects({
     q,
     types: typesArr,
     authorId,
@@ -60,6 +67,8 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     includeTags: isIncludeTags,
     includeAuthor: isIncludeAuthor,
     includeExtDl: isIncludeExtDl,
+    limit,
+    offset,
   });
 
   const { getDatabase } = await import("@/lib/db");
@@ -124,17 +133,20 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       {/* 件数表示 */}
       <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
         <Typography variant="body2" color="text.secondary">
-          {tSearch("results", { count: filtered.length })}
+          {tSearch("results", { count: totalCount })}
         </Typography>
       </Box>
 
       {/* プロジェクト一覧 */}
       {filtered.length > 0 ? (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {filtered.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </Box>
+        <>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {filtered.map((project) => (
+              <ProjectCard key={project.id} project={project as any} />
+            ))}
+          </Box>
+          <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
+        </>
       ) : (
         <Box sx={{ textAlign: "center", py: 10 }}>
           <Typography variant="h6" color="text.secondary">
