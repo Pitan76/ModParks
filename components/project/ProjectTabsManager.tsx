@@ -13,12 +13,13 @@ import { useTranslations } from "next-intl";
 interface ProjectTabsManagerProps {
   descriptionContent: React.ReactNode;
   filesContent: React.ReactNode;
+  dependenciesContent: React.ReactNode;
   manageHref: string;
   canEdit: boolean;
   issueTrackerUrl?: string | null;
 }
 
-export default function ProjectTabsManager({ descriptionContent, filesContent, manageHref, canEdit, issueTrackerUrl }: ProjectTabsManagerProps) {
+export default function ProjectTabsManager({ descriptionContent, filesContent, dependenciesContent, manageHref, canEdit, issueTrackerUrl }: ProjectTabsManagerProps) {
   const t = useTranslations("Project");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,16 +104,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, m
       
       {tab === 1 && <Box>{filesContent}</Box>}
       
-      {tab === 2 && (
-        <Box sx={{ p: 6, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider" }}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            {t("tabs.underConstruction")}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t("tabs.dependenciesDesc")}
-          </Typography>
-        </Box>
-      )}
+      {tab === 2 && <Box>{dependenciesContent}</Box>}
     </Box>
   );
 }

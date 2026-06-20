@@ -11,10 +11,12 @@ import { getDatabase } from "@/lib/db";
 import { projectFavorites } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { getProjectBySlug } from "@/lib/actions/project";
+import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 import ProjectTabsManager from "@/components/project/ProjectTabsManager";
+import ProjectDependencies from "@/components/project/ProjectDependencies";
 import ProjectComments from "@/components/project/ProjectComments";
 import LinkButton from "@/components/ui/LinkButton";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
@@ -87,9 +89,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   const db = await getDatabase();
-  const [favoritesData, userFavoriteData] = await Promise.all([
+  const [favoritesData, userFavoriteData, dependencies, dependents] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(projectFavorites).where(eq(projectFavorites.projectId, project.id)).get(),
-    session?.user?.id ? db.select().from(projectFavorites).where(and(eq(projectFavorites.projectId, project.id), eq(projectFavorites.userId, session.user.id))).get() : null
+    session?.user?.id ? db.select().from(projectFavorites).where(and(eq(projectFavorites.projectId, project.id), eq(projectFavorites.userId, session.user.id))).get() : null,
+    getProjectDependencies(project.id),
+    getProjectDependents(project.id),
   ]);
 
   const favoritesCount = favoritesData?.count || 0;
@@ -161,6 +165,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   <Typography color="text.secondary">{t("noVersions")}</Typography>
                 )}
               </Box>
+            }
+            dependenciesContent={
+              <ProjectDependencies dependencies={dependencies} dependents={dependents} />
             }
           />
 
