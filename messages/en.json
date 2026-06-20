@@ -69,6 +69,9 @@
       "loaders": "Mod Loaders",
       "status": "Status",
       "slugRule": "Alphanumeric and hyphens only",
+      "modrinthId": "Modrinth ID (Optional)",
+      "curseforgeId": "CurseForge ID (Optional)",
+      "externalConnectionsTitle": "External Connections (Used for syncing download counts, etc.)",
       "customLinks": {
         "title": "Custom Links",
         "linkTitle": "Title",
@@ -109,7 +112,11 @@
     "manage": "Manage",
     "managePage": {
       "title": "Manage Project",
-      "success": "Project updated successfully"
+      "success": "Project updated successfully",
+      "sync": "Sync External Data",
+      "syncing": "Syncing...",
+      "syncSuccess": "External data synced successfully",
+      "syncError": "Failed to sync external data"
     },
     "sidebar": {
       "license": "License",

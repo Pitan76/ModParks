@@ -9,7 +9,9 @@ import LinkButton from "@/components/ui/LinkButton";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
-import { useTranslations, useFormatter } from "next-intl";
+import { useTranslations, useFormatter, useLocale } from "next-intl";
+import Tooltip from "@mui/material/Tooltip";
+import { formatCompactNumber } from "@/lib/utils/format";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
 import AddToCollectionButton from "./AddToCollectionButton";
 
@@ -27,6 +29,9 @@ export interface ProjectDetailHeaderProps {
     description: string;
     iconUrl?: string | null;
     downloads: number;
+    externalDownloads?: number;
+    modrinthId?: string | null;
+    curseforgeId?: string | null;
     createdAt: Date;
     updatedAt: Date;
     author: {
@@ -58,6 +63,18 @@ export default function ProjectDetailHeader({
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
   const format = useFormatter();
+  const locale = useLocale();
+
+  const localDownloads = p.downloads || 0;
+  const extDownloads = p.externalDownloads || 0;
+  const totalDownloads = localDownloads + extDownloads;
+
+  let extLabel = tProject("stats.external");
+  if (p.modrinthId && !p.curseforgeId) extLabel = "Modrinth";
+  else if (!p.modrinthId && p.curseforgeId) extLabel = "CurseForge";
+
+  const modparksLabel = tProject("stats.modparks");
+  const tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}, ${extLabel}: ${formatCompactNumber(extDownloads, locale)}`;
 
   return (
     <>
@@ -128,12 +145,14 @@ export default function ProjectDetailHeader({
               </Typography>
             </LinkButton>
             <Typography variant="body2" color="text.disabled">·</Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <DownloadIcon sx={{ fontSize: 14, color: "text.disabled" }} />
-              <Typography variant="body2" color="text.disabled">
-                {p.downloads.toLocaleString()}
-              </Typography>
-            </Box>
+            <Tooltip title={extDownloads > 0 ? tooltipText : `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`} arrow placement="top">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, cursor: "help" }}>
+                <DownloadIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                <Typography variant="body2" color="text.disabled">
+                  {formatCompactNumber(totalDownloads, locale)}
+                </Typography>
+              </Box>
+            </Tooltip>
           </Box>
           
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1 }}>

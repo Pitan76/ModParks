@@ -43,14 +43,14 @@ export default function ProjectFavoriteButton({
     startTransition(async () => {
       try {
         const result = isLoggedIn ? await toggleProjectFavorite(projectId) : await toggleCookieFavorite(projectId);
-        if (result.error) {
+        if ("error" in result && result.error) {
           // 失敗したら元に戻す
           setFavorited(initialFavorited);
           setCount(initialCount);
           alert(t("favorite.error"));
         } else {
           // 成功した場合、DB側の最新状態と同期する
-          if (result.favorited !== undefined) {
+          if ("favorited" in result && result.favorited !== undefined) {
               setFavorited(result.favorited);
           }
         }

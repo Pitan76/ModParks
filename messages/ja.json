@@ -69,6 +69,9 @@
       "loaders": "対応するModローダー",
       "status": "公開状態",
       "slugRule": "半角英数字とハイフンのみ",
+      "modrinthId": "Modrinth ID (任意)",
+      "curseforgeId": "CurseForge ID (任意)",
+      "externalConnectionsTitle": "外部連携 (外部からのダウンロード数同期などに使用されます)",
       "customLinks": {
         "title": "カスタムリンク",
         "linkTitle": "タイトル",
@@ -115,7 +118,11 @@
     "manage": "管理",
     "managePage": {
       "title": "プロジェクト管理",
-      "success": "プロジェクトを更新しました"
+      "success": "プロジェクトを更新しました",
+      "sync": "外部データを同期する",
+      "syncing": "同期中...",
+      "syncSuccess": "外部データを同期しました",
+      "syncError": "同期に失敗しました"
     },
     "sidebar": {
       "license": "ライセンス",
