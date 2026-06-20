@@ -68,14 +68,35 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
 
     const formData = new FormData(e.currentTarget);
     
-    // Server Action呼び出し
-    const result = await updateProject(project.id, formData);
-    
-    if (result && result.error) {
-      setError(result.error as { [key: string]: string[] });
-      setPending(false);
-    } else {
-      router.push(`/projects/${formData.get("slug")}`);
+    const maxRetries = 3;
+    let retries = 0;
+    let success = false;
+
+    while (retries < maxRetries && !success) {
+      try {
+        // Server Action呼び出し
+        const result = await updateProject(project.id, formData);
+        
+        if (result && result.error) {
+          setError(result.error as { [key: string]: string[] });
+          setPending(false);
+          return; // バリデーションエラー時はリトライ不要
+        } else {
+          router.push(`/projects/${formData.get("slug")}`);
+          success = true;
+        }
+      } catch (err) {
+        retries++;
+        console.error(`Save attempt ${retries} failed:`, err);
+        
+        if (retries >= maxRetries) {
+          setToast({ message: `通信エラーが発生しました（${maxRetries}回再試行失敗）。少し時間を置いてからやり直してください。`, severity: "error" });
+          setPending(false);
+        } else {
+          // リトライ前に待機 (1回目: 1秒, 2回目: 2秒...)
+          await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+        }
+      }
     }
   };
 
