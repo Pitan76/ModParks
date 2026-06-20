@@ -6,7 +6,19 @@ import { eq } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { revalidatePath } from "next/cache";
 
-export async function fetchModrinthProjects() {
+export interface ImportedProject {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  type: "mod" | "plugin";
+  license: string;
+  sourceUrl?: string;
+  issueTrackerUrl?: string;
+  iconUrl?: string;
+}
+
+export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
   const { db, session } = await getAuthenticatedDb();
   
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
@@ -19,7 +31,7 @@ export async function fetchModrinthProjects() {
     headers: { Authorization: settings.modrinthApiKey, "User-Agent": "ModParks/1.0" }
   });
   if (!userRes.ok) throw new Error("Failed to fetch Modrinth user.");
-  const userData = (await userRes.json()) as any;
+  const userData = (await userRes.json()) as { id: string };
 
   // Get user projects
   const projRes = await fetch(`https://api.modrinth.com/v2/user/${userData.id}/projects`, {
@@ -28,7 +40,7 @@ export async function fetchModrinthProjects() {
   if (!projRes.ok) throw new Error("Failed to fetch Modrinth projects.");
   const projectsData = (await projRes.json()) as any[];
 
-  return projectsData.map((p: any) => ({
+  return projectsData.map((p) => ({
     id: p.id,
     name: p.title,
     slug: p.slug,
@@ -41,39 +53,7 @@ export async function fetchModrinthProjects() {
   }));
 }
 
-export async function importProjectsFromModrinth(selectedProjects: any[]) {
-  const { db, session } = await getAuthenticatedDb();
-
-  let importedCount = 0;
-
-  for (const p of selectedProjects) {
-    // Check if project already exists (by slug or modrinthId)
-    const existing = await db.select().from(projects).where(eq(projects.slug, p.slug)).get();
-    if (existing) continue;
-
-    await db.insert(projects).values({
-      id: createId(),
-      slug: p.slug,
-      name: p.name,
-      description: p.description,
-      type: p.type,
-      license: p.license,
-      sourceUrl: p.sourceUrl || null,
-      issueTrackerUrl: p.issueTrackerUrl || null,
-      iconUrl: p.iconUrl || null,
-      modrinthId: p.id,
-      authorId: session.user.id,
-      status: "draft",
-    }).run();
-
-    importedCount++;
-  }
-
-  revalidatePath("/projects");
-  return { success: true, importedCount };
-}
-
-export async function fetchCurseForgeProjects() {
+export async function fetchCurseForgeProjects(): Promise<ImportedProject[]> {
   const { db, session } = await getAuthenticatedDb();
   
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
@@ -91,10 +71,10 @@ export async function fetchCurseForgeProjects() {
   });
   
   if (!projRes.ok) throw new Error("Failed to fetch CurseForge projects.");
-  const resData = (await projRes.json()) as any;
-  const projectsData = resData.data as any[];
+  const resData = (await projRes.json()) as { data: any[] };
+  const projectsData = resData.data;
 
-  return projectsData.map((p: any) => ({
+  return projectsData.map((p) => ({
     id: p.id.toString(),
     name: p.name,
     slug: p.slug,
@@ -107,7 +87,7 @@ export async function fetchCurseForgeProjects() {
   }));
 }
 
-export async function importProjectsFromCurseForge(selectedProjects: any[]) {
+export async function importProjects(selectedProjects: ImportedProject[], source: "modrinth" | "curseforge") {
   const { db, session } = await getAuthenticatedDb();
 
   let importedCount = 0;
@@ -126,7 +106,8 @@ export async function importProjectsFromCurseForge(selectedProjects: any[]) {
       sourceUrl: p.sourceUrl || null,
       issueTrackerUrl: p.issueTrackerUrl || null,
       iconUrl: p.iconUrl || null,
-      curseforgeId: p.id,
+      modrinthId: source === "modrinth" ? p.id : null,
+      curseforgeId: source === "curseforge" ? p.id : null,
       authorId: session.user.id,
       status: "draft",
     }).run();
