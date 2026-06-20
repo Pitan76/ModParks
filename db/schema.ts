@@ -58,6 +58,9 @@ export const userSettings = sqliteTable("user_settings", {
   defaultProjectStatus: text("default_project_status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
   defaultLicense: text("default_license").notNull().default("All Rights Reserved"),
   custom:        text("custom", { mode: "json" }),
+  modrinthApiKey: text("modrinth_api_key"),
+  curseforgeApiKey: text("curseforge_api_key"),
+  defaultCommentsEnabled: integer("default_comments_enabled", { mode: "boolean" }).notNull().default(false),
 });
 
 export const accounts = sqliteTable(
@@ -147,6 +150,12 @@ export const projects = sqliteTable("projects", {
   updatedAt:   integer("updated_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
+  modrinthId:  text("modrinth_id"),
+  curseforgeId: text("curseforge_id"),
+  issueTrackerUrl: text("issue_tracker_url"),
+  externalDownloads: integer("external_downloads").notNull().default(0),
+  commentsEnabled: integer("comments_enabled", { mode: "boolean" }).notNull().default(false),
+  sourceIdeaId: text("source_idea_id"),
 }, (table) => ({
   authorIdx: index("projects_author_idx").on(table.authorId),
   statusIdx: index("projects_status_idx").on(table.status),
@@ -310,6 +319,7 @@ export const collections = sqliteTable(
     name: text("name").notNull(),
     description: text("description"),
     visibility: text("visibility").notNull().default("public"), // public | unlisted | private
+    iconUrl: text("icon_url"),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
@@ -377,6 +387,7 @@ export const ideas = sqliteTable("ideas", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   status:      text("status", { enum: ["open", "in_progress", "fulfilled"] }).notNull().default("open"),
+  visibility:  text("visibility", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
   createdAt:   integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
@@ -483,6 +494,10 @@ export type ProjectMember = typeof projectMembers.$inferSelect;
 export type Tag         = typeof tags.$inferSelect;
 export type Platform    = typeof platforms.$inferSelect;
 
+export type UserFollow  = typeof userFollows.$inferSelect;
+export type CollectionFollow = typeof collectionFollows.$inferSelect;
+export type ProjectComment = typeof projectComments.$inferSelect;
+
 // ─── Authenticators (WebAuthn / Passkeys) ───────────────────────────────────
 
 export const authenticators = sqliteTable(
@@ -514,4 +529,68 @@ export const rateLimits = sqliteTable("rate_limits", {
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
 });
 
+// ─── User Follows ─────────────────────────────────────────────────────────────
 
+export const userFollows = sqliteTable(
+  "user_follows",
+  {
+    followerId: text("follower_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    followingId: text("following_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.followerId, t.followingId] }),
+    followerIdx: index("user_follows_follower_idx").on(t.followerId),
+    followingIdx: index("user_follows_following_idx").on(t.followingId),
+  })
+);
+
+// ─── Collection Follows ───────────────────────────────────────────────────────
+
+export const collectionFollows = sqliteTable(
+  "collection_follows",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    collectionId: text("collection_id")
+      .notNull()
+      .references(() => collections.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.collectionId] }),
+    userIdx: index("collection_follows_user_idx").on(t.userId),
+    collectionIdx: index("collection_follows_collection_idx").on(t.collectionId),
+  })
+);
+
+// ─── Project Comments ─────────────────────────────────────────────────────────
+
+export const projectComments = sqliteTable("project_comments", {
+  id:          text("id").primaryKey(),
+  projectId:   text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  authorId:    text("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  content:     text("content").notNull(),
+  createdAt:   integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt:   integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  projectIdx: index("project_comments_project_idx").on(table.projectId),
+  authorIdx: index("project_comments_author_idx").on(table.authorId),
+}));
