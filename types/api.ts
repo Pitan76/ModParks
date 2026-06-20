@@ -69,7 +69,6 @@ export interface ApiDependency {
 }
 
 export interface ApiProjectDetail extends ApiProject {
-  versions: ApiVersion[];
   dependencies: ApiDependency[];
   dependents: ApiDependency[];
 }
