@@ -52,6 +52,7 @@ export default function AppFooter() {
             <Link
               component={NextLink}
               href="/terms"
+              prefetch={false}
               sx={{ color: "text.secondary", fontSize: "0.875rem" }}
             >
               利用規約
@@ -59,6 +60,7 @@ export default function AppFooter() {
             <Link
               component={NextLink}
               href="/privacy"
+              prefetch={false}
               sx={{ color: "text.secondary", fontSize: "0.875rem" }}
             >
               プライバシーポリシー
