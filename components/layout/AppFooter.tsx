@@ -9,9 +9,11 @@ import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import RssFeedIcon from "@mui/icons-material/RssFeed";
 import { Link as NextLink } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export default function AppFooter() {
   const year = new Date().getFullYear();
+  const t = useTranslations("Footer");
 
   return (
     <Box
@@ -43,7 +45,7 @@ export default function AppFooter() {
               ModParks
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Minecraft Java Edition向けMod/Pluginプラットフォーム
+              {t("description")}
             </Typography>
           </Box>
 
@@ -55,7 +57,7 @@ export default function AppFooter() {
               prefetch={false}
               sx={{ color: "text.secondary", fontSize: "0.875rem" }}
             >
-              利用規約
+              {t("terms")}
             </Link>
             <Link
               component={NextLink}
@@ -63,7 +65,7 @@ export default function AppFooter() {
               prefetch={false}
               sx={{ color: "text.secondary", fontSize: "0.875rem" }}
             >
-              プライバシーポリシー
+              {t("privacy")}
             </Link>
             <Link
               href="/feed.xml"

@@ -682,5 +682,14 @@
       "title": "Privacy Policy",
       "content": "ModParks (\"we\", \"our\", or \"us\") respects your privacy. This Privacy Policy explains how we collect, use, and safeguard your information.\n\n## 1. Information Collection\nWe collect information you provide directly to us, such as when you create an account, which includes your email address and username.\n\n## 2. Use of Information\nThe information we collect is used to provide, maintain, and improve the Service, as well as to communicate with you.\n\n## 3. Data Sharing\nWe do not share your personal information with third parties except as necessary to provide our services or as required by law.\n\n## 4. Security\nWe implement reasonable security measures to protect your personal information from unauthorized access."
     }
+  },
+  "Footer": {
+    "about": "About ModParks",
+    "description": "Minecraft Java Edition Mod/Plugin Platform",
+    "docs": "Documentation",
+    "support": "Support",
+    "contact": "Contact",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
   }
 }

@@ -12,9 +12,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
-import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 import { useTranslations } from "next-intl";
 import { createTag, updateTag, deleteTag, createPlatform, updatePlatform, deletePlatform } from "@/lib/actions/config";
 
