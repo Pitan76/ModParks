@@ -56,5 +56,5 @@ export function buildR2Key(
   filename: string
 ): string {
   const timestamp = Date.now();
-  return `${type}/${id}/${timestamp}_${filename}`;
+  return `${type}/${id}/${timestamp}/${filename}`;
 }

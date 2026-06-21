@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
   const uniqueId = createId();
   const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
   const slugOrId = type === "avatar" ? session.user.id : projectSlug!;
-  const key = buildR2Key(type, slugOrId, `${uniqueId}_${safeFileName}`);
+  const key = buildR2Key(type, slugOrId, `${uniqueId}/${safeFileName}`);
 
   // 開発環境では署名付きURLの代わりに直接アップロードURLを返す
   // 本番: Cloudflare Workers の R2 バインディングから createPresignedUrl を使用

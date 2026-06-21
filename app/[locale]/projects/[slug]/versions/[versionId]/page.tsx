@@ -84,6 +84,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
   }
 
   const t = await getTranslations("Project");
+  const tCommon = await getTranslations("Common");
 
   const parsedLoaders = Array.isArray(version.loaders) ? version.loaders : (JSON.parse(version.loaders || "[]") as string[]);
   const parsedMcVersions = Array.isArray(version.mcVersions) ? version.mcVersions : (JSON.parse(version.mcVersions || "[]") as string[]);
@@ -93,7 +94,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link href={`/projects`} style={{ textDecoration: "none", color: "inherit" }}>
-          {t("title")}
+          {tCommon("projects")}
         </Link>
         <Link href={`/projects/${project.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
           {project.name}
@@ -110,7 +111,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
           startIcon={<ArrowBackIcon />}
           sx={{ mr: 2, color: "text.secondary" }}
         >
-          {t("back")}
+          {tCommon("back")}
         </LinkButton>
       </Box>
 
