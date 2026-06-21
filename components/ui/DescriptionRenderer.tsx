@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import MarkdownRenderer from "./MarkdownRenderer";
@@ -13,6 +13,9 @@ interface DescriptionRendererProps {
 }
 
 export default function DescriptionRenderer({ content, format = "markdown" }: DescriptionRendererProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const renderedContent = useMemo(() => {
     if (format === "pukiwiki") {
       try {
@@ -24,6 +27,10 @@ export default function DescriptionRenderer({ content, format = "markdown" }: De
     }
     return content;
   }, [content, format]);
+
+  if (!mounted) {
+    return <Box sx={{ p: 2, minHeight: 100 }} />; // Placeholder during SSR
+  }
 
   if (format === "plaintext") {
     return (

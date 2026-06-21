@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -23,6 +23,13 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
       iframe: ["src", "width", "height", "allow", "allowfullscreen", "frameborder", "title", "style"],
     },
   };
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return <Box sx={{ p: 2, minHeight: 100 }} />; // Placeholder during SSR
+  }
 
   return (
     <Box
