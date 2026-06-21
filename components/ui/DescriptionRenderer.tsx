@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import MarkdownRenderer from "./MarkdownRenderer";
 // @ts-ignore
-import { pukiwiki2md } from "@onozaty/pukiwiki-to-md";
+import puki2md from "puki2md";
 
 interface DescriptionRendererProps {
   content: string;
@@ -16,7 +16,7 @@ export default function DescriptionRenderer({ content, format = "markdown" }: De
   const renderedContent = useMemo(() => {
     if (format === "pukiwiki") {
       try {
-        return pukiwiki2md(content);
+        return puki2md(content);
       } catch (err) {
         console.error("PukiWiki to Markdown conversion failed:", err);
         return content; // Fallback
