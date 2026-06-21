@@ -18,6 +18,24 @@ export async function updateUserRole(targetUserId: string, newRole: "user" | "ad
   return { success: true };
 }
 
+export async function updateUsernameByAdmin(targetUserId: string, newUsername: string) {
+  const { db } = await getAdminDb();
+  const { userProfiles } = await import("@/db/schema");
+  
+  if (!newUsername || !/^[a-zA-Z0-9_-]+$/.test(newUsername)) {
+    throw new Error("Invalid username format. Use alphanumeric characters, hyphens, and underscores.");
+  }
+
+  const existing = await db.select().from(userProfiles).where(eq(userProfiles.username, newUsername)).get();
+  if (existing && existing.userId !== targetUserId) {
+    throw new Error("Username already taken by another user.");
+  }
+
+  await db.update(userProfiles).set({ username: newUsername }).where(eq(userProfiles.userId, targetUserId));
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
 export async function deleteUser(targetUserId: string) {
   const { db, session } = await getAdminDb();
 
