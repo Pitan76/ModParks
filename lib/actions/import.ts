@@ -29,7 +29,7 @@ export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
 
   // Get user info
   const userRes = await fetch("https://api.modrinth.com/v2/user", {
-    headers: { Authorization: settings.modrinthApiKey, "User-Agent": "ModParks/1.0" }
+    headers: { Authorization: settings.modrinthApiKey.trim(), "User-Agent": "ModParks/1.0" }
   });
   if (!userRes.ok) {
     const errorText = await userRes.text().catch(() => "Could not read error body");
@@ -43,7 +43,7 @@ export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
 
   // Get user projects
   const projRes = await fetch(`https://api.modrinth.com/v2/user/${userData.id}/projects`, {
-    headers: { Authorization: settings.modrinthApiKey, "User-Agent": "ModParks/1.0" }
+    headers: { Authorization: settings.modrinthApiKey.trim(), "User-Agent": "ModParks/1.0" }
   });
   if (!projRes.ok) {
     const errorText = await projRes.text().catch(() => "Could not read error body");

@@ -294,9 +294,9 @@ export async function updateIntegrations(modrinthKey: string, curseforgeKey: str
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userSettings).set({
-    modrinthApiKey: modrinthKey || null,
-    curseforgeApiKey: curseforgeKey || null,
-    curseforgeProjectId: curseforgeProjectId || null,
+    modrinthApiKey: modrinthKey?.trim() || null,
+    curseforgeApiKey: curseforgeKey?.trim() || null,
+    curseforgeProjectId: curseforgeProjectId?.trim() || null,
   }).where(eq(userSettings.userId, userId));
 
   revalidatePath("/settings");
