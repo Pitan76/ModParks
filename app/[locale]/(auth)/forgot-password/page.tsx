@@ -19,8 +19,6 @@ export default function ForgotPasswordPage() {
   const tAuth = useTranslations("Auth");
   const locale = useLocale();
 
-  const isEn = locale === "en";
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -34,14 +32,14 @@ export default function ForgotPasswordPage() {
       const res = await requestPasswordReset(formData);
       
       if (res?.error) {
-        if (res.error === "TOO_MANY_REQUESTS") setError(isEn ? "Too many requests. Please try again later." : "リクエストが多すぎます。しばらく経ってからお試しください。");
-        else if (res.error === "failedToSendEmail") setError(isEn ? "Failed to send email." : "メールの送信に失敗しました。");
-        else setError(isEn ? "An unexpected error occurred." : "予期せぬエラーが発生しました。");
+        if (res.error === "TOO_MANY_REQUESTS") setError(tAuth("login.errors.tooManyRequests"));
+        else if (res.error === "failedToSendEmail") setError(tAuth("login.errors.failedToSend"));
+        else setError(tAuth("login.errors.unexpected"));
       } else {
         setSuccess(true);
       }
     } catch (err) {
-      setError(isEn ? "An unexpected error occurred." : "予期せぬエラーが発生しました。");
+      setError(tAuth("login.errors.unexpected"));
     } finally {
       setLoading(false);
     }
@@ -59,13 +57,13 @@ export default function ForgotPasswordPage() {
         boxShadow: 1
       }}>
         <Typography component="h1" variant="h5" sx={{ mb: 3, fontWeight: "bold" }}>
-          {isEn ? "Reset Password" : "パスワードの再設定"}
+          {tAuth("login.forgotPasswordTitle")}
         </Typography>
 
         {success ? (
           <Box sx={{ width: "100%", textAlign: "center" }}>
             <Alert severity="success" sx={{ mb: 3 }}>
-              {isEn ? "If the email exists, a password reset link has been sent." : "メールアドレスが登録されている場合、パスワード再設定リンクを送信しました。"}
+              {tAuth("login.forgotPasswordSuccess")}
             </Alert>
             <Link href={`/${locale}/login`} style={{ textDecoration: "none" }}>
               <Button variant="outlined" fullWidth>
@@ -78,7 +76,7 @@ export default function ForgotPasswordPage() {
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {isEn ? "Enter your email address and we will send you a link to reset your password." : "登録しているメールアドレスを入力してください。パスワード再設定用のリンクを送信します。"}
+              {tAuth("login.forgotPasswordDesc")}
             </Typography>
 
             <TextField
@@ -101,13 +99,13 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               sx={{ mt: 3, mb: 2, py: 1.5 }}
             >
-              {loading ? (isEn ? "Sending..." : "送信中...") : (isEn ? "Send Reset Link" : "再設定リンクを送信")}
+              {loading ? tAuth("login.sending") : tAuth("login.sendResetLink")}
             </Button>
             
             <Box sx={{ textAlign: "center" }}>
               <Link href={`/${locale}/login`} style={{ textDecoration: "none" }}>
                 <Typography variant="body2" color="primary">
-                  {isEn ? "Back to Login" : "ログイン画面に戻る"}
+                  {tAuth("login.backToLogin")}
                 </Typography>
               </Link>
             </Box>
