@@ -130,8 +130,8 @@
       "report": "Report"
     },
     "header": {
-      "publishedAt": "Published: {date}",
-      "updatedAt": "Updated: {date}",
+      "publishedAt": "{date}",
+      "updatedAt": "{date}",
       "addVersion": "Add Version"
     },
     "versions": "Versions",

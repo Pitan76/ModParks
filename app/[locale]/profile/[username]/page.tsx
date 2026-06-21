@@ -34,6 +34,7 @@ import CollectionCard from "@/components/list/CollectionCard";
 import { formatCompactNumber } from "@/lib/utils/format";
 import PaginationControls from "@/components/ui/PaginationControls";
 import Tooltip from "@mui/material/Tooltip";
+import { DownloadLabel } from "@/components/ui/ProjectInfoLabels";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -215,18 +216,20 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                 </Box>
               )}
 
-              <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
-                <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{displayTotalProjects}</Box> {tCommon("projects")}
-                </Typography>
-
-                <Tooltip title={`ModParks: ${formatCompactNumber(nativeDownloads, locale)}, Modrinth: ${formatCompactNumber(modrinthDownloads, locale)}, CurseForge: ${formatCompactNumber(curseforgeDownloads, locale)}`} arrow placement="top">
-                  <Typography variant="body2" color="text.secondary" sx={{ cursor: "pointer", borderBottom: "1px dotted", borderColor: "divider" }}>
-                    <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>
-                      {formatCompactNumber(totalDownloads, locale)}
-                    </Box> {tCommon("downloads")}
-                  </Typography>
-                </Tooltip>
+              <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <DownloadLabel 
+                    downloads={nativeDownloads} 
+                    totalDownloads={totalDownloads} 
+                    externalDownloads={{ native: nativeDownloads, modrinth: modrinthDownloads, curseforge: curseforgeDownloads }} 
+                    textVariant="body2" 
+                    textColor="text.primary" 
+                    iconColor="text.secondary"
+                    iconSize={18} 
+                    sx={{ '& .MuiTypography-root': { fontWeight: 800 } }}
+                  />
+                  <Typography variant="body2" color="text.secondary">{tCommon("downloads")}</Typography>
+                </Box>
 
                 <Typography variant="body2" color="text.secondary">
                   <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> {tCommon("followers")}
@@ -300,7 +303,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 0 }}>
-          {t("projects")}
+          {t("projects")} <Box component="span" sx={{ color: "text.secondary", fontSize: "1.1rem", fontWeight: "normal", ml: 0.5 }}>({displayTotalProjects})</Box>
         </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
           <ProfileSortSelect />

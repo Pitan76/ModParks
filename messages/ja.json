@@ -149,8 +149,8 @@
       "report": "通報"
     },
     "header": {
-      "publishedAt": "公開: {date}",
-      "updatedAt": "更新: {date}",
+      "publishedAt": "{date}",
+      "updatedAt": "{date}",
       "addVersion": "新バージョンを追加"
     },
     "versions": "バージョン",
