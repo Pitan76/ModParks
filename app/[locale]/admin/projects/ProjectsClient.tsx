@@ -14,6 +14,7 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Link } from "@/i18n/routing";
 import { adminDeleteProject } from "@/lib/actions/admin";
@@ -86,6 +87,9 @@ export default function ProjectsClient({ projects }: { projects: AdminProject[] 
                   </TableCell>
                   <TableCell>{createdDate.toLocaleDateString()}</TableCell>
                   <TableCell align="right">
+                    <IconButton component={Link} href={`/projects/${project.slug}/edit`} color="secondary" title="Manage Project">
+                      <EditIcon fontSize="small" />
+                    </IconButton>
                     <IconButton component={Link} href={`/projects/${project.slug}`} color="primary" title="View Project">
                       <OpenInNewIcon fontSize="small" />
                     </IconButton>
