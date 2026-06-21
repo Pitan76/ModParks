@@ -172,7 +172,26 @@ export async function changePassword(oldPass: string, newPass: string, totpToken
 export async function deleteAccount() {
   const { db, userId } = await getAuthenticatedDb();
 
-  const res = await db.update(users).set({ deletedAt: new Date() }).where(eq(users.id, userId)).returning();
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+  if (!user) return { success: false };
+
+  const timestamp = Date.now();
+  const scrambledEmail = user.email ? `deleted_${timestamp}_${user.email}` : null;
+  const scrambledGithubId = user.githubId ? `deleted_${timestamp}_${user.githubId}` : null;
+
+  await db.update(users).set({ 
+    deletedAt: new Date(),
+    email: scrambledEmail,
+    githubId: scrambledGithubId
+  }).where(eq(users.id, userId));
+
+  const profile = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).get();
+  if (profile) {
+    await db.update(userProfiles).set({
+      username: `deleted_${timestamp}_${profile.username}`
+    }).where(eq(userProfiles.userId, userId));
+  }
+
   return { success: true };
 }
 

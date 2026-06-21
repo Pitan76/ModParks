@@ -58,13 +58,45 @@ export async function updateUsernameByAdmin(targetUserId: string, newUsername: s
 
 export async function deleteUser(targetUserId: string) {
   const { db, session } = await getAdminDb();
+  const { userProfiles } = await import("@/db/schema");
 
   if (targetUserId === session.user.id) {
     throw new Error("Cannot delete yourself");
   }
 
-  // Soft delete by setting deletedAt
-  await db.update(users).set({ deletedAt: new Date() }).where(eq(users.id, targetUserId));
+  const user = await db.select().from(users).where(eq(users.id, targetUserId)).get();
+  if (!user) throw new Error("User not found");
+
+  const timestamp = Date.now();
+  const scrambledEmail = user.email ? `deleted_${timestamp}_${user.email}` : null;
+  const scrambledGithubId = user.githubId ? `deleted_${timestamp}_${user.githubId}` : null;
+
+  // Soft delete by setting deletedAt and scrambling unique fields so they can be reused
+  await db.update(users).set({ 
+    deletedAt: new Date(),
+    email: scrambledEmail,
+    githubId: scrambledGithubId
+  }).where(eq(users.id, targetUserId));
+
+  // Scramble username as well to free it up
+  const profile = await db.select().from(userProfiles).where(eq(userProfiles.userId, targetUserId)).get();
+  if (profile) {
+    await db.update(userProfiles).set({
+      username: `deleted_${timestamp}_${profile.username}`
+    }).where(eq(userProfiles.userId, targetUserId));
+  }
+
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
+export async function purgeDeletedUsers() {
+  const { db } = await getAdminDb();
+  const { isNotNull } = await import("drizzle-orm");
+
+  // Hard delete all users where deletedAt is not null
+  await db.delete(users).where(isNotNull(users.deletedAt));
+
   revalidatePath("/admin/users");
   return { success: true };
 }
