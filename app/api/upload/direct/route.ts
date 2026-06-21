@@ -39,6 +39,13 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
+    const contentLengthStr = req.headers.get("content-length");
+    const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : 0;
+    
+    if (contentLength > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 413 });
+    }
+
     const contentType = req.headers.get("content-type") || "application/octet-stream";
     
     if (!req.body) {
