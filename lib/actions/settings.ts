@@ -162,7 +162,7 @@ export async function changePassword(oldPass: string, newPass: string, totpToken
     if (delta === null) return { error: "INVALID_CODE" };
   }
 
-  const hashed = await bcrypt.hash(newPass, 12);
+  const hashed = await bcrypt.hash(newPass, 8);
   await db.update(users).set({ passwordHash: hashed }).where(eq(users.id, userId));
 
   revalidatePath("/settings");
