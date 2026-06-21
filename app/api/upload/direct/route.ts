@@ -40,13 +40,12 @@ export async function PUT(req: NextRequest) {
 
   try {
     const contentType = req.headers.get("content-type") || "application/octet-stream";
-    const body = await req.arrayBuffer();
     
-    if (!body || body.byteLength === 0) {
+    if (!req.body) {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    await uploadToR2(R2, key, body, contentType);
+    await uploadToR2(R2, key, req.body, contentType);
 
     return NextResponse.json({ success: true, key });
   } catch (err: any) {

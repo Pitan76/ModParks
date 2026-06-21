@@ -51,12 +51,23 @@ export async function getD1(): Promise<D1Database> {
   return db;
 }
 
+const globalForDb = globalThis as unknown as {
+  cachedDb?: DrizzleD1Database<typeof schema>;
+};
+
 /**
  * D1バインディングの取得と Drizzle ORM インスタンスの生成をまとめて行うヘルパー。
  * Server Action やルートハンドラで `const db = await getDatabase();` の1行で利用できます。
+ * Cloudflare Workersの128MBメモリ制限対策として、Drizzleインスタンスをグローバルにキャッシュします。
  */
 export async function getDatabase(): Promise<DrizzleD1Database<typeof schema>> {
+  if (globalForDb.cachedDb) {
+    return globalForDb.cachedDb;
+  }
+  
   const d1 = await getD1();
-  return getDb(d1);
+  const db = getDb(d1);
+  globalForDb.cachedDb = db;
+  return db;
 }
 
