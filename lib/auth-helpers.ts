@@ -24,3 +24,24 @@ export async function getAdminDb() {
   if (user?.role !== "admin") throw new Error("Forbidden");
   return { db, session, userId };
 }
+
+/**
+ * プロジェクトの編集権限（オーナー、メンバー、管理者）を確認するヘルパー。
+ * 権限がない場合は "Forbidden" エラーをスローします。
+ */
+export async function assertProjectAccess(db: any, project: { id: string; authorId: string }, session: any) {
+  if (project.authorId === session.user.id || session.user.role === "admin") {
+    return true; // Author or Admin
+  }
+  const { projectMembers } = await import("@/db/schema");
+  const { eq, and } = await import("drizzle-orm");
+  const member = await db.select()
+    .from(projectMembers)
+    .where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id)))
+    .get();
+  
+  if (!member) {
+    throw new Error("Forbidden");
+  }
+  return true; // Member
+}

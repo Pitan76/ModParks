@@ -1,6 +1,6 @@
 "use server";
 
-import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
 import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions, users, projectMembers } from "@/db/schema";
 import { createVersionSchema } from "@/lib/validations";
@@ -37,7 +37,7 @@ export async function getVersionById(versionId: string) {
  * @throws Error プロジェクトが見つからない場合
  */
 export async function createVersion(projectSlug: string, formData: FormData) {
-  const { db, userId } = await getAuthenticatedDb();
+  const { db, session } = await getAuthenticatedDb();
 
   const project = await db
     .select()
@@ -46,9 +46,7 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     .get();
 
   if (!project) throw new Error("Project not found");
-  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId))).get();
-  const userRecord = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
-  if (project.authorId !== userId && !member && userRecord?.role !== "admin") throw new Error("Forbidden");
+  await assertProjectAccess(db, project, session);
 
   const raw = {
     versionNumber: formData.get("versionNumber"),
@@ -132,14 +130,12 @@ export async function createVersion(projectSlug: string, formData: FormData) {
  * プロジェクトのバージョン情報を更新する Server Action
  */
 export async function updateVersion(versionId: string, projectSlug: string, formData: FormData) {
-  const { db, userId } = await getAuthenticatedDb();
+  const { db, session } = await getAuthenticatedDb();
 
   const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
   if (!project) throw new Error("Project not found");
 
-  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId))).get();
-  const userRecord = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
-  if (project.authorId !== userId && !member && userRecord?.role !== "admin") throw new Error("Forbidden");
+  await assertProjectAccess(db, project, session);
 
   const raw = {
     versionNumber: formData.get("versionNumber"),
@@ -182,7 +178,7 @@ export async function updateVersion(versionId: string, projectSlug: string, form
  * @returns { success: boolean } または { error: string }
  */
 export async function deleteVersion(versionId: string, projectSlug: string) {
-  const { db, userId } = await getAuthenticatedDb();
+  const { db, session } = await getAuthenticatedDb();
 
   const project = await db
     .select()
@@ -192,25 +188,11 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
 
   if (!project) return { error: "Project not found" };
 
-  // 権限チェック: オーナー、メンバー、または管理者のみ削除可能
-  let isAuthorized = false;
-  if (project.authorId === userId) {
-    isAuthorized = true;
-  } else {
-    // 管理者チェック
-    const userRecord = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
-    if (userRecord?.role === "admin") {
-      isAuthorized = true;
-    } else {
-      // メンバーチェック
-      const memberRecord = await db.select().from(projectMembers).where(eq(projectMembers.projectId, project.id)).all();
-      if (memberRecord.some(m => m.userId === userId)) {
-        isAuthorized = true;
-      }
-    }
+  try {
+    await assertProjectAccess(db, project, session);
+  } catch (e) {
+    return { error: "Forbidden" };
   }
-
-  if (!isAuthorized) return { error: "Forbidden" };
 
   const version = await db
     .select()

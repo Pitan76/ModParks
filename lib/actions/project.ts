@@ -1,6 +1,6 @@
 "use server";
 
-import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
 import { projects, projectTags, projectMembers, users, userProfiles, versions, userSettings } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
@@ -90,11 +90,7 @@ export async function updateProject(projectId: string, formData: FormData) {
 
   if (!project) throw new Error("Project not found");
 
-  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  
-  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
-    throw new Error("Forbidden");
-  }
+  await assertProjectAccess(db, project, session);
 
   const raw = {
     name:        formData.get("name"),
@@ -445,10 +441,7 @@ export async function updateProjectIcon(projectId: string, iconUrl: string) {
   const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
   if (!project) throw new Error("Not found");
 
-  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
-    throw new Error("Forbidden");
-  }
+  await assertProjectAccess(db, project, session);
 
   await db.update(projects).set({ iconUrl, updatedAt: new Date() }).where(eq(projects.id, projectId));
   revalidatePath(`/[locale]/projects/[slug]`, "page");
@@ -519,10 +512,7 @@ export async function syncExternalProjectData(projectId: string) {
   const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
   if (!project) throw new Error("Project not found");
 
-  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
-    throw new Error("Forbidden");
-  }
+  await assertProjectAccess(db, project, session);
 
   const settings = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, session.user.id) });
   
