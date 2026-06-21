@@ -126,15 +126,42 @@ export const authConfig = {
       },
     }),
   ],
+  events: {
+    async createUser({ user }: { user: any }) {
+      const { getDatabase } = await import("@/lib/db");
+      const { userProfiles, userSettings } = await import("@/db/schema");
+      const db = await getDatabase();
+      
+      try {
+        await db.insert(userProfiles).values({
+          userId: user.id as string,
+          username: user.id as string,
+          displayName: user.name || "Unknown",
+          avatarUrl: user.image,
+        }).run();
+        
+        await db.insert(userSettings).values({
+          userId: user.id as string,
+        }).run();
+      } catch (e) {
+        console.error("Failed to create profile/settings for new user:", e);
+      }
+    }
+  },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, profile }: { user: any, account?: any, profile?: any }) {
       if (user?.email) {
         const { getDatabase } = await import("@/lib/db");
-        const { users } = await import("@/db/schema");
+        const { users, userProfiles } = await import("@/db/schema");
         const { eq } = await import("drizzle-orm");
         const db = await getDatabase();
         const dbUser = await db.select().from(users).where(eq(users.email, user.email as string)).get();
         
+        // マジックリンクログイン時、ユーザーが存在しない場合は新規作成させず登録画面へリダイレクト
+        if (account?.provider === "resend" && !dbUser) {
+          return "/ja/register";
+        }
+
         // 退会済みユーザーのログインを拒否
         if (dbUser?.deletedAt) {
           return false;
@@ -154,7 +181,7 @@ export const authConfig = {
       }
       return true;
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger, session }: { token: any, user?: any, trigger?: any, session?: any }) {
       if (user) {
         token.id = user.id;
         token.username = (user as any).username ?? null;
@@ -164,7 +191,7 @@ export const authConfig = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any, token?: any }) {
       if (session.user) {
         session.user.id = (token.sub ?? token.id) as string;
         session.user.username = (token.username ?? null) as string | null;
