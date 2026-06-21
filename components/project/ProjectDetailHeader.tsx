@@ -14,6 +14,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { formatCompactNumber } from "@/lib/utils/format";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
 import AddToCollectionButton from "./AddToCollectionButton";
+import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 
 /**
  * プロジェクト詳細のヘッダーおよび説明文を表示するコンポーネント
@@ -63,19 +64,6 @@ export default function ProjectDetailHeader({
 }: ProjectDetailHeaderProps) {
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
-  const format = useFormatter();
-  const locale = useLocale();
-
-  const localDownloads = p.downloads || 0;
-  const extDl = (p.externalDownloads as Record<string, number> | undefined) || {};
-  const modrinthDl = extDl.modrinth || 0;
-  const curseforgeDl = extDl.curseforge || 0;
-  const totalDownloads = p.totalDownloads || localDownloads + modrinthDl + curseforgeDl;
-
-  const modparksLabel = tProject("stats.modparks");
-  let tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`;
-  if (modrinthDl > 0) tooltipText += `, Modrinth: ${formatCompactNumber(modrinthDl, locale)}`;
-  if (curseforgeDl > 0) tooltipText += `, CurseForge: ${formatCompactNumber(curseforgeDl, locale)}`;
 
   return (
     <>
@@ -126,49 +114,20 @@ export default function ProjectDetailHeader({
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-            <LinkButton
-              href={`/profile/${p.author.username}`}
-              variant="text"
-              sx={{ 
-                p: 0, 
-                minWidth: "auto", 
-                textTransform: "none", 
-                color: "text.secondary", 
-                display: "flex", 
-                alignItems: "center", 
-                gap: 1,
-                "&:hover": { color: "primary.main", bgcolor: "transparent" }
-              }}
-            >
-              <Avatar src={p.author.avatarUrl ?? undefined} sx={{ width: 22, height: 22 }} />
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {p.author.displayName}
-              </Typography>
-            </LinkButton>
+            <AuthorLabel author={p.author} />
             <Typography variant="body2" color="text.disabled">·</Typography>
-            <Tooltip title={tooltipText} arrow placement="top">
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, cursor: "help" }}>
-                <DownloadIcon sx={{ fontSize: 14, color: "text.disabled" }} />
-                <Typography variant="body2" color="text.disabled">
-                  {formatCompactNumber(totalDownloads, locale)}
-                </Typography>
-              </Box>
-            </Tooltip>
+            <DownloadLabel 
+              downloads={p.downloads} 
+              totalDownloads={p.totalDownloads} 
+              externalDownloads={p.externalDownloads} 
+              modrinthId={p.modrinthId} 
+              curseforgeId={p.curseforgeId} 
+            />
           </Box>
           
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, flexWrap: "wrap" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
-              <AccessTimeIcon sx={{ fontSize: 14 }} />
-              <Typography variant="caption" sx={{ whiteSpace: "nowrap" }}>
-                {tProject("header.publishedAt", { date: format.dateTime(new Date(p.createdAt), { dateStyle: "short" }) })}
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
-              <EditIcon sx={{ fontSize: 14 }} />
-              <Typography variant="caption" sx={{ whiteSpace: "nowrap" }}>
-                {tProject("header.updatedAt", { date: format.dateTime(new Date(p.updatedAt), { dateStyle: "short" }) })}
-              </Typography>
-            </Box>
+            <DateLabel date={p.createdAt} type="published" />
+            <DateLabel date={p.updatedAt} type="updated" />
             </Box>
           </Box>
         </Box>

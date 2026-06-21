@@ -14,8 +14,8 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Tooltip from "@mui/material/Tooltip";
 import { Link, useRouter } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
-import { formatCompactNumber } from "@/lib/utils/format";
-import { useLocale, useTranslations, useFormatter } from "next-intl";
+import { useTranslations } from "next-intl";
+import { DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 
 /**
  * プロジェクト一覧のカードに表示するデータの型定義
@@ -59,10 +59,7 @@ const TYPE_LABEL = {
  * @param props ProjectCardProps プロジェクトのメタ情報や作者情報を含む
  */
 export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
-  const locale = useLocale();
   const tTags = useTranslations("Tags");
-  const tProject = useTranslations("Project");
-  const format = useFormatter();
   const router = useRouter();
   const isGrid = layout === "grid";
 
@@ -73,25 +70,6 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
 
   // Ensure tags is always an array to avoid undefined errors
   const safeTags: string[] = project.tags ?? [];
-
-  const localDownloads = project.downloads || 0;
-  const extDl = (project.externalDownloads as Record<string, number> | undefined) || {};
-  const modrinthDl = extDl.modrinth || 0;
-  const curseforgeDl = extDl.curseforge || 0;
-  const totalDownloads = project.totalDownloads || localDownloads + modrinthDl + curseforgeDl;
-
-  const modparksLabel = tProject("stats.modparks");
-  let tooltipText = `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`;
-  
-  if (modrinthDl > 0) tooltipText += `, Modrinth: ${formatCompactNumber(modrinthDl, locale)}`;
-  if (curseforgeDl > 0) tooltipText += `, CurseForge: ${formatCompactNumber(curseforgeDl, locale)}`;
-
-  if (modrinthDl === 0 && curseforgeDl === 0 && (extDl.native || 0) > 0) {
-    let extLabel = tProject("stats.external");
-    if (project.modrinthId && !project.curseforgeId) extLabel = "Modrinth";
-    else if (!project.modrinthId && project.curseforgeId) extLabel = "CurseForge";
-    tooltipText += `, ${extLabel}: ${formatCompactNumber(extDl.native || 0, locale)}`;
-  }
 
   return (
     <Card id={`project-card-${project.slug}`} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
@@ -169,9 +147,8 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 <Typography variant="caption" color="text.secondary">
                   by {project.authorDisplayName || project.authorUsername || "Unknown"}
                 </Typography>
-                <Typography variant="caption" color="text.disabled">
-                  • {format.dateTime(new Date(project.updatedAt), { dateStyle: "short" })}
-                </Typography>
+                <Typography variant="caption" color="text.disabled">•</Typography>
+                <DateLabel date={project.updatedAt} type="updated" iconSize={12} textVariant="caption" textColor="text.disabled" />
               </Box>
             </Box>
           </Box>
@@ -189,14 +166,17 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
             }}
           >
-            <Tooltip title={Object.keys(extDl).length > 0 ? tooltipText : `${modparksLabel}: ${formatCompactNumber(localDownloads, locale)}`} arrow placement="top">
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary", cursor: "help" }}>
-                <DownloadIcon sx={{ fontSize: "1rem" }} />
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  {formatCompactNumber(totalDownloads, locale)}
-                </Typography>
-              </Box>
-            </Tooltip>
+            <DownloadLabel 
+              downloads={project.downloads} 
+              totalDownloads={project.totalDownloads} 
+              externalDownloads={project.externalDownloads} 
+              modrinthId={project.modrinthId} 
+              curseforgeId={project.curseforgeId} 
+              iconSize="1rem"
+              textVariant="body2"
+              textColor="text.secondary"
+              iconColor="text.secondary"
+            />
             
             {safeTags.length > 0 && (
               <Box sx={{ display: "flex", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
