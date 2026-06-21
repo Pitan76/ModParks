@@ -21,7 +21,7 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
       role: users.role,
       createdAt: users.createdAt,
       deletedAt: users.deletedAt
-  }).from(users).leftJoin(userProfiles, eq(users.id, userProfiles.userId)).where(isNull(users.deletedAt)).orderBy(desc(users.createdAt)).all() as any[];
+  }).from(users).leftJoin(userProfiles, eq(users.id, userProfiles.userId)).orderBy(desc(users.createdAt)).all() as any[];
 
   return (
     <>
