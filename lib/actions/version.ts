@@ -137,6 +137,10 @@ export async function updateVersion(versionId: string, projectSlug: string, form
 
   await assertProjectAccess(db, project, session);
 
+  const version = await db.select().from(versions).where(eq(versions.id, versionId)).get();
+  if (!version) throw new Error("Version not found");
+  if (version.projectId !== project.id) throw new Error("Forbidden: Version does not belong to this project");
+
   const raw = {
     versionNumber: formData.get("versionNumber"),
     mcVersions:    formData.getAll("mcVersions"),
@@ -201,6 +205,7 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
     .get();
 
   if (!version) return { error: "Version not found" };
+  if (version.projectId !== project.id) return { error: "Forbidden: Version does not belong to this project" };
 
   // TODO: 必要に応じて R2 ストレージからファイルを削除する処理をここに追加 (deleteFromR2 など)
   

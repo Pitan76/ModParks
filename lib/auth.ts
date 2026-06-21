@@ -199,6 +199,26 @@ export const authConfig = {
         session.user.displayName = (token.displayName ?? null) as string | null;
         session.user.avatarUrl = (token.avatarUrl ?? null) as string | null;
         session.user.role = (token.role ?? "user") as string;
+        
+        // Always fetch the latest role and status from the DB to prevent stale cache vulnerabilities
+        try {
+          const { getDatabase } = await import("@/lib/db");
+          const db = await getDatabase();
+          if (db) {
+            const { users } = await import("@/db/schema");
+            const { eq } = await import("drizzle-orm");
+            const dbUser = await db.select({ role: users.role, deletedAt: users.deletedAt }).from(users).where(eq(users.id, session.user.id)).get();
+            if (dbUser) {
+              session.user.role = dbUser.role as string;
+              if (dbUser.deletedAt) {
+                // Return an empty session if the user is deleted
+                return { ...session, user: undefined } as any;
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to refresh user role in session callback", e);
+        }
       }
       return session;
     },
