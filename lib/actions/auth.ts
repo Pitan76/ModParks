@@ -146,3 +146,88 @@ export async function registerUser(formData: FormData) {
 
   return { success: true };
 }
+
+export async function requestPasswordReset(formData: FormData) {
+  const email = formData.get("email") as string;
+  const locale = (formData.get("locale") as string) || "ja";
+
+  const { checkRateLimit } = await import("@/lib/rate-limit");
+  const rlRes = await checkRateLimit("reset_password", 3, 15 * 60 * 1000);
+  if (!rlRes.success) return { error: "TOO_MANY_REQUESTS" };
+
+  if (!email) return { error: "emailRequired" };
+
+  const db = await getDatabase();
+  const user = await db.select().from(users).where(eq(users.email, email)).get();
+  
+  if (!user) {
+    // Return success even if user doesn't exist to prevent email enumeration
+    return { success: true };
+  }
+
+  const token = crypto.randomUUID() + crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, user.id)).run();
+  await db.insert(passwordResetTokens).values({
+    userId: user.id,
+    token,
+    expiresAt,
+  }).run();
+
+  const link = `${SITE_URL}/${locale}/reset-password?token=${token}`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.AUTH_RESEND_KEY}`
+    },
+    body: JSON.stringify({
+      from: "no-reply@modparks.pitan76.net",
+      to: email,
+      subject: locale === "en" ? "Reset your password" : "パスワードの再設定",
+      html: `
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h2>${locale === "en" ? "Reset your password" : "パスワードの再設定"}</h2>
+          <p>${locale === "en" ? "Click the button below to reset your password. This link will expire in 1 hour." : "下のボタンをクリックしてパスワードを再設定してください。このリンクの有効期限は1時間です。"}</p>
+          <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px;">
+            ${locale === "en" ? "Reset Password" : "パスワードを再設定する"}
+          </a>
+        </div>
+      `
+    })
+  });
+
+  if (!res.ok) {
+    console.error("Failed to send reset email", await res.text());
+    return { error: "failedToSendEmail" };
+  }
+
+  return { success: true };
+}
+
+export async function resetPasswordWithToken(formData: FormData) {
+  const token = formData.get("token") as string;
+  const newPassword = formData.get("password") as string;
+
+  if (!token || !newPassword) return { error: "invalidData" };
+
+  const { checkRateLimit } = await import("@/lib/rate-limit");
+  const rlRes = await checkRateLimit("reset_password_confirm", 5, 15 * 60 * 1000);
+  if (!rlRes.success) return { error: "TOO_MANY_REQUESTS" };
+
+  const db = await getDatabase();
+  const resetToken = await db.select().from(passwordResetTokens).where(eq(passwordResetTokens.token, token)).get();
+
+  if (!resetToken) return { error: "invalidToken" };
+  if (resetToken.expiresAt.getTime() < Date.now()) return { error: "tokenExpired" };
+
+  const { default: bcrypt } = await import("bcryptjs");
+  const passwordHash = await bcrypt.hash(newPassword, 8); // Using 8 to avoid Cloudflare Workers 50ms CPU limit
+
+  await db.update(users).set({ passwordHash }).where(eq(users.id, resetToken.userId)).run();
+  await db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, resetToken.id)).run();
+
+  return { success: true };
+}
