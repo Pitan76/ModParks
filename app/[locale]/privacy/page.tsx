@@ -17,7 +17,7 @@ export default async function PrivacyPolicyPage({ params }: { params: Promise<{ 
 
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
-      <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
+      <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: "bold" }}>
         {t("privacy.title")}
       </Typography>
       <Box sx={{ mt: 4 }}>

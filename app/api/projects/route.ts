@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       modrinthId,
       curseforgeId,
       issueTrackerUrl,
-      externalDownloads,
+      externalDownloads: {}, // Expects an object, not a number
       commentsEnabled,
       sourceIdeaId: ideaId,
     }).run();

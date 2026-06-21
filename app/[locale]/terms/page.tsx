@@ -17,7 +17,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
 
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
-      <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
+      <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: "bold" }}>
         {t("terms.title")}
       </Typography>
       <Box sx={{ mt: 4 }}>
