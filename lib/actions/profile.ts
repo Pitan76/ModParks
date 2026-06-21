@@ -31,3 +31,43 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/profile");
   return { success: true };
 }
+
+export async function getFollowList(targetUsername: string, type: "followers" | "following") {
+  const { getDb, getD1 } = await import("@/lib/db");
+  const { users, userProfiles, userFollows } = await import("@/db/schema");
+  const { eq, and, isNull } = await import("drizzle-orm");
+
+  const d1 = await getD1();
+  const db = getDb(d1);
+
+  const targetProfile = await db.select().from(userProfiles).where(eq(userProfiles.username, targetUsername)).get();
+  if (!targetProfile) throw new Error("User not found");
+
+  if (type === "followers") {
+    // Users who follow target
+    return await db.select({
+      id: users.id,
+      username: userProfiles.username,
+      displayName: userProfiles.displayName,
+      avatarUrl: userProfiles.avatarUrl,
+    })
+      .from(userFollows)
+      .innerJoin(users, eq(userFollows.followerId, users.id))
+      .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(and(eq(userFollows.followingId, targetProfile.userId), isNull(users.deletedAt)))
+      .all();
+  } else {
+    // Users who target follows
+    return await db.select({
+      id: users.id,
+      username: userProfiles.username,
+      displayName: userProfiles.displayName,
+      avatarUrl: userProfiles.avatarUrl,
+    })
+      .from(userFollows)
+      .innerJoin(users, eq(userFollows.followingId, users.id))
+      .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(and(eq(userFollows.followerId, targetProfile.userId), isNull(users.deletedAt)))
+      .all();
+  }
+}

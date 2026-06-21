@@ -8,6 +8,19 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemText from "@mui/material/ListItemText";
+import Avatar from "@mui/material/Avatar";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Link as RoutingLink } from "@/i18n/routing";
+import { getFollowList } from "@/lib/actions/profile";
 
 interface Props {
   targetUsername: string;
@@ -18,12 +31,23 @@ interface Props {
   isOwner?: boolean;
 }
 
+interface UserSummary {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+}
+
 export default function FollowUserButton({ targetUsername, initialIsFollowing, initialFollowersCount, initialFollowingCount, isLoggedIn, isOwner = false }: Props) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [followersCount, setFollowersCount] = useState(initialFollowersCount);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const t = useTranslations("Common");
+
+  const [dialogOpen, setDialogOpen] = useState<"followers" | "following" | null>(null);
+  const [dialogUsers, setDialogUsers] = useState<UserSummary[]>([]);
+  const [dialogLoading, setDialogLoading] = useState(false);
 
   const handleToggleFollow = async () => {
     if (!isLoggedIn) {
@@ -45,29 +69,98 @@ export default function FollowUserButton({ targetUsername, initialIsFollowing, i
     }
   };
 
+  const openDialog = async (type: "followers" | "following") => {
+    setDialogOpen(type);
+    setDialogLoading(true);
+    try {
+      const users = await getFollowList(targetUsername, type);
+      setDialogUsers(users as any);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDialogLoading(false);
+    }
+  };
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-      <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap", alignItems: "center" }}>
-        <Typography variant="body2" color="text.secondary">
-          <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> {t("followers")}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{initialFollowingCount}</Box> {t("following")}
-        </Typography>
+    <>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap", alignItems: "center" }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            onClick={() => openDialog("followers")}
+            sx={{ cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+          >
+            <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> {t("followers")}
+          </Typography>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            onClick={() => openDialog("following")}
+            sx={{ cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+          >
+            <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{initialFollowingCount}</Box> {t("following")}
+          </Typography>
+        </Box>
+        {!isOwner && (
+          <Button 
+            variant={isFollowing ? "outlined" : "contained"} 
+            color={isFollowing ? "inherit" : "primary"}
+            startIcon={isFollowing ? <PersonRemoveIcon /> : <PersonAddIcon />}
+            onClick={handleToggleFollow}
+            disabled={loading}
+            size="small"
+            sx={{ width: "fit-content", mt: 1 }}
+          >
+            {isFollowing ? t("unfollow") : t("follow")}
+          </Button>
+        )}
       </Box>
-      {!isOwner && (
-        <Button 
-          variant={isFollowing ? "outlined" : "contained"} 
-          color={isFollowing ? "inherit" : "primary"}
-          startIcon={isFollowing ? <PersonRemoveIcon /> : <PersonAddIcon />}
-          onClick={handleToggleFollow}
-          disabled={loading}
-          size="small"
-          sx={{ width: "fit-content", mt: 1 }}
-        >
-          {isFollowing ? t("unfollow") : t("follow")}
-        </Button>
-      )}
-    </Box>
+
+      <Dialog open={!!dialogOpen} onClose={() => setDialogOpen(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ m: 0, p: 2 }}>
+          {dialogOpen === "followers" ? t("followers") : t("following")}
+          <IconButton
+            onClick={() => setDialogOpen(null)}
+            sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 0 }}>
+          {dialogLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : dialogUsers.length === 0 ? (
+            <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
+              No users found.
+            </Box>
+          ) : (
+            <List sx={{ pt: 0 }}>
+              {dialogUsers.map((u) => (
+                <ListItem 
+                  key={u.id} 
+                  component={RoutingLink as any} 
+                  href={`/profile/${u.username}`} 
+                  onClick={() => setDialogOpen(null)}
+                  sx={{ color: "inherit", textDecoration: "none", "&:hover": { bgcolor: "action.hover" } }}
+                >
+                  <ListItemAvatar>
+                    <Avatar src={u.avatarUrl || ""} />
+                  </ListItemAvatar>
+                  <ListItemText 
+                    primary={u.displayName || u.username} 
+                    secondary={`@${u.username}`} 
+                    primaryTypographyProps={{ fontWeight: 600 }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
