@@ -145,7 +145,7 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
             {p.tags.map((tag: string) => (
-              <Link key={tag} href={`/projects?tags=${encodeURIComponent(tag)}`} style={{ textDecoration: "none" }}>
+              <Link key={tag} href={`/projects?tags=${encodeURIComponent(tag)}`} prefetch={false} style={{ textDecoration: "none" }}>
                 <Chip
                   label={getTagLabel(tag)}
                   size="small"

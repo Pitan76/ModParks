@@ -64,7 +64,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
         </IconButton>
 
         {/* ロゴ (モバイルでのみ表示、デスクトップはサイドバーに表示) */}
-        <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
+        <Link href="/" prefetch={false} style={{ textDecoration: "none", color: "inherit" }}>
           <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", gap: 1 }}>
             <Box
               component="img"
@@ -109,7 +109,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
 
         {/* スマホ向け: 正方形のアイコンボタン */}
         <Box sx={{ display: { xs: "flex", sm: "none" }, ml: 0 }}>
-          <Link href="/projects/new" style={{ display: "flex", textDecoration: "none" }} id="nav-new-project-mobile">
+          <Link href="/projects/new" prefetch={false} style={{ display: "flex", textDecoration: "none" }} id="nav-new-project-mobile">
             <IconButton
               size="small"
               sx={{ 
