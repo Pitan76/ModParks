@@ -92,10 +92,13 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
           <Tab label={t("tabs.dependencies")} value={2} />
           {issueTrackerUrl && (
             <Tab 
-              label={t("tabs.issues")}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {t("tabs.issues")}
+                  <OpenInNewIcon sx={{ fontSize: '1rem' }} />
+                </Box>
+              }
               value={4}
-              icon={<OpenInNewIcon sx={{ fontSize: '1rem', ml: 0.5 }} />}
-              iconPosition="end"
             />
           )}
           {canEdit && (
