@@ -22,7 +22,7 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams?.get("token");
   
-  const tAuth = useTranslations("Auth");
+
   const locale = useLocale();
   const isEn = locale === "en";
 
