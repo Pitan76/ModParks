@@ -692,7 +692,13 @@
       "passwordMismatch": "新しいパスワードが一致しません",
       "setPassword": "パスワードの設定",
       "setBtn": "設定する",
-      "successSetPassword": "パスワードを設定しました"
+      "successSetPassword": "パスワードを設定しました",
+      "exportData": "データのエクスポート",
+      "exportDataDesc": "アカウントに関するデータを様々な形式でダウンロードできます。",
+      "exportJson": "JSON形式",
+      "exportCsv": "CSV形式",
+      "exportMd": "Markdown形式",
+      "exportTxt": "テキスト形式"
     }
   },
   "Legal": {

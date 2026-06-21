@@ -670,7 +670,13 @@
       "passwordMismatch": "New passwords do not match",
       "setPassword": "Set Password",
       "setBtn": "Set Password",
-      "successSetPassword": "Password has been set"
+      "successSetPassword": "Password has been set",
+      "exportData": "Export Data",
+      "exportDataDesc": "You can download your account data in various formats.",
+      "exportJson": "JSON Format",
+      "exportCsv": "CSV Format",
+      "exportMd": "Markdown Format",
+      "exportTxt": "Text Format"
     }
   },
   "Legal": {

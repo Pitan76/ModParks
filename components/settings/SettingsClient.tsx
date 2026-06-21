@@ -269,6 +269,10 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     setIsDeletingAccount(false);
   };
 
+  const handleExportData = (format: string) => {
+    window.open(`/api/user/export?format=${format}`, "_blank");
+  };
+
   const handleSetupTotp = async () => {
     const res = await generateTotpSecret();
     setTotpSetupUri(res.uri);
@@ -468,6 +472,19 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
               <TextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} required />
               {is2FAEnabled && <TextField label={t("security.verificationCode")} type="text" size="small" value={passwordTotpToken} onChange={e => setPasswordTotpToken(e.target.value)} required />}
               <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", height: 40 }}>{hasPassword ? t("account.updateBtn") : t("account.setBtn")}</Button>
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 4 }} />
+
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>{t("account.exportData")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.exportDataDesc")}</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 4 }}>
+              <Button variant="outlined" onClick={() => handleExportData("json")}>{t("account.exportJson")}</Button>
+              <Button variant="outlined" onClick={() => handleExportData("csv")}>{t("account.exportCsv")}</Button>
+              <Button variant="outlined" onClick={() => handleExportData("md")}>{t("account.exportMd")}</Button>
+              <Button variant="outlined" onClick={() => handleExportData("txt")}>{t("account.exportTxt")}</Button>
             </Box>
           </Box>
 
