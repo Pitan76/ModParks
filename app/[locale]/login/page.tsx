@@ -131,6 +131,13 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
           />
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
+            <Link href={`/${locale}/forgot-password`} style={{ textDecoration: "none" }}>
+              <Typography variant="body2" color="primary">
+                {tAuth("login.forgotPassword")}
+              </Typography>
+            </Link>
+          </Box>
 
           <Button
             type="submit"

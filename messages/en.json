@@ -337,6 +337,7 @@
       "loggingIn": "Logging in...",
       "loginWithGithub": "Log in with GitHub",
       "loginWithEmail": "Log in with Magic Link",
+      "forgotPassword": "Forgot your password?",
       "sendLink": "Send",
       "noAccount": "Don't have an account? ",
       "registerLink": "Register",

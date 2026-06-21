@@ -619,3 +619,22 @@ export const projectComments = sqliteTable("project_comments", {
   projectIdx: index("project_comments_project_idx").on(table.projectId),
   authorIdx: index("project_comments_author_idx").on(table.authorId),
 }));
+
+// ─── Password Reset Tokens ────────────────────────────────────────────────────
+
+export const passwordResetTokens = sqliteTable("password_reset_tokens", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  tokenIdx: index("password_reset_tokens_token_idx").on(table.token),
+  userIdx: index("password_reset_tokens_user_idx").on(table.userId),
+}));

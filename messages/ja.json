@@ -359,6 +359,7 @@
       "loggingIn": "ログイン中...",
       "loginWithGithub": "GitHub でログイン",
       "loginWithEmail": "マジックリンクでログイン",
+      "forgotPassword": "パスワードをお忘れですか？",
       "sendLink": "送信",
       "noAccount": "アカウントをお持ちでないですか？ ",
       "registerLink": "新規登録",
