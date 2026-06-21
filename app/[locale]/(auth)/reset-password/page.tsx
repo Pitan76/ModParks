@@ -22,27 +22,26 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams?.get("token");
   
-
+  const tAuth = useTranslations("Auth");
   const locale = useLocale();
-  const isEn = locale === "en";
 
   useEffect(() => {
     if (!token) {
-      setError(isEn ? "Invalid or missing token." : "無効なトークンです。");
+      setError(tAuth("login.errors.invalidToken"));
     }
-  }, [token, isEn]);
+  }, [token, tAuth]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!token) return;
 
     if (password !== confirmPassword) {
-      setError(isEn ? "Passwords do not match." : "パスワードが一致しません。");
+      setError(tAuth("login.errors.passwordsMismatch"));
       return;
     }
 
     if (password.length < 8) {
-      setError(isEn ? "Password must be at least 8 characters long." : "パスワードは8文字以上である必要があります。");
+      setError(tAuth("login.errors.passwordTooShort"));
       return;
     }
 
@@ -57,15 +56,15 @@ function ResetPasswordForm() {
       const res = await resetPasswordWithToken(formData);
       
       if (res?.error) {
-        if (res.error === "TOO_MANY_REQUESTS") setError(isEn ? "Too many requests. Please try again later." : "リクエストが多すぎます。しばらく経ってからお試しください。");
-        else if (res.error === "invalidToken") setError(isEn ? "Invalid token." : "無効なトークンです。");
-        else if (res.error === "tokenExpired") setError(isEn ? "Token has expired. Please request a new link." : "トークンの有効期限が切れています。再度リセットリンクを発行してください。");
-        else setError(isEn ? "An unexpected error occurred." : "予期せぬエラーが発生しました。");
+        if (res.error === "TOO_MANY_REQUESTS") setError(tAuth("login.errors.tooManyRequests"));
+        else if (res.error === "invalidToken") setError(tAuth("login.errors.invalidToken"));
+        else if (res.error === "tokenExpired") setError(tAuth("login.errors.tokenExpired"));
+        else setError(tAuth("login.errors.unexpected"));
       } else {
         setSuccess(true);
       }
     } catch (err) {
-      setError(isEn ? "An unexpected error occurred." : "予期せぬエラーが発生しました。");
+      setError(tAuth("login.errors.unexpected"));
     } finally {
       setLoading(false);
     }
@@ -75,11 +74,11 @@ function ResetPasswordForm() {
     return (
       <Box sx={{ width: "100%", textAlign: "center" }}>
         <Alert severity="success" sx={{ mb: 3 }}>
-          {isEn ? "Password has been reset successfully." : "パスワードが正常に再設定されました。"}
+          {tAuth("login.resetSuccess")}
         </Alert>
         <Link href={`/${locale}/login`} style={{ textDecoration: "none" }}>
           <Button variant="contained" fullWidth size="large">
-            {isEn ? "Go to Login" : "ログイン画面へ"}
+            {tAuth("login.goToLogin")}
           </Button>
         </Link>
       </Box>
@@ -92,7 +91,7 @@ function ResetPasswordForm() {
       
       <TextField
         name="password"
-        label={isEn ? "New Password" : "新しいパスワード"}
+        label={tAuth("login.newPassword")}
         type="password"
         fullWidth
         required
@@ -104,7 +103,7 @@ function ResetPasswordForm() {
 
       <TextField
         name="confirmPassword"
-        label={isEn ? "Confirm New Password" : "新しいパスワード（確認）"}
+        label={tAuth("login.confirmNewPassword")}
         type="password"
         fullWidth
         required
@@ -122,15 +121,14 @@ function ResetPasswordForm() {
         disabled={loading || !token}
         sx={{ mt: 3, mb: 2, py: 1.5 }}
       >
-        {loading ? (isEn ? "Resetting..." : "再設定中...") : (isEn ? "Reset Password" : "パスワードを再設定する")}
+        {loading ? tAuth("login.resetting") : tAuth("login.resetPasswordBtn")}
       </Button>
     </form>
   );
 }
 
 export default function ResetPasswordPage() {
-  const locale = useLocale();
-  const isEn = locale === "en";
+  const tAuth = useTranslations("Auth");
 
   return (
     <Container maxWidth="xs" sx={{ py: 8 }}>
@@ -144,7 +142,7 @@ export default function ResetPasswordPage() {
         boxShadow: 1
       }}>
         <Typography component="h1" variant="h5" sx={{ mb: 3, fontWeight: "bold" }}>
-          {isEn ? "Reset Password" : "パスワードの再設定"}
+          {tAuth("login.resetPasswordTitle")}
         </Typography>
         
         <Suspense fallback={<Typography>Loading...</Typography>}>
