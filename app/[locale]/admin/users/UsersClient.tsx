@@ -14,10 +14,16 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
-import { updateUserRole, deleteUser } from "@/lib/actions/admin";
+import { updateUserRole, deleteUser, updateUsernameByAdmin } from "@/lib/actions/admin";
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import TextField from "@mui/material/TextField";
 import { useTranslations } from "next-intl";
 
 export interface User {
@@ -32,6 +38,11 @@ export interface User {
 export default function UsersClient({ users }: { users: User[] }) {
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const tAdmin = useTranslations("Admin.users");
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editUserId, setEditUserId] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleRoleChange = async (userId: string, newRole: "user" | "admin") => {
     try {
@@ -52,6 +63,27 @@ export default function UsersClient({ users }: { users: User[] }) {
       setMsg({ type: "error", text: err.message });
     }
     setTimeout(() => setMsg(null), 3000);
+  };
+
+  const handleOpenEditDialog = (user: User) => {
+    setEditUserId(user.id);
+    setEditUsername(user.username || "");
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveUsername = async () => {
+    if (!editUsername) return;
+    setIsEditing(true);
+    try {
+      await updateUsernameByAdmin(editUserId, editUsername);
+      setMsg({ type: "success", text: "User ID updated successfully" });
+      setEditDialogOpen(false);
+    } catch (err: any) {
+      setMsg({ type: "error", text: err.message });
+    } finally {
+      setIsEditing(false);
+      setTimeout(() => setMsg(null), 3000);
+    }
   };
 
   return (
@@ -100,7 +132,10 @@ export default function UsersClient({ users }: { users: User[] }) {
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <IconButton color="error" onClick={() => handleDeleteUser(user.id)}>
+                    <IconButton color="primary" onClick={() => handleOpenEditDialog(user)} title="Edit User ID">
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton color="error" onClick={() => handleDeleteUser(user.id)} title="Delete User">
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>
@@ -110,6 +145,31 @@ export default function UsersClient({ users }: { users: User[] }) {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Edit User ID</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2, mt: 1 }}>
+            Changing the User ID (username) will update their profile URL.
+          </Typography>
+          <TextField
+            autoFocus
+            fullWidth
+            label="New User ID"
+            value={editUsername}
+            onChange={(e) => setEditUsername(e.target.value)}
+            disabled={isEditing}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setEditDialogOpen(false)} disabled={isEditing} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveUsername} disabled={isEditing || !editUsername} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
