@@ -101,6 +101,20 @@ export async function purgeDeletedUsers() {
   return { success: true };
 }
 
+export async function hardDeleteUser(targetUserId: string) {
+  const { db, session } = await getAdminDb();
+
+  if (targetUserId === session.user.id) {
+    throw new Error("Cannot delete yourself");
+  }
+
+  // Hard delete the specific user
+  await db.delete(users).where(eq(users.id, targetUserId));
+
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
 export async function adminDeleteProject(projectId: string) {
   const { db } = await getAdminDb();
   const { projects } = await import("@/db/schema");
