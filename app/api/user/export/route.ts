@@ -43,9 +43,12 @@ export async function GET(req: NextRequest) {
         id: p.id,
         slug: p.slug,
         name: p.name,
+        description: p.description,
         type: p.type,
         status: p.status,
         downloads: p.downloads,
+        totalDownloads: p.totalDownloads,
+        externalDownloads: p.externalDownloads,
         createdAt: p.createdAt,
       })),
       ideas: userIdeas.map(i => ({
@@ -124,7 +127,25 @@ export async function GET(req: NextRequest) {
         content += "プロジェクトはありません。\n";
       } else {
         data.projects.forEach(p => {
-          content += `${li}${p.name} (${p.slug}) - タイプ: ${p.type}, 状態: ${p.status}, DL数: ${p.downloads}\n`;
+          const ext = (p.externalDownloads as Record<string, number>) || {};
+          const modrinth = ext.modrinth || 0;
+          const curseforge = ext.curseforge || 0;
+          
+          let dlText = `${p.totalDownloads || p.downloads}`;
+          if (modrinth > 0 || curseforge > 0) {
+            dlText += ` (ModParks: ${p.downloads}`;
+            if (modrinth > 0) dlText += `, Modrinth: ${modrinth}`;
+            if (curseforge > 0) dlText += `, CurseForge: ${curseforge}`;
+            dlText += `)`;
+          } else if (p.totalDownloads && p.totalDownloads !== p.downloads) {
+            dlText += ` (ModParks: ${p.downloads})`;
+          }
+
+          if (isMd) {
+            content += `### ${p.name} (${p.slug})\n${p.description || "説明なし"}\n\n状態: ${p.status}\nDL数: ${dlText}\nタイプ: ${p.type}\n\n`;
+          } else {
+            content += `${li}${p.name} (${p.slug}) - タイプ: ${p.type}, 状態: ${p.status}, DL数: ${dlText}\n`;
+          }
         });
       }
       content += "\n";
