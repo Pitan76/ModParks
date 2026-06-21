@@ -11,8 +11,8 @@ import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { useTranslations } from "next-intl";
@@ -93,15 +93,14 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Typography variant="subtitle2" color="text.secondary">{t("keywordOptions")}</Typography>
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <ToggleButtonGroup
+            <RadioGroup
+              row
               value={tempSearchMode}
-              exclusive
-              onChange={(_, v) => { if (v) setTempSearchMode(v); }}
-              size="small"
+              onChange={(e) => setTempSearchMode(e.target.value)}
             >
-              <ToggleButton value="OR">OR</ToggleButton>
-              <ToggleButton value="AND">AND</ToggleButton>
-            </ToggleButtonGroup>
+              <FormControlLabel value="OR" control={<Radio size="small" />} label="OR" />
+              <FormControlLabel value="AND" control={<Radio size="small" />} label="AND" />
+            </RadioGroup>
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
             <FormControlLabel
