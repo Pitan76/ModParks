@@ -113,7 +113,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                           {user.displayName || user.username}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          @{user.username}
+                          {user.username ? `@${user.username}` : "(ID未設定)"}
                         </Typography>
                       </Box>
                     </Box>

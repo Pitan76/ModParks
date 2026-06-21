@@ -20,7 +20,7 @@ export async function updateUserRole(targetUserId: string, newRole: "user" | "ad
 
 export async function updateUsernameByAdmin(targetUserId: string, newUsername: string) {
   const { db } = await getAdminDb();
-  const { userProfiles } = await import("@/db/schema");
+  const { userProfiles, userSettings, users } = await import("@/db/schema");
   
   if (!newUsername || !/^[a-zA-Z0-9_-]+$/.test(newUsername)) {
     throw new Error("Invalid username format. Use alphanumeric characters, hyphens, and underscores.");
@@ -31,7 +31,27 @@ export async function updateUsernameByAdmin(targetUserId: string, newUsername: s
     throw new Error("Username already taken by another user.");
   }
 
-  await db.update(userProfiles).set({ username: newUsername }).where(eq(userProfiles.userId, targetUserId));
+  const targetProfile = await db.select().from(userProfiles).where(eq(userProfiles.userId, targetUserId)).get();
+  
+  if (targetProfile) {
+    await db.update(userProfiles).set({ username: newUsername }).where(eq(userProfiles.userId, targetUserId));
+  } else {
+    const user = await db.select().from(users).where(eq(users.id, targetUserId)).get();
+    if (!user) throw new Error("User not found");
+    
+    await db.insert(userProfiles).values({
+      userId: targetUserId,
+      username: newUsername,
+      displayName: user.name || "Unknown",
+      avatarUrl: user.image,
+    });
+    
+    const settings = await db.select().from(userSettings).where(eq(userSettings.userId, targetUserId)).get();
+    if (!settings) {
+      await db.insert(userSettings).values({ userId: targetUserId });
+    }
+  }
+
   revalidatePath("/admin/users");
   return { success: true };
 }
