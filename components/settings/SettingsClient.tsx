@@ -691,7 +691,10 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             {integrationMsg && <Alert severity={integrationMsg.type} sx={{ mb: 3 }}>{integrationMsg.text}</Alert>}
 
             <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.modrinth")}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.modrinthDesc")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{t("integration.modrinthDesc")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              APIキー（PAT）は <a href="https://modrinth.com/settings/pats" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>Modrinth Settings</a> から作成できます。「Read projects」と「Read user data」の権限が必要です。
+            </Typography>
             <TextField
               fullWidth
               label="Modrinth API Key"
@@ -703,7 +706,10 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             />
 
             <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.curseforgeDesc")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{t("integration.curseforgeDesc")}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              APIキーは <a href="https://console.curseforge.com/?#/api-keys" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>CurseForge Console</a> から作成できます。
+            </Typography>
             <TextField
               fullWidth
               label="CurseForge API Key"
