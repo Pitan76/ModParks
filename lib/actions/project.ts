@@ -151,8 +151,19 @@ export async function updateProject(projectId: string, formData: FormData) {
     }
   }
 
-  // 自動同期（外部API呼び出しによるレスポンス遅延やメモリ圧迫を防ぐため、
-  // updateProject内での自動同期は行わず、ユーザーの明示的なSyncボタン操作に委ねます）
+  // ユーザーの提案に従い、自動同期は3日に1回（またはそれ以上の間隔）のみ実行します。
+  // これにより、連続編集時のAPI呼び出しの詰まり（メモリ圧迫）を防ぎつつ、定期的な同期を保証します。
+  try {
+    const extObj = project.externalDownloads as Record<string, number> | undefined;
+    const lastSyncedAt = extObj?.lastSyncedAt || 0;
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    
+    if (Date.now() - lastSyncedAt > threeDaysMs) {
+      await syncExternalProjectData(project.id);
+    }
+  } catch (e) {
+    // ignore
+  }
 
   revalidatePath(`/projects/${fields.slug ?? project.slug}`);
   revalidatePath(`/projects/${fields.slug ?? project.slug}/edit`);
@@ -619,16 +630,18 @@ export async function syncExternalProjectData(projectId: string) {
     }
   }
 
-  if (newExtDl > 0) {
-    const extObj: Record<string, number> = {};
-    if (modrinthDl > 0) extObj.modrinth = modrinthDl;
-    if (curseforgeDl > 0) extObj.curseforge = curseforgeDl;
-    
-    await db.update(projects).set({ 
-      externalDownloads: extObj,
-      totalDownloads: project.downloads + newExtDl
-    }).where(eq(projects.id, project.id)).run();
-  }
+  const extObj: Record<string, number> = {
+    ...(project.externalDownloads as Record<string, number> || {}),
+    lastSyncedAt: Date.now()
+  };
+  
+  if (modrinthDl > 0) extObj.modrinth = modrinthDl;
+  if (curseforgeDl > 0) extObj.curseforge = curseforgeDl;
+  
+  await db.update(projects).set({ 
+    externalDownloads: extObj,
+    totalDownloads: project.downloads + newExtDl
+  }).where(eq(projects.id, project.id)).run();
   
   revalidatePath(`/projects/${project.slug}`);
   return { success: true, externalDownloads: newExtDl };
