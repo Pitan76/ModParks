@@ -212,22 +212,20 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                   initialFollowingCount={followingCount}
                   isLoggedIn={!!session?.user}
                   isOwner={isOwner}
-                />
-              </Box>
-
-              <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap", alignItems: "center" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <DownloadLabel 
-                    downloads={nativeDownloads} 
-                    totalDownloads={totalDownloads} 
-                    externalDownloads={{ native: nativeDownloads, modrinth: modrinthDownloads, curseforge: curseforgeDownloads }} 
-                    textVariant="body2" 
-                    textColor="text.primary" 
-                    iconColor="text.secondary"
-                    iconSize={18} 
-                    sx={{ '& .MuiTypography-root': { fontWeight: 800 } }}
-                  />
-                </Box>
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <DownloadLabel 
+                      downloads={nativeDownloads} 
+                      totalDownloads={totalDownloads} 
+                      externalDownloads={{ native: nativeDownloads, modrinth: modrinthDownloads, curseforge: curseforgeDownloads }} 
+                      textVariant="body2" 
+                      textColor="text.primary" 
+                      iconColor="text.secondary"
+                      iconSize={18} 
+                      sx={{ '& .MuiTypography-root': { fontWeight: 800 } }}
+                    />
+                  </Box>
+                </FollowUserButton>
               </Box>
             </Box>
 
