@@ -1,7 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { versions, projects } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getR2PublicUrl } from "@/lib/r2";
 
 /** GET /api/download/[versionId]
  * - ダウンロードカウントをインクリメント
@@ -37,26 +39,27 @@ export async function GET(req: NextRequest) {
     }
 
     // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）
-    const { checkRateLimit } = await import("@/lib/rate-limit");
     const rlRes = await checkRateLimit(`download:${versionId}`, 1, 10 * 60 * 1000);
     
     if (rlRes.success) {
       await Promise.all([
         db
           .update(versions)
-          .set({ downloads: version.downloads + 1 })
+          .set({ downloads: sql`${versions.downloads} + 1` })
           .where(eq(versions.id, versionId))
           .run(),
         db
           .update(projects)
-          .set({ downloads: project.downloads + 1, totalDownloads: project.totalDownloads + 1 })
+          .set({ 
+            downloads: sql`${projects.downloads} + 1`, 
+            totalDownloads: sql`${projects.totalDownloads} + 1` 
+          })
           .where(eq(projects.id, project.id))
           .run(),
       ]);
     }
 
     // 外部URLの場合はそのままリダイレクト、R2の場合はプレフィックスを付加
-    const { getR2PublicUrl } = await import("@/lib/r2");
     const fileUrl = version.fileUrl.startsWith("http")
       ? version.fileUrl
       : getR2PublicUrl(version.fileUrl);

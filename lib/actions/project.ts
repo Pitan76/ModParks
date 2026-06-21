@@ -376,7 +376,19 @@ export async function getProjectBySlug(slug: string) {
   if (!row) return null;
 
   const tagsRows = await db.select().from(projectTags).where(eq(projectTags.projectId, row.project.id)).all();
-  const versionsRows = await db.select().from(versions).where(eq(versions.projectId, row.project.id)).orderBy(desc(versions.createdAt)).all();
+  const versionsRows = await db.select({
+    id: versions.id,
+    versionNumber: versions.versionNumber,
+    mcVersions: versions.mcVersions,
+    loaders: versions.loaders,
+    fileName: versions.fileName,
+    fileSize: versions.fileSize,
+    downloads: versions.downloads,
+    createdAt: versions.createdAt,
+    projectId: versions.projectId,
+    fileUrl: versions.fileUrl,
+    fileSha256: versions.fileSha256,
+  }).from(versions).where(eq(versions.projectId, row.project.id)).orderBy(desc(versions.createdAt)).limit(20).all();
 
   return {
     ...row.project,
@@ -398,35 +410,19 @@ export async function getUserProjectStats(authorId: string) {
       totalProjects: sql<number>`count(*)`,
       nativeDownloads: sql<number>`sum(${projects.downloads})`,
       totalDownloads: sql<number>`sum(${projects.totalDownloads})`,
+      modrinthDownloads: sql<number>`sum(COALESCE(json_extract(${projects.externalDownloads}, '$.modrinth'), 0))`,
+      curseforgeDownloads: sql<number>`sum(COALESCE(json_extract(${projects.externalDownloads}, '$.curseforge'), 0))`,
     })
     .from(projects)
     .where(and(eq(projects.authorId, authorId), eq(projects.status, "public")))
     .get();
 
-  // JSONカラムはSQLのSUMが困難なため、外部ダウンロード数の内訳はJavaScriptで計算する
-  const userProjects = await db
-    .select({ externalDownloads: projects.externalDownloads })
-    .from(projects)
-    .where(and(eq(projects.authorId, authorId), eq(projects.status, "public")))
-    .all();
-
-  let modrinthDownloads = 0;
-  let curseforgeDownloads = 0;
-
-  for (const p of userProjects) {
-    if (p.externalDownloads) {
-      const ext = p.externalDownloads as Record<string, number>;
-      modrinthDownloads += ext.modrinth || 0;
-      curseforgeDownloads += ext.curseforge || 0;
-    }
-  }
-
   return {
     totalProjects: result?.totalProjects || 0,
     totalDownloads: result?.totalDownloads || 0,
     nativeDownloads: result?.nativeDownloads || 0,
-    modrinthDownloads,
-    curseforgeDownloads,
+    modrinthDownloads: result?.modrinthDownloads || 0,
+    curseforgeDownloads: result?.curseforgeDownloads || 0,
   };
 }
 

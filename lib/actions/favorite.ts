@@ -3,7 +3,7 @@
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
 import { projectFavorites, projects, users, userProfiles, projectTags } from "@/db/schema";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, sql, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -46,11 +46,16 @@ export async function toggleProjectFavorite(projectId: string) {
 
 export async function getFavoriteProjects(userId: string) {
   const db = await getDatabase();
+  const { description, ...restProjects } = getTableColumns(projects);
   
   // project_favorites と projects, users を結合して取得
   const rows = await db
     .select({
-      project: projects,
+      project: {
+        ...restProjects,
+        description: sql<string>`SUBSTR(${projects.description}, 1, 300) || CASE WHEN LENGTH(${projects.description}) > 300 THEN '...' ELSE '' END`,
+        tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = projects.id)`
+      },
       author: {
         username: userProfiles.username,
         displayName: userProfiles.displayName,
@@ -66,24 +71,28 @@ export async function getFavoriteProjects(userId: string) {
     .orderBy(desc(projectFavorites.createdAt))
     .all();
 
-  const projectIds = rows.map((r) => r.project.id);
-  let tagsData: { projectId: string; tag: string }[] = [];
-  if (projectIds.length > 0) {
-    tagsData = await db
-      .select()
-      .from(projectTags)
-      .where(inArray(projectTags.projectId, projectIds))
-      .all();
-  }
+  return rows.map((row) => {
+    let parsedTags: string[] = [];
+    if (row.project.tagsJson) {
+      try {
+        const t = JSON.parse(row.project.tagsJson);
+        if (Array.isArray(t) && t.length > 0 && t[0] !== null) {
+          parsedTags = t;
+        }
+      } catch(e) {}
+    }
+    
+    const { tagsJson, ...projectData } = row.project;
 
-  return rows.map((row) => ({
-    ...row.project,
-    authorUsername: row.author?.username,
-    authorDisplayName: row.author?.displayName ?? row.author?.username,
-    authorAvatarUrl: row.author?.avatarUrl,
-    tags: tagsData.filter((t) => t.projectId === row.project.id).map((t) => t.tag),
-    favoritedAt: row.favoritedAt
-  }));
+    return {
+      ...projectData,
+      authorUsername: row.author?.username,
+      authorDisplayName: row.author?.displayName ?? row.author?.username,
+      authorAvatarUrl: row.author?.avatarUrl,
+      tags: parsedTags,
+      favoritedAt: row.favoritedAt
+    };
+  });
 }
 
 // ─── クッキーによるお気に入り (非ログイン時) ──────────────────────────────────────
