@@ -132,6 +132,7 @@ export async function importProjects(selectedProjects: ImportedProject[], source
   if (!selectedProjects.length) return { success: true, importedCount: 0 };
 
   let importedCount = 0;
+  const newProjects = [];
 
   for (const p of selectedProjects) {
     const existing = await db.select().from(projects).where(eq(projects.slug, p.slug)).get();
@@ -145,7 +146,7 @@ export async function importProjects(selectedProjects: ImportedProject[], source
       }]);
     }
 
-    await db.insert(projects).values({
+    newProjects.push({
       id: createId(),
       slug: p.slug,
       name: p.name,
@@ -159,10 +160,13 @@ export async function importProjects(selectedProjects: ImportedProject[], source
       modrinthId: source === "modrinth" ? p.id : null,
       curseforgeId: source === "curseforge" ? p.id : null,
       authorId: session.user.id,
-      status: "draft",
-    }).run();
+      status: "draft" as const,
+    });
+  }
 
-    importedCount++;
+  if (newProjects.length > 0) {
+    await db.insert(projects).values(newProjects).run();
+    importedCount = newProjects.length;
   }
 
   revalidatePath("/projects");

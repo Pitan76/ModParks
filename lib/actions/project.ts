@@ -8,6 +8,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq, desc, and, or, like, sql, inArray, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 
 // ─── プロジェクト作成 ─────────────────────────────────────────────────────────
 
@@ -158,7 +159,13 @@ export async function updateProject(projectId: string, formData: FormData) {
     const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
     
     if (Date.now() - lastSyncedAt > threeDaysMs) {
-      await syncExternalProjectData(project.id);
+      after(async () => {
+        try {
+          await syncExternalProjectData(project.id);
+        } catch (err) {
+          console.error("Background sync failed:", err);
+        }
+      });
     }
   } catch (e) {
     // ignore
@@ -255,19 +262,19 @@ export async function getProjects(params: {
 
   if (loaders && loaders.length > 0) {
     conditions.push(
-      sql`${projects.id} IN (SELECT project_id FROM versions WHERE id IN (SELECT version_id FROM version_loaders WHERE ${inArray(sql`loader`, loaders)}))`
+      sql`EXISTS (SELECT 1 FROM versions v JOIN version_loaders vl ON v.id = vl.version_id WHERE v.project_id = ${projects.id} AND ${inArray(sql`vl.loader`, loaders)})`
     );
   }
 
   if (mcVersions && mcVersions.length > 0) {
     conditions.push(
-      sql`${projects.id} IN (SELECT project_id FROM versions WHERE id IN (SELECT version_id FROM version_mc_versions WHERE ${inArray(sql`mc_version`, mcVersions)}))`
+      sql`EXISTS (SELECT 1 FROM versions v JOIN version_mc_versions vmc ON v.id = vmc.version_id WHERE v.project_id = ${projects.id} AND ${inArray(sql`vmc.mc_version`, mcVersions)})`
     );
   }
 
   if (tags && tags.length > 0) {
     conditions.push(
-      sql`${projects.id} IN (SELECT project_id FROM project_tags WHERE ${inArray(sql`tag`, tags)})`
+      sql`EXISTS (SELECT 1 FROM project_tags pt WHERE pt.project_id = ${projects.id} AND ${inArray(sql`pt.tag`, tags)})`
     );
   }
 
