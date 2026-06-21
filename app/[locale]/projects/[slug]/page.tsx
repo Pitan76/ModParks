@@ -19,7 +19,6 @@ import ProjectTabsManager from "@/components/project/ProjectTabsManager";
 import ProjectDependencies from "@/components/project/ProjectDependencies";
 import ProjectComments from "@/components/project/ProjectComments";
 import LinkButton from "@/components/ui/LinkButton";
-import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import AddIcon from "@mui/icons-material/Add";
 import { SITE_URL } from "@/lib/config";

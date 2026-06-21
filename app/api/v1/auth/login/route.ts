@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles, apiKeys } from "@/db/schema";
 import { eq, or, sql } from "drizzle-orm";
@@ -7,7 +7,7 @@ import { TOTP } from "otpauth";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = await request.json() as any;
     const { identifier, password, totpCode } = body;
 
     if (!identifier || !password) {

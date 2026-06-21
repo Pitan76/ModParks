@@ -190,35 +190,62 @@ export const authConfig = {
         token.avatarUrl = (user as any).avatarUrl ?? user.image ?? null;
         token.role = (user as any).role ?? "user";
       }
+      
+      const now = Date.now();
+      const TTL_MS = 5 * 60 * 1000; // 5 minutes
+      
+      if (trigger === "update") {
+        token.lastDbCheck = 0; // Force refresh
+      }
+      
+      if (token.id && (!token.lastDbCheck || now - token.lastDbCheck > TTL_MS)) {
+        try {
+          const { getDatabase } = await import("@/lib/db");
+          const db = await getDatabase();
+          if (db) {
+            const { users, userProfiles, userSettings } = await import("@/db/schema");
+            const { eq } = await import("drizzle-orm");
+            const dbUser = await db.select({
+              role: users.role,
+              deletedAt: users.deletedAt,
+              avatarUrl: userProfiles.avatarUrl,
+              displayName: userProfiles.displayName,
+              username: userProfiles.username,
+              locale: userSettings.locale
+            }).from(users)
+            .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+            .leftJoin(userSettings, eq(users.id, userSettings.userId))
+            .where(eq(users.id, token.id as string)).get();
+            
+            if (dbUser) {
+              token.role = dbUser.role as string;
+              token.isDeleted = !!dbUser.deletedAt;
+              if (dbUser.avatarUrl) token.avatarUrl = dbUser.avatarUrl;
+              if (dbUser.displayName) token.displayName = dbUser.displayName;
+              if (dbUser.username) token.username = dbUser.username;
+              if (dbUser.locale) token.locale = dbUser.locale;
+            }
+            token.lastDbCheck = now;
+          }
+        } catch (e) {
+          console.error("Failed to refresh user data in jwt callback", e);
+        }
+      }
+      
       return token;
     },
     async session({ session, token }: { session: any, token?: any }) {
       if (session.user) {
+        if (token?.isDeleted) {
+          return { ...session, user: undefined } as any;
+        }
+        
         session.user.id = (token.sub ?? token.id) as string;
         session.user.username = (token.username ?? null) as string | null;
         session.user.displayName = (token.displayName ?? null) as string | null;
         session.user.avatarUrl = (token.avatarUrl ?? null) as string | null;
         session.user.role = (token.role ?? "user") as string;
-        
-        // Always fetch the latest role and status from the DB to prevent stale cache vulnerabilities
-        try {
-          const { getDatabase } = await import("@/lib/db");
-          const db = await getDatabase();
-          if (db) {
-            const { users } = await import("@/db/schema");
-            const { eq } = await import("drizzle-orm");
-            const dbUser = await db.select({ role: users.role, deletedAt: users.deletedAt }).from(users).where(eq(users.id, session.user.id)).get();
-            if (dbUser) {
-              session.user.role = dbUser.role as string;
-              if (dbUser.deletedAt) {
-                // Return an empty session if the user is deleted
-                return { ...session, user: undefined } as any;
-              }
-            }
-          }
-        } catch (e) {
-          console.error("Failed to refresh user role in session callback", e);
-        }
+        session.user.locale = (token.locale ?? null) as string | null;
       }
       return session;
     },

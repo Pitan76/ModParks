@@ -13,6 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { useState, useRef } from "react";
 import { updateProfile } from "@/lib/actions/profile";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { resizeImageFile } from "@/lib/utils/image";
 import { useTranslations } from "next-intl";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -39,6 +40,7 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const t = useTranslations("Profile");
+  const { update } = useSession();
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -103,6 +105,7 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
     if (result && result.error) {
       setMessage({ type: "error", text: t("error." + result.error) || result.error });
     } else {
+      await update();
       setMessage({ type: "success", text: t("updateSuccess") });
       router.refresh();
     }

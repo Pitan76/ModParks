@@ -22,7 +22,6 @@ import { getUserCollections } from "@/lib/actions/collection";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import Alert from "@mui/material/Alert";
-import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
 import { Link as RoutingLink } from "@/i18n/routing";
@@ -31,9 +30,7 @@ import { userFollows } from "@/db/schema";
 import { and, sql } from "drizzle-orm";
 import FollowUserButton from "@/components/user/FollowUserButton";
 import CollectionCard from "@/components/list/CollectionCard";
-import { formatCompactNumber } from "@/lib/utils/format";
 import PaginationControls from "@/components/ui/PaginationControls";
-import Tooltip from "@mui/material/Tooltip";
 import { DownloadLabel } from "@/components/ui/ProjectInfoLabels";
 
 interface PublicProfileProps {

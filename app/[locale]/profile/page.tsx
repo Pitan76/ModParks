@@ -1,9 +1,7 @@
 import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Avatar from "@mui/material/Avatar";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";

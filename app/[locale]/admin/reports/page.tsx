@@ -1,4 +1,3 @@
-import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
@@ -6,7 +5,6 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import Divider from "@mui/material/Divider";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";

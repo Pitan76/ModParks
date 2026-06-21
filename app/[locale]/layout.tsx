@@ -11,9 +11,7 @@ import { routing } from "@/i18n/routing";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
-import { getDatabase } from "@/lib/db";
-import { users, userProfiles, userSettings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { SessionProvider } from "@/components/SessionProvider";
 import AppLayout from "@/components/layout/AppLayout";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
@@ -77,24 +75,8 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
   let userLocale = null;
   if (session?.user?.id) {
-    // 常に最新のプロフィール情報（特にアバター）を取得して上書き
-    const db = await getDatabase();
-    const dbUser = await db.select({
-      avatarUrl: userProfiles.avatarUrl,
-      displayName: userProfiles.displayName,
-      username: userProfiles.username,
-      locale: userSettings.locale
-    }).from(users)
-    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .innerJoin(userSettings, eq(users.id, userSettings.userId))
-    .where(eq(users.id, session.user.id)).get();
-    
-    if (dbUser) {
-      session.user.avatarUrl = dbUser.avatarUrl;
-      session.user.displayName = dbUser.displayName ?? "";
-      session.user.username = dbUser.username;
-      userLocale = dbUser.locale;
-    }
+    // 最新情報は auth.ts の jwt コールバックで 5分TTL キャッシュされているものを利用
+    userLocale = (session.user as any).locale;
   }
 
   const cookieStore = await cookies();
@@ -104,13 +86,15 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     <html lang={locale} suppressHydrationWarning>
       <body>
         <ThemeRegistry initialMode={themeMode}>
-          <NextIntlClientProvider messages={messages}>
-            {userLocale && <LocaleSyncer userLocale={userLocale} />}
-            <AppLayout session={session}>
-              {children}
-              <AppFooter />
-            </AppLayout>
-          </NextIntlClientProvider>
+          <SessionProvider session={session}>
+            <NextIntlClientProvider messages={messages}>
+              {userLocale && <LocaleSyncer userLocale={userLocale} />}
+              <AppLayout session={session}>
+                {children}
+                <AppFooter />
+              </AppLayout>
+            </NextIntlClientProvider>
+          </SessionProvider>
         </ThemeRegistry>
       </body>
     </html>

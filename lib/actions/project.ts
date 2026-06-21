@@ -301,7 +301,8 @@ export async function getProjects(params: {
       .select({
         project: {
           ...restProjects,
-          description: sql<string>`SUBSTR(${projects.description}, 1, 300) || CASE WHEN LENGTH(${projects.description}) > 300 THEN '...' ELSE '' END`
+          description: sql<string>`SUBSTR(${projects.description}, 1, 300) || CASE WHEN LENGTH(${projects.description}) > 300 THEN '...' ELSE '' END`,
+          tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = projects.id)`
         },
         author: {
           username: userProfiles.username,
@@ -324,38 +325,27 @@ export async function getProjects(params: {
     throw err;
   }
 
-  // 各プロジェクトのタグを取得
-  const projectIds = rows.map((r) => r.project.id);
-  let tagsData: { projectId: string; tag: string }[] = [];
-  if (projectIds.length > 0) {
-    // SQlite chunking to avoid too many variables limit
-    const chunkSize = 100;
-    for (let i = 0; i < projectIds.length; i += chunkSize) {
-      const chunk = projectIds.slice(i, i + chunkSize);
-      const chunkTags = await db
-        .select()
-        .from(projectTags)
-        .where(inArray(projectTags.projectId, chunk))
-        .all();
-      tagsData = tagsData.concat(chunkTags);
+  const data = rows.map((row) => {
+    let parsedTags: string[] = [];
+    if (row.project.tagsJson) {
+      try {
+        const t = JSON.parse(row.project.tagsJson);
+        if (Array.isArray(t) && t.length > 0 && t[0] !== null) {
+          parsedTags = t;
+        }
+      } catch(e) {}
     }
-  }
+    
+    const { tagsJson, ...projectData } = row.project;
 
-  const tagsMap = new Map<string, string[]>();
-  for (const t of tagsData) {
-    if (!tagsMap.has(t.projectId)) {
-      tagsMap.set(t.projectId, []);
-    }
-    tagsMap.get(t.projectId)!.push(t.tag);
-  }
-
-  const data = rows.map((row) => ({
-    ...row.project,
-    authorUsername: row.author?.username,
-    authorDisplayName: row.author?.displayName ?? row.author?.username,
-    authorAvatarUrl: row.author?.avatarUrl,
-    tags: tagsMap.get(row.project.id) || [],
-  }));
+    return {
+      ...projectData,
+      authorUsername: row.author?.username,
+      authorDisplayName: row.author?.displayName ?? row.author?.username,
+      authorAvatarUrl: row.author?.avatarUrl,
+      tags: parsedTags,
+    };
+  });
 
   return { data, totalCount };
 }

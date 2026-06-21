@@ -1,8 +1,6 @@
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid";
-import AddIcon from "@mui/icons-material/Add";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import ProjectCard from "@/components/project/ProjectCard";
@@ -10,7 +8,6 @@ import LinkButton from "@/components/ui/LinkButton";
 import ProjectSearchBar from "@/components/project/ProjectSearchBar";
 import { getProjects } from "@/lib/actions/project";
 import { auth } from "@/lib/auth";
-import { Link } from "@/i18n/routing";
 import PaginationControls from "@/components/ui/PaginationControls";
 
 interface ProjectsPageProps {

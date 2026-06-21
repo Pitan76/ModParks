@@ -1,21 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/routing";
+import { setRequestLocale } from "next-intl/server";
 import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import PeopleIcon from "@mui/icons-material/People";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import ReportIcon from "@mui/icons-material/Report";
-import SettingsIcon from "@mui/icons-material/Settings";
-
-const DRAWER_WIDTH = 240;
 
 export default async function AdminLayout({
   children,
