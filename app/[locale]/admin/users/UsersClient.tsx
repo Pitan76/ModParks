@@ -14,7 +14,7 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
-import { updateUserRole, deleteUser, updateUsernameByAdmin, purgeDeletedUsers } from "@/lib/actions/admin";
+import { updateUserRole, deleteUser, updateUsernameByAdmin, purgeDeletedUsers, hardDeleteUser } from "@/lib/actions/admin";
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -24,6 +24,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import { useTranslations } from "next-intl";
 
 export interface User {
@@ -34,6 +36,7 @@ export interface User {
   avatarUrl: string | null;
   role: string;
   createdAt: Date | number;
+  deletedAt: Date | null;
 }
 export default function UsersClient({ users }: { users: User[] }) {
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -44,6 +47,11 @@ export default function UsersClient({ users }: { users: User[] }) {
   const [editUsername, setEditUsername] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const activeUsers = users.filter((u) => !u.deletedAt);
+  const deletedUsers = users.filter((u) => u.deletedAt);
+  const displayedUsers = tabIndex === 0 ? activeUsers : deletedUsers;
 
   const handleRoleChange = async (userId: string, newRole: "user" | "admin") => {
     try {
@@ -60,6 +68,17 @@ export default function UsersClient({ users }: { users: User[] }) {
     try {
       await deleteUser(userId);
       setMsg({ type: "success", text: "User successfully deleted" });
+    } catch (err: any) {
+      setMsg({ type: "error", text: err.message });
+    }
+    setTimeout(() => setMsg(null), 3000);
+  };
+
+  const handleHardDeleteUser = async (userId: string) => {
+    if (!confirm("この幽霊アカウントを物理削除しますか？\n（この操作は取り消せません）")) return;
+    try {
+      await hardDeleteUser(userId);
+      setMsg({ type: "success", text: "Ghost account permanently deleted" });
     } catch (err: any) {
       setMsg({ type: "error", text: err.message });
     }
@@ -103,18 +122,19 @@ export default function UsersClient({ users }: { users: User[] }) {
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
-        <Typography variant="body2" color="text.secondary">
-          Manage your users here.
-        </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "flex-end" }}>
+        <Tabs value={tabIndex} onChange={(_, newVal) => setTabIndex(newVal)}>
+          <Tab label={`Active Users (${activeUsers.length})`} />
+          <Tab label={`Ghost Accounts (${deletedUsers.length})`} />
+        </Tabs>
         <Button 
           variant="outlined" 
           color="error" 
           startIcon={<DeleteIcon />} 
           onClick={handlePurgeDeletedUsers}
-          disabled={isPurging}
+          disabled={isPurging || deletedUsers.length === 0}
         >
-          幽霊アカウントを物理削除
+          すべての幽霊アカウントを物理削除
         </Button>
       </Box>
       
@@ -131,15 +151,15 @@ export default function UsersClient({ users }: { users: User[] }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((user) => {
+            {displayedUsers.map((user) => {
               const joinedDate = new Date(typeof user.createdAt === "number" ? user.createdAt * 1000 : user.createdAt);
               return (
-                <TableRow key={user.id}>
+                <TableRow key={user.id} sx={{ opacity: user.deletedAt ? 0.5 : 1 }}>
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Avatar src={user.avatarUrl || undefined} sx={{ width: 32, height: 32 }} />
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold", textDecoration: user.deletedAt ? "line-through" : "none" }}>
                           {user.displayName || user.username}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -156,22 +176,38 @@ export default function UsersClient({ users }: { users: User[] }) {
                       size="small"
                       onChange={(e) => handleRoleChange(user.id, e.target.value as "user" | "admin")}
                       sx={{ minWidth: 120 }}
+                      disabled={!!user.deletedAt}
                     >
                       <MenuItem value="user">{tAdmin("roleUser")}</MenuItem>
                       <MenuItem value="admin">{tAdmin("roleAdmin")}</MenuItem>
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <IconButton color="primary" onClick={() => handleOpenEditDialog(user)} title="Edit User ID">
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton color="error" onClick={() => handleDeleteUser(user.id)} title="Delete User">
-                      <DeleteIcon />
-                    </IconButton>
+                    {!user.deletedAt ? (
+                      <>
+                        <IconButton color="primary" onClick={() => handleOpenEditDialog(user)} title="Edit User ID">
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton color="error" onClick={() => handleDeleteUser(user.id)} title="Delete User">
+                          <DeleteIcon />
+                        </IconButton>
+                      </>
+                    ) : (
+                      <Button color="error" size="small" onClick={() => handleHardDeleteUser(user.id)}>
+                        Hard Delete
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               );
             })}
+            {displayedUsers.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
+                  No users found in this category.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
