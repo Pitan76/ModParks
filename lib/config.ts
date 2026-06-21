@@ -5,7 +5,7 @@ export const API_CONFIG = {
   /** 一覧APIのデフォルト取得件数 */
   DEFAULT_LIMIT: 20,
   /** 一覧APIの最大取得件数 */
-  MAX_LIMIT: 50,
+  MAX_LIMIT: 80,
 } as const;
 
 /** サイトのベースURL */

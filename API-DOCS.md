@@ -61,6 +61,54 @@ Fetches public details of a specific project by its slug.
 
 ---
 
+## Projects List API
+
+### 1. List Projects
+Fetches a list of public projects.
+
+- **URL:** `/api/v1/projects`
+- **Method:** `GET`
+- **Query Parameters:**
+  - `limit` (optional): Default 20, Max 80.
+  - `offset` (optional): Default 0.
+- **Response (200 OK):**
+```json
+{
+  "data": [
+    {
+      "id": "12345",
+      "slug": "sample-mod",
+      "name": "Sample Mod",
+      "iconUrl": "https://example.com/icon.png",
+      "type": "mod",
+      "license": "MIT",
+      "downloads": {
+        "total": 1500,
+        "native": 500,
+        "modrinth": 800,
+        "curseforge": 200
+      },
+      "createdAt": 1672531200000,
+      "updatedAt": 1685587200000,
+      "author": {
+        "username": "Pitan76",
+        "displayName": "Pitan",
+        "avatarUrl": "https://github.com/..."
+      },
+      "categories": ["Utility","Magic"],
+      "tags": ["fabric","forge"]
+    }
+  ],
+  "meta": {
+    "limit": 20,
+    "offset": 0,
+    "count": 1
+  }
+}
+```
+- **Error (400 Bad Request):** Invalid `limit`/`offset`.
+
+
 ## Versions API
 
 ### 1. Get Project Versions
@@ -120,7 +168,7 @@ Fetches recently posted ideas on the Idea Board.
 - **URL:** `/api/v1/ideas`
 - **Method:** `GET`
 - **Query Parameters:**
-  - `limit` (optional): Default 20, Max 50.
+  - `limit` (optional): Default 20, Max 80.
 - **Response (200 OK):**
   ```json
   {
