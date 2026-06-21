@@ -6,7 +6,7 @@ import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { auth } from "@/lib/auth";
+import { getAdminDb } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
@@ -22,8 +22,11 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const session = await auth();
-  if (session?.user?.role !== "admin") redirect("/");
+  try {
+    await getAdminDb();
+  } catch (e) {
+    redirect("/");
+  }
 
   const tAdmin = await getTranslations("Admin");
 

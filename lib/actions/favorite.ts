@@ -100,6 +100,10 @@ export async function toggleCookieFavorite(projectId: string) {
   if (favorites.includes(projectId)) {
     favorites = favorites.filter(id => id !== projectId);
   } else {
+    // M-4: Limit max cookie favorites to 50 to prevent DoS via huge cookie size
+    if (favorites.length >= 50) {
+      favorites.shift(); // Remove the oldest favorite
+    }
     favorites.push(projectId);
     favorited = true;
   }

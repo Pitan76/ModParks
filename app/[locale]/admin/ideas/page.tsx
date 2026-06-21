@@ -1,4 +1,4 @@
-import { getDatabase } from "@/lib/db";
+import { getAdminDb } from "@/lib/auth-helpers";
 import { ideas, users, userProfiles } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
@@ -10,7 +10,7 @@ export default async function AdminIdeasPage({ params }: { params: Promise<{ loc
   setRequestLocale(locale);
   const tAdmin = await getTranslations("Admin.ideas");
 
-  const db = await getDatabase();
+  const { db } = await getAdminDb();
   const allIdeas = await db
     .select({
       id: ideas.id,

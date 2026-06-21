@@ -30,11 +30,18 @@ export async function getAdminDb() {
  * 権限がない場合は "Forbidden" エラーをスローします。
  */
 export async function assertProjectAccess(db: any, project: { id: string; authorId: string }, session: any) {
-  if (project.authorId === session.user.id || session.user.role === "admin") {
-    return true; // Author or Admin
+  if (project.authorId === session.user.id) {
+    return true; // Author
   }
-  const { projectMembers } = await import("@/db/schema");
+  
+  const { users, projectMembers } = await import("@/db/schema");
   const { eq, and } = await import("drizzle-orm");
+  
+  const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, session.user.id)).get();
+  if (dbUser?.role === "admin") {
+    return true; // Admin
+  }
+
   const member = await db.select()
     .from(projectMembers)
     .where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id)))

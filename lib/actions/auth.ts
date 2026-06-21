@@ -215,6 +215,8 @@ export async function resetPasswordWithToken(formData: FormData) {
   const newPassword = formData.get("password") as string;
 
   if (!token || !newPassword) return { error: "invalidData" };
+  
+  if (newPassword.length < 8) return { error: "passwordLength" };
 
   const { checkRateLimit } = await import("@/lib/rate-limit");
   const rlRes = await checkRateLimit("reset_password_confirm", 5, 15 * 60 * 1000);

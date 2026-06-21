@@ -7,7 +7,7 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
-import { auth } from "@/lib/auth";
+import { getAdminDb } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
@@ -21,8 +21,11 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const session = await auth();
-  if (session?.user?.role !== "admin") redirect("/");
+  try {
+    await getAdminDb();
+  } catch (e) {
+    redirect("/");
+  }
 
   const tAdmin = await getTranslations("Admin");
   const reports = await getReports();

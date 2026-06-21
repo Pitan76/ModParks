@@ -1,7 +1,7 @@
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getD1, getDb } from "@/lib/db";
+import { getAdminDb } from "@/lib/auth-helpers";
 import { tags, platforms } from "@/db/schema";
 import ConfigClient from "./ConfigClient";
 
@@ -10,8 +10,7 @@ export default async function AdminConfigPage({ params }: { params: Promise<{ lo
   setRequestLocale(locale);
   const tAdmin = await getTranslations("Admin.config");
 
-  const d1 = await getD1();
-  const db = getDb(d1);
+  const { db } = await getAdminDb();
 
   const [allTags, allPlatforms] = await Promise.all([
     db.select().from(tags).all(),
