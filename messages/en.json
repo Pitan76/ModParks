@@ -23,7 +23,9 @@
     "itemsPerPage": "Items per page",
     "downloads": "Downloads",
     "followers": "Followers",
-    "following": "Following"
+    "following": "Following",
+    "follow": "Follow",
+    "unfollow": "Unfollow"
   },
   "Nav": {
     "home": "Home",
