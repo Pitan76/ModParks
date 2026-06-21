@@ -11,6 +11,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Paper from "@mui/material/Paper";
+import Autocomplete from "@mui/material/Autocomplete";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -669,12 +670,20 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
 
           <Typography variant="h6" sx={{ mb: 1 }}>{t("posting.defaultLicense")}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("posting.defaultLicenseDesc")}</Typography>
-          <TextField
-            fullWidth
-            size="small"
+          <Autocomplete
+            freeSolo
+            options={["MIT", "Apache-2.0", "GPL-3.0", "LGPL-3.0", "All Rights Reserved", "CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"]}
             value={postingLicense}
-            onChange={e => setPostingLicense(e.target.value)}
+            onChange={(_, newValue) => setPostingLicense(newValue || "MIT")}
+            onInputChange={(_, newInputValue) => setPostingLicense(newInputValue)}
             sx={{ mb: 4, maxWidth: 300 }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                size="small"
+                fullWidth
+              />
+            )}
           />
 
           <Button type="submit" variant="contained" sx={{ display: "block" }}>
