@@ -151,12 +151,8 @@ export async function updateProject(projectId: string, formData: FormData) {
     }
   }
 
-  // 自動同期
-  try {
-    await syncExternalProjectData(project.id);
-  } catch (e) {
-    // ignore
-  }
+  // 自動同期（外部API呼び出しによるレスポンス遅延やメモリ圧迫を防ぐため、
+  // updateProject内での自動同期は行わず、ユーザーの明示的なSyncボタン操作に委ねます）
 
   revalidatePath(`/projects/${fields.slug ?? project.slug}`);
   revalidatePath(`/projects/${fields.slug ?? project.slug}/edit`);
