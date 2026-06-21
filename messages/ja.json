@@ -23,7 +23,9 @@
     "itemsPerPage": "表示件数",
     "downloads": "ダウンロード",
     "followers": "フォロワー",
-    "following": "フォロー中"
+    "following": "フォロー中",
+    "follow": "フォローする",
+    "unfollow": "フォロー解除"
   },
   "Nav": {
     "home": "ホーム",
