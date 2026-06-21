@@ -19,7 +19,10 @@ export async function sendRegistrationEmail(formData: FormData) {
 
   const db = await getDatabase();
   const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
-  if (existingUser) return { error: "emailTaken" };
+  if (existingUser) {
+    // L-5: Return success even if user exists to prevent email enumeration
+    return { success: true };
+  }
 
   // Generate a random token
   const token = createId() + createId();
