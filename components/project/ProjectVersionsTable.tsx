@@ -17,6 +17,7 @@ import Paper from "@mui/material/Paper";
 import { getLoaderInfo } from "@/lib/loaders";
 import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { compactMcVersions } from "@/lib/utils/format";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -50,12 +51,15 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
   const t = useTranslations("Project");
 
   const parsedVersions = useMemo(() => {
-    return versions.map((version) => ({
-      ...version,
-      date: new Date(typeof version.createdAt === "number" ? version.createdAt * 1000 : version.createdAt),
-      parsedLoaders: Array.isArray(version.loaders) ? version.loaders : (JSON.parse(version.loaders || "[]") as string[]),
-      parsedMcVersions: Array.isArray(version.mcVersions) ? version.mcVersions : (JSON.parse(version.mcVersions || "[]") as string[]),
-    }));
+    return versions.map((version) => {
+      const rawMcVersions = Array.isArray(version.mcVersions) ? version.mcVersions : (JSON.parse(version.mcVersions || "[]") as string[]);
+      return {
+        ...version,
+        date: new Date(typeof version.createdAt === "number" ? version.createdAt * 1000 : version.createdAt),
+        parsedLoaders: Array.isArray(version.loaders) ? version.loaders : (JSON.parse(version.loaders || "[]") as string[]),
+        parsedMcVersions: compactMcVersions(rawMcVersions),
+      };
+    });
   }, [versions]);
 
   return (
