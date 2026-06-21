@@ -122,6 +122,7 @@ export interface DateLabelProps extends Omit<BoxProps, "children"> {
   iconSize?: number | string;
   textVariant?: TypographyProps["variant"];
   textColor?: string;
+  hideIcon?: boolean;
 }
 
 export function DateLabel({
@@ -130,6 +131,7 @@ export function DateLabel({
   iconSize = 14,
   textVariant = "caption",
   textColor = "text.secondary",
+  hideIcon = false,
   sx,
   ...props
 }: DateLabelProps) {
@@ -138,11 +140,13 @@ export function DateLabel({
   const dateObj = new Date(date);
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: textColor, ...sx }} {...props}>
-      {type === "published" ? (
-        <AccessTimeIcon sx={{ fontSize: iconSize }} />
-      ) : (
-        <EditIcon sx={{ fontSize: iconSize }} />
+    <Box sx={{ display: "flex", alignItems: "center", gap: hideIcon ? 0 : 0.5, color: textColor, ...sx }} {...props}>
+      {!hideIcon && (
+        type === "published" ? (
+          <AccessTimeIcon sx={{ fontSize: iconSize }} />
+        ) : (
+          <EditIcon sx={{ fontSize: iconSize }} />
+        )
       )}
       <Typography variant={textVariant} sx={{ whiteSpace: "nowrap", color: "inherit" }}>
         {tProject(type === "published" ? "header.publishedAt" : "header.updatedAt", {

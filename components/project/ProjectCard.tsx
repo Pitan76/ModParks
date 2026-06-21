@@ -148,7 +148,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                   by {project.authorDisplayName || project.authorUsername || "Unknown"}
                 </Typography>
                 <Typography variant="caption" color="text.disabled">•</Typography>
-                <DateLabel date={project.updatedAt} type="updated" iconSize={12} textVariant="caption" textColor="text.disabled" />
+                <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
               </Box>
             </Box>
           </Box>
