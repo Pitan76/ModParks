@@ -14,7 +14,7 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
-import { updateUserRole, deleteUser, updateUsernameByAdmin } from "@/lib/actions/admin";
+import { updateUserRole, deleteUser, updateUsernameByAdmin, purgeDeletedUsers } from "@/lib/actions/admin";
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -43,6 +43,7 @@ export default function UsersClient({ users }: { users: User[] }) {
   const [editUserId, setEditUserId] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [isPurging, setIsPurging] = useState(false);
 
   const handleRoleChange = async (userId: string, newRole: "user" | "admin") => {
     try {
@@ -63,6 +64,20 @@ export default function UsersClient({ users }: { users: User[] }) {
       setMsg({ type: "error", text: err.message });
     }
     setTimeout(() => setMsg(null), 3000);
+  };
+
+  const handlePurgeDeletedUsers = async () => {
+    if (!confirm("完全に削除された「幽霊アカウント（退会済みユーザー）」をデータベースから物理削除しますか？\n（この操作は取り消せません。メールアドレスが完全に解放されます）")) return;
+    setIsPurging(true);
+    try {
+      await purgeDeletedUsers();
+      setMsg({ type: "success", text: "Ghost accounts purged successfully" });
+    } catch (err: any) {
+      setMsg({ type: "error", text: err.message });
+    } finally {
+      setIsPurging(false);
+      setTimeout(() => setMsg(null), 3000);
+    }
   };
 
   const handleOpenEditDialog = (user: User) => {
@@ -88,6 +103,21 @@ export default function UsersClient({ users }: { users: User[] }) {
 
   return (
     <Box>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
+        <Typography variant="body2" color="text.secondary">
+          Manage your users here.
+        </Typography>
+        <Button 
+          variant="outlined" 
+          color="error" 
+          startIcon={<DeleteIcon />} 
+          onClick={handlePurgeDeletedUsers}
+          disabled={isPurging}
+        >
+          幽霊アカウントを物理削除
+        </Button>
+      </Box>
+      
       {msg && <Alert severity={msg.type} sx={{ mb: 2 }}>{msg.text}</Alert>}
       <TableContainer component={Paper} variant="outlined">
         <Table size="small">
