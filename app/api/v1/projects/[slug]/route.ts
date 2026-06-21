@@ -112,3 +112,49 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   return NextResponse.json(data);
 }
+
+export async function PATCH(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const d1 = await getD1();
+  const db = getDb(d1);
+  
+  const auth = await validateApiKey(request);
+  if (!auth.valid || !auth.userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { slug } = await params;
+  
+  const [project] = await db.select().from(projects).where(eq(projects.slug, slug)).limit(1);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
+
+  const [userRecord] = await db.select().from(users).where(eq(users.id, auth.userId)).limit(1);
+  if (project.authorId !== auth.userId && userRecord?.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  let body: any;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const updates: any = { updatedAt: new Date() };
+  if (body.name !== undefined) updates.name = body.name;
+  if (body.slug !== undefined) {
+    const existing = await db.select().from(projects).where(eq(projects.slug, body.slug)).get();
+    if (existing && existing.id !== project.id) {
+      return NextResponse.json({ error: "Slug is already taken" }, { status: 409 });
+    }
+    updates.slug = body.slug;
+    updates.previousSlug = project.slug;
+  }
+  if (body.description !== undefined) updates.description = body.description;
+  if (body.type !== undefined) updates.type = body.type;
+
+  await db.update(projects).set(updates).where(eq(projects.id, project.id)).run();
+
+  return NextResponse.json({ success: true });
+}

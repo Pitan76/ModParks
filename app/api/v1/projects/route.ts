@@ -5,6 +5,7 @@ import { validateApiKey } from "@/lib/api-auth";
 import { API_CONFIG } from "@/lib/config";
 import { eq, desc, and, inArray, like } from "drizzle-orm";
 import { ApiProject, PaginatedResponse } from "@/types/api";
+import { createId } from "@paralleldrive/cuid2";
 
 export async function GET(request: Request) {
   const d1 = await getD1();
@@ -111,4 +112,51 @@ export async function GET(request: Request) {
   };
 
   return NextResponse.json(response);
+}
+
+export async function POST(request: Request) {
+  const d1 = await getD1();
+  const db = getDb(d1);
+
+  const auth = await validateApiKey(request);
+  if (!auth.valid || !auth.userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: any;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { name, slug, description, type } = body;
+
+  if (!name || !slug || !type) {
+    return NextResponse.json({ error: "name, slug, and type are required" }, { status: 400 });
+  }
+
+  const existing = await db.select().from(projects).where(eq(projects.slug, slug)).get();
+  if (existing) {
+    return NextResponse.json({ error: "Slug is already taken" }, { status: 409 });
+  }
+
+  const id = createId();
+
+  await db.insert(projects).values({
+    id,
+    slug,
+    name,
+    description: description || "",
+    descriptionFormat: "markdown",
+    type,
+    license: "All Rights Reserved",
+    authorId: auth.userId,
+    status: "draft",
+  }).run();
+
+  return NextResponse.json({
+    success: true,
+    data: { id, slug, name, type }
+  });
 }
