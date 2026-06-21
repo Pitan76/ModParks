@@ -110,5 +110,5 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     }))
   };
 
-  return NextResponse.json({ data });
+  return NextResponse.json(data);
 }
