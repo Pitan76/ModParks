@@ -22,6 +22,43 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Missing key" }, { status: 400 });
   }
 
+  // Key validation (H-1)
+  const allowedPrefixes = [
+    `avatar/${session.user.id}/`,
+    `icon/`,
+    `mod/`
+  ];
+  const isAllowedPrefix = allowedPrefixes.some(prefix => key.startsWith(prefix));
+  if (!isAllowedPrefix) {
+    return NextResponse.json({ error: "Forbidden: Invalid key prefix" }, { status: 403 });
+  }
+
+  if (key.startsWith("icon/") || key.startsWith("mod/")) {
+    const parts = key.split("/");
+    if (parts.length < 3) {
+      return NextResponse.json({ error: "Forbidden: Invalid key format" }, { status: 403 });
+    }
+    const slugOrId = parts[1];
+    
+    if (slugOrId !== "new-project") {
+      const { getDb, getD1 } = await import("@/lib/db");
+      const { projects, projectMembers } = await import("@/db/schema");
+      const { eq, and } = await import("drizzle-orm");
+      const d1 = await getD1();
+      const db = getDb(d1);
+      const project = await db.select().from(projects).where(eq(projects.slug, slugOrId)).get();
+      
+      if (!project) {
+        return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      }
+
+      const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
+      if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+        return NextResponse.json({ error: "Forbidden: You don't have permission to upload to this project" }, { status: 403 });
+      }
+    }
+  }
+
   let R2: R2Bucket;
   if (process.env.NODE_ENV === "development" && typeof process !== "undefined" && process.release?.name === "node") {
     // 開発環境のWrangler Proxy経由でR2を取得

@@ -132,6 +132,9 @@ export async function changeEmail(newEmail: string, password?: string) {
     if (!password) return { error: "errorWrongPassword" };
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) return { error: "errorWrongPassword" };
+  } else {
+    // H-2: Require OAuth users to set a password before changing their email
+    return { error: "errorSetPasswordFirst" };
   }
 
   const existing = await db.select().from(users).where(eq(users.email, newEmail)).get();
@@ -169,11 +172,38 @@ export async function changePassword(oldPass: string, newPass: string, totpToken
   return { success: true };
 }
 
-export async function deleteAccount() {
+export async function deleteAccount(passwordOrToken?: string) {
   const { db, userId } = await getAuthenticatedDb();
 
   const user = await db.select().from(users).where(eq(users.id, userId)).get();
   if (!user) return { success: false };
+
+  let isAuthorized = false;
+
+  // H-3: Check password if exists
+  if (user.passwordHash) {
+    if (!passwordOrToken) return { error: "errorWrongPassword" };
+    isAuthorized = await bcrypt.compare(passwordOrToken, user.passwordHash);
+  } else {
+    // If OAuth-only and they somehow have TOTP, we check TOTP. Otherwise, reject.
+    if (!user.twoFactorEnabled) {
+       return { error: "errorSetPasswordFirst" };
+    }
+  }
+
+  // If password failed or they are OAuth-only with TOTP, check TOTP token
+  if (!isAuthorized && user.twoFactorSecret && passwordOrToken) {
+    const { TOTP } = await import("otpauth");
+    const totp = new TOTP({ secret: user.twoFactorSecret });
+    const delta = totp.validate({ token: passwordOrToken, window: 1 });
+    if (delta !== null) {
+      isAuthorized = true;
+    }
+  }
+
+  if ((user.passwordHash || user.twoFactorEnabled) && !isAuthorized) {
+    return { error: "UNAUTHORIZED" };
+  }
 
   const timestamp = Date.now();
   const scrambledEmail = user.email ? `deleted_${timestamp}_${user.email}` : null;

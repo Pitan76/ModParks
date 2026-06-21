@@ -259,12 +259,16 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
   };
 
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deletePasswordOrToken, setDeletePasswordOrToken] = useState("");
   const handleDeleteAccount = async () => {
     setIsDeletingAccount(true);
-    const res = await deleteAccount();
+    const res = await deleteAccount(deletePasswordOrToken);
     if (res.success) {
       setDeleteOpen(false);
       signOut({ callbackUrl: "/" });
+    } else {
+      showAccMsg("error", res.error || "errorWrongPassword");
+      setDeleteOpen(false);
     }
     setIsDeletingAccount(false);
   };
@@ -498,16 +502,41 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             </Button>
           </Box>
 
-          <TypedConfirmDialog
-            open={deleteOpen}
-            onClose={() => !isDeletingAccount && setDeleteOpen(false)}
-            onConfirm={handleDeleteAccount}
-            title={t("account.deleteAccount")}
-            description={t("account.deleteAccountConfirm")}
-            expectedValue={user.username}
-            expectedValueLabel="確認のため、あなたのユーザー名を入力してください:"
-            pending={isDeletingAccount}
-          />
+          <Dialog open={deleteOpen} onClose={() => !isDeletingAccount && setDeleteOpen(false)} maxWidth="sm" fullWidth>
+            <DialogTitle sx={{ color: "error.main", fontWeight: "bold" }}>{t("account.deleteAccount")}</DialogTitle>
+            <DialogContent>
+              <DialogContentText sx={{ mb: 2 }}>
+                {t("account.deleteAccountConfirm")}
+              </DialogContentText>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                アカウントを削除するには、パスワード（または2要素認証コード）を入力してください。
+              </Typography>
+              <TextField
+                autoFocus
+                fullWidth
+                variant="outlined"
+                type="password"
+                value={deletePasswordOrToken}
+                onChange={(e) => setDeletePasswordOrToken(e.target.value)}
+                placeholder="パスワードまたは認証コード"
+                disabled={isDeletingAccount}
+                autoComplete="off"
+              />
+            </DialogContent>
+            <DialogActions sx={{ px: 3, pb: 3 }}>
+              <Button onClick={() => setDeleteOpen(false)} disabled={isDeletingAccount} variant="outlined" color="inherit">
+                {tCommon("cancel")}
+              </Button>
+              <Button 
+                onClick={handleDeleteAccount} 
+                disabled={!deletePasswordOrToken || isDeletingAccount} 
+                variant="contained" 
+                color="error"
+              >
+                {t("account.deleteBtn")}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       )
     },
