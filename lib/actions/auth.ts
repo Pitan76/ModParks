@@ -3,7 +3,7 @@
 import { getDatabase } from "@/lib/db";
 import { users, userProfiles, userSettings, verificationTokens } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import bcrypt from "bcryptjs";
+
 import { createId } from "@paralleldrive/cuid2";
 import { SITE_URL } from "@/lib/config";
 
@@ -118,7 +118,8 @@ export async function registerUser(formData: FormData) {
     return { error: "usernameTaken" };
   }
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  const { default: bcrypt } = await import("bcryptjs");
+  const passwordHash = await bcrypt.hash(password, 8);
   const id = createId();
 
   await db.insert(users).values({
