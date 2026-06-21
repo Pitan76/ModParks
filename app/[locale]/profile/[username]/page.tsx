@@ -259,44 +259,47 @@ export default async function PublicProfilePage({ params, searchParams }: Public
             </Typography>
           )}
 
-          {user.links && (() => {
+          {(() => {
+            let parsedLinks: any[] = [];
             try {
-              const parsedLinks = JSON.parse(user.links);
-              if (!Array.isArray(parsedLinks) || parsedLinks.length === 0) return null;
-              return (
-                <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 2 }}>
-                  {parsedLinks.map((link: any, i: number) => (
-                    <Link
-                      key={i}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, color: "text.primary" }}
-                    >
-                      {getLinkIcon(link.url)}
-                      {link.title || link.url}
-                    </Link>
-                  ))}
-                </Box>
-              );
-            } catch {
-              return null;
-            }
-          })()}
+              if (user.links) {
+                const parsed = JSON.parse(user.links);
+                if (Array.isArray(parsed)) parsedLinks = parsed;
+              }
+            } catch {}
 
-          {user.githubUsername && ((user.custom as Record<string, any>)?.showGithubLink ?? true) && (
-            <Box sx={{ mt: 1 }}>
-              <Link
-                href={`https://github.com/${user.githubUsername}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, color: "text.primary" }}
-              >
-                <GitHubIcon fontSize="small" />
-                {user.githubUsername}
-              </Link>
-            </Box>
-          )}
+            const showGithub = user.githubUsername && ((user.custom as Record<string, any>)?.showGithubLink ?? true);
+
+            if (parsedLinks.length === 0 && !showGithub) return null;
+
+            return (
+              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 2 }}>
+                {showGithub && (
+                  <Link
+                    href={`https://github.com/${user.githubUsername}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, color: "text.primary" }}
+                  >
+                    <GitHubIcon fontSize="small" />
+                    {user.githubUsername}
+                  </Link>
+                )}
+                {parsedLinks.map((link: any, i: number) => (
+                  <Link
+                    key={i}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, color: "text.primary" }}
+                  >
+                    {getLinkIcon(link.url)}
+                    {link.title || link.url}
+                  </Link>
+                ))}
+              </Box>
+            );
+          })()}
         </Box>
       </Box>
 
