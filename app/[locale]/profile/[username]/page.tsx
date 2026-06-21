@@ -204,17 +204,16 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                 @{user.username}
               </Typography>
 
-              {!isOwner && (
-                <Box sx={{ mt: 2 }}>
-                  <FollowUserButton
-                    targetUsername={user.username}
-                    initialIsFollowing={isFollowing}
-                    initialFollowersCount={followersCount}
-                    initialFollowingCount={followingCount}
-                    isLoggedIn={!!session?.user}
-                  />
-                </Box>
-              )}
+              <Box sx={{ mt: 2 }}>
+                <FollowUserButton
+                  targetUsername={user.username}
+                  initialIsFollowing={isFollowing}
+                  initialFollowersCount={followersCount}
+                  initialFollowingCount={followingCount}
+                  isLoggedIn={!!session?.user}
+                  isOwner={isOwner}
+                />
+              </Box>
 
               <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap", alignItems: "center" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -229,13 +228,6 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                     sx={{ '& .MuiTypography-root': { fontWeight: 800 } }}
                   />
                 </Box>
-
-                <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followersCount}</Box> {tCommon("followers")}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>{followingCount}</Box> {tCommon("following")}
-                </Typography>
               </Box>
             </Box>
 
