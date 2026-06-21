@@ -8,7 +8,7 @@ import { getDb } from "@/lib/db";
 import * as schema from "@/db/schema";
 import { users, userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcryptjs";
+
 
 
 /**
@@ -83,6 +83,7 @@ export const authConfig = {
             return null;
           }
 
+          const { default: bcrypt } = await import("bcryptjs");
           const passwordsMatch = await bcrypt.compare(credentials.password as string, user.passwordHash);
           if (!passwordsMatch) {
             console.log("[Auth] Password mismatch for user:", credentials.email);

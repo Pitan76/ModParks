@@ -5,7 +5,7 @@ import { getDatabase } from "@/lib/db";
 import { projects, projectTags, projectMembers, users, userProfiles, versions, userSettings } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, desc, and, like, inArray, sql, or } from "drizzle-orm";
+import { eq, desc, and, or, like, sql, inArray, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -296,9 +296,13 @@ export async function getProjects(params: {
     }
 
     // プロジェクトと著者の情報をJOINして取得
+    const { description, ...restProjects } = getTableColumns(projects);
     rows = await db
       .select({
-        project: projects,
+        project: {
+          ...restProjects,
+          description: sql<string>`SUBSTR(${projects.description}, 1, 300) || CASE WHEN LENGTH(${projects.description}) > 300 THEN '...' ELSE '' END`
+        },
         author: {
           username: userProfiles.username,
           displayName: userProfiles.displayName,
