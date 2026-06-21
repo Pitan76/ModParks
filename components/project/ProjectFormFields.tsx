@@ -22,6 +22,7 @@ export interface ProjectFormFieldsProps {
     slug?: string;
     type?: string;
     description?: string;
+    descriptionFormat?: string;
     license?: string;
     sourceUrl?: string | null;
     links?: string | null;
@@ -100,7 +101,24 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
         {children}
       </Stack>
 
-      <TextField
+      <Stack direction="column" spacing={1}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel id="project-description-format-label">形式</InputLabel>
+            <Select
+              labelId="project-description-format-label"
+              id="project-description-format"
+              name="descriptionFormat"
+              label="形式"
+              defaultValue={project?.descriptionFormat || "markdown"}
+            >
+              <MenuItem value="markdown">Markdown</MenuItem>
+              <MenuItem value="plaintext">Plain Text</MenuItem>
+              <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        <TextField
         id="project-description"
         name="description"
         label={t("fields.description")}
@@ -117,6 +135,7 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           }
         }}
       />
+      </Stack>
 
       <Autocomplete
         multiple

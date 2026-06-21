@@ -24,6 +24,7 @@ export async function createProject(formData: FormData) {
     name:        formData.get("name"),
     slug:        formData.get("slug"),
     description: formData.get("description"),
+    descriptionFormat: formData.get("descriptionFormat"),
     type:        formData.get("type"),
     license:     formData.get("license"),
     sourceUrl:   formData.get("sourceUrl"),
@@ -36,7 +37,7 @@ export async function createProject(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { name, slug, description, type, license, sourceUrl, links, tags } = parsed.data;
+  const { name, slug, description, descriptionFormat, type, license, sourceUrl, links, tags } = parsed.data;
   const id = createId();
 
   // スラッグの重複チェック
@@ -50,6 +51,7 @@ export async function createProject(formData: FormData) {
     slug,
     name,
     description,
+    descriptionFormat: descriptionFormat || "markdown",
     type,
     license,
     sourceUrl:  sourceUrl || null,
@@ -96,6 +98,7 @@ export async function updateProject(projectId: string, formData: FormData) {
     name:        formData.get("name"),
     slug:        formData.get("slug"),
     description: formData.get("description"),
+    descriptionFormat: formData.get("descriptionFormat"),
     type:        formData.get("type"),
     license:     formData.get("license"),
     sourceUrl:   formData.get("sourceUrl"),

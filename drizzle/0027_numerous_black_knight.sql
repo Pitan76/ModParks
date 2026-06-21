@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `description_format` text DEFAULT 'markdown' NOT NULL;

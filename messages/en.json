@@ -531,6 +531,8 @@
     "weapons": "Weapons",
     "armor": "Armor",
     "food": "Food",
+    "tool": "Tool",
+    "equipment": "Equipment",
     "library": "Library"
   },
   "Settings": {

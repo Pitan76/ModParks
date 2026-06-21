@@ -553,6 +553,8 @@
     "weapons": "武器",
     "armor": "防具",
     "food": "食料",
+    "tool": "ツール",
+    "equipment": "装備",
     "library": "前提MOD"
   },
   "Settings": {

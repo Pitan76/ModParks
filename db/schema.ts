@@ -143,6 +143,7 @@ export const projects = sqliteTable("projects", {
   sourceUrl:   text("source_url"),
   links:       text("links"),
   status:      text("status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
+  descriptionFormat: text("description_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull().default("markdown"),
   authorId:    text("author_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),

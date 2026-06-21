@@ -20,6 +20,7 @@ import ProjectDependencies from "@/components/project/ProjectDependencies";
 import ProjectComments from "@/components/project/ProjectComments";
 import LinkButton from "@/components/ui/LinkButton";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
+import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import AddIcon from "@mui/icons-material/Add";
 import { SITE_URL } from "@/lib/config";
 
@@ -144,8 +145,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             manageHref={`/projects/${p.slug}/edit`}
             issueTrackerUrl={p.issueTrackerUrl}
             descriptionContent={
-              <Box sx={{ p: 1 }}>
-                <MarkdownRenderer content={p.description || ""} />
+              <Box sx={{ mt: 2 }}>
+                <DescriptionRenderer content={p.description || ""} format={p.descriptionFormat || "markdown"} />
               </Box>
             }
             filesContent={
