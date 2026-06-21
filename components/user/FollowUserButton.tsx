@@ -29,6 +29,7 @@ interface Props {
   initialFollowingCount: number;
   isLoggedIn: boolean;
   isOwner?: boolean;
+  children?: React.ReactNode;
 }
 
 interface UserSummary {
@@ -38,7 +39,7 @@ interface UserSummary {
   avatarUrl: string | null;
 }
 
-export default function FollowUserButton({ targetUsername, initialIsFollowing, initialFollowersCount, initialFollowingCount, isLoggedIn, isOwner = false }: Props) {
+export default function FollowUserButton({ targetUsername, initialIsFollowing, initialFollowersCount, initialFollowingCount, isLoggedIn, isOwner = false, children }: Props) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [followersCount, setFollowersCount] = useState(initialFollowersCount);
   const [loading, setLoading] = useState(false);
@@ -86,6 +87,7 @@ export default function FollowUserButton({ targetUsername, initialIsFollowing, i
     <>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap", alignItems: "center" }}>
+          {children}
           <Typography 
             variant="body2" 
             color="text.secondary" 
@@ -151,9 +153,8 @@ export default function FollowUserButton({ targetUsername, initialIsFollowing, i
                     <Avatar src={u.avatarUrl || ""} />
                   </ListItemAvatar>
                   <ListItemText 
-                    primary={u.displayName || u.username} 
+                    primary={<Typography sx={{ fontWeight: 600 }}>{u.displayName || u.username}</Typography>}
                     secondary={`@${u.username}`} 
-                    primaryTypographyProps={{ fontWeight: 600 }}
                   />
                 </ListItem>
               ))}
