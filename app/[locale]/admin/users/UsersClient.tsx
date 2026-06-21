@@ -18,15 +18,19 @@ import { updateUserRole, deleteUser, updateUsernameByAdmin, purgeDeletedUsers, h
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import InfoIcon from "@mui/icons-material/Info";
 import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import DialogContentText from "@mui/material/DialogContentText";
 import TextField from "@mui/material/TextField";
+import { Link } from "@/i18n/routing";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { useTranslations } from "next-intl";
+import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 
 export interface User {
   id: string;
@@ -37,6 +41,8 @@ export interface User {
   role: string;
   createdAt: Date | number;
   deletedAt: Date | null;
+  twoFactorEnabled?: boolean;
+  hasGithub?: boolean;
 }
 export default function UsersClient({ users }: { users: User[] }) {
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -48,6 +54,9 @@ export default function UsersClient({ users }: { users: User[] }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
+
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [detailsUser, setDetailsUser] = useState<User | null>(null);
 
   const activeUsers = users.filter((u) => !u.deletedAt);
   const deletedUsers = users.filter((u) => u.deletedAt);
@@ -63,15 +72,22 @@ export default function UsersClient({ users }: { users: User[] }) {
     setTimeout(() => setMsg(null), 3000);
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm("Are you sure you want to delete this user? This cannot be undone.")) return;
+  const [deleteUserTarget, setDeleteUserTarget] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteUser = async () => {
+    if (!deleteUserTarget) return;
+    setIsDeleting(true);
     try {
-      await deleteUser(userId);
+      await deleteUser(deleteUserTarget.id);
       setMsg({ type: "success", text: "User successfully deleted" });
+      setDeleteUserTarget(null);
     } catch (err: any) {
       setMsg({ type: "error", text: err.message });
+    } finally {
+      setIsDeleting(false);
+      setTimeout(() => setMsg(null), 3000);
     }
-    setTimeout(() => setMsg(null), 3000);
   };
 
   const handleHardDeleteUser = async (userId: string) => {
@@ -185,10 +201,13 @@ export default function UsersClient({ users }: { users: User[] }) {
                   <TableCell>
                     {!user.deletedAt ? (
                       <>
+                        <IconButton color="info" onClick={() => { setDetailsUser(user); setDetailsDialogOpen(true); }} title="View User Info">
+                          <InfoIcon />
+                        </IconButton>
                         <IconButton color="primary" onClick={() => handleOpenEditDialog(user)} title="Edit User ID">
                           <EditIcon />
                         </IconButton>
-                        <IconButton color="error" onClick={() => handleDeleteUser(user.id)} title="Delete User">
+                        <IconButton color="error" onClick={() => setDeleteUserTarget(user)} title="Delete User">
                           <DeleteIcon />
                         </IconButton>
                       </>
@@ -234,6 +253,75 @@ export default function UsersClient({ users }: { users: User[] }) {
           <Button onClick={handleSaveUsername} disabled={isEditing || !editUsername} variant="contained">
             Save
           </Button>
+        </DialogActions>
+      </Dialog>
+      <TypedConfirmDialog
+        open={!!deleteUserTarget}
+        onClose={() => !isDeleting && setDeleteUserTarget(null)}
+        onConfirm={handleDeleteUser}
+        title="Delete User"
+        description={<>Are you sure you want to delete the user <strong>{deleteUserTarget?.displayName || deleteUserTarget?.username}</strong>? This cannot be undone.</>}
+        expectedValue={deleteUserTarget?.username || deleteUserTarget?.id || ""}
+        expectedValueLabel="Please type the username to confirm:"
+        pending={isDeleting}
+      />
+
+      <Dialog open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>User Information</DialogTitle>
+        <DialogContent>
+          {detailsUser && (
+            <Table size="small">
+              <TableBody>
+                <TableRow>
+                  <TableCell variant="head" sx={{ width: "35%", fontWeight: "bold" }}>ID</TableCell>
+                  <TableCell>{detailsUser.id}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell variant="head" sx={{ fontWeight: "bold" }}>Username</TableCell>
+                  <TableCell>@{detailsUser.username || "N/A"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell variant="head" sx={{ fontWeight: "bold" }}>Display Name</TableCell>
+                  <TableCell>{detailsUser.displayName}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell variant="head" sx={{ fontWeight: "bold" }}>Email</TableCell>
+                  <TableCell>{detailsUser.email}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell variant="head" sx={{ fontWeight: "bold" }}>Profile Link</TableCell>
+                  <TableCell>
+                    {detailsUser.username ? (
+                      <Link href={`/profile/${detailsUser.username}`} style={{ color: "#1976d2" }} target="_blank">
+                        View Profile
+                      </Link>
+                    ) : (
+                      "N/A"
+                    )}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell variant="head" sx={{ fontWeight: "bold" }}>Account Created</TableCell>
+                  <TableCell>{new Date(typeof detailsUser.createdAt === "number" ? detailsUser.createdAt * 1000 : detailsUser.createdAt).toLocaleString()}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell variant="head" sx={{ fontWeight: "bold" }}>2FA Enabled</TableCell>
+                  <TableCell>{detailsUser.twoFactorEnabled ? "Yes" : "No"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell variant="head" sx={{ fontWeight: "bold" }}>GitHub Linked</TableCell>
+                  <TableCell>{detailsUser.hasGithub ? "Yes" : "No"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell variant="head" sx={{ fontWeight: "bold" }}>Deleted Status</TableCell>
+                  <TableCell>{detailsUser.deletedAt ? new Date(detailsUser.deletedAt).toLocaleString() : "Active"}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDetailsDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

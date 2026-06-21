@@ -20,6 +20,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { formatCompactNumber } from "@/lib/utils/format";
 import { Link } from "@/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/project";
+import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 
 interface ProjectForManagement {
   id: string;
@@ -40,6 +41,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   // Menu state for status change
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -87,9 +89,6 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
 
   const handleBatchDelete = async () => {
     if (selected.size === 0) return;
-    if (!confirm(`本当に選択した ${selected.size} 件のプロジェクトを削除しますか？この操作は元に戻せません。`)) {
-      return;
-    }
     
     setLoading(true);
     setError(null);
@@ -97,6 +96,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
       const ids = Array.from(selected);
       await batchDeleteProjects(ids);
       setSelected(new Set());
+      setDeleteDialogOpen(false);
       router.refresh();
     } catch (err: any) {
       setError(err.message || "削除に失敗しました");
@@ -143,7 +143,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
           variant="outlined"
           color="error"
           startIcon={<DeleteIcon />}
-          onClick={handleBatchDelete}
+          onClick={() => setDeleteDialogOpen(true)}
           disabled={selected.size === 0 || loading}
         >
           削除
@@ -211,6 +211,17 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TypedConfirmDialog
+        open={deleteDialogOpen}
+        onClose={() => !loading && setDeleteDialogOpen(false)}
+        onConfirm={handleBatchDelete}
+        title="プロジェクト一括削除"
+        description={<>本当に選択した <strong>{selected.size}</strong> 件のプロジェクトを削除しますか？この操作は元に戻せません。</>}
+        expectedValue="DELETE"
+        expectedValueLabel="確認のため、半角大文字で DELETE と入力してください:"
+        pending={loading}
+      />
     </Box>
   );
 }

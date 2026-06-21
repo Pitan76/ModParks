@@ -31,14 +31,25 @@ export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
   const userRes = await fetch("https://api.modrinth.com/v2/user", {
     headers: { Authorization: settings.modrinthApiKey, "User-Agent": "ModParks/1.0" }
   });
-  if (!userRes.ok) throw new Error("Failed to fetch Modrinth user.");
+  if (!userRes.ok) {
+    const errorText = await userRes.text().catch(() => "Could not read error body");
+    console.error("Modrinth API Error (User Fetch):", userRes.status, errorText);
+    if (userRes.status === 401) {
+      throw new Error("Modrinthの認証に失敗しました。設定画面に登録したAPIキー (Personal Access Token) が正しいか確認してください。PATは 'mrp_' から始まります。");
+    }
+    throw new Error(`Failed to fetch Modrinth user. Status: ${userRes.status}`);
+  }
   const userData = (await userRes.json()) as { id: string };
 
   // Get user projects
   const projRes = await fetch(`https://api.modrinth.com/v2/user/${userData.id}/projects`, {
     headers: { Authorization: settings.modrinthApiKey, "User-Agent": "ModParks/1.0" }
   });
-  if (!projRes.ok) throw new Error("Failed to fetch Modrinth projects.");
+  if (!projRes.ok) {
+    const errorText = await projRes.text().catch(() => "Could not read error body");
+    console.error("Modrinth API Error (Projects Fetch):", projRes.status, errorText);
+    throw new Error(`Failed to fetch Modrinth projects. Status: ${projRes.status}`);
+  }
   const projectsData = (await projRes.json()) as any[];
 
   return projectsData.map((p) => ({

@@ -39,6 +39,7 @@ import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { signIn, signOut } from "next-auth/react";
 import { resizeImageFile } from "@/lib/utils/image";
+import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 
 interface SettingsClientProps {
   user: { username: string, displayName: string, bio: string, email: string, avatarUrl: string, links: string, locale: string, showGithubLink: boolean };
@@ -256,12 +257,15 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
     }
   };
 
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
     const res = await deleteAccount();
     if (res.success) {
       setDeleteOpen(false);
       signOut({ callbackUrl: "/" });
     }
+    setIsDeletingAccount(false);
   };
 
   const handleSetupTotp = async () => {
@@ -476,18 +480,16 @@ export default function SettingsClient({ user, apiKeys, isGitHubConnected, hasPa
             </Button>
           </Box>
 
-          <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-            <DialogTitle>{t("account.deleteAccount")}</DialogTitle>
-            <DialogContent>
-              <DialogContentText>{t("account.deleteAccountConfirm")}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteOpen(false)}>{tCommon("cancel")}</Button>
-              <Button color="error" variant="contained" onClick={handleDeleteAccount}>
-                {t("account.deleteBtn")}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <TypedConfirmDialog
+            open={deleteOpen}
+            onClose={() => !isDeletingAccount && setDeleteOpen(false)}
+            onConfirm={handleDeleteAccount}
+            title={t("account.deleteAccount")}
+            description={t("account.deleteAccountConfirm")}
+            expectedValue={user.username}
+            expectedValueLabel="確認のため、あなたのユーザー名を入力してください:"
+            pending={isDeletingAccount}
+          />
         </Box>
       )
     },

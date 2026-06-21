@@ -40,7 +40,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
   
   const [pending, setPending] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const [toast, setToast] = useState<{ message: string; severity: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{ message: string; severity: "success" | "error" | "info" } | null>(null);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
 
   const handleSync = async () => {

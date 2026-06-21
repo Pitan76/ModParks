@@ -28,6 +28,7 @@ import { useState, useMemo } from "react";
 import type { SyntheticEvent } from "react";
 import { deleteVersion, updateVersion } from "@/lib/actions/version";
 import { useFormatter, useTranslations } from "next-intl";
+import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import { MC_VERSIONS } from "@/lib/validations";
 import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
@@ -198,21 +199,16 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
         </Table>
       </TableContainer>
 
-      {/* Delete Dialog */}
-      <Dialog open={!!deleteId} onClose={() => !pending && setDeleteId(null)}>
-        <DialogTitle>{t("manager.deleteTitle")}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {t("manager.deleteConfirm")}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteId(null)} disabled={pending} variant="text">{tCommon("cancel")}</Button>
-          <Button color="error" variant="text" onClick={handleDelete} disabled={pending}>
-            {tCommon("delete")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <TypedConfirmDialog
+        open={!!deleteId}
+        onClose={() => !pending && setDeleteId(null)}
+        onConfirm={handleDelete}
+        title={t("manager.deleteTitle")}
+        description={t("manager.deleteConfirm")}
+        expectedValue={localVersions.find(v => v.id === deleteId)?.versionNumber || ""}
+        expectedValueLabel="確認のため、バージョン番号を入力してください:"
+        pending={pending}
+      />
 
       {/* Edit Dialog */}
       <Dialog open={!!editTarget} onClose={() => !pending && setEditTarget(null)} maxWidth="sm" fullWidth>

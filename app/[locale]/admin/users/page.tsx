@@ -20,15 +20,24 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
       email: users.email,
       role: users.role,
       createdAt: users.createdAt,
-      deletedAt: users.deletedAt
+      deletedAt: users.deletedAt,
+      twoFactorEnabled: users.twoFactorEnabled
   }).from(users).leftJoin(userProfiles, eq(users.id, userProfiles.userId)).orderBy(desc(users.createdAt)).all() as any[];
+
+  const { accounts } = await import("@/db/schema");
+  const allAccounts = await db.select({ userId: accounts.userId, provider: accounts.provider }).from(accounts).all();
+  
+  const mappedUsers = allUsers.map(u => ({
+    ...u,
+    hasGithub: allAccounts.some(acc => acc.userId === u.id && acc.provider === "github")
+  }));
 
   return (
     <>
       <Typography variant="h4" sx={{ mb: 4, fontWeight: "bold" }}>
         {tAdmin("title")}
       </Typography>
-      <UsersClient users={allUsers} />
+      <UsersClient users={mappedUsers} />
     </>
   );
 }

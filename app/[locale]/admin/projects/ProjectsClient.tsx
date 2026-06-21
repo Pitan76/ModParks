@@ -17,6 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Link } from "@/i18n/routing";
 import { adminDeleteProject } from "@/lib/actions/admin";
+import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 
 interface AdminProject {
   id: string;
@@ -29,16 +30,22 @@ interface AdminProject {
 
 export default function ProjectsClient({ projects }: { projects: AdminProject[] }) {
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminProject | null>(null);
+  const [pending, setPending] = useState(false);
 
-  const handleDeleteProject = async (projectId: string) => {
-    if (!confirm("Are you sure you want to completely delete this project? This action cannot be undone and will delete all associated versions and files.")) return;
+  const handleDeleteProject = async () => {
+    if (!deleteTarget) return;
+    setPending(true);
     try {
-      await adminDeleteProject(projectId);
+      await adminDeleteProject(deleteTarget.id);
       setMsg({ type: "success", text: "Project successfully deleted" });
+      setDeleteTarget(null);
     } catch (err: any) {
       setMsg({ type: "error", text: err.message });
+    } finally {
+      setPending(false);
+      setTimeout(() => setMsg(null), 3000);
     }
-    setTimeout(() => setMsg(null), 3000);
   };
 
   return (
@@ -82,7 +89,7 @@ export default function ProjectsClient({ projects }: { projects: AdminProject[] 
                     <IconButton component={Link} href={`/projects/${project.slug}`} color="primary" title="View Project">
                       <OpenInNewIcon fontSize="small" />
                     </IconButton>
-                    <IconButton color="error" onClick={() => handleDeleteProject(project.id)} title="Delete Project">
+                    <IconButton color="error" onClick={() => setDeleteTarget(project)} title="Delete Project">
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </TableCell>
@@ -99,6 +106,17 @@ export default function ProjectsClient({ projects }: { projects: AdminProject[] 
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TypedConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => !pending && setDeleteTarget(null)}
+        onConfirm={handleDeleteProject}
+        title="Delete Project"
+        description={<>Are you sure you want to completely delete the project <strong>{deleteTarget?.name}</strong>? This action cannot be undone and will delete all associated versions and files.</>}
+        expectedValue={deleteTarget?.slug || ""}
+        expectedValueLabel="Please type the project slug to confirm:"
+        pending={pending}
+      />
     </Box>
   );
 }
