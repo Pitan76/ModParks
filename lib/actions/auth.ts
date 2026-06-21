@@ -177,6 +177,9 @@ export async function requestPasswordReset(formData: FormData) {
 
   const link = `${SITE_URL}/${locale}/reset-password?token=${token}`;
 
+  const { getTranslations } = await import("next-intl/server");
+  const tAuth = await getTranslations({ locale, namespace: "Auth" });
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -186,13 +189,13 @@ export async function requestPasswordReset(formData: FormData) {
     body: JSON.stringify({
       from: "no-reply@modparks.pitan76.net",
       to: email,
-      subject: locale === "en" ? "Reset your password" : "パスワードの再設定",
+      subject: tAuth("login.emailSubject"),
       html: `
         <div style="font-family: sans-serif; padding: 20px;">
-          <h2>${locale === "en" ? "Reset your password" : "パスワードの再設定"}</h2>
-          <p>${locale === "en" ? "Click the button below to reset your password. This link will expire in 1 hour." : "下のボタンをクリックしてパスワードを再設定してください。このリンクの有効期限は1時間です。"}</p>
+          <h2>${tAuth("login.emailSubject")}</h2>
+          <p>${tAuth("login.emailBody")}</p>
           <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px;">
-            ${locale === "en" ? "Reset Password" : "パスワードを再設定する"}
+            ${tAuth("login.resetPasswordBtn")}
           </a>
         </div>
       `
