@@ -239,6 +239,7 @@
     "uploadForm": {
       "error": {
         "fileRequired": "ファイルを選択してください",
+        "fileTooLarge": "ファイルサイズは5MB以下にしてください",
         "uploadFailed": "アップロードに失敗しました",
         "uploadError": "アップロード中にエラーが発生しました"
       },

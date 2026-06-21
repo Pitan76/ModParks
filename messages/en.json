@@ -220,6 +220,7 @@
     "uploadForm": {
       "error": {
         "fileRequired": "Please select a file",
+        "fileTooLarge": "File size must be 5MB or less",
         "uploadFailed": "Failed to upload",
         "uploadError": "An error occurred during upload"
       },

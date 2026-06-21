@@ -107,6 +107,12 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
       loaders.forEach(l => formData.append("loaders", l));
 
       if (uploadMode === "file" && file) {
+        if (file.size > 5 * 1024 * 1024) {
+          setError({ fileUrl: [tVersion("uploadForm.error.fileTooLarge")] });
+          setPending(false);
+          return;
+        }
+
         const presignRes = await fetch("/api/upload/presign", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
