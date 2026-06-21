@@ -230,7 +230,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
             </Box>
 
             {isOwner && (
-              <RoutingLink href="/settings?tab=profile" style={{ textDecoration: "none", flexShrink: 0 }}>
+              <RoutingLink href="/settings?tab=profile" prefetch={false} style={{ textDecoration: "none", flexShrink: 0 }}>
                 <Button
                   variant="outlined"
                   startIcon={<EditIcon />}
@@ -300,7 +300,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         <Box sx={{ display: "flex", gap: 2 }}>
           <ProfileSortSelect />
           {isOwner && (
-            <RoutingLink href="/projects?author=me" style={{ textDecoration: "none" }}>
+            <RoutingLink href="/projects?author=me" prefetch={false} style={{ textDecoration: "none" }}>
               <Button
                 variant="outlined"
                 size="small"

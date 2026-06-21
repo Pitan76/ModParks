@@ -6,6 +6,6 @@ import { ComponentProps } from "react";
 
 type LinkButtonProps = ButtonProps & ComponentProps<typeof Link>;
 
-export default function LinkButton(props: LinkButtonProps) {
-  return <Button component={Link} {...props} />;
+export default function LinkButton({ prefetch = false, ...props }: LinkButtonProps) {
+  return <Button component={Link} prefetch={prefetch} {...props} />;
 }

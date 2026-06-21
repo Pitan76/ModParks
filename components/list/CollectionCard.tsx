@@ -21,7 +21,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
   const t = useTranslations("Profile");
 
   return (
-    <RoutingLink href={`/lists/${collection.id}`} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
+    <RoutingLink href={`/lists/${collection.id}`} prefetch={false} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
       <Box
         sx={{
           p: 2.5,

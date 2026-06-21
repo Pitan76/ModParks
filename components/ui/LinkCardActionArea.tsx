@@ -6,6 +6,6 @@ import { ComponentProps } from "react";
 
 type LinkCardActionAreaProps = CardActionAreaProps & ComponentProps<typeof Link>;
 
-export default function LinkCardActionArea(props: LinkCardActionAreaProps) {
-  return <CardActionArea component={Link} {...props} />;
+export default function LinkCardActionArea({ prefetch = false, ...props }: LinkCardActionAreaProps) {
+  return <CardActionArea component={Link} prefetch={prefetch} {...props} />;
 }
