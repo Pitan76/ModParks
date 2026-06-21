@@ -228,7 +228,6 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                     iconSize={18} 
                     sx={{ '& .MuiTypography-root': { fontWeight: 800 } }}
                   />
-                  <Typography variant="body2" color="text.secondary">{tCommon("downloads")}</Typography>
                 </Box>
 
                 <Typography variant="body2" color="text.secondary">
