@@ -23,8 +23,28 @@ export async function GET(request: Request) {
   const type = searchParams.get("type");
   const q = searchParams.get("q");
   const sort = searchParams.get("sort") || "downloads";
+  const author = searchParams.get("author");
 
   let conditions = [eq(projects.status, "public")];
+  
+  // 自分自身のリクエストかチェックするため、APIキーがあるか確認する
+  let isMine = false;
+  if (author) {
+    const auth = await validateApiKey(request);
+    if (auth.valid && auth.userId) {
+      const [u] = await db.select().from(userProfiles).where(eq(userProfiles.username, author)).limit(1);
+      if (u && u.userId === auth.userId) {
+        isMine = true;
+      }
+    }
+    
+    if (isMine) {
+      // 自分の場合は、status=public の条件を外し、全て表示するか、削除済み以外とする
+      conditions = []; 
+    }
+    conditions.push(eq(userProfiles.username, author));
+  }
+
   if (type === "mod" || type === "plugin") {
     conditions.push(eq(projects.type, type as "mod" | "plugin"));
   }
