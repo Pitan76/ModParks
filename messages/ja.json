@@ -341,7 +341,14 @@
       "title": "タイトル",
       "titlePlaceholder": "例: 建築が楽になる魔法の杖を追加するMod",
       "content": "どんなMod/Pluginが欲しいですか？",
-      "contentPlaceholder": "具体的な機能や、なぜ欲しいのかを書いてみましょう。"
+      "contentPlaceholder": "具体的な機能や、なぜ欲しいのかを書いてみましょう。",
+      "visibility": "公開範囲",
+      "visibilityOptions": {
+        "public": "公開",
+        "unlisted": "限定公開",
+        "private": "非公開",
+        "draft": "下書き"
+      }
     },
     "submitting": "送信中...",
     "submitIdea": "アイデアを投稿する",

@@ -91,17 +91,17 @@ export default function NewIdeaPage() {
               />
 
               <FormControl fullWidth size="small">
-                <InputLabel>公開範囲</InputLabel>
+                <InputLabel>{tIdea("fields.visibility")}</InputLabel>
                 <Select
                   name="visibility"
-                  label="公開範囲"
+                  label={tIdea("fields.visibility")}
                   defaultValue="public"
                   disabled={pending}
                 >
-                  <MenuItem value="public">公開 (誰でも閲覧可能)</MenuItem>
-                  <MenuItem value="unlisted">限定公開 (リンクを知っている人のみ閲覧可能)</MenuItem>
-                  <MenuItem value="private">非公開 (自分のみ閲覧可能)</MenuItem>
-                  <MenuItem value="draft">下書き</MenuItem>
+                  <MenuItem value="public">{tIdea("fields.visibilityOptions.public")}</MenuItem>
+                  <MenuItem value="unlisted">{tIdea("fields.visibilityOptions.unlisted")}</MenuItem>
+                  <MenuItem value="private">{tIdea("fields.visibilityOptions.private")}</MenuItem>
+                  <MenuItem value="draft">{tIdea("fields.visibilityOptions.draft")}</MenuItem>
                 </Select>
               </FormControl>
 

@@ -324,7 +324,14 @@
       "title": "Title",
       "titlePlaceholder": "e.g. A magic wand mod for easier building",
       "content": "What kind of Mod/Plugin do you want?",
-      "contentPlaceholder": "Describe the specific features and why you want it."
+      "contentPlaceholder": "Describe the specific features and why you want it.",
+      "visibility": "Visibility",
+      "visibilityOptions": {
+        "public": "Public",
+        "unlisted": "Unlisted",
+        "private": "Private",
+        "draft": "Draft"
+      }
     },
     "submitting": "Submitting...",
     "submitIdea": "Post Idea",
