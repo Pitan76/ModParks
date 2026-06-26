@@ -34,9 +34,12 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
   };
 
   const [tab, setTab] = useState(getTabFromParam(tabParam));
+  const [visitedTabs, setVisitedTabs] = useState<Set<number>>(new Set([getTabFromParam(tabParam)]));
 
   useEffect(() => {
-    setTab(getTabFromParam(tabParam));
+    const currentTab = getTabFromParam(tabParam);
+    setTab(currentTab);
+    setVisitedTabs(prev => new Set(prev).add(currentTab));
   }, [tabParam]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -53,6 +56,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
     }
     
     setTab(newValue);
+    setVisitedTabs(prev => new Set(prev).add(newValue));
     
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (newValue === 1) {
@@ -110,11 +114,15 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
         </Tabs>
       </Box>
 
-      {tab === 0 && <Box>{descriptionContent}</Box>}
-      
-      {tab === 1 && <Box>{filesContent}</Box>}
-      
-      {tab === 2 && <Box>{dependenciesContent}</Box>}
+      {visitedTabs.has(0) && (
+        <Box sx={{ display: tab === 0 ? "block" : "none" }}>{descriptionContent}</Box>
+      )}
+      {visitedTabs.has(1) && (
+        <Box sx={{ display: tab === 1 ? "block" : "none" }}>{filesContent}</Box>
+      )}
+      {visitedTabs.has(2) && (
+        <Box sx={{ display: tab === 2 ? "block" : "none" }}>{dependenciesContent}</Box>
+      )}
     </Box>
   );
 }
