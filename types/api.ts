@@ -12,7 +12,7 @@ export interface ApiProject {
   name: string;
   description: string;
   iconUrl: string | null;
-  type: "mod" | "plugin";
+  type: "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
   license: string;
   downloads: Record<string, number>;
   createdAt: number;

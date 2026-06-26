@@ -37,7 +37,7 @@ interface ProjectSearchBarProps {
 export default function ProjectSearchBar({ 
   initialQ = "", 
   initialAuthor = "",
-  initialTypes = ["mod", "plugin"],
+  initialTypes = ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"],
   initialSort = "updated",
   initialLoaders = [],
   initialMcVersions = [],
@@ -173,6 +173,10 @@ export default function ProjectSearchBar({
         >
           <ToggleButton value="mod" id="filter-mod">{t("filters.mod")}</ToggleButton>
           <ToggleButton value="plugin" id="filter-plugin">{t("filters.plugin")}</ToggleButton>
+          <ToggleButton value="resourcepack" id="filter-resourcepack">{t("filters.resourcepack")}</ToggleButton>
+          <ToggleButton value="datapack" id="filter-datapack">{t("filters.datapack")}</ToggleButton>
+          <ToggleButton value="shader" id="filter-shader">{t("filters.shader")}</ToggleButton>
+          <ToggleButton value="modpack" id="filter-modpack">{t("filters.modpack")}</ToggleButton>
         </ToggleButtonGroup>
 
         <FormControl size="small" sx={{ minWidth: 150 }}>

@@ -73,7 +73,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     name: project.name,
     description: project.description,
     iconUrl: project.iconUrl,
-    type: project.type as "mod" | "plugin",
+    type: project.type as "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack",
     license: project.license,
     downloads: {
       total: project.totalDownloads,

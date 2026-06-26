@@ -35,7 +35,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const authorId = author === "me" && session?.user?.id ? session.user.id : undefined;
   const authorUsername = author !== "me" && author ? author : undefined;
 
-  const typesArr = types ? types.split(",") : ["mod", "plugin"];
+  const typesArr = types ? types.split(",") : ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"];
   const loadersArr = loaders ? loaders.split(",") : undefined;
   const mcVersionsArr = mcVersions ? mcVersions.split(",") : undefined;
   const tagsArr = tags ? tags.split(",") : undefined;

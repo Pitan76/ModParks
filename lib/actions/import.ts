@@ -11,7 +11,7 @@ export interface ImportedProject {
   name: string;
   slug: string;
   description: string;
-  type: "mod" | "plugin";
+  type: "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
   license?: string;
   sourceUrl?: string;
   issueTrackerUrl?: string;

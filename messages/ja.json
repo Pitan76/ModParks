@@ -37,7 +37,8 @@
     "settings": "設定",
     "admin": "システム管理",
     "login": "ログイン",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "dashboard": "ダッシュボード"
   },
   "Home": {
     "hero": {
@@ -54,7 +55,11 @@
   "Project": {
     "type": {
       "mod": "MOD",
-      "plugin": "プラグイン"
+      "plugin": "プラグイン",
+      "resourcepack": "リソースパック",
+      "datapack": "データパック",
+      "shader": "シェーダー",
+      "modpack": "MODパック"
     },
     "status": {
       "public": "公開",
@@ -529,7 +534,11 @@
       "type": "種類",
       "all": "すべて",
       "mod": "MOD",
-      "plugin": "プラグイン"
+      "plugin": "プラグイン",
+      "resourcepack": "リソースパック",
+      "datapack": "データパック",
+      "shader": "シェーダー",
+      "modpack": "MODパック"
     },
     "sort": {
       "label": "並び順",
@@ -582,6 +591,37 @@
     "tool": "ツール",
     "equipment": "装備",
     "library": "前提MOD"
+  },
+  "Dashboard": {
+    "title": "ダッシュボード",
+    "stats": {
+      "projects": "プロジェクト数",
+      "downloads": "総ダウンロード数",
+      "favorites": "お気に入りされた数",
+      "comments": "最近のコメント数"
+    },
+    "topProjects": "人気プロジェクト",
+    "noProjects": "プロジェクトがありません",
+    "recentComments": "最近のコメント",
+    "noComments": "コメントはまだありません"
+  },
+  "Onboarding": {
+    "step1": {
+      "title": "プロジェクトを探そう",
+      "content": "ModParksには、MinecraftのMOD、プラグイン、データパック、シェーダーなどがたくさんあります。検索やフィルタリング機能で気になるプロジェクトを見つけましょう。"
+    },
+    "step2": {
+      "title": "自分の作品を公開しよう",
+      "content": "自分で作ったプロジェクトを公開したり、CurseForgeやModrinthからのインポート機能を使って、簡単にプロジェクトを登録することができます。"
+    },
+    "step3": {
+      "title": "多言語対応で世界中へ",
+      "content": "ModParksは日本語と英語に対応しています。あなたの作品を世界中のMinecraftプレイヤーに届けましょう。"
+    },
+    "next": "次へ",
+    "back": "戻る",
+    "finish": "はじめる",
+    "skip": "スキップ"
   },
   "Settings": {
     "title": "アカウント設定",

@@ -37,7 +37,8 @@
     "settings": "Settings",
     "admin": "Admin",
     "login": "Sign in",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "dashboard": "Dashboard"
   },
   "Home": {
     "hero": {
@@ -54,7 +55,11 @@
   "Project": {
     "type": {
       "mod": "Mod",
-      "plugin": "Plugin"
+      "plugin": "Plugin",
+      "resourcepack": "Resource Pack",
+      "datapack": "Data Pack",
+      "shader": "Shader",
+      "modpack": "Modpack"
     },
     "status": {
       "public": "Public",
@@ -507,7 +512,11 @@
       "type": "Type",
       "all": "All",
       "mod": "Mod",
-      "plugin": "Plugin"
+      "plugin": "Plugin",
+      "resourcepack": "Resource Pack",
+      "datapack": "Data Pack",
+      "shader": "Shader",
+      "modpack": "Modpack"
     },
     "sort": {
       "label": "Sort By",
@@ -560,6 +569,37 @@
     "tool": "Tool",
     "equipment": "Equipment",
     "library": "Library"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "stats": {
+      "projects": "Total Projects",
+      "downloads": "Total Downloads",
+      "favorites": "Times Favorited",
+      "comments": "Recent Comments"
+    },
+    "topProjects": "Top Projects",
+    "noProjects": "No projects yet.",
+    "recentComments": "Recent Comments",
+    "noComments": "No comments yet."
+  },
+  "Onboarding": {
+    "step1": {
+      "title": "Discover Projects",
+      "content": "ModParks features a wide variety of Minecraft Mods, Plugins, Data Packs, Shaders, and more. Use our search and filters to find what you need."
+    },
+    "step2": {
+      "title": "Share Your Work",
+      "content": "Publish your own projects or import them easily from CurseForge and Modrinth."
+    },
+    "step3": {
+      "title": "Global Reach",
+      "content": "ModParks supports both English and Japanese. Share your creations with players all over the world!"
+    },
+    "next": "Next",
+    "back": "Back",
+    "finish": "Get Started",
+    "skip": "Skip"
   },
   "Settings": {
     "title": "Account Settings",

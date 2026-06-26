@@ -231,7 +231,7 @@ export async function getProjects(params: {
   }
   
   if (types && types.length > 0) {
-    conditions.push(inArray(projects.type, types as ("mod" | "plugin")[]));
+    conditions.push(inArray(projects.type, types as ("mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack")[]));
   }
 
   if (q) {

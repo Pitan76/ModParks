@@ -45,8 +45,8 @@ export async function GET(request: Request) {
     conditions.push(eq(userProfiles.username, author));
   }
 
-  if (type === "mod" || type === "plugin") {
-    conditions.push(eq(projects.type, type as "mod" | "plugin"));
+  if (type === "mod" || type === "plugin" || type === "resourcepack" || type === "datapack" || type === "shader" || type === "modpack") {
+    conditions.push(eq(projects.type, type as "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack"));
   }
   if (q) {
     conditions.push(like(projects.name, `%${q}%`));
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
     name: p.name,
     description: p.description,
     iconUrl: p.iconUrl,
-    type: p.type as "mod" | "plugin",
+    type: p.type as "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack",
     license: p.license,
     downloads: {
       total: p.totalDownloads,

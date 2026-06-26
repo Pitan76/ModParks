@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";
 import AdminSidebar from "./AdminSidebar";
 import AppHeader from "./AppHeader";
+import OnboardingTour from "./OnboardingTour";
 
 import type { Session } from "next-auth";
 
@@ -46,6 +47,7 @@ export default function AppLayout({
           {children}
         </Box>
       </Box>
+      <OnboardingTour />
     </Box>
   );
 }

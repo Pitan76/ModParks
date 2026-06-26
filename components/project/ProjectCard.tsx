@@ -27,7 +27,7 @@ export interface ProjectCardProps {
     name:        string;
     description: string;
     iconUrl:     string | null;
-    type:        "mod" | "plugin";
+    type:        "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
     license:     string;
     downloads:   number;
     totalDownloads: number;
@@ -43,15 +43,23 @@ export interface ProjectCardProps {
   layout?: "list" | "grid";
 }
 
-const TYPE_COLOR = {
-  mod:    "primary",
-  plugin: "secondary",
-} as const;
+const TYPE_COLOR: Record<ProjectCardProps["project"]["type"], "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"> = {
+  mod:          "primary",
+  plugin:       "secondary",
+  resourcepack: "success",
+  datapack:     "warning",
+  shader:       "info",
+  modpack:      "error",
+};
 
-const TYPE_LABEL = {
-  mod:    "Mod",
-  plugin: "Plugin",
-} as const;
+const TYPE_LABEL: Record<ProjectCardProps["project"]["type"], string> = {
+  mod:          "Mod",
+  plugin:       "Plugin",
+  resourcepack: "Resource Pack",
+  datapack:     "Data Pack",
+  shader:       "Shader",
+  modpack:      "Modpack",
+};
 
 
 /**

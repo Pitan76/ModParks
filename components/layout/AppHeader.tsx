@@ -200,6 +200,13 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
               >
                 {t("myProjects")}
               </LinkMenuItem>
+              <LinkMenuItem
+                href="/dashboard"
+                onClick={handleMenuClose}
+                id="user-menu-dashboard"
+              >
+                {t("dashboard")}
+              </LinkMenuItem>
               <MenuItem
                 component={Link}
                 href="/settings"

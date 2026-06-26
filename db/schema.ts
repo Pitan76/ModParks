@@ -138,7 +138,7 @@ export const projects = sqliteTable("projects", {
   name:        text("name").notNull(),
   description: text("description").notNull(),
   iconUrl:     text("icon_url"),
-  type:        text("type", { enum: ["mod", "plugin"] }).notNull(),
+  type:        text("type", { enum: ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"] }).notNull(),
   license:     text("license").notNull(),
   sourceUrl:   text("source_url"),
   links:       text("links"),
@@ -175,7 +175,7 @@ export const projects = sqliteTable("projects", {
 export const categories = sqliteTable("categories", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  type: text("type", { enum: ["mod", "plugin"] }).notNull(),
+  type: text("type", { enum: ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"] }).notNull(),
 });
 
 export const projectCategories = sqliteTable(

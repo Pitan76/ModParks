@@ -95,6 +95,10 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           >
             <MenuItem value="mod">{t("type.mod")}</MenuItem>
             <MenuItem value="plugin">{t("type.plugin")}</MenuItem>
+            <MenuItem value="resourcepack">{t("type.resourcepack")}</MenuItem>
+            <MenuItem value="datapack">{t("type.datapack")}</MenuItem>
+            <MenuItem value="shader">{t("type.shader")}</MenuItem>
+            <MenuItem value="modpack">{t("type.modpack")}</MenuItem>
           </Select>
           {error?.type && <Typography color="error" variant="caption">{error.type[0]}</Typography>}
         </FormControl>
