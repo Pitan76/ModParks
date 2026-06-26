@@ -3,11 +3,11 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getDatabase } from "@/lib/db";
 import { getUserProjectStats } from "@/lib/actions/project";
-import { getFavoriteProjects } from "@/lib/actions/user";
+import { getFavoriteProjects } from "@/lib/actions/favorite";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -136,7 +136,6 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                   tags: [],
                   externalDownloads: p.externalDownloads as Record<string, number>
                 }}
-                locale={locale}
               />
             )) : (
               <Typography color="text.secondary">{t("noProjects")}</Typography>
@@ -153,7 +152,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               {latestComments.length > 0 ? latestComments.map(c => (
                 <Box key={c.id} sx={{ pb: 2, borderBottom: "1px solid", borderColor: "divider", "&:last-child": { borderBottom: "none", pb: 0 } }}>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    <strong>{c.authorDisplayName || c.authorUsername}</strong> on <strong>{c.projectName}</strong>
+                    <strong>{c.authorName || c.authorUsername}</strong> on <strong>{c.projectName}</strong>
                   </Typography>
                   <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
                     {c.content}
