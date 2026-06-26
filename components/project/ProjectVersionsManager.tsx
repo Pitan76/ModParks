@@ -24,7 +24,8 @@ import TextField from "@mui/material/TextField";
 import Autocomplete, { AutocompleteRenderGetTagProps } from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import type { SyntheticEvent } from "react";
 import { deleteVersion, updateVersion } from "@/lib/actions/version";
 import { useFormatter, useTranslations } from "next-intl";
@@ -51,6 +52,10 @@ export interface ProjectVersionsManagerProps {
 }
 
 export default function ProjectVersionsManager({ projectSlug, versions: initialVersions, openIdeas, availablePlatforms = [] }: ProjectVersionsManagerProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const format = useFormatter();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Version");
@@ -75,6 +80,21 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
   const [editChangelog, setEditChangelog] = useState("");
   const [editMc, setEditMc] = useState<string[]>([]);
   const [editLoaders, setEditLoaders] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!searchParams) return;
+    const editId = searchParams.get("editVersionId");
+    if (editId) {
+      const targetVersion = localVersions.find(v => v.id === editId);
+      if (targetVersion) {
+        openEdit(targetVersion);
+        // Clean up the URL
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("editVersionId");
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      }
+    }
+  }, [searchParams, localVersions, pathname, router]);
 
   const handleDelete = async () => {
     if (!deleteId) return;

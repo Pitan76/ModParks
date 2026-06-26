@@ -14,10 +14,25 @@ export interface TabbedPanelItem {
 export interface TabbedPanelProps {
   items: TabbedPanelItem[];
   defaultTab?: number;
+  value?: number;
+  onChange?: (newValue: number) => void;
 }
 
-export default function TabbedPanel({ items, defaultTab = 0 }: TabbedPanelProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
+export default function TabbedPanel({ items, defaultTab = 0, value, onChange }: TabbedPanelProps) {
+  const [internalActiveTab, setInternalActiveTab] = useState(defaultTab);
+  
+  const isControlled = value !== undefined;
+  const activeTab = isControlled ? value : internalActiveTab;
+
+  const handleTabChange = (newValue: number) => {
+    if (!isControlled) {
+      setInternalActiveTab(newValue);
+    }
+    if (onChange) {
+      onChange(newValue);
+    }
+  };
+
 
   // 隠されていないタブだけを抽出
   const visibleItems = items.filter(item => !item.hidden);
@@ -34,7 +49,7 @@ export default function TabbedPanel({ items, defaultTab = 0 }: TabbedPanelProps)
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4, maxWidth: "100%" }}>
         <Tabs
           value={safeActiveTab}
-          onChange={(_, newValue) => setActiveTab(newValue)}
+          onChange={(_, newValue) => handleTabChange(newValue)}
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile

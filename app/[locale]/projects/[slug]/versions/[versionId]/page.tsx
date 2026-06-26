@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { getProjectBySlug } from "@/lib/actions/project";
 import { getVersionById } from "@/lib/actions/version";
+import { getProjectMembers } from "@/lib/actions/member";
 import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -16,6 +17,7 @@ import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
 import { Link } from "@/i18n/routing";
 import { getLoaderInfo } from "@/lib/loaders";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
@@ -73,14 +75,21 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
 
   if (!project || !version) notFound();
 
-  // If the project is not public, check auth
-  if (project.status !== "public") {
-    if (!session?.user) notFound();
+  let canEdit = false;
+  if (session?.user) {
     const isOwner = session.user.id === project.authorId;
-    // For simplicity here, we rely on the owner check. In a more complex app, we should also check if the user is a member/admin.
-    if (!isOwner && session.user.role !== "admin") {
-      notFound();
+    const isAdmin = session.user.role === "admin";
+    let isMember = false;
+    if (!isOwner && !isAdmin) {
+      const members = await getProjectMembers(project.id);
+      isMember = members.some(m => m.id === session.user.id);
     }
+    canEdit = isOwner || isAdmin || isMember;
+  }
+
+  // If the project is not public, check auth
+  if (project.status !== "public" && !canEdit) {
+    notFound();
   }
 
   const t = await getTranslations("Project");
@@ -105,14 +114,25 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
         <Typography color="text.primary">v{version.versionNumber}</Typography>
       </Breadcrumbs>
 
-      <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
         <LinkButton
           href={`/projects/${project.slug}?tab=files`}
           startIcon={<ArrowBackIcon />}
-          sx={{ mr: 2, color: "text.secondary" }}
+          sx={{ color: "text.secondary" }}
         >
           {tCommon("back")}
         </LinkButton>
+
+        {canEdit && (
+          <LinkButton
+            href={`/projects/${project.slug}/edit?tab=files&editVersionId=${version.id}`}
+            startIcon={<EditIcon />}
+            variant="outlined"
+            size="small"
+          >
+            バージョンの編集
+          </LinkButton>
+        )}
       </Box>
 
       <Card variant="outlined" sx={{ mb: 4 }}>

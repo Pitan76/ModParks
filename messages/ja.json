@@ -137,7 +137,7 @@
     },
     "manage": "管理",
     "managePage": {
-      "title": "プロジェクト管理",
+      "title": "{name}を編集",
       "success": "プロジェクトを更新しました",
       "sync": "外部データを同期する",
       "syncing": "同期中...",

@@ -118,7 +118,7 @@
     },
     "manage": "Manage",
     "managePage": {
-      "title": "Manage Project",
+      "title": "Edit {name}",
       "success": "Project updated successfully",
       "sync": "Sync External Data",
       "syncing": "Syncing...",
