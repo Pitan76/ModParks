@@ -167,6 +167,7 @@ export const projects = sqliteTable("projects", {
   typeIdx: index("projects_type_idx").on(table.type),
   downloadsIdx: index("projects_downloads_idx").on(table.downloads),
   updatedAtIdx: index("projects_updated_at_idx").on(table.updatedAt),
+  createdAtIdx: index("projects_created_at_idx").on(table.createdAt),
 }));
 
 // ─── Project Categories ───────────────────────────────────────────────────────
@@ -217,6 +218,7 @@ export const versions = sqliteTable("versions", {
     .default(sql`(unixepoch())`),
 }, (table) => ({
   projectIdx: index("versions_project_idx").on(table.projectId),
+  projectCreatedAtIdx: index("versions_project_created_at_idx").on(table.projectId, table.createdAt),
 }));
 
 // ─── Version Search Optimizations ──────────────────────────────────────────────
