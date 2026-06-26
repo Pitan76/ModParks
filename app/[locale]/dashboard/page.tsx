@@ -55,12 +55,23 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
     .orderBy(desc(projectComments.createdAt))
     .limit(5);
 
+  // Get current user profile
+  const profileList = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1);
+  const profile = profileList[0];
+
   // Get top 3 projects
-  const topProjects = await db.select()
+  const rawTopProjects = await db.select()
     .from(projects)
     .where(eq(projects.authorId, userId))
     .orderBy(desc(projects.totalDownloads))
     .limit(3);
+
+  const topProjects = rawTopProjects.map(p => ({
+    ...p,
+    authorUsername: profile?.username,
+    authorDisplayName: profile?.displayName,
+    authorAvatarUrl: profile?.avatarUrl,
+  }));
 
   const StatCard = ({ title, value, icon, color }: { title: string, value: number, icon: React.ReactNode, color: string }) => (
     <Card sx={{ height: "100%", borderTop: `4px solid ${color}` }}>

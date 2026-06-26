@@ -83,7 +83,7 @@ export default function ProjectSearchBar({
       const params = new URLSearchParams();
       if (newQ) params.set("q", newQ);
       if (filters.author) params.set("author", filters.author);
-      if (newTypes.length > 0 && newTypes.length < 2) params.set("types", newTypes.join(","));
+      if (newTypes.length > 0 && newTypes.length < 6) params.set("types", newTypes.join(","));
       if (newSort && newSort !== "updated") params.set("sort", newSort);
       
       if (filters.loaders.length > 0) params.set("loaders", filters.loaders.join(","));

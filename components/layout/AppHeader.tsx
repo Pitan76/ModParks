@@ -207,14 +207,13 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
               >
                 {t("dashboard")}
               </LinkMenuItem>
-              <MenuItem
-                component={Link}
+              <LinkMenuItem
                 href="/settings"
                 onClick={handleMenuClose}
-                sx={{ px: 2, py: 1.5 }}
+                id="user-menu-settings"
               >
                 {t("settings")}
-              </MenuItem>
+              </LinkMenuItem>
               {session.user.role === "admin" && (
                 <LinkMenuItem
                   href="/admin"
