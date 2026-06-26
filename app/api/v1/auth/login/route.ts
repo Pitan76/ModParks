@@ -75,8 +75,14 @@ export async function POST(request: Request) {
     const newApiKey = `sk_mp_${crypto.randomUUID().replace(/-/g, "")}`;
     const keyName = `CLI Login - ${new Date().toISOString().split("T")[0]}`;
 
+    const encoder = new TextEncoder();
+    const data = encoder.encode(newApiKey);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashedKey = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+
     await db.insert(apiKeys).values({
-      key: newApiKey,
+      key: hashedKey,
       name: keyName,
       userId: user.id,
     });
