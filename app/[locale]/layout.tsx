@@ -1,9 +1,5 @@
 import type { Metadata, Viewport } from "next";
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-};
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -16,6 +12,11 @@ import AppLayout from "@/components/layout/AppLayout";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
 import { SITE_URL } from "@/lib/config";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -57,18 +58,22 @@ export const metadata: Metadata = {
   },
 };
 
-interface LocaleLayoutProps {
+type LocaleLayoutProps = {
   children: React.ReactNode;
   params:   Promise<{ locale: string }>;
-}
+};
 
-export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
+/**
+ * 言語別ルートのレイアウト
+ * @param children ページコンテンツ
+ * @param params 言語を含むパラメータ
+ * @returns 言語別レイアウト
+ */
+const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   const { locale } = await params;
 
-  // ロケール検証
-  if (!routing.locales.includes(locale as "ja" | "en")) {
-    notFound();
-  }
+  // 未対応言語であれば404を返す
+  if (!routing.locales.includes(locale as "ja" | "en")) notFound();
 
   const messages = await getMessages();
   const session  = await auth();
@@ -100,3 +105,5 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     </html>
   );
 }
+
+export default LocaleLayout;

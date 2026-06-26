@@ -11,7 +11,7 @@ import { registerUser } from "@/lib/actions/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-function RegisterCompleteForm() {
+const RegisterCompleteForm = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
@@ -25,7 +25,7 @@ function RegisterCompleteForm() {
   const token = searchParams?.get("token");
   const email = searchParams?.get("email");
 
-  async function handleSubmit(formData: FormData) {
+  const handleSubmit = async (formData: FormData) => {
     setLoading(true);
     setError("");
 
@@ -47,7 +47,7 @@ function RegisterCompleteForm() {
       setError(tAuth("register.error.registrationFailed"));
       setLoading(false);
     }
-  }
+  };
 
   if (!token || !email) {
     return (
@@ -123,9 +123,9 @@ function RegisterCompleteForm() {
       </form>
     </Box>
   );
-}
+};
 
-export default function RegisterCompletePage() {
+const RegisterCompletePage = () => {
   return (
     <Container maxWidth="xs" sx={{ py: 8 }}>
       <Suspense fallback={<Typography>Loading...</Typography>}>
@@ -133,4 +133,6 @@ export default function RegisterCompletePage() {
       </Suspense>
     </Container>
   );
-}
+};
+
+export default RegisterCompletePage;

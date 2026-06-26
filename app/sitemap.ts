@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/config';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+const sitemap = (): MetadataRoute.Sitemap => {
   const locales = ['ja', 'en'];
   const routes = [
     '',
@@ -24,4 +24,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   return sitemapEntries;
-}
+};
+
+export default sitemap;

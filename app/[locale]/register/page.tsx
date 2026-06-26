@@ -14,7 +14,7 @@ import { sendRegistrationEmail } from "@/lib/actions/auth";
 import { signIn } from "next-auth/react";
 import { useTranslations, useLocale } from "next-intl";
 
-export default function RegisterPage() {
+const RegisterPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export default function RegisterPage() {
     signIn("github", { callbackUrl: `/${locale}/projects` });
   };
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -55,7 +55,7 @@ export default function RegisterPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <Container maxWidth="xs" sx={{ py: 8 }}>
@@ -134,4 +134,6 @@ export default function RegisterPage() {
       </Box>
     </Container>
   );
-}
+};
+
+export default RegisterPage;

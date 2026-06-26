@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 
 // ルートは /ja にリダイレクト
-export default function RootPage() {
+const RootPage = () => {
   redirect("/ja");
-}
+};
+
+export default RootPage;

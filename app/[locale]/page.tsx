@@ -13,11 +13,11 @@ import { getLoaderInfo } from "@/lib/loaders";
 
 import { getProjects } from "@/lib/actions/project";
 
-interface HomePageProps {
+type HomePageProps = {
   params: Promise<{ locale: string }>;
-}
+};
 
-export default async function HomePage({ params }: HomePageProps) {
+const HomePage = async ({ params }: HomePageProps) => {
   const { locale } = await params;
   setRequestLocale(locale);
 
@@ -31,19 +31,16 @@ export default async function HomePage({ params }: HomePageProps) {
 
   return (
     <Box>
-      {/* ─── Hero ─────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <Box
         sx={{
           position:   "relative",
           py:         { xs: 8, md: 14 },
           overflow:   "hidden",
-          // background: "linear-gradient(180deg, rgba(74,222,128,0.08) 0%, transparent 100%)",
           "&::before": {
             content:  '""',
             position: "absolute",
             inset:    0,
-            // background:
-            //   "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(74,222,128,0.15) 0%, transparent 70%)",
           },
         }}
       >
@@ -128,7 +125,7 @@ export default async function HomePage({ params }: HomePageProps) {
         </Container>
       </Box>
 
-      {/* ─── 新着プロジェクト ──────────────────────────────────────────── */}
+      {/* 新着プロジェクト */}
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -153,7 +150,7 @@ export default async function HomePage({ params }: HomePageProps) {
         </Grid>
       </Container>
 
-      {/* ─── 最近更新されたプロジェクト ──────────────────────────────────────────── */}
+      {/* 最近更新されたプロジェクト */}
       <Container maxWidth="lg" sx={{ pb: 6 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -179,4 +176,6 @@ export default async function HomePage({ params }: HomePageProps) {
       </Container>
     </Box>
   );
-}
+};
+
+export default HomePage;

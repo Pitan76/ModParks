@@ -9,7 +9,13 @@ import SettingsClient from "@/components/settings/SettingsClient";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 
-export default async function SettingsPage({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+export const generateMetadata = async ({ params }: { params: Promise<{ locale: string }> }) => {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Settings" });
+  return { title: t("title") };
+};
+
+const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) => {
   const { locale } = await params;
   const resolvedSearchParams = await searchParams;
   setRequestLocale(locale);
@@ -60,4 +66,6 @@ export default async function SettingsPage({ params, searchParams }: { params: P
       />
     </Container>
   );
-}
+};
+
+export default SettingsPage;
