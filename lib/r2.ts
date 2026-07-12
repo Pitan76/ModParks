@@ -3,6 +3,26 @@
  * Workers の R2 バインディングを使って署名付き URL を発行 / オブジェクトを操作する
  */
 
+/**
+ * R2 バケットのバインディングを取得する。
+ * 開発環境では Wrangler Proxy 経由、本番では CloudflareContext から取得する。
+ * サーバー側（Server Action / Route Handler）で R2 を直接操作する際に使用します。
+ */
+export async function getR2Bucket(): Promise<R2Bucket> {
+  let bucket: R2Bucket;
+  if (process.env.NODE_ENV === "development" && typeof process !== "undefined" && process.release?.name === "node") {
+    const { getCachedPlatformProxy } = await import("@/lib/proxy");
+    const proxy = await getCachedPlatformProxy();
+    bucket = proxy.env.modparks_storage;
+  } else {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const { env } = await getCloudflareContext({ async: true });
+    bucket = (env as unknown as { modparks_storage: R2Bucket }).modparks_storage;
+  }
+  if (!bucket) throw new Error("R2 binding not found");
+  return bucket;
+}
+
 /** R2 にファイルをアップロードする */
 export async function uploadToR2(
   bucket: R2Bucket,

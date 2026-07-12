@@ -79,7 +79,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       <ProjectEditClient
         isOwner={isOwner}
         basicInfoForm={<ProjectEditForm project={project} availableTags={availableTags} />}
-        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} />}
+        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} githubRepo={project.githubRepo} />}
         membersManager={
           <ProjectMembersManager 
             projectId={project.id} 

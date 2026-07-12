@@ -107,6 +107,7 @@ export async function updateProject(projectId: string, formData: FormData) {
     status:      formData.get("status"),
     modrinthId:  formData.get("modrinthId") || null,
     curseforgeId: formData.get("curseforgeId") || null,
+    githubRepo:  formData.get("githubRepo") || null,
     issueTrackerUrl: formData.get("issueTrackerUrl") || null,
     tags:        formData.getAll("tags"),
   };
@@ -116,7 +117,17 @@ export async function updateProject(projectId: string, formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { tags, ...fields } = parsed.data;
+  const { tags, githubRepo, ...fields } = parsed.data;
+
+  // GitHub リポジトリは "owner/repo" に正規化して保存（URL 貼り付けも許容）
+  let normalizedGithubRepo: string | null = null;
+  if (githubRepo) {
+    const { normalizeGithubRepo } = await import("@/lib/utils/github");
+    normalizedGithubRepo = normalizeGithubRepo(githubRepo);
+    if (!normalizedGithubRepo) {
+      return { error: { githubRepo: ["'owner/repo' 形式、または GitHub リポジトリの URL を入力してください。"] } };
+    }
+  }
 
   // スラッグが変更された場合の重複チェックとpreviousSlugの更新
   let previousSlugToSet: string | undefined = undefined;
@@ -135,6 +146,7 @@ export async function updateProject(projectId: string, formData: FormData) {
       issueTrackerUrl: fields.issueTrackerUrl !== undefined ? fields.issueTrackerUrl : project.issueTrackerUrl,
       sourceUrl: fields.sourceUrl || null,
       links: fields.links || null,
+      githubRepo: normalizedGithubRepo,
       iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
       updatedAt: new Date(),
       ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {})

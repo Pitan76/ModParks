@@ -161,6 +161,8 @@ export const projects = sqliteTable("projects", {
   externalDownloads: text("external_downloads", { mode: "json" }).$type<Record<string, number>>().notNull().default({}),
   commentsEnabled: integer("comments_enabled", { mode: "boolean" }).notNull().default(false),
   sourceIdeaId: text("source_idea_id"),
+  /** 連携する GitHub リポジトリ ("owner/repo" 形式)。Release 自動取り込みに使用 */
+  githubRepo: text("github_repo"),
 }, (table) => ({
   authorIdx: index("projects_author_idx").on(table.authorId),
   statusIdx: index("projects_status_idx").on(table.status),

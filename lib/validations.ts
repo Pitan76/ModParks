@@ -81,6 +81,7 @@ export const createProjectSchema = z.object({
   links:       z.string().optional().or(z.literal("")),
   modrinthId:  z.string().optional().nullable(),
   curseforgeId: z.string().optional().nullable(),
+  githubRepo:  z.string().max(140).optional().nullable(),
   tags:        z.array(z.string().max(32)).max(10, "タグは10個まで"),
 });
 

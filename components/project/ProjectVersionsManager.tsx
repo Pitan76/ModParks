@@ -28,6 +28,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import type { SyntheticEvent } from "react";
 import { deleteVersion, updateVersion } from "@/lib/actions/version";
+import { importGithubRelease } from "@/lib/actions/github";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import { useFormatter, useTranslations } from "next-intl";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
@@ -49,9 +51,10 @@ export interface ProjectVersionsManagerProps {
   versions: ProjectVersion[];
   openIdeas: { id: string; title: string }[];
   availablePlatforms?: { slug: string; name: string }[];
+  githubRepo?: string | null;
 }
 
-export default function ProjectVersionsManager({ projectSlug, versions: initialVersions, openIdeas, availablePlatforms = [] }: ProjectVersionsManagerProps) {
+export default function ProjectVersionsManager({ projectSlug, versions: initialVersions, openIdeas, availablePlatforms = [], githubRepo }: ProjectVersionsManagerProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -66,6 +69,26 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
   const [pending, setPending] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [editError, setEditError] = useState<{ [key: string]: string[] } | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState<{ text: string; severity: "success" | "error" } | null>(null);
+
+  const handleImportGithub = async () => {
+    setImporting(true);
+    setImportMsg(null);
+    try {
+      const res = await importGithubRelease(projectSlug);
+      if ("error" in res) {
+        setImportMsg({ text: res.error, severity: "error" });
+      } else {
+        setImportMsg({ text: `バージョン ${res.versionNumber} を取り込みました。`, severity: "success" });
+        router.refresh();
+      }
+    } catch (err: any) {
+      setImportMsg({ text: err?.message || "取り込みに失敗しました。", severity: "error" });
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const parsedVersions = useMemo(() => {
     return localVersions.map(v => {
@@ -169,11 +192,24 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
         <Typography variant="body2" color="text.secondary">
           {t("manager.description")}
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setUploadOpen(true)}>
-          {t("manager.addVersion")}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          {githubRepo && (
+            <Button
+              variant="outlined"
+              startIcon={<GitHubIcon />}
+              onClick={handleImportGithub}
+              disabled={importing}
+            >
+              {importing ? "取り込み中..." : "GitHub Releaseから取り込む"}
+            </Button>
+          )}
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setUploadOpen(true)}>
+            {t("manager.addVersion")}
+          </Button>
+        </Stack>
       </Box>
 
+      {importMsg && <Alert severity={importMsg.severity} sx={{ mb: 3 }} onClose={() => setImportMsg(null)}>{importMsg.text}</Alert>}
       {errorMsg && <Alert severity="error" sx={{ mb: 3 }}>{errorMsg}</Alert>}
 
       <TableContainer component={Paper} variant="outlined" sx={{ width: "100%", maxWidth: "100%", overflowX: "auto" }}>

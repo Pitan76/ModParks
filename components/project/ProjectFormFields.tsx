@@ -29,6 +29,7 @@ export interface ProjectFormFieldsProps {
     iconUrl?: string | null;
     modrinthId?: string | null;
     curseforgeId?: string | null;
+    githubRepo?: string | null;
     tags?: string[];
   };
   availableTags?: { slug: string; name: string }[];
@@ -249,6 +250,16 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           helperText={error?.curseforgeId?.[0]}
         />
       </Stack>
+      <TextField
+        id="project-github-repo"
+        name="githubRepo"
+        label="GitHub リポジトリ"
+        placeholder="owner/repo"
+        fullWidth
+        defaultValue={project?.githubRepo || ""}
+        error={!!error?.githubRepo}
+        helperText={error?.githubRepo?.[0] || "Release から自動でバージョンを取り込めます（例: Pitan76/modparks）"}
+      />
 
       <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.customLinks.title")}</Typography>
       {links.map((link, idx) => (

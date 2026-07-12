@@ -12,8 +12,10 @@ export interface ParsedModInfo {
 
 /**
  * JAR/ZIPファイルを解析し、Mod/Pluginのバージョン情報、対応ローダー、対応MCバージョンを抽出します。
+ * クライアント側の File だけでなく、サーバー側（GitHub Release 取り込みなど）の
+ * ArrayBuffer / Uint8Array も受け取れます。
  */
-export async function parseModJar(file: File): Promise<ParsedModInfo> {
+export async function parseModJar(file: File | ArrayBuffer | Uint8Array): Promise<ParsedModInfo> {
   const zip = new JSZip();
   const loadedZip = await zip.loadAsync(file);
   
@@ -98,6 +100,44 @@ export async function parseModJar(file: File): Promise<ParsedModInfo> {
          }
       }
     } catch (e) { console.error("Failed to parse neoforge.mods.toml", e); }
+  }
+
+  // 4. Check quilt.mod.json (Quilt)
+  const quiltJson = loadedZip.file("quilt.mod.json");
+  if (quiltJson) {
+    const content = await quiltJson.async("string");
+    try {
+      const parsed = JSON.parse(content);
+      const ql = parsed.quilt_loader;
+      if (ql?.version && !String(ql.version).includes("${")) detectedVersion = ql.version;
+      detectedLoaders.push("quilt");
+
+      const mcDep = (ql?.depends as any[] | undefined)?.find(d => d?.id === "minecraft");
+      const range = typeof mcDep === "object" ? mcDep?.versions : undefined;
+      if (range) {
+        const ranges = Array.isArray(range) ? range : [range];
+        MC_VERSIONS.forEach(v => {
+          if (ranges.some(r => typeof r === "string" && r.includes(v))) detectedMcVersions.push(v);
+        });
+      }
+    } catch (e) { console.error("Failed to parse quilt.mod.json", e); }
+  }
+
+  // 5. Check plugin.yml (Bukkit / Spigot / Paper)
+  const pluginYml = loadedZip.file("plugin.yml");
+  if (pluginYml) {
+    const content = await pluginYml.async("string");
+    try {
+      const versionMatch = content.match(/^version:\s*["']?([^"'\r\n]+)["']?/m);
+      if (versionMatch && !versionMatch[1].includes("${")) detectedVersion = versionMatch[1].trim();
+      // api-version (例: 1.20) から対応MCバージョンを推定
+      const apiMatch = content.match(/^api-version:\s*["']?([^"'\r\n]+)["']?/m);
+      if (apiMatch) {
+        const api = apiMatch[1].trim();
+        MC_VERSIONS.forEach(v => { if (v === api || v.startsWith(api + ".")) detectedMcVersions.push(v); });
+      }
+      detectedLoaders.push("paper");
+    } catch (e) { console.error("Failed to parse plugin.yml", e); }
   }
 
   // Filter valid loaders only
