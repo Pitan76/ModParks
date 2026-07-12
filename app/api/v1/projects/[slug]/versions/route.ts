@@ -9,6 +9,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { buildR2Key, getR2PublicUrl, uploadToR2 } from "@/lib/r2";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidatePath } from "next/cache";
+import { withPublicCache } from "@/lib/http/cache";
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const d1 = await getD1();
@@ -56,7 +57,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     fileUrl: `/api/download?versionId=${v.id}`
   }));
 
-  return NextResponse.json({ data });
+  return withPublicCache(NextResponse.json({ data }));
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {

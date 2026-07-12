@@ -6,6 +6,7 @@ import { API_CONFIG } from "@/lib/config";
 import { eq, desc, and, inArray, like } from "drizzle-orm";
 import { ApiProject, PaginatedResponse } from "@/types/api";
 import { createId } from "@paralleldrive/cuid2";
+import { withPublicCache } from "@/lib/http/cache";
 
 export async function GET(request: Request) {
   const d1 = await getD1();
@@ -131,7 +132,7 @@ export async function GET(request: Request) {
     }
   };
 
-  return NextResponse.json(response);
+  return withPublicCache(NextResponse.json(response));
 }
 
 export async function POST(request: Request) {

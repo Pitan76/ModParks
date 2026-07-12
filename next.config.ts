@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
     // script/styleは 'unsafe-inline' を許容した最低限のCSPに留める
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",

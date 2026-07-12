@@ -5,6 +5,7 @@ import { validateApiKey } from "@/lib/api-auth";
 import { API_CONFIG } from "@/lib/config";
 import { eq, desc } from "drizzle-orm";
 import { ApiIdea, PaginatedResponse } from "@/types/api";
+import { withPublicCache } from "@/lib/http/cache";
 
 export async function GET(request: Request) {
   const d1 = await getD1();
@@ -63,5 +64,5 @@ export async function GET(request: Request) {
     }
   };
 
-  return NextResponse.json(response);
+  return withPublicCache(NextResponse.json(response));
 }

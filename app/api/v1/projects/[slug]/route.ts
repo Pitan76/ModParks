@@ -5,6 +5,7 @@ import { validateApiKey } from "@/lib/api-auth";
 import { eq, and } from "drizzle-orm";
 import { ApiProjectDetail } from "@/types/api";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
+import { withPublicCache } from "@/lib/http/cache";
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const d1 = await getD1();
@@ -110,7 +111,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     }))
   };
 
-  return NextResponse.json(data);
+  return withPublicCache(NextResponse.json(data));
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ slug: string }> }) {
