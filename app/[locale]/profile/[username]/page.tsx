@@ -26,6 +26,7 @@ import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
 import { Link as RoutingLink } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/config";
+import { parseLinks } from "@/lib/utils/links";
 import { userFollows } from "@/db/schema";
 import { and, sql } from "drizzle-orm";
 import FollowUserButton from "@/components/user/FollowUserButton";
@@ -247,13 +248,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
           )}
 
           {(() => {
-            let parsedLinks: any[] = [];
-            try {
-              if (user.links) {
-                const parsed = JSON.parse(user.links);
-                if (Array.isArray(parsed)) parsedLinks = parsed;
-              }
-            } catch {}
+            const parsedLinks = parseLinks(user.links);
 
             const showGithub = user.githubUsername && ((user.custom as Record<string, any>)?.showGithubLink ?? true);
 

@@ -16,6 +16,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import { useTranslations } from "next-intl";
 import ReportDialog from "@/components/project/ReportDialog";
 import { Link } from "@/i18n/routing";
+import { parseLinks } from "@/lib/utils/links";
 
 // Simple mapping for custom links
 const getLinkIcon = (url: string) => {
@@ -105,8 +106,7 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
 
       {/* カスタムリンク */}
       {(() => {
-        let links: {title: string, url: string}[] = [];
-        try { links = JSON.parse(p.links || "[]"); } catch {}
+        const links = parseLinks(p.links);
         if (links.length === 0) return null;
         
         return (

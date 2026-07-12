@@ -638,6 +638,8 @@
       "bio": "自己紹介",
       "save": "保存する",
       "success": "プロフィールを更新しました",
+      "uploadError": "アップロード準備に失敗しました",
+      "uploadFailed": "アップロードに失敗しました",
       "customLinks": "カスタムリンク",
       "linkTitle": "タイトル",
       "addLink": "リンクを追加"

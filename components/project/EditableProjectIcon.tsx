@@ -10,6 +10,7 @@ import { resizeImageFile } from "@/lib/utils/image";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 import { updateProjectIcon } from "@/lib/actions/project";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export interface EditableProjectIconProps {
   projectId: string;
@@ -22,20 +23,26 @@ export interface EditableProjectIconProps {
 export default function EditableProjectIcon({ projectId, projectSlug, projectName, initialIconUrl, canEdit }: EditableProjectIconProps) {
   const [iconUrl, setIconUrl] = useState<string>(initialIconUrl || "");
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const t = useTranslations("Project");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
+    setError(null);
 
     try {
       // リサイズ → R2 アップロード → DB更新
       const resizedFile = await resizeImageFile(file, 400, 400);
-      const { publicUrl } = await uploadFileToR2(resizedFile, { type: "icon", projectSlug });
+      const { publicUrl } = await uploadFileToR2(resizedFile, { type: "icon", projectSlug }, {
+        presignError: t("iconUpload.error"),
+        uploadError: t("iconUpload.error"),
+      });
 
       setIconUrl(publicUrl);
 
@@ -45,8 +52,7 @@ export default function EditableProjectIcon({ projectId, projectSlug, projectNam
       });
 
     } catch (err: any) {
-      console.error(err);
-      alert("アップロードに失敗しました。");
+      setError(err.message || t("iconUpload.error"));
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -56,8 +62,9 @@ export default function EditableProjectIcon({ projectId, projectSlug, projectNam
   };
 
   return (
-    <Box 
-      sx={{ 
+    <Box sx={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 0.5 }}>
+    <Box
+      sx={{
         position: "relative",
         cursor: canEdit ? "pointer" : "default",
         "&:hover .overlay": canEdit ? { opacity: 1 } : {},
@@ -108,13 +115,19 @@ export default function EditableProjectIcon({ projectId, projectSlug, projectNam
         />
       )}
 
-      <input 
-        type="file" 
+      <input
+        type="file"
         accept="image/png, image/jpeg, image/gif, image/webp"
         style={{ display: "none" }}
         ref={fileInputRef}
         onChange={handleFileChange}
       />
+    </Box>
+    {error && (
+      <Typography variant="caption" color="error" sx={{ maxWidth: { xs: 60, sm: 80 }, textAlign: "center" }}>
+        {error}
+      </Typography>
+    )}
     </Box>
   );
 }

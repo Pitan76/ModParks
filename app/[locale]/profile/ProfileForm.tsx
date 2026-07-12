@@ -4,18 +4,14 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
-import Badge from "@mui/material/Badge";
-import IconButton from "@mui/material/IconButton";
-import CircularProgress from "@mui/material/CircularProgress";
-import EditIcon from "@mui/icons-material/Edit";
-import { useState, useRef } from "react";
+import { useState } from "react";
+import AvatarUploadBadge from "@/components/common/AvatarUploadBadge";
 import { updateProfile } from "@/lib/actions/profile";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { resizeImageFile } from "@/lib/utils/image";
-import { uploadFileToR2 } from "@/lib/utils/upload";
+import { useAvatarUpload } from "@/lib/hooks/useAvatarUpload";
+import { useFlashMessage } from "@/components/settings/useFlashMessage";
 import { useTranslations } from "next-intl";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
@@ -35,40 +31,20 @@ interface ProfileFormProps {
 
 export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
   const [pending, setPending] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(initialData.avatarUrl);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { message, flash, setMessage } = useFlashMessage();
   const router = useRouter();
   const t = useTranslations("Profile");
   const { update } = useSession();
 
+  const { uploading, fileInputRef, handleFileChange } = useAvatarUpload({
+    onUploaded: setAvatarUrl,
+    onError: (msg) => flash("error", msg),
+    errorMessages: { presign: t("uploadError"), upload: t("uploadFailed") },
+  });
+
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    setMessage(null);
-    try {
-      // 画像の自動リサイズ (最大400x400) 後に R2 へアップロード
-      const resizedFile = await resizeImageFile(file, 400, 400);
-      const { publicUrl } = await uploadFileToR2(resizedFile, { type: "avatar" }, {
-        presignError: t("uploadError"),
-        uploadError: t("uploadFailed"),
-      });
-      setAvatarUrl(publicUrl);
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message });
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -78,14 +54,14 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
 
     const formData = new FormData(e.currentTarget);
     formData.set("avatarUrl", avatarUrl);
-    
+
     const result = await updateProfile(formData);
 
     if (result && result.error) {
-      setMessage({ type: "error", text: t("error." + result.error) || result.error });
+      flash("error", t("error." + result.error) || result.error);
     } else {
       await update();
-      setMessage({ type: "success", text: t("updateSuccess") });
+      flash("success", t("updateSuccess"));
       router.refresh();
     }
     setPending(false);
@@ -104,27 +80,12 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
           ref={fileInputRef}
           onChange={handleFileChange}
         />
-        <Badge
-          overlap="circular"
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          badgeContent={
-            <IconButton 
-              size="small" 
-              onClick={handleAvatarClick}
-              disabled={uploading}
-              sx={{ bgcolor: "background.paper", boxShadow: 1, "&:hover": { bgcolor: "action.hover" } }}
-            >
-              {uploading ? <CircularProgress size={16} /> : <EditIcon fontSize="small" />}
-            </IconButton>
-          }
-        >
-          <Avatar
-            src={avatarUrl}
-            alt={initialData.displayName}
-            sx={{ width: 80, height: 80, cursor: uploading ? "wait" : "pointer" }}
-            onClick={handleAvatarClick}
-          />
-        </Badge>
+        <AvatarUploadBadge
+          src={avatarUrl}
+          alt={initialData.displayName}
+          uploading={uploading}
+          onEdit={handleAvatarClick}
+        />
         <Box>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             @{initialData.username}

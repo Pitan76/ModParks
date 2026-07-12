@@ -1,23 +1,19 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { updateProfile } from "@/lib/actions/settings";
-import { resizeImageFile } from "@/lib/utils/image";
-import { uploadFileToR2 } from "@/lib/utils/upload";
+import { useAvatarUpload } from "@/lib/hooks/useAvatarUpload";
 import { useLinksEditor } from "@/lib/hooks/useLinksEditor";
+import AvatarUploadBadge from "@/components/common/AvatarUploadBadge";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
-import Avatar from "@mui/material/Avatar";
-import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
-import CircularProgress from "@mui/material/CircularProgress";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import { useFlashMessage } from "../useFlashMessage";
 
@@ -28,36 +24,19 @@ interface ProfileTabProps {
 
 export default function ProfileTab({ user, locale }: ProfileTabProps) {
   const t = useTranslations("Settings");
-  const { message, flash, setMessage } = useFlashMessage();
+  const { message, flash } = useFlashMessage();
 
   const [displayName, setDisplayName] = useState(user.displayName);
   const [bio, setBio] = useState(user.bio);
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { links, addLink, removeLink, changeLink } = useLinksEditor(user.links);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    setMessage(null);
-    try {
-      const resizedFile = await resizeImageFile(file, 400, 400);
-      const { publicUrl } = await uploadFileToR2(resizedFile, { type: "avatar" }, {
-        presignError: "Upload error",
-        uploadError: "Upload failed",
-      });
-      setAvatarUrl(publicUrl);
-    } catch (err: any) {
-      flash("error", err.message);
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
+  const { uploading, fileInputRef, handleFileChange } = useAvatarUpload({
+    onUploaded: setAvatarUrl,
+    onError: (msg) => flash("error", msg),
+    errorMessages: { presign: t("profile.uploadError"), upload: t("profile.uploadFailed") },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,27 +50,12 @@ export default function ProfileTab({ user, locale }: ProfileTabProps) {
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 4 }}>
         <input type="file" accept="image/*" hidden ref={fileInputRef} onChange={handleFileChange} />
-        <Badge
-          overlap="circular"
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          badgeContent={
-            <IconButton
-              size="small"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              sx={{ bgcolor: "background.paper", boxShadow: 1, "&:hover": { bgcolor: "action.hover" } }}
-            >
-              {uploading ? <CircularProgress size={16} /> : <EditIcon fontSize="small" />}
-            </IconButton>
-          }
-        >
-          <Avatar
-            src={avatarUrl}
-            alt={displayName}
-            sx={{ width: 80, height: 80, cursor: uploading ? "wait" : "pointer" }}
-            onClick={() => fileInputRef.current?.click()}
-          />
-        </Badge>
+        <AvatarUploadBadge
+          src={avatarUrl}
+          alt={displayName}
+          uploading={uploading}
+          onEdit={() => fileInputRef.current?.click()}
+        />
         <Box>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>@{user.username}</Typography>
         </Box>

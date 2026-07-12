@@ -616,6 +616,8 @@
       "bio": "Bio",
       "save": "Save",
       "success": "Profile updated successfully",
+      "uploadError": "Failed to prepare upload",
+      "uploadFailed": "Failed to upload",
       "customLinks": "Custom Links",
       "linkTitle": "Title",
       "addLink": "Add Link"
