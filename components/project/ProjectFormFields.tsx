@@ -12,6 +12,7 @@ import Box from "@mui/material/Box";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
+import { LICENSE_OPTIONS } from "@/lib/licenses";
 
 
 
@@ -195,7 +196,7 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
         <Autocomplete
           id="project-license"
           freeSolo
-          options={["MIT", "Apache-2.0", "GPL-3.0", "LGPL-3.0", "All Rights Reserved", "CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"]}
+          options={LICENSE_OPTIONS as unknown as string[]}
           defaultValue={project?.license || defaultLicense || "MIT"}
           fullWidth
           renderInput={(params) => (

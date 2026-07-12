@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { uploadToR2 } from "@/lib/r2";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import type { Env } from "@/lib/db";
+import { uploadToR2, getR2Bucket } from "@/lib/r2";
 
 /** PUT /api/upload/direct
  * 開発環境向けの R2 への直接アップロードエンドポイント
@@ -60,18 +58,9 @@ export async function PUT(req: NextRequest) {
   }
 
   let R2: R2Bucket;
-  if (process.env.NODE_ENV === "development" && typeof process !== "undefined" && process.release?.name === "node") {
-    // 開発環境のWrangler Proxy経由でR2を取得
-    const { getCachedPlatformProxy } = await import("@/lib/proxy");
-    const proxy = await getCachedPlatformProxy();
-    R2 = proxy.env.modparks_storage;
-  } else {
-    // Edgeランタイム / 本番環境
-    const { env } = await getCloudflareContext({ async: true });
-    R2 = (env as unknown as Env).modparks_storage;
-  }
-
-  if (!R2) {
+  try {
+    R2 = await getR2Bucket();
+  } catch {
     return NextResponse.json({ error: "R2 binding not found" }, { status: 500 });
   }
 

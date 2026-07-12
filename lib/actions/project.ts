@@ -9,6 +9,7 @@ import { eq, desc, and, or, like, sql, inArray, getTableColumns } from "drizzle-
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
+import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
 
 // ─── プロジェクト作成 ─────────────────────────────────────────────────────────
 
@@ -224,81 +225,13 @@ export async function getProjects(params: {
   calculateTotal?: boolean;
 }) {
   const db = await getDatabase();
-  const { 
-    q, types, authorId, authorUsername, limit = 20, offset = 0, sort = "updated", 
-    loaders, mcVersions, tags,
-    searchMode = "OR", includeDesc = true, includeTags = true, includeAuthor = true,
+  const {
+    limit = 20, offset = 0, sort = "updated",
     includeExtDl = false, calculateTotal = false
   } = params;
 
-  const conditions = [];
-  if (authorId) {
-    conditions.push(eq(projects.authorId, authorId));
-  } else if (authorUsername) {
-    conditions.push(eq(userProfiles.username, authorUsername));
-    conditions.push(eq(projects.status, "public"));
-  } else {
-    // 検索・一覧表示には「public」のみ表示（unlisted, private, draft は表示しない）
-    conditions.push(eq(projects.status, "public"));
-  }
-  
-  if (types && types.length > 0) {
-    conditions.push(inArray(projects.type, types as ("mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack")[]));
-  }
-
-  if (q) {
-    const keywords = q.trim().split(/\s+/).filter(Boolean);
-    if (keywords.length > 0) {
-      const keywordConditions = keywords.map(kw => {
-        const kwConds = [like(projects.name, `%${kw}%`)];
-        if (includeDesc) {
-          kwConds.push(like(projects.description, `%${kw}%`));
-        }
-        if (includeAuthor) {
-          kwConds.push(like(userProfiles.username, `%${kw}%`));
-          kwConds.push(like(userProfiles.displayName, `%${kw}%`));
-        }
-        if (includeTags) {
-          kwConds.push(sql`${projects.id} IN (SELECT project_id FROM project_tags WHERE tag LIKE ${`%${kw}%`})`);
-        }
-        return or(...kwConds);
-      });
-
-      if (searchMode === "AND") {
-        conditions.push(and(...keywordConditions)!);
-      } else {
-        conditions.push(or(...keywordConditions)!);
-      }
-    }
-  }
-
-  if (loaders && loaders.length > 0) {
-    conditions.push(
-      sql`EXISTS (SELECT 1 FROM versions v JOIN version_loaders vl ON v.id = vl.version_id WHERE v.project_id = ${projects.id} AND ${inArray(sql`vl.loader`, loaders)})`
-    );
-  }
-
-  if (mcVersions && mcVersions.length > 0) {
-    conditions.push(
-      sql`EXISTS (SELECT 1 FROM versions v JOIN version_mc_versions vmc ON v.id = vmc.version_id WHERE v.project_id = ${projects.id} AND ${inArray(sql`vmc.mc_version`, mcVersions)})`
-    );
-  }
-
-  if (tags && tags.length > 0) {
-    conditions.push(
-      sql`EXISTS (SELECT 1 FROM project_tags pt WHERE pt.project_id = ${projects.id} AND ${inArray(sql`pt.tag`, tags)})`
-    );
-  }
-
-  let orderByExpr = desc(projects.updatedAt);
-  if (sort === "downloads") {
-    if (includeExtDl) {
-      orderByExpr = desc(projects.totalDownloads);
-    } else {
-      orderByExpr = desc(projects.downloads);
-    }
-  }
-  if (sort === "newest") orderByExpr = desc(projects.createdAt);
+  const conditions = buildProjectSearchConditions(params);
+  const orderByExpr = resolveProjectOrderBy(sort, includeExtDl);
 
   let rows;
   let totalCount = 0;

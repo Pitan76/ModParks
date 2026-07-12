@@ -1,11 +1,12 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { projects, versions, versionLoaders, versionMcVersions } from "@/db/schema";
+import { projects, versions } from "@/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2 } from "@/lib/r2";
+import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { parseModJar } from "@/lib/utils/modParser";
 import {
   fetchGithubReleases,
@@ -138,35 +139,18 @@ export async function importGithubRelease(
   }
 
   const id = createId();
-  await db
-    .insert(versions)
-    .values({
-      id,
-      versionNumber,
-      mcVersions: JSON.stringify(parsed.detectedMcVersions),
-      loaders: JSON.stringify(parsed.detectedLoaders),
-      changelog: release.body || "",
-      fileUrl: getR2PublicUrl(key),
-      fileName: asset.name,
-      fileSize: asset.size,
-      fileSha256,
-      projectId: project.id,
-      createdAt: new Date(),
-    })
-    .run();
-
-  if (parsed.detectedLoaders.length > 0) {
-    await db
-      .insert(versionLoaders)
-      .values(parsed.detectedLoaders.map((loader) => ({ versionId: id, loader })))
-      .run();
-  }
-  if (parsed.detectedMcVersions.length > 0) {
-    await db
-      .insert(versionMcVersions)
-      .values(parsed.detectedMcVersions.map((mcVersion) => ({ versionId: id, mcVersion })))
-      .run();
-  }
+  await insertVersionRecord(db, {
+    id,
+    versionNumber,
+    mcVersions: parsed.detectedMcVersions,
+    loaders: parsed.detectedLoaders,
+    changelog: release.body || "",
+    fileUrl: getR2PublicUrl(key),
+    fileName: asset.name,
+    fileSize: asset.size,
+    fileSha256,
+    projectId: project.id,
+  });
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true, versionId: id, versionNumber };
