@@ -5,7 +5,12 @@ import { headers } from "next/headers";
 
 export async function checkRateLimit(action: string, limit: number, windowMs: number) {
   const reqHeaders = await headers();
-  const ip = reqHeaders.get("x-forwarded-for") || reqHeaders.get("cf-connecting-ip") || "127.0.0.1";
+  // cf-connecting-ip はCloudflareが付与する信頼できる値。
+  // x-forwarded-for はクライアント改変可能なため、優先せず先頭要素のみ採用する
+  const ip =
+    reqHeaders.get("cf-connecting-ip") ||
+    reqHeaders.get("x-forwarded-for")?.split(",")[0].trim() ||
+    "127.0.0.1";
   const id = `rate:${action}:${ip}`;
 
   const db = await getDatabase();
