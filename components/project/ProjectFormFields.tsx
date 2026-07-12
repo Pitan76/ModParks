@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
+import { useLinksEditor } from "@/lib/hooks/useLinksEditor";
 
 
 
@@ -43,20 +44,7 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
   const tTags = useTranslations("Tags");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
   
-  let initialLinks = [];
-  try {
-    initialLinks = JSON.parse(project?.links || "[]");
-    if (!Array.isArray(initialLinks)) initialLinks = [];
-  } catch(e) {}
-  const [links, setLinks] = useState<{ title: string, url: string }[]>(initialLinks);
-
-  const handleAddLink = () => setLinks([...links, { title: "", url: "" }]);
-  const handleRemoveLink = (idx: number) => setLinks(links.filter((_, i) => i !== idx));
-  const handleLinkChange = (idx: number, field: "title" | "url", val: string) => {
-    const newLinks = [...links];
-    newLinks[idx][field] = val;
-    setLinks(newLinks);
-  };
+  const { links, addLink, removeLink, changeLink } = useLinksEditor(project?.links);
 
   return (
     <>
@@ -269,21 +257,21 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
             label={t("fields.customLinks.linkTitle")}
             size="small"
             value={link.title}
-            onChange={e => handleLinkChange(idx, "title", e.target.value)}
+            onChange={e => changeLink(idx, "title", e.target.value)}
             sx={{ width: 150 }}
           />
           <TextField
             label={t("fields.customLinks.url")}
             size="small"
             value={link.url}
-            onChange={e => handleLinkChange(idx, "url", e.target.value)}
+            onChange={e => changeLink(idx, "url", e.target.value)}
             sx={{ flex: 1 }}
           />
-          <Chip label={t("fields.customLinks.delete")} color="error" variant="outlined" onClick={() => handleRemoveLink(idx)} sx={{ cursor: "pointer" }} />
+          <Chip label={t("fields.customLinks.delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer" }} />
         </Stack>
       ))}
       <Box>
-        <Chip label={t("fields.customLinks.addLink")} color="primary" variant="outlined" onClick={handleAddLink} sx={{ cursor: "pointer" }} />
+        <Chip label={t("fields.customLinks.addLink")} color="primary" variant="outlined" onClick={addLink} sx={{ cursor: "pointer" }} />
       </Box>
       <input type="hidden" name="links" value={JSON.stringify(links)} />
     </>

@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import { useState, useRef } from "react";
 import { resizeImageFile } from "@/lib/utils/image";
+import { uploadFileToR2 } from "@/lib/utils/upload";
 import { useTranslations } from "next-intl";
 
 export interface ProjectIconUploadProps {
@@ -30,35 +31,12 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
     setError(null);
 
     try {
-      // 1. 画像の自動リサイズ (最大400x400)
+      // 画像の自動リサイズ (最大400x400) 後に R2 へアップロード（新規時は仮のslugを使う）
       const resizedFile = await resizeImageFile(file, 400, 400);
-
-      // 2. Presign URLの発行
-      const presignRes = await fetch("/api/upload/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: resizedFile.name,
-          contentType: resizedFile.type,
-          type: "icon",
-          projectSlug: projectSlug || "new-project", // 新規時は仮のslugを使うか、後で更新する
-        }),
-      });
-
-      if (!presignRes.ok) {
-        throw new Error(t("iconUpload.error"));
-      }
-
-      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
-
-      // 3. R2へのアップロード
-      const uploadRes = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": resizedFile.type },
-        body: resizedFile,
-      });
-
-      if (!uploadRes.ok) throw new Error(t("iconUpload.error"));
+      const { publicUrl } = await uploadFileToR2(resizedFile, {
+        type: "icon",
+        projectSlug: projectSlug || "new-project",
+      }, { presignError: t("iconUpload.error"), uploadError: t("iconUpload.error") });
 
       setIconUrl(publicUrl);
     } catch (err: any) {

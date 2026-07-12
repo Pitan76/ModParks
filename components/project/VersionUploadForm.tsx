@@ -19,6 +19,7 @@ import { createVersion } from "@/lib/actions/version";
 import { getLoaderInfo } from "@/lib/loaders";
 import { MC_VERSIONS } from "@/lib/validations";
 import { parseModJar } from "@/lib/utils/modParser";
+import { uploadFileToR2 } from "@/lib/utils/upload";
 
 import { useTranslations } from "next-intl";
 
@@ -113,34 +114,9 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
           return;
         }
 
-        const presignRes = await fetch("/api/upload/presign", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fileName: file.name,
-            contentType: file.type || "application/java-archive",
-            type: "mod",
-            projectSlug: slug,
-          }),
+        const { publicUrl } = await uploadFileToR2(file, { type: "mod", projectSlug: slug }, {
+          uploadError: tVersion("uploadForm.error.uploadFailed"),
         });
-
-        if (!presignRes.ok) {
-          const d = (await presignRes.json()) as { error?: string };
-          throw new Error(d.error || "Presign failed");
-        }
-
-        const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
-
-        const arrayBuffer = await file.arrayBuffer();
-        const uploadRes = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type || "application/java-archive" },
-          body: arrayBuffer,
-        });
-
-        if (!uploadRes.ok) {
-          throw new Error(tVersion("uploadForm.error.uploadFailed"));
-        }
 
         formData.append("fileUrl", publicUrl);
         formData.append("fileName", file.name);

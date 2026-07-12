@@ -15,6 +15,7 @@ import { updateProfile } from "@/lib/actions/profile";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { resizeImageFile } from "@/lib/utils/image";
+import { uploadFileToR2 } from "@/lib/utils/upload";
 import { useTranslations } from "next-intl";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
@@ -53,34 +54,12 @@ export default function ProfileForm({ initialData, labels }: ProfileFormProps) {
     setUploading(true);
     setMessage(null);
     try {
-      // 1. 画像の自動リサイズ (最大400x400)
+      // 画像の自動リサイズ (最大400x400) 後に R2 へアップロード
       const resizedFile = await resizeImageFile(file, 400, 400);
-
-      // 2. Presign URLの発行
-      const presignRes = await fetch("/api/upload/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: resizedFile.name,
-          contentType: resizedFile.type,
-          type: "avatar"
-        }),
+      const { publicUrl } = await uploadFileToR2(resizedFile, { type: "avatar" }, {
+        presignError: t("uploadError"),
+        uploadError: t("uploadFailed"),
       });
-      if (!presignRes.ok) {
-        throw new Error(t("uploadError"));
-      }
-      
-      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
-
-      // 3. R2へのアップロード
-      const uploadRes = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": resizedFile.type },
-        body: resizedFile,
-      });
-      
-      if (!uploadRes.ok) throw new Error(t("uploadFailed"));
-
       setAvatarUrl(publicUrl);
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });

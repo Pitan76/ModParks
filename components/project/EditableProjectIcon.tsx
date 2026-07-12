@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { resizeImageFile } from "@/lib/utils/image";
+import { uploadFileToR2 } from "@/lib/utils/upload";
 import { updateProjectIcon } from "@/lib/actions/project";
 import { useRouter } from "next/navigation";
 
@@ -32,39 +33,12 @@ export default function EditableProjectIcon({ projectId, projectSlug, projectNam
     setUploading(true);
 
     try {
-      // 1. リサイズ
+      // リサイズ → R2 アップロード → DB更新
       const resizedFile = await resizeImageFile(file, 400, 400);
+      const { publicUrl } = await uploadFileToR2(resizedFile, { type: "icon", projectSlug });
 
-      // 2. Presign URLの発行
-      const presignRes = await fetch("/api/upload/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: resizedFile.name,
-          contentType: resizedFile.type,
-          type: "icon",
-          projectSlug: projectSlug,
-        }),
-      });
-
-      if (!presignRes.ok) {
-        throw new Error("Failed to get presigned URL");
-      }
-
-      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string, publicUrl: string };
-
-      // 3. アップロード
-      const uploadRes = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": resizedFile.type },
-        body: resizedFile,
-      });
-
-      if (!uploadRes.ok) throw new Error("Failed to upload image to R2");
-
-      // 4. DB更新
       setIconUrl(publicUrl);
-      
+
       startTransition(async () => {
         await updateProjectIcon(projectId, publicUrl);
         router.refresh();

@@ -4,6 +4,8 @@ import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { updateProfile } from "@/lib/actions/settings";
 import { resizeImageFile } from "@/lib/utils/image";
+import { uploadFileToR2 } from "@/lib/utils/upload";
+import { useLinksEditor } from "@/lib/hooks/useLinksEditor";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -34,20 +36,7 @@ export default function ProfileTab({ user, locale }: ProfileTabProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  let initialLinks: { title: string; url: string }[] = [];
-  try {
-    const parsed = JSON.parse(user.links);
-    if (Array.isArray(parsed)) initialLinks = parsed;
-  } catch {}
-  const [links, setLinks] = useState(initialLinks);
-
-  const handleAddLink = () => setLinks([...links, { title: "", url: "" }]);
-  const handleRemoveLink = (idx: number) => setLinks(links.filter((_, i) => i !== idx));
-  const handleLinkChange = (idx: number, field: "title" | "url", val: string) => {
-    const newLinks = [...links];
-    newLinks[idx][field] = val;
-    setLinks(newLinks);
-  };
+  const { links, addLink, removeLink, changeLink } = useLinksEditor(user.links);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,23 +46,10 @@ export default function ProfileTab({ user, locale }: ProfileTabProps) {
     setMessage(null);
     try {
       const resizedFile = await resizeImageFile(file, 400, 400);
-
-      const presignRes = await fetch("/api/upload/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: resizedFile.name, contentType: resizedFile.type, type: "avatar" }),
+      const { publicUrl } = await uploadFileToR2(resizedFile, { type: "avatar" }, {
+        presignError: "Upload error",
+        uploadError: "Upload failed",
       });
-      if (!presignRes.ok) throw new Error("Upload error");
-
-      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string; publicUrl: string };
-
-      const uploadRes = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": resizedFile.type },
-        body: resizedFile,
-      });
-      if (!uploadRes.ok) throw new Error("Upload failed");
-
       setAvatarUrl(publicUrl);
     } catch (err: any) {
       flash("error", err.message);
@@ -128,14 +104,14 @@ export default function ProfileTab({ user, locale }: ProfileTabProps) {
       <Typography variant="h6" sx={{ mb: 2 }}>{t("profile.customLinks")}</Typography>
       {links.map((link, idx) => (
         <Box key={idx} sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>
-          <TextField label={t("profile.linkTitle")} size="small" value={link.title} onChange={(e) => handleLinkChange(idx, "title", e.target.value)} sx={{ width: 150 }} />
-          <TextField label="URL" size="small" value={link.url} onChange={(e) => handleLinkChange(idx, "url", e.target.value)} sx={{ flex: 1 }} />
-          <IconButton color="error" onClick={() => handleRemoveLink(idx)}>
+          <TextField label={t("profile.linkTitle")} size="small" value={link.title} onChange={(e) => changeLink(idx, "title", e.target.value)} sx={{ width: 150 }} />
+          <TextField label="URL" size="small" value={link.url} onChange={(e) => changeLink(idx, "url", e.target.value)} sx={{ flex: 1 }} />
+          <IconButton color="error" onClick={() => removeLink(idx)}>
             <DeleteIcon />
           </IconButton>
         </Box>
       ))}
-      <Button startIcon={<AddIcon />} variant="outlined" size="small" onClick={handleAddLink} sx={{ mb: 4 }}>
+      <Button startIcon={<AddIcon />} variant="outlined" size="small" onClick={addLink} sx={{ mb: 4 }}>
         {t("profile.addLink")}
       </Button>
 
