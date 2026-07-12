@@ -66,9 +66,11 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   const dependencies = await getProjectDependencies(project.id);
 
-  const { tags: tagsTable, platforms: platformsTable } = await import("@/db/schema");
-  const availableTags = await db.select({ slug: tagsTable.slug, name: tagsTable.name }).from(tagsTable).all();
-  const availablePlatforms = await db.select({ slug: platformsTable.slug, name: platformsTable.name }).from(platformsTable).all();
+  const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
+  const [availableTags, availablePlatforms] = await Promise.all([
+    getAvailableTags(),
+    getAvailablePlatforms(),
+  ]);
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>

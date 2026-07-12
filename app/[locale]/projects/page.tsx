@@ -70,11 +70,11 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     calculateTotal: true,
   });
 
-  const { getDatabase } = await import("@/lib/db");
-  const { tags: tagsTable, platforms: platformsTable } = await import("@/db/schema");
-  const db = await getDatabase();
-  const availableTags = await db.select({ slug: tagsTable.slug, name: tagsTable.name }).from(tagsTable).all();
-  const availablePlatforms = await db.select({ slug: platformsTable.slug, name: platformsTable.name }).from(platformsTable).all();
+  const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
+  const [availableTags, availablePlatforms] = await Promise.all([
+    getAvailableTags(),
+    getAvailablePlatforms(),
+  ]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>

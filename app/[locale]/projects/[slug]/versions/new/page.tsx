@@ -1,10 +1,11 @@
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import { getDb, getD1 } from "@/lib/db";
-import { ideas, platforms as platformsTable } from "@/db/schema";
+import { ideas } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import { getTranslations } from "next-intl/server";
+import { getAvailablePlatforms } from "@/lib/queries/masterData";
 
 interface NewVersionPageProps {
   params: Promise<{ slug: string }>;
@@ -22,7 +23,7 @@ export default async function NewVersionPage({ params }: NewVersionPageProps) {
     .where(inArray(ideas.status, ["open", "in_progress"]))
     .all();
 
-  const availablePlatforms = await db.select({ slug: platformsTable.slug, name: platformsTable.name }).from(platformsTable).all();
+  const availablePlatforms = await getAvailablePlatforms();
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
