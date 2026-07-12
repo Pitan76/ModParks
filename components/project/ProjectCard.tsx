@@ -99,7 +99,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               src={project.iconUrl ?? undefined}
               alt={project.name}
               variant="rounded"
-              imgProps={{ loading: "lazy", decoding: "async", width: 48, height: 48 }}
+              slotProps={{ img: { loading: "lazy", decoding: "async" } }}
               sx={{
                 width: 48,
                 height: 48,
