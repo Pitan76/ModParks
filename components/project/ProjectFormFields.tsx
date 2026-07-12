@@ -98,12 +98,12 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
       <Stack direction="column" spacing={1}>
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel id="project-description-format-label">形式</InputLabel>
+            <InputLabel id="project-description-format-label">{t("fields.descriptionFormat")}</InputLabel>
             <Select
               labelId="project-description-format-label"
               id="project-description-format"
               name="descriptionFormat"
-              label="形式"
+              label={t("fields.descriptionFormat")}
               defaultValue={project?.descriptionFormat || "markdown"}
             >
               <MenuItem value="markdown">Markdown</MenuItem>
@@ -210,7 +210,7 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
         <TextField
           id="project-issue-tracker"
           name="issueTrackerUrl"
-          label="Issue Tracker URL"
+          label={t("fields.issueTrackerUrl")}
           fullWidth
           defaultValue={(project as any)?.issueTrackerUrl || ""}
           error={!!error?.issueTrackerUrl}
@@ -242,12 +242,12 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
       <TextField
         id="project-github-repo"
         name="githubRepo"
-        label="GitHub リポジトリ"
+        label={t("fields.githubRepo")}
         placeholder="owner/repo"
         fullWidth
         defaultValue={project?.githubRepo || ""}
         error={!!error?.githubRepo}
-        helperText={error?.githubRepo?.[0] || "Release から自動でバージョンを取り込めます（例: Pitan76/modparks）"}
+        helperText={error?.githubRepo?.[0] || t("fields.githubRepoHelper")}
       />
 
       <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.customLinks.title")}</Typography>

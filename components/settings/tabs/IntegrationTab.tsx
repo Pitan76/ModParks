@@ -12,7 +12,7 @@ import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import { useFlashMessage } from "../useFlashMessage";
+import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface IntegrationTabProps {
   modrinthApiKey: string;

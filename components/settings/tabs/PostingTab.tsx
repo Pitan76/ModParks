@@ -13,7 +13,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
-import { useFlashMessage } from "../useFlashMessage";
+import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface PostingTabProps {
   defaultProjectStatus: string;

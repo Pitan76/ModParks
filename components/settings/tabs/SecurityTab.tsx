@@ -15,7 +15,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import { useFlashMessage } from "../useFlashMessage";
+import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface SecurityTabProps {
   is2FAEnabled: boolean;

@@ -104,7 +104,7 @@ export default function EditableProjectIcon({ projectId, projectSlug, projectNam
             borderRadius: "10px",
           }}
         >
-          <Typography variant="caption" sx={{ fontWeight: "bold" }}>変更</Typography>
+          <Typography variant="caption" sx={{ fontWeight: "bold" }}>{t("iconUpload.change")}</Typography>
         </Box>
       )}
 

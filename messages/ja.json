@@ -83,6 +83,11 @@
       "slugRule": "半角英数字とハイフンのみ",
       "modrinthId": "Modrinth ID (任意)",
       "curseforgeId": "CurseForge ID (任意)",
+      "descriptionFormat": "形式",
+      "issueTrackerUrl": "Issue Tracker URL",
+      "githubRepo": "GitHub リポジトリ",
+      "githubRepoHelper": "Release から自動でバージョンを取り込めます（例: Pitan76/modparks）",
+      "linksSection": "リンク",
       "externalConnectionsTitle": "外部連携 (外部からのダウンロード数同期などに使用されます)",
       "customLinks": {
         "title": "カスタムリンク",
@@ -101,7 +106,8 @@
       "title": "プロジェクトアイコン (最大 400x400)",
       "select": "アイコンを選択",
       "autoResizeNote": "※大きな画像は自動的に400x400にリサイズされます",
-      "error": "アイコンのアップロードに失敗しました"
+      "error": "アイコンのアップロードに失敗しました",
+      "change": "変更"
     },
     "uploadForm": {
       "title": "プロジェクトアイコン (最大 400x400)",

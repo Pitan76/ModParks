@@ -113,7 +113,7 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
           <Box sx={{ mb: 2, mt: p.sourceUrl ? 2 : 0 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
               <LinkIcon fontSize="small" color="action" />
-              リンク
+              {t("fields.linksSection")}
             </Typography>
             <Stack spacing={1}>
               {links.map((l, idx) => (

@@ -15,7 +15,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useFlashMessage } from "../useFlashMessage";
+import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface ProfileTabProps {
   user: { username: string; displayName: string; bio: string; avatarUrl: string; links: string };

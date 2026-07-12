@@ -83,6 +83,11 @@
       "slugRule": "Alphanumeric and hyphens only",
       "modrinthId": "Modrinth ID (Optional)",
       "curseforgeId": "CurseForge ID (Optional)",
+      "descriptionFormat": "Format",
+      "issueTrackerUrl": "Issue Tracker URL",
+      "githubRepo": "GitHub Repository",
+      "githubRepoHelper": "Versions can be imported automatically from Releases (e.g. Pitan76/modparks)",
+      "linksSection": "Links",
       "externalConnectionsTitle": "External Connections (Used for syncing download counts, etc.)",
       "customLinks": {
         "title": "Custom Links",
@@ -101,7 +106,8 @@
       "title": "Project Icon (Max 400x400)",
       "select": "Select Icon",
       "autoResizeNote": "*Large images will be automatically resized to 400x400",
-      "error": "Failed to upload icon"
+      "error": "Failed to upload icon",
+      "change": "Change"
     },
     "explore": {
       "title": "Explore Projects",

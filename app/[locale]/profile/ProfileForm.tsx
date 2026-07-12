@@ -11,7 +11,7 @@ import { updateProfile } from "@/lib/actions/profile";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useAvatarUpload } from "@/lib/hooks/useAvatarUpload";
-import { useFlashMessage } from "@/components/settings/useFlashMessage";
+import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 import { useTranslations } from "next-intl";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
