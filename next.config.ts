@@ -10,8 +10,12 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    // Server Actions を有効化
     optimizePackageImports: ["@mui/icons-material", "@mui/material"],
+    // デプロイ間で Server Action の暗号鍵を固定し、世代ズレによる
+    // "Failed to find Server Action" を防ぐ。ビルド時に同じ値を渡すこと。
+    serverActions: {
+      encryptionKey: process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,
+    },
   },
   images: {
     // GitHub アバター & R2 ファイルを許可

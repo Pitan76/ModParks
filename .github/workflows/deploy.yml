@@ -23,9 +23,14 @@ jobs:
 
       - name: Build OpenNext
         run: npx opennextjs-cloudflare build
+        env:
+          # デプロイ間で Server Action の暗号鍵を固定する（ビルド時に焼き込まれる）
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.100.0"
+          command: deploy
