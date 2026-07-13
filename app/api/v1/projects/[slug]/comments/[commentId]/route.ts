@@ -4,6 +4,43 @@ import { auth } from "@/lib/auth";
 import { projectComments, projects, projectMembers } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 
+export async function PATCH(request: Request, { params }: { params: Promise<{ slug: string, commentId: string }> }) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { commentId } = await params;
+    const body = (await request.json()) as any;
+    const content = typeof body?.content === "string" ? body.content.trim() : "";
+
+    if (!content) {
+      return NextResponse.json({ error: "Content is required" }, { status: 400 });
+    }
+    if (content.length > 2000) {
+      return NextResponse.json({ error: "Content is too long" }, { status: 400 });
+    }
+
+    const db = await getDatabase();
+    const comment = await db.select().from(projectComments).where(eq(projectComments.id, commentId)).get();
+    if (!comment) return NextResponse.json({ error: "Comment not found" }, { status: 404 });
+
+    // 編集は本文の書き換えであり、投稿者本人のみ許可（削除とは異なりモデレーション権限では編集しない）
+    if (comment.authorId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    await db.update(projectComments)
+      .set({ content, updatedAt: new Date() })
+      .where(eq(projectComments.id, commentId))
+      .run();
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request, { params }: { params: Promise<{ slug: string, commentId: string }> }) {
   try {
     const session = await auth();

@@ -35,9 +35,10 @@ interface EditListDialogProps {
   open: boolean;
   onClose: () => void;
   collection: CollectionData;
+  ownerUsername?: string;
 }
 
-export default function EditListDialog({ open, onClose, collection }: EditListDialogProps) {
+export default function EditListDialog({ open, onClose, collection, ownerUsername }: EditListDialogProps) {
   const router = useRouter();
   const [name, setName] = useState(collection.name);
   const [description, setDescription] = useState(collection.description || "");
@@ -79,7 +80,8 @@ export default function EditListDialog({ open, onClose, collection }: EditListDi
 
       if (!res.ok) throw new Error("Failed to delete collection");
 
-      router.push("/"); // TODO: Redirect to profile or lists index
+      // 削除後は所有者のプロフィール（リスト一覧を含む）へ戻す
+      router.push(ownerUsername ? `/profile/${ownerUsername}` : "/");
     } catch (error) {
       console.error(error);
       alert("エラーが発生しました");

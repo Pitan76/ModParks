@@ -152,6 +152,8 @@ export async function importGithubRelease(
     projectId: project.id,
   });
 
+  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true, versionId: id, versionNumber };
 }

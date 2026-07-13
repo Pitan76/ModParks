@@ -14,6 +14,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import LinkButton from "@/components/ui/LinkButton";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
 import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
+import IdeaOwnerActions from "@/components/idea/IdeaOwnerActions";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export default async function IdeaDetailPage({ params }: { params: Promise<{ locale: string, id: string }> }) {
@@ -33,6 +34,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       title: ideas.title,
       content: ideas.content,
       status: ideas.status,
+      visibility: ideas.visibility,
       createdAt: ideas.createdAt,
       authorId: users.id,
       authorName: userProfiles.displayName,
@@ -45,6 +47,11 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
     .get();
 
   if (!ideaData) return notFound();
+
+  // 投稿者本人または管理者のみ編集/削除操作を表示
+  const canManage =
+    !!session?.user &&
+    (session.user.id === ideaData.authorId || (session.user as any).role === "admin");
 
   // 2. Fetch Likes
   const [likesData, userLike] = await Promise.all([
@@ -112,7 +119,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             <Avatar src={ideaData.authorAvatar || undefined} sx={{ width: 48, height: 48 }}>
               {ideaData.authorName?.[0] || "U"}
             </Avatar>
-            <Box>
+            <Box sx={{ flexGrow: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
                 {ideaData.authorName}
               </Typography>
@@ -120,6 +127,14 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                 {new Date(ideaData.createdAt!).toLocaleString()}
               </Typography>
             </Box>
+            {canManage && (
+              <IdeaOwnerActions
+                ideaId={id}
+                initialTitle={ideaData.title}
+                initialContent={ideaData.content}
+                initialVisibility={ideaData.visibility ?? "public"}
+              />
+            )}
           </Box>
 
           <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 3 }}>

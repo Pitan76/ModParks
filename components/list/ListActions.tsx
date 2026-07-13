@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
 import EditListDialog from "./EditListDialog";
 
-export default function ListActions({ isOwner, collection }: { isOwner: boolean; collection: any }) {
+export default function ListActions({ isOwner, collection, ownerUsername }: { isOwner: boolean; collection: any; ownerUsername?: string }) {
   const [open, setOpen] = useState(false);
 
   if (!isOwner) return null;
@@ -22,9 +22,10 @@ export default function ListActions({ isOwner, collection }: { isOwner: boolean;
       </Button>
       {open && (
         <EditListDialog 
-          open={open} 
-          onClose={() => setOpen(false)} 
-          collection={collection} 
+          open={open}
+          onClose={() => setOpen(false)}
+          collection={collection}
+          ownerUsername={ownerUsername}
         />
       )}
     </>

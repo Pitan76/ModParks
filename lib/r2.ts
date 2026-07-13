@@ -64,6 +64,23 @@ export async function deleteFromR2(
 }
 
 /**
+ * 保存済みの fileUrl から R2 オブジェクトキーを逆算します。
+ * 外部URL（GitHub / Modrinth / CurseForge 等）の場合は R2 上に実体が無いため null を返します。
+ * @param fileUrl versions.fileUrl に保存された値
+ * @returns R2キー、または R2 管理外なら null
+ */
+export function getR2KeyFromUrl(fileUrl: string): string | null {
+  if (process.env.R2_PUBLIC_URL && fileUrl.startsWith(`${process.env.R2_PUBLIC_URL}/`)) {
+    return fileUrl.slice(process.env.R2_PUBLIC_URL.length + 1);
+  }
+  // ローカル開発時などの API 経由パス
+  if (fileUrl.startsWith("/api/r2/")) {
+    return fileUrl.slice("/api/r2/".length);
+  }
+  return null;
+}
+
+/**
  * R2 に保存するオブジェクトのキー（パス）を構築します。
  * @param type 保存するファイルの種類 (avatar | mod | icon 等)
  * @param id プロジェクトSlugやユーザーIDなどの識別子

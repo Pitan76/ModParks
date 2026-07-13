@@ -29,7 +29,8 @@ interface ProjectForManagement {
   type: string;
   status: string;
   downloads: number | null;
-  externalDownloads: number | null;
+  // externalDownloads は JSON オブジェクトのため合算には集計済みの totalDownloads を使う
+  totalDownloads: number | null;
 }
 
 interface BatchProjectOperationsClientProps {
@@ -185,7 +186,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
               </TableRow>
             ) : (
               projects.map((p) => {
-                const totalDl = (p.downloads || 0) + (p.externalDownloads || 0);
+                const totalDl = p.totalDownloads || 0;
                 return (
                   <TableRow key={p.id} hover>
                     <TableCell padding="checkbox">

@@ -9,6 +9,7 @@ import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 
 /**
  * IDを指定してバージョン詳細を取得する
@@ -89,6 +90,9 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     projectId:     project.id,
   });
 
+  // 新バージョン登録をプロジェクトの最終更新日時に反映（「最近更新順」ソート用）
+  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+
   const ideaId = formData.get("ideaId") as string;
   if (ideaId) {
     await db.insert(versionIdeas).values({
@@ -153,6 +157,8 @@ export async function updateVersion(versionId: string, projectSlug: string, form
     await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId, mcVersion: mc }))).run();
   }
 
+  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
 }
@@ -189,9 +195,21 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
   if (!version) return { error: "Version not found" };
   if (version.projectId !== project.id) return { error: "Forbidden: Version does not belong to this project" };
 
-  // TODO: 必要に応じて R2 ストレージからファイルを削除する処理をここに追加 (deleteFromR2 など)
-  
-  await db.delete(versions).where(eq(versions.id, versionId)).run();
+  // R2 上に実体があるファイルのみ削除（外部URLはスキップ）。
+  // ストレージ削除失敗でDB削除まで巻き込まないよう境界で握りつぶす。
+  const r2Key = getR2KeyFromUrl(version.fileUrl);
+  if (r2Key) {
+    try {
+      const bucket = await getR2Bucket();
+      await deleteFromR2(bucket, r2Key);
+    } catch (e) {
+      console.error(`[deleteVersion] Failed to delete R2 object: ${r2Key}`, e);
+    }
+  }
 
+  await db.delete(versions).where(eq(versions.id, versionId)).run();
+  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+
+  revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
 }

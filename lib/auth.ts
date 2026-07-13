@@ -131,12 +131,19 @@ export const authConfig = {
     async createUser({ user }: { user: any }) {
       const { getDatabase } = await import("@/lib/db");
       const { userProfiles, userSettings } = await import("@/db/schema");
+      const { generateUniqueUsername } = await import("@/lib/utils/username");
       const db = await getDatabase();
-      
+
       try {
+        // UUID をそのまま username にすると公開URLが /profile/<UUID> になり
+        // ユーザー名機能が破綻するため、人間可読で一意な username を生成する
+        const username = await generateUniqueUsername(db, {
+          email: user.email,
+          name: user.name,
+        });
         await db.insert(userProfiles).values({
           userId: user.id as string,
-          username: user.id as string,
+          username,
           displayName: user.name || "Unknown",
           avatarUrl: user.image,
         }).run();
@@ -170,9 +177,15 @@ export const authConfig = {
 
         // GitHub連携時に githubUsername を更新
         if (account?.provider === "github" && profile?.login && dbUser) {
+          // profile 未作成の稀なケースでも UUID を username にしないよう生成する
+          const { generateUniqueUsername } = await import("@/lib/utils/username");
+          const fallbackUsername = await generateUniqueUsername(db, {
+            email: dbUser.email,
+            name: profile.login as string,
+          });
           await db.insert(userProfiles).values({
             userId: dbUser.id,
-            username: dbUser.id,
+            username: fallbackUsername,
             githubUsername: profile.login as string,
           }).onConflictDoUpdate({
             target: userProfiles.userId,

@@ -71,7 +71,7 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
               />
             </Box>
             <Box sx={{ mt: 1 }}>
-              <ListActions isOwner={isOwner} collection={collection} />
+              <ListActions isOwner={isOwner} collection={collection} ownerUsername={collection.author?.username} />
             </Box>
             <Box sx={{ mt: 2 }}>
               {!isOwner ? (
