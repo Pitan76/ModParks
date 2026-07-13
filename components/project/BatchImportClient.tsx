@@ -24,6 +24,22 @@ interface BatchImportClientProps {
   hasCurseForgeProject: boolean;
 }
 
+/**
+ * catch で受けた例外を、UIに出せる分かりやすい文言へ整形する。
+ * production の Server Action はエラー本文を秘匿するため、生の技術メッセージは
+ * ユーザーに見せず原因別の案内へ変換する。
+ */
+function toDisplayError(err: unknown, fallback: string): string {
+  const raw = err instanceof Error ? err.message : String(err ?? "");
+  if (raw.includes("Failed to find Server Action")) {
+    return "新しいバージョンが公開されたようです。ページを再読み込みしてからもう一度お試しください。";
+  }
+  if (raw.includes("Server Components render") || raw.includes("digest")) {
+    return "サーバー側でエラーが発生しました。時間をおいて再度お試しください。解決しない場合は運営者にお問い合わせください。";
+  }
+  return raw || fallback;
+}
+
 export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProject }: BatchImportClientProps) {
   const router = useRouter();
   const [projects, setProjects] = useState<ImportedProject[]>([]);
@@ -50,8 +66,8 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
       setProjects(result.projects);
       setSource(targetSource);
       setSelected(new Set(result.projects.map(p => p.id)));
-    } catch (err: any) {
-      setError(err.message || `Failed to fetch ${targetSource} projects`);
+    } catch (err) {
+      setError(toDisplayError(err, `${targetSource} の取得に失敗しました。`));
     } finally {
       setLoading(false);
     }
@@ -79,14 +95,16 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
     try {
       const toImport = projects.filter(p => selected.has(p.id));
       const res = await importProjects(toImport, source, addExternalLink);
-      
-      if (res.success) {
-        setSuccessMsg(`Successfully imported ${res.importedCount} projects.`);
-        setProjects([]);
-        setSelected(new Set());
+
+      if (!res.success) {
+        setError(res.error || "インポートに失敗しました。");
+        return;
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to import projects");
+      setSuccessMsg(`${res.importedCount}件のプロジェクトをインポートしました。`);
+      setProjects([]);
+      setSelected(new Set());
+    } catch (err) {
+      setError(toDisplayError(err, "インポートに失敗しました。"));
     } finally {
       setImporting(false);
     }

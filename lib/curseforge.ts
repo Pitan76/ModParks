@@ -34,15 +34,41 @@ export interface CfProjectSummary {
   authors: { id: number; name: string }[];
 }
 
+/** gameId=432 は Minecraft */
+const MINECRAFT_GAME_ID = 432;
+
 /**
  * コンソールAPIでプロジェクト情報を取得する。
- * @param modId 数値のCurseForge Mod ID
+ * 数値 Mod ID・スラッグのどちらでも解決する（スラッグは検索APIで数値IDに変換）。
+ * @param projectRef 数値のCurseForge Mod ID もしくはスラッグ
  */
-export async function fetchCfProject(modId: string): Promise<CfProjectSummary | null> {
+export async function fetchCfProject(projectRef: string): Promise<CfProjectSummary | null> {
+  const ref = projectRef.trim();
+  if (/^\d+$/.test(ref)) return fetchCfProjectByModId(ref);
+  return fetchCfProjectBySlug(ref);
+}
+
+/** 数値 Mod ID で直接取得する */
+async function fetchCfProjectByModId(modId: string): Promise<CfProjectSummary | null> {
   const res = await fetch(`${CF_API_BASE}/v1/mods/${modId}`, { headers: consoleHeaders() });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.warn(`[curseforge] fetch by modId failed: modId=${modId} status=${res.status}`);
+    return null;
+  }
   const json = (await res.json()) as any;
   return json.data ?? null;
+}
+
+/** スラッグを検索APIで数値IDに解決して取得する */
+async function fetchCfProjectBySlug(slug: string): Promise<CfProjectSummary | null> {
+  const url = `${CF_API_BASE}/v1/mods/search?gameId=${MINECRAFT_GAME_ID}&slug=${encodeURIComponent(slug)}`;
+  const res = await fetch(url, { headers: consoleHeaders() });
+  if (!res.ok) {
+    console.warn(`[curseforge] search by slug failed: slug=${slug} status=${res.status}`);
+    return null;
+  }
+  const json = (await res.json()) as { data?: CfProjectSummary[] };
+  return json.data?.[0] ?? null;
 }
 
 /**
@@ -72,9 +98,13 @@ export async function verifyCfProjectOwnership(modId: string, authorToken: strin
   if (!token) return false;
 
   // プロジェクトのアップロードファイル一覧は所有者のみ取得できる。
-  // 200 → 所有者、401/403 → 非所有者/無効トークン。
+  // 200 → 所有者、401/403 → 非所有者/無効トークン、404 → Project ID 誤り。
   const res = await fetch(`${CF_UPLOAD_BASE}/projects/${modId}/files`, {
     headers: { "X-Api-Token": token, "User-Agent": UA },
   });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.warn(`[curseforge] ownership check failed: modId=${modId} status=${res.status} body=${body.slice(0, 200)}`);
+  }
   return res.ok;
 }
