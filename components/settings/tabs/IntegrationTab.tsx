@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import { updateIntegrations, disconnectGitHub, toggleGithubVisibility } from "@/lib/actions/settings";
+import CurseForgeVerify from "./CurseForgeVerify";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -16,27 +17,26 @@ import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface IntegrationTabProps {
   modrinthApiKey: string;
-  curseforgeAuthorToken: string;
   curseforgeProjectId: string;
+  curseforgeVerified: boolean;
+  curseforgeVerifyCode: string;
   isGitHubConnected: boolean;
   showGithubLinkInitial: boolean;
 }
 
-export default function IntegrationTab({ modrinthApiKey, curseforgeAuthorToken, curseforgeProjectId, isGitHubConnected, showGithubLinkInitial }: IntegrationTabProps) {
+export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, isGitHubConnected, showGithubLinkInitial }: IntegrationTabProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const { message, flash } = useFlashMessage();
 
   const [modrinthKey, setModrinthKey] = useState(modrinthApiKey || "");
-  const [curseforgeToken, setCurseforgeToken] = useState(curseforgeAuthorToken || "");
-  const [curseforgeProject, setCurseforgeProject] = useState(curseforgeProjectId || "");
 
   const [githubMsg, setGithubMsg] = useState("");
   const [showGithubLink, setShowGithubLink] = useState(showGithubLinkInitial);
 
   const handleIntegrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateIntegrations(modrinthKey, curseforgeToken, curseforgeProject);
+    await updateIntegrations(modrinthKey);
     flash("success", tCommon("saved") || "保存しました");
   };
 
@@ -64,27 +64,20 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeAuthorToken, 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           APIキー（PAT）は <a href="https://modrinth.com/settings/pats" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>Modrinth Settings</a> から作成できます。「Read projects」と「Read user data」の権限が必要です。
         </Typography>
-        <TextField fullWidth label="Modrinth API Key" size="small" type="password" value={modrinthKey} onChange={(e) => setModrinthKey(e.target.value)} sx={{ mb: 4, maxWidth: 400 }} />
-
-        <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{t("integration.curseforgeDesc")}</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Author トークンは <a href="https://authors.curseforge.com/#/settings/api-tokens" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>CurseForge for Authors</a> の API Tokens から発行できます。ご自身がプロジェクトの所有者本人であることの確認に使用します。
-        </Typography>
-        <TextField fullWidth label="CurseForge Author Token" size="small" type="password" value={curseforgeToken} onChange={(e) => setCurseforgeToken(e.target.value)} sx={{ mb: 2, maxWidth: 400 }} />
-        <TextField
-          fullWidth
-          label="CurseForge Project ID"
-          size="small"
-          type="text"
-          value={curseforgeProject}
-          onChange={(e) => setCurseforgeProject(e.target.value)}
-          helperText="CurseForgeからの一括インポートに使用します（ご自身のModのIDを1つだけ入力してください）"
-          sx={{ mb: 4, maxWidth: 400 }}
-        />
+        <TextField fullWidth label="Modrinth API Key" size="small" type="password" value={modrinthKey} onChange={(e) => setModrinthKey(e.target.value)} sx={{ mb: 3, maxWidth: 400 }} />
 
         <Button type="submit" variant="contained" sx={{ display: "block", mb: 4 }}>{t("profile.save")}</Button>
       </Box>
+
+      <Divider sx={{ my: 4 }} />
+
+      <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.curseforgeDesc")}</Typography>
+      <CurseForgeVerify
+        projectId={curseforgeProjectId}
+        verified={curseforgeVerified}
+        pendingCode={curseforgeVerifyCode}
+      />
 
       <Divider sx={{ my: 4 }} />
 

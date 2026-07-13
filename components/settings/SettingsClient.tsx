@@ -21,8 +21,9 @@ interface SettingsClientProps {
   defaultProjectStatus?: string;
   defaultLicense?: string;
   modrinthApiKey?: string;
-  curseforgeAuthorToken?: string;
   curseforgeProjectId?: string;
+  curseforgeVerified?: boolean;
+  curseforgeVerifyCode?: string;
   error?: string;
 }
 
@@ -35,8 +36,9 @@ export default function SettingsClient({
   defaultProjectStatus,
   defaultLicense,
   modrinthApiKey,
-  curseforgeAuthorToken,
   curseforgeProjectId,
+  curseforgeVerified,
+  curseforgeVerifyCode,
   error,
 }: SettingsClientProps) {
   const t = useTranslations("Settings");

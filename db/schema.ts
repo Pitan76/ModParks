@@ -61,10 +61,15 @@ export const userSettings = sqliteTable("user_settings", {
   modrinthApiKey: text("modrinth_api_key"),
   /** @deprecated Studios コンソールキーは運営が env CURSEFORGE_FOR_STUDIOS_API_KEY で全体設定する方式に移行 */
   curseforgeApiKey: text("curseforge_api_key"),
+  /** 所有確認済みの CurseForge 作者ID。この作者のプロジェクトのみインポートを許可する */
   curseforgeAuthorId: text("curseforge_author_id"),
   curseforgeProjectId: text("curseforge_project_id"),
-  /** CurseForge for Authors のアップロードAPIトークン。インポート時の本人（プロジェクト所有）検証に使用 */
+  /** @deprecated アップロードAPIでは安全に所有確認できないため、チャレンジコード方式へ移行 */
   curseforgeAuthorToken: text("curseforge_author_token"),
+  /** 発行中の所有確認コード。プロジェクトの公開フィールドに記載されているか照合する */
+  curseforgeVerifyCode: text("curseforge_verify_code"),
+  /** 所有確認が完了した日時。未確認なら null */
+  curseforgeVerifiedAt: integer("curseforge_verified_at", { mode: "timestamp" }),
   defaultCommentsEnabled: integer("default_comments_enabled", { mode: "boolean" }).notNull().default(false),
 });
 

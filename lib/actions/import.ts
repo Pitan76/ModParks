@@ -5,7 +5,7 @@ import { projects, userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { revalidatePath } from "next/cache";
-import { getConsoleApiKey, fetchCfProject, verifyCfProjectOwnership } from "@/lib/curseforge";
+import { fetchCfAuthorProjects } from "@/lib/curseforge";
 
 export interface ImportedProject {
   id: string;
@@ -110,45 +110,12 @@ async function loadCurseForgeProjects(): Promise<ImportedProject[]> {
   const { db, session } = await getAuthenticatedDb();
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
-  if (!settings?.curseforgeAuthorToken) {
-    throw new ImportError("CurseForge の Author トークンが未設定です。設定画面で登録してください。");
-  }
-  if (!settings?.curseforgeProjectId) {
-    throw new ImportError("CurseForge Project ID is not configured.");
+  if (!settings?.curseforgeVerifiedAt || !settings.curseforgeAuthorId) {
+    throw new ImportError("CurseForge の所有確認が未完了です。設定画面で所有確認を行ってください。");
   }
 
-  const consoleKey = getConsoleApiKey();
-
-  // 1. 共通コンソールキーで対象プロジェクトを取得し、作者を特定する
-  const projectData = await fetchCfProject(settings.curseforgeProjectId);
-  if (!projectData) {
-    throw new ImportError(`Failed to fetch the specified CurseForge project (ID: ${settings.curseforgeProjectId}).`);
-  }
-  const authors = projectData.authors;
-  if (!authors || authors.length === 0) {
-    throw new ImportError("No authors found for the specified CurseForge project.");
-  }
-
-  // 2. Author トークンで対象プロジェクトの所有を検証（本人確認）
-  //    コンソールキーは身元と紐づかないため、この検証を通らない限りインポートを許可しない
-  const owns = await verifyCfProjectOwnership(projectData.id.toString(), settings.curseforgeAuthorToken);
-  if (!owns) {
-    throw new ImportError("指定されたプロジェクトの所有者であることを確認できませんでした。Author トークンと Project ID が正しいか確認してください。");
-  }
-
-  // 3. 検証済み作者のプロジェクト一覧をコンソールキーで取得 (gameId 432 = Minecraft)
-  const authorId = authors[0].id;
-  const projRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&authorId=${authorId}`, {
-    headers: { "x-api-key": consoleKey, "Accept": "application/json", "User-Agent": "ModParks/1.0 (modparks.pitan76.net)" }
-  });
-
-  if (!projRes.ok) {
-    const errorText = await projRes.text();
-    console.error("CurseForge API Error:", projRes.status, errorText);
-    throw new ImportError(`Failed to fetch CurseForge projects. Status: ${projRes.status}`);
-  }
-  const resData = (await projRes.json()) as { data: any[] };
-  const projectsData = resData.data;
+  // 所有確認済みの作者IDに紐づくプロジェクトのみを一覧する
+  const projectsData = await fetchCfAuthorProjects(settings.curseforgeAuthorId);
 
   return projectsData.map((p) => ({
     id: p.id.toString(),
@@ -172,14 +139,15 @@ export async function importProjects(selectedProjects: ImportedProject[], source
   if (!selectedProjects.length) return { success: true, importedCount: 0 };
 
   // CurseForge はクライアント送信のプロジェクトを信用せず、インポート時に
-  // Author トークンで各プロジェクトの所有を再検証する（本 action は直接呼び出し可能なため）
-  let cfAuthorToken: string | null = null;
+  // 所有確認済み作者IDのプロジェクト集合を取得し直して照合する（本 action は直接呼び出し可能なため）
+  let cfAllowedProjectIds: Set<string> | null = null;
   if (source === "curseforge") {
     const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
-    if (!settings?.curseforgeAuthorToken) {
-      return { success: false, error: "CurseForge の Author トークンが未設定です。" };
+    if (!settings?.curseforgeVerifiedAt || !settings.curseforgeAuthorId) {
+      return { success: false, error: "CurseForge の所有確認が未完了です。" };
     }
-    cfAuthorToken = settings.curseforgeAuthorToken;
+    const owned = await fetchCfAuthorProjects(settings.curseforgeAuthorId);
+    cfAllowedProjectIds = new Set(owned.map((p) => p.id.toString()));
   }
 
   let importedCount = 0;
@@ -189,13 +157,10 @@ export async function importProjects(selectedProjects: ImportedProject[], source
     const existing = await db.select().from(projects).where(eq(projects.slug, p.slug)).get();
     if (existing) continue;
 
-    // CurseForge: 所有者本人でないプロジェクトはスキップ（他人のプロジェクト奪取を防止）
-    if (source === "curseforge" && cfAuthorToken) {
-      const owns = await verifyCfProjectOwnership(p.id, cfAuthorToken);
-      if (!owns) {
-        console.warn(`[import] Skipped CF project ${p.id} (${p.slug}): ownership not verified for user ${session.user.id}`);
-        continue;
-      }
+    // CurseForge: 所有確認済み作者のプロジェクト集合に無いものはスキップ（他人のプロジェクト奪取を防止）
+    if (source === "curseforge" && cfAllowedProjectIds && !cfAllowedProjectIds.has(p.id)) {
+      console.warn(`[import] Skipped CF project ${p.id} (${p.slug}): not owned by verified author for user ${session.user.id}`);
+      continue;
     }
 
     let linksJson = "[]";

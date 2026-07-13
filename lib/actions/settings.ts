@@ -320,14 +320,11 @@ export async function updatePostingSettings(status: "draft" | "public" | "unlist
   return { success: true };
 }
 
-export async function updateIntegrations(modrinthKey: string, curseforgeAuthorToken: string, curseforgeProjectId: string) {
+export async function updateIntegrations(modrinthKey: string) {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userSettings).set({
     modrinthApiKey: modrinthKey?.trim() || null,
-    // Studios コンソールキーは運営が env で全体設定するため、ユーザーは Author トークンのみ登録する
-    curseforgeAuthorToken: curseforgeAuthorToken?.trim() || null,
-    curseforgeProjectId: curseforgeProjectId?.trim() || null,
   }).where(eq(userSettings.userId, userId));
 
   revalidatePath("/settings");
