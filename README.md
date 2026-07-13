@@ -3,16 +3,19 @@
 **ModParks** は、Minecraft Java Edition 向けの Mod および Plugin プラットフォームです。
 日本発のプラットフォームとして、開発者とプレイヤーがより円滑に作品を共有し、コミュニケーションできる場を提供することを目的としています。
 
-## 特徴 (Features)
+## 特徴
 
-- **プロジェクトの公開と探索**: ModやPluginを検索、発見、ダウンロード。
-- **バージョン管理**: バージョンごとのJar/Zipファイルのアップロード（Cloudflare R2対応）または外部URL（GitHub Releases, Modrinth, CurseForge 等）へのリンク機能。
-- **多言語対応 (i18n)**: 日本語と英語の表示切り替え（`next-intl` による実装）。
-- **認証**: GitHub アカウントを用いたセキュアなログイン（Auth.js / NextAuth）。
-- **アイデアボード**: ユーザーが「こんなModが欲しい！」を投稿・議論し、実現されたプロジェクトと紐付けられる機能。
-- **通報システム**: ガイドライン違反のプロジェクトを管理者に報告する機能。
+- プロジェクトの公開と探索: ModやPluginを検索、発見、ダウンロード。
+- バージョン管理: バージョンごとのJar/Zipファイルのアップロード、または外部URL（GitHub Releases, Modrinth, CurseForge 等）へのリンク機能。
+- 多言語対応: 日本語と英語の表示切り替え。
+- 認証: GitHub アカウントを用いたログイン。
+- アイデアボード: ユーザーが「こんなModが欲しい！」を投稿・議論し、実現されたプロジェクトと紐付けられる機能。
+- 記法: Markdown, PlainText, PukiWikiの文法が対応
+- インポートと同期機能: 他のプラットフォームとの連携が強み。インポートはもちろんDL数同期なども
+ 
 
-## 技術スタック (Tech Stack)
+
+## 技術スタック
 
 - **Framework**: [Next.js](https://nextjs.org/) (App Router, v15)
 - **Language**: TypeScript
