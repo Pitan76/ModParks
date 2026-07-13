@@ -20,12 +20,43 @@ export interface ImportedProject {
   iconUrl?: string;
 }
 
-export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
+/**
+ * 外部サービス取得アクションの結果。
+ * Server Action が throw するとproduction ではエラーメッセージが秘匿されてしまうため、
+ * エラーもデータとして返してクライアントに実メッセージを届ける。
+ */
+export type FetchProjectsResult =
+  | { ok: true; projects: ImportedProject[] }
+  | { ok: false; error: string };
+
+/** 想定内エラー（クライアントに文言をそのまま見せてよい） */
+class ImportError extends Error {}
+
+/**
+ * 例外を握って {@link FetchProjectsResult} に変換する。
+ * ImportError はユーザ向け文言、その他は汎用文言＋サーバログ。
+ */
+function toFetchResult(source: string, err: unknown): FetchProjectsResult {
+  if (err instanceof ImportError) return { ok: false, error: err.message };
+  console.error(`[import] Unexpected error while fetching ${source} projects:`, err);
+  const detail = err instanceof Error ? err.message : String(err);
+  return { ok: false, error: `${source} プロジェクトの取得に失敗しました: ${detail}` };
+}
+
+export async function fetchModrinthProjects(): Promise<FetchProjectsResult> {
+  try {
+    return { ok: true, projects: await loadModrinthProjects() };
+  } catch (err) {
+    return toFetchResult("Modrinth", err);
+  }
+}
+
+async function loadModrinthProjects(): Promise<ImportedProject[]> {
   const { db, session } = await getAuthenticatedDb();
   
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
   if (!settings?.modrinthApiKey) {
-    throw new Error("Modrinth API key is not configured.");
+    throw new ImportError("Modrinth API key is not configured.");
   }
 
   // Get user info
@@ -36,9 +67,9 @@ export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
     const errorText = await userRes.text().catch(() => "Could not read error body");
     console.error("Modrinth API Error (User Fetch):", userRes.status, errorText);
     if (userRes.status === 401) {
-      throw new Error("Modrinthの認証に失敗しました。設定画面に登録したAPIキー (Personal Access Token) が正しいか確認してください。PATは 'mrp_' から始まります。");
+      throw new ImportError("Modrinthの認証に失敗しました。設定画面に登録したAPIキー (Personal Access Token) が正しいか確認してください。PATは 'mrp_' から始まります。");
     }
-    throw new Error(`Failed to fetch Modrinth user. Status: ${userRes.status}`);
+    throw new ImportError(`Failed to fetch Modrinth user. Status: ${userRes.status}`);
   }
   const userData = (await userRes.json()) as { id: string };
 
@@ -49,7 +80,7 @@ export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
   if (!projRes.ok) {
     const errorText = await projRes.text().catch(() => "Could not read error body");
     console.error("Modrinth API Error (Projects Fetch):", projRes.status, errorText);
-    throw new Error(`Failed to fetch Modrinth projects. Status: ${projRes.status}`);
+    throw new ImportError(`Failed to fetch Modrinth projects. Status: ${projRes.status}`);
   }
   const projectsData = (await projRes.json()) as any[];
 
@@ -67,15 +98,23 @@ export async function fetchModrinthProjects(): Promise<ImportedProject[]> {
   }));
 }
 
-export async function fetchCurseForgeProjects(): Promise<ImportedProject[]> {
+export async function fetchCurseForgeProjects(): Promise<FetchProjectsResult> {
+  try {
+    return { ok: true, projects: await loadCurseForgeProjects() };
+  } catch (err) {
+    return toFetchResult("CurseForge", err);
+  }
+}
+
+async function loadCurseForgeProjects(): Promise<ImportedProject[]> {
   const { db, session } = await getAuthenticatedDb();
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
   if (!settings?.curseforgeAuthorToken) {
-    throw new Error("CurseForge の Author トークンが未設定です。設定画面で登録してください。");
+    throw new ImportError("CurseForge の Author トークンが未設定です。設定画面で登録してください。");
   }
   if (!settings?.curseforgeProjectId) {
-    throw new Error("CurseForge Project ID is not configured.");
+    throw new ImportError("CurseForge Project ID is not configured.");
   }
 
   const consoleKey = getConsoleApiKey();
@@ -83,18 +122,18 @@ export async function fetchCurseForgeProjects(): Promise<ImportedProject[]> {
   // 1. 共通コンソールキーで対象プロジェクトを取得し、作者を特定する
   const projectData = await fetchCfProject(settings.curseforgeProjectId);
   if (!projectData) {
-    throw new Error(`Failed to fetch the specified CurseForge project (ID: ${settings.curseforgeProjectId}).`);
+    throw new ImportError(`Failed to fetch the specified CurseForge project (ID: ${settings.curseforgeProjectId}).`);
   }
   const authors = projectData.authors;
   if (!authors || authors.length === 0) {
-    throw new Error("No authors found for the specified CurseForge project.");
+    throw new ImportError("No authors found for the specified CurseForge project.");
   }
 
   // 2. Author トークンで対象プロジェクトの所有を検証（本人確認）
   //    コンソールキーは身元と紐づかないため、この検証を通らない限りインポートを許可しない
   const owns = await verifyCfProjectOwnership(projectData.id.toString(), settings.curseforgeAuthorToken);
   if (!owns) {
-    throw new Error("指定されたプロジェクトの所有者であることを確認できませんでした。Author トークンと Project ID が正しいか確認してください。");
+    throw new ImportError("指定されたプロジェクトの所有者であることを確認できませんでした。Author トークンと Project ID が正しいか確認してください。");
   }
 
   // 3. 検証済み作者のプロジェクト一覧をコンソールキーで取得 (gameId 432 = Minecraft)
@@ -106,7 +145,7 @@ export async function fetchCurseForgeProjects(): Promise<ImportedProject[]> {
   if (!projRes.ok) {
     const errorText = await projRes.text();
     console.error("CurseForge API Error:", projRes.status, errorText);
-    throw new Error(`Failed to fetch CurseForge projects. Status: ${projRes.status}`);
+    throw new ImportError(`Failed to fetch CurseForge projects. Status: ${projRes.status}`);
   }
   const resData = (await projRes.json()) as { data: any[] };
   const projectsData = resData.data;

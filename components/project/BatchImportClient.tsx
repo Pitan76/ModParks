@@ -40,12 +40,16 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
     setError(null);
     setSuccessMsg(null);
     try {
-      const fetched = targetSource === "modrinth" 
-        ? await fetchModrinthProjects() 
+      const result = targetSource === "modrinth"
+        ? await fetchModrinthProjects()
         : await fetchCurseForgeProjects();
-      setProjects(fetched);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setProjects(result.projects);
       setSource(targetSource);
-      setSelected(new Set(fetched.map(p => p.id)));
+      setSelected(new Set(result.projects.map(p => p.id)));
     } catch (err: any) {
       setError(err.message || `Failed to fetch ${targetSource} projects`);
     } finally {
