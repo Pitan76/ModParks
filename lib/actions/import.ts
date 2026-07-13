@@ -117,11 +117,11 @@ async function loadCurseForgeProjects(): Promise<ImportedProject[]> {
   // 所有確認済みの作者IDに紐づくプロジェクトのみを一覧する
   const projectsData = await fetchCfAuthorProjects(settings.curseforgeAuthorId);
 
-  return projectsData.map((p) => ({
+  return projectsData.map((p): ImportedProject => ({
     id: p.id.toString(),
     name: p.name,
     slug: p.slug,
-    description: p.summary,
+    description: p.summary ?? "",
     type: p.classId === 6 ? "mod" : p.classId === 17 ? "mod" : "plugin", // Simplified, 6 is Mods
     license: "All Rights Reserved", // CF doesn't expose license easily in search
     sourceUrl: p.links?.sourceUrl,
