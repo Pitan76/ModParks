@@ -28,10 +28,10 @@ export default async function ImportProjectsPage({ params }: { params: Promise<{
         外部からの一括インポート
       </Typography>
 
-      <BatchImportClient 
+      <BatchImportClient
         hasModrinthKey={!!settings?.modrinthApiKey}
-        hasCurseForgeKey={!!settings?.curseforgeAuthorToken}
-        hasCurseForgeProject={!!settings?.curseforgeProjectId}
+        hasCurseForgeKey={!!settings?.curseforgeVerifiedAt}
+        hasCurseForgeProject={!!settings?.curseforgeVerifiedAt}
       />
     </Container>
   );

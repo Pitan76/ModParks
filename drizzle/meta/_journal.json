@@ -225,6 +225,13 @@
       "when": 1783947537980,
       "tag": "0031_curseforge_author_token",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1783953114730,
+      "tag": "0032_simple_war_machine",
+      "breakpoints": true
     }
   ]
 }
