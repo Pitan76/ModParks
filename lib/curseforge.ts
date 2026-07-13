@@ -36,6 +36,17 @@ export interface CfProjectSummary {
   links?: { wikiUrl?: string; issuesUrl?: string; sourceUrl?: string };
 }
 
+/** 検索APIが返すMinecraftプロジェクトの生データ（インポートで参照するフィールドのみ） */
+export interface CfRawMod {
+  id: number;
+  name: string;
+  slug: string;
+  summary?: string;
+  classId?: number;
+  links?: { sourceUrl?: string; issuesUrl?: string; websiteUrl?: string };
+  logo?: { url?: string };
+}
+
 /** gameId=432 は Minecraft */
 const MINECRAFT_GAME_ID = 432;
 
@@ -66,14 +77,14 @@ async function fetchCfProjectByModId(modId: string): Promise<CfProjectSummary | 
  * @param authorId 数値のCurseForge作者ID
  * @returns 検索APIの生プロジェクト配列
  */
-export async function fetchCfAuthorProjects(authorId: string): Promise<any[]> {
+export async function fetchCfAuthorProjects(authorId: string): Promise<CfRawMod[]> {
   const url = `${CF_API_BASE}/v1/mods/search?gameId=${MINECRAFT_GAME_ID}&authorId=${encodeURIComponent(authorId)}`;
   const res = await fetch(url, { headers: consoleHeaders() });
   if (!res.ok) {
     console.warn(`[curseforge] search by authorId failed: authorId=${authorId} status=${res.status}`);
     throw new Error(`Failed to fetch CurseForge projects. Status: ${res.status}`);
   }
-  const json = (await res.json()) as { data?: any[] };
+  const json = (await res.json()) as { data?: CfRawMod[] };
   return json.data ?? [];
 }
 
