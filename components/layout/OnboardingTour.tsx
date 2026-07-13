@@ -25,20 +25,43 @@ export default function OnboardingTour() {
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user && !(session.user as any).onboardingCompleted) {
-      setOpen(true);
-    } else {
-      setOpen(false);
+    if (status === "loading") return;
+
+    const isCompletedLocal = localStorage.getItem("onboardingCompleted") === "true";
+
+    if (status === "authenticated" && session?.user) {
+      const isCompletedDb = (session.user as any).onboardingCompleted;
+      
+      if (!isCompletedDb) {
+        if (isCompletedLocal) {
+          // Locally completed, sync to DB without showing dialog
+          completeOnboarding().then(() => update()).catch(console.error);
+        } else {
+          setOpen(true);
+        }
+      } else {
+        // DB completed, sync to local if missing
+        if (!isCompletedLocal) {
+          localStorage.setItem("onboardingCompleted", "true");
+        }
+        setOpen(false);
+      }
+    } else if (status === "unauthenticated") {
+      setOpen(!isCompletedLocal);
     }
-  }, [status, session]);
+  }, [status, session, update]);
 
   const handleClose = async () => {
     setOpen(false);
-    try {
-      await completeOnboarding();
-      await update();
-    } catch (e) {
-      console.error("Failed to update onboarding status:", e);
+    localStorage.setItem("onboardingCompleted", "true");
+    
+    if (status === "authenticated") {
+      try {
+        await completeOnboarding();
+        await update();
+      } catch (e) {
+        console.error("Failed to update onboarding status:", e);
+      }
     }
   };
 
