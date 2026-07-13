@@ -8,6 +8,7 @@ import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
+import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
 
 interface MarkdownRendererProps {
   content: string;
@@ -28,7 +29,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <Box sx={{ p: 2, minHeight: 100 }} />; // Placeholder during SSR
+    return <DescriptionSkeleton />;
   }
 
   return (
