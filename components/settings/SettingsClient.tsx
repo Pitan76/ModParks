@@ -60,8 +60,9 @@ export default function SettingsClient({
       content: (
         <IntegrationTab
           modrinthApiKey={modrinthApiKey || ""}
-          curseforgeAuthorToken={curseforgeAuthorToken || ""}
           curseforgeProjectId={curseforgeProjectId || ""}
+          curseforgeVerified={!!curseforgeVerified}
+          curseforgeVerifyCode={curseforgeVerifyCode || ""}
           isGitHubConnected={isGitHubConnected}
           showGithubLinkInitial={user.showGithubLink}
         />
