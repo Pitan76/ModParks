@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import MarkdownRenderer from "./MarkdownRenderer";
+import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
 // @ts-ignore
 import puki2md from "puki2md";
 
@@ -29,7 +30,7 @@ export default function DescriptionRenderer({ content, format = "markdown" }: De
   }, [content, format]);
 
   if (!mounted) {
-    return <Box sx={{ p: 2, minHeight: 100 }} />; // Placeholder during SSR
+    return <DescriptionSkeleton />;
   }
 
   if (format === "plaintext") {
