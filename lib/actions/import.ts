@@ -84,18 +84,35 @@ async function loadModrinthProjects(): Promise<ImportedProject[]> {
   }
   const projectsData = (await projRes.json()) as any[];
 
-  return projectsData.map((p) => ({
-    id: p.id,
-    name: p.title,
-    slug: p.slug,
-    description: p.description,
-    type: p.project_type === "mod" ? "mod" : p.project_type === "plugin" ? "plugin" : "mod",
-    license: p.license?.name,
-    sourceUrl: p.source_url,
-    issueTrackerUrl: p.issues_url,
-    websiteUrl: `https://modrinth.com/mod/${p.slug}`,
-    iconUrl: p.icon_url,
-  }));
+  const existingProjects = await db
+    .select({
+      modrinthId: projects.modrinthId,
+      slug: projects.slug,
+    })
+    .from(projects)
+    .all();
+
+  const existingModrinthIds = new Set(
+    existingProjects.map((p) => p.modrinthId).filter(Boolean)
+  );
+  const existingSlugs = new Set(
+    existingProjects.map((p) => p.slug).filter(Boolean)
+  );
+
+  return projectsData
+    .map((p) => ({
+      id: p.id,
+      name: p.title,
+      slug: p.slug,
+      description: p.description,
+      type: (p.project_type === "mod" ? "mod" : p.project_type === "plugin" ? "plugin" : "mod") as ImportedProject["type"],
+      license: p.license?.name,
+      sourceUrl: p.source_url,
+      issueTrackerUrl: p.issues_url,
+      websiteUrl: `https://modrinth.com/mod/${p.slug}`,
+      iconUrl: p.icon_url,
+    }))
+    .filter((p) => !existingModrinthIds.has(p.id) && !existingSlugs.has(p.slug));
 }
 
 export async function fetchCurseForgeProjects(): Promise<FetchProjectsResult> {
@@ -117,18 +134,35 @@ async function loadCurseForgeProjects(): Promise<ImportedProject[]> {
   // 所有確認済みの作者IDに紐づくプロジェクトのみを一覧する
   const projectsData = await fetchCfAuthorProjects(settings.curseforgeAuthorId);
 
-  return projectsData.map((p): ImportedProject => ({
-    id: p.id.toString(),
-    name: p.name,
-    slug: p.slug,
-    description: p.summary ?? "",
-    type: p.classId === 6 ? "mod" : p.classId === 17 ? "mod" : "plugin", // Simplified, 6 is Mods
-    license: "All Rights Reserved", // CF doesn't expose license easily in search
-    sourceUrl: p.links?.sourceUrl,
-    issueTrackerUrl: p.links?.issuesUrl,
-    websiteUrl: p.links?.websiteUrl,
-    iconUrl: p.logo?.url,
-  }));
+  const existingProjects = await db
+    .select({
+      curseforgeId: projects.curseforgeId,
+      slug: projects.slug,
+    })
+    .from(projects)
+    .all();
+
+  const existingCfIds = new Set(
+    existingProjects.map((p) => p.curseforgeId).filter(Boolean)
+  );
+  const existingSlugs = new Set(
+    existingProjects.map((p) => p.slug).filter(Boolean)
+  );
+
+  return projectsData
+    .map((p): ImportedProject => ({
+      id: p.id.toString(),
+      name: p.name,
+      slug: p.slug,
+      description: p.summary ?? "",
+      type: (p.classId === 6 ? "mod" : p.classId === 17 ? "mod" : "plugin") as ImportedProject["type"], // Simplified, 6 is Mods
+      license: "All Rights Reserved", // CF doesn't expose license easily in search
+      sourceUrl: p.links?.sourceUrl,
+      issueTrackerUrl: p.links?.issuesUrl,
+      websiteUrl: p.links?.websiteUrl,
+      iconUrl: p.logo?.url,
+    }))
+    .filter((p) => !existingCfIds.has(p.id) && !existingSlugs.has(p.slug));
 }
 
 /**

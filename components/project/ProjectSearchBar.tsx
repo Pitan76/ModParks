@@ -155,7 +155,7 @@ export default function ProjectSearchBar({
         <IconButton 
           onClick={() => setAdvancedOpen(true)} 
           color={isAdvancedActive ? "primary" : "default"}
-          sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}
+          sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1 }}
         >
           <TuneIcon />
         </IconButton>

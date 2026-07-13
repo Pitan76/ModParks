@@ -15,23 +15,31 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import SearchIcon from "@mui/icons-material/Search";
 import PublishIcon from "@mui/icons-material/Publish";
 import LanguageIcon from "@mui/icons-material/Language";
+import { useSession } from "next-auth/react";
+import { completeOnboarding } from "@/lib/actions/settings";
 
 export default function OnboardingTour() {
   const t = useTranslations("Onboarding");
+  const { data: session, status, update } = useSession();
   const [open, setOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    // Only run on client
-    const hasCompleted = localStorage.getItem("modparks_onboarding_completed");
-    if (!hasCompleted) {
+    if (status === "authenticated" && session?.user && !(session.user as any).onboardingCompleted) {
       setOpen(true);
+    } else {
+      setOpen(false);
     }
-  }, []);
+  }, [status, session]);
 
-  const handleClose = () => {
-    localStorage.setItem("modparks_onboarding_completed", "true");
+  const handleClose = async () => {
     setOpen(false);
+    try {
+      await completeOnboarding();
+      await update();
+    } catch (e) {
+      console.error("Failed to update onboarding status:", e);
+    }
   };
 
   const steps = [

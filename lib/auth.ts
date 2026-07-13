@@ -224,7 +224,8 @@ export const authConfig = {
               avatarUrl: userProfiles.avatarUrl,
               displayName: userProfiles.displayName,
               username: userProfiles.username,
-              locale: userSettings.locale
+              locale: userSettings.locale,
+              custom: userSettings.custom,
             }).from(users)
             .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
             .leftJoin(userSettings, eq(users.id, userSettings.userId))
@@ -237,6 +238,14 @@ export const authConfig = {
               if (dbUser.displayName) token.displayName = dbUser.displayName;
               if (dbUser.username) token.username = dbUser.username;
               if (dbUser.locale) token.locale = dbUser.locale;
+              
+              let customObj: any = {};
+              if (typeof dbUser.custom === "string") {
+                try { customObj = JSON.parse(dbUser.custom); } catch (_) {}
+              } else if (dbUser.custom) {
+                customObj = dbUser.custom;
+              }
+              token.onboardingCompleted = !!customObj?.onboardingCompleted;
             }
             token.lastDbCheck = now;
           }
@@ -259,6 +268,7 @@ export const authConfig = {
         session.user.avatarUrl = (token.avatarUrl ?? null) as string | null;
         session.user.role = (token.role ?? "user") as string;
         session.user.locale = (token.locale ?? null) as string | null;
+        session.user.onboardingCompleted = !!token?.onboardingCompleted;
       }
       return session;
     },

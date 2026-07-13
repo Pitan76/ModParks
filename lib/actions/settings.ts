@@ -330,3 +330,18 @@ export async function updateIntegrations(modrinthKey: string) {
   revalidatePath("/settings");
   return { success: true };
 }
+
+export async function completeOnboarding() {
+  const { db, userId } = await getAuthenticatedDb();
+
+  const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
+  if (!settings) return { error: "Settings not found" };
+
+  const customObj = (settings.custom as Record<string, any>) || {};
+  customObj.onboardingCompleted = true;
+
+  await db.update(userSettings).set({ custom: customObj }).where(eq(userSettings.userId, userId));
+
+  revalidatePath("/");
+  return { success: true };
+}
