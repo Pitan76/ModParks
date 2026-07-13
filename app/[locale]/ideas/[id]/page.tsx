@@ -15,6 +15,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
 import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
 import IdeaOwnerActions from "@/components/idea/IdeaOwnerActions";
+import IdeaCommentItem from "@/components/idea/IdeaCommentItem";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export default async function IdeaDetailPage({ params }: { params: Promise<{ locale: string, id: string }> }) {
@@ -68,6 +69,8 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       id: ideaComments.id,
       content: ideaComments.content,
       createdAt: ideaComments.createdAt,
+      updatedAt: ideaComments.updatedAt,
+      authorId: ideaComments.authorId,
       authorName: userProfiles.displayName,
       authorAvatar: userProfiles.avatarUrl,
     })
@@ -216,26 +219,22 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
         )}
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {comments.map((comment) => (
-            <Box key={comment.id} sx={{ display: "flex", gap: 2 }}>
-              <Avatar src={comment.authorAvatar || undefined} sx={{ width: 40, height: 40 }}>
-                {comment.authorName?.[0] || "U"}
-              </Avatar>
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.5 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    {comment.authorName}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {new Date(comment.createdAt!).toLocaleString()}
-                  </Typography>
-                </Box>
-                <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
-                  {comment.content}
-                </Typography>
-              </Box>
-            </Box>
-          ))}
+          {comments.map((comment) => {
+            const isCommentAuthor = session?.user?.id === comment.authorId;
+            return (
+              <IdeaCommentItem
+                key={comment.id}
+                id={comment.id}
+                content={comment.content}
+                createdAt={comment.createdAt}
+                updatedAt={comment.updatedAt}
+                authorName={comment.authorName}
+                authorAvatar={comment.authorAvatar}
+                canEdit={isCommentAuthor}
+                canDelete={isCommentAuthor || canManage}
+              />
+            );
+          })}
           {comments.length === 0 && (
             <Typography color="text.secondary">{tIdea("noComments")}</Typography>
           )}

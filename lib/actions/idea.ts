@@ -201,9 +201,14 @@ export async function deleteIdeaComment(commentId: string) {
 
   const comment = await db.select().from(ideaComments).where(eq(ideaComments.id, commentId)).get();
   if (!comment) return { error: "コメントが見つかりません" };
-  if (!(await canManageIdea(db, comment.authorId, userId))) {
-    return { error: "削除する権限がありません" };
+
+  // 削除はコメント投稿者本人・管理者に加え、アイデア所有者によるモデレーションも許可
+  let allowed = await canManageIdea(db, comment.authorId, userId);
+  if (!allowed) {
+    const idea = await db.select({ authorId: ideas.authorId }).from(ideas).where(eq(ideas.id, comment.ideaId)).get();
+    allowed = idea?.authorId === userId;
   }
+  if (!allowed) return { error: "削除する権限がありません" };
 
   await db.delete(ideaComments).where(eq(ideaComments.id, commentId)).run();
 
