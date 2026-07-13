@@ -91,7 +91,7 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
     <html lang={locale} suppressHydrationWarning>
       <body>
         <ThemeRegistry initialMode={themeMode}>
-          <SessionProvider session={session}>
+          <SessionProvider session={session} refetchOnWindowFocus={false}>
             <NextIntlClientProvider messages={messages}>
               {userLocale && <LocaleSyncer userLocale={userLocale} />}
               <AppLayout session={session}>
