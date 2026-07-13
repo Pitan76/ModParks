@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -24,6 +24,8 @@ export default function OnboardingTour() {
   const [open, setOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
+  const syncAttempted = useRef(false);
+
   useEffect(() => {
     if (status === "loading") return;
 
@@ -35,7 +37,10 @@ export default function OnboardingTour() {
       if (!isCompletedDb) {
         if (isCompletedLocal) {
           // Locally completed, sync to DB without showing dialog
-          completeOnboarding().then(() => update()).catch(console.error);
+          if (!syncAttempted.current) {
+            syncAttempted.current = true;
+            completeOnboarding().then(() => update()).catch(console.error);
+          }
         } else {
           setOpen(true);
         }
@@ -56,11 +61,14 @@ export default function OnboardingTour() {
     localStorage.setItem("onboardingCompleted", "true");
     
     if (status === "authenticated") {
-      try {
-        await completeOnboarding();
-        await update();
-      } catch (e) {
-        console.error("Failed to update onboarding status:", e);
+      if (!syncAttempted.current) {
+        syncAttempted.current = true;
+        try {
+          await completeOnboarding();
+          await update();
+        } catch (e) {
+          console.error("Failed to update onboarding status:", e);
+        }
       }
     }
   };
