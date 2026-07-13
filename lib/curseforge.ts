@@ -97,9 +97,10 @@ export async function verifyCfProjectOwnership(modId: string, authorToken: strin
   const token = authorToken.trim();
   if (!token) return false;
 
-  // プロジェクトのアップロードファイル一覧は所有者のみ取得できる。
+  // アップロードAPIで唯一のプロジェクト単位GETである localization/export は所有者のみアクセスできる。
   // 200 → 所有者、401/403 → 非所有者/無効トークン、404 → Project ID 誤り。
-  const res = await fetch(`${CF_UPLOAD_BASE}/projects/${modId}/files`, {
+  // （アップロードAPIにはファイル一覧エンドポイントが存在せず、誤ったパスは 5100 を返す）
+  const res = await fetch(`${CF_UPLOAD_BASE}/projects/${modId}/localization/export`, {
     headers: { "X-Api-Token": token, "User-Agent": UA },
   });
   if (!res.ok) {
