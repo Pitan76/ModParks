@@ -29,8 +29,8 @@ export default async function ImportProjectsPage({ params }: { params: Promise<{
       </Typography>
 
       <BatchImportClient 
-        hasModrinthKey={!!settings?.modrinthApiKey} 
-        hasCurseForgeKey={!!settings?.curseforgeApiKey} 
+        hasModrinthKey={!!settings?.modrinthApiKey}
+        hasCurseForgeKey={!!settings?.curseforgeAuthorToken}
         hasCurseForgeProject={!!settings?.curseforgeProjectId}
       />
     </Container>

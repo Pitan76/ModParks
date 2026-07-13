@@ -59,9 +59,12 @@ export const userSettings = sqliteTable("user_settings", {
   defaultLicense: text("default_license").notNull().default("All Rights Reserved"),
   custom:        text("custom", { mode: "json" }),
   modrinthApiKey: text("modrinth_api_key"),
+  /** @deprecated Studios コンソールキーは運営が env CURSEFORGE_FOR_STUDIOS_API_KEY で全体設定する方式に移行 */
   curseforgeApiKey: text("curseforge_api_key"),
   curseforgeAuthorId: text("curseforge_author_id"),
   curseforgeProjectId: text("curseforge_project_id"),
+  /** CurseForge for Authors のアップロードAPIトークン。インポート時の本人（プロジェクト所有）検証に使用 */
+  curseforgeAuthorToken: text("curseforge_author_token"),
   defaultCommentsEnabled: integer("default_comments_enabled", { mode: "boolean" }).notNull().default(false),
 });
 

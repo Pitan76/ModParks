@@ -21,7 +21,7 @@ interface SettingsClientProps {
   defaultProjectStatus?: string;
   defaultLicense?: string;
   modrinthApiKey?: string;
-  curseforgeApiKey?: string;
+  curseforgeAuthorToken?: string;
   curseforgeProjectId?: string;
   error?: string;
 }
@@ -35,7 +35,7 @@ export default function SettingsClient({
   defaultProjectStatus,
   defaultLicense,
   modrinthApiKey,
-  curseforgeApiKey,
+  curseforgeAuthorToken,
   curseforgeProjectId,
   error,
 }: SettingsClientProps) {
@@ -58,7 +58,7 @@ export default function SettingsClient({
       content: (
         <IntegrationTab
           modrinthApiKey={modrinthApiKey || ""}
-          curseforgeApiKey={curseforgeApiKey || ""}
+          curseforgeAuthorToken={curseforgeAuthorToken || ""}
           curseforgeProjectId={curseforgeProjectId || ""}
           isGitHubConnected={isGitHubConnected}
           showGithubLinkInitial={user.showGithubLink}

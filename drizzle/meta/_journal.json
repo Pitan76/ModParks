@@ -218,6 +218,13 @@
       "when": 1783866747103,
       "tag": "0030_public_bill_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1783947537980,
+      "tag": "0031_curseforge_author_token",
+      "breakpoints": true
     }
   ]
 }

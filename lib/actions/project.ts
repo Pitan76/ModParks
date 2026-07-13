@@ -483,7 +483,8 @@ export async function syncExternalProjectData(projectId: string) {
   
   if (project.curseforgeId) {
     try {
-      const rawCfApiKey = settings?.curseforgeApiKey || process.env.CURSEFORGE_API_KEY;
+      // Studios コンソールキーは運営が env で全体設定する共通シークレット
+      const rawCfApiKey = process.env.CURSEFORGE_FOR_STUDIOS_API_KEY;
       if (rawCfApiKey) {
         const cfApiKey = rawCfApiKey.trim();
         let targetCfId = project.curseforgeId;

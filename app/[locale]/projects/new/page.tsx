@@ -19,7 +19,8 @@ export default async function NewProjectPage({ searchParams }: { searchParams: P
       defaultLicense = settingsRecord.defaultLicense;
     }
     hasModrinthKey = !!settingsRecord?.modrinthApiKey;
-    hasCurseForgeKey = !!settingsRecord?.curseforgeApiKey;
+    // CF の単体URLインポートは運営設定の共通コンソールキーを使うため、サーバー側の設定有無で判定
+    hasCurseForgeKey = !!(process.env.CURSEFORGE_FOR_STUDIOS_API_KEY);
   }
 
   const resolvedParams = await searchParams;

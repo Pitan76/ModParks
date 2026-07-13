@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getConsoleApiKey } from "@/lib/curseforge";
 
 function normalizeLicense(rawLicense: string | undefined | null): string {
   if (!rawLicense) return "All Rights Reserved";
@@ -92,9 +93,12 @@ export async function GET(request: Request) {
         projectUrl,
       });
     } else if (platform === "curseforge") {
-      const cfApiKey = settings?.curseforgeApiKey;
-      if (!cfApiKey) {
-        return NextResponse.json({ error: "CurseForge API Key is not set in settings" }, { status: 400 });
+      // 読み取りは運営設定の共通コンソールキーを使用
+      let cfApiKey: string;
+      try {
+        cfApiKey = getConsoleApiKey();
+      } catch {
+        return NextResponse.json({ error: "CurseForge integration is not configured on the server" }, { status: 503 });
       }
       let mod = null;
       if (!/^\d+$/.test(targetId)) {
