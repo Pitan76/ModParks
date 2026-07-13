@@ -60,8 +60,9 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
         defaultProjectStatus={settingsRecord?.defaultProjectStatus || "draft"}
         defaultLicense={settingsRecord?.defaultLicense || "All Rights Reserved"}
         modrinthApiKey={settingsRecord?.modrinthApiKey || ""}
-        curseforgeAuthorToken={settingsRecord?.curseforgeAuthorToken || ""}
         curseforgeProjectId={settingsRecord?.curseforgeProjectId || ""}
+        curseforgeVerified={!!settingsRecord?.curseforgeVerifiedAt}
+        curseforgeVerifyCode={settingsRecord?.curseforgeVerifyCode || ""}
         error={resolvedSearchParams.error as string | undefined}
       />
     </Container>

@@ -692,7 +692,25 @@
       "modrinth": "Modrinth連携",
       "modrinthDesc": "ModrinthのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。",
       "curseforge": "CurseForge連携",
-      "curseforgeDesc": "CurseForgeのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。"
+      "curseforgeDesc": "所有確認を行うと、その作者のプロジェクトをまとめてインポートできるようになります。"
+    },
+    "cfVerify": {
+      "title": "CurseForge 所有確認",
+      "desc": "確認コードを発行し、ご自身のCurseForgeプロジェクトの「説明文（Summary）」または「Source / Issues / Wiki」リンクのいずれかに一時的に記載してから「確認する」を押してください。確認は一度きりで、完了後はコードを削除して構いません。",
+      "projectIdLabel": "CurseForge Project ID",
+      "projectIdHelp": "ご自身のModのIDを1つだけ入力してください（例: 697926）",
+      "generate": "確認コードを発行",
+      "codeInstruction": "このコードを対象プロジェクトの説明文またはリンクに貼り付けて保存し、「確認する」を押してください。",
+      "confirm": "確認する",
+      "verified": "所有確認済みです。",
+      "verifiedNow": "所有確認が完了しました。コードは削除して構いません。",
+      "error": {
+        "projectIdRequired": "Project ID を入力してください。",
+        "notStarted": "先に確認コードを発行してください。",
+        "projectNotFound": "指定されたプロジェクトが見つかりませんでした。Project ID を確認してください。",
+        "codeNotFound": "プロジェクトに確認コードが見つかりませんでした。説明文またはリンクに記載して保存したか確認してください（反映まで時間がかかる場合があります）。",
+        "noAuthor": "プロジェクトの作者情報を取得できませんでした。"
+      }
     },
     "errors": {
       "adminPasswordRequired": "管理画面にアクセスするにはセキュリティのためパスワードを設定してください。"
