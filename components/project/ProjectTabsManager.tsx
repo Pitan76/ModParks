@@ -34,12 +34,9 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
   };
 
   const [tab, setTab] = useState(getTabFromParam(tabParam));
-  const [visitedTabs, setVisitedTabs] = useState<Set<number>>(new Set([getTabFromParam(tabParam)]));
 
   useEffect(() => {
-    const currentTab = getTabFromParam(tabParam);
-    setTab(currentTab);
-    setVisitedTabs(prev => new Set(prev).add(currentTab));
+    setTab(getTabFromParam(tabParam));
   }, [tabParam]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -56,8 +53,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
     }
     
     setTab(newValue);
-    setVisitedTabs(prev => new Set(prev).add(newValue));
-    
+
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (newValue === 1) {
       params.set("tab", "files");
@@ -114,15 +110,11 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
         </Tabs>
       </Box>
 
-      {visitedTabs.has(0) && (
-        <Box sx={{ display: tab === 0 ? "block" : "none" }}>{descriptionContent}</Box>
-      )}
-      {visitedTabs.has(1) && (
-        <Box sx={{ display: tab === 1 ? "block" : "none" }}>{filesContent}</Box>
-      )}
-      {visitedTabs.has(2) && (
-        <Box sx={{ display: tab === 2 ? "block" : "none" }}>{dependenciesContent}</Box>
-      )}
+      {/* 全タブを常時マウントし表示だけ切替。データはサーバー取得済みのため
+          再取得は発生せず、初回オープンのラグも無くなる */}
+      <Box sx={{ display: tab === 0 ? "block" : "none" }}>{descriptionContent}</Box>
+      <Box sx={{ display: tab === 1 ? "block" : "none" }}>{filesContent}</Box>
+      <Box sx={{ display: tab === 2 ? "block" : "none" }}>{dependenciesContent}</Box>
     </Box>
   );
 }
