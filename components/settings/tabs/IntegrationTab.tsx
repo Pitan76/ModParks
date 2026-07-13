@@ -69,7 +69,7 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeAuthorToken, 
         <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{t("integration.curseforgeDesc")}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Author トークンは <a href="https://authors.curseforge.com/account/api-tokens" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>CurseForge for Authors</a> の API Tokens から発行できます。ご自身がプロジェクトの所有者本人であることの確認に使用します。
+          Author トークンは <a href="https://authors.curseforge.com/#/settings/api-tokens" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>CurseForge for Authors</a> の API Tokens から発行できます。ご自身がプロジェクトの所有者本人であることの確認に使用します。
         </Typography>
         <TextField fullWidth label="CurseForge Author Token" size="small" type="password" value={curseforgeToken} onChange={(e) => setCurseforgeToken(e.target.value)} sx={{ mb: 2, maxWidth: 400 }} />
         <TextField
