@@ -425,7 +425,6 @@ export async function batchUpdateProjectStatus(projectIds: string[], status: "pu
   const { db, session } = await getAuthenticatedDb();
   if (!projectIds.length) return { success: true };
 
-  // TODO: adminの場合は作者チェックをスキップするなどの処理
   const isOwnerCondition = eq(projects.authorId, session.user.id);
   const conditions = session.user.role === "admin" ? inArray(projects.id, projectIds) : and(inArray(projects.id, projectIds), isOwnerCondition);
 

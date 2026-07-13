@@ -85,8 +85,8 @@ export default function FollowUserButton({ targetUsername, initialIsFollowing, i
 
   return (
     <>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap", alignItems: "center" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: { xs: "center", sm: "flex-start" } }}>
+        <Box sx={{ display: "flex", gap: { xs: 2, sm: 3 }, flexWrap: "wrap", alignItems: "center", justifyContent: { xs: "center", sm: "flex-start" } }}>
           {children}
           <Typography 
             variant="body2" 

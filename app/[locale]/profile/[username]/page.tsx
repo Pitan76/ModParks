@@ -190,11 +190,11 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 6 }}>
-        <Avatar src={user.avatarUrl || ""} sx={{ width: 100, height: 100 }} />
-        <Box sx={{ flex: 1 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <Box>
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "center", sm: "flex-start" }, textAlign: { xs: "center", sm: "left" }, gap: 3, mb: 6 }}>
+        <Avatar src={user.avatarUrl || ""} sx={{ width: { xs: 88, sm: 100 }, height: { xs: 88, sm: 100 }, flexShrink: 0 }} />
+        <Box sx={{ flex: 1, width: "100%", minWidth: 0 }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "center", sm: "flex-start" }, gap: 2 }}>
+            <Box sx={{ minWidth: 0 }}>
               <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
                 {user.displayName || user.username}
               </Typography>
