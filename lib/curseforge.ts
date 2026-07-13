@@ -85,7 +85,7 @@ export async function isAuthorTokenValid(authorToken: string): Promise<boolean> 
 /**
  * 指定プロジェクトの所有者本人かどうかを、Author アップロードAPIトークンで検証する。
  *
- * ぴたんの方針: コンソールAPIでプロジェクトを取得し、Author トークンで
+ * 方針: コンソールAPIでプロジェクトを取得し、Author トークンで
  * そのプロジェクトのアップロードAPI（所有者のみアクセス可能なエンドポイント）に
  * アクセスできれば本人所有と判定する。
  *
