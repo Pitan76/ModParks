@@ -340,7 +340,11 @@
     "manage": "Manage",
     "noProjects": "No public projects yet.",
     "lists": "Lists",
-    "visibility": {},
+    "visibility": {
+      "public": "Public",
+      "unlisted": "Unlisted",
+      "private": "Private"
+    },
     "noLists": "No lists created yet.",
     "favorites": "Favorites",
     "noFavorites": "No favorite projects yet."

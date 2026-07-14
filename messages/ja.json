@@ -356,7 +356,11 @@
     "manage": "管理",
     "noProjects": "まだ公開されているプロジェクトはありません。",
     "lists": "リスト",
-    "visibility": {},
+    "visibility": {
+      "public": "公開",
+      "unlisted": "限定公開",
+      "private": "非公開"
+    },
     "noLists": "まだリストは作成されていません。",
     "favorites": "お気に入り",
     "noFavorites": "まだお気に入りに登録したプロジェクトはありません。"
