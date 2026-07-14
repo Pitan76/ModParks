@@ -103,6 +103,34 @@ export async function updateIdea(ideaId: string, formData: FormData) {
   return { success: true };
 }
 
+// ─── ステータス変更 ─────────────────────────────────────────────────────────────
+
+/**
+ * アイデアのステータスを変更する。投稿者本人または管理者のみ許可。
+ */
+export async function updateIdeaStatus(ideaId: string, status: "open" | "in_progress" | "fulfilled") {
+  const { db, userId } = await getAuthenticatedDb();
+
+  const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
+  if (!idea) return { error: { server: ["アイデアが見つかりません"] } };
+  if (!(await canManageIdea(db, idea.authorId, userId))) {
+    return { error: { server: ["ステータスを変更する権限がありません"] } };
+  }
+
+  if (!["open", "in_progress", "fulfilled"].includes(status)) {
+    return { error: { server: ["無効なステータスです"] } };
+  }
+
+  await db.update(ideas)
+    .set({ status })
+    .where(eq(ideas.id, ideaId))
+    .run();
+
+  revalidatePath("/ideas");
+  revalidatePath(`/ideas/${ideaId}`);
+  return { success: true };
+}
+
 // ─── アイデア削除 ─────────────────────────────────────────────────────────────
 
 /**

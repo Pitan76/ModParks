@@ -382,6 +382,7 @@
       "in_progress": "In Progress",
       "resolved": "Resolved"
     },
+    "changeStatus": "Change Status",
     "backToIdeas": "Back to Ideas",
     "noIdeas": "No ideas yet",
     "postFirstIdea": "Post your \"I want this Mod!\" idea!",

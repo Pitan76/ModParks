@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projects, projectTags, projectMembers, users, userProfiles, versions, userSettings } from "@/db/schema";
+import { projects, projectTags, projectMembers, users, userProfiles, versions, userSettings, ideas } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, desc, and, or, like, sql, inArray, getTableColumns } from "drizzle-orm";
@@ -354,11 +354,13 @@ export async function getProjectBySlug(slug: string) {
         username: userProfiles.username,
         displayName: userProfiles.displayName,
         avatarUrl: userProfiles.avatarUrl,
-      }
+      },
+      sourceIdeaTitle: ideas.title,
     })
     .from(projects)
     .leftJoin(users, eq(projects.authorId, users.id))
     .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .leftJoin(ideas, eq(projects.sourceIdeaId, ideas.id))
     .where(or(eq(projects.slug, slug), eq(projects.previousSlug, slug)))
     .get();
 
@@ -383,6 +385,7 @@ export async function getProjectBySlug(slug: string) {
   return {
     ...row.project,
     author: row.author,
+    sourceIdeaTitle: row.sourceIdeaTitle,
     tags: tagsRows.map((t) => t.tag),
     versions: versionsRows,
     redirectSlug: row.project.slug !== slug ? row.project.slug : undefined,

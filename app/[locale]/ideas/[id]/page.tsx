@@ -15,6 +15,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
 import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
 import IdeaOwnerActions from "@/components/idea/IdeaOwnerActions";
+import IdeaStatusControl from "@/components/idea/IdeaStatusControl";
 import IdeaCommentItem from "@/components/idea/IdeaCommentItem";
 import { formatDate } from "@/lib/utils/format";
 import { Link } from "@/i18n/routing";
@@ -86,21 +87,59 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
     .orderBy(desc(ideaComments.createdAt))
     .all();
 
-  // 4. Fetch Linked Versions
-  const linkedVersions = await db
-    .select({
-      versionId: versions.id,
-      versionNumber: versions.versionNumber,
-      projectId: projects.id,
-      projectName: projects.name,
-      projectSlug: projects.slug,
-      projectDescription: projects.description,
-    })
-    .from(versionIdeas)
-    .innerJoin(versions, eq(versionIdeas.versionId, versions.id))
-    .innerJoin(projects, eq(versions.projectId, projects.id))
-    .where(eq(versionIdeas.ideaId, id))
-    .all();
+  // 4. Fetch Linked Versions and Source Idea Projects
+  const [linkedVersions, sourceIdeaProjects] = await Promise.all([
+    db
+      .select({
+        versionId: versions.id,
+        versionNumber: versions.versionNumber,
+        projectId: projects.id,
+        projectName: projects.name,
+        projectSlug: projects.slug,
+        projectDescription: projects.description,
+      })
+      .from(versionIdeas)
+      .innerJoin(versions, eq(versionIdeas.versionId, versions.id))
+      .innerJoin(projects, eq(versions.projectId, projects.id))
+      .where(eq(versionIdeas.ideaId, id))
+      .all(),
+    db
+      .select({
+        projectId: projects.id,
+        projectName: projects.name,
+        projectSlug: projects.slug,
+        projectDescription: projects.description,
+      })
+      .from(projects)
+      .where(eq(projects.sourceIdeaId, id))
+      .all(),
+  ]);
+
+  const resolvedProjectsMap = new Map();
+  for (const p of sourceIdeaProjects) {
+    resolvedProjectsMap.set(p.projectId, {
+      projectId: p.projectId,
+      projectName: p.projectName,
+      projectSlug: p.projectSlug,
+      projectDescription: p.projectDescription,
+      versionNumber: null as string | null,
+    });
+  }
+  for (const v of linkedVersions) {
+    if (!resolvedProjectsMap.has(v.projectId)) {
+      resolvedProjectsMap.set(v.projectId, {
+        projectId: v.projectId,
+        projectName: v.projectName,
+        projectSlug: v.projectSlug,
+        projectDescription: v.projectDescription,
+        versionNumber: v.versionNumber,
+      });
+    } else {
+      const existing = resolvedProjectsMap.get(v.projectId);
+      if (!existing.versionNumber) existing.versionNumber = v.versionNumber;
+    }
+  }
+  const resolvedProjects = Array.from(resolvedProjectsMap.values());
 
   return (
     <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
@@ -195,36 +234,40 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                   {tIdea("createProject")}
                 </LinkButton>
               )}
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
-                {tIdea("statusLabel", { status: ideaData.status === "open" ? tIdea("status.open") : ideaData.status === "in_progress" ? tIdea("status.in_progress") : tIdea("status.resolved") })}
-              </Typography>
+              {canManage ? (
+                <IdeaStatusControl ideaId={id} initialStatus={ideaData.status} />
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
+                  {tIdea("statusLabel", { status: ideaData.status === "open" ? tIdea("status.open") : ideaData.status === "in_progress" ? tIdea("status.in_progress") : tIdea("status.resolved") })}
+                </Typography>
+              )}
             </Box>
           </Box>
         </CardContent>
       </Card>
 
-      {/* Linked Versions */}
-      {linkedVersions.length > 0 && (
+      {/* Resolved Projects */}
+      {resolvedProjects.length > 0 && (
         <Box sx={{ mb: 6 }}>
           <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
             <CheckCircleIcon color="success" />
             {tIdea("resolvedBy")}
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {linkedVersions.map((v) => (
-              <Card key={v.versionId} variant="outlined" sx={{ borderRadius: 2, bgcolor: "success.50", borderColor: "success.main" }}>
+            {resolvedProjects.map((p) => (
+              <Card key={p.projectId} variant="outlined" sx={{ borderRadius: 2, bgcolor: "success.50", borderColor: "success.main" }}>
                 <CardContent sx={{ py: 2, display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "stretch", sm: "center" }, gap: 2, "&:last-child": { pb: 2 } }}>
                   <Box sx={{ minWidth: 0 }}>
                     <Typography variant="body1" sx={{ fontWeight: 600, color: "success.dark", wordBreak: "break-word" }}>
-                      {v.projectName} (v{v.versionNumber})
+                      {p.projectName} {p.versionNumber ? `(v${p.versionNumber})` : ""}
                     </Typography>
-                    {v.projectDescription && (
+                    {p.projectDescription && (
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        {v.projectDescription}
+                        {p.projectDescription}
                       </Typography>
                     )}
                   </Box>
-                  <LinkButton variant="outlined" size="small" href={`/projects/${v.projectSlug}`} sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
+                  <LinkButton variant="outlined" size="small" href={`/projects/${p.projectSlug}`} sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
                     {tIdea("viewProject")}
                   </LinkButton>
                 </CardContent>

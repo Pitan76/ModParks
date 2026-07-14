@@ -398,6 +398,7 @@
       "in_progress": "対応中",
       "resolved": "解決済"
     },
+    "changeStatus": "ステータスを変更",
     "backToIdeas": "アイデア一覧へ戻る",
     "noIdeas": "まだアイデアがありません",
     "postFirstIdea": "あなたの「こんなMODが欲しい！」を投稿してみましょう！",

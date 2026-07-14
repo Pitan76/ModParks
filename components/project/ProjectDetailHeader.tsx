@@ -35,6 +35,8 @@ export interface ProjectDetailHeaderProps {
     externalDownloads?: Record<string, number> | null;
     modrinthId?: string | null;
     curseforgeId?: string | null;
+    sourceIdeaId?: string | null;
+    sourceIdeaTitle?: string | null;
     createdAt: Date;
     updatedAt: Date;
     author: {
@@ -114,6 +116,18 @@ export default function ProjectDetailHeader({
                 size="small"
                 variant="outlined"
               />
+            )}
+            {p.sourceIdeaId && p.sourceIdeaTitle && (
+              <Tooltip title="このアイデアから生まれたプロジェクト">
+                <LinkButton
+                  href={`/ideas/${p.sourceIdeaId}`}
+                  variant="outlined"
+                  size="small"
+                  sx={{ borderRadius: "16px", py: 0, px: 1, textTransform: "none", color: "text.secondary", borderColor: "divider", "&:hover": { borderColor: "primary.main", color: "primary.main", bgcolor: "transparent" } }}
+                >
+                  💡 {p.sourceIdeaTitle}
+                </LinkButton>
+              </Tooltip>
             )}
           </Box>
 
