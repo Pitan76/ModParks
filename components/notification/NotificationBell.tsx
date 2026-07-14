@@ -29,7 +29,7 @@ export default function NotificationBell() {
     try {
       const res = await fetch("/api/notifications");
       if (!res.ok) return;
-      const data = await res.json();
+      const data = (await res.json()) as { items?: Notification[]; unreadCount?: number };
       setItems(data.items ?? []);
       setUnread(data.unreadCount ?? 0);
     } catch {

@@ -49,7 +49,8 @@
     "admin": "Admin",
     "login": "Sign in",
     "logout": "Sign out",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "notifications": "Notifications"
   },
   "Home": {
     "hero": {
@@ -100,7 +101,9 @@
         "linkTitle": "Title",
         "url": "URL",
         "addLink": "Add Link"
-      }
+      },
+      "discordWebhook": "Discord Webhook URL",
+      "discordWebhookHelper": "When a new version is published, an announcement is sent to this Discord webhook (optional)."
     },
     "table": {
       "version": "Version",
@@ -787,6 +790,11 @@
       "exportCsv": "CSV Format",
       "exportMd": "Markdown Format",
       "exportTxt": "Text Format"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose which types of notifications you want to receive.",
+      "successUpdate": "Notification settings updated."
     }
   },
   "Legal": {
@@ -823,5 +831,35 @@
     "iconUrlHelper": "* Upload feature is coming soon. Please enter URL for now.",
     "noProjectsInList": "There are no projects in the list.",
     "preview": "Preview:"
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "empty": "No notifications.",
+    "viewAll": "View all",
+    "markAllRead": "Mark all as read",
+    "subscribe": {
+      "subscribe": "Notify on new releases",
+      "subscribed": "Subscribed"
+    },
+    "type": {
+      "new_project": "A developer you follow publishes a new project",
+      "new_version": "New release from a project you subscribe to",
+      "project_comment": "A comment on your project",
+      "idea_comment": "A comment on your idea",
+      "idea_like": "A like on your idea",
+      "project_favorite": "Someone favorites your project",
+      "follow": "Someone follows you",
+      "list_add": "Your project is added to a list"
+    },
+    "message": {
+      "new_project": "{authorName} published a new project \"{projectName}\"",
+      "new_version": "New version {versionNumber} of \"{projectName}\" is available",
+      "project_comment": "{actorName} commented on \"{projectName}\"",
+      "idea_comment": "{actorName} commented on idea \"{ideaTitle}\"",
+      "idea_like": "{actorName} liked your idea \"{ideaTitle}\"",
+      "project_favorite": "{actorName} favorited \"{projectName}\"",
+      "follow": "{actorName} started following you",
+      "list_add": "{actorName} added \"{projectName}\" to list \"{collectionName}\""
+    }
   }
 }

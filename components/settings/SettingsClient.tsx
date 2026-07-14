@@ -11,6 +11,7 @@ import SecurityTab from "./tabs/SecurityTab";
 import ApiKeysTab from "./tabs/ApiKeysTab";
 import PostingTab from "./tabs/PostingTab";
 import IntegrationTab from "./tabs/IntegrationTab";
+import NotificationsTab from "./tabs/NotificationsTab";
 
 interface SettingsClientProps {
   user: { username: string; displayName: string; bio: string; email: string; avatarUrl: string; links: string; locale: string; showGithubLink: boolean };
@@ -24,6 +25,7 @@ interface SettingsClientProps {
   curseforgeProjectId?: string;
   curseforgeVerified?: boolean;
   curseforgeVerifyCode?: string;
+  notificationPrefs?: Record<string, boolean> | null;
   error?: string;
 }
 
@@ -39,6 +41,7 @@ export default function SettingsClient({
   curseforgeProjectId,
   curseforgeVerified,
   curseforgeVerifyCode,
+  notificationPrefs,
   error,
 }: SettingsClientProps) {
   const t = useTranslations("Settings");
@@ -55,6 +58,7 @@ export default function SettingsClient({
     { label: t("security.title"), content: <SecurityTab is2FAEnabled={is2FAEnabled} setIs2FAEnabled={setIs2FAEnabled} /> },
     { label: t("apiKeys.title"), content: <ApiKeysTab apiKeys={apiKeys} /> },
     { label: t("posting.title"), content: <PostingTab defaultProjectStatus={defaultProjectStatus || "draft"} defaultLicense={defaultLicense || "All Rights Reserved"} /> },
+    { label: t("notifications.title"), content: <NotificationsTab initialPrefs={notificationPrefs ?? null} /> },
     {
       label: t("integration.title"),
       content: (

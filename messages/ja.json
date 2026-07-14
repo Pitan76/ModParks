@@ -49,7 +49,8 @@
     "admin": "システム管理",
     "login": "ログイン",
     "logout": "ログアウト",
-    "dashboard": "ダッシュボード"
+    "dashboard": "ダッシュボード",
+    "notifications": "通知"
   },
   "Home": {
     "hero": {
@@ -100,7 +101,9 @@
         "linkTitle": "タイトル",
         "url": "URL",
         "addLink": "リンクを追加"
-      }
+      },
+      "discordWebhook": "Discord Webhook URL",
+      "discordWebhookHelper": "新しいバージョンを公開したとき、この Discord Webhook に告知を送信します（任意）。"
     },
     "table": {
       "version": "バージョン",
@@ -808,6 +811,11 @@
       "exportCsv": "CSV形式",
       "exportMd": "Markdown形式",
       "exportTxt": "テキスト形式"
+    },
+    "notifications": {
+      "title": "通知設定",
+      "description": "受け取る通知の種類を選択できます。",
+      "successUpdate": "通知設定を更新しました。"
     }
   },
   "Legal": {
@@ -844,5 +852,35 @@
     "iconUrlHelper": "※アップロード機能は将来実装予定です。現在はURLを入力してください。",
     "noProjectsInList": "リストにプロジェクトがありません。",
     "preview": "プレビュー:"
+  },
+  "Notifications": {
+    "title": "通知",
+    "empty": "通知はありません。",
+    "viewAll": "すべて表示",
+    "markAllRead": "すべて既読にする",
+    "subscribe": {
+      "subscribe": "新リリースを通知",
+      "subscribed": "通知中"
+    },
+    "type": {
+      "new_project": "フォロー中の開発者が新しいプロジェクトを公開",
+      "new_version": "購読中プロジェクトの新しいリリース",
+      "project_comment": "自分のプロジェクトへのコメント",
+      "idea_comment": "自分のアイデアへのコメント",
+      "idea_like": "自分のアイデアへのいいね",
+      "project_favorite": "自分のプロジェクトのお気に入り登録",
+      "follow": "フォローされたとき",
+      "list_add": "自分のプロジェクトがリストに追加されたとき"
+    },
+    "message": {
+      "new_project": "{authorName} が新しいプロジェクト「{projectName}」を公開しました",
+      "new_version": "「{projectName}」の新しいバージョン {versionNumber} が公開されました",
+      "project_comment": "{actorName} が「{projectName}」にコメントしました",
+      "idea_comment": "{actorName} がアイデア「{ideaTitle}」にコメントしました",
+      "idea_like": "{actorName} がアイデア「{ideaTitle}」にいいねしました",
+      "project_favorite": "{actorName} が「{projectName}」をお気に入りに登録しました",
+      "follow": "{actorName} があなたをフォローしました",
+      "list_add": "{actorName} が「{projectName}」をリスト「{collectionName}」に追加しました"
+    }
   }
 }

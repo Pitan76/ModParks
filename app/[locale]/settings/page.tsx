@@ -63,6 +63,7 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
         curseforgeProjectId={settingsRecord?.curseforgeProjectId || ""}
         curseforgeVerified={!!settingsRecord?.curseforgeVerifiedAt}
         curseforgeVerifyCode={settingsRecord?.curseforgeVerifyCode || ""}
+        notificationPrefs={settingsRecord?.notificationPrefs ?? null}
         error={resolvedSearchParams.error as string | undefined}
       />
     </Container>

@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
@@ -26,10 +25,10 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>{t("title")}</Typography>
         {items.length > 0 && <MarkAllReadButton />}
-      </Stack>
+      </Box>
 
       {items.length === 0 ? (
         <Box sx={{ py: 6, textAlign: "center" }}>
