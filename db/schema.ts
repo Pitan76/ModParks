@@ -464,6 +464,8 @@ export const ideaComments = sqliteTable("idea_comments", {
   authorId:    text("author_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  /** 返信先の親コメントID（1階層のみ）。トップレベルなら null */
+  parentId:    text("parent_id"),
   content:     text("content").notNull(),
   createdAt:   integer("created_at", { mode: "timestamp" })
     .notNull()

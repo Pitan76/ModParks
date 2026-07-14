@@ -8,6 +8,7 @@ export const NOTIFICATION_TYPES = [
   "project_favorite",
   "follow",
   "list_add",
+  "comment_reply",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
