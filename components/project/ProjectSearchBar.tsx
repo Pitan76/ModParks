@@ -3,8 +3,6 @@
 import { useRouter, usePathname } from "next/navigation";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -13,6 +11,9 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import IconButton from "@mui/material/IconButton";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Checkbox from "@mui/material/Checkbox";
+import ListItemText from "@mui/material/ListItemText";
 import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition, useEffect, useRef } from "react";
 import AdvancedSearchDialog, { AdvancedSearchFilters } from "./AdvancedSearchDialog";
@@ -162,22 +163,48 @@ export default function ProjectSearchBar({
       </Box>
 
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
-        <ToggleButtonGroup
-          id="type-filter"
-          value={types}
-          onChange={(_, v) => {
-            if (v.length === 0) return; // Prevent unselecting both
-            setTypes(v);
-          }}
-          size="small"
-        >
-          <ToggleButton value="mod" id="filter-mod">{t("filters.mod")}</ToggleButton>
-          <ToggleButton value="plugin" id="filter-plugin">{t("filters.plugin")}</ToggleButton>
-          <ToggleButton value="resourcepack" id="filter-resourcepack">{t("filters.resourcepack")}</ToggleButton>
-          <ToggleButton value="datapack" id="filter-datapack">{t("filters.datapack")}</ToggleButton>
-          <ToggleButton value="shader" id="filter-shader">{t("filters.shader")}</ToggleButton>
-          <ToggleButton value="modpack" id="filter-modpack">{t("filters.modpack")}</ToggleButton>
-        </ToggleButtonGroup>
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel id="type-select-label">{t("filters.type")}</InputLabel>
+          <Select
+            labelId="type-select-label"
+            id="type-filter"
+            multiple
+            value={types}
+            onChange={(e) => {
+              const val = e.target.value;
+              const newTypes = typeof val === "string" ? val.split(",") : (val as string[]);
+              if (newTypes.length === 0) return; // Prevent unselecting all
+              setTypes(newTypes);
+            }}
+            input={<OutlinedInput label={t("filters.type")} />}
+            renderValue={(selected) => selected.map((v) => t(`filters.${v}`)).join(", ")}
+          >
+            <MenuItem value="mod" id="filter-mod">
+              <Checkbox checked={types.indexOf("mod") > -1} />
+              <ListItemText primary={t("filters.mod")} />
+            </MenuItem>
+            <MenuItem value="plugin" id="filter-plugin">
+              <Checkbox checked={types.indexOf("plugin") > -1} />
+              <ListItemText primary={t("filters.plugin")} />
+            </MenuItem>
+            <MenuItem value="resourcepack" id="filter-resourcepack">
+              <Checkbox checked={types.indexOf("resourcepack") > -1} />
+              <ListItemText primary={t("filters.resourcepack")} />
+            </MenuItem>
+            <MenuItem value="datapack" id="filter-datapack">
+              <Checkbox checked={types.indexOf("datapack") > -1} />
+              <ListItemText primary={t("filters.datapack")} />
+            </MenuItem>
+            <MenuItem value="shader" id="filter-shader">
+              <Checkbox checked={types.indexOf("shader") > -1} />
+              <ListItemText primary={t("filters.shader")} />
+            </MenuItem>
+            <MenuItem value="modpack" id="filter-modpack">
+              <Checkbox checked={types.indexOf("modpack") > -1} />
+              <ListItemText primary={t("filters.modpack")} />
+            </MenuItem>
+          </Select>
+        </FormControl>
 
         <FormControl size="small" sx={{ minWidth: 150 }}>
           <InputLabel id="sort-select-label-main">{t("sort.label")}</InputLabel>
