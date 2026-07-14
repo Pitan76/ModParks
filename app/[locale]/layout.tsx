@@ -68,6 +68,8 @@ export const metadata: Metadata = {
   },
 };
 
+import PwaRegister from "@/components/PwaRegister";
+
 type LocaleLayoutProps = {
   children: React.ReactNode;
   params:   Promise<{ locale: string }>;
@@ -100,6 +102,7 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
+        <PwaRegister />
         <ThemeRegistry initialMode={themeMode}>
           <SessionProvider session={session} refetchOnWindowFocus={false}>
             <NextIntlClientProvider messages={messages}>

@@ -1,14 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
-import withPWAInit from "@ducanh2912/next-pwa";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
-
-const withPWA = withPWAInit({
-  dest: "public",
-  disable: false, // 開発環境でもテストできるように一旦falseにします
-  register: true,
-});
 
 const nextConfig: NextConfig = {
   // Cloudflare Workers (Edge Runtime) 向け設定
@@ -72,4 +65,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(withPWA(nextConfig));
+export default withNextIntl(nextConfig);

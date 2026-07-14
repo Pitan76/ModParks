@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "ModParks",
     short_name: "ModParks",
     description: "Minecraft Java Edition向けのMOD/プラグインを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
-    start_url: "/",
+    start_url: "/ja",
     display: "standalone",
     background_color: "#121212",
     theme_color: "#121212",
