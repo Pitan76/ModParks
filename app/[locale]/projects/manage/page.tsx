@@ -36,10 +36,10 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
       <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }} gutterBottom>
-            プロジェクト管理
+            {tProject("manageTitle")}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            あなたのすべてのプロジェクトを管理し、ステータス変更や一括削除などの操作を行えます。
+            {tProject("manageDescription")}
           </Typography>
         </Box>
 
@@ -49,7 +49,7 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
             variant="outlined"
             sx={{ flex: { xs: 1, sm: "none" }, whiteSpace: "nowrap" }}
           >
-            一括インポート
+            {tProject("batchImport")}
           </LinkButton>
           <LinkButton
             href="/projects/new"

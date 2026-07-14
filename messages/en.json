@@ -31,7 +31,6 @@
     "create": "Create",
     "confirmLabel": "Please enter the following to confirm",
     "add": "Add",
-    "saving": "Saving...",
     "visibility": {
       "public": "Public",
       "unlisted": "Unlisted",
@@ -208,6 +207,32 @@
       "member": "Member",
       "addUsername": "Add Username",
       "deleteConfirm": "Are you sure you want to remove this member?"
+    },
+    "goToManage": "Go to Management",
+    "manageTitle": "Manage Projects",
+    "manageDescription": "Manage all your projects — change status, bulk delete, and more.",
+    "batchImport": "Bulk Import",
+    "batch": {
+      "changeStatus": "Change Status",
+      "delete": "Delete",
+      "selectedCount": "{count} selected",
+      "colName": "Project Name",
+      "colSlug": "Slug",
+      "colType": "Type",
+      "colStatus": "Status",
+      "colDownloads": "Total DLs",
+      "colActions": "Actions",
+      "empty": "No projects",
+      "edit": "Edit",
+      "makePublic": "Make Public",
+      "makeUnlisted": "Make Unlisted",
+      "makePrivate": "Make Private",
+      "makeDraft": "Make Draft",
+      "deleteTitle": "Bulk Delete Projects",
+      "deleteDescription": "Are you sure you want to delete the selected <b>{count}</b> projects? This action cannot be undone.",
+      "deleteConfirmLabel": "Enter DELETE in uppercase to confirm:",
+      "statusUpdateError": "Failed to update status",
+      "deleteError": "Failed to delete"
     }
   },
   "Version": {
@@ -348,7 +373,8 @@
     "viewProject": "View Project",
     "comments": "Comments ({count})",
     "loginToComment": "You must be logged in to comment.",
-    "noComments": "No comments yet."
+    "noComments": "No comments yet.",
+    "createProject": "Create Project"
   },
   "Auth": {
     "login": {
@@ -594,7 +620,23 @@
     "topProjects": "Top Projects",
     "noProjects": "No projects yet.",
     "recentComments": "Recent Comments",
-    "noComments": "No comments yet."
+    "noComments": "No comments yet.",
+    "newIdea": "New Idea",
+    "viewAll": "View All",
+    "myIdeas": "My Ideas",
+    "recentFavorites": "Recent Favorites",
+    "favoritedOn": "Favorited on {date}",
+    "noIdeas": "No ideas yet.",
+    "noFavorites": "No favorites yet",
+    "commentOn": "On",
+    "table": {
+      "projectName": "Project Name",
+      "status": "Status",
+      "downloads": "Downloads",
+      "updated": "Updated",
+      "ideaTitle": "Idea Title",
+      "created": "Created"
+    }
   },
   "Onboarding": {
     "step1": {

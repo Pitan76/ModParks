@@ -98,7 +98,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
               variant="contained"
               sx={{ flexShrink: 0, width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
             >
-              プロジェクト管理画面へ
+              {tProject("goToManage")}
             </LinkButton>
           </Box>
         )}

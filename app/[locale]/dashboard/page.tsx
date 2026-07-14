@@ -151,7 +151,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         </Typography>
         <Box sx={{ display: "flex", gap: { xs: 1, sm: 2 }, flexWrap: "wrap" }}>
           <LinkButton href="/ideas/new" variant="outlined" color="primary" startIcon={<AddIcon />} sx={{ flex: { xs: 1, sm: "none" }, borderRadius: 2, px: { xs: 2, sm: 3 }, fontWeight: "bold", textTransform: "none", whiteSpace: "nowrap" }}>
-            New Idea
+            {t("newIdea")}
           </LinkButton>
           <LinkButton href="/projects/new" variant="contained" color="primary" startIcon={<AddIcon />} sx={{ flex: { xs: 1, sm: "none" }, borderRadius: 2, px: { xs: 2, sm: 3 }, fontWeight: "bold", textTransform: "none", whiteSpace: "nowrap" }}>
             {tNav("newProject")}
@@ -209,7 +209,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                   {tNav("myProjects")}
                 </Typography>
                 <LinkButton href="/projects/manage" variant="text" endIcon={<ChevronRightIcon />} sx={{ fontWeight: "bold" }}>
-                  View All
+                  {t("viewAll")}
                 </LinkButton>
               </Box>
               <Card sx={{ borderRadius: 3 }}>
@@ -217,10 +217,10 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                   <Table sx={{ minWidth: 480 }}>
                     <TableHead sx={{ bgcolor: "action.hover" }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: "bold" }}>Project Name</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-                        <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>Downloads</TableCell>
-                        <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>Updated</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("table.projectName")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("table.status")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>{t("table.downloads")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>{t("table.updated")}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -259,10 +259,10 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Typography variant="h5" sx={{ fontWeight: 800, fontSize: { xs: "1.25rem", sm: "1.5rem" }, display: "flex", alignItems: "center", minWidth: 0 }}>
                   <LightbulbIcon sx={{ verticalAlign: "middle", mr: 1 }} />
-                  My Ideas
+                  {t("myIdeas")}
                 </Typography>
                 <LinkButton href="/ideas?author=me" variant="text" endIcon={<ChevronRightIcon />} sx={{ fontWeight: "bold" }}>
-                  View All
+                  {t("viewAll")}
                 </LinkButton>
               </Box>
               <Card sx={{ borderRadius: 3 }}>
@@ -270,9 +270,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                   <Table sx={{ minWidth: 420 }}>
                     <TableHead sx={{ bgcolor: "action.hover" }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: "bold" }}>Idea Title</TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-                        <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>Created</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("table.ideaTitle")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>{t("table.status")}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>{t("table.created")}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -293,7 +293,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                       )) : (
                         <TableRow>
                           <TableCell colSpan={3} align="center" sx={{ py: 4, color: "text.secondary" }}>
-                            No ideas yet.
+                            {t("noIdeas")}
                           </TableCell>
                         </TableRow>
                       )}
@@ -333,7 +333,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                         </Typography>
                       </Box>
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: "0.8rem" }}>
-                        On <Link href={`/projects/${c.projectSlug}`} style={{ color: "inherit", textDecoration: "underline" }}>{c.projectName}</Link>
+                        {t("commentOn")} <Link href={`/projects/${c.projectSlug}`} style={{ color: "inherit", textDecoration: "underline" }}>{c.projectName}</Link>
                       </Typography>
                       <Typography variant="body1" sx={{ wordBreak: "break-word", lineHeight: 1.6 }}>
                         {c.content}
@@ -352,7 +352,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
                 <FavoriteIcon sx={{ verticalAlign: "middle", mr: 1 }} />
-                Recent Favorites
+                {t("recentFavorites")}
               </Typography>
               <Card sx={{ borderRadius: 3 }}>
                 <CardContent sx={{ p: 0 }}>
@@ -373,14 +373,14 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                           </Typography>
                         </Link>
                         <Typography variant="caption" color="text.secondary">
-                          Favorited on {new Date(fav.favoritedAt || 0).toLocaleDateString()}
+                          {t("favoritedOn", { date: new Date(fav.favoritedAt || 0).toLocaleDateString() })}
                         </Typography>
                       </Box>
                       <ChevronRightIcon color="action" fontSize="small" />
                     </Box>
                   )) : (
                     <Box sx={{ py: 4, textAlign: "center" }}>
-                      <Typography color="text.secondary">No favorites yet</Typography>
+                      <Typography color="text.secondary">{t("noFavorites")}</Typography>
                     </Box>
                   )}
                 </CardContent>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -39,6 +40,8 @@ interface BatchProjectOperationsClientProps {
 
 export default function BatchProjectOperationsClient({ projects }: BatchProjectOperationsClientProps) {
   const router = useRouter();
+  const t = useTranslations("Project.batch");
+  const tCommon = useTranslations("Common");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +85,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
       setSelected(new Set());
       router.refresh();
     } catch (err: any) {
-      setError(err.message || "ステータス更新に失敗しました");
+      setError(err.message || t("statusUpdateError"));
     } finally {
       setLoading(false);
     }
@@ -100,20 +103,15 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
       setDeleteDialogOpen(false);
       router.refresh();
     } catch (err: any) {
-      setError(err.message || "削除に失敗しました");
+      setError(err.message || t("deleteError"));
     } finally {
       setLoading(false);
     }
   };
 
   const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "public": return "公開";
-      case "unlisted": return "限定公開";
-      case "private": return "非公開";
-      case "draft": return "下書き";
-      default: return status;
-    }
+    if (tCommon.has(`visibility.${status}` as any)) return tCommon(`visibility.${status}` as any);
+    return status;
   };
 
   return (
@@ -127,17 +125,17 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
           onClick={handleStatusClick}
           disabled={selected.size === 0 || loading}
         >
-          ステータス変更
+          {t("changeStatus")}
         </Button>
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleStatusClose}
         >
-          <MenuItem onClick={() => handleBatchStatus("public")}>公開にする</MenuItem>
-          <MenuItem onClick={() => handleBatchStatus("unlisted")}>限定公開にする</MenuItem>
-          <MenuItem onClick={() => handleBatchStatus("private")}>非公開にする</MenuItem>
-          <MenuItem onClick={() => handleBatchStatus("draft")}>下書きにする</MenuItem>
+          <MenuItem onClick={() => handleBatchStatus("public")}>{t("makePublic")}</MenuItem>
+          <MenuItem onClick={() => handleBatchStatus("unlisted")}>{t("makeUnlisted")}</MenuItem>
+          <MenuItem onClick={() => handleBatchStatus("private")}>{t("makePrivate")}</MenuItem>
+          <MenuItem onClick={() => handleBatchStatus("draft")}>{t("makeDraft")}</MenuItem>
         </Menu>
 
         <Button
@@ -147,13 +145,13 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
           onClick={() => setDeleteDialogOpen(true)}
           disabled={selected.size === 0 || loading}
         >
-          削除
+          {t("delete")}
         </Button>
 
         <Box sx={{ flexGrow: 1 }} />
         {selected.size > 0 && (
           <Box sx={{ typography: "body2", color: "text.secondary" }}>
-            {selected.size} 件選択中
+            {t("selectedCount", { count: selected.size })}
           </Box>
         )}
       </Box>
@@ -169,19 +167,19 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
                   onChange={handleToggleAll}
                 />
               </TableCell>
-              <TableCell>プロジェクト名</TableCell>
-              <TableCell>Slug</TableCell>
-              <TableCell>種類</TableCell>
-              <TableCell>ステータス</TableCell>
-              <TableCell align="right">総DL数</TableCell>
-              <TableCell align="center">操作</TableCell>
+              <TableCell>{t("colName")}</TableCell>
+              <TableCell>{t("colSlug")}</TableCell>
+              <TableCell>{t("colType")}</TableCell>
+              <TableCell>{t("colStatus")}</TableCell>
+              <TableCell align="right">{t("colDownloads")}</TableCell>
+              <TableCell align="center">{t("colActions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {projects.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                  プロジェクトがありません
+                  {t("empty")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -202,7 +200,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
                     <TableCell align="right">{formatCompactNumber(totalDl, "ja")}</TableCell>
                     <TableCell align="center">
                       <Button component={Link} href={`/projects/${p.slug}/edit`} size="small">
-                        編集
+                        {t("edit")}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -217,10 +215,10 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
         open={deleteDialogOpen}
         onClose={() => !loading && setDeleteDialogOpen(false)}
         onConfirm={handleBatchDelete}
-        title="プロジェクト一括削除"
-        description={<>本当に選択した <strong>{selected.size}</strong> 件のプロジェクトを削除しますか？この操作は元に戻せません。</>}
+        title={t("deleteTitle")}
+        description={t.rich("deleteDescription", { count: selected.size, b: (chunks) => <strong>{chunks}</strong> })}
         expectedValue="DELETE"
-        expectedValueLabel="確認のため、半角大文字で DELETE と入力してください:"
+        expectedValueLabel={t("deleteConfirmLabel")}
         pending={loading}
       />
     </Box>

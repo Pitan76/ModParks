@@ -191,7 +191,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                   href={`/projects/new?ideaId=${id}`}
                   sx={{ whiteSpace: "nowrap" }}
                 >
-                  プロジェクトを作成
+                  {tIdea("createProject")}
                 </LinkButton>
               )}
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>

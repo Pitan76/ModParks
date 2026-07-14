@@ -226,6 +226,32 @@
       "member": "メンバー",
       "addUsername": "ユーザー名を追加",
       "deleteConfirm": "本当にこのメンバーを削除しますか？"
+    },
+    "goToManage": "プロジェクト管理画面へ",
+    "manageTitle": "プロジェクト管理",
+    "manageDescription": "あなたのすべてのプロジェクトを管理し、ステータス変更や一括削除などの操作を行えます。",
+    "batchImport": "一括インポート",
+    "batch": {
+      "changeStatus": "ステータス変更",
+      "delete": "削除",
+      "selectedCount": "{count} 件選択中",
+      "colName": "プロジェクト名",
+      "colSlug": "Slug",
+      "colType": "種類",
+      "colStatus": "ステータス",
+      "colDownloads": "総DL数",
+      "colActions": "操作",
+      "empty": "プロジェクトがありません",
+      "edit": "編集",
+      "makePublic": "公開にする",
+      "makeUnlisted": "限定公開にする",
+      "makePrivate": "非公開にする",
+      "makeDraft": "下書きにする",
+      "deleteTitle": "プロジェクト一括削除",
+      "deleteDescription": "本当に選択した <b>{count}</b> 件のプロジェクトを削除しますか？この操作は元に戻せません。",
+      "deleteConfirmLabel": "確認のため、半角大文字で DELETE と入力してください:",
+      "statusUpdateError": "ステータス更新に失敗しました",
+      "deleteError": "削除に失敗しました"
     }
   },
   "Version": {
@@ -368,7 +394,8 @@
       "submitFailed": "アイデアの投稿に失敗しました",
       "likeFailed": "いいねの操作に失敗しました",
       "commentFailed": "コメントの投稿に失敗しました"
-    }
+    },
+    "createProject": "プロジェクトを作成"
   },
   "Auth": {
     "login": {
@@ -614,7 +641,23 @@
     "topProjects": "人気プロジェクト",
     "noProjects": "プロジェクトがありません",
     "recentComments": "最近のコメント",
-    "noComments": "コメントはまだありません"
+    "noComments": "コメントはまだありません",
+    "newIdea": "新しいアイデア",
+    "viewAll": "すべて表示",
+    "myIdeas": "マイアイデア",
+    "recentFavorites": "最近のお気に入り",
+    "favoritedOn": "{date} にお気に入り",
+    "noIdeas": "アイデアはまだありません。",
+    "noFavorites": "お気に入りはまだありません",
+    "commentOn": "投稿先",
+    "table": {
+      "projectName": "プロジェクト名",
+      "status": "ステータス",
+      "downloads": "ダウンロード",
+      "updated": "更新日",
+      "ideaTitle": "アイデア",
+      "created": "作成日"
+    }
   },
   "Onboarding": {
     "step1": {
