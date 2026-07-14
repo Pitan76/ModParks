@@ -25,7 +25,11 @@
     "followers": "フォロワー",
     "following": "フォロー中",
     "follow": "フォローする",
-    "unfollow": "フォロー解除"
+    "unfollow": "フォロー解除",
+    "clear": "クリア",
+    "create": "作成",
+    "confirmLabel": "確認のため以下を入力してください",
+    "add": "追加"
   },
   "Nav": {
     "home": "ホーム",
@@ -219,6 +223,14 @@
       "removeSuccess": "依存関係を削除しました。",
       "dependents": "依存されているプロジェクト",
       "noDependents": "このプロジェクトに依存しているプロジェクトはありません。"
+    },
+    "members": {
+      "title": "メンバー管理",
+      "owner": "オーナー",
+      "member": "メンバー",
+      "addUsername": "ユーザー名を追加",
+      "addBtn": "追加",
+      "deleteConfirm": "本当にこのメンバーを削除しますか？"
     }
   },
   "Version": {
@@ -236,7 +248,12 @@
       "deleteTitle": "バージョンを削除しますか？",
       "deleteConfirm": "この操作は取り消せません。削除するとユーザーはこのバージョンをダウンロードできなくなります。",
       "editTitle": "バージョンの編集",
-      "uploadTitle": "新しいバージョンをアップロード"
+      "uploadTitle": "新しいバージョンをアップロード",
+      "importing": "取り込み中...",
+      "importGithub": "GitHub Releaseから取り込む",
+      "confirmVersionLabel": "確認のため、バージョン番号を入力してください:",
+      "importSuccess": "バージョン {version} を取り込みました。",
+      "importError": "取り込みに失敗しました。"
     },
     "fields": {
       "versionNumber": "バージョン番号",
@@ -792,5 +809,22 @@
     "contact": "お問い合わせ",
     "terms": "利用規約",
     "privacy": "プライバシーポリシー"
+  },
+  "List": {
+    "editList": "リストを編集",
+    "deleteConfirm": "本当にこのリストを削除しますか？この操作は元に戻せません。",
+    "saveToList": "リストに保存",
+    "close": "閉じる",
+    "createNewList": "新しくリストを作成",
+    "createListHeading": "新しいリストを作成",
+    "noLists": "リストがありません",
+    "pleaseCreateList": "新しくリストを作成してください",
+    "iconSettings": "アイコン設定",
+    "iconUrlOrUpload": "URL入力 / 画像アップロード",
+    "iconFromProject": "プロジェクトから選択",
+    "iconUrlLabel": "アイコンのURL (またはアップロード)",
+    "iconUrlHelper": "※アップロード機能は将来実装予定です。現在はURLを入力してください。",
+    "noProjectsInList": "リストにプロジェクトがありません。",
+    "preview": "プレビュー:"
   }
 }

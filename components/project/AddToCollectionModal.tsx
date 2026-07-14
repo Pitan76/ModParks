@@ -25,8 +25,9 @@ interface AddToCollectionModalProps {
 }
 
 export default function AddToCollectionModal({ open, onClose, projectId, userId }: AddToCollectionModalProps) {
-  const t = useTranslations("Project"); // fallback translations
-  // Normally we would have translations for Collection, using fallback for now
+  const tProject = useTranslations("Project"); // fallback translations
+  const tList = useTranslations("List");
+  const tCommon = useTranslations("Common");
   
   const [collections, setCollections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +64,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
         console.error(err);
         // Revert
         setCollections(prev => prev.map(c => c.id === collectionId ? { ...c, containsProject: currentStatus } : c));
-        alert("Failed to update collection.");
+        alert(tCommon("error"));
       }
     });
   };
@@ -85,7 +86,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
         }
       } catch (err) {
         console.error(err);
-        alert("Failed to create collection.");
+        alert(tCommon("error"));
       }
     });
   };
@@ -96,12 +97,12 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
       onClose={onClose} 
       fullWidth 
       maxWidth="xs"
-      title="リストに保存"
+      title={tList("saveToList")}
       titleProps={{ sx: { fontWeight: "bold" } }}
       actions={
         <>
           <Button onClick={onClose} variant="text" color="inherit">
-            閉じる
+            {tList("close")}
           </Button>
           {!creating && (
             <Button 
@@ -109,7 +110,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
               onClick={() => setCreating(true)}
               disabled={isPending}
             >
-              新しくリストを作成
+              {tList("createNewList")}
             </Button>
           )}
         </>
@@ -124,7 +125,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
           <List sx={{ pt: 0, pb: 0 }}>
             {collections.length === 0 && !creating && (
               <ListItem>
-                <ListItemText primary="リストがありません" secondary="新しくリストを作成してください" />
+                <ListItemText primary={tList("noLists")} secondary={tList("pleaseCreateList")} />
               </ListItem>
             )}
             {collections.map((c) => (
@@ -140,7 +141,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
                   </ListItemIcon>
                   <ListItemText 
                     primary={c.name} 
-                    secondary={c.visibility === "public" ? "公開" : c.visibility === "unlisted" ? "限定公開" : "非公開"} 
+                    secondary={c.visibility === "public" ? tProject("form.public") : c.visibility === "unlisted" ? tProject("form.unlisted") : tProject("form.private")} 
                   />
                 </ListItemButton>
               </ListItem>
@@ -150,9 +151,9 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
 
         {creating && (
           <Box sx={{ p: 2, bgcolor: "background.default" }}>
-            <Typography variant="subtitle2" sx={{ mb: 2 }}>新しいリストを作成</Typography>
+            <Typography variant="subtitle2" sx={{ mb: 2 }}>{tList("createListHeading")}</Typography>
             <FormTextField
-              label="名前"
+              label={tProject("fields.name")}
               size="small"
               fullWidth
               value={newCollectionName}
@@ -161,23 +162,23 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
               disabled={isPending}
             />
             <FormSelect
-              label="公開設定"
+              label={tProject("form.status")}
               value={newCollectionVisibility}
               onChange={(e) => setNewCollectionVisibility(e.target.value as any)}
               disabled={isPending}
               options={[
-                { value: "public", label: "公開" },
-                { value: "unlisted", label: "限定公開" },
-                { value: "private", label: "非公開" },
+                { value: "public", label: tProject("form.public") },
+                { value: "unlisted", label: tProject("form.unlisted") },
+                { value: "private", label: tProject("form.private") },
               ]}
               formControlProps={{ fullWidth: true, size: "small", sx: { mb: 2 } }}
             />
             <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
               <Button size="small" onClick={() => setCreating(false)} disabled={isPending}>
-                キャンセル
+                {tCommon("cancel")}
               </Button>
               <Button size="small" variant="contained" onClick={handleCreate} disabled={!newCollectionName.trim() || isPending}>
-                作成
+                {tCommon("create")}
               </Button>
             </Box>
           </Box>

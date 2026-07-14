@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import Button from "@mui/material/Button";
 import FormTextField from "@/components/ui/form/FormTextField";
@@ -34,6 +35,9 @@ interface EditListDialogProps {
 
 export default function EditListDialog({ open, onClose, collection, ownerUsername }: EditListDialogProps) {
   const router = useRouter();
+  const tList = useTranslations("List");
+  const tProject = useTranslations("Project");
+  const tCommon = useTranslations("Common");
   const [name, setName] = useState(collection.name);
   const [description, setDescription] = useState(collection.description || "");
   const [visibility, setVisibility] = useState(collection.visibility);
@@ -65,7 +69,7 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
   };
 
   const handleDelete = async () => {
-    if (!confirm("本当にこのリストを削除しますか？この操作は元に戻せません。")) return;
+    if (!confirm(tList("deleteConfirm"))) return;
     try {
       setLoading(true);
       const res = await fetch(`/api/v1/collections/${collection.id}`, {
@@ -90,28 +94,28 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
       onClose={onClose} 
       fullWidth 
       maxWidth="sm"
-      title="リストを編集"
+      title={tList("editList")}
       titleProps={{ sx: { fontWeight: "bold" } }}
       actions={
         <>
-          <Button color="error" onClick={handleDelete} disabled={loading}>削除</Button>
+          <Button color="error" onClick={handleDelete} disabled={loading}>{tCommon("delete")}</Button>
           <Box>
-            <Button onClick={onClose} disabled={loading} sx={{ mr: 1 }}>キャンセル</Button>
-            <Button variant="contained" onClick={handleSave} disabled={loading || !name} disableElevation>保存</Button>
+            <Button onClick={onClose} disabled={loading} sx={{ mr: 1 }}>{tCommon("cancel")}</Button>
+            <Button variant="contained" onClick={handleSave} disabled={loading || !name} disableElevation>{tCommon("save")}</Button>
           </Box>
         </>
       }
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
         <FormTextField
-          label="リスト名"
+          label={tProject("fields.name")}
           fullWidth
           required
           value={name}
           onChange={e => setName(e.target.value)}
         />
         <FormTextField
-          label="説明"
+          label={tProject("fields.description")}
           fullWidth
           multiline
           rows={3}
@@ -119,20 +123,20 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
           onChange={e => setDescription(e.target.value)}
         />
         <FormSelect
-          label="公開範囲"
+          label={tProject("form.status")}
           value={visibility}
           onChange={e => setVisibility(e.target.value as string)}
           options={[
-            { value: "public", label: "公開" },
-            { value: "unlisted", label: "限定公開" },
-            { value: "private", label: "非公開" },
+            { value: "public", label: tProject("form.public") },
+            { value: "unlisted", label: tProject("form.unlisted") },
+            { value: "private", label: tProject("form.private") },
           ]}
           formControlProps={{ fullWidth: true }}
         />
 
           {/* アイコン設定 */}
           <Box sx={{ border: "1px solid", borderColor: "divider", p: 2, borderRadius: 1 }}>
-            <Typography variant="subtitle2" sx={{ mb: 2 }}>アイコン設定</Typography>
+            <Typography variant="subtitle2" sx={{ mb: 2 }}>{tList("iconSettings")}</Typography>
             <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
               <Button 
                 variant={iconSource === "url" ? "contained" : "outlined"} 
@@ -140,7 +144,7 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
                 size="small"
                 disableElevation
               >
-                URL入力 / 画像アップロード
+                {tList("iconUrlOrUpload")}
               </Button>
               <Button 
                 variant={iconSource === "projects" ? "contained" : "outlined"} 
@@ -148,52 +152,53 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
                 size="small"
                 disableElevation
               >
-                プロジェクトから選択
+                {tList("iconFromProject")}
               </Button>
             </Box>
 
             {iconSource === "url" && (
               <FormTextField
-                label="アイコンのURL (またはアップロード)"
+                label={tList("iconUrlLabel")}
                 fullWidth
                 size="small"
                 value={iconUrl}
                 onChange={e => setIconUrl(e.target.value)}
                 placeholder="https://..."
-                helperText="※アップロード機能は将来実装予定です。現在はURLを入力してください。"
+                helperText={tList("iconUrlHelper")}
               />
             )}
 
             {iconSource === "projects" && (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {collection.items.map(item => (
-                  <Avatar
-                    key={item.id}
-                    src={item.iconUrl || ""}
-                    alt={item.name}
-                    sx={{ 
-                      width: 48, height: 48, 
-                      cursor: "pointer",
-                      border: iconUrl === item.iconUrl ? "2px solid #1976d2" : "2px solid transparent",
-                      transition: "0.2s",
-                      "&:hover": { opacity: 0.8 }
-                    }}
-                    onClick={() => setIconUrl(item.iconUrl || "")}
-                  />
-                ))}
-                {collection.items.length === 0 && (
-                  <Typography variant="body2" color="text.secondary">
-                    リストにプロジェクトがありません。
-                  </Typography>
-                )}
-              </Box>
+              collection.items.length > 0 ? (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {collection.items.map(item => (
+                    <Avatar
+                      key={item.id}
+                      src={item.iconUrl || ""}
+                      alt={item.name}
+                      sx={{ 
+                        width: 48, height: 48, 
+                        cursor: "pointer",
+                        border: iconUrl === item.iconUrl ? "2px solid #1976d2" : "2px solid transparent",
+                        transition: "0.2s",
+                        "&:hover": { opacity: 0.8 }
+                      }}
+                      onClick={() => setIconUrl(item.iconUrl || "")}
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {tList("noProjectsInList")}
+                </Typography>
+              )
             )}
             
             {iconUrl && (
               <Box sx={{ mt: 3, display: "flex", alignItems: "center", gap: 2 }}>
-                <Typography variant="body2" color="text.secondary">プレビュー:</Typography>
-                <Avatar src={iconUrl} variant="rounded" sx={{ width: 64, height: 64, boxShadow: 1 }} />
-                <Button size="small" color="error" onClick={() => setIconUrl("")}>クリア</Button>
+                <Typography variant="body2" color="text.secondary">{tList("preview")}</Typography>
+                <Avatar src={iconUrl} variant="rounded" sx={{ width: 48, height: 48 }} />
+                <Button size="small" color="error" onClick={() => setIconUrl("")}>{tCommon("clear")}</Button>
               </Box>
             )}
           </Box>

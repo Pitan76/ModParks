@@ -19,6 +19,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { addProjectMember, removeProjectMember } from "@/lib/actions/member";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface ProjectMembersManagerProps {
   projectId: string;
@@ -31,6 +32,8 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
   const [username, setUsername] = useState("");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const tProject = useTranslations("Project");
+  const tCommon = useTranslations("Common");
 
   const handleAdd = () => {
     if (!username.trim() || isPending) return;
@@ -51,7 +54,7 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
   };
 
   const handleRemove = (userId: string) => {
-    if (!confirm("本当にこのメンバーを削除しますか？") || isPending) return;
+    if (!confirm(tProject("members.deleteConfirm")) || isPending) return;
 
     startTransition(async () => {
       try {
@@ -67,7 +70,7 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
     <Card sx={{ mb: 4 }}>
       <CardContent sx={{ p: 4 }}>
         <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-          メンバー管理
+          {tProject("members.title")}
         </Typography>
 
         <List sx={{ mb: 3 }}>
@@ -82,10 +85,10 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
               />
               <ListItemSecondaryAction>
                 {member.role === "owner" ? (
-                  <Chip label="オーナー" color="primary" size="small" />
+                  <Chip label={tProject("members.owner")} color="primary" size="small" />
                 ) : (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Chip label="メンバー" size="small" variant="outlined" />
+                    <Chip label={tProject("members.member")} size="small" variant="outlined" />
                     {(isOwner || currentUserId === member.id) && (
                       <IconButton edge="end" color="error" onClick={() => handleRemove(member.id)} disabled={isPending}>
                         <DeleteIcon />
@@ -102,7 +105,7 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
           <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
             <TextField
               size="small"
-              label="ユーザー名を追加"
+              label={tProject("members.addUsername")}
               value={username}
               onChange={e => setUsername(e.target.value)}
               disabled={isPending}
@@ -115,7 +118,7 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
               disabled={!username.trim() || isPending}
               sx={{ height: 40 }}
             >
-              追加
+              {tCommon("add")}
             </Button>
           </Box>
         )}

@@ -78,11 +78,11 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
       if ("error" in res) {
         setImportMsg({ text: res.error, severity: "error" });
       } else {
-        setImportMsg({ text: `バージョン ${res.versionNumber} を取り込みました。`, severity: "success" });
+        setImportMsg({ text: t("manager.importSuccess", { version: res.versionNumber }), severity: "success" });
         router.refresh();
       }
     } catch (err: any) {
-      setImportMsg({ text: err?.message || "取り込みに失敗しました。", severity: "error" });
+      setImportMsg({ text: err?.message || t("manager.importError"), severity: "error" });
     } finally {
       setImporting(false);
     }
@@ -198,7 +198,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
               onClick={handleImportGithub}
               disabled={importing}
             >
-              {importing ? "取り込み中..." : "GitHub Releaseから取り込む"}
+              {importing ? t("manager.importing") : t("manager.importGithub")}
             </Button>
           )}
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setUploadOpen(true)}>
@@ -260,7 +260,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
         title={t("manager.deleteTitle")}
         description={t("manager.deleteConfirm")}
         expectedValue={localVersions.find(v => v.id === deleteId)?.versionNumber || ""}
-        expectedValueLabel="確認のため、バージョン番号を入力してください:"
+        expectedValueLabel={t("manager.confirmVersionLabel")}
         pending={pending}
       />
 

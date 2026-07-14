@@ -6,6 +6,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import FormTextField from "@/components/ui/form/FormTextField";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import { useTranslations } from "next-intl";
 
 export interface TypedConfirmDialogProps {
   open: boolean;
@@ -27,11 +28,16 @@ export default function TypedConfirmDialog({
   title,
   description,
   expectedValue,
-  expectedValueLabel = "確認のため以下を入力してください",
-  confirmButtonText = "削除",
-  cancelButtonText = "キャンセル",
+  expectedValueLabel,
+  confirmButtonText,
+  cancelButtonText,
   pending = false,
 }: TypedConfirmDialogProps) {
+  const tCommon = useTranslations("Common");
+  const actualLabel = expectedValueLabel || tCommon("confirmLabel");
+  const actualConfirm = confirmButtonText || tCommon("delete");
+  const actualCancel = cancelButtonText || tCommon("cancel");
+
   const [inputValue, setInputValue] = useState("");
 
   // ダイアログが開くたびに入力値をリセット
@@ -53,8 +59,8 @@ export default function TypedConfirmDialog({
       titleProps={{ sx: { color: "error.main", fontWeight: "bold" } }}
       onCancel={onClose}
       onConfirm={onConfirm}
-      confirmText={confirmButtonText}
-      cancelText={cancelButtonText}
+      confirmText={actualConfirm}
+      cancelText={actualCancel}
       confirmColor="error"
       isSubmitting={pending}
       confirmDisabled={!isMatch}
@@ -65,7 +71,7 @@ export default function TypedConfirmDialog({
       
       <Box sx={{ bgcolor: "background.default", p: 2, borderRadius: 1, border: "1px solid", borderColor: "divider", mb: 3 }}>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          {expectedValueLabel}
+          {actualLabel}
         </Typography>
         <Typography variant="body1" sx={{ fontWeight: "bold", userSelect: "all", fontFamily: "monospace" }}>
           {expectedValue}
