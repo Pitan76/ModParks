@@ -94,9 +94,10 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
           issueTrackerUrl: json.contact?.issues || "",
         };
       }
-      // 2. Try META-INF/mods.toml
-      else if (zip.file("META-INF/mods.toml")) {
-        const content = await zip.file("META-INF/mods.toml")!.async("string");
+      // 2. Try META-INF/mods.toml or META-INF/neoforge.mods.toml
+      else if (zip.file("META-INF/mods.toml") || zip.file("META-INF/neoforge.mods.toml")) {
+        const fileObj = zip.file("META-INF/mods.toml") || zip.file("META-INF/neoforge.mods.toml");
+        const content = await fileObj!.async("string");
         const toml = parse(content) as any;
         const mod = toml.mods?.[0];
         if (mod) {
@@ -267,7 +268,7 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
               </Button>
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              fabric.mod.json, META-INF/mods.toml, mcmod.info 等のファイルからプロジェクト情報を自動取得します。
+              fabric.mod.json, META-INF/mods.toml, META-INF/neoforge.mods.toml, mcmod.info 等のファイルからプロジェクト情報を自動取得します。
             </Typography>
             {jarError && <Alert severity="error" sx={{ mt: 2 }}>{jarError}</Alert>}
             {jarData && <Alert severity="success" sx={{ mt: 2 }}>{t("create.jar.fetchSuccess")}</Alert>}
