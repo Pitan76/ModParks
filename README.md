@@ -1,10 +1,8 @@
 # ModParks
-
-**ModParks** は、Minecraft Java Edition 向けの Mod および Plugin プラットフォームです。
+ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラグイン配布プラットフォームです。
 日本発のプラットフォームとして、開発者とプレイヤーがより円滑に作品を共有し、コミュニケーションできる場を提供することを目的としています。
 
 ## 特徴
-
 - プロジェクトの公開と探索: ModやPluginを検索、発見、ダウンロード。
 - バージョン管理: バージョンごとのJar/Zipファイルのアップロード、または外部URL（GitHub Releases, Modrinth, CurseForge 等）へのリンク機能。
 - 多言語対応: 日本語と英語の表示切り替え。
@@ -12,21 +10,18 @@
 - アイデアボード: ユーザーが「こんなModが欲しい！」を投稿・議論し、実現されたプロジェクトと紐付けられる機能。
 - 記法: Markdown, PlainText, PukiWikiの文法が対応
 - インポートと同期機能: 他のプラットフォームとの連携が強み。インポートはもちろんDL数同期なども
- 
-
 
 ## 技術スタック
-
-- **Framework**: [Next.js](https://nextjs.org/) (App Router, v15)
-- **Language**: TypeScript
-- **Styling / UI**: [Material-UI (MUI v6)](https://mui.com/)
-- **Database**: [Cloudflare D1](https://developers.cloudflare.com/d1/)
+- **フレームワーク**: [Next.js](https://nextjs.org/) (App Router, v15)
+- **言語**: TypeScript
+- **スタイリング / UI**: [Material-UI (MUI v6)](https://mui.com/)
+- **データベース**: [Cloudflare D1](https://developers.cloudflare.com/d1/)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
-- **Storage**: [Cloudflare R2](https://developers.cloudflare.com/r2/)
-- **Authentication**: [Auth.js (NextAuth v5)](https://authjs.dev/)
-- **i18n**: [next-intl](https://next-intl-docs.vercel.app/)
+- **ストレージ**: [Cloudflare R2](https://developers.cloudflare.com/r2/)
+- **認証**: [Auth.js (NextAuth v5)](https://authjs.dev/)
+- **多言語化**: [next-intl](https://next-intl-docs.vercel.app/)
 
-## ローカル開発環境のセットアップ (Getting Started)
+## ローカル開発環境のセットアップ
 
 ### 1. 前提条件
 - Node.js (v20以上)
