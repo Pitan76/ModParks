@@ -178,9 +178,10 @@ export default function ProjectSearchBar({
             }}
             input={<OutlinedInput label={t("filters.type")} />}
             renderValue={(selected) => {
-              if (selected.length === 6) {
-                return t("filters.all");
-              }
+              if (selected.length === 6) return t("filters.all");
+              if (selected.length >= 4)
+                return selected.slice(0, 3).map((v) => t(`filters.${v}`)).join(", ") + "...";
+              
               return selected.map((v) => t(`filters.${v}`)).join(", ");
             }}
           >
