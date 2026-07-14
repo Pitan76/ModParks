@@ -177,7 +177,12 @@ export default function ProjectSearchBar({
               setTypes(newTypes);
             }}
             input={<OutlinedInput label={t("filters.type")} />}
-            renderValue={(selected) => selected.map((v) => t(`filters.${v}`)).join(", ")}
+            renderValue={(selected) => {
+              if (selected.length === 6) {
+                return t("filters.all");
+              }
+              return selected.map((v) => t(`filters.${v}`)).join(", ");
+            }}
           >
             <MenuItem value="mod" id="filter-mod">
               <Checkbox checked={types.indexOf("mod") > -1} />
