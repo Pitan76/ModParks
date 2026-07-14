@@ -683,6 +683,31 @@ export const projectSubscriptions = sqliteTable(
 
 export type ProjectSubscription = typeof projectSubscriptions.$inferSelect;
 
+// ─── Developer Subscriptions (プロフィールの通知ベル) ─────────────────────────
+
+export const developerSubscriptions = sqliteTable(
+  "developer_subscriptions",
+  {
+    subscriberId: text("subscriber_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** 通知を購読する対象の開発者 */
+    developerId: text("developer_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.subscriberId, t.developerId] }),
+    developerIdx: index("developer_subscriptions_developer_idx").on(t.developerId),
+    subscriberIdx: index("developer_subscriptions_subscriber_idx").on(t.subscriberId),
+  })
+);
+
+export type DeveloperSubscription = typeof developerSubscriptions.$inferSelect;
+
 // ─── Notifications ────────────────────────────────────────────────────────────
 
 export const notifications = sqliteTable("notifications", {

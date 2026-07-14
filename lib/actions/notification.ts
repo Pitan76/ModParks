@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { notifications, projectSubscriptions, userSettings } from "@/db/schema";
+import { notifications, projectSubscriptions, developerSubscriptions, userSettings } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { NOTIFICATION_TYPES, type NotificationType } from "@/lib/notifications/types";
@@ -71,6 +71,29 @@ export async function toggleProjectSubscription(projectId: string) {
   }
 
   await db.insert(projectSubscriptions).values({ projectId, userId }).run();
+  return { success: true, subscribed: true };
+}
+
+/** 開発者の新プロジェクト通知の購読（プロフィールのベル）をトグルする */
+export async function toggleDeveloperSubscription(developerId: string) {
+  const { db, userId } = await getAuthenticatedDb();
+  if (developerId === userId) return { success: false, subscribed: false };
+
+  const existing = await db
+    .select({ subscriberId: developerSubscriptions.subscriberId })
+    .from(developerSubscriptions)
+    .where(and(eq(developerSubscriptions.developerId, developerId), eq(developerSubscriptions.subscriberId, userId)))
+    .get();
+
+  if (existing) {
+    await db
+      .delete(developerSubscriptions)
+      .where(and(eq(developerSubscriptions.developerId, developerId), eq(developerSubscriptions.subscriberId, userId)))
+      .run();
+    return { success: true, subscribed: false };
+  }
+
+  await db.insert(developerSubscriptions).values({ developerId, subscriberId: userId }).run();
   return { success: true, subscribed: true };
 }
 

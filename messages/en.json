@@ -860,7 +860,8 @@
     "subscribe": {
       "subscribe": "Notify on new releases",
       "subscribed": "Subscribed",
-      "developerActive": "Following: you will be notified of new projects"
+      "developerActive": "Following: you will be notified of new projects",
+      "developer": "Get notified of new projects"
     },
     "type": {
       "new_project": "A developer you follow publishes a new project",

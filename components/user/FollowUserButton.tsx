@@ -7,7 +7,9 @@ import Box from "@mui/material/Box";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import Tooltip from "@mui/material/Tooltip";
+import { toggleDeveloperSubscription } from "@/lib/actions/notification";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Dialog from "@mui/material/Dialog";
@@ -26,7 +28,9 @@ import { getFollowList } from "@/lib/actions/profile";
 
 interface Props {
   targetUsername: string;
+  targetUserId: string;
   initialIsFollowing: boolean;
+  initialSubscribed: boolean;
   initialFollowersCount: number;
   initialFollowingCount: number;
   isLoggedIn: boolean;
@@ -41,8 +45,10 @@ interface UserSummary {
   avatarUrl: string | null;
 }
 
-export default function FollowUserButton({ targetUsername, initialIsFollowing, initialFollowersCount, initialFollowingCount, isLoggedIn, isOwner = false, children }: Props) {
+export default function FollowUserButton({ targetUsername, targetUserId, initialIsFollowing, initialSubscribed, initialFollowersCount, initialFollowingCount, isLoggedIn, isOwner = false, children }: Props) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+  const [subscribed, setSubscribed] = useState(initialSubscribed);
+  const [subLoading, setSubLoading] = useState(false);
   const [followersCount, setFollowersCount] = useState(initialFollowersCount);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -70,6 +76,21 @@ export default function FollowUserButton({ targetUsername, initialIsFollowing, i
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleSubscribe = async () => {
+    if (!isLoggedIn) {
+      router.push("/login");
+      return;
+    }
+    setSubLoading(true);
+    setSubscribed((v) => !v);
+    try {
+      const result = await toggleDeveloperSubscription(targetUserId);
+      if ("subscribed" in result) setSubscribed(result.subscribed);
+    } finally {
+      setSubLoading(false);
     }
   };
 
@@ -121,11 +142,17 @@ export default function FollowUserButton({ targetUsername, initialIsFollowing, i
             >
               {isFollowing ? t("unfollow") : t("follow")}
             </Button>
-            {isFollowing && (
-              <Tooltip title={tn("subscribe.developerActive")}>
-                <NotificationsActiveIcon color="primary" fontSize="small" />
-              </Tooltip>
-            )}
+            <Tooltip title={subscribed ? tn("subscribe.developerActive") : tn("subscribe.developer")}>
+              <IconButton
+                onClick={handleToggleSubscribe}
+                disabled={subLoading}
+                size="small"
+                color={subscribed ? "primary" : "default"}
+                aria-label="notification bell"
+              >
+                {subscribed ? <NotificationsActiveIcon fontSize="small" /> : <NotificationsNoneIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
       </Box>

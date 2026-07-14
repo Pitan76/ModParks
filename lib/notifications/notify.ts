@@ -1,4 +1,4 @@
-import { notifications, projectSubscriptions, userFollows, userSettings, users, userProfiles } from "@/db/schema";
+import { notifications, projectSubscriptions, developerSubscriptions, userSettings, users, userProfiles } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { Project } from "@/db/schema";
 import { sendDiscordVersionNotification } from "@/lib/notifications/discord";
@@ -80,21 +80,22 @@ export async function notifyNewVersion(
 }
 
 /**
- * 新プロジェクト公開: 作者のフォロワー（プロフィールのベルON）へ通知。
+ * 新プロジェクト公開: 作者を購読している（プロフィールのベルON）ユーザーへ通知。
+ * フォローとは独立した購読（developer_subscriptions）を対象とする。
  */
 export async function notifyNewProject(
   db: any,
   project: Pick<Project, "slug" | "name" | "iconUrl" | "authorId">,
   authorName: string,
 ): Promise<void> {
-  const followers = await db
-    .select({ userId: userFollows.followerId })
-    .from(userFollows)
-    .where(eq(userFollows.followingId, project.authorId))
+  const subscribers = await db
+    .select({ userId: developerSubscriptions.subscriberId })
+    .from(developerSubscriptions)
+    .where(eq(developerSubscriptions.developerId, project.authorId))
     .all();
 
-  const recipients = followers
-    .map((f: { userId: string }) => f.userId)
+  const recipients = subscribers
+    .map((s: { userId: string }) => s.userId)
     .filter((id: string) => id !== project.authorId);
 
   await dispatchNotifications(db, recipients, "new_project", {

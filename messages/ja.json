@@ -881,7 +881,8 @@
     "subscribe": {
       "subscribe": "新リリースを通知",
       "subscribed": "通知中",
-      "developerActive": "フォロー中: 新しいプロジェクトの公開を通知します"
+      "developerActive": "フォロー中: 新しいプロジェクトの公開を通知します",
+      "developer": "新しいプロジェクトの公開を通知する"
     },
     "type": {
       "new_project": "フォロー中の開発者が新しいプロジェクトを公開",

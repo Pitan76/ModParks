@@ -27,7 +27,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Link as RoutingLink } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/config";
 import { parseLinks } from "@/lib/utils/links";
-import { userFollows } from "@/db/schema";
+import { userFollows, developerSubscriptions } from "@/db/schema";
 import { and, sql } from "drizzle-orm";
 import FollowUserButton from "@/components/user/FollowUserButton";
 import CollectionCard from "@/components/list/CollectionCard";
@@ -167,10 +167,15 @@ export default async function PublicProfilePage({ params, searchParams }: Public
   const followingCount = followingData?.count || 0;
 
   let isFollowing = false;
+  let isSubscribed = false;
   if (session?.user?.id && !isOwner) {
     const followRecord = await db.select().from(userFollows).where(and(eq(userFollows.followerId, session.user.id), eq(userFollows.followingId, user.id))).get();
     if (followRecord) {
       isFollowing = true;
+    }
+    const subRecord = await db.select().from(developerSubscriptions).where(and(eq(developerSubscriptions.subscriberId, session.user.id), eq(developerSubscriptions.developerId, user.id))).get();
+    if (subRecord) {
+      isSubscribed = true;
     }
   }
 
@@ -205,7 +210,9 @@ export default async function PublicProfilePage({ params, searchParams }: Public
               <Box sx={{ mt: 2 }}>
                 <FollowUserButton
                   targetUsername={user.username}
+                  targetUserId={user.id}
                   initialIsFollowing={isFollowing}
+                  initialSubscribed={isSubscribed}
                   initialFollowersCount={followersCount}
                   initialFollowingCount={followingCount}
                   isLoggedIn={!!session?.user}
