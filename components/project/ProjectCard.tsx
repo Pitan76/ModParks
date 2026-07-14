@@ -152,16 +152,20 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 {project.description}
               </Typography>
 
-              <Box sx={{ display: "flex", flexDirection: "column", mt: 0.5, minWidth: 0 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5, minWidth: 0 }}>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   noWrap
-                  sx={{ display: "block", maxWidth: "100%" }}
+                  sx={{ minWidth: 0 }}
                 >
                   by {project.authorDisplayName || project.authorUsername || "Unknown"}
                 </Typography>
-                <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
+                {/* 広い画面（リスト表示のsm以上）では作者名の横に日付を置く。狭い場合はDL数の横へ回す */}
+                <Box sx={{ display: isGrid ? "none" : { xs: "none", sm: "flex" }, alignItems: "center", gap: 0.5, flexShrink: 0 }}>
+                  <Typography variant="caption" color="text.disabled">•</Typography>
+                  <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -179,17 +183,24 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
             }}
           >
-            <DownloadLabel 
-              downloads={project.downloads} 
-              totalDownloads={project.totalDownloads} 
-              externalDownloads={project.externalDownloads} 
-              modrinthId={project.modrinthId} 
-              curseforgeId={project.curseforgeId} 
-              iconSize="1rem"
-              textVariant="body2"
-              textColor="text.secondary"
-              iconColor="text.secondary"
-            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
+              <DownloadLabel
+                downloads={project.downloads}
+                totalDownloads={project.totalDownloads}
+                externalDownloads={project.externalDownloads}
+                modrinthId={project.modrinthId}
+                curseforgeId={project.curseforgeId}
+                iconSize="1rem"
+                textVariant="body2"
+                textColor="text.secondary"
+                iconColor="text.secondary"
+              />
+              {/* 狭い画面・グリッド表示ではDL数の横に日付を置く */}
+              <Box sx={{ display: isGrid ? "flex" : { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.5, minWidth: 0 }}>
+                <Typography variant="caption" color="text.disabled">•</Typography>
+                <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
+              </Box>
+            </Box>
             
             {safeTags.length > 0 && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
