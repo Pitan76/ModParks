@@ -624,6 +624,8 @@ export const projectComments = sqliteTable("project_comments", {
   authorId:    text("author_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  /** 返信先の親コメントID（1階層のみ）。トップレベルなら null */
+  parentId:    text("parent_id"),
   content:     text("content").notNull(),
   createdAt:   integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -689,7 +691,12 @@ export const notifications = sqliteTable("notifications", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  type: text("type", { enum: ["new_version", "new_project"] }).notNull(),
+  type: text("type", {
+    enum: [
+      "new_version", "new_project", "project_comment", "idea_comment",
+      "idea_like", "project_favorite", "follow", "list_add", "comment_reply",
+    ],
+  }).notNull(),
   /** 表示に必要な情報 (projectSlug, projectName, versionNumber 等)。type ごとに構造が異なる */
   payload: text("payload", { mode: "json" }).$type<Record<string, string>>().notNull(),
   read: integer("read", { mode: "boolean" }).notNull().default(false),

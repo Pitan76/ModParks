@@ -18,6 +18,8 @@ import ProjectFormFields from "@/components/project/ProjectFormFields";
 import SyncIcon from "@mui/icons-material/Sync";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 
 interface ProjectEditFormProps {
   project: {
@@ -29,6 +31,7 @@ interface ProjectEditFormProps {
     license: string;
     sourceUrl?: string | null;
     status: string;
+    commentsEnabled?: boolean;
   };
   availableTags?: { slug: string; name: string }[];
 }
@@ -131,6 +134,10 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
                 <MenuItem value="draft">{tCommon("visibility.draft")}</MenuItem>
               </Select>
             </FormControl>
+            <FormControlLabel
+              control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} />}
+              label={t("fields.commentsEnabled")}
+            />
           </ProjectFormFields>
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>

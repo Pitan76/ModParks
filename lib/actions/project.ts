@@ -182,6 +182,7 @@ export async function updateProject(projectId: string, formData: FormData) {
       links: fields.links || null,
       githubRepo: normalizedGithubRepo,
       discordWebhookUrl: normalizedWebhook,
+      commentsEnabled: formData.get("commentsEnabled") === "on",
       iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
       updatedAt: new Date(),
       ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {})

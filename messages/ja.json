@@ -103,7 +103,8 @@
         "addLink": "リンクを追加"
       },
       "discordWebhook": "Discord Webhook URL",
-      "discordWebhookHelper": "新しいバージョンを公開したとき、この Discord Webhook に告知を送信します（任意）。"
+      "discordWebhookHelper": "新しいバージョンを公開したとき、この Discord Webhook に告知を送信します（任意）。",
+      "commentsEnabled": "コメントを有効にする"
     },
     "table": {
       "version": "バージョン",
@@ -255,6 +256,17 @@
       "deleteConfirmLabel": "確認のため、半角大文字で DELETE と入力してください:",
       "statusUpdateError": "ステータス更新に失敗しました",
       "deleteError": "削除に失敗しました"
+    },
+    "comments": {
+      "title": "コメント",
+      "placeholder": "プロジェクトについてコメントする...",
+      "submit": "投稿する",
+      "loginPrompt": "コメントするにはログインしてください。",
+      "empty": "まだコメントはありません。",
+      "deleteConfirm": "このコメントを削除しますか？",
+      "reply": "返信",
+      "replyPlaceholder": "返信を入力...",
+      "cancel": "キャンセル"
     }
   },
   "Version": {
@@ -870,7 +882,8 @@
       "idea_like": "自分のアイデアへのいいね",
       "project_favorite": "自分のプロジェクトのお気に入り登録",
       "follow": "フォローされたとき",
-      "list_add": "自分のプロジェクトがリストに追加されたとき"
+      "list_add": "自分のプロジェクトがリストに追加されたとき",
+      "comment_reply": "自分のコメントへの返信"
     },
     "message": {
       "new_project": "{authorName} が新しいプロジェクト「{projectName}」を公開しました",
@@ -880,7 +893,8 @@
       "idea_like": "{actorName} がアイデア「{ideaTitle}」にいいねしました",
       "project_favorite": "{actorName} が「{projectName}」をお気に入りに登録しました",
       "follow": "{actorName} があなたをフォローしました",
-      "list_add": "{actorName} が「{projectName}」をリスト「{collectionName}」に追加しました"
+      "list_add": "{actorName} が「{projectName}」をリスト「{collectionName}」に追加しました",
+      "comment_reply": "{actorName} があなたのコメントに返信しました"
     }
   }
 }

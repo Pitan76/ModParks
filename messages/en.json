@@ -103,7 +103,8 @@
         "addLink": "Add Link"
       },
       "discordWebhook": "Discord Webhook URL",
-      "discordWebhookHelper": "When a new version is published, an announcement is sent to this Discord webhook (optional)."
+      "discordWebhookHelper": "When a new version is published, an announcement is sent to this Discord webhook (optional).",
+      "commentsEnabled": "Enable comments"
     },
     "table": {
       "version": "Version",
@@ -236,6 +237,17 @@
       "deleteConfirmLabel": "Enter DELETE in uppercase to confirm:",
       "statusUpdateError": "Failed to update status",
       "deleteError": "Failed to delete"
+    },
+    "comments": {
+      "title": "Comments",
+      "placeholder": "Comment on this project...",
+      "submit": "Post",
+      "loginPrompt": "Please log in to comment.",
+      "empty": "No comments yet.",
+      "deleteConfirm": "Delete this comment?",
+      "reply": "Reply",
+      "replyPlaceholder": "Write a reply...",
+      "cancel": "Cancel"
     }
   },
   "Version": {
@@ -849,7 +861,8 @@
       "idea_like": "A like on your idea",
       "project_favorite": "Someone favorites your project",
       "follow": "Someone follows you",
-      "list_add": "Your project is added to a list"
+      "list_add": "Your project is added to a list",
+      "comment_reply": "A reply to your comment"
     },
     "message": {
       "new_project": "{authorName} published a new project \"{projectName}\"",
@@ -859,7 +872,8 @@
       "idea_like": "{actorName} liked your idea \"{ideaTitle}\"",
       "project_favorite": "{actorName} favorited \"{projectName}\"",
       "follow": "{actorName} started following you",
-      "list_add": "{actorName} added \"{projectName}\" to list \"{collectionName}\""
+      "list_add": "{actorName} added \"{projectName}\" to list \"{collectionName}\"",
+      "comment_reply": "{actorName} replied to your comment"
     }
   }
 }
