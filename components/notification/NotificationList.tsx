@@ -24,9 +24,11 @@ export default function NotificationList({ items }: Props) {
         return (
           <Box key={n.id}>
             {i > 0 && <Divider component="li" />}
-            <ListItemButton component={Link} href={href} sx={{ bgcolor: n.read ? "transparent" : "action.hover" }}>
-              <ListItemText primary={message} secondary={new Date(n.createdAt).toLocaleString()} />
-            </ListItemButton>
+            <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
+              <ListItemButton sx={{ bgcolor: n.read ? "transparent" : "action.hover" }}>
+                <ListItemText primary={message} secondary={new Date(n.createdAt).toLocaleString()} />
+              </ListItemButton>
+            </Link>
           </Box>
         );
       })}
