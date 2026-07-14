@@ -147,7 +147,8 @@
       "creating": "作成中...",
       "tabs": {
         "normal": "新規作成",
-        "import": "外部インポート"
+        "import": "外部インポート",
+        "jar": "Jarから入力"
       },
       "import": {
         "title": "外部プロジェクトからデータを取得",
@@ -157,6 +158,12 @@
         "modrinthKeyWarning": "ModrinthのAPIキーが設定されていません。非公開プロジェクトを取得するにはアカウント設定からAPIキーを登録してください。",
         "curseforgeKeyWarning": "CurseForgeのAPIキーが設定されていません。取得に失敗する場合はアカウント設定からAPIキーを登録してください。",
         "fetchSuccess": "データを取得しました。フォームに反映されました。"
+      },
+      "jar": {
+        "title": ".jarファイルから情報を読み取る",
+        "select": "ファイルを選択",
+        "fetchSuccess": "データを取得しました。フォームに反映されました。",
+        "fetchError": "情報の読み取りに失敗しました"
       }
     },
     "edit": {

@@ -37,6 +37,10 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
   const [importData, setImportData] = useState<any>(null);
   const [formKey, setFormKey] = useState(0);
 
+  const [jarImporting, setJarImporting] = useState(false);
+  const [jarError, setJarError] = useState("");
+  const [jarData, setJarData] = useState<any>(null);
+
   const handleImport = async () => {
     if (!importId) return;
     setImporting(true);
@@ -58,6 +62,95 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
       setImportError(err.message);
     } finally {
       setImporting(false);
+    }
+  };
+
+  const handleJarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setJarImporting(true);
+    setJarError("");
+    setJarData(null);
+    try {
+      const JSZip = (await import('jszip')).default;
+      const { parse } = await import('smol-toml');
+
+      const zip = new JSZip();
+      await zip.loadAsync(file);
+
+      let foundData: any = null;
+
+      // 1. Try fabric.mod.json
+      if (zip.file("fabric.mod.json")) {
+        const content = await zip.file("fabric.mod.json")!.async("string");
+        const json = JSON.parse(content);
+        foundData = {
+          name: json.name || json.id,
+          slug: json.id,
+          description: json.description || "",
+          license: typeof json.license === 'string' ? json.license : (json.license?.[0] || "MIT"),
+          sourceUrl: json.contact?.sources || json.contact?.repo || "",
+          issueTrackerUrl: json.contact?.issues || "",
+        };
+      }
+      // 2. Try META-INF/mods.toml
+      else if (zip.file("META-INF/mods.toml")) {
+        const content = await zip.file("META-INF/mods.toml")!.async("string");
+        const toml = parse(content) as any;
+        const mod = toml.mods?.[0];
+        if (mod) {
+          foundData = {
+            name: mod.displayName || mod.modId,
+            slug: mod.modId,
+            description: mod.description || "",
+            license: mod.license || "All Rights Reserved",
+            issueTrackerUrl: mod.issueTrackerURL || "",
+          };
+        }
+      }
+      // 3. Try mcmod.info
+      else if (zip.file("mcmod.info")) {
+        const content = await zip.file("mcmod.info")!.async("string");
+        try {
+          let json = JSON.parse(content);
+          if (json.modList) json = json.modList;
+          const mod = Array.isArray(json) ? json[0] : json;
+          if (mod) {
+            foundData = {
+              name: mod.name || mod.modid,
+              slug: mod.modid,
+              description: mod.description || "",
+              sourceUrl: mod.url || "",
+            };
+          }
+        } catch (e) {
+          console.warn("Invalid mcmod.info JSON", e);
+        }
+      }
+
+      if (foundData) {
+        if (foundData.description) {
+           foundData.description = foundData.description.replace(/^\s+|\s+$/g, '');
+        }
+        if (foundData.slug) {
+           // slugize just in case it has invalid chars, although modids are usually clean
+           foundData.slug = foundData.slug.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+        }
+
+        setImportData(foundData);
+        setJarData(foundData);
+        setFormKey(k => k + 1);
+      } else {
+        throw new Error(t("create.jar.fetchError"));
+      }
+    } catch (err: any) {
+      console.error(err);
+      setJarError(err.message || t("create.jar.fetchError"));
+    } finally {
+      setJarImporting(false);
+      // Reset input so the same file can be selected again
+      e.target.value = "";
     }
   };
 
@@ -119,6 +212,7 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
         >
           <Tab label={t("create.tabs.normal")} />
           <Tab label={t("create.tabs.import")} />
+          <Tab label={t("create.tabs.jar")} />
         </Tabs>
       </Box>
 
@@ -152,7 +246,31 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
               <Alert severity="warning" sx={{ mt: 2 }}>{t("create.import.curseforgeKeyWarning")}</Alert>
             )}
             {importError && <Alert severity="error" sx={{ mt: 2 }}>{importError}</Alert>}
-            {importData && <Alert severity="success" sx={{ mt: 2 }}>{t("create.import.fetchSuccess")}</Alert>}
+            {importData && !jarData && <Alert severity="success" sx={{ mt: 2 }}>{t("create.import.fetchSuccess")}</Alert>}
+          </CardContent>
+        </Card>
+      )}
+
+      {tabIndex === 2 && (
+        <Card sx={{ mb: 4, bgcolor: "background.default" }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t("create.jar.title")}</Typography>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+              <Button component="label" variant="contained" disabled={jarImporting}>
+                {jarImporting ? <CircularProgress size={24} color="inherit" /> : t("create.jar.select")}
+                <input
+                  type="file"
+                  hidden
+                  accept=".jar,.zip"
+                  onChange={handleJarSelect}
+                />
+              </Button>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              fabric.mod.json, META-INF/mods.toml, mcmod.info 等のファイルからプロジェクト情報を自動取得します。
+            </Typography>
+            {jarError && <Alert severity="error" sx={{ mt: 2 }}>{jarError}</Alert>}
+            {jarData && <Alert severity="success" sx={{ mt: 2 }}>{t("create.jar.fetchSuccess")}</Alert>}
           </CardContent>
         </Card>
       )}

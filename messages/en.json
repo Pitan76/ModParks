@@ -138,7 +138,27 @@
       "title": "New Project",
       "success": "Project created successfully",
       "submit": "Create Project",
-      "creating": "Creating..."
+      "creating": "Creating...",
+      "tabs": {
+        "normal": "New",
+        "import": "Import",
+        "jar": "From .jar"
+      },
+      "import": {
+        "title": "Fetch data from external project",
+        "platform": "Platform",
+        "idLabel": "Project ID / Slug / URL",
+        "fetchData": "Fetch Data",
+        "modrinthKeyWarning": "Modrinth API key is not set. To fetch private projects, please register your API key in account settings.",
+        "curseforgeKeyWarning": "CurseForge API key is not set. If fetching fails, please register your API key in account settings.",
+        "fetchSuccess": "Data fetched and applied to the form."
+      },
+      "jar": {
+        "title": "Read info from .jar file",
+        "select": "Select File",
+        "fetchSuccess": "Data fetched and applied to the form.",
+        "fetchError": "Failed to read information"
+      }
     },
     "edit": {
       "title": "Edit Project",
