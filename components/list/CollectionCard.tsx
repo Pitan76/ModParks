@@ -18,7 +18,6 @@ interface CollectionCardProps {
 }
 
 export default function CollectionCard({ collection }: CollectionCardProps) {
-  const t = useTranslations("Profile");
   const tCommon = useTranslations("Common");
 
   return (
