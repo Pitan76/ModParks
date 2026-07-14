@@ -6,6 +6,8 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import Tooltip from "@mui/material/Tooltip";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Dialog from "@mui/material/Dialog";
@@ -45,6 +47,7 @@ export default function FollowUserButton({ targetUsername, initialIsFollowing, i
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const t = useTranslations("Common");
+  const tn = useTranslations("Notifications");
 
   const [dialogOpen, setDialogOpen] = useState<"followers" | "following" | null>(null);
   const [dialogUsers, setDialogUsers] = useState<UserSummary[]>([]);
@@ -106,17 +109,24 @@ export default function FollowUserButton({ targetUsername, initialIsFollowing, i
           </Typography>
         </Box>
         {!isOwner && (
-          <Button 
-            variant={isFollowing ? "outlined" : "contained"} 
-            color={isFollowing ? "inherit" : "primary"}
-            startIcon={isFollowing ? <PersonRemoveIcon /> : <PersonAddIcon />}
-            onClick={handleToggleFollow}
-            disabled={loading}
-            size="small"
-            sx={{ width: "fit-content", mt: 1 }}
-          >
-            {isFollowing ? t("unfollow") : t("follow")}
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+            <Button
+              variant={isFollowing ? "outlined" : "contained"}
+              color={isFollowing ? "inherit" : "primary"}
+              startIcon={isFollowing ? <PersonRemoveIcon /> : <PersonAddIcon />}
+              onClick={handleToggleFollow}
+              disabled={loading}
+              size="small"
+              sx={{ width: "fit-content" }}
+            >
+              {isFollowing ? t("unfollow") : t("follow")}
+            </Button>
+            {isFollowing && (
+              <Tooltip title={tn("subscribe.developerActive")}>
+                <NotificationsActiveIcon color="primary" fontSize="small" />
+              </Tooltip>
+            )}
+          </Box>
         )}
       </Box>
 

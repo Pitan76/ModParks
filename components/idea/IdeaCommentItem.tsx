@@ -12,10 +12,12 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { updateIdeaComment, deleteIdeaComment } from "@/lib/actions/idea";
+import ReplyIcon from "@mui/icons-material/Reply";
+import { useTranslations } from "next-intl";
+import { updateIdeaComment, deleteIdeaComment, createIdeaComment } from "@/lib/actions/idea";
 import { Link } from "@/i18n/routing";
 
-interface IdeaCommentItemProps {
+export interface IdeaCommentData {
   id: string;
   content: string;
   createdAt: Date | null;
@@ -23,24 +25,24 @@ interface IdeaCommentItemProps {
   authorName: string | null;
   authorAvatar: string | null;
   authorUsername: string | null;
-  /** 本人のみ編集可 / 本人・管理者は削除可 */
   canEdit: boolean;
   canDelete: boolean;
 }
 
-export default function IdeaCommentItem({
-  id,
-  content,
-  createdAt,
-  updatedAt,
-  authorName,
-  authorAvatar,
-  authorUsername,
-  canEdit,
-  canDelete,
-}: IdeaCommentItemProps) {
+interface IdeaCommentItemProps extends IdeaCommentData {
+  /** 返信先アイデアID（返信フォーム送信に使用）。返信自身には渡さない */
+  ideaId?: string;
+  isLoggedIn?: boolean;
+  replies?: IdeaCommentData[];
+}
+
+export default function IdeaCommentItem(props: IdeaCommentItemProps) {
+  const { id, content, createdAt, updatedAt, authorName, authorAvatar, authorUsername, canEdit, canDelete, ideaId, isLoggedIn, replies = [] } = props;
+  const t = useTranslations("Project.comments");
   const router = useRouter();
   const [editing, setEditing] = useState(false);
+  const [replying, setReplying] = useState(false);
+  const [replyText, setReplyText] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +55,7 @@ export default function IdeaCommentItem({
     const result = await updateIdeaComment(id, new FormData(e.currentTarget));
     if (result?.error) {
       const err = result.error as Record<string, string[]>;
-      setError(err.content?.[0] || err.server?.[0] || "更新に失敗しました");
+      setError(err.content?.[0] || err.server?.[0] || "");
       setPending(false);
       return;
     }
@@ -63,89 +65,92 @@ export default function IdeaCommentItem({
   };
 
   const handleDelete = async () => {
-    if (!confirm("このコメントを削除しますか？")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     setPending(true);
     const result = await deleteIdeaComment(id);
-    if (result?.error) {
-      setPending(false);
-      return;
-    }
+    if (result?.error) { setPending(false); return; }
+    router.refresh();
+  };
+
+  const handleReply = async () => {
+    if (!replyText.trim() || !ideaId) return;
+    setPending(true);
+    const fd = new FormData();
+    fd.set("content", replyText);
+    fd.set("parentId", id);
+    await createIdeaComment(ideaId, fd);
+    setReplyText("");
+    setReplying(false);
+    setPending(false);
     router.refresh();
   };
 
   return (
     <Box sx={{ display: "flex", gap: 2 }}>
-      {authorUsername ? (
-        <Link href={`/profile/${authorUsername}`} style={{ textDecoration: "none", color: "inherit" }}>
-          <Avatar src={authorAvatar || undefined} sx={{ width: 40, height: 40 }}>
-            {authorName?.[0] || "U"}
-          </Avatar>
-        </Link>
-      ) : (
-        <Avatar src={authorAvatar || undefined} sx={{ width: 40, height: 40 }}>
-          {authorName?.[0] || "U"}
-        </Avatar>
-      )}
+      <AuthorAvatar username={authorUsername} avatar={authorAvatar} name={authorName} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.5 }}>
-          {authorUsername ? (
-            <Link href={`/profile/${authorUsername}`} style={{ textDecoration: "none", color: "inherit" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, "&:hover": { textDecoration: "underline" } }}>
-                {authorName}
-              </Typography>
-            </Link>
-          ) : (
-            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-              {authorName}
-            </Typography>
-          )}
+          <AuthorName username={authorUsername} name={authorName} />
           <Typography variant="caption" color="text.secondary">
-            {createdAt ? new Date(createdAt).toLocaleString() : ""}{isEdited ? "（編集済み）" : ""}
+            {createdAt ? new Date(createdAt).toLocaleString() : ""}{isEdited ? "*" : ""}
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
           {!editing && canEdit && (
-            <IconButton size="small" aria-label="コメントを編集" onClick={() => setEditing(true)} disabled={pending}>
-              <EditIcon sx={{ fontSize: 16 }} />
-            </IconButton>
+            <IconButton size="small" onClick={() => setEditing(true)} disabled={pending}><EditIcon sx={{ fontSize: 16 }} /></IconButton>
           )}
           {!editing && canDelete && (
-            <IconButton size="small" aria-label="コメントを削除" color="error" onClick={handleDelete} disabled={pending}>
-              <DeleteIcon sx={{ fontSize: 16 }} />
-            </IconButton>
+            <IconButton size="small" color="error" onClick={handleDelete} disabled={pending}><DeleteIcon sx={{ fontSize: 16 }} /></IconButton>
           )}
         </Box>
 
         {editing ? (
           <form onSubmit={handleSave}>
             <Stack spacing={1}>
-              <TextField
-                name="content"
-                defaultValue={content}
-                fullWidth
-                multiline
-                minRows={2}
-                size="small"
-                autoFocus
-                error={!!error}
-                helperText={error}
-                disabled={pending}
-              />
+              <TextField name="content" defaultValue={content} fullWidth multiline minRows={2} size="small" autoFocus error={!!error} helperText={error} disabled={pending} />
               <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-                <Button size="small" onClick={() => { setEditing(false); setError(null); }} disabled={pending}>
-                  キャンセル
-                </Button>
-                <Button size="small" type="submit" variant="contained" disabled={pending}>
-                  {pending ? "保存中..." : "保存"}
-                </Button>
+                <Button size="small" onClick={() => { setEditing(false); setError(null); }} disabled={pending}>{t("cancel")}</Button>
+                <Button size="small" type="submit" variant="contained" disabled={pending}>{t("submit")}</Button>
               </Box>
             </Stack>
           </form>
         ) : (
-          <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
-            {content}
-          </Typography>
+          <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>{content}</Typography>
+        )}
+
+        {ideaId && isLoggedIn && !editing && (
+          <Button size="small" startIcon={<ReplyIcon fontSize="small" />} onClick={() => setReplying((v) => !v)} sx={{ mt: 0.5 }}>
+            {t("reply")}
+          </Button>
+        )}
+
+        {replying && (
+          <Stack spacing={1} sx={{ mt: 1 }}>
+            <TextField multiline minRows={2} size="small" placeholder={t("replyPlaceholder")} value={replyText} onChange={(e) => setReplyText(e.target.value)} disabled={pending} />
+            <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
+              <Button size="small" onClick={() => setReplying(false)} disabled={pending}>{t("cancel")}</Button>
+              <Button size="small" variant="contained" onClick={handleReply} disabled={pending || !replyText.trim()}>{t("submit")}</Button>
+            </Box>
+          </Stack>
+        )}
+
+        {replies.length > 0 && (
+          <Box sx={{ mt: 2, pl: 2, borderLeft: "2px solid", borderColor: "divider", display: "flex", flexDirection: "column", gap: 2 }}>
+            {replies.map((r) => <IdeaCommentItem key={r.id} {...r} />)}
+          </Box>
         )}
       </Box>
     </Box>
   );
+}
+
+function AuthorAvatar({ username, avatar, name }: { username: string | null; avatar: string | null; name: string | null }) {
+  const el = <Avatar src={avatar || undefined} sx={{ width: 40, height: 40 }}>{name?.[0] || "U"}</Avatar>;
+  if (!username) return el;
+  return <Link href={`/profile/${username}`} style={{ textDecoration: "none", color: "inherit" }}>{el}</Link>;
+}
+
+function AuthorName({ username, name }: { username: string | null; name: string | null }) {
+  const el = <Typography variant="subtitle2" sx={{ fontWeight: 700, "&:hover": username ? { textDecoration: "underline" } : undefined }}>{name}</Typography>;
+  if (!username) return el;
+  return <Link href={`/profile/${username}`} style={{ textDecoration: "none", color: "inherit" }}>{el}</Link>;
 }

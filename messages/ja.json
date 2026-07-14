@@ -872,7 +872,8 @@
     "markAllRead": "すべて既読にする",
     "subscribe": {
       "subscribe": "新リリースを通知",
-      "subscribed": "通知中"
+      "subscribed": "通知中",
+      "developerActive": "フォロー中: 新しいプロジェクトの公開を通知します"
     },
     "type": {
       "new_project": "フォロー中の開発者が新しいプロジェクトを公開",

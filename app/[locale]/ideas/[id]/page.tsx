@@ -73,6 +73,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       content: ideaComments.content,
       createdAt: ideaComments.createdAt,
       updatedAt: ideaComments.updatedAt,
+      parentId: ideaComments.parentId,
       authorId: ideaComments.authorId,
       authorName: userProfiles.displayName,
       authorAvatar: userProfiles.avatarUrl,
@@ -252,12 +253,13 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
         )}
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {comments.map((comment) => {
+          {comments.filter((c) => !c.parentId).map((comment) => {
             const isCommentAuthor = session?.user?.id === comment.authorId;
             return (
               <IdeaCommentItem
                 key={comment.id}
                 id={comment.id}
+                ideaId={id}
                 content={comment.content}
                 createdAt={comment.createdAt}
                 updatedAt={comment.updatedAt}
@@ -266,6 +268,20 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                 authorUsername={comment.authorUsername}
                 canEdit={isCommentAuthor}
                 canDelete={isCommentAuthor || canManage}
+                isLoggedIn={!!session?.user}
+                replies={comments
+                  .filter((r) => r.parentId === comment.id)
+                  .map((r) => ({
+                    id: r.id,
+                    content: r.content,
+                    createdAt: r.createdAt,
+                    updatedAt: r.updatedAt,
+                    authorName: r.authorName,
+                    authorAvatar: r.authorAvatar,
+                    authorUsername: r.authorUsername,
+                    canEdit: session?.user?.id === r.authorId,
+                    canDelete: session?.user?.id === r.authorId || canManage,
+                  }))}
               />
             );
           })}

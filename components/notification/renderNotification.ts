@@ -18,13 +18,8 @@ export function renderNotification(t: Translate, n: Notification): RenderedNotif
 }
 
 function hrefFor(type: string, p: Record<string, string>): string {
-  switch (type) {
-    case "idea_comment":
-    case "idea_like":
-      return `/ideas/${p.ideaId ?? ""}`;
-    case "follow":
-      return `/profile/${p.actorUsername ?? ""}`;
-    default:
-      return `/projects/${p.projectSlug ?? ""}`;
-  }
+  if (type === "follow") return `/profile/${p.actorUsername ?? ""}`;
+  // comment_reply など、アイデア/プロジェクト両方に紐づく種別は payload から判定する
+  if (p.ideaId) return `/ideas/${p.ideaId}`;
+  return `/projects/${p.projectSlug ?? ""}`;
 }

@@ -851,7 +851,8 @@
     "markAllRead": "Mark all as read",
     "subscribe": {
       "subscribe": "Notify on new releases",
-      "subscribed": "Subscribed"
+      "subscribed": "Subscribed",
+      "developerActive": "Following: you will be notified of new projects"
     },
     "type": {
       "new_project": "A developer you follow publishes a new project",
