@@ -16,6 +16,8 @@ import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
 import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
 import IdeaOwnerActions from "@/components/idea/IdeaOwnerActions";
 import IdeaCommentItem from "@/components/idea/IdeaCommentItem";
+import { formatDate } from "@/lib/utils/format";
+import { Link } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export default async function IdeaDetailPage({ params }: { params: Promise<{ locale: string, id: string }> }) {
@@ -40,6 +42,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       authorId: users.id,
       authorName: userProfiles.displayName,
       authorAvatar: userProfiles.avatarUrl,
+      authorUsername: userProfiles.username,
     })
     .from(ideas)
     .innerJoin(users, eq(ideas.authorId, users.id))
@@ -73,6 +76,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       authorId: ideaComments.authorId,
       authorName: userProfiles.displayName,
       authorAvatar: userProfiles.avatarUrl,
+      authorUsername: userProfiles.username,
     })
     .from(ideaComments)
     .innerJoin(users, eq(ideaComments.authorId, users.id))
@@ -119,17 +123,29 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       <Card variant="outlined" sx={{ borderRadius: 3, mb: 4 }}>
         <CardContent sx={{ p: { xs: 3, md: 5 } }}>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 3 }}>
-            <Avatar src={ideaData.authorAvatar || undefined} sx={{ width: 48, height: 48 }}>
-              {ideaData.authorName?.[0] || "U"}
-            </Avatar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                {ideaData.authorName}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {new Date(ideaData.createdAt!).toLocaleString()}
-              </Typography>
-            </Box>
+            <Link
+              href={`/profile/${ideaData.authorUsername}`}
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+              }}
+            >
+              <Avatar src={ideaData.authorAvatar || undefined} sx={{ width: 48, height: 48 }}>
+                {ideaData.authorName?.[0] || "U"}
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2, "&:hover": { textDecoration: "underline" } }}>
+                  {ideaData.authorName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {formatDate(ideaData.createdAt!)}
+                </Typography>
+              </Box>
+            </Link>
+            <Box sx={{ flexGrow: 1 }} />
             {canManage && (
               <IdeaOwnerActions
                 ideaId={id}
@@ -148,20 +164,37 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             {ideaData.content}
           </Typography>
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Box sx={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            alignItems: { xs: "stretch", sm: "center" },
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2
+          }}>
             <IdeaLikeButton 
               ideaId={id} 
               initialCount={initialCount} 
               initialLiked={initialLiked} 
               isLoggedIn={!!session} 
             />
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: 2, 
+              flexWrap: "wrap",
+              justifyContent: { xs: "flex-start", sm: "flex-end" }
+            }}>
               {session?.user && ideaData.status !== "fulfilled" && (
-                <LinkButton variant="contained" size="small" href={`/projects/new?ideaId=${id}`}>
+                <LinkButton 
+                  variant="contained" 
+                  size="small" 
+                  href={`/projects/new?ideaId=${id}`}
+                  sx={{ whiteSpace: "nowrap" }}
+                >
                   プロジェクトを作成
                 </LinkButton>
               )}
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
                 {tIdea("statusLabel", { status: ideaData.status === "open" ? tIdea("status.open") : ideaData.status === "in_progress" ? tIdea("status.in_progress") : tIdea("status.resolved") })}
               </Typography>
             </Box>
@@ -230,6 +263,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                 updatedAt={comment.updatedAt}
                 authorName={comment.authorName}
                 authorAvatar={comment.authorAvatar}
+                authorUsername={comment.authorUsername}
                 canEdit={isCommentAuthor}
                 canDelete={isCommentAuthor || canManage}
               />

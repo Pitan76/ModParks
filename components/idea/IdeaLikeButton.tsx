@@ -48,6 +48,7 @@ export default function IdeaLikeButton({ ideaId, initialLiked, initialCount, isL
         px: 2,
         textTransform: "none",
         fontWeight: "bold",
+        whiteSpace: "nowrap",
       }}
     >
       {tIdea("like", { count })}

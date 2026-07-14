@@ -1,4 +1,16 @@
 /**
+ * 日付を YYYY/MM/DD 形式にフォーマットします。
+ */
+export function formatDate(date: Date | number | string): string {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}/${mm}/${dd}`;
+}
+
+/**
  * ダウンロード数などの数値をロケールに合わせてフォーマットします。
  * 日本語の場合は 1万 以上の場合は「万」を使い、それ未満はカンマ区切り (e.g. 5,600)。
  * 英語の場合は 1K, 1M などのK/Mサフィックスを使用します。

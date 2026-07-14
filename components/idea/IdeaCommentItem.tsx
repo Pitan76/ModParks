@@ -13,6 +13,7 @@ import Stack from "@mui/material/Stack";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { updateIdeaComment, deleteIdeaComment } from "@/lib/actions/idea";
+import { Link } from "@/i18n/routing";
 
 interface IdeaCommentItemProps {
   id: string;
@@ -21,6 +22,7 @@ interface IdeaCommentItemProps {
   updatedAt: Date | null;
   authorName: string | null;
   authorAvatar: string | null;
+  authorUsername: string | null;
   /** 本人のみ編集可 / 本人・管理者は削除可 */
   canEdit: boolean;
   canDelete: boolean;
@@ -33,6 +35,7 @@ export default function IdeaCommentItem({
   updatedAt,
   authorName,
   authorAvatar,
+  authorUsername,
   canEdit,
   canDelete,
 }: IdeaCommentItemProps) {
@@ -72,14 +75,30 @@ export default function IdeaCommentItem({
 
   return (
     <Box sx={{ display: "flex", gap: 2 }}>
-      <Avatar src={authorAvatar || undefined} sx={{ width: 40, height: 40 }}>
-        {authorName?.[0] || "U"}
-      </Avatar>
+      {authorUsername ? (
+        <Link href={`/profile/${authorUsername}`} style={{ textDecoration: "none", color: "inherit" }}>
+          <Avatar src={authorAvatar || undefined} sx={{ width: 40, height: 40 }}>
+            {authorName?.[0] || "U"}
+          </Avatar>
+        </Link>
+      ) : (
+        <Avatar src={authorAvatar || undefined} sx={{ width: 40, height: 40 }}>
+          {authorName?.[0] || "U"}
+        </Avatar>
+      )}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.5 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-            {authorName}
-          </Typography>
+          {authorUsername ? (
+            <Link href={`/profile/${authorUsername}`} style={{ textDecoration: "none", color: "inherit" }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, "&:hover": { textDecoration: "underline" } }}>
+                {authorName}
+              </Typography>
+            </Link>
+          ) : (
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+              {authorName}
+            </Typography>
+          )}
           <Typography variant="caption" color="text.secondary">
             {createdAt ? new Date(createdAt).toLocaleString() : ""}{isEdited ? "（編集済み）" : ""}
           </Typography>

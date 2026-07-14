@@ -15,6 +15,7 @@ import CommentIcon from "@mui/icons-material/Comment";
 import AddIcon from "@mui/icons-material/Add";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import LinkButton from "@/components/ui/LinkButton";
+import { formatDate } from "@/lib/utils/format";
 
 export default async function IdeasPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -95,7 +96,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
                       variant="outlined"
                     />
                     <Typography variant="caption" color="text.disabled" sx={{ ml: "auto" }}>
-                      {new Date(idea.createdAt!).toLocaleDateString()}
+                      {formatDate(idea.createdAt!)}
                     </Typography>
                   </Box>
                 </Box>
