@@ -128,13 +128,8 @@ export default function ProjectDetailHeader({
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, flexWrap: "wrap" }}>
             <DateLabel date={p.createdAt} type="published" />
             <DateLabel date={p.updatedAt} type="updated" />
-            </Box>
-          </Box>
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: { xs: "row", sm: "column" }, gap: 1, width: { xs: "100%", sm: "auto" }, flexWrap: "wrap" }}>
-          <Box sx={{ display: "flex", gap: 1, width: { xs: "100%", sm: "auto" } }}>
-            <Box sx={{ flex: { xs: 1, sm: "initial" } }}>
+            
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: { sm: 2 } }}>
               <ProjectFavoriteButton
                 projectId={p.id}
                 initialCount={favoritesCount}
@@ -142,12 +137,11 @@ export default function ProjectDetailHeader({
                 isLoggedIn={isLoggedIn}
                 variant="icon"
               />
-            </Box>
-            {isLoggedIn && currentUserId && (
-              <Box sx={{ flex: { xs: 1, sm: "initial" } }}>
+              {isLoggedIn && currentUserId && (
                 <AddToCollectionButton projectId={p.id} userId={currentUserId} variant="icon" />
-              </Box>
-            )}
+              )}
+            </Box>
+          </Box>
           </Box>
         </Box>
       </Box>
