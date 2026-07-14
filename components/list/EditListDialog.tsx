@@ -127,9 +127,9 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
           value={visibility}
           onChange={e => setVisibility(e.target.value as string)}
           options={[
-            { value: "public", label: tProject("form.public") },
-            { value: "unlisted", label: tProject("form.unlisted") },
-            { value: "private", label: tProject("form.private") },
+            { value: "public", label: tCommon("visibility.public") },
+            { value: "unlisted", label: tCommon("visibility.unlisted") },
+            { value: "private", label: tCommon("visibility.private") },
           ]}
           formControlProps={{ fullWidth: true }}
         />

@@ -29,7 +29,13 @@
     "clear": "クリア",
     "create": "作成",
     "confirmLabel": "確認のため以下を入力してください",
-    "add": "追加"
+    "add": "追加",
+    "visibility": {
+      "public": "公開",
+      "unlisted": "限定公開",
+      "private": "非公開",
+      "draft": "下書き"
+    }
   },
   "Nav": {
     "home": "ホーム",
@@ -65,12 +71,7 @@
       "shader": "シェーダー",
       "modpack": "MODパック"
     },
-    "status": {
-      "public": "公開",
-      "unlisted": "限定公開",
-      "private": "非公開",
-      "draft": "下書き"
-    },
+    "status": {},
     "fields": {
       "name": "プロジェクト名",
       "slug": "スラッグ",
@@ -97,7 +98,6 @@
         "title": "カスタムリンク",
         "linkTitle": "タイトル",
         "url": "URL",
-        "delete": "削除",
         "addLink": "リンクを追加"
       }
     },
@@ -181,12 +181,6 @@
     "report": "通報",
     "form": {
       "status": "ステータス",
-      "public": "公開",
-      "unlisted": "限定公開 (リンクを知っている人のみ)",
-      "private": "非公開",
-      "draft": "下書き",
-      "cancel": "キャンセル",
-      "save": "保存",
       "saving": "保存中..."
     },
     "favorite": {
@@ -229,7 +223,6 @@
       "owner": "オーナー",
       "member": "メンバー",
       "addUsername": "ユーザー名を追加",
-      "addBtn": "追加",
       "deleteConfirm": "本当にこのメンバーを削除しますか？"
     }
   },
@@ -307,14 +300,11 @@
       "spam": "スパム",
       "other": "その他"
     },
-    "cancel": "キャンセル",
     "sending": "送信中...",
-    "submit": "送信",
     "success": "通報しました。確認後に対応いたします。"
   },
   "Profile": {
     "title": "プロフィール編集",
-    "edit": "編集",
     "displayName": "表示名",
     "bio": "自己紹介",
     "bioHelper": "公開プロフィールに表示されます",
@@ -335,11 +325,7 @@
     "manage": "管理",
     "noProjects": "まだ公開されているプロジェクトはありません。",
     "lists": "リスト",
-    "visibility": {
-      "public": "公開",
-      "unlisted": "限定公開",
-      "private": "非公開"
-    },
+    "visibility": {},
     "noLists": "まだリストは作成されていません。",
     "favorites": "お気に入り",
     "noFavorites": "まだお気に入りに登録したプロジェクトはありません。"
@@ -366,12 +352,7 @@
       "content": "どんなMOD/プラグインが欲しいですか？",
       "contentPlaceholder": "具体的な機能や、なぜ欲しいのかを書いてみましょう。",
       "visibility": "公開範囲",
-      "visibilityOptions": {
-        "public": "公開",
-        "unlisted": "限定公開",
-        "private": "非公開",
-        "draft": "下書き"
-      }
+      "visibilityOptions": {}
     },
     "submitting": "送信中...",
     "submitIdea": "アイデアを投稿する",
@@ -420,7 +401,6 @@
         "passwordsMismatch": "パスワードが一致しません。",
         "passwordTooShort": "パスワードは8文字以上である必要があります。"
       },
-      "sendLink": "送信",
       "noAccount": "アカウントをお持ちでないですか？ ",
       "registerLink": "新規登録",
       "error": {
@@ -429,8 +409,7 @@
       },
       "twoFactorDesc": "認証アプリで生成された6桁のコードを入力してください。",
       "verify": "認証する",
-      "twoFactorRequired": "2段階認証",
-      "cancel": "キャンセル"
+      "twoFactorRequired": "2段階認証"
     },
     "register": {
       "title": "新規登録",
@@ -672,7 +651,6 @@
       "description": "APIキーを使用すると、外部ツールからアカウントにアクセスできます。セキュリティのため、キーは作成時に一度だけ表示されます。",
       "name": "キーの名前",
       "generate": "新しく生成する",
-      "delete": "削除",
       "lastUsed": "最終利用",
       "neverUsed": "未使用",
       "copied": "コピーしました",
@@ -696,10 +674,6 @@
       "title": "投稿設定",
       "defaultProjectStatus": "デフォルトの公開状態",
       "defaultProjectStatusDesc": "新しく作成するプロジェクトの初期公開状態を設定します。",
-      "statusDraft": "下書き",
-      "statusPublic": "公開",
-      "statusUnlisted": "限定公開",
-      "statusPrivate": "非公開",
       "defaultLicense": "デフォルトのライセンス",
       "defaultLicenseDesc": "新しく作成するプロジェクトの初期ライセンスを設定します。",
       "successUpdate": "投稿設定を更新しました"
@@ -814,7 +788,6 @@
     "editList": "リストを編集",
     "deleteConfirm": "本当にこのリストを削除しますか？この操作は元に戻せません。",
     "saveToList": "リストに保存",
-    "close": "閉じる",
     "createNewList": "新しくリストを作成",
     "createListHeading": "新しいリストを作成",
     "noLists": "リストがありません",

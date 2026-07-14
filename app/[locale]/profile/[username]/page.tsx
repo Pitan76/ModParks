@@ -235,7 +235,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
                   size="small"
                   sx={{ whiteSpace: "nowrap" }}
                 >
-                  {t("edit")}
+                  {tCommon("edit")}
                 </Button>
               </RoutingLink>
             )}

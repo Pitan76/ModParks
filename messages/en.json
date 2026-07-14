@@ -29,7 +29,13 @@
     "clear": "Clear",
     "create": "Create",
     "confirmLabel": "Please enter the following to confirm",
-    "add": "Add"
+    "add": "Add",
+    "visibility": {
+      "public": "Public",
+      "unlisted": "Unlisted",
+      "private": "Private",
+      "draft": "Draft"
+    }
   },
   "Nav": {
     "home": "Home",
@@ -65,12 +71,7 @@
       "shader": "Shader",
       "modpack": "Modpack"
     },
-    "status": {
-      "public": "Public",
-      "unlisted": "Unlisted",
-      "private": "Private",
-      "draft": "Draft"
-    },
+    "status": {},
     "fields": {
       "name": "Project Name",
       "edit": "Edit",
@@ -97,7 +98,6 @@
         "title": "Custom Links",
         "linkTitle": "Title",
         "url": "URL",
-        "delete": "Delete",
         "addLink": "Add Link"
       }
     },
@@ -162,12 +162,6 @@
     "report": "Report",
     "form": {
       "status": "Status",
-      "public": "Public",
-      "unlisted": "Unlisted (Link sharing)",
-      "private": "Private",
-      "draft": "Draft",
-      "cancel": "Cancel",
-      "save": "Save",
       "saving": "Saving..."
     },
     "favorite": {
@@ -210,7 +204,6 @@
       "owner": "Owner",
       "member": "Member",
       "addUsername": "Add Username",
-      "addBtn": "Add",
       "deleteConfirm": "Are you sure you want to remove this member?"
     }
   },
@@ -288,9 +281,7 @@
       "spam": "Spam",
       "other": "Other"
     },
-    "cancel": "Cancel",
     "sending": "Sending...",
-    "submit": "Submit",
     "success": "Report submitted successfully.",
     "error": {
       "submitFailed": "Failed to submit report"
@@ -318,11 +309,7 @@
     "manage": "Manage",
     "noProjects": "No public projects yet.",
     "lists": "Lists",
-    "visibility": {
-      "public": "Public",
-      "unlisted": "Unlisted",
-      "private": "Private"
-    },
+    "visibility": {},
     "noLists": "No lists created yet.",
     "favorites": "Favorites",
     "noFavorites": "No favorite projects yet."
@@ -349,12 +336,7 @@
       "content": "What kind of Mod/Plugin do you want?",
       "contentPlaceholder": "Describe the specific features and why you want it.",
       "visibility": "Visibility",
-      "visibilityOptions": {
-        "public": "Public",
-        "unlisted": "Unlisted",
-        "private": "Private",
-        "draft": "Draft"
-      }
+      "visibilityOptions": {}
     },
     "submitting": "Submitting...",
     "submitIdea": "Post Idea",
@@ -398,7 +380,6 @@
         "passwordsMismatch": "Passwords do not match.",
         "passwordTooShort": "Password must be at least 8 characters long."
       },
-      "sendLink": "Send",
       "noAccount": "Don't have an account? ",
       "registerLink": "Register",
       "error": {
@@ -407,8 +388,7 @@
       },
       "twoFactorDesc": "Enter the 6-digit code from your authenticator app.",
       "verify": "Verify",
-      "twoFactorRequired": "Two-Factor Authentication",
-      "cancel": "Cancel"
+      "twoFactorRequired": "Two-Factor Authentication"
     },
     "register": {
       "title": "Register",
@@ -650,7 +630,6 @@
       "description": "API keys allow external tools to access your account. For security reasons, keys are shown only once upon creation.",
       "name": "Key Name",
       "generate": "Generate New Key",
-      "delete": "Delete",
       "lastUsed": "Last used",
       "neverUsed": "Never used",
       "copied": "Copied to clipboard",
@@ -674,10 +653,6 @@
       "title": "Posting Settings",
       "defaultProjectStatus": "Default Visibility",
       "defaultProjectStatusDesc": "Set the initial visibility status for newly created projects.",
-      "statusDraft": "Draft",
-      "statusPublic": "Public",
-      "statusUnlisted": "Unlisted",
-      "statusPrivate": "Private",
       "defaultLicense": "Default License",
       "defaultLicenseDesc": "Set the initial license for newly created projects.",
       "successUpdate": "Posting settings updated successfully"
@@ -792,7 +767,6 @@
     "editList": "Edit List",
     "deleteConfirm": "Are you sure you want to delete this list? This action cannot be undone.",
     "saveToList": "Save to List",
-    "close": "Close",
     "createNewList": "Create New List",
     "createListHeading": "Create a New List",
     "noLists": "No lists found",

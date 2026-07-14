@@ -24,6 +24,7 @@ interface ApiKeysTabProps {
 }
 
 export default function ApiKeysTab({ apiKeys }: ApiKeysTabProps) {
+  const tCommon = useTranslations("Common");
   const t = useTranslations("Settings");
   const format = useFormatter();
 
@@ -77,7 +78,7 @@ export default function ApiKeysTab({ apiKeys }: ApiKeysTabProps) {
             <TableRow>
               <TableCell>{t("apiKeys.name")}</TableCell>
               <TableCell>{t("apiKeys.lastUsed")}</TableCell>
-              <TableCell align="right">{t("apiKeys.delete")}</TableCell>
+              <TableCell align="right">{tCommon("delete")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

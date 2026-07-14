@@ -37,6 +37,7 @@ export interface ProjectFormFieldsProps {
 }
 
 export default function ProjectFormFields({ error, project, availableTags = [], defaultLicense, children }: ProjectFormFieldsProps) {
+  const tCommon = useTranslations("Common");
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
@@ -243,7 +244,7 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => changeLink(idx, "url", e.target.value)}
             sx={{ flex: 1 }}
           />
-          <Chip label={t("fields.customLinks.delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer" }} />
+          <Chip label={tCommon("delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer" }} />
         </Stack>
       ))}
       <Box>

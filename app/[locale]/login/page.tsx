@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
 export default function LoginPage() {
+  const tCommon = useTranslations("Common");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -191,7 +192,7 @@ export default function LoginPage() {
               disabled={loading || !email}
               sx={{ whiteSpace: "nowrap" }}
             >
-              {tAuth("login.sendLink") || "Send Link"}
+              {tCommon("submit") || "Send Link"}
             </Button>
           </Box>
         </form>
@@ -228,7 +229,7 @@ export default function LoginPage() {
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 3 }}>
               <Button onClick={() => setShowTwoFactor(false)} disabled={loading} color="inherit">
-                {tAuth("login.cancel") || "Cancel"}
+                {tCommon("cancel") || "Cancel"}
               </Button>
               <Button type="submit" disabled={loading || !token}>
                 {tAuth("login.verify") || "Verify"}

@@ -18,6 +18,7 @@ interface Props {
 }
 
 export default function PostingTab({ defaultProjectStatus, defaultLicense }: Props) {
+  const tCommon = useTranslations("Common");
   const t = useTranslations("Settings");
   const { message, flash } = useFlashMessage();
 
@@ -42,10 +43,10 @@ export default function PostingTab({ defaultProjectStatus, defaultLicense }: Pro
           value={postingStatus}
           onChange={(e) => setPostingStatus(e.target.value as string)}
           options={[
-            { value: "draft", label: t("posting.statusDraft") },
-            { value: "public", label: t("posting.statusPublic") },
-            { value: "unlisted", label: t("posting.statusUnlisted") },
-            { value: "private", label: t("posting.statusPrivate") },
+            { value: "draft", label: tCommon("visibility.draft") },
+            { value: "public", label: tCommon("visibility.public") },
+            { value: "unlisted", label: tCommon("visibility.unlisted") },
+            { value: "private", label: tCommon("visibility.private") },
           ]}
         />
       </Box>

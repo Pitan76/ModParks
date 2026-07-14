@@ -102,7 +102,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
       actions={
         <>
           <Button onClick={onClose} variant="text" color="inherit">
-            {tList("close")}
+            {tCommon("close")}
           </Button>
           {!creating && (
             <Button 
@@ -141,7 +141,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
                   </ListItemIcon>
                   <ListItemText 
                     primary={c.name} 
-                    secondary={c.visibility === "public" ? tProject("form.public") : c.visibility === "unlisted" ? tProject("form.unlisted") : tProject("form.private")} 
+                    secondary={c.visibility === "public" ? tCommon("visibility.public") : c.visibility === "unlisted" ? tCommon("visibility.unlisted") : tCommon("visibility.private")} 
                   />
                 </ListItemButton>
               </ListItem>
@@ -167,9 +167,9 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
               onChange={(e) => setNewCollectionVisibility(e.target.value as any)}
               disabled={isPending}
               options={[
-                { value: "public", label: tProject("form.public") },
-                { value: "unlisted", label: tProject("form.unlisted") },
-                { value: "private", label: tProject("form.private") },
+                { value: "public", label: tCommon("visibility.public") },
+                { value: "unlisted", label: tCommon("visibility.unlisted") },
+                { value: "private", label: tCommon("visibility.private") },
               ]}
               formControlProps={{ fullWidth: true, size: "small", sx: { mb: 2 } }}
             />

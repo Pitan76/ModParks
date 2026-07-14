@@ -22,6 +22,7 @@ interface ReportDialogProps {
 }
 
 export default function ReportDialog({ projectId }: ReportDialogProps) {
+  const tCommon = useTranslations("Common");
   const t = useTranslations("Report");
   const [open,    setOpen]    = React.useState(false);
   const [reason,  setReason]  = React.useState<string>(REPORT_REASONS[0]);
@@ -100,7 +101,7 @@ export default function ReportDialog({ projectId }: ReportDialogProps) {
         </DialogContent>
         <DialogActions>
           <Button id="report-cancel" onClick={() => setOpen(false)} variant="text">
-            {t("cancel")}
+            {tCommon("cancel")}
           </Button>
           {!success && (
             <Button
@@ -110,7 +111,7 @@ export default function ReportDialog({ projectId }: ReportDialogProps) {
               color="error"
               disabled={pending}
             >
-              {pending ? t("sending") : t("submit")}
+              {pending ? t("sending") : tCommon("submit")}
             </Button>
           )}
         </DialogActions>

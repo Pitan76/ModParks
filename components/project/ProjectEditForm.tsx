@@ -34,6 +34,7 @@ interface ProjectEditFormProps {
 }
 
 export default function ProjectEditForm({ project, availableTags = [] }: ProjectEditFormProps) {
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const t = useTranslations("Project.form");
   const tManage = useTranslations("Project.managePage");
@@ -145,7 +146,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
 
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
-                {t("cancel")}
+                {tCommon("cancel")}
               </Button>
               <Button type="submit" variant="contained" disabled={pending}>
                 {pending ? t("saving") : t("save")}

@@ -21,6 +21,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import { useTranslations } from "next-intl";
 
 export default function NewIdeaPage() {
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const tIdea = useTranslations("Idea");
   const [pending, setPending] = useState(false);
@@ -98,10 +99,10 @@ export default function NewIdeaPage() {
                   defaultValue="public"
                   disabled={pending}
                 >
-                  <MenuItem value="public">{tIdea("fields.visibilityOptions.public")}</MenuItem>
-                  <MenuItem value="unlisted">{tIdea("fields.visibilityOptions.unlisted")}</MenuItem>
-                  <MenuItem value="private">{tIdea("fields.visibilityOptions.private")}</MenuItem>
-                  <MenuItem value="draft">{tIdea("fields.visibilityOptions.draft")}</MenuItem>
+                  <MenuItem value="public">{tCommon("visibility.public")}</MenuItem>
+                  <MenuItem value="unlisted">{tCommon("visibility.unlisted")}</MenuItem>
+                  <MenuItem value="private">{tCommon("visibility.private")}</MenuItem>
+                  <MenuItem value="draft">{tCommon("visibility.draft")}</MenuItem>
                 </Select>
               </FormControl>
 
