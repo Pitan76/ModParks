@@ -82,6 +82,7 @@ export const createProjectSchema = z.object({
   modrinthId:  z.string().optional().nullable(),
   curseforgeId: z.string().optional().nullable(),
   githubRepo:  z.string().max(140).optional().nullable(),
+  discordWebhookUrl: z.string().url("有効なURLを入力してください").max(255).optional().or(z.literal("")).nullable(),
   tags:        z.array(z.string().max(32)).max(10, "タグは10個まで"),
 });
 

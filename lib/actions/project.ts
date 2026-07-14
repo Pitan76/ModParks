@@ -10,6 +10,28 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
+import { notifyNewProject } from "@/lib/notifications/notify";
+
+/** 下書き→公開の初回公開時のみ、作者フォロワーへ新プロジェクト通知を送る */
+async function maybeNotifyPublish(
+  db: any,
+  project: { slug: string; name: string; iconUrl: string | null; authorId: string; status: string },
+  newSlug: string,
+  newStatus: string | undefined,
+): Promise<void> {
+  if (project.status !== "draft") return;
+  if (newStatus !== "public" && newStatus !== "unlisted") return;
+
+  const author = await db
+    .select({ displayName: userProfiles.displayName, username: users.name })
+    .from(users)
+    .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
+    .where(eq(users.id, project.authorId))
+    .get();
+
+  const authorName = author?.displayName || author?.username || "";
+  await notifyNewProject(db, { ...project, slug: newSlug, name: project.name }, authorName);
+}
 
 // ─── プロジェクト作成 ─────────────────────────────────────────────────────────
 
@@ -109,6 +131,7 @@ export async function updateProject(projectId: string, formData: FormData) {
     modrinthId:  formData.get("modrinthId") || null,
     curseforgeId: formData.get("curseforgeId") || null,
     githubRepo:  formData.get("githubRepo") || null,
+    discordWebhookUrl: formData.get("discordWebhookUrl") || null,
     issueTrackerUrl: formData.get("issueTrackerUrl") || null,
     tags:        formData.getAll("tags"),
   };
@@ -118,7 +141,17 @@ export async function updateProject(projectId: string, formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { tags, githubRepo, ...fields } = parsed.data;
+  const { tags, githubRepo, discordWebhookUrl, ...fields } = parsed.data;
+
+  // Discord Webhook URL は Discord ホストのみ許可（SSRF/誤設定防止）
+  let normalizedWebhook: string | null = null;
+  if (discordWebhookUrl) {
+    const { isValidDiscordWebhookUrl } = await import("@/lib/notifications/discord");
+    if (!isValidDiscordWebhookUrl(discordWebhookUrl)) {
+      return { error: { discordWebhookUrl: ["Discord の Webhook URL を入力してください。"] } };
+    }
+    normalizedWebhook = discordWebhookUrl;
+  }
 
   // GitHub リポジトリは "owner/repo" に正規化して保存（URL 貼り付けも許容）
   let normalizedGithubRepo: string | null = null;
@@ -148,6 +181,7 @@ export async function updateProject(projectId: string, formData: FormData) {
       sourceUrl: fields.sourceUrl || null,
       links: fields.links || null,
       githubRepo: normalizedGithubRepo,
+      discordWebhookUrl: normalizedWebhook,
       iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
       updatedAt: new Date(),
       ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {})
@@ -183,6 +217,8 @@ export async function updateProject(projectId: string, formData: FormData) {
   } catch (e) {
     // ignore
   }
+
+  await maybeNotifyPublish(db, project, fields.slug ?? project.slug, fields.status);
 
   revalidatePath(`/projects/${fields.slug ?? project.slug}`);
   revalidatePath(`/projects/${fields.slug ?? project.slug}/edit`);

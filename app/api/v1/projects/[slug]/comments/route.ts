@@ -63,6 +63,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       content: content.trim(),
     }).run();
 
+    const { notifyToUser, resolveActorName } = await import("@/lib/notifications/notify");
+    await notifyToUser(db, project.authorId, session.user.id, "project_comment", {
+      projectSlug: project.slug,
+      projectName: project.name,
+      actorName: await resolveActorName(db, session.user.id),
+    });
+
     return NextResponse.json({ success: true, id: newCommentId });
   } catch (error) {
     console.error(error);

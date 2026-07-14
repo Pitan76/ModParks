@@ -6,6 +6,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import FolderIcon from "@mui/icons-material/Folder";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useTranslations } from "next-intl";
 import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
@@ -28,6 +29,7 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
   ];
 
   if (session?.user) {
+    navItems.push({ id: "notifications", label: t("notifications"), path: "/notifications", icon: <NotificationsIcon /> });
     navItems.push({ id: "dashboard", label: t("dashboard"), path: "/dashboard", icon: <DashboardIcon /> });
     navItems.push({ id: "myProjects", label: t("myProjects"), path: "/projects/manage", icon: <FolderIcon /> });
     navItems.push({ id: "profile", label: t("profile"), path: `/profile/${session.user.username}`, icon: <AccountCircleIcon /> });

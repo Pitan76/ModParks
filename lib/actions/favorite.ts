@@ -6,6 +6,7 @@ import { projectFavorites, projects, users, userProfiles, projectTags } from "@/
 import { eq, and, desc, inArray, sql, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
 
 // ─── お気に入りのトグル ─────────────────────────────────────────────────────────
 
@@ -30,9 +31,20 @@ export async function toggleProjectFavorite(projectId: string) {
     revalidatePath("/[locale]/projects", "page");
     revalidatePath("/[locale]/profile/[username]", "page");
 
-    const project = await db.select({ slug: projects.slug }).from(projects).where(eq(projects.id, projectId)).get();
+    const project = await db
+      .select({ slug: projects.slug, name: projects.name, authorId: projects.authorId })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .get();
     if (project) {
       revalidatePath("/[locale]/projects/[slug]", "page");
+      if (!existing) {
+        await notifyToUser(db, project.authorId, userId, "project_favorite", {
+          projectSlug: project.slug,
+          projectName: project.name,
+          actorName: await resolveActorName(db, userId),
+        });
+      }
     }
 
     return { success: true, favorited: !existing };

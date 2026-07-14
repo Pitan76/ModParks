@@ -4,6 +4,7 @@ import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
 import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions, users, projectMembers } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
+import { notifyNewVersion } from "@/lib/notifications/notify";
 import { createVersionSchema } from "@/lib/validations";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -92,6 +93,8 @@ export async function createVersion(projectSlug: string, formData: FormData) {
 
   // 新バージョン登録をプロジェクトの最終更新日時に反映（「最近更新順」ソート用）
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+
+  await notifyNewVersion(db, project, parsed.data.versionNumber);
 
   const ideaId = formData.get("ideaId") as string;
   if (ideaId) {

@@ -77,6 +77,21 @@ export async function toggleProjectInCollection(collectionId: string, projectId:
   } else {
     await db.insert(collectionItems).values({ collectionId, projectId });
     added = true;
+
+    const project = await db
+      .select({ slug: projects.slug, name: projects.name, authorId: projects.authorId })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .get();
+    if (project) {
+      const { notifyToUser, resolveActorName } = await import("@/lib/notifications/notify");
+      await notifyToUser(db, project.authorId, userId, "list_add", {
+        projectSlug: project.slug,
+        projectName: project.name,
+        collectionName: collection.name,
+        actorName: await resolveActorName(db, userId),
+      });
+    }
   }
 
   revalidatePath("/[locale]/lists/[id]", "page");

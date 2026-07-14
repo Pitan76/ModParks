@@ -29,6 +29,7 @@ export interface ProjectFormFieldsProps {
     modrinthId?: string | null;
     curseforgeId?: string | null;
     githubRepo?: string | null;
+    discordWebhookUrl?: string | null;
     tags?: string[];
   };
   availableTags?: { slug: string; name: string }[];
@@ -225,6 +226,16 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
         defaultValue={project?.githubRepo || ""}
         errorMessages={error?.githubRepo}
         helperText={t("fields.githubRepoHelper")}
+      />
+      <FormTextField
+        id="project-discord-webhook"
+        name="discordWebhookUrl"
+        label={t("fields.discordWebhook")}
+        placeholder="https://discord.com/api/webhooks/..."
+        fullWidth
+        defaultValue={project?.discordWebhookUrl || ""}
+        errorMessages={error?.discordWebhookUrl}
+        helperText={t("fields.discordWebhookHelper")}
       />
 
       <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.customLinks.title")}</Typography>

@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { projectFavorites } from "@/db/schema";
+import { projectFavorites, projectSubscriptions } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { getProjectBySlug } from "@/lib/actions/project";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
@@ -96,12 +96,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   const db = await getDatabase();
-  const [favoritesData, userFavoriteData, dependencies, dependents] = await Promise.all([
+  const [favoritesData, userFavoriteData, dependencies, dependents, userSubscription] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(projectFavorites).where(eq(projectFavorites.projectId, project.id)).get(),
     session?.user?.id ? db.select().from(projectFavorites).where(and(eq(projectFavorites.projectId, project.id), eq(projectFavorites.userId, session.user.id))).get() : null,
     getProjectDependencies(project.id),
     getProjectDependents(project.id),
+    session?.user?.id ? db.select().from(projectSubscriptions).where(and(eq(projectSubscriptions.projectId, project.id), eq(projectSubscriptions.userId, session.user.id))).get() : null,
   ]);
+
+  const isSubscribed = !!userSubscription;
 
   const favoritesCount = favoritesData?.count || 0;
 
@@ -137,6 +140,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             currentUserId={session?.user?.id}
             isFavorited={isFavorited}
             favoritesCount={favoritesCount}
+            isSubscribed={isSubscribed}
           />
 
           <ProjectTabsManager 

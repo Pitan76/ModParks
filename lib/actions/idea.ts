@@ -6,6 +6,16 @@ import { createIdeaSchema, createIdeaCommentSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
+
+/** アイデアの投稿者・タイトルを取得する（通知の宛先・表示用） */
+async function getIdeaTarget(db: any, ideaId: string) {
+  return db
+    .select({ authorId: ideas.authorId, title: ideas.title })
+    .from(ideas)
+    .where(eq(ideas.id, ideaId))
+    .get();
+}
 
 // ─── アイデア作成 ─────────────────────────────────────────────────────────────
 
@@ -125,6 +135,14 @@ export async function toggleIdeaLike(ideaId: string) {
       await db.delete(ideaLikes).where(and(eq(ideaLikes.ideaId, ideaId), eq(ideaLikes.userId, userId)));
     } else {
       await db.insert(ideaLikes).values({ ideaId, userId });
+      const idea = await getIdeaTarget(db, ideaId);
+      if (idea) {
+        await notifyToUser(db, idea.authorId, userId, "idea_like", {
+          ideaId,
+          ideaTitle: idea.title,
+          actorName: await resolveActorName(db, userId),
+        });
+      }
     }
 
     revalidatePath("/ideas");
@@ -160,6 +178,15 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
       content,
       authorId: userId,
     });
+
+    const idea = await getIdeaTarget(db, ideaId);
+    if (idea) {
+      await notifyToUser(db, idea.authorId, userId, "idea_comment", {
+        ideaId,
+        ideaTitle: idea.title,
+        actorName: await resolveActorName(db, userId),
+      });
+    }
 
     revalidatePath(`/ideas/${ideaId}`);
     return { success: true };

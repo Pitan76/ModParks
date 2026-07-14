@@ -71,6 +71,8 @@ export const userSettings = sqliteTable("user_settings", {
   /** 所有確認が完了した日時。未確認なら null */
   curseforgeVerifiedAt: integer("curseforge_verified_at", { mode: "timestamp" }),
   defaultCommentsEnabled: integer("default_comments_enabled", { mode: "boolean" }).notNull().default(false),
+  /** 通知種別ごとの受信ON/OFF。未設定の種別はデフォルトON扱い */
+  notificationPrefs: text("notification_prefs", { mode: "json" }).$type<Record<string, boolean>>(),
 });
 
 export const accounts = sqliteTable(
@@ -171,6 +173,8 @@ export const projects = sqliteTable("projects", {
   sourceIdeaId: text("source_idea_id"),
   /** 連携する GitHub リポジトリ ("owner/repo" 形式)。Release 自動取り込みに使用 */
   githubRepo: text("github_repo"),
+  /** 新バージョン公開時に告知を送る Discord Webhook URL */
+  discordWebhookUrl: text("discord_webhook_url"),
 }, (table) => ({
   authorIdx: index("projects_author_idx").on(table.authorId),
   statusIdx: index("projects_status_idx").on(table.status),
@@ -650,3 +654,51 @@ export const passwordResetTokens = sqliteTable("password_reset_tokens", {
   tokenIdx: index("password_reset_tokens_token_idx").on(table.token),
   userIdx: index("password_reset_tokens_user_idx").on(table.userId),
 }));
+
+// ─── Project Subscriptions (通知ベル) ─────────────────────────────────────────
+
+export const projectSubscriptions = sqliteTable(
+  "project_subscriptions",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.projectId] }),
+    projectIdx: index("project_subscriptions_project_idx").on(t.projectId),
+    userIdx: index("project_subscriptions_user_idx").on(t.userId),
+  })
+);
+
+export type ProjectSubscription = typeof projectSubscriptions.$inferSelect;
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export const notifications = sqliteTable("notifications", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  /** 通知の受信者 */
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: text("type", { enum: ["new_version", "new_project"] }).notNull(),
+  /** 表示に必要な情報 (projectSlug, projectName, versionNumber 等)。type ごとに構造が異なる */
+  payload: text("payload", { mode: "json" }).$type<Record<string, string>>().notNull(),
+  read: integer("read", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  userIdx: index("notifications_user_idx").on(table.userId),
+  userReadIdx: index("notifications_user_read_idx").on(table.userId, table.read),
+}));
+
+export type Notification = typeof notifications.$inferSelect;

@@ -23,6 +23,7 @@ import { usePathname, useRouter, Link } from "@/i18n/routing";
 import LinkButton from "@/components/ui/LinkButton";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import { useColorMode } from "@/components/ThemeRegistry";
+import NotificationBell from "@/components/notification/NotificationBell";
 
 import type { Session } from "next-auth";
 
@@ -124,6 +125,9 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
             </IconButton>
           </Link>
         </Box>
+
+        {/* 通知ベル (ログイン時のみ) */}
+        {session?.user && <NotificationBell />}
 
         {/* テーマ切替 */}
         <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"}>

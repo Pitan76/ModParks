@@ -13,6 +13,7 @@ import { useTranslations, useFormatter, useLocale } from "next-intl";
 import Tooltip from "@mui/material/Tooltip";
 import { formatCompactNumber } from "@/lib/utils/format";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
+import ProjectSubscribeButton from "./ProjectSubscribeButton";
 import AddToCollectionButton from "./AddToCollectionButton";
 import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 
@@ -52,15 +53,18 @@ export interface ProjectDetailHeaderProps {
   isLoggedIn: boolean;
   /** ログインユーザーID（リスト追加等に使用） */
   currentUserId?: string;
+  /** 新リリース通知を購読しているか */
+  isSubscribed?: boolean;
 }
 
-export default function ProjectDetailHeader({ 
-  project: p, 
-  canEdit, 
-  isFavorited, 
-  favoritesCount, 
+export default function ProjectDetailHeader({
+  project: p,
+  canEdit,
+  isFavorited,
+  favoritesCount,
   isLoggedIn,
-  currentUserId
+  currentUserId,
+  isSubscribed = false
 }: ProjectDetailHeaderProps) {
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
@@ -137,6 +141,9 @@ export default function ProjectDetailHeader({
                 isLoggedIn={isLoggedIn}
                 variant="icon"
               />
+              {isLoggedIn && (
+                <ProjectSubscribeButton projectId={p.id} initialSubscribed={isSubscribed} />
+              )}
               {isLoggedIn && currentUserId && (
                 <AddToCollectionButton projectId={p.id} userId={currentUserId} variant="icon" />
               )}
