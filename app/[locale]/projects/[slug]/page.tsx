@@ -20,6 +20,7 @@ import ProjectDependencies from "@/components/project/ProjectDependencies";
 import ProjectComments from "@/components/project/ProjectComments";
 import LinkButton from "@/components/ui/LinkButton";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
+import AdSlot from "@/components/ads/AdSlot";
 import AddIcon from "@mui/icons-material/Add";
 import { SITE_URL } from "@/lib/config";
 
@@ -194,6 +195,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         {/* ─── 右カラム: サイドバー ─────────────────────────────────────── */}
         <Grid size={{ xs: 12, md: 4 }}>
           <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
+          <Box sx={{ mt: 3 }}>
+            <AdSlot slot="project-sidebar" minHeight={250} />
+          </Box>
         </Grid>
       </Grid>
     </Container>
