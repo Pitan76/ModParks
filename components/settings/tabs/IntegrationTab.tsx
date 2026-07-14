@@ -73,11 +73,7 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
 
       <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.curseforgeDesc")}</Typography>
-      <CurseForgeVerify
-        projectId={curseforgeProjectId}
-        verified={curseforgeVerified}
-        pendingCode={curseforgeVerifyCode}
-      />
+      <CurseForgeVerify projectId={curseforgeProjectId} verified={curseforgeVerified} pendingCode={curseforgeVerifyCode} />
 
       <Divider sx={{ my: 4 }} />
 

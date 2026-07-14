@@ -673,12 +673,12 @@
       "curseforgeDesc": "Once you verify ownership, you can bulk-import that author's projects."
     },
     "cfVerify": {
-      "title": "CurseForge Ownership Verification",
-      "desc": "Generate a verification code and temporarily add it to either the Summary or one of the Source / Issues / Wiki links of your CurseForge project, then press \"Verify\". Verification is one-time; you may remove the code once done.",
+      "title": "Ownership Verification",
+      "desc": "Generate a verification code and temporarily add it to the Summary of your CurseForge project, then wait a few minutes and press \"Verify\". Verification is one-time; you may remove the code once done.",
       "projectIdLabel": "CurseForge Project ID",
       "projectIdHelp": "Enter a single Mod ID that you own (e.g. 697926)",
       "generate": "Generate code",
-      "codeInstruction": "Paste this code into your project's summary or a link and save, then press \"Verify\".",
+      "codeInstruction": "Paste this code into your project's summary and save, then press \"Verify\".",
       "confirm": "Verify",
       "verified": "Ownership verified.",
       "verifiedNow": "Ownership verified. You may now remove the code.",
@@ -686,7 +686,7 @@
         "projectIdRequired": "Please enter a Project ID.",
         "notStarted": "Please generate a verification code first.",
         "projectNotFound": "The specified project was not found. Please check the Project ID.",
-        "codeNotFound": "The verification code was not found on the project. Make sure you added it to the summary or a link and saved (it may take a while to propagate).",
+        "codeNotFound": "The verification code was not found on the project. Make sure you added it to the summary and saved (it may take a while to propagate).",
         "noAuthor": "Could not retrieve the project's author information."
       }
     },

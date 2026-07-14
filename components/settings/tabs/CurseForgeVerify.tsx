@@ -9,14 +9,14 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 
-interface CurseForgeVerifyProps {
+interface Props {
   projectId: string;
   verified: boolean;
   pendingCode: string;
 }
 
 /** CurseForge プロジェクトの所有をチャレンジコードで確認するUI */
-export default function CurseForgeVerify({ projectId, verified, pendingCode }: CurseForgeVerifyProps) {
+export default function CurseForgeVerify({ projectId, verified, pendingCode }: Props) {
   const t = useTranslations("Settings.cfVerify");
   const [pid, setPid] = useState(projectId || "");
   const [code, setCode] = useState(pendingCode || "");
@@ -41,7 +41,7 @@ export default function CurseForgeVerify({ projectId, verified, pendingCode }: C
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ mb: 1 }}>{t("title")}</Typography>
+      {/* <Typography variant="h6" sx={{ mb: 1 }}>{t("title")}</Typography> */}
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("desc")}</Typography>
 
       {msg && <Alert severity={msg.type} sx={{ mb: 2 }}>{msg.text}</Alert>}
