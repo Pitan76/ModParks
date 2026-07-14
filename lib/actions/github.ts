@@ -59,19 +59,13 @@ export async function listGithubReleases(projectSlug: string): Promise<
 }
 
 /**
- * 連携している GitHub リポジトリの Release から新しいバージョンを取り込む。
- * releaseId 未指定なら最新の安定版 Release を対象とする。
+ * 内部システム用のインポート関数（セッション・権限チェックなし）。Webhook等から使用する。
  */
-export async function importGithubRelease(
-  projectSlug: string,
+export async function importGithubReleaseSystem(
+  db: any,
+  project: { id: string; slug: string; githubRepo: string | null },
   releaseId?: number
 ): Promise<{ success: true; versionId: string; versionNumber: string } | { error: string }> {
-  const { db, session } = await getAuthenticatedDb();
-
-  const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
-  if (!project) return { error: "Project not found" };
-  await assertProjectAccess(db, project, session);
-
   const repo = project.githubRepo ? normalizeGithubRepo(project.githubRepo) : null;
   if (!repo) return { error: "No valid GitHub repository linked to this project." };
 
@@ -154,6 +148,23 @@ export async function importGithubRelease(
 
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
 
-  revalidatePath(`/projects/${projectSlug}`);
+  revalidatePath(`/projects/${project.slug}`);
   return { success: true, versionId: id, versionNumber };
+}
+
+/**
+ * 連携している GitHub リポジトリの Release から新しいバージョンを取り込む。
+ * releaseId 未指定なら最新の安定版 Release を対象とする。
+ */
+export async function importGithubRelease(
+  projectSlug: string,
+  releaseId?: number
+): Promise<{ success: true; versionId: string; versionNumber: string } | { error: string }> {
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
+  if (!project) return { error: "Project not found" };
+  await assertProjectAccess(db, project, session);
+
+  return importGithubReleaseSystem(db, project, releaseId);
 }

@@ -1,0 +1,34 @@
+====== GitHub Webhook 連携 ======
+
+ModParksでは、連携しているGitHubリポジトリで新しいReleaseが作成された際に、自動的にModParks上のプロジェクトにも新しいVersionを追加する仕組みを提供しています。
+
+===== 機能の概要 =====
+
+プロジェクトの「GitHub リポジトリ」設定（例: ''owner/repo''）が正しく行われている場合、GitHub側でWebhookを設定するだけで、手動でファイルをアップロードしたり取り込みボタンを押したりする手間を省くことができます。
+
+  * GitHubで新しいReleaseが公開（''published'' または ''released'' イベント）されると、ModParksがそれを受信します。
+  * 設定されているリポジトリ情報を元に該当するプロジェクトを探し、自動的に最新のRelease（.jar や .zip アセット）をダウンロード・解析します。
+  * ModParks側に新しいVersionとして自動的に登録されます。
+
+===== Webhook の設定方法 =====
+
+あなたのプロジェクトを自動同期させるには、連携しているGitHubリポジトリの設定画面からWebhookを追加します。
+
+  - GitHubリポジトリの **Settings** > **Webhooks** を開きます。
+  - **Add webhook** ボタンをクリックします。
+  - **Payload URL** に以下のURLを入力します：
+    ''https://modparks.pitan76.net/api/webhooks/github''
+  - **Content type** は ''application/json'' を選択します。
+  - **Secret** は現在ModParks側では検証に必須としていないため、空のままで構いません。（※将来的に指定が可能になる場合があります）
+  - **Which events would you like to trigger this webhook?** の項目で、**Let me select individual events.** を選択します。
+  - リストの中から **Releases** にのみチェックを入れます（他のイベントは不要です）。
+  - **Active** にチェックが入っていることを確認し、**Add webhook** をクリックします。
+
+設定は以上です。今後このリポジトリで新しいReleaseを公開するたびに、ModParksに自動的にVersionが追加されます。
+
+===== 注意事項 =====
+
+  * Webhook経由で自動同期されるファイルは、通常のアップロードと同じく最大 50MB の制限があります。
+  * ''.jar'' ファイルが優先してダウンロード・解析されます。見つからない場合は ''.zip'' ファイルがフォールバックとして使用されます。
+  * プレリリース（Prerelease）や下書き（Draft）の状態のReleaseは自動同期の対象外となるか、安定版として扱われない場合があります。
+  * もしWebhookの送信に失敗した、または何らかの理由で自動登録されなかった場合は、プロジェクトのバージョン管理画面から手動で「GitHub Releaseから取り込む」機能を利用してインポートすることも可能です。
