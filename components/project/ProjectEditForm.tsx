@@ -134,11 +134,12 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
                 <MenuItem value="draft">{tCommon("visibility.draft")}</MenuItem>
               </Select>
             </FormControl>
-            <FormControlLabel
-              control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} />}
-              label={t("fields.commentsEnabled")}
-            />
           </ProjectFormFields>
+
+          <FormControlLabel
+            control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} />}
+            label={t("fields.commentsEnabled")}
+          />
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
             <Button 

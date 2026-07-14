@@ -17,6 +17,18 @@ async function getIdeaTarget(db: any, ideaId: string) {
     .get();
 }
 
+/** 返信先の正規化（1階層のみ）。親コメントIDと親投稿者IDを返す */
+async function resolveCommentParent(db: any, ideaId: string, rawParentId: string | null) {
+  if (!rawParentId) return { parentId: null as string | null, parentAuthorId: null as string | null };
+  const parent = await db
+    .select({ id: ideaComments.id, authorId: ideaComments.authorId, parentId: ideaComments.parentId })
+    .from(ideaComments)
+    .where(and(eq(ideaComments.id, rawParentId), eq(ideaComments.ideaId, ideaId)))
+    .get();
+  if (!parent) return { parentId: null, parentAuthorId: null };
+  return { parentId: parent.parentId ?? parent.id, parentAuthorId: parent.authorId };
+}
+
 // ─── アイデア作成 ─────────────────────────────────────────────────────────────
 
 export async function createIdea(formData: FormData) {
@@ -170,22 +182,27 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
 
   const { content } = parsed.data;
   const id = createId();
+  const rawParentId = formData.get("parentId") as string | null;
 
   try {
+    const { parentId, parentAuthorId } = await resolveCommentParent(db, ideaId, rawParentId);
+
     await db.insert(ideaComments).values({
       id,
       ideaId,
       content,
       authorId: userId,
+      parentId,
     });
 
     const idea = await getIdeaTarget(db, ideaId);
     if (idea) {
-      await notifyToUser(db, idea.authorId, userId, "idea_comment", {
-        ideaId,
-        ideaTitle: idea.title,
-        actorName: await resolveActorName(db, userId),
-      });
+      const actorName = await resolveActorName(db, userId);
+      if (parentAuthorId) {
+        await notifyToUser(db, parentAuthorId, userId, "comment_reply", { ideaId, ideaTitle: idea.title, actorName });
+      } else {
+        await notifyToUser(db, idea.authorId, userId, "idea_comment", { ideaId, ideaTitle: idea.title, actorName });
+      }
     }
 
     revalidatePath(`/ideas/${ideaId}`);
