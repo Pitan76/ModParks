@@ -44,7 +44,7 @@
     "hero": {
       "title": "マイクラのMOD、プラグインを",
       "titleHighlight": "みんなで一緒につくったり、探したりしてみませんか？",
-      "description": "ModParksは日本発のMinecraft Java Edition向けMod/Pluginプラットフォームです。",
+      "description": "ModParksは日本発のMinecraft Java Edition向けMOD/プラグインプラットフォームです。",
       "searchPlaceholder": "MOD/プラグインを検索..."
     },
     "newProjects": "新着",
@@ -78,7 +78,7 @@
       "sourceUrl": "ソースコードのURL (任意)",
       "tags": "タグ (入力/選択)",
       "mcVersions": "対応するMinecraftのバージョン",
-      "loaders": "対応するModローダー",
+      "loaders": "対応するMODローダー",
       "status": "公開状態",
       "slugRule": "半角英数字とハイフンのみ",
       "modrinthId": "Modrinth ID (任意)",
@@ -88,7 +88,7 @@
       "githubRepo": "GitHub リポジトリ",
       "githubRepoHelper": "Release から自動でバージョンを取り込めます（例: Pitan76/modparks）",
       "linksSection": "リンク",
-      "externalConnectionsTitle": "外部連携 (外部からのダウンロード数同期などに使用されます)",
+      "externalConnectionsTitle": "外部連携 (外部からのDL数同期などに使用されます)",
       "customLinks": {
         "title": "カスタムリンク",
         "linkTitle": "タイトル",
@@ -117,11 +117,11 @@
     },
     "explore": {
       "title": "プロジェクトを探す",
-      "description": "様々なModやプラグインを見つけましょう。"
+      "description": "様々なMODやプラグインを見つけましょう。"
     },
     "myProjects": {
       "title": "プロジェクト",
-      "description": "あなたが作成したModやプラグインの一覧です。(下書きも表示されます)"
+      "description": "あなたが作成したMODやプラグインの一覧です。(下書きも表示されます)"
     },
     "create": {
       "title": "新規プロジェクト",
@@ -340,13 +340,13 @@
     },
     "backToIdeas": "アイデア一覧へ戻る",
     "noIdeas": "まだアイデアがありません",
-    "postFirstIdea": "あなたの「こんなModが欲しい！」を投稿してみましょう！",
+    "postFirstIdea": "あなたの「こんなMODが欲しい！」を投稿してみましょう！",
     "backToList": "アイデア一覧に戻る",
     "postIdeaTitle": "アイデアを投稿",
     "fields": {
       "title": "タイトル",
-      "titlePlaceholder": "例: 建築が楽になる魔法の杖を追加するMod",
-      "content": "どんなMod/Pluginが欲しいですか？",
+      "titlePlaceholder": "例: 建築が楽になる魔法の杖を追加するMOD",
+      "content": "どんなMOD/プラグインが欲しいですか？",
       "contentPlaceholder": "具体的な機能や、なぜ欲しいのかを書いてみましょう。",
       "visibility": "公開範囲",
       "visibilityOptions": {
@@ -359,7 +359,7 @@
     "submitting": "送信中...",
     "submitIdea": "アイデアを投稿する",
     "statusLabel": "ステータス: {status}",
-    "resolvedBy": "このアイデアを実現したMod",
+    "resolvedBy": "このアイデアを実現したMOD",
     "viewProject": "プロジェクトを見る",
     "comments": "コメント ({count})",
     "loginToComment": "コメントするにはログインが必要です。",
@@ -698,7 +698,7 @@
       "title": "所有者確認",
       "desc": "確認コードを発行し、ご自身のCurseForgeプロジェクトの「Summary」に一時的に記載してから数分ほど待ってから「確認する」を押してください。確認は一度きりで、完了後はコードを削除して構いません。",
       "projectIdLabel": "CurseForge Project ID",
-      "projectIdHelp": "ご自身のModのIDを1つだけ入力してください（例: 697926）",
+      "projectIdHelp": "あなたのプロジェクトのIDもしくはスラッグを1つだけ入力してください（例: 697926）",
       "generate": "確認コードを発行",
       "codeInstruction": "このコードを対象プロジェクトのSummaryに貼り付けて保存し、「確認する」を押してください。",
       "confirm": "確認する",
@@ -717,10 +717,10 @@
     },
     "security": {
       "title": "セキュリティ",
-      "twoFactorAuth": "2段階認証 (2FA)",
-      "twoFactorDesc": "アカウントのセキュリティを強化します。",
-      "twoFactorEnabled": "2段階認証は有効です",
-      "twoFactorDisabled": "2段階認証は無効です",
+      "twoFactorAuth": "2段階認証",
+      "twoFactorDesc": "ログイン時、6桁のコードを求められるOTP認証です。",
+      "twoFactorEnabled": "2FAは有効です",
+      "twoFactorDisabled": "2FAは無効です",
       "enableTwoFactor": "有効にする",
       "disableTwoFactor": "無効にする",
       "twoFactorSetupTitle": "2段階認証のセットアップ",
@@ -728,8 +728,8 @@
       "verifyAndEnable": "認証して有効化",
       "verificationCode": "6桁の認証コード",
       "invalidCode": "認証コードが間違っています",
-      "passkeys": "パスキー (WebAuthn)",
-      "passkeysDesc": "生体認証（指紋、顔認証）やセキュリティキーを使用してログインします。",
+      "passkeys": "パスキー",
+      "passkeysDesc": "生体認証やセキュリティキーなどを用いてログインします。",
       "registerPasskey": "パスキーを登録",
       "noPasskeys": "登録されているパスキーはありません"
     },
@@ -767,7 +767,7 @@
       "setBtn": "設定する",
       "successSetPassword": "パスワードを設定しました",
       "exportData": "データのエクスポート",
-      "exportDataDesc": "アカウントに関するデータを様々な形式でダウンロードできます。",
+      "exportDataDesc": "アカウントに関するデータをダウンロードできます。",
       "exportJson": "JSON形式",
       "exportCsv": "CSV形式",
       "exportMd": "Markdown形式",
@@ -786,7 +786,7 @@
   },
   "Footer": {
     "about": "ModParksについて",
-    "description": "Minecraft Java Edition向けMod/Pluginプラットフォーム",
+    "description": "Minecraft Java Edition向けMOD/プラグインプラットフォーム",
     "docs": "ドキュメント",
     "support": "サポート",
     "contact": "お問い合わせ",
