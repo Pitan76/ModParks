@@ -158,7 +158,7 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
                 fullWidth
                 size="small"
                 value={iconUrl}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIconUrl(e.target.value)}
+                onChange={e => setIconUrl(e.target.value)}
                 placeholder="https://..."
                 helperText="※アップロード機能は将来実装予定です。現在はURLを入力してください。"
               />
