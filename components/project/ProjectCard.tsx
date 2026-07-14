@@ -152,11 +152,15 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 {project.description}
               </Typography>
 
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-                <Typography variant="caption" color="text.secondary">
+              <Box sx={{ display: "flex", flexDirection: "column", mt: 0.5, minWidth: 0 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  noWrap
+                  sx={{ display: "block", maxWidth: "100%" }}
+                >
                   by {project.authorDisplayName || project.authorUsername || "Unknown"}
                 </Typography>
-                <Typography variant="caption" color="text.disabled">•</Typography>
                 <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
               </Box>
             </Box>
@@ -188,7 +192,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
             />
             
             {safeTags.length > 0 && (
-              <Box sx={{ display: "flex", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
                 {safeTags.slice(0, isGrid ? 2 : 3).map((tag) => (
                   <Chip
                     key={tag}
@@ -206,11 +210,12 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 ))}
                 {safeTags.length > (isGrid ? 2 : 3) && (
                   <Tooltip title={safeTags.slice(isGrid ? 2 : 3).map(getTagLabel).join(", ")} arrow placement="top">
-                    <span>
-                      <Box component="span" sx={{ ml: 0.5, cursor: "help", color: "text.disabled", fontSize: "0.75rem" }}>
-                        +{safeTags.length - (isGrid ? 2 : 3)}
-                      </Box>
-                    </span>
+                    <Box
+                      component="span"
+                      sx={{ display: "inline-flex", alignItems: "center", height: 18, cursor: "help", color: "text.disabled", fontSize: "0.65rem", lineHeight: 1 }}
+                    >
+                      +{safeTags.length - (isGrid ? 2 : 3)}
+                    </Box>
                   </Tooltip>
                 )}
               </Box>
