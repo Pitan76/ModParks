@@ -16,6 +16,7 @@ import { SITE_URL } from "@/lib/config";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#121212",
 };
 
 export const metadata: Metadata = {
@@ -26,6 +27,15 @@ export const metadata: Metadata = {
   },
   description: "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
   keywords: ["Minecraft", "Mod", "Plugin", "Java Edition", "Fabric", "Forge", "Paper"],
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "ModParks",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type:    "website",
     locale:  "ja_JP",

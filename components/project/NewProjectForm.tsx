@@ -9,7 +9,6 @@ import Button from "@mui/material/Button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { createProject } from "@/lib/actions/project";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";

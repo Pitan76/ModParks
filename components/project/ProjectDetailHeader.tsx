@@ -1,17 +1,11 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
-import Avatar from "@mui/material/Avatar";
 import EditableProjectIcon from "./EditableProjectIcon";
-import EditIcon from "@mui/icons-material/Edit";
-import DownloadIcon from "@mui/icons-material/Download";
 import LinkButton from "@/components/ui/LinkButton";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
-import { useTranslations, useFormatter, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import Tooltip from "@mui/material/Tooltip";
-import { formatCompactNumber } from "@/lib/utils/format";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
 import ProjectSubscribeButton from "./ProjectSubscribeButton";
 import AddToCollectionButton from "./AddToCollectionButton";

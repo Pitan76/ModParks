@@ -48,7 +48,7 @@ export async function GET() {
   <channel>
     <title>ModParks</title>
     <link>${SITE_URL}</link>
-    <description>Minecraft Java Edition向けのMod/Pluginプラットフォーム、新着および更新されたプロジェクト</description>
+    <description>Minecraft Java Edition向けのMOD/プラグイン配布プラットフォーム、新着および更新されたプロジェクト</description>
     <language>ja</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml" />

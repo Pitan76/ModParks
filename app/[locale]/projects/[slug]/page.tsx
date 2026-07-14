@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
   }
 
   const title = `${project.name}`;
-  const description = project.description || "Minecraft Java Edition向けのMod/Plugin";
+  const description = project.description || "Minecraft Java Edition向けのMOD/プラグイン";
   const imageUrl = project.iconUrl || SITE_URL + "/icon.png";
 
   return {

@@ -2,8 +2,8 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projectDependencies, projects, projectMembers, users } from "@/db/schema";
-import { eq, and, or } from "drizzle-orm";
+import { projectDependencies, projects, projectMembers } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export type DependencyType = "required" | "optional" | "incompatible" | "embedded";
