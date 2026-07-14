@@ -13,7 +13,7 @@
     "db:studio": "drizzle-kit studio",
     "cf:dev": "wrangler dev",
     "cf:deploy": "opennextjs-cloudflare build && wrangler deploy",
-    "sync2local": "rm -rf .wrangler/state/v3/d1 && CI=true wrangler d1 migrations apply modparks-db --local && wrangler d1 export modparks-db --remote --output=remote_data.sql --no-schema -y && wrangler d1 execute modparks-db --local --command=\"DELETE FROM d1_migrations\" -y && wrangler d1 execute modparks-db --local --file=remote_data.sql -y && rm remote_data.sql"
+    "sync2local": "node -e \"require('fs').rmSync('.wrangler/state/v3/d1', {recursive:true,force:true})\" && CI=true wrangler d1 migrations apply modparks-db --local && wrangler d1 export modparks-db --remote --output=remote_data.sql --no-schema -y && wrangler d1 execute modparks-db --local --command=\"DELETE FROM d1_migrations\" -y && wrangler d1 execute modparks-db --local --file=remote_data.sql -y && node -e \"require('fs').rmSync('remote_data.sql', {force:true})\""
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",

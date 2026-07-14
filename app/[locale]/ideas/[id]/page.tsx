@@ -102,9 +102,9 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
     .all();
 
   return (
-    <Container maxWidth="md" sx={{ py: 5 }}>
+    <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
       <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary", flexWrap: "wrap", minWidth: 0 }}>
           <LinkButton href="/" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
             <HomeIcon fontSize="small" />
           </LinkButton>
@@ -113,7 +113,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             {tNav("ideas")}
           </LinkButton>
           <span>/</span>
-          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>
+          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "60vw" }}>
             {ideaData.title}
           </Typography>
         </Box>
@@ -156,7 +156,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             )}
           </Box>
 
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 3 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 3, fontSize: { xs: "1.6rem", sm: "2.125rem" }, wordBreak: "break-word", overflowWrap: "anywhere" }}>
             {ideaData.title}
           </Typography>
 
@@ -212,9 +212,9 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {linkedVersions.map((v) => (
               <Card key={v.versionId} variant="outlined" sx={{ borderRadius: 2, bgcolor: "success.50", borderColor: "success.main" }}>
-                <CardContent sx={{ py: 2, display: "flex", justifyContent: "space-between", alignItems: "center", "&:last-child": { pb: 2 } }}>
-                  <Box>
-                    <Typography variant="body1" sx={{ fontWeight: 600, color: "success.dark" }}>
+                <CardContent sx={{ py: 2, display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "stretch", sm: "center" }, gap: 2, "&:last-child": { pb: 2 } }}>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: "success.dark", wordBreak: "break-word" }}>
                       {v.projectName} (v{v.versionNumber})
                     </Typography>
                     {v.projectDescription && (
@@ -223,7 +223,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                       </Typography>
                     )}
                   </Box>
-                  <LinkButton variant="outlined" size="small" href={`/projects/${v.projectSlug}`}>
+                  <LinkButton variant="outlined" size="small" href={`/projects/${v.projectSlug}`} sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
                     {tIdea("viewProject")}
                   </LinkButton>
                 </CardContent>

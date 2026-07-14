@@ -68,7 +68,7 @@ export default function ProjectDetailHeader({
   return (
     <>
       <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary", flexWrap: "wrap", minWidth: 0 }}>
           <LinkButton href="/" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
             <HomeIcon fontSize="small" />
           </LinkButton>
@@ -77,7 +77,7 @@ export default function ProjectDetailHeader({
             {tCommon("projects")}
           </LinkButton>
           <span>/</span>
-          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>
+          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "60vw" }}>
             {p.name}
           </Typography>
         </Box>
@@ -95,7 +95,7 @@ export default function ProjectDetailHeader({
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 800, wordBreak: "break-word", overflowWrap: "anywhere" }}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 800, wordBreak: "break-word", overflowWrap: "anywhere", fontSize: { xs: "1.5rem", sm: "2.125rem" } }}>
               {p.name}
             </Typography>
             <Chip

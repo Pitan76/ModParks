@@ -125,8 +125,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   // ダウンロード数の合算 (ローカル + 外部) はデータベースの totalDownloads を利用する
 
   return (
-    <Container maxWidth="lg" sx={{ py: 5 }}>
-      <Grid container spacing={4}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
+      <Grid container spacing={{ xs: 3, md: 4 }}>
         {/* ─── 左カラム: プロジェクト情報 ──────────────────────────────── */}
         <Grid size={{ xs: 12, md: 8 }} sx={{ minWidth: 0, maxWidth: "100%" }}>
           
@@ -150,7 +150,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             }
             filesContent={
               <Box>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "stretch", sm: "center" }, gap: 2, mb: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     {t("versions")}
                   </Typography>
@@ -159,6 +159,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                       variant="contained"
                       startIcon={<AddIcon />}
                       href={`/projects/${p.slug}/versions/new`}
+                      sx={{ whiteSpace: "nowrap" }}
                     >
                       {t("header.addVersion")}
                     </LinkButton>

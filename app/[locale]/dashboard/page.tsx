@@ -99,13 +99,13 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       borderRadius: 3,
       border: "none"
     }}>
-      <CardContent sx={{ position: "relative", overflow: "hidden", p: 3, height: "100%" }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, position: "relative", zIndex: 1 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: "uppercase", opacity: 0.9, letterSpacing: 0.5 }}>
+      <CardContent sx={{ position: "relative", overflow: "hidden", p: { xs: 2, sm: 3 }, height: "100%" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: { xs: 1, sm: 2 }, position: "relative", zIndex: 1 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: "uppercase", opacity: 0.9, letterSpacing: 0.5, fontSize: { xs: "0.7rem", sm: "0.875rem" }, lineHeight: 1.3 }}>
             {title}
           </Typography>
         </Box>
-        <Typography variant="h3" sx={{ fontWeight: 800, position: "relative", zIndex: 1 }}>
+        <Typography variant="h3" sx={{ fontWeight: 800, position: "relative", zIndex: 1, fontSize: { xs: "1.75rem", sm: "3rem" } }}>
           {value.toLocaleString()}
         </Typography>
         <Box sx={{ 
@@ -144,23 +144,23 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 6 }}>
-      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, mb: 4, gap: 2 }}>
-        <Typography variant="h4" sx={{ fontWeight: 900 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "stretch", sm: "center" }, mb: 4, gap: 2 }}>
+        <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: "1.75rem", sm: "2.125rem" } }}>
           {t("title")}
         </Typography>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <LinkButton href="/ideas/new" variant="outlined" color="primary" startIcon={<AddIcon />} sx={{ borderRadius: 2, px: 3, fontWeight: "bold", textTransform: "none" }}>
+        <Box sx={{ display: "flex", gap: { xs: 1, sm: 2 }, flexWrap: "wrap" }}>
+          <LinkButton href="/ideas/new" variant="outlined" color="primary" startIcon={<AddIcon />} sx={{ flex: { xs: 1, sm: "none" }, borderRadius: 2, px: { xs: 2, sm: 3 }, fontWeight: "bold", textTransform: "none", whiteSpace: "nowrap" }}>
             New Idea
           </LinkButton>
-          <LinkButton href="/projects/new" variant="contained" color="primary" startIcon={<AddIcon />} sx={{ borderRadius: 2, px: 3, fontWeight: "bold", textTransform: "none" }}>
+          <LinkButton href="/projects/new" variant="contained" color="primary" startIcon={<AddIcon />} sx={{ flex: { xs: 1, sm: "none" }, borderRadius: 2, px: { xs: 2, sm: 3 }, fontWeight: "bold", textTransform: "none", whiteSpace: "nowrap" }}>
             {tNav("newProject")}
           </LinkButton>
         </Box>
       </Box>
 
       {/* Stats Grid */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 4, md: 6 } }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard 
             title={t("stats.projects")} 
@@ -196,15 +196,15 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       </Grid>
 
       {/* 2-Column Layout */}
-      <Grid container spacing={4}>
+      <Grid container spacing={{ xs: 3, md: 4 }}>
         {/* Main Content (Left) */}
         <Grid size={{ xs: 12, lg: 8 }}>
-          <Stack spacing={6}>
+          <Stack spacing={{ xs: 4, md: 6 }}>
             
             {/* My Projects */}
             <Box>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, fontSize: { xs: "1.25rem", sm: "1.5rem" }, display: "flex", alignItems: "center", minWidth: 0 }}>
                   <FolderIcon sx={{ verticalAlign: "middle", mr: 1 }} />
                   {tNav("myProjects")}
                 </Typography>
@@ -214,7 +214,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               </Box>
               <Card sx={{ borderRadius: 3 }}>
                 <TableContainer>
-                  <Table>
+                  <Table sx={{ minWidth: 480 }}>
                     <TableHead sx={{ bgcolor: "action.hover" }}>
                       <TableRow>
                         <TableCell sx={{ fontWeight: "bold" }}>Project Name</TableCell>
@@ -257,7 +257,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             {/* My Ideas */}
             <Box>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, fontSize: { xs: "1.25rem", sm: "1.5rem" }, display: "flex", alignItems: "center", minWidth: 0 }}>
                   <LightbulbIcon sx={{ verticalAlign: "middle", mr: 1 }} />
                   My Ideas
                 </Typography>
@@ -267,7 +267,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               </Box>
               <Card sx={{ borderRadius: 3 }}>
                 <TableContainer>
-                  <Table>
+                  <Table sx={{ minWidth: 420 }}>
                     <TableHead sx={{ bgcolor: "action.hover" }}>
                       <TableRow>
                         <TableCell sx={{ fontWeight: "bold" }}>Idea Title</TableCell>
@@ -308,7 +308,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
 
         {/* Sidebar Content (Right) */}
         <Grid size={{ xs: 12, lg: 4 }}>
-          <Stack spacing={6}>
+          <Stack spacing={{ xs: 4, md: 6 }}>
             {/* Recent Comments */}
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>

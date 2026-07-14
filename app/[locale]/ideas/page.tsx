@@ -48,10 +48,10 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
     .all();
 
   return (
-    <Container maxWidth="md" sx={{ py: 6 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
+    <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "stretch", sm: "center" }, gap: 2, mb: 4 }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1, fontSize: { xs: "1.6rem", sm: "2.125rem" } }}>
             {tIdea("title")}
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -62,7 +62,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
           href="/ideas/new"
           variant="contained"
           startIcon={<AddIcon />}
-          sx={{ flexShrink: 0 }}
+          sx={{ flexShrink: 0, width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
         >
           {tIdea("postIdea")}
         </LinkButton>
@@ -74,13 +74,13 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
             <LinkCardActionArea href={`/ideas/${idea.id}`} sx={{ p: 3 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5, wordBreak: "break-word", overflowWrap: "anywhere" }}>
                     {idea.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {idea.content}
                   </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 3 }, flexWrap: "wrap" }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
                       <FavoriteIcon fontSize="small" />
                       <Typography variant="body2">{idea.likesCount}</Typography>

@@ -32,22 +32,22 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
   });
 
   return (
-    <Container maxWidth="lg" sx={{ py: 5 }}>
-      <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "flex-start", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }} gutterBottom>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
+      <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }} gutterBottom>
             プロジェクト管理
           </Typography>
           <Typography variant="body1" color="text.secondary">
             あなたのすべてのプロジェクトを管理し、ステータス変更や一括削除などの操作を行えます。
           </Typography>
         </Box>
-        
-        <Box sx={{ display: "flex", gap: 2, flexShrink: 0 }}>
+
+        <Box sx={{ display: "flex", gap: { xs: 1, sm: 2 }, flexShrink: 0, flexWrap: "wrap" }}>
           <LinkButton
             href="/projects/import"
             variant="outlined"
-            sx={{ flexShrink: 0 }}
+            sx={{ flex: { xs: 1, sm: "none" }, whiteSpace: "nowrap" }}
           >
             一括インポート
           </LinkButton>
@@ -55,7 +55,7 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
             href="/projects/new"
             variant="contained"
             startIcon={<AddIcon />}
-            sx={{ flexShrink: 0 }}
+            sx={{ flex: { xs: 1, sm: "none" }, whiteSpace: "nowrap" }}
           >
             {tProject("newProject")}
           </LinkButton>

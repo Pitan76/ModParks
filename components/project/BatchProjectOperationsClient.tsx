@@ -120,7 +120,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
     <Box>
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-      <Box sx={{ mb: 2, display: "flex", gap: 2, alignItems: "center" }}>
+      <Box sx={{ mb: 2, display: "flex", gap: { xs: 1, sm: 2 }, alignItems: "center", flexWrap: "wrap" }}>
         <Button
           variant="contained"
           startIcon={<EditIcon />}
@@ -159,7 +159,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
       </Box>
 
       <TableContainer component={Paper} variant="outlined">
-        <Table>
+        <Table sx={{ minWidth: 640 }}>
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">

@@ -77,11 +77,11 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   ]);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 5 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
       {/* ページタイトル */}
-      <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "flex-start", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }} gutterBottom>
+      <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }} gutterBottom>
             {author === "me" ? tProject("myProjects.title") : tProject("explore.title")}
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -96,7 +96,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
             <LinkButton
               href="/projects/manage"
               variant="contained"
-              sx={{ flexShrink: 0 }}
+              sx={{ flexShrink: 0, width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
             >
               プロジェクト管理画面へ
             </LinkButton>

@@ -189,13 +189,13 @@ export default async function PublicProfilePage({ params, searchParams }: Public
   const displayTotalProjects = isOwner ? totalCount : totalProjects;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
-      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "center", sm: "flex-start" }, textAlign: { xs: "center", sm: "left" }, gap: 3, mb: 6 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "center", sm: "flex-start" }, textAlign: { xs: "center", sm: "left" }, gap: 3, mb: { xs: 4, md: 6 } }}>
         <Avatar src={user.avatarUrl || ""} sx={{ width: { xs: 88, sm: 100 }, height: { xs: 88, sm: 100 }, flexShrink: 0 }} />
         <Box sx={{ flex: 1, width: "100%", minWidth: 0 }}>
           <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "center", sm: "flex-start" }, gap: 2 }}>
             <Box sx={{ minWidth: 0 }}>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" }, wordBreak: "break-word", overflowWrap: "anywhere" }}>
                 {user.displayName || user.username}
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
@@ -285,8 +285,8 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2, mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0, fontSize: { xs: "1.3rem", sm: "1.5rem" } }}>
           {t("projects")} <Box component="span" sx={{ color: "text.secondary", fontSize: "1.1rem", fontWeight: "normal", ml: 0.5 }}>({displayTotalProjects})</Box>
         </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>

@@ -38,8 +38,8 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
   const isGitHubConnected = userAccounts.some(acc => acc.provider === "github");
 
   return (
-    <Container maxWidth="md" sx={{ py: 6 }}>
-      <Typography variant="h4" sx={{ mb: 4, fontWeight: 800 }}>
+    <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
+      <Typography variant="h4" sx={{ mb: 4, fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }}>
         {t("title")}
       </Typography>
       <SettingsClient
