@@ -1,7 +1,9 @@
 // ルートレイアウト
 // 実際のレイアウトは app/[locale]/layout.tsx で定義
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => {
+import { ReactNode } from "react";
+
+const RootLayout = ({ children }: { children: ReactNode }) => {
   return children;
 };
 

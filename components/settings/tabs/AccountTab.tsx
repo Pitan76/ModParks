@@ -6,14 +6,11 @@ import { signOut } from "next-auth/react";
 import { changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
+import FormTextField from "@/components/ui/form/FormTextField";
+import FormSelect from "@/components/ui/form/FormSelect";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -103,13 +100,17 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
 
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>{t("account.language")}</Typography>
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel id="locale-select-label">{t("account.languageLabel")}</InputLabel>
-          <Select labelId="locale-select-label" value={locale} label={t("account.languageLabel")} onChange={(e) => setLocale(e.target.value as "ja" | "en")}>
-            <MenuItem value="ja">🇯🇵 日本語</MenuItem>
-            <MenuItem value="en">🇺🇸 English</MenuItem>
-          </Select>
-        </FormControl>
+        <FormSelect
+          size="small"
+          label={t("account.languageLabel")}
+          value={locale}
+          onChange={(e) => setLocale(e.target.value as "ja" | "en")}
+          options={[
+            { value: "ja", label: "🇯🇵 日本語" },
+            { value: "en", label: "🇺🇸 English" },
+          ]}
+          formControlProps={{ sx: { minWidth: 200 } }}
+        />
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t("account.languageWarning")}</Typography>
       </Box>
       <Divider sx={{ my: 4 }} />
@@ -118,7 +119,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
         <Typography variant="h6" sx={{ mb: 1 }}>{t("account.changeId")}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.changeIdDesc")}</Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <TextField label={t("account.newId")} size="small" value={username} onChange={(e) => setUsername(e.target.value)} required />
+          <FormTextField label={t("account.newId")} size="small" value={username} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)} required />
           <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("account.updateBtn")}</Button>
         </Box>
       </Box>
@@ -128,8 +129,8 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
       <Box component="form" onSubmit={handleEmailChange} sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>{t("account.changeEmail")}</Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <TextField label={t("account.newEmail")} size="small" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          {hasPassword && <TextField label={t("account.currentPassword")} type="password" size="small" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} required />}
+          <FormTextField label={t("account.newEmail")} size="small" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} required />
+          {hasPassword && <FormTextField label={t("account.currentPassword")} type="password" size="small" value={emailPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmailPassword(e.target.value)} required />}
           <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("account.updateBtn")}</Button>
         </Box>
       </Box>
@@ -139,10 +140,10 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
       <Box component="form" onSubmit={handlePasswordChange} sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>{hasPassword ? t("account.changePassword") : t("account.setPassword")}</Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 300 }}>
-          {hasPassword && <TextField label={t("account.currentPassword")} type="password" size="small" value={oldPass} onChange={(e) => setOldPass(e.target.value)} required />}
-          <TextField label={t("account.newPassword")} type="password" size="small" value={newPass} onChange={(e) => setNewPass(e.target.value)} required />
-          <TextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} required />
-          {is2FAEnabled && <TextField label={t("security.verificationCode")} type="text" size="small" value={passwordTotpToken} onChange={(e) => setPasswordTotpToken(e.target.value)} required />}
+          {hasPassword && <FormTextField label={t("account.currentPassword")} type="password" size="small" value={oldPass} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOldPass(e.target.value)} required />}
+          <FormTextField label={t("account.newPassword")} type="password" size="small" value={newPass} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPass(e.target.value)} required />
+          <FormTextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPass(e.target.value)} required />
+          {is2FAEnabled && <FormTextField label={t("security.verificationCode")} type="text" size="small" value={passwordTotpToken} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPasswordTotpToken(e.target.value)} required />}
           <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", height: 40 }}>{hasPassword ? t("account.updateBtn") : t("account.setBtn")}</Button>
         </Box>
       </Box>
@@ -175,13 +176,13 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
           <Typography variant="body2" color="text.secondary" gutterBottom>
             アカウントを削除するには、パスワード（または2要素認証コード）を入力してください。
           </Typography>
-          <TextField
+          <FormTextField
             autoFocus
             fullWidth
             variant="outlined"
             type="password"
             value={deletePasswordOrToken}
-            onChange={(e) => setDeletePasswordOrToken(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeletePasswordOrToken(e.target.value)}
             placeholder="パスワードまたは認証コード"
             disabled={isDeletingAccount}
             autoComplete="off"

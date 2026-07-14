@@ -1,10 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+import FormSelect from "@/components/ui/form/FormSelect";
 import { useTranslations } from "next-intl";
 
 export default function ProfileSortSelect() {
@@ -22,18 +19,17 @@ export default function ProfileSortSelect() {
   };
 
   return (
-    <FormControl size="small" sx={{ minWidth: 140 }}>
-      <InputLabel id="profile-sort-label">{t("label")}</InputLabel>
-      <Select
-        labelId="profile-sort-label"
-        value={sort}
-        label={t("label")}
-        onChange={(e) => handleChange(e.target.value)}
-      >
-        <MenuItem value="updated">{t("updated")}</MenuItem>
-        <MenuItem value="downloads">{t("downloads")}</MenuItem>
-        <MenuItem value="newest">{t("newest")}</MenuItem>
-      </Select>
-    </FormControl>
+    <FormSelect
+      size="small"
+      label={t("label")}
+      value={sort}
+      onChange={(e) => handleChange(e.target.value as string)}
+      options={[
+        { value: "updated", label: t("updated") },
+        { value: "downloads", label: t("downloads") },
+        { value: "newest", label: t("newest") },
+      ]}
+      formControlProps={{ sx: { minWidth: 140 } }}
+    />
   );
 }

@@ -12,8 +12,8 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import IconButton from "@mui/material/IconButton";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import Checkbox from "@mui/material/Checkbox";
-import ListItemText from "@mui/material/ListItemText";
+import FormSelect from "@/components/ui/form/FormSelect";
+import FormMultiSelect from "@/components/ui/form/FormMultiSelect";
 import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition, useEffect, useRef } from "react";
 import AdvancedSearchDialog, { AdvancedSearchFilters } from "./AdvancedSearchDialog";
@@ -163,12 +163,11 @@ export default function ProjectSearchBar({
       </Box>
 
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel id="type-select-label">{t("filters.type")}</InputLabel>
-          <Select
-            labelId="type-select-label"
+        <Box sx={{ minWidth: 200 }}>
+          <FormMultiSelect
             id="type-filter"
-            multiple
+            size="small"
+            label={t("filters.type")}
             value={types}
             onChange={(e) => {
               const val = e.target.value;
@@ -176,55 +175,37 @@ export default function ProjectSearchBar({
               if (newTypes.length === 0) return; // Prevent unselecting all
               setTypes(newTypes);
             }}
-            input={<OutlinedInput label={t("filters.type")} />}
-            renderValue={(selected) => {
+            options={[
+              { value: "mod", label: t("filters.mod") },
+              { value: "plugin", label: t("filters.plugin") },
+              { value: "resourcepack", label: t("filters.resourcepack") },
+              { value: "datapack", label: t("filters.datapack") },
+              { value: "shader", label: t("filters.shader") },
+              { value: "modpack", label: t("filters.modpack") },
+            ]}
+            renderSelected={(selected) => {
               if (selected.length === 6) return t("filters.all");
               if (selected.length >= 4)
                 return selected.slice(0, 3).map((v) => t(`filters.${v}`)).join(", ") + "...";
-              
               return selected.map((v) => t(`filters.${v}`)).join(", ");
             }}
-          >
-            <MenuItem value="mod" id="filter-mod">
-              <Checkbox checked={types.indexOf("mod") > -1} />
-              <ListItemText primary={t("filters.mod")} />
-            </MenuItem>
-            <MenuItem value="plugin" id="filter-plugin">
-              <Checkbox checked={types.indexOf("plugin") > -1} />
-              <ListItemText primary={t("filters.plugin")} />
-            </MenuItem>
-            <MenuItem value="resourcepack" id="filter-resourcepack">
-              <Checkbox checked={types.indexOf("resourcepack") > -1} />
-              <ListItemText primary={t("filters.resourcepack")} />
-            </MenuItem>
-            <MenuItem value="datapack" id="filter-datapack">
-              <Checkbox checked={types.indexOf("datapack") > -1} />
-              <ListItemText primary={t("filters.datapack")} />
-            </MenuItem>
-            <MenuItem value="shader" id="filter-shader">
-              <Checkbox checked={types.indexOf("shader") > -1} />
-              <ListItemText primary={t("filters.shader")} />
-            </MenuItem>
-            <MenuItem value="modpack" id="filter-modpack">
-              <Checkbox checked={types.indexOf("modpack") > -1} />
-              <ListItemText primary={t("filters.modpack")} />
-            </MenuItem>
-          </Select>
-        </FormControl>
+          />
+        </Box>
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="sort-select-label-main">{t("sort.label")}</InputLabel>
-          <Select
-            labelId="sort-select-label-main"
-            value={appliedSort}
+        <Box sx={{ minWidth: 150 }}>
+          <FormSelect
+            id="sort-select"
+            size="small"
             label={t("sort.label")}
-            onChange={(e) => setAppliedSort(e.target.value)}
-          >
-            <MenuItem value="updated">{t("sort.updated")}</MenuItem>
-            <MenuItem value="downloads">{t("sort.downloads")}</MenuItem>
-            <MenuItem value="newest">{t("sort.newest")}</MenuItem>
-          </Select>
-        </FormControl>
+            value={appliedSort}
+            onChange={(e) => setAppliedSort(e.target.value as string)}
+            options={[
+              { value: "updated", label: t("sort.updated") },
+              { value: "downloads", label: t("sort.downloads") },
+              { value: "newest", label: t("sort.newest") },
+            ]}
+          />
+        </Box>
       </Box>
 
       <AdvancedSearchDialog

@@ -1,14 +1,11 @@
 import React from "react";
-import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
-import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
+import FormTextField from "@/components/ui/form/FormTextField";
+import FormSelect from "@/components/ui/form/FormSelect";
+import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
@@ -51,92 +48,88 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
       <ProjectIconUpload initialIconUrl={project?.iconUrl} projectSlug={project?.slug} />
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-        <TextField
+        <FormTextField
           id="project-name"
           name="name"
           label={t("fields.name")}
           fullWidth
           required
           defaultValue={project?.name}
-          error={!!error?.name}
-          helperText={error?.name?.[0]}
+          errorMessages={error?.name}
         />
-        <TextField
+        <FormTextField
           id="project-slug"
           name="slug"
           label={t("fields.slug")}
           fullWidth
           required
           defaultValue={project?.slug}
-          error={!!error?.slug}
-          helperText={error?.slug?.[0] || t("fields.slugHelper")}
+          errorMessages={error?.slug}
+          helperText={t("fields.slugHelper")}
         />
       </Stack>
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-        <FormControl fullWidth required error={!!error?.type}>
-          <InputLabel id="project-type-label">{t("fields.type")}</InputLabel>
-          <Select
-            labelId="project-type-label"
-            id="project-type"
-            name="type"
-            label={t("fields.type")}
-            defaultValue={project?.type || "mod"}
-          >
-            <MenuItem value="mod">{t("type.mod")}</MenuItem>
-            <MenuItem value="plugin">{t("type.plugin")}</MenuItem>
-            <MenuItem value="resourcepack">{t("type.resourcepack")}</MenuItem>
-            <MenuItem value="datapack">{t("type.datapack")}</MenuItem>
-            <MenuItem value="shader">{t("type.shader")}</MenuItem>
-            <MenuItem value="modpack">{t("type.modpack")}</MenuItem>
-          </Select>
-          {error?.type && <Typography color="error" variant="caption">{error.type[0]}</Typography>}
-        </FormControl>
+        <FormSelect
+          id="project-type"
+          name="type"
+          label={t("fields.type")}
+          defaultValue={project?.type || "mod"}
+          errorMessages={error?.type}
+          options={[
+            { value: "mod", label: t("type.mod") },
+            { value: "plugin", label: t("type.plugin") },
+            { value: "resourcepack", label: t("type.resourcepack") },
+            { value: "datapack", label: t("type.datapack") },
+            { value: "shader", label: t("type.shader") },
+            { value: "modpack", label: t("type.modpack") },
+          ]}
+          formControlProps={{ required: true }}
+        />
         {children}
       </Stack>
 
       <Stack direction="column" spacing={1}>
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel id="project-description-format-label">{t("fields.descriptionFormat")}</InputLabel>
-            <Select
-              labelId="project-description-format-label"
-              id="project-description-format"
-              name="descriptionFormat"
-              label={t("fields.descriptionFormat")}
-              defaultValue={project?.descriptionFormat || "markdown"}
-            >
-              <MenuItem value="markdown">Markdown</MenuItem>
-              <MenuItem value="plaintext">Plain Text</MenuItem>
-              <MenuItem value="pukiwiki">PukiWiki</MenuItem>
-            </Select>
-          </FormControl>
+          <FormSelect
+            id="project-description-format"
+            name="descriptionFormat"
+            size="small"
+            label={t("fields.descriptionFormat")}
+            defaultValue={project?.descriptionFormat || "markdown"}
+            options={[
+              { value: "markdown", label: "Markdown" },
+              { value: "plaintext", label: "Plain Text" },
+              { value: "pukiwiki", label: "PukiWiki" },
+            ]}
+            formControlProps={{ sx: { minWidth: 150 } }}
+          />
         </Box>
-        <TextField
-        id="project-description"
-        name="description"
-        label={t("fields.description")}
-        multiline
-        minRows={10}
-        fullWidth
-        required
-        defaultValue={project?.description}
-        error={!!error?.description}
-        helperText={error?.description?.[0]}
-        sx={{
-          "& textarea": {
-            resize: "vertical !important",
-          }
-        }}
-      />
+        <FormTextField
+          id="project-description"
+          name="description"
+          label={t("fields.description")}
+          multiline
+          minRows={10}
+          fullWidth
+          required
+          defaultValue={project?.description}
+          errorMessages={error?.description}
+          sx={{
+            "& textarea": {
+              resize: "vertical !important",
+            }
+          }}
+        />
       </Stack>
 
-      <Autocomplete
+      <FormAutocomplete
         multiple
         freeSolo
         disableCloseOnSelect
+        // @ts-ignore
         options={availableTags}
-        getOptionLabel={(option) => {
+        getOptionLabel={(option: any) => {
           const slug = typeof option === "string" ? option : option.slug;
           try {
             const translated = tTags(slug as any);
@@ -166,105 +159,88 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
             return <Chip variant="outlined" label={label} {...getTagProps({ index })} key={`tag-${index}`} />;
           })
         }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={t("fields.tags")}
-            placeholder={t("fields.tags")}
-            error={!!error?.tags}
-            helperText={error?.tags?.[0]}
-          />
-        )}
+        label={t("fields.tags")}
+        placeholder={t("fields.tags")}
+        errorMessages={error?.tags}
       />
       {tags.map((tag) => (
         <input type="hidden" name="tags" value={tag} key={`hidden-tag-${tag}`} />
       ))}
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-        <Autocomplete
+        <FormAutocomplete
           id="project-license"
           freeSolo
           options={LICENSE_OPTIONS as unknown as string[]}
           defaultValue={project?.license || defaultLicense || "MIT"}
           fullWidth
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              name="license"
-              label={t("fields.license")}
-              required
-              error={!!error?.license}
-              helperText={error?.license?.[0]}
-            />
-          )}
+          label={t("fields.license")}
+          errorMessages={error?.license}
+          renderInputProps={{ name: "license", required: true }}
         />
-        <TextField
+        <FormTextField
           id="project-source"
           name="sourceUrl"
           label={t("fields.sourceUrl")}
           fullWidth
           defaultValue={project?.sourceUrl || ""}
-          error={!!error?.sourceUrl}
-          helperText={error?.sourceUrl?.[0]}
+          errorMessages={error?.sourceUrl}
         />
-        <TextField
+        <FormTextField
           id="project-issue-tracker"
           name="issueTrackerUrl"
           label={t("fields.issueTrackerUrl")}
           fullWidth
           defaultValue={(project as any)?.issueTrackerUrl || ""}
-          error={!!error?.issueTrackerUrl}
-          helperText={error?.issueTrackerUrl?.[0]}
+          errorMessages={error?.issueTrackerUrl}
         />
       </Stack>
 
       <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.externalConnectionsTitle")}</Typography>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-        <TextField
+        <FormTextField
           id="project-modrinth"
           name="modrinthId"
           label={t("fields.modrinthId")}
           fullWidth
           defaultValue={project?.modrinthId || ""}
-          error={!!error?.modrinthId}
-          helperText={error?.modrinthId?.[0]}
+          errorMessages={error?.modrinthId}
         />
-        <TextField
+        <FormTextField
           id="project-curseforge"
           name="curseforgeId"
           label={t("fields.curseforgeId")}
           fullWidth
           defaultValue={project?.curseforgeId || ""}
-          error={!!error?.curseforgeId}
-          helperText={error?.curseforgeId?.[0]}
+          errorMessages={error?.curseforgeId}
         />
       </Stack>
-      <TextField
+      <FormTextField
         id="project-github-repo"
         name="githubRepo"
         label={t("fields.githubRepo")}
         placeholder="owner/repo"
         fullWidth
         defaultValue={project?.githubRepo || ""}
-        error={!!error?.githubRepo}
-        helperText={error?.githubRepo?.[0] || t("fields.githubRepoHelper")}
+        errorMessages={error?.githubRepo}
+        helperText={t("fields.githubRepoHelper")}
       />
 
       <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.customLinks.title")}</Typography>
       {links.map((link, idx) => (
         <Stack direction="row" spacing={2} key={idx} sx={{ alignItems: "center" }}>
-          <TextField
+          <FormTextField
             label={t("fields.customLinks.linkTitle")}
             size="small"
             value={link.title}
-            onChange={e => changeLink(idx, "title", e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => changeLink(idx, "title", e.target.value)}
             sx={{ width: 150 }}
           />
-          <TextField
+          <FormTextField
             label={t("fields.customLinks.url")}
             size="small"
             value={link.url}
-            onChange={e => changeLink(idx, "url", e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => changeLink(idx, "url", e.target.value)}
             sx={{ flex: 1 }}
           />
           <Chip label={t("fields.customLinks.delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer" }} />

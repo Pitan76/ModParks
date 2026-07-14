@@ -5,13 +5,10 @@ import { useTranslations } from "next-intl";
 import { updatePostingSettings } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
+import FormSelect from "@/components/ui/form/FormSelect";
+import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import Autocomplete from "@mui/material/Autocomplete";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
@@ -39,25 +36,30 @@ export default function PostingTab({ defaultProjectStatus, defaultLicense }: Pos
 
       <Typography variant="h6" sx={{ mb: 1 }}>{t("posting.defaultProjectStatus")}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("posting.defaultProjectStatusDesc")}</Typography>
-      <FormControl fullWidth sx={{ mb: 4, maxWidth: 300 }}>
-        <Select size="small" value={postingStatus} onChange={(e) => setPostingStatus(e.target.value)}>
-          <MenuItem value="draft">{t("posting.statusDraft")}</MenuItem>
-          <MenuItem value="public">{t("posting.statusPublic")}</MenuItem>
-          <MenuItem value="unlisted">{t("posting.statusUnlisted")}</MenuItem>
-          <MenuItem value="private">{t("posting.statusPrivate")}</MenuItem>
-        </Select>
-      </FormControl>
+      <Box sx={{ mb: 4, maxWidth: 300 }}>
+        <FormSelect
+          size="small"
+          value={postingStatus}
+          onChange={(e) => setPostingStatus(e.target.value as string)}
+          options={[
+            { value: "draft", label: t("posting.statusDraft") },
+            { value: "public", label: t("posting.statusPublic") },
+            { value: "unlisted", label: t("posting.statusUnlisted") },
+            { value: "private", label: t("posting.statusPrivate") },
+          ]}
+        />
+      </Box>
 
       <Typography variant="h6" sx={{ mb: 1 }}>{t("posting.defaultLicense")}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("posting.defaultLicenseDesc")}</Typography>
-      <Autocomplete
+      <FormAutocomplete
         freeSolo
         options={LICENSE_OPTIONS as unknown as string[]}
         value={postingLicense}
-        onChange={(_, newValue) => setPostingLicense(newValue || "MIT")}
+        onChange={(_, newValue) => setPostingLicense((newValue as string) || "MIT")}
         onInputChange={(_, newInputValue) => setPostingLicense(newInputValue)}
         sx={{ mb: 4, maxWidth: 300 }}
-        renderInput={(params) => <TextField {...params} size="small" fullWidth />}
+        renderInputProps={{ size: "small", fullWidth: true }}
       />
 
       <Button type="submit" variant="contained" sx={{ display: "block" }}>{t("profile.save")}</Button>

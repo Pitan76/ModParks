@@ -5,8 +5,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
+import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
+import FormTextField from "@/components/ui/form/FormTextField";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -124,26 +124,27 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         
         <Divider />
 
-        <TextField
+        <FormTextField
           label={t("author") || "Author (Username)"}
           size="small"
           value={tempAuthor}
-          onChange={(e) => setTempAuthor(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTempAuthor(e.target.value)}
           placeholder="e.g. pitan76"
           fullWidth
         />
         
         {/* @ts-ignore */}
-        <Autocomplete
+        <FormAutocomplete
           multiple
           options={availablePlatforms}
-          getOptionLabel={(option) => {
+          getOptionLabel={(option: any) => {
             if (typeof option === "string") return option;
             return option.name || option.slug || "";
           }}
           value={availablePlatforms.filter(p => tempLoaders.includes(p.slug)) as any}
           onChange={(_, val: any[]) => setTempLoaders(val.map(v => typeof v === "string" ? v : v.slug))}
-          renderInput={(params) => <TextField {...params} label={t("platforms")} size="small" />}
+          label={t("platforms")}
+          renderInputProps={{ size: "small" }}
           renderOption={(props, option: any) => {
             const slug = typeof option === "string" ? option : option.slug;
             const name = typeof option === "string" ? option : option.name;
@@ -176,12 +177,13 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         />
 
         {/* @ts-ignore */}
-        <Autocomplete
+        <FormAutocomplete
           multiple
           options={MC_VERSIONS as unknown as string[]}
           value={tempMcVersions}
           onChange={(_, val) => setTempMcVersions(val)}
-          renderInput={(params) => <TextField {...params} label={t("mcVersions")} size="small" />}
+          label={t("mcVersions")}
+          renderInputProps={{ size: "small" }}
           // @ts-ignore
           renderTags={(val: any, getTagProps: any) => val.map((option: any, idx: any) => {
             const { key, ...tagProps } = getTagProps({ index: idx });
@@ -190,11 +192,11 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         />
 
         {/* @ts-ignore */}
-        <Autocomplete
+        <FormAutocomplete
           multiple
           freeSolo
           options={availableTags}
-          getOptionLabel={(option) => {
+          getOptionLabel={(option: any) => {
             const slug = typeof option === "string" ? option : option.slug;
             try {
               const translated = tTags(slug as any);
@@ -205,7 +207,8 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           }}
           value={tempTags as any}
           onChange={(_, val: any[]) => setTempTags(val.map(v => typeof v === "string" ? v : v.slug || v.inputValue || ""))}
-          renderInput={(params) => <TextField {...params} label={t("tags")} size="small" />}
+          label={t("tags")}
+          renderInputProps={{ size: "small" }}
           renderOption={(props, option: any) => {
             const slug = typeof option === "string" ? option : option.slug;
             let label = typeof option === "string" ? option : option.name;
