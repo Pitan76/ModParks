@@ -33,6 +33,10 @@ import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import { MC_VERSIONS } from "@/lib/validations";
 import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
+import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
+import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 export interface ProjectVersion {
   id: string;
@@ -42,6 +46,7 @@ export interface ProjectVersion {
   createdAt: Date;
   downloads: number;
   changelog: string;
+  releaseChannel: string;
 }
 
 export interface ProjectVersionsManagerProps {
@@ -101,6 +106,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
   const [editChangelog, setEditChangelog] = useState("");
   const [editMc, setEditMc] = useState<string[]>([]);
   const [editLoaders, setEditLoaders] = useState<string[]>([]);
+  const [editChannel, setEditChannel] = useState<string>(DEFAULT_RELEASE_CHANNEL);
 
   useEffect(() => {
     if (!searchParams) return;
@@ -141,6 +147,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
     setEditTarget(v);
     setEditNumber(v.versionNumber);
     setEditChangelog(v.changelog || "");
+    setEditChannel(v.releaseChannel || DEFAULT_RELEASE_CHANNEL);
     try {
       setEditMc(JSON.parse(v.mcVersions) || []);
       setEditLoaders(JSON.parse(v.loaders) || []);
@@ -160,6 +167,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
     const formData = new FormData();
     formData.append("versionNumber", editNumber);
     formData.append("changelog", editChangelog);
+    formData.append("releaseChannel", editChannel);
     editMc.forEach(mc => formData.append("mcVersions", mc));
     editLoaders.forEach(l => formData.append("loaders", l));
 
@@ -172,6 +180,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
           ...v,
           versionNumber: editNumber,
           changelog: editChangelog,
+          releaseChannel: editChannel,
           mcVersions: JSON.stringify(editMc),
           loaders: JSON.stringify(editLoaders)
         } : v));
@@ -225,7 +234,12 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
             {parsedVersions.map((v) => {
               return (
                 <TableRow key={v.id}>
-                  <TableCell sx={{ fontWeight: "bold" }}>{v.versionNumber}</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <span>{v.versionNumber}</span>
+                      <ReleaseChannelChip channel={v.releaseChannel} />
+                    </Stack>
+                  </TableCell>
                   <TableCell>{v.parsedMcVersions.join(", ")}</TableCell>
                   <TableCell>{v.downloads}</TableCell>
                   <TableCell>
@@ -291,6 +305,23 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
             helperText={editError?.versionNumber?.[0]}
             sx={{ mt: 1 }}
           />
+
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+              {t("fields.releaseChannel")}
+            </Typography>
+            <ToggleButtonGroup
+              color="primary"
+              value={editChannel}
+              exclusive
+              onChange={(_, val) => { if (val) setEditChannel(val); }}
+              size="small"
+            >
+              {RELEASE_CHANNELS.map((ch) => (
+                <ToggleButton key={ch} value={ch}>{t(`channels.${ch}`)}</ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Box>
 
           <FormAutocomplete
             multiple

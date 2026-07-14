@@ -20,6 +20,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
 import { Link } from "@/i18n/routing";
 import { getLoaderInfo } from "@/lib/loaders";
+import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
 import { SITE_URL } from "@/lib/config";
@@ -139,9 +140,12 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
           <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, mb: 3, gap: 2 }}>
             <Box>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
-                v{version.versionNumber}
-              </Typography>
+              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
+                  v{version.versionNumber}
+                </Typography>
+                <ReleaseChannelChip channel={version.releaseChannel} size="medium" />
+              </Stack>
               <Stack direction="row" spacing={2} sx={{ color: "text.secondary", alignItems: "center", flexWrap: "wrap", rowGap: 1 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                   <CalendarTodayIcon sx={{ fontSize: 16 }} />

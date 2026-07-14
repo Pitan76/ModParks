@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
 import { getLoaderInfo } from "@/lib/loaders";
 import { MC_VERSIONS } from "@/lib/validations";
+import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 
@@ -48,6 +49,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
   const [file, setFile] = useState<File | null>(null);
   const [externalUrl, setExternalUrl] = useState("");
   const [versionNumber, setVersionNumber] = useState("");
+  const [releaseChannel, setReleaseChannel] = useState<string>(DEFAULT_RELEASE_CHANNEL);
   const [parsing, setParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,6 +108,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
       
       mcVersions.forEach(v => formData.append("mcVersions", v));
       loaders.forEach(l => formData.append("loaders", l));
+      formData.set("releaseChannel", releaseChannel);
 
       if (uploadMode === "file" && file) {
         if (file.size > 5 * 1024 * 1024) {
@@ -229,6 +232,26 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
             error={!!error?.versionNumber}
             helperText={error?.versionNumber?.[0]}
           />
+
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+              {tVersion("fields.releaseChannel")}
+            </Typography>
+            <ToggleButtonGroup
+              color="primary"
+              value={releaseChannel}
+              exclusive
+              onChange={(_, val) => { if (val) setReleaseChannel(val); }}
+              aria-label="Release Channel"
+              size="small"
+            >
+              {RELEASE_CHANNELS.map((ch) => (
+                <ToggleButton key={ch} value={ch}>
+                  {tVersion(`channels.${ch}`)}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Box>
 
           <Autocomplete
             multiple

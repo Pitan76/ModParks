@@ -47,6 +47,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     id: v.id,
     versionNumber: v.versionNumber,
     changelog: v.changelog,
+    releaseChannel: v.releaseChannel,
     fileSize: v.fileSize,
     fileSha256: v.fileSha256,
     fileName: v.fileName,
@@ -105,6 +106,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     mcVersions: parseArrayField("mcVersions"),
     loaders: parseArrayField("loaders"),
     changelog: formData.get("changelog") || "",
+    releaseChannel: formData.get("releaseChannel") ?? undefined,
   };
 
   const parsed = createVersionSchema.safeParse(raw);
@@ -172,6 +174,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     mcVersions: JSON.stringify(parsed.data.mcVersions),
     loaders: JSON.stringify(parsed.data.loaders),
     changelog: parsed.data.changelog || "",
+    releaseChannel: parsed.data.releaseChannel,
     fileUrl,
     fileName,
     fileSize,

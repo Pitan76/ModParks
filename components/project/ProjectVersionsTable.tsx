@@ -15,9 +15,12 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { getLoaderInfo } from "@/lib/loaders";
-import { useMemo } from "react";
+import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
+import { useState, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { compactMcVersions } from "@/lib/utils/format";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -28,6 +31,7 @@ interface ProjectVersionsTableProps {
   versions: {
     id:            string;
     versionNumber: string;
+    releaseChannel: string;
     mcVersions:    string | string[];
     loaders:       string | string[];
     changelog:     string;
@@ -49,6 +53,7 @@ function formatBytes(bytes: number): string {
 export default function ProjectVersionsTable({ versions, projectSlug }: ProjectVersionsTableProps) {
   const locale = useLocale();
   const t = useTranslations("Project");
+  const [filterChannel, setFilterChannel] = useState<string>("all");
 
   const parsedVersions = useMemo(() => {
     return versions.map((version) => {
@@ -62,8 +67,22 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
     });
   }, [versions]);
 
+  const filteredVersions = useMemo(() => {
+    if (filterChannel === "all") return parsedVersions;
+    return parsedVersions.filter((v) => v.releaseChannel === filterChannel);
+  }, [parsedVersions, filterChannel]);
+
   return (
     <>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+        <Tabs value={filterChannel} onChange={(e, val) => setFilterChannel(val)} aria-label="Version channels">
+          <Tab label="All" value="all" />
+          <Tab label={t("channels.release")} value="release" />
+          <Tab label={t("channels.beta")} value="beta" />
+          <Tab label={t("channels.alpha")} value="alpha" />
+        </Tabs>
+      </Box>
+
       {/* Desktop Table View */}
       <TableContainer component={Paper} variant="outlined" sx={{ mb: 2, display: { xs: "none", md: "block" }, width: "100%", maxWidth: "100%", overflowX: "auto" }}>
         <Table sx={{ minWidth: 650 }}>
@@ -76,16 +95,25 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
             </TableRow>
           </TableHead>
           <TableBody>
-            {parsedVersions.map((version) => {
+            {filteredVersions.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} align="center" sx={{ py: 4, color: "text.secondary" }}>
+                  No versions found in this channel.
+                </TableCell>
+              </TableRow>
+            ) : filteredVersions.map((version) => {
               const versionUrl = `/projects/${projectSlug}/versions/${version.id}`;
               return (
                 <TableRow key={version.id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                   <TableCell>
-                    <Link href={versionUrl} style={{ textDecoration: "none" }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main", "&:hover": { textDecoration: "underline" } }}>
-                        v{version.versionNumber}
-                      </Typography>
-                    </Link>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                      <Link href={versionUrl} style={{ textDecoration: "none" }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main", "&:hover": { textDecoration: "underline" } }}>
+                          v{version.versionNumber}
+                        </Typography>
+                      </Link>
+                      <ReleaseChannelChip channel={version.releaseChannel} />
+                    </Stack>
                     {version.changelog && (
                       <Typography
                         variant="caption"
@@ -171,18 +199,25 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
       </TableContainer>
 
       {/* Mobile Card View */}
-      <Stack spacing={2} sx={{ display: { xs: "flex", md: "none" }, mb: 2 }}>
-        {parsedVersions.map((version) => {
+      <Stack spacing={2} sx={{ display: { xs: "flex", md: "none" } }}>
+        {filteredVersions.length === 0 ? (
+          <Box sx={{ py: 4, textAlign: "center", color: "text.secondary" }}>
+            No versions found in this channel.
+          </Box>
+        ) : filteredVersions.map((version) => {
           const versionUrl = `/projects/${projectSlug}/versions/${version.id}`;
           return (
             <Card key={version.id} variant="outlined">
               <CardContent sx={{ pb: 1 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
-                  <Link href={versionUrl} style={{ textDecoration: "none" }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "primary.main", "&:hover": { textDecoration: "underline" } }}>
-                      v{version.versionNumber}
-                    </Typography>
-                  </Link>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                    <Link href={versionUrl} style={{ textDecoration: "none" }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "primary.main", "&:hover": { textDecoration: "underline" } }}>
+                        v{version.versionNumber}
+                      </Typography>
+                    </Link>
+                    <ReleaseChannelChip channel={version.releaseChannel} />
+                  </Stack>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     {version.fileSize && (
                       <Typography variant="caption" color="text.disabled">

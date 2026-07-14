@@ -25,6 +25,7 @@ export interface ApiVersion {
   id: string;
   versionNumber: string;
   changelog: string;
+  releaseChannel: string;
   downloads: number;
   fileUrl: string;
   fileName: string;

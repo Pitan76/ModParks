@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 
 
 const MC_VERSIONS = [
@@ -115,6 +116,7 @@ export const createVersionSchema = z.object({
     .array(z.string())
     .min(1, "ローダーを1つ以上選択してください"),
   changelog: z.string().max(10000).optional().or(z.literal("")),
+  releaseChannel: z.enum(RELEASE_CHANNELS).default(DEFAULT_RELEASE_CHANNEL),
 });
 
 export type CreateVersionInput = z.infer<typeof createVersionSchema>;

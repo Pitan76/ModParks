@@ -368,6 +368,7 @@ export async function getProjectBySlug(slug: string) {
   const versionsRows = await db.select({
     id: versions.id,
     versionNumber: versions.versionNumber,
+    releaseChannel: versions.releaseChannel,
     mcVersions: versions.mcVersions,
     loaders: versions.loaders,
     fileName: versions.fileName,

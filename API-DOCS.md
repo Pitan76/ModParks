@@ -123,6 +123,7 @@ Fetches all public versions of a specific project.
       {
         "id": "abc-123",
         "versionNumber": "1.0.0",
+        "versionChannel": "release",
         "mcVersions": ["1.20.1", "1.20.2"],
         "loaders": ["fabric", "forge"],
         "changelog": "Initial release",

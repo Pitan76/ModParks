@@ -56,6 +56,7 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     mcVersions:    formData.getAll("mcVersions"),
     loaders:       formData.getAll("loaders"),
     changelog:     formData.get("changelog"),
+    releaseChannel: formData.get("releaseChannel") ?? undefined,
   };
 
   const parsed = createVersionSchema.safeParse(raw);
@@ -84,6 +85,7 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     mcVersions:    parsed.data.mcVersions,
     loaders:       parsed.data.loaders,
     changelog:     parsed.data.changelog || "",
+    releaseChannel: parsed.data.releaseChannel,
     fileUrl,
     fileName,
     fileSize:      formData.get("fileSize") ? Number(formData.get("fileSize")) : null,
@@ -135,6 +137,7 @@ export async function updateVersion(versionId: string, projectSlug: string, form
     mcVersions:    formData.getAll("mcVersions"),
     loaders:       formData.getAll("loaders"),
     changelog:     formData.get("changelog"),
+    releaseChannel: formData.get("releaseChannel") ?? undefined,
   };
 
   const parsed = createVersionSchema.safeParse(raw);
@@ -147,6 +150,7 @@ export async function updateVersion(versionId: string, projectSlug: string, form
     mcVersions:    JSON.stringify(parsed.data.mcVersions),
     loaders:       JSON.stringify(parsed.data.loaders),
     changelog:     parsed.data.changelog || "",
+    releaseChannel: parsed.data.releaseChannel,
   }).where(eq(versions.id, versionId)).run();
 
   // Loader と mcVersion のテーブルも更新

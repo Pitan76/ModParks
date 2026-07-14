@@ -7,6 +7,7 @@ export interface VersionRecordInput {
   mcVersions: string[];
   loaders: string[];
   changelog: string;
+  releaseChannel: string;
   fileUrl: string;
   fileName: string;
   fileSize?: number | null;
@@ -25,6 +26,7 @@ export async function insertVersionRecord(db: any, input: VersionRecordInput): P
     mcVersions: JSON.stringify(input.mcVersions),
     loaders: JSON.stringify(input.loaders),
     changelog: input.changelog,
+    releaseChannel: input.releaseChannel,
     fileUrl: input.fileUrl,
     fileName: input.fileName,
     fileSize: input.fileSize ?? null,

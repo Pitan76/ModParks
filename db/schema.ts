@@ -219,6 +219,8 @@ export const versions = sqliteTable("versions", {
   /** JSON: string[] — 対応ローダー */
   loaders:       text("loaders").notNull(),
   changelog:     text("changelog").notNull(),
+  /** リリースチャネル: release(安定版) / beta / alpha */
+  releaseChannel: text("release_channel").notNull().default("release"),
   fileUrl:       text("file_url").notNull(),
   fileName:      text("file_name").notNull(),
   fileSize:      integer("file_size"),

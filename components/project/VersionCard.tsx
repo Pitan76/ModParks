@@ -8,6 +8,7 @@ import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { getLoaderInfo } from "@/lib/loaders";
+import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import { useLocale, useTranslations } from "next-intl";
 
 /**
@@ -17,6 +18,7 @@ interface VersionCardProps {
   version: {
     id:            string;
     versionNumber: string;
+    releaseChannel: string;
     mcVersions:    string | string[];
     loaders:       string | string[];
     changelog:     string;
@@ -71,6 +73,8 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
               <Typography variant="subtitle2" sx={{ fontWeight: 700,  color: "primary.main"  }}>
                 v{version.versionNumber}
               </Typography>
+              <ReleaseChannelChip channel={version.releaseChannel} />
+
 
               {/* ローダー */}
               <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", mt: 1 }}>

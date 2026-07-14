@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2 } from "@/lib/r2";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
+import { channelFromGithubPrerelease } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/utils/modParser";
 import {
   fetchGithubReleases,
@@ -140,6 +141,7 @@ export async function importGithubReleaseSystem(
     mcVersions: parsed.detectedMcVersions,
     loaders: parsed.detectedLoaders,
     changelog: release.body || "",
+    releaseChannel: channelFromGithubPrerelease(release.prerelease),
     fileUrl: getR2PublicUrl(key),
     fileName: asset.name,
     fileSize: asset.size,

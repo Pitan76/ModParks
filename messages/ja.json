@@ -304,7 +304,13 @@
       "mcVersions": "MCバージョン",
       "loaders": "プラットフォーム",
       "changelog": "変更履歴",
+      "releaseChannel": "リリース種別",
       "file": "ファイル"
+    },
+    "channels": {
+      "release": "リリース",
+      "beta": "ベータ",
+      "alpha": "アルファ"
     },
     "create": {
       "title": "バージョン追加",

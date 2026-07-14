@@ -285,7 +285,13 @@
       "mcVersions": "Minecraft Versions",
       "loaders": "Loaders",
       "changelog": "Changelog",
+      "releaseChannel": "Release Type",
       "file": "File"
+    },
+    "channels": {
+      "release": "Release",
+      "beta": "Beta",
+      "alpha": "Alpha"
     },
     "create": {
       "title": "Add Version",
