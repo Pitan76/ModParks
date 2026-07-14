@@ -14,7 +14,7 @@ ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラ
 ## 技術スタック
 - **フレームワーク**: [Next.js](https://nextjs.org/) (App Router, v15)
 - **言語**: TypeScript
-- **スタイリング / UI**: [Material-UI (MUI v6)](https://mui.com/)
+- **スタイリング / UI**: [MUI v6](https://mui.com/)
 - **データベース**: [Cloudflare D1](https://developers.cloudflare.com/d1/)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 - **ストレージ**: [Cloudflare R2](https://developers.cloudflare.com/r2/)
@@ -64,13 +64,8 @@ npm run dev
 *注意: ローカル開発環境では `wrangler.getPlatformProxy` のキャッシュ機構 (`lib/proxy.ts`) によって、Next.jsのホットリロード時にも重いプロキシインスタンスの再起動が防がれ、軽快に動作するよう設計されています。*
 
 ## フォルダ構成
-
 - `app/`: Next.js App Router (ルーティング, Server Components)
 - `components/`: 再利用可能なReactコンポーネント (UI, フォーム等)
 - `db/`: Drizzle ORM のスキーマ定義 (`schema.ts`)
 - `lib/`: データベース接続 (`db.ts`), APIクライアント, アクション群, バリデーション等
 - `messages/`: `next-intl` 向けの翻訳ファイル (`ja.json`, `en.json`)
-
-## ライセンス (License)
-
-このプロジェクトは [MIT License](LICENSE) の元に公開されています。
