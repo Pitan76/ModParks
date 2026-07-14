@@ -19,6 +19,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
         id: projectComments.id,
         content: projectComments.content,
         createdAt: projectComments.createdAt,
+        parentId: projectComments.parentId,
         authorId: users.id,
         authorName: userProfiles.displayName,
         authorAvatar: userProfiles.avatarUrl,
