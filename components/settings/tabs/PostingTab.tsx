@@ -12,12 +12,12 @@ import Alert from "@mui/material/Alert";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
-interface PostingTabProps {
+interface Props {
   defaultProjectStatus: string;
   defaultLicense: string;
 }
 
-export default function PostingTab({ defaultProjectStatus, defaultLicense }: PostingTabProps) {
+export default function PostingTab({ defaultProjectStatus, defaultLicense }: Props) {
   const t = useTranslations("Settings");
   const { message, flash } = useFlashMessage();
 

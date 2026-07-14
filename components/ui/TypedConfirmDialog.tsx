@@ -1,13 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
+import AbstractDialog from "@/components/ui/AbstractDialog";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import FormTextField from "@/components/ui/form/FormTextField";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
@@ -48,47 +44,45 @@ export default function TypedConfirmDialog({
   const isMatch = inputValue === expectedValue;
 
   return (
-    <Dialog open={open} onClose={() => !pending && onClose()} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ color: "error.main", fontWeight: "bold" }}>{title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText sx={{ mb: 3 }}>
-          {description}
-        </DialogContentText>
-        
-        <Box sx={{ bgcolor: "background.default", p: 2, borderRadius: 1, border: "1px solid", borderColor: "divider", mb: 3 }}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            {expectedValueLabel}
-          </Typography>
-          <Typography variant="body1" sx={{ fontWeight: "bold", userSelect: "all", fontFamily: "monospace" }}>
-            {expectedValue}
-          </Typography>
-        </Box>
+    <AbstractDialog 
+      open={open} 
+      onClose={() => !pending && onClose()} 
+      maxWidth="sm" 
+      fullWidth
+      title={title}
+      titleProps={{ sx: { color: "error.main", fontWeight: "bold" } }}
+      onCancel={onClose}
+      onConfirm={onConfirm}
+      confirmText={confirmButtonText}
+      cancelText={cancelButtonText}
+      confirmColor="error"
+      isSubmitting={pending}
+      confirmDisabled={!isMatch}
+    >
+      <DialogContentText sx={{ mb: 3 }}>
+        {description}
+      </DialogContentText>
+      
+      <Box sx={{ bgcolor: "background.default", p: 2, borderRadius: 1, border: "1px solid", borderColor: "divider", mb: 3 }}>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          {expectedValueLabel}
+        </Typography>
+        <Typography variant="body1" sx={{ fontWeight: "bold", userSelect: "all", fontFamily: "monospace" }}>
+          {expectedValue}
+        </Typography>
+      </Box>
 
-        <TextField
-          autoFocus
-          fullWidth
-          variant="outlined"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder={expectedValue}
-          disabled={pending}
-          error={inputValue.length > 0 && !isMatch}
-          autoComplete="off"
-        />
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onClose} disabled={pending} variant="outlined" color="inherit">
-          {cancelButtonText}
-        </Button>
-        <Button 
-          onClick={onConfirm} 
-          disabled={!isMatch || pending} 
-          variant="contained" 
-          color="error"
-        >
-          {confirmButtonText}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <FormTextField
+        autoFocus
+        fullWidth
+        variant="outlined"
+        value={inputValue}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
+        placeholder={expectedValue}
+        disabled={pending}
+        error={inputValue.length > 0 && !isMatch}
+        autoComplete="off"
+      />
+    </AbstractDialog>
   );
 }

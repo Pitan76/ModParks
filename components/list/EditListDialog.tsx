@@ -2,16 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import AbstractDialog from "@/components/ui/AbstractDialog";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+import FormTextField from "@/components/ui/form/FormTextField";
+import FormSelect from "@/components/ui/form/FormSelect";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
@@ -91,37 +85,50 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: "bold" }}>リストを編集</DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
-          <TextField
-            label="リスト名"
-            fullWidth
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <TextField
-            label="説明"
-            fullWidth
-            multiline
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <FormControl fullWidth>
-            <InputLabel>公開範囲</InputLabel>
-            <Select
-              value={visibility}
-              label="公開範囲"
-              onChange={(e) => setVisibility(e.target.value)}
-            >
-              <MenuItem value="public">公開</MenuItem>
-              <MenuItem value="unlisted">限定公開</MenuItem>
-              <MenuItem value="private">非公開</MenuItem>
-            </Select>
-          </FormControl>
+    <AbstractDialog 
+      open={open} 
+      onClose={onClose} 
+      fullWidth 
+      maxWidth="sm"
+      title="リストを編集"
+      titleProps={{ sx: { fontWeight: "bold" } }}
+      actions={
+        <>
+          <Button color="error" onClick={handleDelete} disabled={loading}>削除</Button>
+          <Box>
+            <Button onClick={onClose} disabled={loading} sx={{ mr: 1 }}>キャンセル</Button>
+            <Button variant="contained" onClick={handleSave} disabled={loading || !name} disableElevation>保存</Button>
+          </Box>
+        </>
+      }
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
+        <FormTextField
+          label="リスト名"
+          fullWidth
+          required
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+        <FormTextField
+          label="説明"
+          fullWidth
+          multiline
+          rows={3}
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+        />
+        <FormSelect
+          label="公開範囲"
+          value={visibility}
+          onChange={e => setVisibility(e.target.value as string)}
+          options={[
+            { value: "public", label: "公開" },
+            { value: "unlisted", label: "限定公開" },
+            { value: "private", label: "非公開" },
+          ]}
+          formControlProps={{ fullWidth: true }}
+        />
 
           {/* アイコン設定 */}
           <Box sx={{ border: "1px solid", borderColor: "divider", p: 2, borderRadius: 1 }}>
@@ -146,12 +153,12 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
             </Box>
 
             {iconSource === "url" && (
-              <TextField
+              <FormTextField
                 label="アイコンのURL (またはアップロード)"
                 fullWidth
                 size="small"
                 value={iconUrl}
-                onChange={(e) => setIconUrl(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIconUrl(e.target.value)}
                 placeholder="https://..."
                 helperText="※アップロード機能は将来実装予定です。現在はURLを入力してください。"
               />
@@ -190,15 +197,7 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
               </Box>
             )}
           </Box>
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
-        <Button color="error" onClick={handleDelete} disabled={loading}>削除</Button>
-        <Box>
-          <Button onClick={onClose} disabled={loading} sx={{ mr: 1 }}>キャンセル</Button>
-          <Button variant="contained" onClick={handleSave} disabled={loading || !name} disableElevation>保存</Button>
-        </Box>
-      </DialogActions>
-    </Dialog>
+      </Box>
+    </AbstractDialog>
   );
 }

@@ -11,11 +11,8 @@ import FormSelect from "@/components/ui/form/FormSelect";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
+import AbstractDialog from "@/components/ui/AbstractDialog";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface AccountTabProps {
@@ -169,30 +166,37 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
         <Button variant="outlined" color="error" onClick={() => setDeleteOpen(true)}>{t("account.deleteBtn")}</Button>
       </Box>
 
-      <Dialog open={deleteOpen} onClose={() => !isDeletingAccount && setDeleteOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ color: "error.main", fontWeight: "bold" }}>{t("account.deleteAccount")}</DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ mb: 2 }}>{t("account.deleteAccountConfirm")}</DialogContentText>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            アカウントを削除するには、パスワード（または2要素認証コード）を入力してください。
-          </Typography>
-          <FormTextField
-            autoFocus
-            fullWidth
-            variant="outlined"
-            type="password"
-            value={deletePasswordOrToken}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeletePasswordOrToken(e.target.value)}
-            placeholder="パスワードまたは認証コード"
-            disabled={isDeletingAccount}
-            autoComplete="off"
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setDeleteOpen(false)} disabled={isDeletingAccount} variant="outlined" color="inherit">{tCommon("cancel")}</Button>
-          <Button onClick={handleDeleteAccount} disabled={!deletePasswordOrToken || isDeletingAccount} variant="contained" color="error">{t("account.deleteBtn")}</Button>
-        </DialogActions>
-      </Dialog>
+      <AbstractDialog 
+        open={deleteOpen} 
+        onClose={() => !isDeletingAccount && setDeleteOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        title={t("account.deleteAccount")}
+        titleProps={{ sx: { color: "error.main", fontWeight: "bold" } }}
+        onCancel={() => setDeleteOpen(false)}
+        onConfirm={handleDeleteAccount}
+        confirmText={t("account.deleteBtn")}
+        confirmColor="error"
+        isSubmitting={isDeletingAccount}
+        confirmDisabled={!deletePasswordOrToken}
+        cancelText={tCommon("cancel")}
+      >
+        <DialogContentText sx={{ mb: 2 }}>{t("account.deleteAccountConfirm")}</DialogContentText>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          アカウントを削除するには、パスワード（または2要素認証コード）を入力してください。
+        </Typography>
+        <FormTextField
+          autoFocus
+          fullWidth
+          variant="outlined"
+          type="password"
+          value={deletePasswordOrToken}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeletePasswordOrToken(e.target.value)}
+          placeholder="パスワードまたは認証コード"
+          disabled={isDeletingAccount}
+          autoComplete="off"
+        />
+      </AbstractDialog>
     </Box>
   );
 }

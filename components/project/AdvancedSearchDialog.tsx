@@ -1,10 +1,6 @@
 "use client";
 
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import AbstractDialog from "@/components/ui/AbstractDialog";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import FormTextField from "@/components/ui/form/FormTextField";
 import Chip from "@mui/material/Chip";
@@ -86,9 +82,17 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t("advancedSearch")}</DialogTitle>
-      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
+    <AbstractDialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      title={t("advancedSearch")}
+      onConfirm={handleApply}
+      onCancel={onClose}
+      confirmText={t("apply")}
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
         
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Typography variant="subtitle2" color="text.secondary">{t("keywordOptions")}</Typography>
@@ -233,11 +237,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           })}
         />
 
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} variant="text">{tCommon("cancel")}</Button>
-        <Button onClick={handleApply} variant="text" color="primary" sx={{ fontWeight: "bold" }}>{t("apply")}</Button>
-      </DialogActions>
-    </Dialog>
+      </Box>
+    </AbstractDialog>
   );
 }

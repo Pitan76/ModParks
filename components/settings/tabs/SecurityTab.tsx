@@ -6,15 +6,12 @@ import { QRCodeSVG } from "qrcode.react";
 import { generateTotpSecret, verifyAndEnableTotp, disableTotp } from "@/lib/actions/settings";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
+import FormTextField from "@/components/ui/form/FormTextField";
+import AbstractDialog from "@/components/ui/AbstractDialog";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface SecurityTabProps {
@@ -80,17 +77,19 @@ export default function SecurityTab({ is2FAEnabled, setIs2FAEnabled }: SecurityT
         {is2FAEnabled ? (
           <>
             <Button variant="outlined" color="error" onClick={() => setDisableTotpOpen(true)}>{t("security.disableTwoFactor")}</Button>
-            <Dialog open={disableTotpOpen} onClose={() => setDisableTotpOpen(false)}>
-              <DialogTitle>{t("security.disableTwoFactor")}</DialogTitle>
-              <DialogContent>
-                <DialogContentText sx={{ mb: 2 }}>{t("account.currentPassword")}</DialogContentText>
-                <TextField fullWidth type="password" size="small" value={disableTotpPasswordOrToken} onChange={(e) => setDisableTotpPasswordOrToken(e.target.value)} />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setDisableTotpOpen(false)}>{tCommon("cancel")}</Button>
-                <Button color="error" variant="contained" onClick={handleDisableTotp}>{t("security.disableTwoFactor")}</Button>
-              </DialogActions>
-            </Dialog>
+            <AbstractDialog 
+              open={disableTotpOpen} 
+              onClose={() => setDisableTotpOpen(false)}
+              title={t("security.disableTwoFactor")}
+              onCancel={() => setDisableTotpOpen(false)}
+              onConfirm={handleDisableTotp}
+              confirmText={t("security.disableTwoFactor")}
+              confirmColor="error"
+              cancelText={tCommon("cancel")}
+            >
+              <DialogContentText sx={{ mb: 2 }}>{t("account.currentPassword")}</DialogContentText>
+              <FormTextField fullWidth type="password" size="small" value={disableTotpPasswordOrToken} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisableTotpPasswordOrToken(e.target.value)} />
+            </AbstractDialog>
           </>
         ) : !totpSetupUri ? (
           <Button variant="contained" onClick={handleSetupTotp}>{t("security.enableTwoFactor")}</Button>
@@ -102,7 +101,7 @@ export default function SecurityTab({ is2FAEnabled, setIs2FAEnabled }: SecurityT
               <QRCodeSVG value={totpSetupUri} size={200} />
             </Box>
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField label={t("security.verificationCode")} size="small" value={totpToken} onChange={(e) => setTotpToken(e.target.value)} />
+              <FormTextField label={t("security.verificationCode")} size="small" value={totpToken} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTotpToken(e.target.value)} />
               <Button variant="contained" onClick={handleVerifyTotp} disabled={!totpToken}>{t("security.verifyAndEnable")}</Button>
             </Box>
           </Box>
