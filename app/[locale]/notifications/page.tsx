@@ -4,13 +4,8 @@ import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import { Link } from "@/i18n/routing";
 import { getNotifications } from "@/lib/queries/notifications";
-import { renderNotification } from "@/components/notification/renderNotification";
+import NotificationList from "@/components/notification/NotificationList";
 import MarkAllReadButton from "@/components/notification/MarkAllReadButton";
 
 export default async function NotificationsPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -35,26 +30,7 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
           <Typography color="text.secondary">{t("empty")}</Typography>
         </Box>
       ) : (
-        <List disablePadding sx={{ bgcolor: "background.paper", borderRadius: 1, border: 1, borderColor: "divider" }}>
-          {items.map((n, i) => {
-            const { message, href } = renderNotification(t, n);
-            return (
-              <Box key={n.id}>
-                {i > 0 && <Divider component="li" />}
-                <ListItemButton
-                  component={Link}
-                  href={href}
-                  sx={{ bgcolor: n.read ? "transparent" : "action.hover" }}
-                >
-                  <ListItemText
-                    primary={message}
-                    secondary={new Date(n.createdAt).toLocaleString()}
-                  />
-                </ListItemButton>
-              </Box>
-            );
-          })}
-        </List>
+        <NotificationList items={items} />
       )}
     </Container>
   );

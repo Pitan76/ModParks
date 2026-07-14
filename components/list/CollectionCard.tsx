@@ -19,6 +19,7 @@ interface CollectionCardProps {
 
 export default function CollectionCard({ collection }: CollectionCardProps) {
   const t = useTranslations("Profile");
+  const tCommon = useTranslations("Common");
 
   return (
     <RoutingLink href={`/lists/${collection.id}`} prefetch={false} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
@@ -53,7 +54,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
               {collection.name}
             </Typography>
             <Chip 
-              label={t(`visibility.${collection.visibility}`)} 
+              label={tCommon(`visibility.${collection.visibility}`)}
               size="small"
               variant="outlined"
               color={collection.visibility === "public" ? "primary" : "default"}

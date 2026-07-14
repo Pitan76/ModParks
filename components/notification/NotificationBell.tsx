@@ -11,7 +11,8 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
+import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import type { Notification } from "@/db/schema";
 import { renderNotification } from "./renderNotification";
 import { markAllNotificationsRead } from "@/lib/actions/notification";
@@ -38,6 +39,8 @@ export default function NotificationBell() {
   }, []);
 
   React.useEffect(() => {
+    // load は非同期 fetch のため setState は同期実行されない（false positive 回避）
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const id = setInterval(load, POLL_INTERVAL_MS);
     return () => clearInterval(id);
@@ -102,9 +105,9 @@ export default function NotificationBell() {
         )}
 
         <Divider />
-        <MenuItem component={Link} href="/notifications" onClick={handleClose} sx={{ justifyContent: "center" }}>
+        <LinkMenuItem href="/notifications" onClick={handleClose} sx={{ justifyContent: "center" }}>
           <Typography variant="body2" color="primary">{t("viewAll")}</Typography>
-        </MenuItem>
+        </LinkMenuItem>
       </Menu>
     </>
   );
