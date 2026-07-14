@@ -36,6 +36,8 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
   }, [endpoint]);
 
   useEffect(() => {
+    // 非同期 fetch のため setState は同期実行されない（false positive 回避）
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchComments();
   }, [fetchComments]);
 
