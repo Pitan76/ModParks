@@ -1,102 +1,84 @@
-# ModParks CLI 🛠️
+# ModParks CLI
 
-ModParks CLIは、コマンドラインから直接ModParksプラットフォームと連携し、プロジェクトの管理やバージョンの公開を自動化するための公式ツールです。
+## 概要
+`modparks` は ModParks の API と連携するコマンドラインツールです。プロジェクトの一覧取得、個別プロジェクトの取得、バージョンやアイデア、コメントの取得・投稿、プロジェクトの同期、そして API キーの保存（login）をサポートします。
 
-## 🎯 なぜCLIが必要なのか？
+## ソースコード
+- [GitHub - Pitan76/ModParks-CLI](https://github.com/Pitan76/ModParks-CLI)
 
-MODやプラグインの開発者は、日々の開発作業においてビルドスクリプト（Gradle, Maven, Node.js等）を使用しています。ModParks CLIを導入することで、開発者はブラウザを開いて手動でファイルをアップロードする手間を省き、**ビルドから公開までのワークフローを完全に自動化**（CI/CDパイプラインとの統合）することができます。
+## インストール
+### Windows (winget)
+```bat
+winget install Pitan76.ModParksCLI
+```
 
-## 📦 インストール方法
-
-Node.js環境（v18以降推奨）がインストールされている必要があります。
-
+### Linux (apt)
 ```bash
-# グローバルにインストールする場合
-npm install -g modparks-cli
+# 鍵とリポジトリの登録
+curl -fsSL https://pitan76.github.io/apt-repo/pitan76.gpg | sudo gpg --dearmor -o /usr/share/keyrings/pitan76-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/pitan76-archive-keyring.gpg] https://pitan76.github.io/apt-repo/ stable main" | sudo tee /etc/apt/sources.list.d/pitan76.list
 
-# プロジェクトの devDependencies としてインストールする場合
-npm install -D modparks-cli
+# インストール
+sudo apt update && sudo apt install modparks-cli
 ```
 
-## 🚀 コマンドリファレンス（予定仕様）
+## 前提条件
+- **Rust** (stable) がインストールされていること
+- `cargo` がパスに通っていること
 
-### `modparks login`
-ModParks APIに接続するための認証トークンを設定します。
-
+## ビルド手順
 ```bash
-modparks login --token <YOUR_API_TOKEN>
+# 依存パッケージを取得し、リリースビルドを作成
+cargo build --release
 ```
-*※トークンはユーザー設定画面の「API Key」タブから発行できます。*
+ビルドが成功すると、実行バイナリは `target/release/modparks-cli.exe` に生成されます。
 
-### `modparks init`
-カレントディレクトリにModParks用の設定ファイル（`modparks.json` または `modparks.toml`）を生成する対話型コマンドです。
-プロジェクトのSlug、デフォルトのローダー、対応バージョンなどを記録し、以後のコマンドを簡略化します。
-
+## インストール（オプション）
+ビルドしたバイナリをパスの通ったディレクトリにコピーすれば、どこからでも `modparks-cli` コマンドを呼び出せます。
 ```bash
-modparks init
+# 例: Windows のユーザープロファイルの bin ディレクトリへコピー
+copy target\release\modparks-cli.exe %USERPROFILE%\bin\
 ```
 
-### `modparks publish`
-ビルドされた成果物（.jar ファイルなど）をModParks上の新しいバージョンとしてアップロード・公開します。
-
+## 使い方
 ```bash
-# 基本的な使用例（引数で指定）
-modparks publish --file build/libs/my-mod-1.0.0.jar \
-  --version "1.0.0" \
-  --mc-version "1.20.1" \
-  --loader "fabric" \
-  --changelog "CHANGELOG.md" \
-  --release-type "release"
-
-# 設定ファイル (modparks.json) がある場合
-modparks publish
+modparks-cli --help
 ```
+以下は主なサブコマンドです。
 
-### `modparks sync`
-ローカルのプロジェクトメタデータ（README.mdなど）と、ModParks上のプロジェクト設定を同期させます。
+| コマンド | 説明 |
+|---|---|
+| `login <API_KEY>` | API キーを保存し、以降のリクエストで認証に使用します |
+| `profile` | 現在ログインしているユーザーの情報を表示します |
+| `projects [PAGE] [--limit <n>]` | プロジェクト一覧を取得（デフォルト 20 件） |
+| `my-projects [PAGE] [--limit <n>]` | 自分が作成したプロジェクト一覧を取得 |
+| `project <slug>` | 指定スラッグのプロジェクト詳細を取得 |
+| `versions <slug> [--limit <n>]` | プロジェクトのバージョン一覧を取得 |
+| `download <slug> [--version <ver>]` | プロジェクトのバージョン（ファイル）をダウンロードします |
+| `ideas [--limit <n>]` | アイデア一覧を取得 |
+| `idea <id>` | 指定IDのアイデア詳細を取得 |
+| `comments <slug>` | プロジェクトのコメント一覧を取得 |
+| `comment-post <slug> <content>`| コメントを投稿 |
+| `sync <slug>` | プロジェクトを外部プラットフォームと同期 |
+| `tui` | ターミナルUI (TUI) を起動してインタラクティブに操作します |
+| `update` | modparks-cli 自身を最新バージョンへアップデートします |
+| `cache-clear` | キャッシュされたレスポンスを削除します |
 
-```bash
-modparks sync --push   # ローカルの設定をサーバーに反映
-modparks sync --pull   # サーバーの設定をローカルに反映
+## TUI (Terminal UI)
+`modparks-cli tui` コマンドで起動できる TUI モードでは、方向キーやショートカットでプロジェクトやアイデアを簡単に閲覧できます。
+
+## 設定ファイル
+設定は JSON 形式で保存され、デフォルトの場所は以下です。
+- Windows: `%LOCALAPPDATA%/modparks-cli/config.json`
+- Linux/macOS: `$HOME/.config/modparks-cli/config.json`
+
+設定ファイルの例:
+```json
+{
+  "api_base_url": "https://modparks.pitan76.net/api/v1",
+  "api_key": "YOUR_API_KEY",
+  "cache_enabled": true,
+  "cache_ttl_seconds": 300
+}
 ```
-
-## ⚙️ CI/CDでの活用例 (GitHub Actions)
-
-`modparks publish` はCI環境での利用を強く意識して設計されています。以下はGitHub Actionsを使用して、リリース作成時に自動でModParksへ公開するワークフローの例です。
-
-```yaml
-name: Publish to ModParks
-
-on:
-  release:
-    types: [published]
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Install ModParks CLI
-        run: npm install -g modparks-cli
-
-      - name: Publish to ModParks
-        env:
-          MODPARKS_TOKEN: ${{ secrets.MODPARKS_API_TOKEN }}
-        run: |
-          modparks publish \
-            --file build/libs/my-mod.jar \
-            --mc-version "1.20.1" \
-            --loader "fabric" \
-            --release-type "release"
-```
-
-*※本ツールは現在開発・構想段階であり、コマンド体系や仕様は変更される可能性があります。*
+`login` コマンドで API キーを保存すると自動的に上記ファイルが作成、更新されます。
