@@ -1,0 +1,124 @@
+====== Versions API ======
+
+特定のプロジェクト（MOD、プラグイン等）に関連付けられたリリースバージョンや、その配布ファイルの情報を管理するためのAPIです。
+
+===== リソース表現 =====
+
+バージョンの情報は、以下のようなJSONデータとして表現されます。
+
+<code json>
+{
+  "id": "string",
+  "projectId": "string",
+  "name": "string",
+  "versionNumber": "string",
+  "changelog": "string",
+  "releaseType": "string",
+  "downloads": "integer",
+  "createdAt": "integer",
+  "files": [
+    {
+      "id": "string",
+      "filename": "string",
+      "size": "integer",
+      "downloadUrl": "string",
+      "hashes": {
+        "sha256": "string"
+      }
+    }
+  ],
+  "gameVersions": [
+    "string"
+  ],
+  "loaders": [
+    "string"
+  ]
+}
+</code>
+
+===== メソッド一覧 =====
+
+  * [[#バージョン一覧の取得]]
+  * [[#新しいバージョンのアップロード]]
+
+----
+
+===== バージョン一覧の取得 =====
+
+指定したプロジェクトに関連付けられている公開バージョン（ファイル）の一覧を取得します。
+
+==== HTTP リクエスト ====
+
+''GET https://modparks.pitan76.net/api/v1/projects/{slug}/versions''
+
+==== パスパラメータ ====
+
+^ パラメータ ^ タイプ ^ 備考 ^
+| ''slug'' | string | 情報を取得したいプロジェクトの一意のスラッグ名。 |
+
+==== クエリパラメータ ====
+
+^ パラメータ ^ タイプ ^ 備考 ^
+| ''limit'' | integer | 取得する最大件数を指定します。 |
+| ''offset'' | integer | 取得を開始する位置（スキップ件数）を指定します。 |
+
+==== レスポンス ====
+
+リクエストが成功すると、バージョン情報の配列を含む以下のJSONが返却されます。
+
+<code json>
+{
+  "data": [
+    // バージョン情報の配列
+  ],
+  "meta": {
+    "limit": "integer",
+    "offset": "integer",
+    "count": "integer"
+  }
+}
+</code>
+
+----
+
+===== 新しいバージョンのアップロード =====
+
+プロジェクトに対して、新しいバージョン情報と配布する実ファイル（''.jar'' など）をアップロードします。
+
+==== HTTP リクエスト ====
+
+''POST https://modparks.pitan76.net/api/v1/projects/{slug}/versions''
+
+==== パスパラメータ ====
+
+^ パラメータ ^ タイプ ^ 備考 ^
+| ''slug'' | string | アップロード先のプロジェクトの一意のスラッグ名。 |
+
+==== 認証 ====
+
+このエンドポイントを利用するには、該当プロジェクトへのファイルアップロード権限を持つユーザーとして認証されている必要があります。
+
+==== リクエストボディ ====
+
+ファイルの送信を伴うため、このリクエストは ''multipart/form-data'' 形式で送信する必要があります。以下の項目を含めてください。
+
+^ プロパティ ^ タイプ ^ 備考 ^
+| ''versionNumber'' | string | リリースのバージョン番号（例: ''1.0.0''）。（必須） |
+| ''file'' | File | アップロードする実ファイル（''.jar''、''.zip'' など）。複数のファイルを含めることも可能です。（必須） |
+| ''name'' | string | リリースの表示名。指定しなかった場合は ''versionNumber'' の値が使用されます。 |
+| ''changelog'' | string | アップデートの変更履歴（Markdown形式での記述が可能）。 |
+| ''releaseType'' | string | リリースの種類。''release''（安定版）、''beta''（ベータ版）、''alpha''（アルファ版）のいずれかを指定します。 |
+| ''gameVersions'' | string/Array | 対応しているゲームのバージョン（例: ''1.20.1''）。複数の場合は配列、またはカンマ区切りの文字列で指定します。 |
+| ''loaders'' | string/Array | 対応しているローダー（例: ''fabric'', ''forge''）。複数の場合は配列、またはカンマ区切りの文字列で指定します。 |
+| ''dependencies'' | string | 依存している他のプロジェクトの情報を記述したJSON文字列。 |
+
+==== レスポンス ====
+
+アップロードが完了すると、新しく作成されたバージョンのIDが返却されます。
+
+<code json>
+{
+  "success": true,
+  "versionId": "string"
+}
+</code>
