@@ -36,7 +36,7 @@ interface ProjectEditFormProps {
 export default function ProjectEditForm({ project, availableTags = [] }: ProjectEditFormProps) {
   const tCommon = useTranslations("Common");
   const router = useRouter();
-  const t = useTranslations("Project.form");
+  const t = useTranslations("Project");
   const tManage = useTranslations("Project.managePage");
   
   const [pending, setPending] = useState(false);
@@ -54,7 +54,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
         setToast({ message: "新しいバージョンが反映されました。ページを更新しています...", severity: "info" });
         setTimeout(() => window.location.reload(), 1500);
       } else if (e.message?.includes("CF_API_KEY_MISSING")) {
-        setToast({ message: t("apiKeyMissing"), severity: "error" });
+        setToast({ message: tManage("apiKeyMissing"), severity: "error" });
       } else if (e.message?.includes("CF_SLUG_NOT_FOUND")) {
         setToast({ message: "CurseForgeで指定されたSlugが見つかりませんでした。正しいか確認してください。", severity: "error" });
       } else {
@@ -117,18 +117,18 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <ProjectFormFields error={error} project={project as any} availableTags={availableTags}>
             <FormControl fullWidth required>
-              <InputLabel id="project-status-label">{t("status")}</InputLabel>
+              <InputLabel id="project-status-label">{t("fields.status")}</InputLabel>
               <Select
                 labelId="project-status-label"
                 id="project-status"
                 name="status"
-                label={t("status")}
+                label={t("fields.status")}
                 defaultValue={project.status}
               >
-                <MenuItem value="public">{t("public")}</MenuItem>
-                <MenuItem value="unlisted">{t("unlisted")}</MenuItem>
-                <MenuItem value="private">{t("private")}</MenuItem>
-                <MenuItem value="draft">{t("draft")}</MenuItem>
+                <MenuItem value="public">{tCommon("visibility.public")}</MenuItem>
+                <MenuItem value="unlisted">{tCommon("visibility.unlisted")}</MenuItem>
+                <MenuItem value="private">{tCommon("visibility.private")}</MenuItem>
+                <MenuItem value="draft">{tCommon("visibility.draft")}</MenuItem>
               </Select>
             </FormControl>
           </ProjectFormFields>
@@ -149,7 +149,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
                 {tCommon("cancel")}
               </Button>
               <Button type="submit" variant="contained" disabled={pending}>
-                {pending ? t("saving") : t("save")}
+                {pending ? tCommon("saving") : tCommon("save")}
               </Button>
             </Box>
           </Box>

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, ignored: true, reason: "Not a release event" });
     }
 
-    const body = await request.json();
+    const body = await request.json() as any;
 
     // Releaseが新しく作られた(published)、あるいは公開された場合のみ対象
     // "created", "published", "released" などがあるが、"published" が一般的な公開イベント

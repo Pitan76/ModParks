@@ -6,6 +6,7 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "save": "Save",
+    "saving": "Saving...",
     "saved": "Saved successfully",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -30,6 +31,7 @@
     "create": "Create",
     "confirmLabel": "Please enter the following to confirm",
     "add": "Add",
+    "saving": "Saving...",
     "visibility": {
       "public": "Public",
       "unlisted": "Unlisted",
@@ -138,7 +140,8 @@
       "sync": "Sync External Data",
       "syncing": "Syncing...",
       "syncSuccess": "External data synced successfully",
-      "syncError": "Failed to sync external data"
+      "syncError": "Failed to sync external data",
+      "apiKeyMissing": "API key is not set."
     },
     "sidebar": {
       "license": "License",

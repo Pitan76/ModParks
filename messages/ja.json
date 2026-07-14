@@ -6,6 +6,7 @@
     "loading": "読み込み中...",
     "error": "エラーが発生しました",
     "save": "保存",
+    "saving": "保存中...",
     "saved": "保存しました",
     "cancel": "キャンセル",
     "delete": "削除",
@@ -157,7 +158,8 @@
       "sync": "外部データを同期する",
       "syncing": "同期中...",
       "syncSuccess": "外部データを同期しました",
-      "syncError": "同期に失敗しました"
+      "syncError": "同期に失敗しました",
+      "apiKeyMissing": "APIキーが設定されていません。"
     },
     "sidebar": {
       "license": "ライセンス",
