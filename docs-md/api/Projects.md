@@ -1,0 +1,185 @@
+# Projects API
+
+ModParks上で公開・管理されているMOD、プラグイン、リソースパックなどのプロジェクト情報にアクセスするためのAPIです。
+
+## リソース表現
+
+プロジェクトの情報は、以下のようなJSONデータとして表現されます。
+
+```json
+{
+  "id": "string",
+  "slug": "string",
+  "name": "string",
+  "description": "string",
+  "iconUrl": "string",
+  "type": "string",
+  "license": "string",
+  "downloads": {
+    "total": "integer",
+    "native": "integer"
+  },
+  "createdAt": "integer",
+  "updatedAt": "integer",
+  "author": {
+    "username": "string",
+    "displayName": "string",
+    "avatarUrl": "string"
+  },
+  "tags": [
+    "string"
+  ]
+}
+```
+
+## メソッド一覧
+
+- [プロジェクト一覧の取得](#プロジェクト一覧の取得)
+- [プロジェクト詳細の取得](#プロジェクト詳細の取得)
+- [新しいプロジェクトの作成](#新しいプロジェクトの作成)
+- [プロジェクト情報の更新](#プロジェクト情報の更新)
+
+---
+
+## プロジェクト一覧の取得
+
+プラットフォーム上で公開されているプロジェクトの一覧を取得します。パラメータを利用して、特定のMODやプラグインを検索・フィルタリングすることができます。
+
+### HTTP リクエスト
+
+`GET https://modparks.pitan76.net/api/v1/projects`
+
+### クエリパラメータ
+
+| パラメータ | タイプ | 備考 |
+|---|---|---|
+| `limit` | integer | 取得する最大件数を指定します。指定しない場合はデフォルト値が適用されます。 |
+| `offset` | integer | 取得を開始する位置（スキップ件数）を指定します。デフォルトは `0` です。 |
+| `type` | string | 特定の種類のプロジェクトのみに絞り込みます（例: `mod`, `plugin`, `resourcepack`, `datapack`, `shader`, `modpack`）。 |
+| `q` | string | プロジェクト名に含まれるキーワードで検索を行います。 |
+| `sort` | string | 取得結果の並び順を指定します。`downloads`（ダウンロード数順：デフォルト）、`updated`（更新順）、`newest`（新着順）が利用可能です。 |
+| `author` | string | 特定のユーザーが作成したプロジェクトのみに絞り込みます。 |
+
+### レスポンス
+
+リクエストが成功すると、プロジェクトの配列とメタデータを含む以下のJSONが返却されます。
+
+```json
+{
+  "data": [
+    {
+      "id": "proj_123",
+      "slug": "awesome-mod",
+      "name": "Awesome Mod",
+      "type": "mod",
+      "downloads": {
+        "total": 1000,
+        "native": 1000
+      }
+    }
+  ],
+  "meta": {
+    "limit": 20,
+    "offset": 0,
+    "count": 1
+  }
+}
+```
+
+---
+
+## プロジェクト詳細の取得
+
+指定したスラッグ（URLの一部）に紐づくプロジェクトの詳細情報を取得します。
+
+### HTTP リクエスト
+
+`GET https://modparks.pitan76.net/api/v1/projects/{slug}`
+
+### パスパラメータ
+
+| パラメータ | タイプ | 備考 |
+|---|---|---|
+| `slug` | string | プロジェクトに割り当てられた一意のスラッグ名。 |
+
+### レスポンス
+
+リクエストが成功すると、該当するプロジェクトの全情報（[リソース表現](#リソース表現) と同形式）が返却されます。
+
+---
+
+## 新しいプロジェクトの作成
+
+新しいプロジェクト（ドラフト状態）を作成します。
+
+### HTTP リクエスト
+
+`POST https://modparks.pitan76.net/api/v1/projects`
+
+### 認証
+
+このエンドポイントを利用するには、有効なAPIトークンまたはセッションによる認証が必要です。
+
+### リクエストボディ
+
+リクエストには、以下の項目を含めたJSONデータを送信してください。
+
+| プロパティ | タイプ | 備考 |
+|---|---|---|
+| `name` | string | プロジェクトの表示名。（必須） |
+| `slug` | string | URLに使用される一意の識別子。（必須） |
+| `type` | string | プロジェクトの種類。`mod` や `plugin` など。（必須） |
+| `description` | string | プロジェクトの概要説明。（オプション） |
+
+### レスポンス
+
+作成に成功すると、新しく発行されたIDなどの基本情報が返却されます。
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "proj_new",
+    "slug": "my-new-mod",
+    "name": "My New Mod",
+    "type": "mod"
+  }
+}
+```
+
+---
+
+## プロジェクト情報の更新
+
+プロジェクトの基本情報や設定を部分的に変更します。
+
+### HTTP リクエスト
+
+`PATCH https://modparks.pitan76.net/api/v1/projects/{slug}`
+
+### パスパラメータ
+
+| パラメータ | タイプ | 備考 |
+|---|---|---|
+| `slug` | string | 更新したいプロジェクトの一意のスラッグ名。 |
+
+### 認証
+
+このエンドポイントを利用するには、対象プロジェクトの編集権限を持つユーザーとして認証されている必要があります。
+
+### リクエストボディ
+
+変更したい項目のみを含むJSONデータを送信してください。
+
+| プロパティ | タイプ | 備考 |
+|---|---|---|
+| `name` | string | プロジェクトの表示名。 |
+| `description` | string | プロジェクトの詳細説明文（Markdown形式に対応）。 |
+| `status` | string | 公開ステータス（`public` や `private` など）。 |
+| `sourceUrl` | string | ソースコードが公開されているURL（GitHubなど）。 |
+| `issueTrackerUrl` | string | 不具合報告などを受け付けるIssueトラッカーのURL。 |
+| `wikiUrl` | string | 公式WikiやドキュメントのURL。 |
+
+### レスポンス
+
+更新が完了すると、HTTPステータス `200 OK` とともに成功を示すレスポンスが返却されます。

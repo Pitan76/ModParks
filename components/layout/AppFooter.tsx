@@ -49,44 +49,68 @@ export default function AppFooter() {
             </Typography>
           </Box>
 
-          {/* リンク */}
-          <Stack direction="row" spacing={3} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
-            <Link
-              component={NextLink}
-              href="/terms"
-              prefetch={false}
-              sx={{ color: "text.secondary", fontSize: "0.875rem" }}
-            >
-              {t("terms")}
-            </Link>
-            <Link
-              component={NextLink}
-              href="/privacy"
-              prefetch={false}
-              sx={{ color: "text.secondary", fontSize: "0.875rem" }}
-            >
-              {t("privacy")}
-            </Link>
-            <Link
-              href="/feed.xml"
-              target="_blank"
-              rel="noopener noreferrer"
-              id="footer-rss"
-              sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}
-            >
-              <RssFeedIcon fontSize="small" />
-              RSS
-            </Link>
-            <Link
-              href="https://github.com/Pitan76/modparks"
-              target="_blank"
-              rel="noopener noreferrer"
-              id="footer-github"
-              sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}
-            >
-              <GitHubIcon fontSize="small" />
-              GitHub
-            </Link>
+          {/* リンク群 */}
+          <Stack spacing={1.5} sx={{ alignItems: { xs: "center", md: "flex-end" } }}>
+            {/* 上段: 外部ツール・リソース */}
+            <Stack direction="row" spacing={2.5} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+              <Link
+                href="https://doku.wikichree.com/modparks"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+              >
+                Wiki
+              </Link>
+              <Link
+                href="/feed.xml"
+                target="_blank"
+                rel="noopener noreferrer"
+                id="footer-rss"
+                sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.875rem" }}
+              >
+                <RssFeedIcon fontSize="small" />
+                RSS
+              </Link>
+              <Link
+                href="https://github.com/Pitan76/ModParks"
+                target="_blank"
+                rel="noopener noreferrer"
+                id="footer-github"
+                sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.875rem" }}
+              >
+                <GitHubIcon fontSize="small" />
+                Web
+              </Link>
+              <Link
+                href="https://github.com/Pitan76/ModParks-CLI"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.875rem" }}
+              >
+                <GitHubIcon fontSize="small" />
+                CLI
+              </Link>
+            </Stack>
+
+            {/* 下段: 法的情報 */}
+            <Stack direction="row" spacing={3} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+              <Link
+                component={NextLink}
+                href="/terms"
+                prefetch={false}
+                sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+              >
+                {t("terms")}
+              </Link>
+              <Link
+                component={NextLink}
+                href="/privacy"
+                prefetch={false}
+                sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+              >
+                {t("privacy")}
+              </Link>
+            </Stack>
           </Stack>
         </Stack>
 
