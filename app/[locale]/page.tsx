@@ -10,6 +10,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import LinkButton from "@/components/ui/LinkButton";
 import ProjectCard from "@/components/project/ProjectCard";
 import { getLoaderInfo } from "@/lib/loaders";
+import AdSlot from "@/components/ads/AdSlot";
 
 import { getProjects } from "@/lib/actions/project";
 
@@ -148,6 +149,10 @@ const HomePage = async ({ params }: HomePageProps) => {
             </Grid>
           ))}
         </Grid>
+      </Container>
+
+      <Container maxWidth="lg" sx={{ pb: 4 }}>
+        <AdSlot slot="home-mid" />
       </Container>
 
       {/* 最近更新されたプロジェクト */}

@@ -36,7 +36,15 @@
       "unlisted": "限定公開",
       "private": "非公開",
       "draft": "下書き"
+    },
+    "view": {
+      "list": "リスト表示",
+      "grid": "グリッド表示"
     }
+  },
+  "Ads": {
+    "label": "広告",
+    "previewLabel": "広告スペース（プレビュー）"
   },
   "Nav": {
     "home": "ホーム",

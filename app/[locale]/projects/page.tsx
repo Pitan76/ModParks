@@ -3,12 +3,13 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
-import ProjectCard from "@/components/project/ProjectCard";
+import ProjectCardList from "@/components/project/ProjectCardList";
 import LinkButton from "@/components/ui/LinkButton";
 import ProjectSearchBar from "@/components/project/ProjectSearchBar";
 import { getProjects } from "@/lib/actions/project";
 import { auth } from "@/lib/auth";
 import PaginationControls from "@/components/ui/PaginationControls";
+import AdSlot from "@/components/ads/AdSlot";
 
 interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
@@ -104,8 +105,12 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         )}
       </Box>
 
+      <Box sx={{ mb: 3 }}>
+        <AdSlot slot="projects-top" />
+      </Box>
+
       {/* 検索バー */}
-      <ProjectSearchBar 
+      <ProjectSearchBar
         initialQ={q} 
         initialAuthor={author}
         initialTypes={typesArr} 
@@ -132,11 +137,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       {/* プロジェクト一覧 */}
       {filtered.length > 0 ? (
         <>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {filtered.map((project) => (
-              <ProjectCard key={project.id} project={project as any} />
-            ))}
-          </Box>
+          <ProjectCardList projects={filtered as any} storageKey="projectsListLayout" />
           <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
         </>
       ) : (

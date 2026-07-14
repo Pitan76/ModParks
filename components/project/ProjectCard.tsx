@@ -16,6 +16,7 @@ import { Link, useRouter } from "@/i18n/routing";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useTranslations } from "next-intl";
 import { DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
+import { toPlainDescription } from "@/lib/utils/plainText";
 
 /**
  * プロジェクト一覧のカードに表示するデータの型定義
@@ -149,7 +150,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                   overflowWrap: "break-word"
                 }}
               >
-                {project.description}
+                {toPlainDescription(project.description)}
               </Typography>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5, minWidth: 0 }}>

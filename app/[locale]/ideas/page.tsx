@@ -16,6 +16,7 @@ import AddIcon from "@mui/icons-material/Add";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import LinkButton from "@/components/ui/LinkButton";
 import { formatDate } from "@/lib/utils/format";
+import { toPlainDescription } from "@/lib/utils/plainText";
 
 export default async function IdeasPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -78,7 +79,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
                     {idea.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {idea.content}
+                    {toPlainDescription(idea.content)}
                   </Typography>
                   <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 3 }, flexWrap: "wrap" }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>

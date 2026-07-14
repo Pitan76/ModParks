@@ -6,6 +6,7 @@ import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
 import { Link as RoutingLink } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { toPlainDescription } from "@/lib/utils/plainText";
 
 interface CollectionCardProps {
   collection: {
@@ -62,7 +63,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
           </Box>
           {collection.description && (
             <Typography variant="body2" color="text.secondary" sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", mt: 0.5 }}>
-              {collection.description}
+              {toPlainDescription(collection.description)}
             </Typography>
           )}
         </Box>

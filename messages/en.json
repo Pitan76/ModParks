@@ -36,7 +36,15 @@
       "unlisted": "Unlisted",
       "private": "Private",
       "draft": "Draft"
+    },
+    "view": {
+      "list": "List view",
+      "grid": "Grid view"
     }
+  },
+  "Ads": {
+    "label": "Advertisement",
+    "previewLabel": "Ad space (preview)"
   },
   "Nav": {
     "home": "Home",

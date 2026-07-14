@@ -14,7 +14,7 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
-import ProjectCard from "@/components/project/ProjectCard";
+import ProjectCardList from "@/components/project/ProjectCardList";
 import ProfileSortSelect from "@/components/profile/ProfileSortSelect";
 import { getProjects } from "@/lib/actions/project";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
@@ -307,13 +307,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
       {visibleProjects.length > 0 ? (
         <>
-          <Grid container spacing={2}>
-            {visibleProjects.map(p => (
-              <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <ProjectCard project={p as any} layout="grid" />
-              </Grid>
-            ))}
-          </Grid>
+          <ProjectCardList projects={visibleProjects as any} storageKey="profileProjectsLayout" defaultLayout="grid" />
 
           <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
         </>
@@ -346,13 +340,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
       </Typography>
 
       {favoritedProjects.length > 0 ? (
-        <Grid container spacing={2}>
-          {favoritedProjects.map(p => (
-            <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={p as any} layout="grid" />
-            </Grid>
-          ))}
-        </Grid>
+        <ProjectCardList projects={favoritedProjects as any} storageKey="profileFavoritesLayout" defaultLayout="grid" />
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>
           {t("noFavorites")}
