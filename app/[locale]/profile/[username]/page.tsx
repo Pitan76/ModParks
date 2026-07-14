@@ -292,37 +292,42 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2, mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0, fontSize: { xs: "1.3rem", sm: "1.5rem" } }}>
-          {t("projects")} <Box component="span" sx={{ color: "text.secondary", fontSize: "1.1rem", fontWeight: "normal", ml: 0.5 }}>({displayTotalProjects})</Box>
-        </Typography>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <ProfileSortSelect />
-          {isOwner && (
-            <RoutingLink href="/projects?author=me" prefetch={false} style={{ textDecoration: "none" }}>
-              <Button
-                variant="outlined"
-                size="small"
-                sx={{ height: '100%' }}
-              >
-                {t("manage")}
-              </Button>
-            </RoutingLink>
-          )}
-        </Box>
-      </Box>
-
-      {visibleProjects.length > 0 ? (
-        <>
-          <ProjectCardList projects={visibleProjects as any} storageKey="profileProjectsLayout" defaultLayout="grid" />
-
-          <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
-        </>
-      ) : (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          {t("noProjects")}
-        </Alert>
-      )}
+      <ProjectCardList
+        projects={visibleProjects as any}
+        storageKey="profileProjectsLayout"
+        defaultLayout="grid"
+        headerLeft={
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 0, fontSize: { xs: "1.3rem", sm: "1.5rem" } }}>
+            {t("projects")} <Box component="span" sx={{ color: "text.secondary", fontSize: "1.1rem", fontWeight: "normal", ml: 0.5 }}>({displayTotalProjects})</Box>
+          </Typography>
+        }
+        headerRight={
+          <>
+            <ProfileSortSelect />
+            {isOwner && (
+              <RoutingLink href="/projects?author=me" prefetch={false} style={{ textDecoration: "none" }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{ height: '100%' }}
+                >
+                  {t("manage")}
+                </Button>
+              </RoutingLink>
+            )}
+          </>
+        }
+        emptyContent={
+          <Alert severity="info" sx={{ mt: 2 }}>
+            {t("noProjects")}
+          </Alert>
+        }
+        footer={
+          visibleProjects.length > 0 && (
+            <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
+          )
+        }
+      />
 
       <Typography variant="h5" sx={{ fontWeight: 700, mt: 6, mb: 3 }}>
         {t("lists")}
@@ -342,17 +347,21 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         </Alert>
       )}
 
-      <Typography variant="h5" sx={{ fontWeight: 700, mt: 6, mb: 3 }}>
-        {t("favorites")}
-      </Typography>
-
-      {favoritedProjects.length > 0 ? (
-        <ProjectCardList projects={favoritedProjects as any} storageKey="profileFavoritesLayout" defaultLayout="grid" />
-      ) : (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          {t("noFavorites")}
-        </Alert>
-      )}
+      <ProjectCardList
+        projects={favoritedProjects as any}
+        storageKey="profileFavoritesLayout"
+        defaultLayout="grid"
+        headerLeft={
+          <Typography variant="h5" sx={{ fontWeight: 700, mt: 6, mb: 0 }}>
+            {t("favorites")}
+          </Typography>
+        }
+        emptyContent={
+          <Alert severity="info" sx={{ mt: 2 }}>
+            {t("noFavorites")}
+          </Alert>
+        }
+      />
     </Container>
   );
 }

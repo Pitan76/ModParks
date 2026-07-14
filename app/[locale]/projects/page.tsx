@@ -127,26 +127,28 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         availablePlatforms={availablePlatforms}
       />
 
-      {/* 件数表示 */}
-      <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
-        <Typography variant="body2" color="text.secondary">
-          {tSearch("results", { count: totalCount })}
-        </Typography>
-      </Box>
-
       {/* プロジェクト一覧 */}
-      {filtered.length > 0 ? (
-        <>
-          <ProjectCardList projects={filtered as any} storageKey="projectsListLayout" />
-          <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
-        </>
-      ) : (
-        <Box sx={{ textAlign: "center", py: 10 }}>
-          <Typography variant="h6" color="text.secondary">
-            {tSearch("noResults")}
+      <ProjectCardList
+        projects={filtered as any}
+        storageKey="projectsListLayout"
+        headerLeft={
+          <Typography variant="body2" color="text.secondary">
+            {tSearch("results", { count: totalCount })}
           </Typography>
-        </Box>
-      )}
+        }
+        emptyContent={
+          <Box sx={{ textAlign: "center", py: 10 }}>
+            <Typography variant="h6" color="text.secondary">
+              {tSearch("noResults")}
+            </Typography>
+          </Box>
+        }
+        footer={
+          filtered.length > 0 && (
+            <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} />
+          )
+        }
+      />
     </Container>
   );
 }

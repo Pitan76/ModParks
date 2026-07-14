@@ -18,6 +18,10 @@ interface ProjectCardListProps {
   /** 表示形式の保存キー。ページごとに独立させたい場合に指定する */
   storageKey?: string;
   defaultLayout?: CardLayout;
+  headerLeft?: React.ReactNode;
+  headerRight?: React.ReactNode;
+  emptyContent?: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
 /** localStorageから表示形式を読み込む。未保存やSSR時はdefaultを返す */
@@ -35,6 +39,10 @@ export default function ProjectCardList({
   projects,
   storageKey = "projectCardLayout",
   defaultLayout = "list",
+  headerLeft,
+  headerRight,
+  emptyContent,
+  footer,
 }: ProjectCardListProps) {
   const tCommon = useTranslations("Common");
   const [layout, setLayout] = useState<CardLayout>(defaultLayout);
@@ -49,24 +57,38 @@ export default function ProjectCardList({
     window.localStorage.setItem(storageKey, value);
   };
 
-  return (
-    <>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-        <ToggleButtonGroup value={layout} exclusive size="small" onChange={handleChange}>
-          <ToggleButton value="list" aria-label={tCommon("view.list")}>
-            <Tooltip title={tCommon("view.list")}>
-              <ViewListIcon fontSize="small" />
-            </Tooltip>
-          </ToggleButton>
-          <ToggleButton value="grid" aria-label={tCommon("view.grid")}>
-            <Tooltip title={tCommon("view.grid")}>
-              <GridViewIcon fontSize="small" />
-            </Tooltip>
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
+  const hasHeader = headerLeft || headerRight || projects.length > 0;
 
-      {layout === "grid" ? (
+  return (
+    <Box>
+      {hasHeader && (
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2, mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {headerLeft}
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, ml: "auto" }}>
+            {headerRight}
+            {projects.length > 0 && (
+              <ToggleButtonGroup value={layout} exclusive size="small" onChange={handleChange}>
+                <ToggleButton value="list" aria-label={tCommon("view.list")}>
+                  <Tooltip title={tCommon("view.list")}>
+                    <ViewListIcon fontSize="small" />
+                  </Tooltip>
+                </ToggleButton>
+                <ToggleButton value="grid" aria-label={tCommon("view.grid")}>
+                  <Tooltip title={tCommon("view.grid")}>
+                    <GridViewIcon fontSize="small" />
+                  </Tooltip>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            )}
+          </Box>
+        </Box>
+      )}
+
+      {projects.length === 0 ? (
+        emptyContent
+      ) : layout === "grid" ? (
         <Grid container spacing={2}>
           {projects.map((project) => (
             <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
@@ -81,6 +103,8 @@ export default function ProjectCardList({
           ))}
         </Box>
       )}
-    </>
+
+      {footer && <Box sx={{ mt: 3 }}>{footer}</Box>}
+    </Box>
   );
 }
