@@ -19,6 +19,8 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import { resizeImageFile } from "@/lib/utils/image";
+import { uploadFileToR2 } from "@/lib/utils/upload";
 
 export default function NewProjectForm({ availableTags, defaultLicense, ideaId, hasModrinthKey, hasCurseForgeKey }: { availableTags: any[], defaultLicense?: string, ideaId?: string, hasModrinthKey?: boolean, hasCurseForgeKey?: boolean }) {
   const router = useRouter();
@@ -79,6 +81,7 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
       await zip.loadAsync(file);
 
       let foundData: any = null;
+      let iconPath: string | null = null;
 
       // 1. Try fabric.mod.json
       if (zip.file("fabric.mod.json")) {
@@ -92,6 +95,13 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
           sourceUrl: json.contact?.sources || json.contact?.repo || "",
           issueTrackerUrl: json.contact?.issues || "",
         };
+        if (json.icon) {
+          if (typeof json.icon === "string") iconPath = json.icon;
+          else if (typeof json.icon === "object") {
+            const keys = Object.keys(json.icon);
+            if (keys.length > 0) iconPath = json.icon[keys[keys.length - 1]];
+          }
+        }
       }
       // 2. Try META-INF/mods.toml or META-INF/neoforge.mods.toml
       else if (zip.file("META-INF/mods.toml") || zip.file("META-INF/neoforge.mods.toml")) {
@@ -107,6 +117,7 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
             license: mod.license || "All Rights Reserved",
             issueTrackerUrl: mod.issueTrackerURL || "",
           };
+          if (mod.logoFile) iconPath = mod.logoFile;
         }
       }
       // 3. Try mcmod.info
@@ -123,6 +134,7 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
               description: mod.description || "",
               sourceUrl: mod.url || "",
             };
+            if (mod.logoFile) iconPath = mod.logoFile;
           }
         } catch (e) {
           console.warn("Invalid mcmod.info JSON", e);
@@ -136,6 +148,32 @@ export default function NewProjectForm({ availableTags, defaultLicense, ideaId, 
         if (foundData.slug) {
            // slugize just in case it has invalid chars, although modids are usually clean
            foundData.slug = foundData.slug.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+        }
+
+        if (iconPath) {
+          iconPath = iconPath.replace(/^\//, '');
+          const iconFileObj = zip.file(iconPath);
+          if (iconFileObj) {
+            try {
+              const blob = await iconFileObj.async("blob");
+              const ext = iconPath.split('.').pop()?.toLowerCase();
+              let mimeType = "image/png";
+              if (ext === "jpg" || ext === "jpeg") mimeType = "image/jpeg";
+              if (ext === "webp") mimeType = "image/webp";
+              if (ext === "gif") mimeType = "image/gif";
+              
+              const iconFile = new File([blob], iconPath.split('/').pop() || "icon.png", { type: mimeType });
+              const resizedFile = await resizeImageFile(iconFile, 400, 400);
+              const { publicUrl } = await uploadFileToR2(resizedFile, {
+                type: "icon",
+                projectSlug: "new-project",
+              }, { presignError: "Upload error", uploadError: "Upload error" });
+              
+              foundData.iconUrl = publicUrl;
+            } catch (e) {
+              console.warn("Failed to upload icon from jar", e);
+            }
+          }
         }
 
         setImportData(foundData);
