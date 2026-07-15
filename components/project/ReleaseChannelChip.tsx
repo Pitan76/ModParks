@@ -2,7 +2,7 @@
 
 import Chip from "@mui/material/Chip";
 import { useTranslations } from "next-intl";
-import { DEFAULT_RELEASE_CHANNEL, getChannelColor } from "@/lib/releaseChannels";
+import { DEFAULT_RELEASE_CHANNEL, getChannelColor, normalizeReleaseChannel } from "@/lib/releaseChannels";
 
 interface ReleaseChannelChipProps {
   channel: string;
@@ -16,13 +16,15 @@ interface ReleaseChannelChipProps {
 export default function ReleaseChannelChip({ channel, size = "small" }: ReleaseChannelChipProps) {
   const t = useTranslations("Version");
 
-  if (!channel || channel === DEFAULT_RELEASE_CHANNEL) return null;
+  const normalized = normalizeReleaseChannel(channel);
+
+  if (!normalized || normalized === DEFAULT_RELEASE_CHANNEL) return null;
 
   return (
     <Chip
-      label={t(`channels.${channel}`)}
+      label={t(`channels.${normalized}`)}
       size={size}
-      color={getChannelColor(channel)}
+      color={getChannelColor(normalized)}
       sx={{ borderRadius: "4px", fontWeight: 600 }}
     />
   );

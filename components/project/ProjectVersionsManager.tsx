@@ -33,7 +33,7 @@ import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import { MC_VERSIONS } from "@/lib/validations";
 import { AVAILABLE_LOADERS, getLoaderInfo } from "@/lib/loaders";
-import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
+import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL, normalizeReleaseChannel } from "@/lib/releaseChannels";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -97,7 +97,12 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
     return localVersions.map(v => {
       let mcvs: string[] = [];
       try { mcvs = JSON.parse(v.mcVersions) as string[]; } catch {}
-      return { ...v, parsedMcVersions: mcvs, date: new Date(v.createdAt) };
+      return {
+        ...v,
+        releaseChannel: normalizeReleaseChannel(v.releaseChannel),
+        parsedMcVersions: mcvs,
+        date: new Date(v.createdAt)
+      };
     });
   }, [localVersions]);
 
@@ -107,7 +112,6 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
   const [editMc, setEditMc] = useState<string[]>([]);
   const [editLoaders, setEditLoaders] = useState<string[]>([]);
   const [editChannel, setEditChannel] = useState<string>(DEFAULT_RELEASE_CHANNEL);
-
   useEffect(() => {
     if (!searchParams) return;
     const editId = searchParams.get("editVersionId");
@@ -130,8 +134,10 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
 
     try {
       const res = await deleteVersion(deleteId, projectSlug);
-      if (res.error) {
-        setErrorMsg(res.error);
+      if ("error" in res) {
+        setErrorMsg(res.error || "Failed to delete version");
+      } else if ((res as any).error) {
+        setErrorMsg((res as any).error);
       } else {
         setLocalVersions(prev => prev.filter(v => v.id !== deleteId));
         setDeleteId(null);
@@ -142,12 +148,11 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
       setPending(false);
     }
   };
-
   const openEdit = (v: ProjectVersion) => {
     setEditTarget(v);
     setEditNumber(v.versionNumber);
     setEditChangelog(v.changelog || "");
-    setEditChannel(v.releaseChannel || DEFAULT_RELEASE_CHANNEL);
+    setEditChannel(normalizeReleaseChannel(v.releaseChannel));
     try {
       setEditMc(JSON.parse(v.mcVersions) || []);
       setEditLoaders(JSON.parse(v.loaders) || []);
@@ -235,7 +240,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
               return (
                 <TableRow key={v.id}>
                   <TableCell sx={{ fontWeight: "bold" }}>
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                       <span>{v.versionNumber}</span>
                       <ReleaseChannelChip channel={v.releaseChannel} />
                     </Stack>

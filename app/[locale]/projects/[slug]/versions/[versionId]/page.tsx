@@ -140,7 +140,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
           <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, mb: 3, gap: 2 }}>
             <Box>
-              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 1 }}>
                 <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
                   v{version.versionNumber}
                 </Typography>

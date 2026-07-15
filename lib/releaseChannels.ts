@@ -23,7 +23,12 @@ export function isReleaseChannel(value: unknown): value is ReleaseChannel {
   return typeof value === "string" && (RELEASE_CHANNELS as readonly string[]).includes(value);
 }
 
+export function normalizeReleaseChannel(value: unknown): ReleaseChannel {
+  return isReleaseChannel(value) ? value : DEFAULT_RELEASE_CHANNEL;
+}
+
 /** GitHub Release の prerelease フラグからチャネルを決定する。 */
 export function channelFromGithubPrerelease(prerelease: boolean): ReleaseChannel {
   return prerelease ? "beta" : "release";
 }
+

@@ -50,9 +50,12 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+import { normalizeReleaseChannel } from "@/lib/releaseChannels";
+
 export default function ProjectVersionsTable({ versions, projectSlug }: ProjectVersionsTableProps) {
   const locale = useLocale();
   const t = useTranslations("Project");
+  const tVersion = useTranslations("Version");
   const [filterChannel, setFilterChannel] = useState<string>("all");
 
   const parsedVersions = useMemo(() => {
@@ -60,6 +63,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
       const rawMcVersions = Array.isArray(version.mcVersions) ? version.mcVersions : (JSON.parse(version.mcVersions || "[]") as string[]);
       return {
         ...version,
+        releaseChannel: normalizeReleaseChannel(version.releaseChannel),
         date: new Date(typeof version.createdAt === "number" ? version.createdAt * 1000 : version.createdAt),
         parsedLoaders: Array.isArray(version.loaders) ? version.loaders : (JSON.parse(version.loaders || "[]") as string[]),
         parsedMcVersions: compactMcVersions(rawMcVersions),
@@ -77,11 +81,12 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs value={filterChannel} onChange={(e, val) => setFilterChannel(val)} aria-label="Version channels">
           <Tab label="All" value="all" />
-          <Tab label={t("channels.release")} value="release" />
-          <Tab label={t("channels.beta")} value="beta" />
-          <Tab label={t("channels.alpha")} value="alpha" />
+          <Tab label={tVersion("channels.release")} value="release" />
+          <Tab label={tVersion("channels.beta")} value="beta" />
+          <Tab label={tVersion("channels.alpha")} value="alpha" />
         </Tabs>
       </Box>
+
 
       {/* Desktop Table View */}
       <TableContainer component={Paper} variant="outlined" sx={{ mb: 2, display: { xs: "none", md: "block" }, width: "100%", maxWidth: "100%", overflowX: "auto" }}>

@@ -1,0 +1,1 @@
+ALTER TABLE `versions` ADD `release_channel` text DEFAULT 'release' NOT NULL;
