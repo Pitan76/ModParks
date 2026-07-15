@@ -201,23 +201,7 @@ export async function updateProject(projectId: string, formData: FormData) {
 
   // ユーザーの提案に従い、自動同期は3日に1回（またはそれ以上の間隔）のみ実行します。
   // これにより、連続編集時のAPI呼び出しの詰まり（メモリ圧迫）を防ぎつつ、定期的な同期を保証します。
-  try {
-    const extObj = project.externalDownloads as Record<string, number> | undefined;
-    const lastSyncedAt = extObj?.lastSyncedAt || 0;
-    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-    
-    if (Date.now() - lastSyncedAt > threeDaysMs) {
-      after(async () => {
-        try {
-          await syncExternalProjectData(project.id);
-        } catch (err) {
-          console.error("Background sync failed:", err);
-        }
-      });
-    }
-  } catch (e) {
-    // ignore
-  }
+  // ※CRON等で分離されたため、ここでのafter()呼び出しは削除しました。
 
   await maybeNotifyPublish(db, project, fields.slug ?? project.slug, fields.status);
 
@@ -491,16 +475,7 @@ export async function batchDeleteProjects(projectIds: string[]) {
   return { success: true };
 }
 
-export async function syncExternalProjectData(projectId: string) {
-  const { db, session } = await getAuthenticatedDb();
-  
-  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
-  if (!project) throw new Error("Project not found");
-
-  await assertProjectAccess(db, project, session);
-
-  const settings = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, session.user.id) });
-  
+export async function syncExternalProjectDataSystem(db: any, project: any, settings: any) {
   let newExtDl = 0;
   let modrinthDl = 0;
   let curseforgeDl = 0;
@@ -626,6 +601,21 @@ export async function syncExternalProjectData(projectId: string) {
     externalDownloads: extObj,
     totalDownloads: project.downloads + newExtDl
   }).where(eq(projects.id, project.id)).run();
+
+  return newExtDl;
+}
+
+export async function syncExternalProjectData(projectId: string) {
+  const { db, session } = await getAuthenticatedDb();
+  
+  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  if (!project) throw new Error("Project not found");
+
+  await assertProjectAccess(db, project, session);
+
+  const settings = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, session.user.id) });
+  
+  const newExtDl = await syncExternalProjectDataSystem(db, project, settings);
   
   revalidatePath(`/projects/${project.slug}`);
   return { success: true, externalDownloads: newExtDl };

@@ -66,15 +66,18 @@ export async function listGithubReleases(projectSlug: string): Promise<
 export async function importGithubReleaseSystem(
   db: any,
   project: { id: string; slug: string; githubRepo: string | null },
-  releaseId?: number
+  releaseId?: number,
+  prefetchedRelease?: GithubRelease | null
 ): Promise<{ success: true; versionId: string; versionNumber: string } | { error: string }> {
   const repo = project.githubRepo ? normalizeGithubRepo(project.githubRepo) : null;
   if (!repo) return { error: "No valid GitHub repository linked to this project." };
 
   // 対象 Release を決定
-  let release: GithubRelease | null;
+  let release: GithubRelease | null = null;
   try {
-    if (releaseId != null) {
+    if (prefetchedRelease !== undefined) {
+      release = prefetchedRelease;
+    } else if (releaseId != null) {
       const all = await fetchGithubReleases(repo);
       release = all.find((r) => r.id === releaseId) ?? null;
     } else {

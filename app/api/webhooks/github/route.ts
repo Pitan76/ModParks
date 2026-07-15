@@ -41,8 +41,22 @@ export async function POST(request: Request) {
     }
 
     // 複数のプロジェクトが同じリポジトリを参照している場合は、すべて同期する
+    // GitHub APIの呼び出しを削減するため、ここでReleaseを1回取得して共有する
+    let prefetchedRelease: any = null;
+    try {
+      const { fetchGithubReleases, normalizeGithubRepo } = await import("@/lib/utils/github");
+      const repo = normalizeGithubRepo(repositoryFullName);
+      if (repo) {
+        const all = await fetchGithubReleases(repo);
+        prefetchedRelease = all.find((r) => r.id === releaseId) ?? null;
+      }
+    } catch (err) {
+      console.error("Failed to prefetch release:", err);
+      // エラー時はフォールバックとして個別に取得させる
+    }
+
     const results = await Promise.allSettled(
-      projectList.map(project => importGithubReleaseSystem(db, project, releaseId))
+      projectList.map(project => importGithubReleaseSystem(db, project, releaseId, prefetchedRelease))
     );
 
     const hasError = results.some(r => r.status === "rejected" || (r.status === "fulfilled" && 'error' in r.value));
