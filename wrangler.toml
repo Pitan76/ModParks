@@ -2,9 +2,12 @@ name = "modparks"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# メインワーカースクリプト（@opennextjs/cloudflare が生成）
-main = ".open-next/worker.js"
+# カスタムワーカースクリプト (Cron 対応のため OpenNext の worker をラップ)
+main = "worker-wrapper.js"
 assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+[triggers]
+crons = ["0 * * * *"] # 毎時0分に実行
 
 [[d1_databases]]
 binding        = "DB"
