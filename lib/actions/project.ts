@@ -505,13 +505,15 @@ export async function syncExternalProjectData(projectId: string) {
   let modrinthDl = 0;
   let curseforgeDl = 0;
   
-  if (project.modrinthId) {
+  const fetchModrinth = async () => {
+    if (!project.modrinthId) return;
     try {
       const res = await fetch(`https://api.modrinth.com/v2/project/${project.modrinthId}`, {
         headers: {
           "User-Agent": "ModParks/1.0 (modparks.pitan76.net)",
           ...(settings?.modrinthApiKey ? { Authorization: settings.modrinthApiKey } : {})
         },
+        next: { revalidate: 300 },
       });
       if (res.ok) {
         const data = await res.json() as any;
@@ -519,9 +521,10 @@ export async function syncExternalProjectData(projectId: string) {
         newExtDl += modrinthDl;
       }
     } catch(e) {}
-  }
+  };
   
-  if (project.curseforgeId) {
+  const fetchCurseforge = async () => {
+    if (!project.curseforgeId) return;
     try {
       // Studios コンソールキーは運営が env で全体設定する共通シークレット
       const rawCfApiKey = process.env.CURSEFORGE_FOR_STUDIOS_API_KEY;
@@ -536,7 +539,8 @@ export async function syncExternalProjectData(projectId: string) {
               "x-api-key": cfApiKey, 
               "Accept": "application/json",
               "User-Agent": "ModParks/1.0 (modparks.pitan76.net)"
-            }
+            },
+            next: { revalidate: 300 },
           });
           if (searchRes.ok) {
             const searchData = await searchRes.json() as any;
@@ -563,7 +567,8 @@ export async function syncExternalProjectData(projectId: string) {
             "x-api-key": cfApiKey, 
             "Accept": "application/json",
             "User-Agent": "ModParks/1.0 (modparks.pitan76.net)"
-          }
+          },
+          next: { revalidate: 300 },
         });
         if (res.ok) {
           const data = await res.json() as any;
@@ -583,7 +588,8 @@ export async function syncExternalProjectData(projectId: string) {
         
         if (/^\d+$/.test(targetCfId)) {
           const cfwRes = await fetch(`https://api.cfwidget.com/${targetCfId}`, {
-            headers: { "User-Agent": "ModParks/1.0 (modparks.pitan76.net)" }
+            headers: { "User-Agent": "ModParks/1.0 (modparks.pitan76.net)" },
+            next: { revalidate: 300 },
           });
           if (cfwRes.ok) {
             const cfwData = await cfwRes.json() as any;
@@ -604,7 +610,9 @@ export async function syncExternalProjectData(projectId: string) {
       console.error(`[CF Sync] Exception:`, e);
       throw e;
     }
-  }
+  };
+
+  await Promise.allSettled([fetchModrinth(), fetchCurseforge()]);
 
   const extObj: Record<string, number> = {
     ...(project.externalDownloads as Record<string, number> || {}),

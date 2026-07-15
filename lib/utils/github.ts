@@ -59,6 +59,7 @@ export async function fetchGithubReleases(repo: string, token?: string): Promise
 
   const res = await fetch(`${GITHUB_API}/repos/${normalized}/releases?per_page=30`, {
     headers: ghHeaders(token),
+    next: { revalidate: 300 },
   });
 
   if (res.status === 404) throw new Error("GitHub repository or releases not found.");
