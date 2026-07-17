@@ -11,6 +11,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
+import { after } from "next/server";
 
 /**
  * IDを指定してバージョン詳細を取得する
@@ -96,7 +97,9 @@ export async function createVersion(projectSlug: string, formData: FormData) {
   // 新バージョン登録をプロジェクトの最終更新日時に反映（「最近更新順」ソート用）
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
 
-  await notifyNewVersion(db, project, parsed.data.versionNumber);
+  after(async () => {
+    await notifyNewVersion(db, project, parsed.data.versionNumber);
+  });
 
   const ideaId = formData.get("ideaId") as string;
   if (ideaId) {

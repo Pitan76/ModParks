@@ -5,6 +5,7 @@ import { projects, versions } from "@/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2 } from "@/lib/r2";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
@@ -155,7 +156,11 @@ export async function importGithubReleaseSystem(
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
 
   const fullProject = await db.select().from(projects).where(eq(projects.id, project.id)).get();
-  if (fullProject) await notifyNewVersion(db, fullProject, versionNumber);
+  if (fullProject) {
+    after(async () => {
+      await notifyNewVersion(db, fullProject, versionNumber);
+    });
+  }
 
   revalidatePath(`/projects/${project.slug}`);
   return { success: true, versionId: id, versionNumber };
