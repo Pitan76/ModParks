@@ -29,6 +29,9 @@ export async function extractAndUploadRecipes(
   const recipes = allPaths.filter(p => p.match(/^data\/[^\/]+\/recipes?\/.*\.json$/));
   const tags = allPaths.filter(p => p.match(/^data\/[^\/]+\/tags?\/.*\.json$/));
   const textures = allPaths.filter(p => p.match(/^assets\/[^\/]+\/textures\/(item|block)\/.*\.png$/));
+  // モデルJSON（item/block）。テクスチャ名 != アイテムID のとき、CDN が
+  // parent/textures チェインを辿って実テクスチャを解決するために必要。
+  const models = allPaths.filter(p => p.match(/^assets\/[^\/]+\/models\/(item|block)\/.*\.json$/));
 
   let uploadedCount = 0;
   const newRecipes: any[] = [];
@@ -112,6 +115,17 @@ export async function extractAndUploadRecipes(
       const texPath = `${match[2]}.png`;
       const content = await zip.files[path].async("arraybuffer");
       await uploadExtractedFile(`/api/${namespace}/texture/${texPath}`, path, content, "image/png");
+    }
+  }
+
+  // Upload Models
+  for (const path of models) {
+    const match = path.match(/^assets\/([^\/]+)\/models\/(.+)\.json$/);
+    if (match) {
+      const namespace = match[1];
+      const modelPath = match[2]; // 例: "item/aegu" / "block/alchemy_chest"
+      const content = await zip.files[path].async("string");
+      await uploadExtractedFile(`/api/${namespace}/model/${modelPath}`, path, content, "application/json");
     }
   }
 
