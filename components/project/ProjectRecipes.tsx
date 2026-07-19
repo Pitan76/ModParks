@@ -1,9 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import ImageList from "@mui/material/ImageList";
-import ImageListItem from "@mui/material/ImageListItem";
-import ImageListItemBar from "@mui/material/ImageListItemBar";
 import { getTranslations } from "next-intl/server";
+import ProjectRecipesGrid from "./ProjectRecipesGrid";
 
 interface ProjectRecipesProps {
   projectSlug: string;
@@ -69,24 +67,14 @@ export default async function ProjectRecipes({ projectSlug, namespaces }: Projec
   }
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <ImageList variant="masonry" cols={3} gap={16}>
-        {recipes.map((recipe) => (
-          <ImageListItem key={recipe.id} sx={{ backgroundColor: "rgba(0,0,0,0.05)", borderRadius: 1, overflow: "hidden", p: 2 }}>
-            <img
-              src={recipe.url}
-              alt={recipe.title}
-              loading="lazy"
-              style={{ objectFit: "contain", width: "100%", height: "auto" }}
-            />
-            <ImageListItemBar
-              title={recipe.title}
-              position="below"
-              sx={{ textAlign: "center" }}
-            />
-          </ImageListItem>
-        ))}
-      </ImageList>
-    </Box>
+    <ProjectRecipesGrid
+      recipes={recipes}
+      labels={{
+        search: t("searchRecipes", { defaultValue: "レシピを検索" }),
+        noMatch: t("noRecipeMatch", { defaultValue: "一致するレシピがありません。" }),
+        showMore: t("showMore", { defaultValue: "もっと見る" }),
+        count: t("recipeCount", { defaultValue: "{shown} / {total}" }),
+      }}
+    />
   );
 }
