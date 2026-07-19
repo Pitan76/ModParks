@@ -54,7 +54,7 @@ export interface ProjectVersion {
   releaseChannel: string;
   fileUrl: string;
   archivedAt?: Date | null;
-  /** R2 に実体があり、レシピ/テクスチャ抽出が可能か（サーバー側で算出） */
+  isExternal?: boolean;
   canExtractRecipes?: boolean;
 }
 
@@ -205,7 +205,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
     setEditNumber(v.versionNumber);
     setEditChangelog(v.changelog || "");
     setEditChannel(normalizeReleaseChannel(v.releaseChannel));
-    const isExternal = !v.canExtractRecipes;
+    const isExternal = !!v.isExternal;
     setIsExternalEdit(isExternal);
     setEditFileUrl(isExternal ? v.fileUrl : "");
     try {

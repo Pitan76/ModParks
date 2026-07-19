@@ -63,7 +63,8 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   const { getR2KeyFromUrl } = await import("@/lib/r2");
   const projectVersions = rawVersions.map((v) => ({
     ...v,
-    canExtractRecipes: !!v.fileUrl && getR2KeyFromUrl(v.fileUrl) !== null,
+    isExternal: !!v.fileUrl && getR2KeyFromUrl(v.fileUrl) === null,
+    canExtractRecipes: !!v.fileUrl,
   }));
 
   const openIdeas = await db

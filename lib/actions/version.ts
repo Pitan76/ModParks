@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions, users, projectMembers } from "@/db/schema";
+import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { createVersionSchema, updateVersionSchema } from "@/lib/validations";
@@ -362,6 +362,9 @@ export async function extractRecipesFromVersion(versionId: string, projectSlug: 
       R2
     );
 
+    revalidatePath(`/projects/${projectSlug}`);
+    revalidatePath(`/[locale]/projects/${projectSlug}`, "page");
+    
     return { success: true, count: extractedCount };
   } catch (err: any) {
     console.error("Failed to extract recipes:", err);

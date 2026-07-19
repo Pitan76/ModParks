@@ -18,7 +18,7 @@ export default async function ProjectRecipes({ projectSlug }: ProjectRecipesProp
 
   try {
     // Fetch the index list from the CDN
-    const res = await fetch(`${cdnUrl}/api/list.json`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${cdnUrl}/api/list.json`, { next: { revalidate: 60 } });
     if (!res.ok) {
       throw new Error("Failed to fetch recipes list");
     }
