@@ -49,6 +49,7 @@ export interface ProjectVersion {
   downloads: number;
   changelog: string;
   releaseChannel: string;
+  fileUrl: string;
 }
 
 export interface ProjectVersionsManagerProps {
