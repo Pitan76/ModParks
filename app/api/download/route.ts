@@ -1,9 +1,51 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { versions, projects } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { versions, projects, projectMembers, users } from "@/db/schema";
+import { eq, and, sql } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getR2PublicUrl } from "@/lib/r2";
+import { auth } from "@/lib/auth";
+import { validateApiKey } from "@/lib/api-auth";
+
+/** 未公開扱いのステータス（直リンクでも認可が必要） */
+const RESTRICTED_STATUSES = new Set(["draft", "private"]);
+
+/**
+ * ダウンロード要求元のユーザーID（セッション or APIキー）を解決する。
+ * どちらも無ければ null。
+ */
+async function resolveRequesterId(req: NextRequest): Promise<string | null> {
+  const session = await auth();
+  if (session?.user?.id) return session.user.id;
+
+  const apiAuth = await validateApiKey(req);
+  if (apiAuth.valid && apiAuth.userId) return apiAuth.userId;
+
+  return null;
+}
+
+/**
+ * 未公開プロジェクトのファイルにアクセスできるのは、作者・メンバー・管理者のみ。
+ */
+async function canAccessRestricted(
+  db: Awaited<ReturnType<typeof getDatabase>>,
+  project: { id: string; authorId: string },
+  userId: string | null
+): Promise<boolean> {
+  if (!userId) return false;
+  if (project.authorId === userId) return true;
+
+  const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
+  if (dbUser?.role === "admin") return true;
+
+  const member = await db
+    .select({ userId: projectMembers.userId })
+    .from(projectMembers)
+    .where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId)))
+    .get();
+
+  return !!member;
+}
 
 /** GET /api/download/[versionId]
  * - ダウンロードカウントをインクリメント
@@ -34,8 +76,17 @@ export async function GET(req: NextRequest) {
       .where(eq(projects.id, version.projectId))
       .get();
 
-    if (!project || project.status === "draft") {
+    if (!project) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    // 未公開（draft/private）は作者・メンバー・管理者のみアクセス可。
+    // public / unlisted は直リンクで誰でもダウンロードできる。
+    if (RESTRICTED_STATUSES.has(project.status)) {
+      const requesterId = await resolveRequesterId(req);
+      if (!(await canAccessRestricted(db, project, requesterId))) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
     }
 
     // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）

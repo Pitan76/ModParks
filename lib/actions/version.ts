@@ -225,3 +225,72 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
 }
+
+export async function extractRecipesFromVersion(versionId: string, projectSlug: string) {
+  const { db } = await getAuthenticatedDb();
+
+  const project = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.slug, projectSlug))
+    .get();
+
+  if (!project) return { error: "Project not found" };
+
+  await assertProjectAccess(project.id);
+
+  const version = await db
+    .select()
+    .from(versions)
+    .where(and(eq(versions.id, versionId), eq(versions.projectId, project.id)))
+    .get();
+
+  if (!version) return { error: "Version not found" };
+
+  if (!version.fileUrl) {
+    return { error: "No file URL associated with this version" };
+  }
+
+  const r2Key = getR2KeyFromUrl(version.fileUrl);
+  if (!r2Key) {
+    return { error: "File is not stored in R2. Cannot extract recipes from external URLs." };
+  }
+
+  try {
+    const R2 = await getR2Bucket();
+    const object = await R2.get(r2Key);
+    
+    if (!object) {
+      return { error: "File not found in R2." };
+    }
+
+    const arrayBuffer = await object.arrayBuffer();
+
+    const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
+    let cdnSecret = process.env.RECIPE_CDN_SECRET;
+    
+    if (!cdnSecret) {
+      try {
+        const { env } = await getCloudflareContext({ async: true });
+        if ((env as any).RECIPE_CDN_SECRET) {
+          cdnSecret = (env as any).RECIPE_CDN_SECRET;
+        }
+      } catch (e) {}
+    }
+
+    const useCdnApi = process.env.USE_RECIPE_CDN_API === "true";
+
+    const extractedCount = await extractAndUploadRecipes(
+      arrayBuffer,
+      cdnUrl,
+      cdnSecret,
+      useCdnApi,
+      R2
+    );
+
+    return { success: true, count: extractedCount };
+  } catch (err: any) {
+    console.error("Failed to extract recipes:", err);
+    return { error: err.message || "Failed to extract recipes" };
+  }
+}
