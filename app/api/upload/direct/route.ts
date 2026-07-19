@@ -73,12 +73,19 @@ export async function PUT(req: NextRequest) {
     }
 
     const contentType = req.headers.get("content-type") || "application/octet-stream";
-    
+
     if (!req.body) {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    await uploadToR2(R2, key, req.body, contentType);
+    // R2 の put() は長さ不明の ReadableStream を受け付けない（"known length" 必須）ため、
+    // 5MB 上限のファイルを一度バッファに読み切ってから渡す。
+    const arrayBuffer = await req.arrayBuffer();
+    if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 413 });
+    }
+
+    await uploadToR2(R2, key, arrayBuffer, contentType);
 
     return NextResponse.json({ success: true, key });
   } catch (err: any) {
