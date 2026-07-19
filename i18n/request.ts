@@ -1,14 +1,14 @@
 import { getRequestConfig } from "next-intl/server";
-import { routing } from "./routing";
+import { routing, localeToFileMap, AppLocale } from "./routing";
 
 export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale;
 
-  if (!locale || !routing.locales.includes(locale as "ja" | "en")) {
+  if (!locale || !routing.locales.includes(locale as AppLocale)) {
     locale = routing.defaultLocale;
   }
 
-  const messageFile = locale === "ja" ? "ja_jp" : locale === "en" ? "en_us" : locale;
+  const messageFile = localeToFileMap[locale as AppLocale] || locale;
 
   return {
     locale,

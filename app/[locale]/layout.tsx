@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { routing } from "@/i18n/routing";
+import { routing, AppLocale } from "@/i18n/routing";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -85,7 +85,7 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   const { locale } = await params;
 
   // 未対応言語であれば404を返す
-  if (!routing.locales.includes(locale as "ja" | "en")) notFound();
+  if (!routing.locales.includes(locale as AppLocale)) notFound();
 
   const messages = await getMessages();
   const session  = await auth();
