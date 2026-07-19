@@ -20,10 +20,23 @@ export function stripHtml(input: string): string {
  * 複数行にまたがる記法にも対応するため、行分割前のテキスト全体に対して適用することを推奨します。
  */
 export function stripMarkdownLinksAndImages(text: string): string {
-  // 画像 ![alt](url), ![alt][id], ![] は除去
-  let processed = text.replace(/!\[[^\]]*\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "");
-  // リンク [text](url), [text][id] はテキスト(または空)のみ残す
-  return processed.replace(/\[([^\]]*)\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "$1");
+  let processed = text;
+  
+  // ネストされた記法（例: [![alt](img)](link)）に対応するため、変化しなくなるまで（最大5回）繰り返す
+  for (let i = 0; i < 5; i++) {
+    const prev = processed;
+    // 画像 ![...](...) または ![...][...] は完全に除去
+    processed = processed.replace(/!\[[\s\S]*?\]\s*(?:\([\s\S]*?\)|\[[\s\S]*?\])?/g, "");
+    // リンク [...](...) または [...][...] はテキストのみ残す
+    processed = processed.replace(/\[([\s\S]*?)\]\s*(?:\([\s\S]*?\)|\[[\s\S]*?\])?/g, "$1");
+    if (processed === prev) break;
+  }
+
+  // 万が一、不正なパースによって `[(https://...)]` や `(https://...)` のような残骸が残った場合は強制的に除去
+  processed = processed.replace(/\[\s*\(\s*https?:\/\/[^\s)\]]+\s*\)\s*\]/g, "");
+  processed = processed.replace(/\(\s*https?:\/\/[^\s)\]]+\s*\)/g, "");
+
+  return processed;
 }
 
 /** 1行分のMarkdownインライン記法・行頭記号を落としてテキスト化する */
