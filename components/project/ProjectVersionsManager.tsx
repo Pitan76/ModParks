@@ -14,6 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import CircularProgress from "@mui/material/CircularProgress";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import Tooltip from "@mui/material/Tooltip";
@@ -320,7 +321,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
                           onClick={() => handleExtractRecipes(v.id)} 
                           disabled={!!extractingId || !v.canExtractRecipes}
                         >
-                          <AutoFixHighIcon />
+                          {extractingId === v.id ? <CircularProgress size={24} color="inherit" /> : <AutoFixHighIcon />}
                         </IconButton>
                       </span>
                     </Tooltip>

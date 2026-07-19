@@ -317,8 +317,9 @@ export async function extractRecipesFromVersion(versionId: string, projectSlug: 
   let R2 = null;
 
   try {
+    R2 = await getR2Bucket();
+
     if (r2Key) {
-      R2 = await getR2Bucket();
       const object = await R2.get(r2Key);
       
       if (!object) {
@@ -342,9 +343,11 @@ export async function extractRecipesFromVersion(versionId: string, projectSlug: 
     
     if (!cdnSecret) {
       try {
-        const { env } = await getCloudflareContext({ async: true });
-        if ((env as any).RECIPE_CDN_SECRET) {
-          cdnSecret = (env as any).RECIPE_CDN_SECRET;
+        if (process.env.NODE_ENV !== "development") {
+          const { env } = await getCloudflareContext({ async: true });
+          if ((env as any).RECIPE_CDN_SECRET) {
+            cdnSecret = (env as any).RECIPE_CDN_SECRET;
+          }
         }
       } catch (e) {}
     }
