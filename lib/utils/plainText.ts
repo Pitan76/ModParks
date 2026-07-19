@@ -25,10 +25,6 @@ function stripMarkdownLine(line: string): string {
   text = text.replace(/^[-*+]\s+/, "");
   text = text.replace(/^\d+\.\s+/, "");
 
-  // 画像 ![alt](url), ![alt][id], ![] は除去
-  text = text.replace(/!\[[^\]]*\](?:\([^)]*\)|\[[^\]]*\])?/g, "");
-  // リンク [text](url), [text][id] はテキスト(または空)のみ残す
-  text = text.replace(/\[([^\]]*)\](?:\([^)]*\)|\[[^\]]*\])?/g, "$1");
 
   // 強調(**, __, *, _), 取り消し線(~~), インラインコード(`)
   text = text.replace(/(\*\*|__|~~)(.*?)\1/g, "$2");
@@ -62,7 +58,13 @@ export function toPlainDescription(description: string | null | undefined): stri
   // コードフェンス ```...``` はブロックごと除去
   const noFence = noHtml.replace(/```[\s\S]*?```/g, "");
 
-  const lines = noFence.split(/\r?\n/);
+  // 改行をまたぐ画像やリンクがあるため、行ごとに分割する前に全体に対して除去・置換を行う
+  // 画像 ![alt](url), ![alt][id], ![] は除去
+  let processed = noFence.replace(/!\[[^\]]*\](?:\([^)]*\)|\[[^\]]*\])?/g, "");
+  // リンク [text](url), [text][id] はテキスト(または空)のみ残す
+  processed = processed.replace(/\[([^\]]*)\](?:\([^)]*\)|\[[^\]]*\])?/g, "$1");
+
+  const lines = processed.split(/\r?\n/);
   const textLines: string[] = [];
   for (const line of lines) {
     if (isStructuralOnly(line)) continue;
