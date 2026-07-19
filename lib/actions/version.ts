@@ -354,7 +354,7 @@ export async function extractRecipesFromVersion(versionId: string, projectSlug: 
 
     const useCdnApi = process.env.USE_RECIPE_CDN_API === "true";
 
-    const extractedCount = await extractAndUploadRecipes(
+    const { count: extractedCount, namespaces } = await extractAndUploadRecipes(
       arrayBuffer,
       cdnUrl,
       cdnSecret,
@@ -362,9 +362,18 @@ export async function extractRecipesFromVersion(versionId: string, projectSlug: 
       R2
     );
 
+    // 検出したネームスペースをプロジェクトへ蓄積（slug と一致しないことが多いため表示フィルタに使う）。
+    if (namespaces.length > 0) {
+      const existing = Array.isArray(project.recipeNamespaces) ? project.recipeNamespaces : [];
+      const merged = Array.from(new Set([...existing, ...namespaces])).sort();
+      if (merged.length !== existing.length) {
+        await db.update(projects).set({ recipeNamespaces: merged }).where(eq(projects.id, project.id)).run();
+      }
+    }
+
     revalidatePath(`/projects/${projectSlug}`);
     revalidatePath(`/[locale]/projects/${projectSlug}`, "page");
-    
+
     return { success: true, count: extractedCount };
   } catch (err: any) {
     console.error("Failed to extract recipes:", err);

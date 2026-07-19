@@ -152,7 +152,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             recipesEnabled={p.recipesEnabled}
             recipesContent={
               <Box sx={{ mt: 2 }}>
-                <ProjectRecipes projectSlug={p.slug} />
+                <ProjectRecipes projectSlug={p.slug} namespaces={p.recipeNamespaces} />
               </Box>
             }
             descriptionContent={

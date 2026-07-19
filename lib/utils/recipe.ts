@@ -32,6 +32,8 @@ export async function extractAndUploadRecipes(
 
   let uploadedCount = 0;
   const newRecipes: any[] = [];
+  // 抽出したレシピのネームスペース（表示フィルタ用にプロジェクトへ保存する）
+  const namespaces = new Set<string>();
 
   /**
    * 抽出ファイルを送出する。
@@ -73,6 +75,7 @@ export async function extractAndUploadRecipes(
     if (match) {
       const namespace = match[1];
       const id = match[2];
+      namespaces.add(namespace);
       const content = await zip.files[path].async("string");
 
       try {
@@ -145,5 +148,5 @@ export async function extractAndUploadRecipes(
     }
   }
 
-  return uploadedCount;
+  return { count: uploadedCount, namespaces: Array.from(namespaces) };
 }

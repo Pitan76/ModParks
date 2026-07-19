@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `recipe_namespaces` text DEFAULT '[]' NOT NULL;

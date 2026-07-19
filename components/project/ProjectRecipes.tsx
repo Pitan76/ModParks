@@ -7,11 +7,17 @@ import { getTranslations } from "next-intl/server";
 
 interface ProjectRecipesProps {
   projectSlug: string;
+  /** 抽出時に検出したネームスペース一覧。slug と一致しないことが多いため優先して使う */
+  namespaces?: string[] | null;
 }
 
-export default async function ProjectRecipes({ projectSlug }: ProjectRecipesProps) {
+export default async function ProjectRecipes({ projectSlug, namespaces }: ProjectRecipesProps) {
   const t = await getTranslations("Project");
   const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
+
+  // 保存済みネームスペースがあればそれで絞り込む。無ければ後方互換で slug を使う。
+  const nsList = namespaces && namespaces.length > 0 ? namespaces : [projectSlug];
+  const nsSet = new Set(nsList);
 
   let recipes: { id: string; url: string; title: string }[] = [];
   let error: string | null = null;
@@ -32,7 +38,7 @@ export default async function ProjectRecipes({ projectSlug }: ProjectRecipesProp
     // Since we extract data/<namespace>/recipes/, we just search for matching namespace.
     // In this case, we use the project slug as the primary guess for the namespace.
     recipes = ids
-      .filter(id => id.startsWith(`${projectSlug}:`))
+      .filter(id => nsSet.has(id.split(":")[0]))
       .map(id => {
         const [namespace, itemId] = id.split(":");
         return {
