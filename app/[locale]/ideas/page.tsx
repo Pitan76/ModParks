@@ -7,16 +7,9 @@ import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-
-import Chip from "@mui/material/Chip";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import CommentIcon from "@mui/icons-material/Comment";
 import AddIcon from "@mui/icons-material/Add";
-import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import LinkButton from "@/components/ui/LinkButton";
-import { formatDate } from "@/lib/utils/format";
-import { toPlainDescription } from "@/lib/utils/plainText";
+import IdeaCard from "@/components/idea/IdeaCard";
 
 export default async function IdeasPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -71,39 +64,18 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {allIdeas.map((idea) => (
-          <Card key={idea.id} variant="outlined" sx={{ transition: "0.2s", "&:hover": { borderColor: "primary.main" } }}>
-            <LinkCardActionArea href={`/ideas/${idea.id}`} sx={{ p: 3 }}>
-              <Box sx={{ display: "flex", gap: 2 }}>
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5, wordBreak: "break-word", overflowWrap: "anywhere" }}>
-                    {idea.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {toPlainDescription(idea.content)}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 3 }, flexWrap: "wrap" }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
-                      <FavoriteIcon fontSize="small" />
-                      <Typography variant="body2">{idea.likesCount}</Typography>
-                    </Box>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
-                      <CommentIcon fontSize="small" />
-                      <Typography variant="body2">{idea.commentsCount}</Typography>
-                    </Box>
-                    <Chip 
-                      label={idea.status === "open" ? tIdea("status.open") : idea.status === "in_progress" ? tIdea("status.in_progress") : tIdea("status.resolved")} 
-                      size="small" 
-                      color={idea.status === "open" ? "primary" : idea.status === "in_progress" ? "warning" : "success"}
-                      variant="outlined"
-                    />
-                    <Typography variant="caption" color="text.disabled" sx={{ ml: "auto" }}>
-                      {formatDate(idea.createdAt!)}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            </LinkCardActionArea>
-          </Card>
+          <IdeaCard
+            key={idea.id}
+            idea={{
+              id: idea.id,
+              title: idea.title,
+              content: idea.content,
+              status: idea.status,
+              createdAt: idea.createdAt!,
+              likesCount: idea.likesCount,
+              commentsCount: idea.commentsCount,
+            }}
+          />
         ))}
         {allIdeas.length === 0 && (
           <Box sx={{ textAlign: "center", py: 8 }}>
