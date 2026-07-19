@@ -933,5 +933,18 @@
       "list_add": "{actorName} が「{projectName}」をリスト「{collectionName}」に追加しました",
       "comment_reply": "{actorName} があなたのコメントに返信しました"
     }
+  },
+  "ContextMenu": {
+    "open": "開く",
+    "openNewTab": "新しいタブで開く",
+    "copyLink": "リンクをコピー",
+    "copied": "コピーしました",
+    "share": "共有",
+    "copyText": "テキストをコピー",
+    "author": "作者ページを開く",
+    "report": "報告",
+    "download": "ダウンロード",
+    "edit": "編集",
+    "viewProject": "プロジェクトを開く"
   }
 }

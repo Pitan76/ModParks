@@ -925,5 +925,18 @@
       "list_add": "{actorName} added \"{projectName}\" to list \"{collectionName}\"",
       "comment_reply": "{actorName} replied to your comment"
     }
+  },
+  "ContextMenu": {
+    "open": "Open",
+    "openNewTab": "Open in new tab",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "share": "Share",
+    "copyText": "Copy text",
+    "author": "Open author page",
+    "report": "Report",
+    "download": "Download",
+    "edit": "Edit",
+    "viewProject": "Open project"
   }
 }
