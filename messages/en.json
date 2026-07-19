@@ -314,7 +314,8 @@
       "loaders": "Loaders",
       "changelog": "Changelog",
       "releaseChannel": "Release Type",
-      "file": "File"
+      "file": "File",
+      "fileUrl": "File URL (External)"
     },
     "channels": {
       "release": "Release",

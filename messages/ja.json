@@ -320,7 +320,8 @@
       "loaders": "プラットフォーム",
       "changelog": "変更履歴",
       "releaseChannel": "リリース種別",
-      "file": "ファイル"
+      "file": "ファイル",
+      "fileUrl": "ファイル URL (外部リンク)"
     },
     "channels": {
       "release": "リリース",
