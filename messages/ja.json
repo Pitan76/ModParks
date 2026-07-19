@@ -112,7 +112,8 @@
       },
       "discordWebhook": "Discord Webhook URL",
       "discordWebhookHelper": "新しいバージョンを公開したとき、この Discord Webhook に告知を送信します（任意）。",
-      "commentsEnabled": "コメントを有効にする"
+      "commentsEnabled": "コメントを有効にする",
+      "recipesEnabled": "レシピタブを有効にする"
     },
     "table": {
       "version": "バージョン",
@@ -193,6 +194,7 @@
     },
     "versions": "バージョン",
     "noVersions": "バージョンがまだありません",
+    "noRecipes": "レシピが見つかりません。",
     "downloads": "ダウンロード",
     "createdAt": "公開日",
     "newProject": "新規プロジェクト",
@@ -214,6 +216,7 @@
       "description": "説明",
       "files": "ファイル",
       "dependencies": "依存関係",
+      "recipes": "レシピ",
       "issues": "問題報告",
       "manage": "管理",
       "underConstruction": "工事中",
@@ -341,7 +344,8 @@
       "modeFile": "ファイルをアップロード",
       "modeUrl": "外部URLを指定",
       "externalUrl": "ダウンロードURL",
-      "externalUrlHelper": "GitHub Releases, Modrinth, CurseForge のURLが使用できます"
+      "externalUrlHelper": "GitHub Releases, Modrinth, CurseForge のURLが使用できます",
+      "extractRecipes": "JARからレシピを抽出してアップロード"
     },
     "loaders": {
       "fabric": "Fabric",

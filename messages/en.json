@@ -111,8 +111,9 @@
         "addLink": "Add Link"
       },
       "discordWebhook": "Discord Webhook URL",
-      "discordWebhookHelper": "When a new version is published, an announcement is sent to this Discord webhook (optional).",
-      "commentsEnabled": "Enable comments"
+      "discordWebhookHelper": "Send a notification to this Discord webhook when a new version is published (optional).",
+      "commentsEnabled": "Enable Comments",
+      "recipesEnabled": "Enable Recipes Tab"
     },
     "table": {
       "version": "Version",
@@ -186,9 +187,10 @@
       "addVersion": "Add Version"
     },
     "versions": "Versions",
-    "noVersions": "No versions yet",
+    "noVersions": "No versions available yet.",
+    "noRecipes": "No recipes found.",
     "downloads": "Downloads",
-    "createdAt": "Created Date",
+    "createdAt": "Published At",
     "newProject": "New Project",
     "uploadNewVersion": "Upload New Version",
     "author": "Author",
@@ -208,6 +210,7 @@
       "description": "Description",
       "files": "Files",
       "dependencies": "Dependencies",
+      "recipes": "Recipes",
       "issues": "Issues",
       "manage": "Manage",
       "underConstruction": "Under Construction",
@@ -333,9 +336,10 @@
       "publish": "Publish Version",
       "uploadMode": "Upload Mode",
       "modeFile": "Upload File",
-      "modeUrl": "Provide External URL",
+      "modeUrl": "Specify external URL",
       "externalUrl": "Download URL",
-      "externalUrlHelper": "You can use GitHub Releases, Modrinth, or CurseForge URLs"
+      "externalUrlHelper": "Supports GitHub Releases, Modrinth, and CurseForge URLs",
+      "extractRecipes": "Extract and upload recipes from JAR"
     },
     "loaders": {
       "fabric": "Fabric",
