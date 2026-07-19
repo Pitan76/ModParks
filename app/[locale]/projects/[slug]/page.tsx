@@ -18,6 +18,7 @@ import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 import ProjectTabsManager from "@/components/project/ProjectTabsManager";
 import ProjectDependencies from "@/components/project/ProjectDependencies";
 import ProjectComments from "@/components/project/ProjectComments";
+import ProjectRecipes from "@/components/project/ProjectRecipes";
 import LinkButton from "@/components/ui/LinkButton";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import AdSlot from "@/components/ads/AdSlot";
@@ -148,6 +149,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             canEdit={canEdit}
             manageHref={`/projects/${p.slug}/edit`}
             issueTrackerUrl={p.issueTrackerUrl}
+            recipesEnabled={p.recipesEnabled}
+            recipesContent={
+              <Box sx={{ mt: 2 }}>
+                <ProjectRecipes projectSlug={p.slug} />
+              </Box>
+            }
             descriptionContent={
               <Box sx={{ mt: 2 }}>
                 <DescriptionRenderer content={p.description || ""} format={p.descriptionFormat || "markdown"} />

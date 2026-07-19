@@ -11,6 +11,8 @@ import Autocomplete, { AutocompleteRenderGetTagProps } from "@mui/material/Autoc
 import CircularProgress from "@mui/material/CircularProgress";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LinkIcon from "@mui/icons-material/Link";
 import { useState, useRef } from "react";
@@ -50,6 +52,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
   const [externalUrl, setExternalUrl] = useState("");
   const [versionNumber, setVersionNumber] = useState("");
   const [releaseChannel, setReleaseChannel] = useState<string>(DEFAULT_RELEASE_CHANNEL);
+  const [extractRecipes, setExtractRecipes] = useState(true);
   const [parsing, setParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -109,6 +112,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
       mcVersions.forEach(v => formData.append("mcVersions", v));
       loaders.forEach(l => formData.append("loaders", l));
       formData.set("releaseChannel", releaseChannel);
+      formData.set("extractRecipes", extractRecipes ? "true" : "false");
 
       if (uploadMode === "file" && file) {
         if (file.size > 5 * 1024 * 1024) {
@@ -187,6 +191,14 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
                   <Typography variant="caption" color="success.main" sx={{ display: "block", mt: 1 }}>
                     {tVersion("uploadForm.selectedFile", { name: file.name, size: (file.size / 1024 / 1024).toFixed(2) })}
                   </Typography>
+                )}
+                {file && (
+                  <Box sx={{ mt: 2 }}>
+                    <FormControlLabel
+                      control={<Switch checked={extractRecipes} onChange={(e) => setExtractRecipes(e.target.checked)} />}
+                      label={tVersion("uploadForm.extractRecipes", "JARからレシピを抽出してアップロード")}
+                    />
+                  </Box>
                 )}
                 {error?.fileUrl && <Typography color="error" variant="caption" sx={{ display: "block", mt: 1 }}>{error.fileUrl[0]}</Typography>}
               </Box>

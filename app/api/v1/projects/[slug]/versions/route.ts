@@ -10,7 +10,7 @@ import { buildR2Key, getR2PublicUrl, uploadToR2 } from "@/lib/r2";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidatePath } from "next/cache";
 import { withPublicCache } from "@/lib/http/cache";
-
+import JSZip from "jszip";
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const d1 = await getD1();
   const db = getDb(d1);
@@ -153,6 +153,26 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       fileUrl = getR2PublicUrl(key);
       fileName = file.name;
       fileSize = file.size;
+
+      const extractRecipes = formData.get("extractRecipes") === "true";
+      if (extractRecipes && (file.name.endsWith(".jar") || file.name.endsWith(".zip"))) {
+        try {
+          const zip = await JSZip.loadAsync(arrayBuffer);
+          const recipeFiles = Object.keys(zip.files).filter(path => 
+            (path.match(/^data\/[^\/]+\/recipes\/.*\.json$/) || path.match(/^data\/[^\/]+\/tags\/items\/.*\.json$/)) && !zip.files[path].dir
+          );
+          
+          for (const path of recipeFiles) {
+            const content = await zip.files[path].async("arraybuffer");
+            // R2 key will be exactly the path: data/<namespace>/recipes/<id>.json
+            await uploadToR2(R2, path, content, "application/json");
+          }
+          console.log(`Extracted and uploaded ${recipeFiles.length} recipe/tag files.`);
+        } catch (zipErr) {
+          console.error("Failed to extract recipes from jar:", zipErr);
+          // Don't fail the whole upload if recipe extraction fails
+        }
+      }
     } catch (err: any) {
       console.error("Upload Error:", err);
       return NextResponse.json({ error: "Failed to upload file to R2" }, { status: 500 });

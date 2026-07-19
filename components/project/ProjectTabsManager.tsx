@@ -14,12 +14,14 @@ interface ProjectTabsManagerProps {
   descriptionContent: React.ReactNode;
   filesContent: React.ReactNode;
   dependenciesContent: React.ReactNode;
+  recipesContent?: React.ReactNode;
   manageHref: string;
   canEdit: boolean;
+  recipesEnabled?: boolean;
   issueTrackerUrl?: string | null;
 }
 
-export default function ProjectTabsManager({ descriptionContent, filesContent, dependenciesContent, manageHref, canEdit, issueTrackerUrl }: ProjectTabsManagerProps) {
+export default function ProjectTabsManager({ descriptionContent, filesContent, dependenciesContent, recipesContent, manageHref, canEdit, recipesEnabled, issueTrackerUrl }: ProjectTabsManagerProps) {
   const t = useTranslations("Project");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,6 +32,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
   const getTabFromParam = (param: string | null) => {
     if (param === "files") return 1;
     if (param === "dependencies") return 2;
+    if (param === "recipes" && recipesEnabled) return 3;
     return 0;
   };
 
@@ -40,12 +43,12 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
   }, [tabParam]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    if (newValue === 3) {
+    if (newValue === 4) {
       router.push(manageHref);
       return;
     }
 
-    if (newValue === 4) {
+    if (newValue === 5) {
       if (issueTrackerUrl) {
         window.open(issueTrackerUrl, "_blank", "noopener,noreferrer");
       }
@@ -59,6 +62,8 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
       params.set("tab", "files");
     } else if (newValue === 2) {
       params.set("tab", "dependencies");
+    } else if (newValue === 3) {
+      params.set("tab", "recipes");
     } else {
       params.delete("tab");
     }
@@ -90,6 +95,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
           <Tab label={t("tabs.description")} value={0} />
           <Tab label={t("tabs.files")} value={1} />
           <Tab label={t("tabs.dependencies")} value={2} />
+          {recipesEnabled && <Tab label={t("tabs.recipes", "レシピ")} value={3} />}
           {issueTrackerUrl && (
             <Tab 
               label={
@@ -98,13 +104,13 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
                   <OpenInNewIcon sx={{ fontSize: '1rem' }} />
                 </Box>
               }
-              value={4}
+              value={5}
             />
           )}
           {canEdit && (
             <Tab 
               label={t("tabs.manage")} 
-              value={3}
+              value={4}
             />
           )}
         </Tabs>
@@ -115,6 +121,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
       <Box sx={{ display: tab === 0 ? "block" : "none" }}>{descriptionContent}</Box>
       <Box sx={{ display: tab === 1 ? "block" : "none" }}>{filesContent}</Box>
       <Box sx={{ display: tab === 2 ? "block" : "none" }}>{dependenciesContent}</Box>
+      {recipesEnabled && <Box sx={{ display: tab === 3 ? "block" : "none" }}>{recipesContent}</Box>}
     </Box>
   );
 }

@@ -170,6 +170,7 @@ export const projects = sqliteTable("projects", {
   totalDownloads: integer("total_downloads").notNull().default(0),
   externalDownloads: text("external_downloads", { mode: "json" }).$type<Record<string, number>>().notNull().default({}),
   commentsEnabled: integer("comments_enabled", { mode: "boolean" }).notNull().default(false),
+  recipesEnabled: integer("recipes_enabled", { mode: "boolean" }).notNull().default(false),
   sourceIdeaId: text("source_idea_id"),
   /** 連携する GitHub リポジトリ ("owner/repo" 形式)。Release 自動取り込みに使用 */
   githubRepo: text("github_repo"),

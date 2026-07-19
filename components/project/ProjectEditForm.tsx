@@ -32,6 +32,7 @@ interface ProjectEditFormProps {
     sourceUrl?: string | null;
     status: string;
     commentsEnabled?: boolean;
+    recipesEnabled?: boolean;
   };
   availableTags?: { slug: string; name: string }[];
 }
@@ -139,6 +140,10 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
           <FormControlLabel
             control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} />}
             label={t("fields.commentsEnabled")}
+          />
+          <FormControlLabel
+            control={<Switch name="recipesEnabled" defaultChecked={!!project.recipesEnabled} />}
+            label={t("fields.recipesEnabled", "レシピタブを有効にする")}
           />
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
