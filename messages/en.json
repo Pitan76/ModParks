@@ -300,8 +300,10 @@
       "importing": "Importing...",
       "importGithub": "Import from GitHub Release",
       "confirmVersionLabel": "Please enter the version number to confirm:",
-      "importSuccess": "Imported version {version}.",
-      "importError": "Failed to import."
+      "importSuccess": "Version {version} imported.",
+      "importError": "Failed to import version.",
+      "extractRecipes": "Extract recipes/textures from JAR",
+      "extractSuccess": "Extraction complete ({count} items)"
     },
     "fields": {
       "versionNumber": "Version Number",

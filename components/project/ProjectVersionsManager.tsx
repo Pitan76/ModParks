@@ -13,6 +13,8 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import Tooltip from "@mui/material/Tooltip";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import DialogContentText from "@mui/material/DialogContentText";
 import FormTextField from "@/components/ui/form/FormTextField";
@@ -25,7 +27,7 @@ import Stack from "@mui/material/Stack";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import type { SyntheticEvent } from "react";
-import { deleteVersion, updateVersion } from "@/lib/actions/version";
+import { deleteVersion, updateVersion, extractRecipesFromVersion } from "@/lib/actions/version";
 import { importGithubRelease } from "@/lib/actions/github";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { useFormatter, useTranslations } from "next-intl";
@@ -148,6 +150,27 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
       setPending(false);
     }
   };
+
+  const [extractingId, setExtractingId] = useState<string | null>(null);
+
+  const handleExtractRecipes = async (versionId: string) => {
+    setExtractingId(versionId);
+    setErrorMsg("");
+    setImportMsg(null);
+    try {
+      const res = await extractRecipesFromVersion(versionId, projectSlug);
+      if ("error" in res) {
+        setErrorMsg(res.error || "Failed to extract recipes");
+      } else {
+        setImportMsg({ text: t("manager.extractSuccess", { count: res.count }), severity: "success" });
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to extract recipes");
+    } finally {
+      setExtractingId(null);
+    }
+  };
+
   const openEdit = (v: ProjectVersion) => {
     setEditTarget(v);
     setEditNumber(v.versionNumber);
@@ -251,6 +274,17 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
                     {format.dateTime(v.date, { dateStyle: "short", timeStyle: "short" })}
                   </TableCell>
                   <TableCell align="right">
+                    <Tooltip title={t("manager.extractRecipes", { defaultValue: "レシピを抽出" })}>
+                      <span>
+                        <IconButton 
+                          color="secondary" 
+                          onClick={() => handleExtractRecipes(v.id)} 
+                          disabled={!!extractingId || !v.fileUrl || v.fileUrl.startsWith("http")}
+                        >
+                          <AutoFixHighIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                     <IconButton color="primary" onClick={() => openEdit(v)}>
                       <EditIcon />
                     </IconButton>
