@@ -86,36 +86,19 @@ export default function ProjectRecipesGrid({ recipes, labels }: ProjectRecipesGr
           }}
         >
           {shown.map((recipe) => (
-            <Box
-              key={recipe.id}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                bgcolor: "action.hover",
-                borderRadius: 2,
-                overflow: "hidden",
-                border: "1px solid",
-                borderColor: "divider",
-                transition: "transform .15s ease, box-shadow .15s ease",
-                "&:hover": { transform: "translateY(-2px)", boxShadow: 3 },
-              }}
-            >
-              <Box sx={{ p: 2, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                <img
-                  src={recipe.url}
-                  alt={recipe.title}
-                  loading="lazy"
-                  style={{ objectFit: "contain", width: "100%", height: "auto" }}
-                />
-              </Box>
+            <Box key={recipe.id}>
+              <img
+                src={recipe.url}
+                alt={recipe.title}
+                loading="lazy"
+                style={{ objectFit: "contain", width: "100%", height: "auto" }}
+              />
               <Typography
                 variant="body2"
+                color="text.secondary"
                 sx={{
-                  px: 1.5,
-                  py: 1,
+                  mt: 0.5,
                   textAlign: "center",
-                  borderTop: "1px solid",
-                  borderColor: "divider",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
