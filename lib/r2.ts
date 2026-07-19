@@ -27,7 +27,7 @@ export async function getR2Bucket(): Promise<R2Bucket> {
 export async function uploadToR2(
   bucket: R2Bucket,
   key: string,
-  body: ReadableStream | ArrayBuffer | Blob,
+  body: ReadableStream | ArrayBuffer | Blob | string,
   contentType: string
 ): Promise<string> {
   await bucket.put(key, body, {

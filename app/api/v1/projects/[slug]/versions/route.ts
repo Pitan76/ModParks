@@ -173,6 +173,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
             }
           }
 
+          const useCdnApi = process.env.USE_RECIPE_CDN_API === "true";
+
           const zip = await JSZip.loadAsync(arrayBuffer);
           const allPaths = Object.keys(zip.files).filter(p => !zip.files[p].dir);
           
@@ -182,17 +184,26 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
 
           let uploadedCount = 0;
 
-          // Helper to PUT to CDN
-          const putToCDN = async (endpoint: string, content: ArrayBuffer | string, contentType: string) => {
-            const url = `${cdnUrl}${endpoint}`;
-            const headers: Record<string, string> = { "Content-Type": contentType };
-            if (cdnSecret) headers["Authorization"] = `Bearer ${cdnSecret}`;
-            
-            const res = await fetch(url, { method: "PUT", headers, body: content });
-            if (!res.ok) {
-              console.warn(`CDN upload failed for ${url}: ${res.status} ${res.statusText}`);
+          // Helper to PUT to CDN or direct R2
+          const uploadExtractedFile = async (endpoint: string, r2Path: string, content: ArrayBuffer | string, contentType: string) => {
+            if (useCdnApi) {
+              const url = `${cdnUrl}${endpoint}`;
+              const headers: Record<string, string> = { "Content-Type": contentType };
+              if (cdnSecret) headers["Authorization"] = `Bearer ${cdnSecret}`;
+              
+              const res = await fetch(url, { method: "PUT", headers, body: content });
+              if (!res.ok) {
+                console.warn(`CDN upload failed for ${url}: ${res.status} ${res.statusText}`);
+              } else {
+                uploadedCount++;
+              }
             } else {
-              uploadedCount++;
+              try {
+                await uploadToR2(R2, r2Path, content, contentType);
+                uploadedCount++;
+              } catch (e) {
+                console.warn(`Direct R2 upload failed for ${r2Path}:`, e);
+              }
             }
           };
 
@@ -203,7 +214,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
               const namespace = match[1];
               const id = match[2];
               const content = await zip.files[path].async("string");
-              await putToCDN(`/api/${namespace}/recipe/${id}`, content, "application/json");
+              await uploadExtractedFile(`/api/${namespace}/recipe/${id}`, path, content, "application/json");
             }
           }
 
@@ -214,7 +225,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
               const namespace = match[1];
               const tagPath = match[2];
               const content = await zip.files[path].async("string");
-              await putToCDN(`/api/${namespace}/tag/${tagPath}`, content, "application/json");
+              await uploadExtractedFile(`/api/${namespace}/tag/${tagPath}`, path, content, "application/json");
             }
           }
 
@@ -225,11 +236,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
               const namespace = match[1];
               const texPath = match[2] + ".png";
               const content = await zip.files[path].async("arraybuffer");
-              await putToCDN(`/api/${namespace}/texture/${texPath}`, content, "image/png");
+              await uploadExtractedFile(`/api/${namespace}/texture/${texPath}`, path, content, "image/png");
             }
           }
           
-          console.log(`Extracted and uploaded ${uploadedCount} recipe/tag/texture files to CDN.`);
+          console.log(`Extracted and uploaded ${uploadedCount} recipe/tag/texture files (CDN API: ${useCdnApi}).`);
         } catch (zipErr) {
           console.error("Failed to extract recipes from jar:", zipErr);
           // Don't fail the whole upload if recipe extraction fails
