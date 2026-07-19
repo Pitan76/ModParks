@@ -12,6 +12,8 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
+import { extractAndUploadRecipes } from "@/lib/utils/recipe";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 /**
  * IDを指定してバージョン詳細を取得する
