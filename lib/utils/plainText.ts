@@ -4,7 +4,7 @@
  */
 
 /** HTMLタグを除去し、代表的なHTMLエンティティを実体へ戻す */
-function stripHtml(input: string): string {
+export function stripHtml(input: string): string {
   const withoutTags = input.replace(/<[^>]*>/g, " ");
   return withoutTags
     .replace(/&nbsp;/g, " ")
@@ -15,8 +15,19 @@ function stripHtml(input: string): string {
     .replace(/&#39;/g, "'");
 }
 
+/** 
+ * Markdownの画像、リンク記法を除去・置換します。
+ * 複数行にまたがる記法にも対応するため、行分割前のテキスト全体に対して適用することを推奨します。
+ */
+export function stripMarkdownLinksAndImages(text: string): string {
+  // 画像 ![alt](url), ![alt][id], ![] は除去
+  let processed = text.replace(/!\[[^\]]*\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "");
+  // リンク [text](url), [text][id] はテキスト(または空)のみ残す
+  return processed.replace(/\[([^\]]*)\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "$1");
+}
+
 /** 1行分のMarkdownインライン記法・行頭記号を落としてテキスト化する */
-function stripMarkdownLine(line: string): string {
+export function stripMarkdownLine(line: string): string {
   let text = line.trim();
 
   // 見出し(#), 引用(>), 箇条書き(-, *, +), 番号付き(1.) の行頭記号
@@ -35,7 +46,7 @@ function stripMarkdownLine(line: string): string {
 }
 
 /** 見出し行・区切り線・箇条書きのみで意味を持たない行かどうか */
-function isStructuralOnly(rawLine: string): boolean {
+export function isStructuralOnly(rawLine: string): boolean {
   const trimmed = rawLine.trim();
   if (trimmed === "") return true;
   // 水平線 (---, ***, ___)
@@ -56,13 +67,10 @@ export function toPlainDescription(description: string | null | undefined): stri
 
   const noHtml = stripHtml(description);
   // コードフェンス ```...``` はブロックごと除去
-  const noFence = noHtml.replace(/```[\s\S]*?```/g, "");
+  let processed = noHtml.replace(/```[\s\S]*?```/g, "");
 
-  // 改行をまたぐ画像やリンクがあるため、行ごとに分割する前に全体に対して除去・置換を行う
-  // 画像 ![alt](url), ![alt][id], ![] は除去
-  let processed = noFence.replace(/!\[[^\]]*\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "");
-  // リンク [text](url), [text][id] はテキスト(または空)のみ残す
-  processed = processed.replace(/\[([^\]]*)\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "$1");
+  // 画像やリンクの除去・置換（改行またぎに対応するため、行分割前に実行）
+  processed = stripMarkdownLinksAndImages(processed);
 
   const lines = processed.split(/\r?\n/);
   const textLines: string[] = [];
