@@ -40,6 +40,8 @@ export function stripMarkdownLinksAndImages(text: string): string {
   processed = processed.replace(/https?:\/\/[^\s)>\]]+/g, "");
 
   // 【追加処理】: 閉じ括弧が欠損している、または予期せぬ文字で途切れた URL 残骸を強制的に消去
+  processed = processed.replace(/!\[([^\]]*)\]\s*\(([^)]*)\)/g, "");
+  processed = processed.replace(/\[([^\]]*)\]\s*\(([^)]*)\)/g, "$1");
   processed = processed.replace(/\[?\s*\(\s*https?:\/\/[^\s\])]+/g, "");
   processed = processed.replace(/\[\s*https?:\/\/[^\s\])]+/g, "");
 
@@ -89,6 +91,7 @@ export function isStructuralOnly(rawLine: string): boolean {
  */
 export function toPlainDescription(description: string | null | undefined): string {
   if (!description) return "";
+  console.log("=== DEBUG ModParks toPlainDescription ===", JSON.stringify(description));
 
   const noHtml = stripHtml(description);
   // コードフェンス ```...``` はブロックごと除去
