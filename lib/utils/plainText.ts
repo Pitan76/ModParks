@@ -17,24 +17,29 @@ export function stripHtml(input: string): string {
 
 /** 
  * Markdownの画像、リンク記法を除去・置換します。
- * 複数行にまたがる記法にも対応するため、行分割前のテキスト全体に対して適用することを推奨します。
+ * 行単位で処理し、ネストされたバッジ記法にも確実に対応します。
  */
 export function stripMarkdownLinksAndImages(text: string): string {
   let processed = text;
-  
-  // ネストされた記法（例: [![alt](img)](link)）に対応するため、変化しなくなるまで（最大5回）繰り返す
-  for (let i = 0; i < 5; i++) {
+
+  // ネストされた記法（例: [![alt](img)](link)）に対応するため、変化しなくなるまで（最大10回）繰り返す
+  for (let i = 0; i < 10; i++) {
     const prev = processed;
-    // 画像 ![...](...) または ![...][...] は完全に除去
-    processed = processed.replace(/!\[[\s\S]*?\]\s*(?:\([\s\S]*?\)|\[[\s\S]*?\])?/g, "");
-    // リンク [...](...) または [...][...] はテキストのみ残す
-    processed = processed.replace(/\[([\s\S]*?)\]\s*(?:\([\s\S]*?\)|\[[\s\S]*?\])?/g, "$1");
+    // 画像 ![...](...) または ![...][...] は完全に除去（行内のみ）
+    processed = processed.replace(/!\[[^\]]*\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "");
+    // リンク [...](...) または [...][...] はテキストのみ残す（行内のみ）
+    processed = processed.replace(/\[([^\]]*)\]\s*(?:\([^)]*\)|\[[^\]]*\])/g, "$1");
     if (processed === prev) break;
   }
 
-  // 万が一、不正なパースによって `[(https://...)]` や `(https://...)` のような残骸が残った場合は強制的に除去
-  processed = processed.replace(/\[\s*\(\s*https?:\/\/[^\s)\]]+\s*\)\s*\]/g, "");
-  processed = processed.replace(/\(\s*https?:\/\/[^\s)\]]+\s*\)/g, "");
+  // 残った孤立 [...] はテキストだけ残す
+  processed = processed.replace(/\[([^\]]*)\]/g, "$1");
+
+  // 残った (URL) パターンを除去
+  processed = processed.replace(/\(\s*https?:\/\/[^\s)]+\s*\)/g, "");
+
+  // ベアURL (https://... や http://...) を除去
+  processed = processed.replace(/https?:\/\/[^\s)>\]]+/g, "");
 
   return processed;
 }
@@ -49,7 +54,6 @@ export function stripMarkdownLine(line: string): string {
   text = text.replace(/^[-*+]\s+/, "");
   text = text.replace(/^\d+\.\s+/, "");
 
-
   // 強調(**, __, *, _), 取り消し線(~~), インラインコード(`)
   text = text.replace(/(\*\*|__|~~)(.*?)\1/g, "$2");
   text = text.replace(/(\*|_)(.*?)\1/g, "$2");
@@ -58,7 +62,7 @@ export function stripMarkdownLine(line: string): string {
   return text.trim();
 }
 
-/** 見出し行・区切り線・箇条書きのみで意味を持たない行かどうか */
+/** 見出し行・区切り線・バッジのみの行など、意味のない行かどうか */
 export function isStructuralOnly(rawLine: string): boolean {
   const trimmed = rawLine.trim();
   if (trimmed === "") return true;
