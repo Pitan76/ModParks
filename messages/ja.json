@@ -836,7 +836,7 @@
       "newPassword": "新しいパスワード",
       "confirmPassword": "新しいパスワード（確認）",
       "deleteAccount": "退会する",
-      "deleteAccountDesc": "退会するとアカウントは30日間論理削除状態になり、その後完全削除されます。この操作は取り消せません。",
+      "deleteAccountDesc": "退会するとアカウントは30日間無効化状態になり、その後完全削除されます。この操作は取り消せません。",
       "deleteAccountConfirm": "本当に退会しますか？",
       "successId": "ユーザーIDを変更しました",
       "successEmail": "メールアドレスを変更しました",
