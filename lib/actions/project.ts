@@ -275,7 +275,7 @@ export async function getProjects(params: {
       .select({
         project: {
           ...restProjects,
-          description: sql<string>`SUBSTR(${projects.description}, 1, 300) || CASE WHEN LENGTH(${projects.description}) > 300 THEN '...' ELSE '' END`,
+          description: sql<string>`SUBSTR(${projects.description}, 1, 1200) || CASE WHEN LENGTH(${projects.description}) > 1200 THEN '...' ELSE '' END`,
           tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = projects.id)`
         },
         author: {
