@@ -14,7 +14,6 @@ import IdeaCard from "@/components/idea/IdeaCard";
 export default async function IdeasPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("Home");
   const tIdea = await getTranslations("Idea");
 
   const db = await getDatabase();

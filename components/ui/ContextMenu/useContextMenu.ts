@@ -23,9 +23,12 @@ export function useContextMenu(
 ): (event: React.MouseEvent) => void {
   const { open } = useContextMenuContext();
   const itemsRef = React.useRef(items);
-  itemsRef.current = items;
   const optionsRef = React.useRef(options);
-  optionsRef.current = options;
+
+  React.useEffect(() => {
+    itemsRef.current = items;
+    optionsRef.current = options;
+  });
 
   return React.useCallback(
     (event: React.MouseEvent) => open(event, itemsRef.current, optionsRef.current),
