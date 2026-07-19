@@ -73,6 +73,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
       {
         id: "cm-version-download",
         label: tMenu("download"),
+        icon: <DownloadIcon fontSize="small" />,
         onClick: () => { window.location.href = downloadUrl; },
       },
       c.copyLink(versionUrl),

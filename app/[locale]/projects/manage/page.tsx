@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
 import AddIcon from "@mui/icons-material/Add";
+import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 import { getProjects } from "@/lib/actions/project";
 import LinkButton from "@/components/ui/LinkButton";
@@ -23,6 +25,7 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
   }
 
   const tProject = await getTranslations("Project");
+  const tCommon = await getTranslations("Common");
 
   // Fetch all user projects (no pagination limit, or high limit) for management
   // For management, we usually want to fetch all or a very high limit.
