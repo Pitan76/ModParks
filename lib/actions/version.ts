@@ -5,7 +5,7 @@ import { getDatabase } from "@/lib/db";
 import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions, users, projectMembers } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
-import { createVersionSchema } from "@/lib/validations";
+import { createVersionSchema, updateVersionSchema } from "@/lib/validations";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
@@ -143,29 +143,43 @@ export async function updateVersion(versionId: string, projectSlug: string, form
     loaders:       formData.getAll("loaders"),
     changelog:     formData.get("changelog"),
     releaseChannel: formData.get("releaseChannel") ?? undefined,
+    fileUrl:       formData.get("fileUrl") ?? undefined,
   };
 
-  const parsed = createVersionSchema.safeParse(raw);
+  const parsed = updateVersionSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  await db.update(versions).set({
+  const updateData: any = {
     versionNumber: parsed.data.versionNumber,
-    mcVersions:    JSON.stringify(parsed.data.mcVersions),
-    loaders:       JSON.stringify(parsed.data.loaders),
-    changelog:     parsed.data.changelog || "",
+    mcVersions:    parsed.data.mcVersions ? JSON.stringify(parsed.data.mcVersions) : undefined,
+    loaders:       parsed.data.loaders ? JSON.stringify(parsed.data.loaders) : undefined,
+    changelog:     parsed.data.changelog,
     releaseChannel: parsed.data.releaseChannel,
-  }).where(eq(versions.id, versionId)).run();
+  };
+
+  if (parsed.data.fileUrl) {
+    if (!isAllowedExternalUrl(parsed.data.fileUrl)) {
+      return { error: { fileUrl: ["許可されていないドメインのURLです。GitHub, Modrinth, CurseForge のURLを使用してください。"] } };
+    }
+    const r2Key = getR2KeyFromUrl(version.fileUrl);
+    if (r2Key) {
+      return { error: { fileUrl: ["直接アップロードされたファイルはURLを変更できません。"] } };
+    }
+    updateData.fileUrl = parsed.data.fileUrl;
+  }
+
+  await db.update(versions).set(updateData).where(eq(versions.id, versionId)).run();
 
   // Loader と mcVersion のテーブルも更新
   await db.delete(versionLoaders).where(eq(versionLoaders.versionId, versionId)).run();
-  if (parsed.data.loaders.length > 0) {
+  if (parsed.data.loaders && parsed.data.loaders.length > 0) {
     await db.insert(versionLoaders).values(parsed.data.loaders.map(loader => ({ versionId, loader }))).run();
   }
 
   await db.delete(versionMcVersions).where(eq(versionMcVersions.versionId, versionId)).run();
-  if (parsed.data.mcVersions.length > 0) {
+  if (parsed.data.mcVersions && parsed.data.mcVersions.length > 0) {
     await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId, mcVersion: mc }))).run();
   }
 
@@ -299,19 +313,29 @@ export async function extractRecipesFromVersion(versionId: string, projectSlug: 
   }
 
   const r2Key = getR2KeyFromUrl(version.fileUrl);
-  if (!r2Key) {
-    return { error: "File is not stored in R2. Cannot extract recipes from external URLs." };
-  }
+  let arrayBuffer: ArrayBuffer;
+  let R2 = null;
 
   try {
-    const R2 = await getR2Bucket();
-    const object = await R2.get(r2Key);
-    
-    if (!object) {
-      return { error: "File not found in R2." };
+    if (r2Key) {
+      R2 = await getR2Bucket();
+      const object = await R2.get(r2Key);
+      
+      if (!object) {
+        return { error: "File not found in R2." };
+      }
+      arrayBuffer = await object.arrayBuffer();
+    } else {
+      // 外部URLからのダウンロード
+      if (!isAllowedExternalUrl(version.fileUrl)) {
+        return { error: "Cannot extract recipes from this external URL domain." };
+      }
+      const res = await fetch(version.fileUrl);
+      if (!res.ok) {
+        return { error: `Failed to download file from external URL: ${res.statusText}` };
+      }
+      arrayBuffer = await res.arrayBuffer();
     }
-
-    const arrayBuffer = await object.arrayBuffer();
 
     const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
     let cdnSecret = process.env.RECIPE_CDN_SECRET;

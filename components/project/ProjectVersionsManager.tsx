@@ -120,6 +120,8 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
   const [editMc, setEditMc] = useState<string[]>([]);
   const [editLoaders, setEditLoaders] = useState<string[]>([]);
   const [editChannel, setEditChannel] = useState<string>(DEFAULT_RELEASE_CHANNEL);
+  const [editFileUrl, setEditFileUrl] = useState<string>("");
+  const [isExternalEdit, setIsExternalEdit] = useState<boolean>(false);
   useEffect(() => {
     if (!searchParams) return;
     const editId = searchParams.get("editVersionId");
@@ -202,6 +204,9 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
     setEditNumber(v.versionNumber);
     setEditChangelog(v.changelog || "");
     setEditChannel(normalizeReleaseChannel(v.releaseChannel));
+    const isExternal = !v.canExtractRecipes;
+    setIsExternalEdit(isExternal);
+    setEditFileUrl(isExternal ? v.fileUrl : "");
     try {
       setEditMc(JSON.parse(v.mcVersions) || []);
       setEditLoaders(JSON.parse(v.loaders) || []);
@@ -224,6 +229,9 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
     formData.append("releaseChannel", editChannel);
     editMc.forEach(mc => formData.append("mcVersions", mc));
     editLoaders.forEach(l => formData.append("loaders", l));
+    if (isExternalEdit && editFileUrl) {
+      formData.append("fileUrl", editFileUrl);
+    }
 
     try {
       const res = await updateVersion(editTarget.id, projectSlug, formData);
@@ -236,7 +244,8 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
           changelog: editChangelog,
           releaseChannel: editChannel,
           mcVersions: JSON.stringify(editMc),
-          loaders: JSON.stringify(editLoaders)
+          loaders: JSON.stringify(editLoaders),
+          ...(isExternalEdit ? { fileUrl: editFileUrl } : {})
         } : v));
         setEditTarget(null);
       }
@@ -385,6 +394,20 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
             helperText={editError?.versionNumber?.[0]}
             sx={{ mt: 1 }}
           />
+
+          {isExternalEdit && (
+            <FormTextField
+              label={t("fields.fileUrl", { defaultValue: "ファイル URL (外部リンク)" })}
+              value={editFileUrl}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditFileUrl(e.target.value)}
+              fullWidth
+              required
+              size="small"
+              error={!!editError?.fileUrl}
+              helperText={editError?.fileUrl?.[0] as string | undefined}
+              sx={{ mt: 1 }}
+            />
+          )}
 
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>

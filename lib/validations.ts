@@ -121,6 +121,26 @@ export const createVersionSchema = z.object({
 
 export type CreateVersionInput = z.infer<typeof createVersionSchema>;
 
+export const updateVersionSchema = createVersionSchema.partial().extend({
+  versionNumber: z
+    .string()
+    .min(1)
+    .max(32)
+    .regex(/^[0-9a-zA-Z.\-+]+$/, "バージョン番号の形式が不正です")
+    .optional(),
+  mcVersions: z
+    .array(z.enum(MC_VERSIONS))
+    .min(1, "Minecraftバージョンを1つ以上選択してください")
+    .optional(),
+  loaders: z
+    .array(z.string())
+    .min(1, "ローダーを1つ以上選択してください")
+    .optional(),
+  fileUrl: z.string().url("有効なURLを入力してください").optional(),
+});
+
+export type UpdateVersionInput = z.infer<typeof updateVersionSchema>;
+
 // ─── External URL ──────────────────────────────────────────────────────────────
 
 /** 外部URLとして許可するドメインのリスト */
