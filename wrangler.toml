@@ -28,6 +28,6 @@ AUTH_URL           = "https://modparks.pitan76.net"
 AUTH_TRUST_HOST    = "true"
 NEXT_PUBLIC_APP_URL = "https://modparks.pitan76.net"
 NEXT_PUBLIC_RECIPE_CDN_URL = "https://recipe.modparks.pitan76.net"
-USE_RECIPE_CDN_API = "true"
+USE_RECIPE_CDN_API = "false"
 
 
