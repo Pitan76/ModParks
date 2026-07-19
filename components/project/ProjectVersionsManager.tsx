@@ -14,6 +14,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import Tooltip from "@mui/material/Tooltip";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import DialogContentText from "@mui/material/DialogContentText";
@@ -27,7 +29,7 @@ import Stack from "@mui/material/Stack";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import type { SyntheticEvent } from "react";
-import { deleteVersion, updateVersion, extractRecipesFromVersion } from "@/lib/actions/version";
+import { deleteVersion, updateVersion, extractRecipesFromVersion, setVersionArchived } from "@/lib/actions/version";
 import { importGithubRelease } from "@/lib/actions/github";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { useFormatter, useTranslations } from "next-intl";
@@ -50,6 +52,7 @@ export interface ProjectVersion {
   changelog: string;
   releaseChannel: string;
   fileUrl: string;
+  archivedAt?: Date | null;
 }
 
 export interface ProjectVersionsManagerProps {
@@ -172,6 +175,26 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
     }
   };
 
+  const [archivingId, setArchivingId] = useState<string | null>(null);
+
+  const handleToggleArchive = async (v: ProjectVersion) => {
+    const nextArchived = !v.archivedAt;
+    setArchivingId(v.id);
+    setErrorMsg("");
+    try {
+      const res = await setVersionArchived(v.id, projectSlug, nextArchived);
+      if (res.error) {
+        setErrorMsg(res.error);
+      } else {
+        setLocalVersions(prev => prev.map(item => item.id === v.id ? { ...item, archivedAt: nextArchived ? new Date() : null } : item));
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to archive version");
+    } finally {
+      setArchivingId(null);
+    }
+  };
+
   const openEdit = (v: ProjectVersion) => {
     setEditTarget(v);
     setEditNumber(v.versionNumber);
@@ -261,12 +284,16 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
           </TableHead>
           <TableBody>
             {parsedVersions.map((v) => {
+              const isArchived = !!v.archivedAt;
               return (
-                <TableRow key={v.id}>
+                <TableRow key={v.id} sx={isArchived ? { opacity: 0.6, bgcolor: "action.hover" } : undefined}>
                   <TableCell sx={{ fontWeight: "bold" }}>
-                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
                       <span>{v.versionNumber}</span>
                       <ReleaseChannelChip channel={v.releaseChannel} />
+                      {isArchived && (
+                        <Chip label={t("manager.archivedLabel")} size="small" color="default" variant="outlined" />
+                      )}
                     </Stack>
                   </TableCell>
                   <TableCell>{v.parsedMcVersions.join(", ")}</TableCell>
@@ -283,6 +310,17 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
                           disabled={!!extractingId || !v.fileUrl || v.fileUrl.startsWith("http")}
                         >
                           <AutoFixHighIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title={isArchived ? t("manager.unarchive") : t("manager.archive")}>
+                      <span>
+                        <IconButton
+                          color="default"
+                          onClick={() => handleToggleArchive(v)}
+                          disabled={archivingId === v.id}
+                        >
+                          {isArchived ? <UnarchiveIcon /> : <ArchiveIcon />}
                         </IconButton>
                       </span>
                     </Tooltip>

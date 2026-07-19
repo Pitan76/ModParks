@@ -90,6 +90,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
+    // アーカイブ済みバージョンは公開ダウンロード不可。作者・メンバー・管理者のみ取得できる。
+    if (version.archivedAt && !isInsider) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）。
     // 作者・メンバー・管理者による自己ダウンロード（テスト等）は集計から除外する。
     const rlRes = isInsider

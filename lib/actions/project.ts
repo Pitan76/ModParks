@@ -5,7 +5,7 @@ import { getDatabase } from "@/lib/db";
 import { projects, projectTags, projectMembers, users, userProfiles, versions, userSettings, ideas } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, desc, and, or, like, sql, inArray, getTableColumns } from "drizzle-orm";
+import { eq, desc, and, or, like, sql, inArray, isNull, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -365,7 +365,7 @@ export async function getProjectBySlug(slug: string) {
     projectId: versions.projectId,
     fileUrl: versions.fileUrl,
     fileSha256: versions.fileSha256,
-  }).from(versions).where(eq(versions.projectId, row.project.id)).orderBy(desc(versions.createdAt)).limit(20).all();
+  }).from(versions).where(and(eq(versions.projectId, row.project.id), isNull(versions.archivedAt))).orderBy(desc(versions.createdAt)).limit(20).all();
 
   return {
     ...row.project,

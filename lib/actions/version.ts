@@ -226,6 +226,53 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
   return { success: true };
 }
 
+/**
+ * バージョンのアーカイブ状態を切り替える Server Action。
+ * アーカイブ済みバージョンは公開一覧・APIレスポンス・ダウンロードから除外され、
+ * 作者・メンバー・管理者のみが管理画面で閲覧できる。ファイル実体は削除しない。
+ * @param versionId 対象のバージョンID
+ * @param projectSlug プロジェクトのSlug（権限チェックおよびリバリデーション用）
+ * @param archived true でアーカイブ、false でアーカイブ解除
+ * @returns { success: boolean } または { error: string }
+ */
+export async function setVersionArchived(versionId: string, projectSlug: string, archived: boolean) {
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.slug, projectSlug))
+    .get();
+
+  if (!project) return { error: "Project not found" };
+
+  try {
+    await assertProjectAccess(db, project, session);
+  } catch (e) {
+    return { error: "Forbidden" };
+  }
+
+  const version = await db
+    .select()
+    .from(versions)
+    .where(eq(versions.id, versionId))
+    .get();
+
+  if (!version) return { error: "Version not found" };
+  if (version.projectId !== project.id) return { error: "Forbidden: Version does not belong to this project" };
+
+  await db
+    .update(versions)
+    .set({ archivedAt: archived ? new Date() : null })
+    .where(eq(versions.id, versionId))
+    .run();
+
+  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+
+  revalidatePath(`/projects/${projectSlug}`);
+  return { success: true };
+}
+
 export async function extractRecipesFromVersion(versionId: string, projectSlug: string) {
   const { db } = await getAuthenticatedDb();
 

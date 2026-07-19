@@ -227,6 +227,8 @@ export const versions = sqliteTable("versions", {
   fileSize:      integer("file_size"),
   fileSha256:    text("file_sha256"),
   downloads:     integer("downloads").notNull().default(0),
+  /** アーカイブ日時。null でなければアーカイブ済み（公開一覧・DLから除外、作者のみ閲覧可） */
+  archivedAt:    integer("archived_at", { mode: "timestamp" }),
   projectId:     text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),

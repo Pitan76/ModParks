@@ -267,6 +267,13 @@
       "when": 1784460737106,
       "tag": "0037_clean_lightspeed",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1784463152961,
+      "tag": "0038_version_archived_at",
+      "breakpoints": true
     }
   ]
 }

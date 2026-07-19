@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, getD1, type Env } from "@/lib/db";
 import { projects, versions, projectMembers, versionLoaders, versionMcVersions } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import { ApiVersion } from "@/types/api";
 import { createVersionSchema, isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -42,7 +42,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const results = await db
     .select()
     .from(versions)
-    .where(eq(versions.projectId, project.id))
+    .where(and(eq(versions.projectId, project.id), isNull(versions.archivedAt)))
     .orderBy(desc(versions.createdAt));
 
   const data: ApiVersion[] = results.map(v => ({
