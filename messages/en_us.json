@@ -101,7 +101,7 @@
       "descriptionFormat": "Format",
       "issueTrackerUrl": "Issue Tracker URL",
       "githubRepo": "GitHub Repository",
-      "githubRepoHelper": "Versions can be imported automatically from Releases (e.g. Pitan76/modparks)",
+      "githubRepoHelper": "Versions can be imported automatically from Releases (e.g. Pitan76/item-alchemy)",
       "linksSection": "Links",
       "externalConnectionsTitle": "External Connections (Used for syncing download counts, etc.)",
       "customLinks": {
