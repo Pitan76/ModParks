@@ -310,8 +310,8 @@
       "importError": "取り込みに失敗しました。",
       "extractRecipes": "JARファイルからレシピ・テクスチャを抽出",
       "extractSuccess": "抽出が完了しました（{count}件）",
-      "archive": "アーカイブ",
-      "unarchive": "アーカイブ解除",
+      "archive": "アーカイブする",
+      "unarchive": "アーカイブを解除する",
       "archivedLabel": "アーカイブ済み"
     },
     "fields": {
