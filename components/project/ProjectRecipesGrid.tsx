@@ -20,7 +20,6 @@ interface ProjectRecipesGridProps {
     search: string;
     noMatch: string;
     showMore: string;
-    count: string; // "{shown} / {total}" 形式
   };
 }
 
@@ -54,19 +53,19 @@ export default function ProjectRecipesGrid({ recipes, labels }: ProjectRecipesGr
             setVisible(PAGE_SIZE);
           }}
           placeholder={labels.search}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            },
           }}
           sx={{ flex: "1 1 240px", maxWidth: 360 }}
         />
         <Typography variant="body2" color="text.secondary">
-          {labels.count
-            .replace("{shown}", String(shown.length))
-            .replace("{total}", String(filtered.length))}
+          {shown.length} / {filtered.length}
         </Typography>
       </Box>
 

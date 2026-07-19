@@ -73,7 +73,6 @@ export default async function ProjectRecipes({ projectSlug, namespaces }: Projec
         search: t("searchRecipes", { defaultValue: "レシピを検索" }),
         noMatch: t("noRecipeMatch", { defaultValue: "一致するレシピがありません。" }),
         showMore: t("showMore", { defaultValue: "もっと見る" }),
-        count: t("recipeCount", { defaultValue: "{shown} / {total}" }),
       }}
     />
   );
