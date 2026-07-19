@@ -309,7 +309,10 @@
       "importSuccess": "バージョン {version} を取り込みました。",
       "importError": "取り込みに失敗しました。",
       "extractRecipes": "JARファイルからレシピ・テクスチャを抽出",
-      "extractSuccess": "抽出が完了しました（{count}件）"
+      "extractSuccess": "抽出が完了しました（{count}件）",
+      "archive": "アーカイブ",
+      "unarchive": "アーカイブ解除",
+      "archivedLabel": "アーカイブ済み"
     },
     "fields": {
       "versionNumber": "バージョン番号",

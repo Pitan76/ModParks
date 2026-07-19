@@ -274,7 +274,7 @@ export async function setVersionArchived(versionId: string, projectSlug: string,
 }
 
 export async function extractRecipesFromVersion(versionId: string, projectSlug: string) {
-  const { db } = await getAuthenticatedDb();
+  const { db, session } = await getAuthenticatedDb();
 
   const project = await db
     .select()
@@ -284,7 +284,7 @@ export async function extractRecipesFromVersion(versionId: string, projectSlug: 
 
   if (!project) return { error: "Project not found" };
 
-  await assertProjectAccess(project.id);
+  await assertProjectAccess(db, project, session);
 
   const version = await db
     .select()

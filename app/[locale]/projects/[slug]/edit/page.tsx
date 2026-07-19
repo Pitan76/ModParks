@@ -51,12 +51,20 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   const t = await getTranslations("Project");
 
   const { db } = await getAuthenticatedDb();
-  const projectVersions = await db
+  const rawVersions = await db
     .select()
     .from(versions)
     .where(eq(versions.projectId, project.id))
     .orderBy(desc(versions.createdAt))
     .all();
+
+  // レシピ/テクスチャ抽出は R2 に実体があるファイルのみ可能。
+  // R2_PUBLIC_URL はサーバー専用envのため、可否をここで算出してクライアントに渡す。
+  const { getR2KeyFromUrl } = await import("@/lib/r2");
+  const projectVersions = rawVersions.map((v) => ({
+    ...v,
+    canExtractRecipes: !!v.fileUrl && getR2KeyFromUrl(v.fileUrl) !== null,
+  }));
 
   const openIdeas = await db
     .select({ id: ideas.id, title: ideas.title })

@@ -303,7 +303,10 @@
       "importSuccess": "Version {version} imported.",
       "importError": "Failed to import version.",
       "extractRecipes": "Extract recipes/textures from JAR",
-      "extractSuccess": "Extraction complete ({count} items)"
+      "extractSuccess": "Extraction complete ({count} items)",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "archivedLabel": "Archived"
     },
     "fields": {
       "versionNumber": "Version Number",

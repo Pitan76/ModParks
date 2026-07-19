@@ -53,6 +53,8 @@ export interface ProjectVersion {
   releaseChannel: string;
   fileUrl: string;
   archivedAt?: Date | null;
+  /** R2 に実体があり、レシピ/テクスチャ抽出が可能か（サーバー側で算出） */
+  canExtractRecipes?: boolean;
 }
 
 export interface ProjectVersionsManagerProps {
@@ -307,7 +309,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
                         <IconButton 
                           color="secondary" 
                           onClick={() => handleExtractRecipes(v.id)} 
-                          disabled={!!extractingId || !v.fileUrl || v.fileUrl.startsWith("http")}
+                          disabled={!!extractingId || !v.canExtractRecipes}
                         >
                           <AutoFixHighIcon />
                         </IconButton>
