@@ -69,3 +69,18 @@ npm run dev
 - `db/`: Drizzle ORM のスキーマ定義 (`schema.ts`)
 - `lib/`: データベース接続 (`db.ts`), APIクライアント, アクション群, バリデーション等
 - `messages/`: `next-intl` 向けの翻訳ファイル (`ja.json`, `en.json`)
+
+## 右クリックメニュー (ContextMenu)
+
+`components/ui/ContextMenu/` に、右クリックで独自コンテキストメニューを出す基盤があります（Chrome のネイティブメニューを妨害しない設計）。詳細・使い方はそちらの [`README.md`](components/ui/ContextMenu/README.md) を参照。
+
+配線済み: `ProjectCard` / `VersionCard` / `CollectionCard` / `IdeaCard`。
+
+### 今後増やせる箇所（候補）
+- **プロフィール / ユーザー行** — フォロー・プロフィールコピー
+- **通知アイテム** — 既読・該当ページへ
+- **プロジェクトコメント / アイデアコメント** — 返信・リンクコピー・報告
+- **依存関係リスト・タグ Chip** — そのタグで絞り込み
+- **プロジェクト詳細ヘッダー** — お気に入り・購読・共有
+
+いずれも `useContextMenu` + `useCommonItems` で数行。owner限定操作は `items` の関数形式 `(target) => [...]` で出し分ける。
