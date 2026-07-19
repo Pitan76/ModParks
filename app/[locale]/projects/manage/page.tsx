@@ -36,6 +36,16 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
+      <Breadcrumbs sx={{ mb: 3 }}>
+        <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
+          {tCommon("home")}
+        </Link>
+        <Link href="/projects" style={{ textDecoration: "none", color: "inherit" }}>
+          {tCommon("projects")}
+        </Link>
+        <Typography color="text.primary">{tProject("manageTitle")}</Typography>
+      </Breadcrumbs>
+
       <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }} gutterBottom>
