@@ -46,6 +46,7 @@ npm install
 AUTH_SECRET="your-auth-secret" # 任意のランダムな文字列
 AUTH_GITHUB_ID="your-github-client-id"
 AUTH_GITHUB_SECRET="your-github-client-secret"
+RECIPE_CDN_SECRET="your-recipe-cdn-secret" # https://recipe.modparks.pitan76.net/ のAPIにアクセスするためのシークレットキー
 ```
 
 ### 5. データベースのセットアップ（ローカルD1）
