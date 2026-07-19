@@ -32,14 +32,16 @@ export function stripMarkdownLinksAndImages(text: string): string {
     if (processed === prev) break;
   }
 
-  // 残った孤立 [...] はテキストだけ残す
-  processed = processed.replace(/\[([^\]]*)\]/g, "$1");
-
-  // 残った (URL) パターンを除去
-  processed = processed.replace(/\(\s*https?:\/\/[^\s)]+\s*\)/g, "");
+  // 万が一、不正なパースによって `[(https://...)]` や `(https://...)` のような残骸が残った場合は強制的に除去
+  processed = processed.replace(/\[\s*\(\s*https?:\/\/[^)]+\s*\)\s*\]/g, "");
+  processed = processed.replace(/\(\s*https?:\/\/[^)]+\s*\)/g, "");
 
   // ベアURL (https://... や http://...) を除去
   processed = processed.replace(/https?:\/\/[^\s)>\]]+/g, "");
+
+  // 【追加処理】: 閉じ括弧が欠損している、または予期せぬ文字で途切れた URL 残骸を強制的に消去
+  processed = processed.replace(/\[?\s*\(\s*https?:\/\/[^\s\])]+/g, "");
+  processed = processed.replace(/\[\s*https?:\/\/[^\s\])]+/g, "");
 
   return processed;
 }
