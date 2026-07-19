@@ -74,7 +74,7 @@ npm run dev
 
 `components/ui/ContextMenu/` に、右クリックで独自コンテキストメニューを出す基盤があります（Chrome のネイティブメニューを妨害しない設計）。詳細・使い方はそちらの [`README.md`](components/ui/ContextMenu/README.md) を参照。
 
-配線済み: `ProjectCard` / `VersionCard` / `CollectionCard` / `IdeaCard`。
+配線済み: `ProjectCard` / `ProjectVersionsTable`（バージョン行・モバイルカード） / `CollectionCard` / `IdeaCard`。
 
 ### 今後増やせる箇所（候補）
 - **プロフィール / ユーザー行** — フォロー・プロフィールコピー
