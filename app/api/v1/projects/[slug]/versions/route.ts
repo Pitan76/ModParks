@@ -157,17 +157,79 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       const extractRecipes = formData.get("extractRecipes") === "true";
       if (extractRecipes && (file.name.endsWith(".jar") || file.name.endsWith(".zip"))) {
         try {
-          const zip = await JSZip.loadAsync(arrayBuffer);
-          const recipeFiles = Object.keys(zip.files).filter(path => 
-            (path.match(/^data\/[^\/]+\/recipes\/.*\.json$/) || path.match(/^data\/[^\/]+\/tags\/items\/.*\.json$/)) && !zip.files[path].dir
-          );
-          
-          for (const path of recipeFiles) {
-            const content = await zip.files[path].async("arraybuffer");
-            // R2 key will be exactly the path: data/<namespace>/recipes/<id>.json
-            await uploadToR2(R2, path, content, "application/json");
+          // Resolve environment variables for the CDN
+          let cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
+          let cdnSecret = process.env.RECIPE_CDN_SECRET || "";
+
+          if (!cdnSecret) {
+            // Try to get from cloudflare context if not in process.env
+            try {
+              const { env } = await getCloudflareContext({ async: true });
+              if ((env as any).RECIPE_CDN_SECRET) {
+                cdnSecret = (env as any).RECIPE_CDN_SECRET;
+              }
+            } catch (e) {
+              // ignore
+            }
           }
-          console.log(`Extracted and uploaded ${recipeFiles.length} recipe/tag files.`);
+
+          const zip = await JSZip.loadAsync(arrayBuffer);
+          const allPaths = Object.keys(zip.files).filter(p => !zip.files[p].dir);
+          
+          const recipes = allPaths.filter(p => p.match(/^data\/[^\/]+\/recipes\/.*\.json$/));
+          const tags = allPaths.filter(p => p.match(/^data\/[^\/]+\/tags\/.*\.json$/));
+          const textures = allPaths.filter(p => p.match(/^assets\/[^\/]+\/textures\/(item|block)\/.*\.png$/));
+
+          let uploadedCount = 0;
+
+          // Helper to PUT to CDN
+          const putToCDN = async (endpoint: string, content: ArrayBuffer | string, contentType: string) => {
+            const url = `${cdnUrl}${endpoint}`;
+            const headers: Record<string, string> = { "Content-Type": contentType };
+            if (cdnSecret) headers["Authorization"] = `Bearer ${cdnSecret}`;
+            
+            const res = await fetch(url, { method: "PUT", headers, body: content });
+            if (!res.ok) {
+              console.warn(`CDN upload failed for ${url}: ${res.status} ${res.statusText}`);
+            } else {
+              uploadedCount++;
+            }
+          };
+
+          // Upload Recipes
+          for (const path of recipes) {
+            const match = path.match(/^data\/([^\/]+)\/recipes\/(.+)\.json$/);
+            if (match) {
+              const namespace = match[1];
+              const id = match[2];
+              const content = await zip.files[path].async("string");
+              await putToCDN(`/api/${namespace}/recipe/${id}`, content, "application/json");
+            }
+          }
+
+          // Upload Tags
+          for (const path of tags) {
+            const match = path.match(/^data\/([^\/]+)\/tags\/(.+)\.json$/);
+            if (match) {
+              const namespace = match[1];
+              const tagPath = match[2];
+              const content = await zip.files[path].async("string");
+              await putToCDN(`/api/${namespace}/tag/${tagPath}`, content, "application/json");
+            }
+          }
+
+          // Upload Textures
+          for (const path of textures) {
+            const match = path.match(/^assets\/([^\/]+)\/textures\/(.+)\.png$/);
+            if (match) {
+              const namespace = match[1];
+              const texPath = match[2] + ".png";
+              const content = await zip.files[path].async("arraybuffer");
+              await putToCDN(`/api/${namespace}/texture/${texPath}`, content, "image/png");
+            }
+          }
+          
+          console.log(`Extracted and uploaded ${uploadedCount} recipe/tag/texture files to CDN.`);
         } catch (zipErr) {
           console.error("Failed to extract recipes from jar:", zipErr);
           // Don't fail the whole upload if recipe extraction fails
