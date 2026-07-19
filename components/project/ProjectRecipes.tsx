@@ -33,8 +33,8 @@ export default function ProjectRecipes({ projectSlug }: ProjectRecipesProps) {
           throw new Error("Failed to fetch recipes list");
         }
         
-        const data = await res.json();
-        const ids: string[] = data.ids || [];
+        const data = await res.json() as { recipes?: { id: string }[] };
+        const ids: string[] = data.recipes ? data.recipes.map(r => r.id) : [];
         
         // Filter by the project's namespace.
         // Assuming the namespace is usually similar to the project slug.

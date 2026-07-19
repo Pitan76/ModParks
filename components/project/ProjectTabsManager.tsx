@@ -95,7 +95,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
           <Tab label={t("tabs.description")} value={0} />
           <Tab label={t("tabs.files")} value={1} />
           <Tab label={t("tabs.dependencies")} value={2} />
-          {recipesEnabled && <Tab label={t("tabs.recipes", "レシピ")} value={3} />}
+          {recipesEnabled && <Tab label={t("tabs.recipes")} value={3} />}
           {issueTrackerUrl && (
             <Tab 
               label={

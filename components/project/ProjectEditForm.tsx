@@ -143,7 +143,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
           />
           <FormControlLabel
             control={<Switch name="recipesEnabled" defaultChecked={!!project.recipesEnabled} />}
-            label={t("fields.recipesEnabled", "レシピタブを有効にする")}
+            label={t("fields.recipesEnabled")}
           />
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>

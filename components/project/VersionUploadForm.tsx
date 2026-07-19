@@ -196,7 +196,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
                   <Box sx={{ mt: 2 }}>
                     <FormControlLabel
                       control={<Switch checked={extractRecipes} onChange={(e) => setExtractRecipes(e.target.checked)} />}
-                      label={tVersion("uploadForm.extractRecipes", "JARからレシピを抽出してアップロード")}
+                      label={tVersion("uploadForm.extractRecipes")}
                     />
                   </Box>
                 )}
