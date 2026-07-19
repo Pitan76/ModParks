@@ -35,3 +35,16 @@ export function useContextMenu(
     [open],
   );
 }
+
+/**
+ * リスト内などで項目が要素ごとに異なる場合に使う低レベルAPI。
+ * 返り値 `open(event, items, options?)` を各要素の onContextMenu で呼ぶ。
+ * （`.map` の中で `useContextMenu` を呼ぶとフックのルール違反になるため）
+ *
+ * @example
+ * const openMenu = useContextMenuHandler();
+ * rows.map((r) => <tr onContextMenu={(e) => openMenu(e, buildItems(r))}>…</tr>);
+ */
+export function useContextMenuHandler() {
+  return useContextMenuContext().open;
+}

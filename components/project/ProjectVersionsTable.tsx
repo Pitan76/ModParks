@@ -16,6 +16,8 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
+import { useContextMenuHandler, useCommonItems } from "@/components/ui/ContextMenu";
+import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 import { useState, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { compactMcVersions } from "@/lib/utils/format";
@@ -56,7 +58,27 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
   const locale = useLocale();
   const t = useTranslations("Project");
   const tVersion = useTranslations("Version");
+  const tMenu = useTranslations("ContextMenu");
   const [filterChannel, setFilterChannel] = useState<string>("all");
+
+  const openMenu = useContextMenuHandler();
+  const c = useCommonItems();
+  const versionMenu = (versionId: string, versionNumber: string): ContextMenuItem[] => {
+    const versionUrl = `/projects/${projectSlug}/versions/${versionId}`;
+    const downloadUrl = `/api/download?versionId=${versionId}`;
+    return [
+      c.open(versionUrl, tMenu("open")),
+      c.openNewTab(versionUrl),
+      { type: "divider" },
+      {
+        id: "cm-version-download",
+        label: tMenu("download"),
+        onClick: () => { window.location.href = downloadUrl; },
+      },
+      c.copyLink(versionUrl),
+      c.copyText(versionNumber, `v${versionNumber}`),
+    ];
+  };
 
   const parsedVersions = useMemo(() => {
     return versions.map((version) => {
@@ -109,7 +131,12 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
             ) : filteredVersions.map((version) => {
               const versionUrl = `/projects/${projectSlug}/versions/${version.id}`;
               return (
-                <TableRow key={version.id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                <TableRow
+                  key={version.id}
+                  hover
+                  onContextMenu={(e) => openMenu(e, versionMenu(version.id, version.versionNumber))}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
                   <TableCell>
                     <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                       <Link href={versionUrl} style={{ textDecoration: "none" }}>
@@ -212,7 +239,11 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
         ) : filteredVersions.map((version) => {
           const versionUrl = `/projects/${projectSlug}/versions/${version.id}`;
           return (
-            <Card key={version.id} variant="outlined">
+            <Card
+              key={version.id}
+              variant="outlined"
+              onContextMenu={(e) => openMenu(e, versionMenu(version.id, version.versionNumber))}
+            >
               <CardContent sx={{ pb: 1 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
                   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
