@@ -13,7 +13,9 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Tooltip from "@mui/material/Tooltip";
 import { Link, useRouter } from "@/i18n/routing";
+import PersonIcon from "@mui/icons-material/Person";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
+import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
 import { DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { toPlainDescription } from "@/lib/utils/plainText";
@@ -69,8 +71,34 @@ const TYPE_LABEL: Record<ProjectCardProps["project"]["type"], string> = {
  */
 export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
   const tTags = useTranslations("Tags");
+  const tMenu = useTranslations("ContextMenu");
   const router = useRouter();
   const isGrid = layout === "grid";
+
+  const c = useCommonItems();
+  const href = `/projects/${project.slug}`;
+  const onContextMenu = useContextMenu(
+    [
+      c.open(href, tMenu("viewProject")),
+      c.openNewTab(href),
+      { type: "divider" },
+      c.copyLink(href),
+      c.share(href, project.name),
+      ...(project.authorUsername
+        ? ([
+            { type: "divider" },
+            {
+              id: "cm-author",
+              label: tMenu("author"),
+              icon: <PersonIcon fontSize="small" />,
+              href: `/profile/${project.authorUsername}`,
+            },
+          ] as const)
+        : []),
+    ],
+    // カード全体が LinkCardActionArea（<a>）なのでリンク素通しは無効化
+    { passthrough: { links: false } },
+  );
 
   const getTagLabel = (tag: string) => {
     const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, '_');
@@ -81,7 +109,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
   const safeTags: string[] = project.tags ?? [];
 
   return (
-    <Card id={`project-card-${project.slug}`} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
+    <Card id={`project-card-${project.slug}`} onContextMenu={onContextMenu} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
       <LinkCardActionArea href={`/projects/${project.slug}`} sx={{ height: "100%" }}>
         <CardContent 
           sx={{ 

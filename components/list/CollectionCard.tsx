@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
 import { Link as RoutingLink } from "@/i18n/routing";
+import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
 import { toPlainDescription } from "@/lib/utils/plainText";
 
@@ -21,9 +22,23 @@ interface CollectionCardProps {
 export default function CollectionCard({ collection }: CollectionCardProps) {
   const tCommon = useTranslations("Common");
 
+  const c = useCommonItems();
+  const href = `/lists/${collection.id}`;
+  const onContextMenu = useContextMenu(
+    [
+      c.open(href),
+      c.openNewTab(href),
+      { type: "divider" },
+      c.copyLink(href),
+      c.share(href, collection.name),
+    ],
+    { passthrough: { links: false } },
+  );
+
   return (
     <RoutingLink href={`/lists/${collection.id}`} prefetch={false} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
       <Box
+        onContextMenu={onContextMenu}
         sx={{
           p: 2.5,
           border: "1px solid",

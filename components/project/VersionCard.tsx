@@ -1,3 +1,5 @@
+"use client";
+
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
@@ -9,6 +11,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
+import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useLocale, useTranslations } from "next-intl";
 
 /**
@@ -45,6 +48,21 @@ function formatBytes(bytes: number): string {
 export default function VersionCard({ version, projectSlug }: VersionCardProps) {
   const locale = useLocale();
   const t = useTranslations("Project");
+  const tMenu = useTranslations("ContextMenu");
+
+  const c = useCommonItems();
+  const downloadUrl = `/api/download?versionId=${version.id}`;
+  const onContextMenu = useContextMenu([
+    c.open(`/projects/${projectSlug}`, tMenu("viewProject")),
+    { type: "divider" },
+    {
+      id: "cm-version-download",
+      label: tMenu("download"),
+      onClick: () => { window.location.href = downloadUrl; },
+    },
+    c.copyLink(downloadUrl),
+    c.copyText(version.versionNumber, `v${version.versionNumber}`),
+  ]);
 
   const date = new Date(
     typeof version.createdAt === "number"
@@ -63,6 +81,7 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
   return (
     <Card
       id={`version-card-${version.id}`}
+      onContextMenu={onContextMenu}
       sx={{ mb: 1.5, "&:hover": { borderColor: "primary.main" } }}
     >
       <CardContent sx={{ p: 2 }}>

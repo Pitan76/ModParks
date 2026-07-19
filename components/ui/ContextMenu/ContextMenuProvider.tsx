@@ -7,6 +7,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+import Snackbar from "@mui/material/Snackbar";
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
 import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
@@ -31,6 +32,8 @@ interface ContextMenuContextValue {
     items: ContextMenuItems,
     options?: UseContextMenuOptions,
   ) => void;
+  /** 共有・コピー等の完了通知を出す */
+  notify: (message: string) => void;
 }
 
 const ContextMenuContext = React.createContext<ContextMenuContextValue | null>(null);
@@ -78,8 +81,11 @@ export function useContextMenuContext(): ContextMenuContextValue {
 
 export default function ContextMenuProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<OpenState | null>(null);
+  const [toast, setToast] = React.useState<string | null>(null);
   const locale = useLocale();
   const router = useRouter();
+
+  const notify = React.useCallback((message: string) => setToast(message), []);
 
   const browserLabel = locale === "en" ? "Browser menu (Shift + right-click)" : "ブラウザ標準メニュー（Shift+右クリック）";
 
@@ -103,7 +109,7 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
 
   const close = React.useCallback(() => setState(null), []);
 
-  const value = React.useMemo<ContextMenuContextValue>(() => ({ open }), [open]);
+  const value = React.useMemo<ContextMenuContextValue>(() => ({ open, notify }), [open, notify]);
 
   return (
     <ContextMenuContext.Provider value={value}>
@@ -163,6 +169,13 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
           </MenuItem>,
         ]}
       </Menu>
+      <Snackbar
+        open={toast !== null}
+        autoHideDuration={2500}
+        onClose={() => setToast(null)}
+        message={toast ?? ""}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </ContextMenuContext.Provider>
   );
 }
