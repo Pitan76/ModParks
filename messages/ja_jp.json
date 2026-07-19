@@ -685,7 +685,7 @@
     "stats": {
       "projects": "プロジェクト数",
       "downloads": "総ダウンロード数",
-      "favorites": "お気に入りされた数",
+      "favorites": "お気に入りした数",
       "comments": "最近のコメント数"
     },
     "topProjects": "人気プロジェクト",

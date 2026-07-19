@@ -238,7 +238,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                             {p.totalDownloads.toLocaleString()}
                           </TableCell>
                           <TableCell align="right" sx={{ color: "text.secondary" }}>
-                            {new Date(p.updatedAt || p.createdAt || 0).toLocaleDateString()}
+                            {new Date(p.updatedAt || p.createdAt || 0).toLocaleDateString(locale)}
                           </TableCell>
                         </TableRow>
                       )) : (
@@ -287,7 +287,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                             <Chip label={idea.status.replace("_", " ")} size="small" color={getIdeaStatusColor(idea.status) as any} sx={{ textTransform: "capitalize" }} />
                           </TableCell>
                           <TableCell align="right" sx={{ color: "text.secondary" }}>
-                            {new Date(idea.createdAt).toLocaleDateString()}
+                            {new Date(idea.createdAt).toLocaleDateString(locale)}
                           </TableCell>
                         </TableRow>
                       )) : (
@@ -329,7 +329,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                           {c.authorName || c.authorUsername}
                         </Typography>
                         <Typography variant="caption" color="text.disabled" sx={{ whiteSpace: "nowrap", ml: 2 }}>
-                          {new Date(c.createdAt || 0).toLocaleDateString()}
+                          {new Date(c.createdAt || 0).toLocaleDateString(locale)}
                         </Typography>
                       </Box>
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: "0.8rem" }}>
@@ -373,7 +373,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                           </Typography>
                         </Link>
                         <Typography variant="caption" color="text.secondary">
-                          {t("favoritedOn", { date: new Date(fav.favoritedAt || 0).toLocaleDateString() })}
+                          {t("favoritedOn", { date: new Date(fav.favoritedAt || 0).toLocaleDateString(locale) })}
                         </Typography>
                       </Box>
                       <ChevronRightIcon color="action" fontSize="small" />
