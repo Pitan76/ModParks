@@ -60,9 +60,9 @@ export function toPlainDescription(description: string | null | undefined): stri
 
   // 改行をまたぐ画像やリンクがあるため、行ごとに分割する前に全体に対して除去・置換を行う
   // 画像 ![alt](url), ![alt][id], ![] は除去
-  let processed = noFence.replace(/!\[[^\]]*\](?:\([^)]*\)|\[[^\]]*\])?/g, "");
+  let processed = noFence.replace(/!\[[^\]]*\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "");
   // リンク [text](url), [text][id] はテキスト(または空)のみ残す
-  processed = processed.replace(/\[([^\]]*)\](?:\([^)]*\)|\[[^\]]*\])?/g, "$1");
+  processed = processed.replace(/\[([^\]]*)\]\s*(?:\([^)]*\)|\[[^\]]*\])?/g, "$1");
 
   const lines = processed.split(/\r?\n/);
   const textLines: string[] = [];
