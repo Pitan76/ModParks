@@ -43,6 +43,12 @@ export function stripMarkdownLinksAndImages(text: string): string {
   processed = processed.replace(/\[?\s*\(\s*https?:\/\/[^\s\])]+/g, "");
   processed = processed.replace(/\[\s*https?:\/\/[^\s\])]+/g, "");
 
+  // URLが先に除去されたことで残ってしまった孤立した括弧の残骸を消去
+  processed = processed.replace(/\[\s*\(/g, "");
+  processed = processed.replace(/\)\s*\]/g, "");
+  processed = processed.replace(/\[\s*\]/g, "");
+  processed = processed.replace(/\(\s*\)/g, "");
+
   return processed;
 }
 
