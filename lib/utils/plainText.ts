@@ -25,9 +25,10 @@ function stripMarkdownLine(line: string): string {
   text = text.replace(/^[-*+]\s+/, "");
   text = text.replace(/^\d+\.\s+/, "");
 
-  // 画像 ![alt](url) は除去、リンク [text](url) はテキストのみ残す
-  text = text.replace(/!\[[^\]]*\]\([^)]*\)/g, "");
-  text = text.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+  // 画像 ![alt](url), ![alt][id], ![] は除去
+  text = text.replace(/!\[[^\]]*\](?:\([^)]*\)|\[[^\]]*\])?/g, "");
+  // リンク [text](url), [text][id] はテキスト(または空)のみ残す
+  text = text.replace(/\[([^\]]*)\](?:\([^)]*\)|\[[^\]]*\])?/g, "$1");
 
   // 強調(**, __, *, _), 取り消し線(~~), インラインコード(`)
   text = text.replace(/(\*\*|__|~~)(.*?)\1/g, "$2");
