@@ -1,15 +1,16 @@
 # ModParks
-ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラグイン配布プラットフォームです。
+ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラグイン配布プラットフォームです。<br />
 日本発のプラットフォームとして、開発者とプレイヤーがより円滑に作品を共有し、コミュニケーションできる場を提供することを目的としています。
 
 ## 特徴
-- プロジェクトの公開と探索: ModやPluginを検索、発見、ダウンロード。
+- プロジェクトの公開と探索: MODやプラグインを検索、発見、ダウンロード。
 - バージョン管理: バージョンごとのJar/Zipファイルのアップロード、または外部URL（GitHub Releases, Modrinth, CurseForge 等）へのリンク機能。
 - 多言語対応: 日本語と英語の表示切り替え。
 - 認証: GitHub アカウントを用いたログイン。
-- アイデアボード: ユーザーが「こんなModが欲しい！」を投稿・議論し、実現されたプロジェクトと紐付けられる機能。
+- アイデアボード: ユーザーが「こんなMODが欲しい！」を投稿・議論し、実現されたプロジェクトと紐付けられる機能。
 - 記法: Markdown, PlainText, PukiWikiの文法が対応
 - インポートと同期機能: 他のプラットフォームとの連携が強み。インポートはもちろんDL数同期なども
+- レシピ抽出機能: レシピをjarから抽出して一覧として表示する (https://recipe.modparks.pitan76.net/)
 
 ## 技術スタック
 - **フレームワーク**: [Next.js](https://nextjs.org/) (App Router, v15)
@@ -61,18 +62,18 @@ npm run dev
 
 ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスして確認してください。
 
-*注意: ローカル開発環境では `wrangler.getPlatformProxy` のキャッシュ機構 (`lib/proxy.ts`) によって、Next.jsのホットリロード時にも重いプロキシインスタンスの再起動が防がれ、軽快に動作するよう設計されています。*
+※ローカル開発環境では `wrangler.getPlatformProxy` のキャッシュ機構 (`lib/proxy.ts`) によって、Next.jsのホットリロード時にも重いプロキシインスタンスの再起動が防がれ、軽快に動作するよう設計されています。
 
 ## フォルダ構成
 - `app/`: Next.js App Router (ルーティング, Server Components)
 - `components/`: 再利用可能なReactコンポーネント (UI, フォーム等)
 - `db/`: Drizzle ORM のスキーマ定義 (`schema.ts`)
 - `lib/`: データベース接続 (`db.ts`), APIクライアント, アクション群, バリデーション等
-- `messages/`: `next-intl` 向けの翻訳ファイル (`ja.json`, `en.json`)
+- `messages/`: `next-intl` 向けの翻訳ファイル (`ja_jp.json`, `en_us.json`)
 
-## 右クリックメニュー (ContextMenu)
+## 右クリックメニュー
 
-`components/ui/ContextMenu/` に、右クリックで独自コンテキストメニューを出す基盤があります（Chrome のネイティブメニューを妨害しない設計）。詳細・使い方はそちらの [`README.md`](components/ui/ContextMenu/README.md) を参照。
+`components/ui/ContextMenu/` に、右クリックで独自コンテキストメニューを出す基盤があります（Chrome のネイティブメニューを妨害しない設計）。詳細・使い方はそちらの 
 
 配線済み: `ProjectCard` / `ProjectVersionsTable`（バージョン行・モバイルカード） / `CollectionCard` / `IdeaCard`。
 
