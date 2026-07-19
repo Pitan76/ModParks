@@ -64,18 +64,43 @@ export async function deleteFromR2(
 }
 
 /**
+ * R2 のキーとして使用するプレフィックス一覧。
+ * buildR2Key() で生成されるキーは必ずこのいずれかで始まる。
+ */
+const R2_KEY_PREFIXES = ["mod/", "icon/", "avatar/"] as const;
+
+/**
  * 保存済みの fileUrl から R2 オブジェクトキーを逆算します。
  * 外部URL（GitHub / Modrinth / CurseForge 等）の場合は R2 上に実体が無いため null を返します。
  * @param fileUrl versions.fileUrl に保存された値
  * @returns R2キー、または R2 管理外なら null
  */
 export function getR2KeyFromUrl(fileUrl: string): string | null {
+  // 1. R2_PUBLIC_URL が設定されている場合は prefix マッチ
   if (process.env.R2_PUBLIC_URL && fileUrl.startsWith(`${process.env.R2_PUBLIC_URL}/`)) {
     return fileUrl.slice(process.env.R2_PUBLIC_URL.length + 1);
   }
-  // ローカル開発時などの API 経由パス
+  // 2. ローカル開発時などの API 経由パス
   if (fileUrl.startsWith("/api/r2/")) {
     return fileUrl.slice("/api/r2/".length);
+  }
+  // 3. フォールバック: R2_PUBLIC_URL が Workers 環境で取得できない場合でも、
+  //    URL のパス部分が R2 キープレフィックスで始まるなら R2 管理ファイルと判定する。
+  //    外部URL（github.com, modrinth.com 等）のパスが mod/ や icon/ で始まることは
+  //    事実上ないため、安全に判定できる。
+  if (fileUrl.startsWith("http")) {
+    try {
+      const pathname = new URL(fileUrl).pathname;
+      // パスの先頭 "/" を除去
+      const pathWithoutSlash = pathname.startsWith("/") ? pathname.slice(1) : pathname;
+      for (const prefix of R2_KEY_PREFIXES) {
+        if (pathWithoutSlash.startsWith(prefix)) {
+          return pathWithoutSlash;
+        }
+      }
+    } catch {
+      // URL パース失敗時は外部URLではないと判断して null
+    }
   }
   return null;
 }

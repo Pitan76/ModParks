@@ -9,10 +9,9 @@ import { createId } from "@paralleldrive/cuid2";
 import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2 } from "@/lib/r2";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { extractAndUploadRecipes } from "@/lib/utils/recipe";
-import { generateIcon } from "@/lib/actions/icon";
 import { revalidatePath } from "next/cache";
 import { withPublicCache } from "@/lib/http/cache";
-import JSZip from "jszip";
+
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const d1 = await getD1();
   const db = getDb(d1);
