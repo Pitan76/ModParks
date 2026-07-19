@@ -88,8 +88,9 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
     canEdit = isOwner || isAdmin || isMember;
   }
 
-  // If the project is not public, check auth
-  if (project.status !== "public" && !canEdit) {
+  // 未公開（draft/private）は作者・メンバー・管理者のみ閲覧可。
+  // public / unlisted は誰でも閲覧できる（unlisted は public と同等扱い）。
+  if ((project.status === "draft" || project.status === "private") && !canEdit) {
     notFound();
   }
 

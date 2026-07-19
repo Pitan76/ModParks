@@ -25,9 +25,10 @@ async function resolveRequesterId(req: NextRequest): Promise<string | null> {
 }
 
 /**
- * 未公開プロジェクトのファイルにアクセスできるのは、作者・メンバー・管理者のみ。
+ * プロジェクトのインサイダー（作者・メンバー・管理者）かどうか。
+ * 未公開ファイルへのアクセス可否と、ダウンロード数カウント除外の両方に使う。
  */
-async function canAccessRestricted(
+async function isProjectInsider(
   db: Awaited<ReturnType<typeof getDatabase>>,
   project: { id: string; authorId: string },
   userId: string | null
@@ -80,18 +81,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
+    const requesterId = await resolveRequesterId(req);
+    const isInsider = await isProjectInsider(db, project, requesterId);
+
     // 未公開（draft/private）は作者・メンバー・管理者のみアクセス可。
     // public / unlisted は直リンクで誰でもダウンロードできる。
-    if (RESTRICTED_STATUSES.has(project.status)) {
-      const requesterId = await resolveRequesterId(req);
-      if (!(await canAccessRestricted(db, project, requesterId))) {
-        return NextResponse.json({ error: "Not found" }, { status: 404 });
-      }
+    if (RESTRICTED_STATUSES.has(project.status) && !isInsider) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）
-    const rlRes = await checkRateLimit(`download:${versionId}`, 1, 10 * 60 * 1000);
-    
+    // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）。
+    // 作者・メンバー・管理者による自己ダウンロード（テスト等）は集計から除外する。
+    const rlRes = isInsider
+      ? { success: false }
+      : await checkRateLimit(`download:${versionId}`, 1, 10 * 60 * 1000);
+
     if (rlRes.success) {
       await Promise.all([
         db
