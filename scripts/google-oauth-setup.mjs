@@ -114,31 +114,62 @@ if (!refreshToken) {
   process.exit(1);
 }
 
-// バックアップ用フォルダを作る。
+// バックアップ用フォルダを用意する。
 // このスクリプトが作ったフォルダなので drive.file の権限だけで読み書きできます。
-const folderRes = await fetch("https://www.googleapis.com/drive/v3/files", {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    name: "ModParks Backups",
-    mimeType: "application/vnd.google-apps.folder",
-  }),
+//
+// 再実行しても同名フォルダが増えないよう、既存があればそれを再利用します。
+// 実行のたびに新規作成すると「見ているフォルダと保存先が違う」状態になります。
+const FOLDER_NAME = "ModParks Backups";
+
+const searchParams = new URLSearchParams({
+  q: `name = '${FOLDER_NAME}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+  fields: "files(id,name)",
 });
 
-if (!folderRes.ok) {
-  console.error("フォルダ作成に失敗しました:", await folderRes.text());
+const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?${searchParams}`, {
+  headers: { Authorization: `Bearer ${accessToken}` },
+});
+
+if (!searchRes.ok) {
+  console.error("フォルダ検索に失敗しました:", await searchRes.text());
   process.exit(1);
 }
 
-const folder = await folderRes.json();
+const existing = (await searchRes.json()).files ?? [];
+let folder;
+
+if (existing.length > 0) {
+  folder = existing[0];
+  console.log(`既存の「${FOLDER_NAME}」フォルダを再利用します。`);
+  if (existing.length > 1) {
+    console.log(`※ 同名フォルダが ${existing.length} 個見つかりました。以前の実行で作られたものです。`);
+    console.log("  不要なものは Drive から削除してください。ID 一覧:");
+    for (const f of existing) console.log(`    ${f.id}`);
+  }
+} else {
+  const folderRes = await fetch("https://www.googleapis.com/drive/v3/files", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name: FOLDER_NAME, mimeType: "application/vnd.google-apps.folder" }),
+  });
+
+  if (!folderRes.ok) {
+    console.error("フォルダ作成に失敗しました:", await folderRes.text());
+    process.exit(1);
+  }
+
+  folder = await folderRes.json();
+  console.log(`Drive に「${FOLDER_NAME}」フォルダを作成しました。`);
+}
 
 console.log("成功しました。以下の 4 つを Worker のシークレットに登録してください:\n");
 console.log(`GOOGLE_OAUTH_CLIENT_ID     = ${clientId}`);
 console.log(`GOOGLE_OAUTH_CLIENT_SECRET = ${clientSecret}`);
 console.log(`GOOGLE_OAUTH_REFRESH_TOKEN = ${refreshToken}`);
 console.log(`GOOGLE_DRIVE_FOLDER_ID     = ${folder.id}`);
-console.log(`\nDrive に「${folder.name}」フォルダを作成しました。ここにバックアップが保存されます。`);
+console.log(`\n保存先フォルダ: https://drive.google.com/drive/folders/${folder.id}`);
+console.log("バックアップがどこに入るか確認したいときは、この URL を開いてください。");
 console.log("※ リフレッシュトークンは Drive への書き込み権限そのものです。取り扱いに注意してください。");
