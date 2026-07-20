@@ -19,7 +19,7 @@ import { getAppSettings } from "@/lib/config/readSettings";
  */
 export async function updateAppSettings(
   input: Partial<AppSettings>
-): Promise<{ success: true; settings: AppSettings } | { error: string }> {
+): Promise<{ success: true; settings: AppSettings; warning?: string } | { error: string }> {
   const { db, userId } = await getAdminDb();
 
   const current = await getAppSettings();
@@ -42,6 +42,24 @@ export async function updateAppSettings(
     return { success: true, settings: next };
   }
 
+  // 送信元アドレスを変えるときは、Resend で検証済みのドメインかを確認する。
+  // 未検証のまま保存すると認証メールが一切送れなくなるため。
+  let warning: string | undefined;
+  if (changed.includes("mailFromAddress")) {
+    const { checkSenderDomain } = await import("@/lib/utils/resendApi");
+    const check = await checkSenderDomain(next.mailFromAddress);
+    if (!check.ok && check.kind === "unverified") {
+      const known = check.verified.length > 0 ? check.verified.join(", ") : "(none)";
+      return {
+        error: `Domain "${check.domain}" is not verified in Resend. Verified domains: ${known}`,
+      };
+    }
+    if (!check.ok && check.kind === "unknown") {
+      // Resend 側の障害で設定変更全体が止まらないよう、警告にとどめる
+      warning = `Could not verify the sender domain with Resend (${check.reason}). Please confirm that email delivery still works.`;
+    }
+  }
+
   const kv = await getSettingsKV();
   await kv.put(SETTINGS_KEY, JSON.stringify(next));
 
@@ -59,7 +77,7 @@ export async function updateAppSettings(
   );
 
   revalidatePath("/admin/config");
-  return { success: true, settings: next };
+  return { success: true, settings: next, warning };
 }
 
 /** 設定変更履歴を新しい順に取得する */

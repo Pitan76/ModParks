@@ -17,7 +17,10 @@ import { APP_SETTING_FIELDS, type AppSettings } from "@/lib/config/appSettings";
 export default function AppSettingsPanel({ initialSettings }: { initialSettings: AppSettings }) {
   const t = useTranslations("Admin.config");
   const [form, setForm] = useState<AppSettings>(initialSettings);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error" | "warning";
+    text: string;
+  } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleSave = () => {
@@ -30,7 +33,11 @@ export default function AppSettingsPanel({ initialSettings }: { initialSettings:
       }
       // KV は結果整合性のため、保存直後は書き込んだ値をそのまま表示する
       setForm(result.settings);
-      setMessage({ type: "success", text: t("appSettingsSaved") });
+      setMessage(
+        result.warning
+          ? { type: "warning", text: `${t("appSettingsSaved")} — ${result.warning}` }
+          : { type: "success", text: t("appSettingsSaved") }
+      );
     });
   };
 
