@@ -65,6 +65,15 @@ export default function AppSettingsPanel({ initialSettings }: { initialSettings:
                   {t(field.helpKey)}
                 </Typography>
               </Box>
+            ) : field.type === "string" ? (
+              <TextField
+                key={field.key}
+                label={t(field.labelKey)}
+                helperText={t(field.helpKey)}
+                value={form[field.key] as string}
+                onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
+                sx={{ maxWidth: 480 }}
+              />
             ) : (
               <TextField
                 key={field.key}

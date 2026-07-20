@@ -7,13 +7,14 @@ import { eq, and } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { SITE_URL } from "@/lib/config";
 import { getAppSettings } from "@/lib/config/readSettings";
+import { formatMailFrom } from "@/lib/config/appSettings";
 
 export async function sendRegistrationEmail(formData: FormData) {
   const email = formData.get("email") as string;
   const locale = (formData.get("locale") as string) || "ja";
 
-  const { registrationEnabled } = await getAppSettings();
-  if (!registrationEnabled) return { error: "registrationDisabled" };
+  const appSettings = await getAppSettings();
+  if (!appSettings.registrationEnabled) return { error: "registrationDisabled" };
 
   const { checkRateLimit } = await import("@/lib/rate-limit");
   const rlRes = await checkRateLimit("register", 5, 15 * 60 * 1000); // 5 times per 15 min
@@ -53,7 +54,7 @@ export async function sendRegistrationEmail(formData: FormData) {
         Authorization: `Bearer ${process.env.AUTH_RESEND_KEY}`,
       },
       body: JSON.stringify({
-        from: "ModParks <no-reply@modparks.pitan76.net>",
+        from: formatMailFrom(appSettings),
         to: email,
         subject,
         html,
@@ -190,6 +191,8 @@ export async function requestPasswordReset(formData: FormData) {
   const { getTranslations } = await import("next-intl/server");
   const tAuth = await getTranslations({ locale, namespace: "Auth" });
 
+  const mailFrom = formatMailFrom(await getAppSettings());
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -197,7 +200,7 @@ export async function requestPasswordReset(formData: FormData) {
       "Authorization": `Bearer ${process.env.AUTH_RESEND_KEY}`
     },
     body: JSON.stringify({
-      from: "no-reply@modparks.pitan76.net",
+      from: mailFrom,
       to: email,
       subject: tAuth("login.emailSubject"),
       html: `

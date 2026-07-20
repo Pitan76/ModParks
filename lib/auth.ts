@@ -6,6 +6,7 @@ import type { NextAuthConfig } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { DEFAULT_APP_SETTINGS } from "@/lib/config/appSettings";
 
 
 
@@ -16,7 +17,38 @@ import { eq } from "drizzle-orm";
 export const authConfig = {
   providers: [
     Resend({
-      from: "no-reply@modparks.pitan76.net",
+      // 実際の送信元は sendVerificationRequest 内で管理画面の設定から解決する。
+      // ここは provider の必須項目を満たすためのフォールバック。
+      from: DEFAULT_APP_SETTINGS.mailFromAddress,
+      /**
+       * 既定実装をほぼそのまま踏襲しつつ、送信元だけを KV の設定から読み出す。
+       * （provider 定義はモジュール読み込み時に評価されるため、ここで await する必要がある）
+       */
+      async sendVerificationRequest({ identifier: to, provider, url }) {
+        const { host } = new URL(url);
+        const { getAppSettings } = await import("@/lib/config/readSettings");
+        const { formatMailFrom } = await import("@/lib/config/appSettings");
+
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${provider.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: formatMailFrom(await getAppSettings()),
+            to,
+            subject: `Sign in to ${host}`,
+            html: `<div style="font-family: sans-serif; padding: 20px;">
+              <h2>Sign in to ${host}</h2>
+              <p><a href="${url}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Sign in</a></p>
+              <p style="color: #666; font-size: 12px;">If you did not request this email, you can safely ignore it.</p>
+            </div>`,
+            text: `Sign in to ${host}\n${url}\n\nIf you did not request this email, you can safely ignore it.\n`,
+          }),
+        });
+        if (!res.ok) throw new Error("Resend error: " + JSON.stringify(await res.json()));
+      },
     }),
     GitHub({
       clientId:     process.env.AUTH_GITHUB_ID!,

@@ -27,7 +27,20 @@ export const appSettingsSchema = z.object({
   autoBackupEnabled: z.boolean().default(false),
   /** 自動バックアップで残す世代数。これを超えた古いものから削除します */
   autoBackupKeepCount: z.number().int().min(1).max(90).default(14),
+  /**
+   * 送信元メールアドレス。
+   * Resend 側で検証済みのドメインでないと送信に失敗するため、変更時は注意すること。
+   */
+  mailFromAddress: z.email().default("no-reply@modparks.pitan76.net"),
+  /** 送信元の表示名。空にするとアドレスのみで送信します */
+  mailFromName: z.string().max(64).default("ModParks"),
 });
+
+/** `"名前 <address>"` 形式の From ヘッダを組み立てる */
+export function formatMailFrom(settings: Pick<AppSettings, "mailFromAddress" | "mailFromName">): string {
+  const name = settings.mailFromName.trim();
+  return name ? `${name} <${settings.mailFromAddress}>` : settings.mailFromAddress;
+}
 
 export type AppSettings = z.infer<typeof appSettingsSchema>;
 
@@ -37,7 +50,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = appSettingsSchema.parse({});
 /** 管理画面のフォーム生成に使うメタ情報 */
 export type AppSettingField = {
   key: keyof AppSettings;
-  type: "number" | "boolean";
+  type: "number" | "boolean" | "string";
   /** 管理画面に表示するラベル（i18n キー） */
   labelKey: string;
   helpKey: string;
@@ -49,6 +62,8 @@ export const APP_SETTING_FIELDS: AppSettingField[] = [
   { key: "registrationEnabled", type: "boolean", labelKey: "registrationEnabled", helpKey: "registrationEnabledHelp" },
   { key: "autoBackupEnabled", type: "boolean", labelKey: "autoBackupEnabled", helpKey: "autoBackupEnabledHelp" },
   { key: "autoBackupKeepCount", type: "number", labelKey: "autoBackupKeepCount", helpKey: "autoBackupKeepCountHelp" },
+  { key: "mailFromAddress", type: "string", labelKey: "mailFromAddress", helpKey: "mailFromAddressHelp" },
+  { key: "mailFromName", type: "string", labelKey: "mailFromName", helpKey: "mailFromNameHelp" },
 ];
 
 /**
