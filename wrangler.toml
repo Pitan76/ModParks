@@ -17,7 +17,7 @@ migrations_dir = "drizzle"
 
 [[kv_namespaces]]
 binding = "SETTINGS_KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "75c45e724c144cc18b629dd2dca50a7e"
 
 [[r2_buckets]]
 bucket_name = "modparks-storage"
@@ -33,5 +33,4 @@ AUTH_TRUST_HOST    = "true"
 NEXT_PUBLIC_APP_URL = "https://modparks.pitan76.net"
 NEXT_PUBLIC_RECIPE_CDN_URL = "https://recipe.modparks.pitan76.net"
 USE_RECIPE_CDN_API = "true"
-
-
+GITHUB_CONFIG_REPO = "Pitan76/ModParks"
