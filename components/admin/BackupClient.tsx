@@ -440,12 +440,19 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
             color="primary"
             startIcon={<AddIcon />}
             onClick={handleCreateBackup}
-            disabled={isPending}
+            disabled={isPending || encryptionConfigured === false}
           >
             {tAdmin("backup.createBtn")}
           </Button>
         </Stack>
       </Stack>
+
+      {encryptionConfigured === false && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <AlertTitle>{tAdmin("backup.encryptionMissingTitle")}</AlertTitle>
+          {tAdmin("backup.encryptionMissingDesc")}
+        </Alert>
+      )}
 
       <Alert severity="warning" sx={{ mb: 4 }}>
         {tAdmin("backup.restoreWarning")}

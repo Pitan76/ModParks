@@ -696,6 +696,8 @@
       "totpLabel": "認証アプリの6桁コード",
       "twoFactorRequired": "復元には2要素認証の設定が必要です。設定画面から有効化してください。",
       "invalidCode": "認証コードが正しくありません。",
+      "encryptionMissingTitle": "バックアップ暗号鍵が未設定です",
+      "encryptionMissingDesc": "バックアップにはパスワードハッシュやAPIキーが含まれるため、暗号鍵が無い状態では作成できません。`openssl rand -base64 32` で生成した値を、設定画面のシークレットに BACKUP_ENCRYPTION_KEY として登録してください。この鍵を失うと既存のバックアップは復元できなくなります。",
       "merge": "マージ",
       "mergeDesc": "現在のデータを消さずに、このバックアップの内容を取り込みます。削除済みのデータは復活しません。",
       "mergePlanning": "差分を計算しています...",

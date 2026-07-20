@@ -688,6 +688,8 @@
       "totpLabel": "6-digit code from your authenticator app",
       "twoFactorRequired": "Two-factor authentication must be enabled to restore. Enable it from your settings.",
       "invalidCode": "The authentication code is incorrect.",
+      "encryptionMissingTitle": "Backup encryption key is not configured",
+      "encryptionMissingDesc": "Backups contain password hashes and API keys, so they cannot be created without an encryption key. Generate one with `openssl rand -base64 32` and register it as BACKUP_ENCRYPTION_KEY in the secrets settings. If this key is lost, existing backups can no longer be restored.",
       "merge": "Merge",
       "mergeDesc": "Imports this backup's contents without deleting current data. Deleted records will not be resurrected.",
       "mergePlanning": "Calculating changes...",
