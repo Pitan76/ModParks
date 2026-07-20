@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdminDb } from "@/lib/auth-helpers";
+import { getAdminDb, getReauthenticatedAdminDb } from "@/lib/auth-helpers";
 import * as schema from "@/db/schema";
 import { revalidatePath } from "next/cache";
 
@@ -83,6 +83,56 @@ const TABLE_RESTORE_ORDER = [
   "notifications",
 ];
 
+type AuditAction = "create" | "auto_create" | "restore" | "merge" | "delete" | "snapshot";
+
+/**
+ * バックアップ操作を監査ログに記録します。
+ *
+ * ログ記録の失敗が本体の操作を巻き添えにしないよう、エラーは握り潰して警告に留めます。
+ * （復元の直後は users が入れ替わっているため、書き込みが失敗しうる）
+ */
+async function writeAuditLog(
+  db: any,
+  entry: {
+    action: AuditAction;
+    status: "success" | "failure";
+    backupKey?: string;
+    snapshotKey?: string;
+    detail?: Record<string, unknown>;
+    performedBy?: string;
+    performedByEmail?: string;
+  }
+) {
+  try {
+    await db.insert(schema.backupAudit).values({
+      action: entry.action,
+      status: entry.status,
+      backupKey: entry.backupKey ?? null,
+      snapshotKey: entry.snapshotKey ?? null,
+      detail: entry.detail ?? null,
+      performedBy: entry.performedBy ?? null,
+      performedByEmail: entry.performedByEmail ?? null,
+    });
+  } catch (e) {
+    console.error("[backup] Failed to write audit log:", e);
+  }
+}
+
+/** 監査ログに残す操作者情報を取得します。 */
+async function getActor(db: any, userId: string) {
+  try {
+    const { eq } = await import("drizzle-orm");
+    const user = await db
+      .select({ email: schema.users.email })
+      .from(schema.users)
+      .where(eq(schema.users.id, userId))
+      .get();
+    return { performedBy: userId, performedByEmail: user?.email ?? undefined };
+  } catch {
+    return { performedBy: userId, performedByEmail: undefined };
+  }
+}
+
 /** バックアップファイルのフォーマット世代。復元側の互換性判定に使います。 */
 const BACKUP_FORMAT_VERSION = "1.0";
 
@@ -148,12 +198,25 @@ function validateBackupPayload(payload: unknown): Record<string, any[]> {
  * データベースの全テーブルのデータをダンプし、JSON 形式で R2 バケットに保存します。
  */
 export async function createBackup() {
-  const { db } = await getAdminDb();
+  const { db, userId } = await getAdminDb();
+  const actor = await getActor(db, userId);
 
-  const key = await dumpToR2(db, "backup");
+  try {
+    const key = await dumpToR2(db, "backup");
 
-  revalidatePath("/admin/backup");
-  return { success: true, key };
+    await writeAuditLog(db, { action: "create", status: "success", backupKey: key, ...actor });
+
+    revalidatePath("/admin/backup");
+    return { success: true, key };
+  } catch (e: any) {
+    await writeAuditLog(db, {
+      action: "create",
+      status: "failure",
+      detail: { error: e?.message ?? String(e) },
+      ...actor,
+    });
+    throw e;
+  }
 }
 
 /**
@@ -180,10 +243,25 @@ export async function getBackups() {
 }
 
 /**
+ * バックアップ・復元操作の監査ログを新しい順に取得します。
+ */
+export async function getBackupAuditLog(limit = 100) {
+  const { db } = await getAdminDb();
+  const { desc } = await import("drizzle-orm");
+
+  return db
+    .select()
+    .from(schema.backupAudit)
+    .orderBy(desc(schema.backupAudit.createdAt))
+    .limit(limit)
+    .all();
+}
+
+/**
  * 指定されたキーのバックアップファイルを R2 バケットから削除します。
  */
 export async function deleteBackup(key: string) {
-  await getAdminDb();
+  const { db, userId } = await getAdminDb();
 
   // key はクライアントから渡ってくるため、バックアップ以外の
   // R2 オブジェクト（アップロード済みファイル等）を消せないよう制限します
@@ -195,6 +273,13 @@ export async function deleteBackup(key: string) {
   const bucket = await getR2Bucket();
 
   await deleteFromR2(bucket, key);
+
+  await writeAuditLog(db, {
+    action: "delete",
+    status: "success",
+    backupKey: key,
+    ...(await getActor(db, userId)),
+  });
 
   revalidatePath("/admin/backup");
   return { success: true };
@@ -262,9 +347,16 @@ async function importBackupData(db: any, tablesData: Record<string, any[]>) {
  * R2 上にも残りますが、R2 ごと失う障害に備えて手元コピーを促す意図です。
  */
 export async function createPreRestoreSnapshot() {
-  const { db } = await getAdminDb();
+  const { db, userId } = await getAdminDb();
 
   const key = await dumpToR2(db, "snapshot");
+
+  await writeAuditLog(db, {
+    action: "snapshot",
+    status: "success",
+    snapshotKey: key,
+    ...(await getActor(db, userId)),
+  });
 
   return {
     success: true,
@@ -280,14 +372,47 @@ export async function createPreRestoreSnapshot() {
  * `snapshotKey` に createPreRestoreSnapshot() の結果を渡すと、
  * 二重にスナップショットを取らずにそれを切り戻し元として扱います。
  */
-async function performRestore(db: any, payload: any, snapshotKey?: string) {
+async function performRestore(
+  db: any,
+  payload: any,
+  snapshotKey: string | undefined,
+  actor: { performedBy?: string; performedByEmail?: string },
+  backupKey?: string
+) {
   const tables = validateBackupPayload(payload);
 
   // 復元は既存データを全削除します。取り返しがつかないため、
   // 実行直前の状態を必ず snapshot/ に退避してから進めます。
   const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot"));
 
-  await importBackupData(db, tables);
+  // 監査ログの操作者情報は復元前に確定させておきます。
+  // 復元後は users が入れ替わり、userId から引けなくなる可能性があるためです。
+  const rowCounts = Object.fromEntries(
+    Object.entries(tables).map(([name, rows]) => [name, rows.length])
+  );
+
+  try {
+    await importBackupData(db, tables);
+  } catch (e: any) {
+    await writeAuditLog(db, {
+      action: "restore",
+      status: "failure",
+      backupKey,
+      snapshotKey: effectiveSnapshotKey,
+      detail: { error: e?.message ?? String(e) },
+      ...actor,
+    });
+    throw e;
+  }
+
+  await writeAuditLog(db, {
+    action: "restore",
+    status: "success",
+    backupKey,
+    snapshotKey: effectiveSnapshotKey,
+    detail: { rowCounts },
+    ...actor,
+  });
 
   revalidatePath("/admin/backup");
   return { success: true, snapshotKey: effectiveSnapshotKey };
@@ -296,8 +421,10 @@ async function performRestore(db: any, payload: any, snapshotKey?: string) {
 /**
  * R2 バケット上の指定されたバックアップファイルからデータを復元します。
  */
-export async function restoreBackup(key: string, snapshotKey?: string) {
-  const { db } = await getAdminDb();
+export async function restoreBackup(key: string, totpToken: string, snapshotKey?: string) {
+  // 復元は取り消しの効かない全置換のため、管理者権限に加えて TOTP 再認証を要求します
+  const { db, userId } = await getReauthenticatedAdminDb(totpToken);
+  const actor = await getActor(db, userId);
 
   if (!key.startsWith("backup/") && !key.startsWith("snapshot/")) {
     throw new Error("Invalid backup key");
@@ -310,14 +437,16 @@ export async function restoreBackup(key: string, snapshotKey?: string) {
     throw new Error("Backup file not found in R2");
   }
 
-  return performRestore(db, JSON.parse(await obj.text()), snapshotKey);
+  return performRestore(db, JSON.parse(await obj.text()), snapshotKey, actor, key);
 }
 
 /**
  * 送信された JSON 文字列データからデータベースを復元します。
  */
-export async function restoreBackupFromJson(jsonStr: string, snapshotKey?: string) {
-  const { db } = await getAdminDb();
+export async function restoreBackupFromJson(jsonStr: string, totpToken: string, snapshotKey?: string) {
+  const { db, userId } = await getReauthenticatedAdminDb(totpToken);
+  const actor = await getActor(db, userId);
 
-  return performRestore(db, JSON.parse(jsonStr), snapshotKey);
+  // ローカルファイルからの復元では R2 上の元キーが存在しないため backupKey は null
+  return performRestore(db, JSON.parse(jsonStr), snapshotKey, actor);
 }

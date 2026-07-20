@@ -24,6 +24,7 @@ import DialogActions from "@mui/material/DialogActions";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import Backdrop from "@mui/material/Backdrop";
 import AddIcon from "@mui/icons-material/Add";
@@ -92,6 +93,17 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
   const [snapshot, setSnapshot] = useState<{ key: string; downloadUrl: string } | null>(null);
   const [snapshotDownloaded, setSnapshotDownloaded] = useState(false);
 
+  // 誤操作防止。復元には TOTP による再認証と、確認フレーズの入力の両方を要求します。
+  const [totpToken, setTotpToken] = useState("");
+  const [confirmPhrase, setConfirmPhrase] = useState("");
+
+  const RESTORE_CONFIRM_PHRASE = "RESTORE";
+  const canRestore =
+    snapshotDownloaded &&
+    totpToken.trim().length > 0 &&
+    confirmPhrase.trim() === RESTORE_CONFIRM_PHRASE &&
+    !isPending;
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const showSnackbar = (message: string, severity: "success" | "error") => {
@@ -152,10 +164,19 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
   };
 
   // R2上のバックアップから復元確認
+  // 再認証まわりのエラーコードを利用者向けの文言に変換する
+  const restoreErrorMessage = (e: any) => {
+    if (e?.message === "TWO_FACTOR_REQUIRED") return tAdmin("backup.twoFactorRequired");
+    if (e?.message === "INVALID_CODE") return tAdmin("backup.invalidCode");
+    return e?.message || "Error restoring database";
+  };
+
   // 復元ダイアログを開くたびにスナップショットの状態をリセットする
   const resetSnapshotState = () => {
     setSnapshot(null);
     setSnapshotDownloaded(false);
+    setTotpToken("");
+    setConfirmPhrase("");
   };
 
   // 現在のDBの内容をスナップショットとして保存し、ブラウザにダウンロードさせる
@@ -178,22 +199,23 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
     setRestoreDialogOpen(true);
   };
 
+  // 再認証コードが誤っている場合に入力内容を失わないよう、
+  // ダイアログは成功時にのみ閉じます。
   const handleConfirmRestore = () => {
     if (!restoreTarget) return;
-    setRestoreDialogOpen(false);
 
     startTransition(async () => {
       try {
-        const res = await restoreBackup(restoreTarget, snapshot?.key);
+        const res = await restoreBackup(restoreTarget, totpToken, snapshot?.key);
         if (res.success) {
           showSnackbar(tAdmin("backup.successRestore"), "success");
+          setRestoreDialogOpen(false);
+          setRestoreTarget(null);
+          resetSnapshotState();
           router.refresh();
         }
       } catch (e: any) {
-        showSnackbar(e.message || "Error restoring database", "error");
-      } finally {
-        setRestoreTarget(null);
-        resetSnapshotState();
+        showSnackbar(restoreErrorMessage(e), "error");
       }
     });
   };
@@ -236,20 +258,19 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
   // ローカルJSONからの復元実行
   const handleConfirmLocalRestore = () => {
     if (!localRestoreContent) return;
-    setLocalRestoreDialogOpen(false);
 
     startTransition(async () => {
       try {
-        const res = await restoreBackupFromJson(localRestoreContent, snapshot?.key);
+        const res = await restoreBackupFromJson(localRestoreContent, totpToken, snapshot?.key);
         if (res.success) {
           showSnackbar(tAdmin("backup.successRestore"), "success");
+          setLocalRestoreDialogOpen(false);
+          setLocalRestoreContent(null);
+          resetSnapshotState();
           router.refresh();
         }
       } catch (e: any) {
-        showSnackbar(e.message || "Error restoring database", "error");
-      } finally {
-        setLocalRestoreContent(null);
-        resetSnapshotState();
+        showSnackbar(restoreErrorMessage(e), "error");
       }
     });
   };
@@ -275,6 +296,29 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         </Box>
       )}
     </Alert>
+  );
+
+  // 誤操作防止のための最終確認セクション（確認フレーズ + TOTP）
+  const confirmSection = (
+    <Stack spacing={2} sx={{ mt: 2 }}>
+      <TextField
+        label={tAdmin("backup.confirmPhraseLabel", { phrase: RESTORE_CONFIRM_PHRASE })}
+        size="small"
+        value={confirmPhrase}
+        onChange={(e) => setConfirmPhrase(e.target.value)}
+        disabled={isPending}
+        autoComplete="off"
+      />
+      <TextField
+        label={tAdmin("backup.totpLabel")}
+        size="small"
+        value={totpToken}
+        onChange={(e) => setTotpToken(e.target.value)}
+        disabled={isPending}
+        autoComplete="one-time-code"
+        inputMode="numeric"
+      />
+    </Stack>
   );
 
   return (
@@ -437,6 +481,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
             </Box>
           </DialogContentText>
           {preRestoreSection}
+          {confirmSection}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRestoreDialogOpen(false)} color="inherit">
@@ -445,7 +490,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
           <Button
             onClick={handleConfirmRestore}
             color="warning"
-            disabled={!snapshotDownloaded || isPending}
+            disabled={!canRestore}
           >
             {tAdmin("backup.restore")}
           </Button>
@@ -463,6 +508,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
             {tAdmin("backup.confirmRestore")}
           </DialogContentText>
           {preRestoreSection}
+          {confirmSection}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setLocalRestoreDialogOpen(false)} color="inherit">
@@ -471,7 +517,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
           <Button
             onClick={handleConfirmLocalRestore}
             color="warning"
-            disabled={!snapshotDownloaded || isPending}
+            disabled={!canRestore}
           >
             {tAdmin("backup.restore")}
           </Button>

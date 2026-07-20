@@ -674,7 +674,11 @@
       "invalidFile": "Invalid backup file.",
       "downloadCurrentData": "Download current data",
       "downloadCurrentDataDesc": "Before restoring, save the current database to your device. This is required so you can roll back if the restore turns out to be wrong.",
-      "currentDataSaved": "Current data saved as {key}. You can now proceed with the restore."
+      "currentDataSaved": "Current data saved as {key}. You can now proceed with the restore.",
+      "confirmPhraseLabel": "Type {phrase} to confirm",
+      "totpLabel": "6-digit code from your authenticator app",
+      "twoFactorRequired": "Two-factor authentication must be enabled to restore. Enable it from your settings.",
+      "invalidCode": "The authentication code is incorrect."
     }
   },
   "Search": {

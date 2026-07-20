@@ -780,3 +780,43 @@ export const settingsAudit = sqliteTable("settings_audit", {
 }));
 
 export type SettingsAudit = typeof settingsAudit.$inferSelect;
+
+// ─── Backup Audit ─────────────────────────────────────────────────────────────
+
+/**
+ * バックアップ・復元操作の監査ログ。
+ *
+ * 復元は全テーブルを削除して入れ替えるため、このテーブルは意図的に
+ * バックアップ／復元の対象（adminBackup.ts の SCHEMA_TABLES）に含めていません。
+ * 復元をまたいでログが残ることで「いつ誰がどのデータに戻したか」を追跡できます。
+ *
+ * 同じ理由で performedBy には外部キー制約を張っていません。
+ * users を参照すると、復元時の users 全削除に連動してログ自体が消えてしまいます。
+ * 代わりに操作時点のメールアドレスを非正規化して保持します。
+ */
+export const backupAudit = sqliteTable("backup_audit", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  action: text("action", {
+    enum: ["create", "auto_create", "restore", "merge", "delete", "snapshot"],
+  }).notNull(),
+  /** 操作対象のバックアップの R2 キー（削除・復元の対象） */
+  backupKey: text("backup_key"),
+  /** 復元時に取得した切り戻し用スナップショットの R2 キー */
+  snapshotKey: text("snapshot_key"),
+  status: text("status", { enum: ["success", "failure"] }).notNull(),
+  /** 失敗時のエラーメッセージ、成功時はテーブルごとの件数などの詳細 */
+  detail: text("detail", { mode: "json" }).$type<Record<string, unknown>>(),
+  /** 操作者の users.id。cron による自動実行の場合は null */
+  performedBy: text("performed_by"),
+  /** 操作時点の操作者のメールアドレス。users が入れ替わってもログを読めるようにするため */
+  performedByEmail: text("performed_by_email"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  actionIdx: index("backup_audit_action_idx").on(table.action, table.createdAt),
+}));
+
+export type BackupAudit = typeof backupAudit.$inferSelect;

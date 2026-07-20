@@ -69,7 +69,7 @@
     "hero": {
       "title": "マイクラのMOD、プラグインを",
       "titleHighlight": "みんなで一緒につくったり、探したりしてみませんか？",
-      "description": "ModParksは日本発のMinecraft Java Edition向けMOD/プラグインプラットフォームです。",
+      "description": "ModParksは日本発のMinecraft Java Edition向けMOD/プラグイン配布プラットフォームです。",
       "searchPlaceholder": "MOD/プラグインを検索..."
     },
     "newProjects": "新着",
@@ -682,7 +682,11 @@
       "invalidFile": "無効なバックアップファイルです。",
       "downloadCurrentData": "現在のデータをダウンロード",
       "downloadCurrentDataDesc": "復元を実行する前に、現在のデータベースを手元に保存してください。復元内容が意図と違った場合に切り戻すために必要です。",
-      "currentDataSaved": "現在のデータを {key} として保存しました。復元に進めます。"
+      "currentDataSaved": "現在のデータを {key} として保存しました。復元に進めます。",
+      "confirmPhraseLabel": "確認のため {phrase} と入力してください",
+      "totpLabel": "認証アプリの6桁コード",
+      "twoFactorRequired": "復元には2要素認証の設定が必要です。設定画面から有効化してください。",
+      "invalidCode": "認証コードが正しくありません。"
     }
   },
   "Search": {

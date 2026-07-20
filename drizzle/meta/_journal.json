@@ -288,6 +288,13 @@
       "when": 1784511889002,
       "tag": "0040_lonely_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "6",
+      "when": 1784514523814,
+      "tag": "0041_numerous_menace",
+      "breakpoints": true
     }
   ]
 }
