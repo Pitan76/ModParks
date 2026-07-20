@@ -530,7 +530,8 @@
       "emailTaken": "このメールアドレスは既に登録されています。",
       "usernameTaken": "このユーザーネームは既に使用されています。",
       "submitFailed": "エラーが発生しました。",
-      "unauthorized": "認証に失敗しました。"
+      "unauthorized": "認証に失敗しました。",
+      "registrationDisabled": "現在、新規ユーザー登録を停止しています。"
     }
   },
   "Admin": {
@@ -564,7 +565,21 @@
       "tagsDesc": "プロジェクトで使用可能なタグを管理します。",
       "newTag": "新しいタグ名",
       "addTag": "タグを追加",
-      "tagsPlaceholder": "現在タグはソースコード内に静的に定義されています。このUIは将来データベースへ移行した際のための仮画面です。"
+      "tagsPlaceholder": "現在タグはソースコード内に静的に定義されています。このUIは将来データベースへ移行した際のための仮画面です。",
+      "appSettings": "アプリ設定",
+      "appSettingsDesc": "Cloudflare KV に保存される設定です。保存後、反映まで最大1分ほどかかる場合があります。",
+      "appSettingsSaved": "設定を保存しました（反映まで最大1分かかる場合があります）",
+      "apiDefaultLimit": "API デフォルト取得件数",
+      "apiDefaultLimitHelp": "一覧APIで limit が指定されなかった場合の件数",
+      "apiMaxLimit": "API 最大取得件数",
+      "apiMaxLimitHelp": "一覧APIで指定できる limit の上限",
+      "registrationEnabled": "新規ユーザー登録を許可",
+      "registrationEnabledHelp": "オフにすると新規登録を受け付けません",
+      "workerVars": "Worker 環境変数",
+      "workerVarsDesc": "GitHub 上の wrangler.toml を書き換える Pull Request を作成します。実際の反映は PR のマージとデプロイ後です。",
+      "varProtected": "この変数は管理画面から変更できません",
+      "createPr": "Pull Request を作成",
+      "prCreated": "Pull Request を作成しました:"
     },
     "projects": {
       "title": "プロジェクト管理",

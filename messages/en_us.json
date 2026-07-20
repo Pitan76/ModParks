@@ -522,7 +522,8 @@
       "emailTaken": "This email address is already in use.",
       "usernameTaken": "This username is already taken.",
       "submitFailed": "An error occurred.",
-      "unauthorized": "Unauthorized access."
+      "unauthorized": "Unauthorized access.",
+      "registrationDisabled": "New registrations are currently disabled."
     }
   },
   "Admin": {
@@ -578,7 +579,21 @@
       "tagsDesc": "Manage predefined tags available for projects.",
       "newTag": "New Tag Name",
       "addTag": "Add Tag",
-      "tagsPlaceholder": "Currently, tags are defined statically in the codebase. This interface is a placeholder for when tags are migrated to the database."
+      "tagsPlaceholder": "Currently, tags are defined statically in the codebase. This interface is a placeholder for when tags are migrated to the database.",
+      "appSettings": "App Settings",
+      "appSettingsDesc": "Stored in Cloudflare KV. Changes may take up to a minute to propagate.",
+      "appSettingsSaved": "Settings saved (may take up to a minute to propagate)",
+      "apiDefaultLimit": "API default limit",
+      "apiDefaultLimitHelp": "Number of items returned when no limit is specified",
+      "apiMaxLimit": "API max limit",
+      "apiMaxLimitHelp": "Upper bound for the limit parameter",
+      "registrationEnabled": "Allow new registrations",
+      "registrationEnabledHelp": "When off, new sign-ups are rejected",
+      "workerVars": "Worker Variables",
+      "workerVarsDesc": "Opens a pull request that edits wrangler.toml on GitHub. Changes take effect once the PR is merged and deployed.",
+      "varProtected": "This variable cannot be edited from the admin UI",
+      "createPr": "Create Pull Request",
+      "prCreated": "Pull request created:"
     },
     "reports": {
       "title": "Report Management",

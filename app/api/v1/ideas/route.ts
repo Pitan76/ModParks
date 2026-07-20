@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { ideas, users, userProfiles } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
-import { API_CONFIG } from "@/lib/config";
+import { getAppSettings } from "@/lib/config/readSettings";
 import { eq, desc } from "drizzle-orm";
 import { ApiIdea, PaginatedResponse } from "@/types/api";
 import { withPublicCache } from "@/lib/http/cache";
@@ -16,7 +16,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   
   const limitParam = parseInt(searchParams.get("limit") || "");
-  const limit = isNaN(limitParam) ? API_CONFIG.DEFAULT_LIMIT : Math.min(limitParam, API_CONFIG.MAX_LIMIT);
+  const appSettings = await getAppSettings();
+  const limit = isNaN(limitParam) ? appSettings.apiDefaultLimit : Math.min(limitParam, appSettings.apiMaxLimit);
   const offsetParam = parseInt(searchParams.get("offset") || "0");
   const offset = isNaN(offsetParam) ? 0 : Math.max(0, offsetParam);
 

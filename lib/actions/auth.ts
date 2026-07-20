@@ -6,10 +6,14 @@ import { eq, and } from "drizzle-orm";
 
 import { createId } from "@paralleldrive/cuid2";
 import { SITE_URL } from "@/lib/config";
+import { getAppSettings } from "@/lib/config/readSettings";
 
 export async function sendRegistrationEmail(formData: FormData) {
   const email = formData.get("email") as string;
   const locale = (formData.get("locale") as string) || "ja";
+
+  const { registrationEnabled } = await getAppSettings();
+  if (!registrationEnabled) return { error: "registrationDisabled" };
 
   const { checkRateLimit } = await import("@/lib/rate-limit");
   const rlRes = await checkRateLimit("register", 5, 15 * 60 * 1000); // 5 times per 15 min
@@ -73,7 +77,10 @@ export async function registerUser(formData: FormData) {
   const email       = formData.get("email") as string;
   const password    = formData.get("password") as string;
   const token       = formData.get("token") as string;
-  
+
+  const { registrationEnabled } = await getAppSettings();
+  if (!registrationEnabled) return { error: "registrationDisabled" };
+
   const { checkRateLimit } = await import("@/lib/rate-limit");
   const rlRes = await checkRateLimit("register_complete", 10, 5 * 60 * 1000);
   if (!rlRes.success) return { error: "TOO_MANY_REQUESTS" };
