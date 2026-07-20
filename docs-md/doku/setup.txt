@@ -1,0 +1,61 @@
+====== 開発環境セットアップガイド ======
+
+ModParksをローカル開発環境でビルドし、起動するまでの手順です。
+
+===== 前提条件 =====
+
+実行には以下の環境が必要です。
+
+  * Node.js (v20以上)
+  * npm、yarn、または pnpm
+
+===== 手順 =====
+
+==== 1. リポジトリのクローン ====
+
+リポジトリをクローンし、プロジェクトのディレクトリに移動します。
+
+<code bash>
+git clone https://github.com/Pitan76/modparks.git
+cd modparks
+</code>
+
+==== 2. パッケージのインストール ====
+
+依存パッケージをインストールします。
+
+<code bash>
+npm install
+</code>
+
+==== 3. 環境変数の設定 ====
+
+プロジェクトルートにある ''.env.local.example'' を参考に、''.env.local'' を作成して適切な値を設定します。
+
+<code env>
+# 例: .env.local
+AUTH_SECRET="your-auth-secret" # 任意のランダムな文字列
+AUTH_GITHUB_ID="your-github-client-id"
+AUTH_GITHUB_SECRET="your-github-client-secret"
+RECIPE_CDN_SECRET="your-recipe-cdn-secret"
+</code>
+
+==== 4. データベースのセットアップ（ローカルD1） ====
+
+ローカル開発用の D1 データベース（SQLite）にマイグレーションを適用し、初期化します。
+
+<code bash>
+npm run db:generate
+npm run db:migrate:local
+</code>
+
+==== 5. 開発サーバーの起動 ====
+
+ローカル開発サーバーを起動します。
+
+<code bash>
+npm run dev
+</code>
+
+起動完了後、ブラウザで [[http://localhost:3000]] にアクセスし動作を確認してください。
+※ローカル開発環境では、Wranglerのキャッシュ機構によって Next.js のホットリロード時もプロキシインスタンスの再起動が防がれ、快適に動作する設計となっています。

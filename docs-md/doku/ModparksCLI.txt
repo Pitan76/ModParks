@@ -59,11 +59,11 @@ modparks-cli --help
 | ''comments <slug>'' | プロジェクトのコメント一覧を取得 |
 | ''comment-post <slug> <content>''| コメントを投稿 |
 | ''sync <slug>'' | プロジェクトを外部プラットフォームと同期 |
-| ''tui'' | ターミナルUI (TUI) を起動してインタラクティブに操作します |
+| ''tui'' | TUIを起動してインタラクティブに操作します |
 | ''update'' | modparks-cli 自身を最新バージョンへアップデートします |
 | ''cache-clear'' | キャッシュされたレスポンスを削除します |
 
-===== TUI (Terminal UI) =====
+===== TUI =====
 ''modparks-cli tui'' コマンドで起動できる TUI モードでは、方向キーやショートカットでプロジェクトやアイデアを簡単に閲覧できます。
 
 ===== 設定ファイル =====

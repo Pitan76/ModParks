@@ -1,0 +1,67 @@
+====== データベース設計とスキーマ ======
+
+ModParksのデータモデルは、[[Drizzle ORM]] を介して構築されており、Cloudflare D1（SQLite互換）を使用しています。
+スキーマ定義の詳細は、ソースコードの ''db/schema.ts'' を参照してください。
+
+===== 主要テーブル構成 =====
+
+==== users (ユーザー) ====
+
+ユーザーのアカウント認証（Auth.js連携）および基本権限情報を管理します。
+
+  * ''id'': プライマリキー (UUID)
+  * ''name'', ''email'', ''image'': Auth.js標準フィールド
+  * ''passwordHash'': パスワードハッシュ
+  * ''githubId'': GitHubアカウントID
+  * ''role'': ユーザーの権限 (''user'' / ''admin'')
+  * ''twoFactorEnabled'': 二要素認証の有効状態
+
+==== user_profiles (ユーザープロフィール) ====
+
+ユーザーの公開プロフィール情報を保持します。
+
+  * ''userId'': users.id への外部キー (プライマリキー, 1対1)
+  * ''username'': 一意のユーザーID
+  * ''displayName'': 表示名
+  * ''bio'': 自己紹介
+  * ''avatarUrl'': アバター画像URL
+
+==== projects (プロジェクト) ====
+
+公開されているMOD、プラグイン、リソースパックなどのメインデータを管理します。
+
+  * ''id'': プライマリキー (cuidなど)
+  * ''slug'': URL用のスラッグ (一意)
+  * ''name'', ''description'': プロジェクト名と説明
+  * ''type'': 種別 (''mod'' / ''plugin'' / ''resourcepack'' / ''datapack'' / ''shader'' / ''modpack'')
+  * ''status'': 公開ステータス (''draft'' / ''public'' / ''unlisted'' / ''private'')
+  * ''authorId'': 作者 (users.id) への外部キー
+  * ''downloads'', ''totalDownloads'': ダウンロード数統計
+  * ''githubRepo'': 連携しているGitHubリポジトリ (Release自動同期用)
+
+==== versions (バージョン) ====
+
+プロジェクトにアップロードされた各リリースのファイル情報を管理します。
+
+  * ''id'': プライマリキー
+  * ''versionNumber'': バージョン表記 (例: ''1.0.0'')
+  * ''mcVersions'': 対応マインクラフトバージョン (JSON形式の配列)
+  * ''loaders'': 対応ローダー (例: Fabric, Forge / JSON形式の配列)
+  * ''fileUrl'', ''fileName'', ''fileSize'': 保存先ファイルの情報
+  * ''projectId'': projects.id への外部キー
+
+==== collections (コレクション) ====
+
+ユーザーが作成したお気に入りプロジェクトのリストです。
+
+  * ''id'': プライマリキー
+  * ''userId'': 作成したユーザーの外部キー
+  * ''name'': リスト名
+  * ''visibility'': 公開範囲 (''public'' / ''unlisted'' / ''private'')
+
+===== リレーション概要 =====
+
+  * **ユーザー 1 : 1 プロフィール**: ''users'' と ''user_profiles'' は 1対1。
+  * **ユーザー 1 : N プロジェクト**: 1人のユーザーは複数のプロジェクトを所有。
+  * **プロジェクト 1 : N バージョン**: 1つのプロジェクトは複数のリリースバージョンを持つ。
+  * **プロジェクト N : M カテゴリ**: プロジェクトは複数のカテゴリに分類可能（中間テーブル ''project_categories'' で解決）。

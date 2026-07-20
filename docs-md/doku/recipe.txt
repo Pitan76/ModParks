@@ -1,0 +1,64 @@
+====== ModParks Recipe ======
+
+ModParks用のレシピ画像を動的に生成・配信するCDN/APIサーバーの仕様です。
+本システムはCloudflareのEdgeネットワーク上で稼働しています。
+
+配信URL: [[https://recipe.modparks.pitan76.net/]]
+APIルート: [[https://recipe.modparks.pitan76.net/api/]]
+
+すべての画像レスポンスは ''Cache-Control: public, max-age=86400''（1日）を返します。
+
+===== APIエンドポイント一覧 =====
+
+^ メソッド ^ パス ^ 説明 ^
+| ''GET'' | ''/api/list.json'' | レシピの索引（JSON）を返します。 |
+| ''GET'' | ''/api/:namespace/:id.png'' | レシピ画像（PNG）を返します。 |
+| ''GET'' | ''/api/:namespace/:id.jpg'' | レシピ画像（JPG）を返します。 |
+| ''GET'' | ''/api/:namespace/:id.gif'' | レシピ画像（アニメーションGIF）を返します。 |
+| ''PUT'' | ''/api/:namespace/recipe/:id'' | レシピJSONをアップロード（要 認証）。 |
+| ''PUT'' | ''/api/:namespace/texture/:path'' | テクスチャ等をアップロード（要 認証）。 |
+| ''PUT'' | ''/api/:namespace/tag/:path'' | タグJSONをアップロード（要 認証）。 |
+| ''POST'' | ''/api/:namespace/recipe/:id/bundle'' | レシピ＋テクスチャを一括アップロード（要 認証）。 |
+| ''GET'' | ''/admin/reindex'' | 索引を再生成します（要 ''secret''）。 |
+| ''GET'' | ''/admin/clean/:namespace/:folder'' | R2上の古いアセットを削除します（要 ''secret''）。 |
+
+===== 画像取得API =====
+
+''GET /api/:namespace/:id.(png|jpg|gif)''
+
+==== パスパラメータ ====
+  * **namespace**: 名前空間（例: ''minecraft''、各Mod ID）。URLに含めることで、バニラ以外のMod（アドオン）のレシピ描画にも対応します。
+  * **id**: レシピID。拡張子で出力形式を指定します。
+
+==== クエリパラメータ ====
+^ 名前 ^ 型 ^ 既定値 ^ 説明 ^
+| ''tagOffset'' | 整数 | ''0'' | タグ（例えば木材など）内で代表として表示する要素のインデックス。 |
+| ''scale'' | 数値 | — | 画像の拡大率。''normalizeScale'' で正規化されます。 |
+
+==== 形式ごとの挙動 ====
+  * **PNG**: 透過を保持した静的画像。
+  * **JPG**: 透過を持てないため、背景を白で合成した画像を返します。
+  * **GIF**: タグに複数アイテムが含まれる場合などに、5フレームのアニメーションGIFをオンザフライで生成します。
+
+===== 書き込みAPI（Mod向け） =====
+
+Modが自身のレシピ・テクスチャを直接R2へ投入するためのAPIです。
+  * **認証**: ''Authorization: Bearer <secret>'' ヘッダ、または ''?secret=<secret>''。環境変数 ''UPLOAD_SECRET'' と一致しない場合は ''401''。
+
+==== レシピ登録 ====
+''PUT /api/:namespace/recipe/:id''
+レシピJSON（ボディ）を保存し、D1キャッシュ破棄・索引更新を行います。
+
+==== テクスチャ登録 ====
+''PUT /api/:namespace/texture/:path''
+''assets/:namespace/textures/:path'' にバイナリ保存します。
+
+==== 一括登録 ====
+''POST /api/:namespace/recipe/:id/bundle''
+レシピ1つと、それが参照するテクスチャ（base64）を1リクエストで一括投入します。
+
+===== システムアーキテクチャ概要 =====
+
+  * **Cloudflare R2**: アセット（テクスチャPNG）やJSONデータ（レシピ・タグ）のマスター保存領域。
+  * **Cloudflare D1**: R2上のJSONファイルの読み込みコストを削減するため、Lazy Cache（遅延保存）データベースとして使用。
+  * **Cloudflare Workers (Hono)**: Satori と ''@resvg/resvg-wasm'' を用いて、MinecraftのクラフトグリッドUIを動的に合成して画像化（PNG/JPG/GIF）します。
