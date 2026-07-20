@@ -1,7 +1,6 @@
 "use server";
 
 import { getAdminDb, getReauthenticatedAdminDb } from "@/lib/auth-helpers";
-import * as schema from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import {
   dumpToR2,
@@ -57,21 +56,6 @@ export async function getBackups() {
   backups.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
   return backups;
-}
-
-/**
- * バックアップ・復元操作の監査ログを新しい順に取得します。
- */
-export async function getBackupAuditLog(limit = 100) {
-  const { db } = await getAdminDb();
-  const { desc } = await import("drizzle-orm");
-
-  return db
-    .select()
-    .from(schema.backupAudit)
-    .orderBy(desc(schema.backupAudit.createdAt))
-    .limit(limit)
-    .all();
 }
 
 /**
