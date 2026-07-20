@@ -1,0 +1,61 @@
+/**
+ * アプリ設定 (App Settings)
+ *
+ * 値の実体は Cloudflare KV に単一キー (SETTINGS_KEY) の JSON として保存し、
+ * 変更履歴は D1 の settings_audit テーブルに残します。
+ *
+ * KV は結果整合性 (最大 60 秒程度) のため、即時性が必須な設定は
+ * ここではなく別の仕組みで扱ってください。
+ */
+import { z } from "zod";
+
+/** KV 上の保存キー。設定はまとめて 1 キーに入れる（読み取り 1 回で済ませるため） */
+export const SETTINGS_KEY = "app:settings";
+
+export const appSettingsSchema = z.object({
+  /** 一覧APIのデフォルト取得件数 */
+  apiDefaultLimit: z.number().int().min(1).max(200).default(20),
+  /** 一覧APIの最大取得件数 */
+  apiMaxLimit: z.number().int().min(1).max(200).default(80),
+  /** 新規ユーザー登録を受け付けるか */
+  registrationEnabled: z.boolean().default(true),
+});
+
+export type AppSettings = z.infer<typeof appSettingsSchema>;
+
+/** スキーマ既定値のみで構成した設定 */
+export const DEFAULT_APP_SETTINGS: AppSettings = appSettingsSchema.parse({});
+
+/** 管理画面のフォーム生成に使うメタ情報 */
+export type AppSettingField = {
+  key: keyof AppSettings;
+  type: "number" | "boolean";
+  /** 管理画面に表示するラベル（i18n キー） */
+  labelKey: string;
+  helpKey: string;
+};
+
+export const APP_SETTING_FIELDS: AppSettingField[] = [
+  { key: "apiDefaultLimit", type: "number", labelKey: "apiDefaultLimit", helpKey: "apiDefaultLimitHelp" },
+  { key: "apiMaxLimit", type: "number", labelKey: "apiMaxLimit", helpKey: "apiMaxLimitHelp" },
+  { key: "registrationEnabled", type: "boolean", labelKey: "registrationEnabled", helpKey: "registrationEnabledHelp" },
+];
+
+/**
+ * 保存済みの値をスキーマに通して正規化する。
+ * 壊れた値・未知のキー・スキーマ追加分は既定値で埋めるため、
+ * KV の内容が古くても安全に読み出せます。
+ */
+export function normalizeAppSettings(raw: unknown): AppSettings {
+  const parsed = appSettingsSchema.safeParse(raw);
+  if (parsed.success) return parsed.data;
+
+  // 一部のフィールドだけ壊れている場合に備え、フィールド単位でフォールバックする
+  const source = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const merged: Record<string, unknown> = {};
+  for (const field of APP_SETTING_FIELDS) {
+    const single = appSettingsSchema.shape[field.key].safeParse(source[field.key]);
+    merged[field.key] = single.success ? single.data : DEFAULT_APP_SETTINGS[field.key];
+  }
+  return appSettingsSchema.parse(merged);
+}

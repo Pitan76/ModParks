@@ -743,3 +743,34 @@ export const notifications = sqliteTable("notifications", {
 }));
 
 export type Notification = typeof notifications.$inferSelect;
+
+// ─── Settings Audit ───────────────────────────────────────────────────────────
+
+/**
+ * アプリ設定 (KV) と Worker vars (GitHub PR) の変更履歴。
+ * 値の実体は KV / wrangler.toml 側にあり、このテーブルは「誰がいつ何を変えたか」だけを保持する。
+ */
+export const settingsAudit = sqliteTable("settings_audit", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  /** 変更対象の種別: app = KV のアプリ設定, vars = wrangler.toml の [vars] */
+  scope: text("scope", { enum: ["app", "vars"] }).notNull(),
+  /** 変更されたキー */
+  key: text("key").notNull(),
+  /** 変更前後の値（JSON 文字列化した表現） */
+  oldValue: text("old_value"),
+  newValue: text("new_value"),
+  /** vars の場合、作成した Pull Request の URL */
+  prUrl: text("pr_url"),
+  changedBy: text("changed_by")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  scopeIdx: index("settings_audit_scope_idx").on(table.scope, table.createdAt),
+}));
+
+export type SettingsAudit = typeof settingsAudit.$inferSelect;
