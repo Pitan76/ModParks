@@ -31,15 +31,20 @@ import AddIcon from "@mui/icons-material/Add";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DownloadIcon from "@mui/icons-material/Download";
 import RestoreIcon from "@mui/icons-material/SettingsBackupRestore";
+import MergeIcon from "@mui/icons-material/CallMerge";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Chip from "@mui/material/Chip";
 import {
   createBackup,
   deleteBackup,
   restoreBackup,
   restoreBackupFromJson,
   createPreRestoreSnapshot,
+  planMergeFromBackup,
+  applyMergeFromBackup,
   getBackups
 } from "@/lib/actions/adminBackup";
+import type { MergePlan } from "@/lib/backup/merge";
 
 interface Backup {
   key: string;
@@ -98,10 +103,27 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
   const [confirmPhrase, setConfirmPhrase] = useState("");
 
   const RESTORE_CONFIRM_PHRASE = "RESTORE";
+  const MERGE_CONFIRM_PHRASE = "MERGE";
+
+  // マージ用の状態。試算 (plan) を表示してから適用する 2 段構え。
+  const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+  const [mergeTarget, setMergeTarget] = useState<string | null>(null);
+  const [mergePlan, setMergePlan] = useState<MergePlan | null>(null);
+
+  const activePhrase = mergeDialogOpen ? MERGE_CONFIRM_PHRASE : RESTORE_CONFIRM_PHRASE;
+
   const canRestore =
     snapshotDownloaded &&
     totpToken.trim().length > 0 &&
     confirmPhrase.trim() === RESTORE_CONFIRM_PHRASE &&
+    !isPending;
+
+  // マージは試算が済んでいることも条件に加える
+  const canMerge =
+    mergePlan !== null &&
+    snapshotDownloaded &&
+    totpToken.trim().length > 0 &&
+    confirmPhrase.trim() === MERGE_CONFIRM_PHRASE &&
     !isPending;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -275,6 +297,43 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
     });
   };
 
+  // マージダイアログを開き、まず試算だけ実行する（DBは変更されない）
+  const openMergeDialog = (key: string) => {
+    resetSnapshotState();
+    setMergePlan(null);
+    setMergeTarget(key);
+    setMergeDialogOpen(true);
+
+    startTransition(async () => {
+      try {
+        setMergePlan(await planMergeFromBackup(key));
+      } catch (e: any) {
+        showSnackbar(e.message || "Error planning merge", "error");
+        setMergeDialogOpen(false);
+      }
+    });
+  };
+
+  const handleConfirmMerge = () => {
+    if (!mergeTarget) return;
+
+    startTransition(async () => {
+      try {
+        const res = await applyMergeFromBackup(mergeTarget, totpToken, snapshot?.key);
+        if (res.success) {
+          showSnackbar(tAdmin("backup.successMerge"), "success");
+          setMergeDialogOpen(false);
+          setMergeTarget(null);
+          setMergePlan(null);
+          resetSnapshotState();
+          router.refresh();
+        }
+      } catch (e: any) {
+        showSnackbar(restoreErrorMessage(e), "error");
+      }
+    });
+  };
+
   // 復元ダイアログ共通の「現在のデータを退避する」セクション。
   // ダウンロードを終えるまで復元ボタンは押せません。
   const preRestoreSection = (
@@ -302,7 +361,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
   const confirmSection = (
     <Stack spacing={2} sx={{ mt: 2 }}>
       <TextField
-        label={tAdmin("backup.confirmPhraseLabel", { phrase: RESTORE_CONFIRM_PHRASE })}
+        label={tAdmin("backup.confirmPhraseLabel", { phrase: activePhrase })}
         size="small"
         value={confirmPhrase}
         onChange={(e) => setConfirmPhrase(e.target.value)}
@@ -418,6 +477,15 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
                             <DownloadIcon />
                           </IconButton>
                         </Tooltip>
+                        <Tooltip title={tAdmin("backup.merge")}>
+                          <IconButton
+                            color="info"
+                            onClick={() => openMergeDialog(backup.key)}
+                            disabled={isPending}
+                          >
+                            <MergeIcon />
+                          </IconButton>
+                        </Tooltip>
                         <Tooltip title={tAdmin("backup.restore")}>
                           <IconButton
                             color="warning"
@@ -445,6 +513,91 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* マージ確認ダイアログ（試算結果を見せてから適用する） */}
+      <Dialog open={mergeDialogOpen} onClose={() => setMergeDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle color="info.main">{tAdmin("backup.merge")}</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            {tAdmin("backup.mergeDesc")}
+            <Box sx={{ mt: 1, fontWeight: "bold", fontFamily: "monospace", wordBreak: "break-all" }}>
+              {mergeTarget?.replace("backup/", "")}
+            </Box>
+          </DialogContentText>
+
+          {!mergePlan ? (
+            <Box sx={{ py: 3, textAlign: "center", color: "text.secondary" }}>
+              {tAdmin("backup.mergePlanning")}
+            </Box>
+          ) : (
+            <>
+              <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", mb: 2 }}>
+                <Chip color="success" label={tAdmin("backup.mergeInserts", { count: mergePlan.totals.inserts })} />
+                <Chip color="warning" label={tAdmin("backup.mergeUpdates", { count: mergePlan.totals.updates })} />
+                <Chip variant="outlined" label={tAdmin("backup.mergeSuppressed", { count: mergePlan.totals.suppressedByTombstone })} />
+                <Chip variant="outlined" color="info" label={tAdmin("backup.mergeNeedsReview", { count: mergePlan.totals.needsReview })} />
+              </Stack>
+
+              {mergePlan.totals.needsReview > 0 && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  {tAdmin("backup.mergeReviewNote")}
+                </Alert>
+              )}
+
+              {/* 差分のあるテーブルだけを一覧表示する */}
+              <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 320, overflowX: "auto" }}>
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>{tAdmin("backup.mergeTable")}</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>{tAdmin("backup.mergeStrategy")}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>{tAdmin("backup.mergeInsertsShort")}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>{tAdmin("backup.mergeUpdatesShort")}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>{tAdmin("backup.mergeSuppressedShort")}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>{tAdmin("backup.mergeNeedsReviewShort")}</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {mergePlan.summaries.filter(
+                      (s) => s.inserts + s.updates + s.suppressedByTombstone + s.needsReview > 0
+                    ).length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 3, color: "text.secondary" }}>
+                          {tAdmin("backup.mergeNoChanges")}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      mergePlan.summaries
+                        .filter((s) => s.inserts + s.updates + s.suppressedByTombstone + s.needsReview > 0)
+                        .map((s) => (
+                          <TableRow key={s.table} hover>
+                            <TableCell sx={{ fontFamily: "monospace" }}>{s.table}</TableCell>
+                            <TableCell sx={{ color: "text.secondary" }}>{s.strategy}</TableCell>
+                            <TableCell align="right">{s.inserts || "-"}</TableCell>
+                            <TableCell align="right">{s.updates || "-"}</TableCell>
+                            <TableCell align="right">{s.suppressedByTombstone || "-"}</TableCell>
+                            <TableCell align="right">{s.needsReview || "-"}</TableCell>
+                          </TableRow>
+                        ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {preRestoreSection}
+              {confirmSection}
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMergeDialogOpen(false)} color="inherit">
+            {tAdmin("cancel")}
+          </Button>
+          <Button onClick={handleConfirmMerge} color="info" variant="contained" disabled={!canMerge}>
+            {tAdmin("backup.mergeApply")}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* 削除確認ダイアログ */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
