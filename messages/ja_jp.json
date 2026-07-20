@@ -592,6 +592,8 @@
       "autoBackupEnabledHelp": "毎日 03:00 UTC に自動でバックアップを作成します。バックアップには認証情報が平文で含まれるため、内容の暗号化を導入するまではオフのままにしてください",
       "autoBackupKeepCount": "自動バックアップの保持世代数",
       "autoBackupKeepCountHelp": "この件数を超えた古いバックアップから順に削除されます（手動作成分も対象）",
+      "driveBackupEnabled": "Google Drive にも退避する",
+      "driveBackupEnabledHelp": "Cloudflare の障害やアカウント停止に備え、バックアップを Google Drive にも保存します。サービスアカウントのシークレット (GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_PRIVATE_KEY / GOOGLE_DRIVE_FOLDER_ID) の登録が必要です。保存先は共有ドライブのフォルダを指定してください",
       "workerVars": "Worker 環境変数",
       "workerVarsDesc": "GitHub 上の wrangler.toml を書き換える Pull Request を作成します。実際の反映は PR のマージとデプロイ後です。",
       "varProtected": "この変数は管理画面から変更できません",

@@ -606,6 +606,8 @@
       "autoBackupEnabledHelp": "Creates a backup daily at 03:00 UTC. Backups contain credentials in plaintext, so leave this off until backup encryption is in place",
       "autoBackupKeepCount": "Automatic backup retention",
       "autoBackupKeepCountHelp": "Backups beyond this count are deleted oldest-first (manually created ones included)",
+      "driveBackupEnabled": "Also copy to Google Drive",
+      "driveBackupEnabledHelp": "Keeps a copy of each backup in Google Drive so it survives a Cloudflare outage or account suspension. Requires the service account secrets (GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_PRIVATE_KEY / GOOGLE_DRIVE_FOLDER_ID). Use a folder on a Shared Drive as the destination",
       "workerVars": "Worker Variables",
       "workerVarsDesc": "Opens a pull request that edits wrangler.toml on GitHub. Changes take effect once the PR is merged and deployed.",
       "varProtected": "This variable cannot be edited from the admin UI",
