@@ -26,6 +26,37 @@ export async function getAdminDb() {
 }
 
 /**
+ * 管理者権限に加えて TOTP による再認証を要求するヘルパー。
+ * シークレットの操作など、影響が大きく取り消しの効かない操作で使用します。
+ *
+ * 2要素認証が未設定の管理者は実行できません（設定を促す）。
+ */
+export async function getReauthenticatedAdminDb(totpToken: string) {
+  const { db, session, userId } = await getAdminDb();
+  const { users } = await import("@/db/schema");
+  const { eq } = await import("drizzle-orm");
+
+  const user = await db
+    .select({ twoFactorEnabled: users.twoFactorEnabled, twoFactorSecret: users.twoFactorSecret })
+    .from(users)
+    .where(eq(users.id, userId))
+    .get();
+
+  if (!user?.twoFactorEnabled || !user.twoFactorSecret) {
+    throw new Error("TWO_FACTOR_REQUIRED");
+  }
+  if (!totpToken) throw new Error("INVALID_CODE");
+
+  const { TOTP } = await import("otpauth");
+  const totp = new TOTP({ secret: user.twoFactorSecret });
+  if (totp.validate({ token: totpToken, window: 1 }) === null) {
+    throw new Error("INVALID_CODE");
+  }
+
+  return { db, session, userId };
+}
+
+/**
  * プロジェクトの編集権限（オーナー、メンバー、管理者）を確認するヘルパー。
  * 権限がない場合は "Forbidden" エラーをスローします。
  */

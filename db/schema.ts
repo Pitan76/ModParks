@@ -754,11 +754,17 @@ export const settingsAudit = sqliteTable("settings_audit", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  /** 変更対象の種別: app = KV のアプリ設定, vars = wrangler.toml の [vars] */
-  scope: text("scope", { enum: ["app", "vars"] }).notNull(),
+  /**
+   * 変更対象の種別:
+   * app = KV のアプリ設定 / vars = wrangler.toml の [vars] / secret = Worker のシークレット
+   */
+  scope: text("scope", { enum: ["app", "vars", "secret"] }).notNull(),
   /** 変更されたキー */
   key: text("key").notNull(),
-  /** 変更前後の値（JSON 文字列化した表現） */
+  /**
+   * 変更前後の値（JSON 文字列化した表現）。
+   * scope = "secret" の場合は値そのものを記録せず、常に null にする。
+   */
   oldValue: text("old_value"),
   newValue: text("new_value"),
   /** vars の場合、作成した Pull Request の URL */
