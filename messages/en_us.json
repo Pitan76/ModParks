@@ -547,7 +547,8 @@
       "ideas": "Ideas",
       "reports": "Reports",
       "config": "Config",
-      "backup": "Backup"
+      "backup": "Backup",
+      "audit": "Audit Logs"
     },
     "users": {
       "title": "User Management",
@@ -683,6 +684,21 @@
       "totpLabel": "6-digit code from your authenticator app",
       "twoFactorRequired": "Two-factor authentication must be enabled to restore. Enable it from your settings.",
       "invalidCode": "The authentication code is incorrect."
+    },
+    "audit": {
+      "title": "Audit Logs",
+      "settingsTab": "Settings Changes",
+      "backupTab": "Backup Actions",
+      "scope": "Scope",
+      "key": "Key",
+      "oldValue": "Old Value",
+      "newValue": "New Value",
+      "operator": "Operator",
+      "date": "Date / Time",
+      "action": "Action",
+      "status": "Status",
+      "detail": "Detail",
+      "noLogs": "No audit logs found."
     }
   },
   "Search": {

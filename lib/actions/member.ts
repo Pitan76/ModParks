@@ -108,6 +108,7 @@ export async function removeProjectMember(projectId: string, userId: string) {
   }
 
   await db.delete(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, userId)));
+  await recordDeletion(db, "project_members", buildRecordKey(projectId, userId));
 
   revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
   return { success: true };

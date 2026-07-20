@@ -145,6 +145,7 @@ export async function removeProjectDependency(dependencyId: string) {
   }
 
   await db.delete(projectDependencies).where(eq(projectDependencies.id, dependencyId)).run();
+  await recordDeletion(db, "project_dependencies", dependencyId);
 
   revalidatePath(`/projects/${project.slug}/dependencies`);
   revalidatePath(`/projects/${project.slug}/edit/dependencies`);

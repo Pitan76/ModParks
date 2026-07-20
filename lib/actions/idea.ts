@@ -146,6 +146,7 @@ export async function deleteIdea(ideaId: string) {
   }
 
   await db.delete(ideas).where(eq(ideas.id, ideaId)).run();
+  await recordDeletion(db, "ideas", ideaId);
 
   revalidatePath("/ideas");
   return { success: true };
@@ -173,6 +174,7 @@ export async function toggleIdeaLike(ideaId: string) {
 
     if (existing) {
       await db.delete(ideaLikes).where(and(eq(ideaLikes.ideaId, ideaId), eq(ideaLikes.userId, userId)));
+      await recordDeletion(db, "idea_likes", buildRecordKey(ideaId, userId));
     } else {
       await db.insert(ideaLikes).values({ ideaId, userId });
       const idea = await getIdeaTarget(db, ideaId);
@@ -283,6 +285,7 @@ export async function deleteIdeaComment(commentId: string) {
   if (!allowed) return { error: "削除する権限がありません" };
 
   await db.delete(ideaComments).where(eq(ideaComments.id, commentId)).run();
+  await recordDeletion(db, "idea_comments", commentId);
 
   revalidatePath(`/ideas/${comment.ideaId}`);
   return { success: true };

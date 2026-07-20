@@ -555,7 +555,8 @@
       "ideas": "アイデア管理",
       "reports": "通報管理",
       "config": "システム設定",
-      "backup": "バックアップ"
+      "backup": "バックアップ",
+      "audit": "監査ログ"
     },
     "users": {
       "title": "ユーザー管理",
@@ -691,6 +692,21 @@
       "totpLabel": "認証アプリの6桁コード",
       "twoFactorRequired": "復元には2要素認証の設定が必要です。設定画面から有効化してください。",
       "invalidCode": "認証コードが正しくありません。"
+    },
+    "audit": {
+      "title": "監査ログ",
+      "settingsTab": "設定変更履歴",
+      "backupTab": "バックアップ履歴",
+      "scope": "スコープ",
+      "key": "キー",
+      "oldValue": "変更前",
+      "newValue": "変更後",
+      "operator": "操作者",
+      "date": "日時",
+      "action": "操作",
+      "status": "ステータス",
+      "detail": "詳細",
+      "noLogs": "ログ履歴はありません。"
     }
   },
   "Search": {

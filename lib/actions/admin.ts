@@ -1,8 +1,8 @@
 "use server";
 
 import { getAdminDb } from "@/lib/auth-helpers";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { users, settingsAudit, backupAudit } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
 
@@ -149,4 +149,42 @@ export async function adminDeleteIdea(ideaId: string) {
   revalidatePath("/admin/ideas");
   revalidatePath("/ideas");
   return { success: true };
+}
+
+export async function getSettingsAudits(limit = 50, offset = 0) {
+  const { db } = await getAdminDb();
+  
+  const logs = await db
+    .select()
+    .from(settingsAudit)
+    .orderBy(desc(settingsAudit.createdAt))
+    .limit(limit)
+    .offset(offset)
+    .all();
+
+  const countRes = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(settingsAudit)
+    .get();
+
+  return { logs, total: countRes?.count ?? 0 };
+}
+
+export async function getBackupAudits(limit = 50, offset = 0) {
+  const { db } = await getAdminDb();
+
+  const logs = await db
+    .select()
+    .from(backupAudit)
+    .orderBy(desc(backupAudit.createdAt))
+    .limit(limit)
+    .offset(offset)
+    .all();
+
+  const countRes = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(backupAudit)
+    .get();
+
+  return { logs, total: countRes?.count ?? 0 };
 }
