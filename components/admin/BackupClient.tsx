@@ -32,6 +32,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DownloadIcon from "@mui/icons-material/Download";
 import RestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import MergeIcon from "@mui/icons-material/CallMerge";
+import AddToDriveIcon from "@mui/icons-material/AddToDrive";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Chip from "@mui/material/Chip";
 import {
@@ -41,6 +42,7 @@ import {
   restoreBackupFromJson,
   createPreRestoreSnapshot,
   getEncryptionStatus,
+  sendBackupToDrive,
   planMergeFromBackup,
   applyMergeFromBackup,
   getBackups
@@ -131,9 +133,10 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
 
   // 暗号鍵が未設定だとバックアップ作成が失敗するため、開いた時点で確認して警告する
   const [encryptionConfigured, setEncryptionConfigured] = useState<boolean | null>(null);
+  const [driveConfigured, setDriveConfigured] = useState(false);
   useEffect(() => {
     getEncryptionStatus()
-      .then((res) => setEncryptionConfigured(res.configured))
+      .then((res) => { setEncryptionConfigured(res.configured); setDriveConfigured(res.driveConfigured); })
       .catch(() => setEncryptionConfigured(null));
   }, []);
 
@@ -172,6 +175,18 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         }
       } catch (e: any) {
         showSnackbar(e.message || "Error creating backup", "error");
+      }
+    });
+  };
+
+  // 既存のバックアップを手動で Google Drive に送る
+  const handleSendToDrive = (key: string) => {
+    startTransition(async () => {
+      try {
+        await sendBackupToDrive(key);
+        showSnackbar(tAdmin("backup.driveUploadSuccess"), "success");
+      } catch (e: any) {
+        showSnackbar(tAdmin("backup.driveUploadFailed", { error: e.message || "unknown" }), "error");
       }
     });
   };
@@ -499,6 +514,24 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
                           >
                             <DownloadIcon />
                           </IconButton>
+                        </Tooltip>
+                        {/* 未設定でもボタンは残し、理由をツールチップで伝える */}
+                        <Tooltip
+                          title={
+                            driveConfigured
+                              ? tAdmin("backup.sendToDrive")
+                              : tAdmin("backup.driveNotConfigured")
+                          }
+                        >
+                          <span>
+                            <IconButton
+                              color="success"
+                              onClick={() => handleSendToDrive(backup.key)}
+                              disabled={isPending || !driveConfigured}
+                            >
+                              <AddToDriveIcon />
+                            </IconButton>
+                          </span>
                         </Tooltip>
                         <Tooltip title={tAdmin("backup.merge")}>
                           <IconButton

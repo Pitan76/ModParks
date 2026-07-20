@@ -805,7 +805,7 @@ export const backupAudit = sqliteTable("backup_audit", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   action: text("action", {
-    enum: ["create", "auto_create", "restore", "merge", "delete", "snapshot"],
+    enum: ["create", "auto_create", "restore", "merge", "delete", "snapshot", "drive_upload"],
   }).notNull(),
   /** 操作対象のバックアップの R2 キー（削除・復元の対象） */
   backupKey: text("backup_key"),

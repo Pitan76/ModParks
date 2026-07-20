@@ -43,14 +43,60 @@ export async function createBackup() {
 }
 
 /**
- * バックアップの暗号化が使える状態かを返します。
- * 未設定だとバックアップ作成そのものが失敗するため、UI で事前に警告するために使います。
+ * バックアップ関連の外部設定が揃っているかを返します。
+ * 暗号鍵が無いとバックアップ作成自体が失敗するため、UI で事前に警告するのに使います。
  */
 export async function getEncryptionStatus() {
   await getAdminDb();
   const { isEncryptionConfigured } = await import("@/lib/backup/crypto");
+  const { getDriveConfig } = await import("@/lib/backup/googleDrive");
 
-  return { configured: isEncryptionConfigured() };
+  return {
+    configured: isEncryptionConfigured(),
+    driveConfigured: getDriveConfig() !== null,
+  };
+}
+
+/**
+ * 既存のバックアップを手動で Google Drive に送ります。
+ *
+ * 自動退避 (driveBackupEnabled) とは独立した操作です。
+ * 管理者が明示的に実行するものなので設定のオン/オフは条件にせず、
+ * シークレットが揃っていることだけを必要とします。
+ *
+ * 世代整理は行いません。手動送信で他の世代が消えるのは想定外の挙動になるためです。
+ */
+export async function sendBackupToDrive(key: string) {
+  const { db, userId } = await getAdminDb();
+  const actor = await getActor(db, userId);
+
+  const payload = await loadBackupFromR2(key);
+  const fileName = key.split("/").pop() ?? key;
+
+  try {
+    const { uploadBackupToDrive } = await import("@/lib/backup/googleDrive");
+    // R2 に入っている内容をそのまま送る（暗号化済みの形を保つ）
+    const fileId = await uploadBackupToDrive(fileName, JSON.stringify(payload));
+
+    await writeAuditLog(db, {
+      action: "drive_upload",
+      status: "success",
+      backupKey: key,
+      detail: { fileId, fileName },
+      ...actor,
+    });
+
+    return { success: true, fileId };
+  } catch (e: any) {
+    await writeAuditLog(db, {
+      action: "drive_upload",
+      status: "failure",
+      backupKey: key,
+      detail: { error: e?.message ?? String(e) },
+      ...actor,
+    });
+    throw e;
+  }
 }
 
 /**

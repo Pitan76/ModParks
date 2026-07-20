@@ -137,7 +137,18 @@ export const TABLE_PRIMARY_KEYS: Record<string, string[]> = {
   notifications: ["id"],
 };
 
-export type AuditAction = "create" | "auto_create" | "restore" | "merge" | "delete" | "snapshot";
+/**
+ * 監査ログに記録する操作種別。
+ * backup_audit.action は CHECK 制約のない text 列なので、値の追加に migration は不要です。
+ */
+export type AuditAction =
+  | "create"
+  | "auto_create"
+  | "restore"
+  | "merge"
+  | "delete"
+  | "snapshot"
+  | "drive_upload";
 
 export interface AuditEntry {
   action: AuditAction;
