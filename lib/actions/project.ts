@@ -191,7 +191,23 @@ export async function updateProject(projectId: string, formData: FormData) {
     .run();
 
   if (tags !== undefined) {
+    // 入れ替え方式のため、消える分を控えてから削除する。
+    // 直後に再挿入されるタグの墓標も残るが、現行DBに行が存在する限り
+    // マージ側は既存行を優先するので実害はない。
+    const previousTags = await db
+      .select({ tag: projectTags.tag })
+      .from(projectTags)
+      .where(eq(projectTags.projectId, project.id))
+      .all();
+
     await db.delete(projectTags).where(eq(projectTags.projectId, project.id)).run();
+
+    await recordDeletion(
+      db,
+      "project_tags",
+      previousTags.map((t: { tag: string }) => buildRecordKey(project.id, t.tag))
+    );
+
     if (tags.length > 0) {
       await db.insert(projectTags).values(
         tags.map((tag) => ({ projectId: project.id, tag }))
