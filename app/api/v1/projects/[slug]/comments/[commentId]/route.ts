@@ -66,6 +66,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     }
 
     await db.delete(projectComments).where(eq(projectComments.id, commentId)).run();
+    await recordDeletion(db, "project_comments", commentId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

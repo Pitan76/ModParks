@@ -84,6 +84,7 @@ export async function DELETE(
     }
 
     await db.delete(collections).where(eq(collections.id, id));
+    await recordDeletion(db, "collections", id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

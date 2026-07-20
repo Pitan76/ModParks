@@ -57,6 +57,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     if (!targetProfile) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     await db.delete(userFollows).where(and(eq(userFollows.followerId, session.user.id), eq(userFollows.followingId, targetProfile.userId))).run();
+    await recordDeletion(db, "user_follows", buildRecordKey(session.user.id, targetProfile.userId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

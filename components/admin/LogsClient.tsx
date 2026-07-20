@@ -247,7 +247,7 @@ export default function LogsClient({ initialSettings, initialBackups }: LogsClie
                   <TableCell>{t("scope")}</TableCell>
                   <TableCell>{t("key")}</TableCell>
                 </TableRow>
-              </Head>
+              </TableHead>
               <TableBody>
                 {settingsLogs.length === 0 ? (
                   <TableRow>
@@ -296,7 +296,7 @@ export default function LogsClient({ initialSettings, initialBackups }: LogsClie
                   <TableCell>{t("action")}</TableCell>
                   <TableCell>{t("status")}</TableCell>
                 </TableRow>
-              </Head>
+              </TableHead>
               <TableBody>
                 {backupsLogs.length === 0 ? (
                   <TableRow>

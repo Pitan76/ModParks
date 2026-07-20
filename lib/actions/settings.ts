@@ -50,6 +50,7 @@ export async function deleteApiKey(id: string) {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.delete(apiKeys).where(and(eq(apiKeys.id, id), eq(apiKeys.userId, userId)));
+  await recordDeletion(db, "api_keys", id);
 
   revalidatePath("/settings");
   return { success: true };

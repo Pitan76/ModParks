@@ -43,6 +43,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const db = await getDatabase();
 
     await db.delete(collectionFollows).where(and(eq(collectionFollows.userId, session.user.id), eq(collectionFollows.collectionId, id))).run();
+    await recordDeletion(db, "collection_follows", buildRecordKey(session.user.id, id));
 
     return NextResponse.json({ success: true });
   } catch (error) {
