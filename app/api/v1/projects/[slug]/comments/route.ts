@@ -5,7 +5,7 @@ import { projectComments, projects, users, userProfiles } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 
-export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await params;
     const db = await getDatabase();

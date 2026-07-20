@@ -220,7 +220,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
             <Autocomplete
               options={openIdeas}
               getOptionLabel={(option) => option.title}
-              onChange={(_, newValue) => {
+              onChange={(_, _newValue) => {
                 // To keep compatibility with form submission, we can use a hidden input or name property.
               }}
               renderInput={(params) => (

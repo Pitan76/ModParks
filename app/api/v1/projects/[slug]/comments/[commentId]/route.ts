@@ -41,7 +41,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ sl
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ slug: string, commentId: string }> }) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ slug: string, commentId: string }> }) {
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
