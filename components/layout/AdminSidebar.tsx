@@ -6,6 +6,7 @@ import ReportIcon from "@mui/icons-material/Report";
 import SettingsIcon from "@mui/icons-material/Settings";
 import FolderIcon from "@mui/icons-material/Folder";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import BackupIcon from "@mui/icons-material/Backup";
 import { useTranslations } from "next-intl";
 import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
@@ -31,6 +32,7 @@ export default function AdminSidebar({ mobileOpen, onMobileClose, session }: Adm
       { id: "admin-ideas", label: tAdmin("sidebar.ideas"), path: "/admin/ideas", icon: <LightbulbIcon /> },
       { id: "admin-reports", label: tAdmin("sidebar.reports"), path: "/admin/reports", icon: <ReportIcon /> },
       { id: "admin-config", label: tAdmin("sidebar.config"), path: "/admin/config", icon: <SettingsIcon /> },
+      { id: "admin-backup", label: tAdmin("sidebar.backup"), path: "/admin/backup", icon: <BackupIcon /> },
     ];
   }
 

@@ -536,7 +536,8 @@
       "projects": "プロジェクト管理",
       "ideas": "アイデア管理",
       "reports": "通報管理",
-      "config": "システム設定"
+      "config": "システム設定",
+      "backup": "バックアップ"
     },
     "users": {
       "title": "ユーザー管理",
@@ -606,6 +607,27 @@
         "unpublish": "非公開にする",
         "dismiss": "却下"
       }
+    },
+    "backup": {
+      "title": "データベースバックアップ",
+      "createBtn": "新しいバックアップを作成",
+      "restoreLocalBtn": "ローカルから復元",
+      "tableName": "ファイル名",
+      "created": "作成日時",
+      "size": "サイズ",
+      "actions": "操作",
+      "download": "ダウンロード",
+      "restore": "復元",
+      "delete": "削除",
+      "noBackups": "バックアップファイルはありません。",
+      "successCreate": "バックアップを作成しました。",
+      "successDelete": "バックアップを削除しました。",
+      "successRestore": "データベースを復元しました。",
+      "confirmDelete": "本当にこのバックアップファイルを削除しますか？",
+      "confirmRestore": "本当にこのバックアップから復元しますか？現在のすべてのデータは削除され、バックアップ時点の状態に上書きされます。復元完了後、必要に応じて再ログインを行ってください。",
+      "restoreWarning": "警告: データベースの復元を実行すると、現在の全データが上書きされます。また、復元されたデータに含まれる管理者アカウントで再度ログインし直す必要があります。",
+      "uploadJsonFile": "JSONファイルを選択してください",
+      "invalidFile": "無効なバックアップファイルです。"
     }
   },
   "Search": {

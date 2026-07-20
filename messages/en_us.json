@@ -528,7 +528,8 @@
       "projects": "Projects",
       "ideas": "Ideas",
       "reports": "Reports",
-      "config": "Config"
+      "config": "Config",
+      "backup": "Backup"
     },
     "users": {
       "title": "User Management",
@@ -598,6 +599,27 @@
         "unpublish": "Unpublish",
         "dismiss": "Dismiss"
       }
+    },
+    "backup": {
+      "title": "Database Backup",
+      "createBtn": "Create New Backup",
+      "restoreLocalBtn": "Restore from Local",
+      "tableName": "File Name",
+      "created": "Created At",
+      "size": "Size",
+      "actions": "Actions",
+      "download": "Download",
+      "restore": "Restore",
+      "delete": "Delete",
+      "noBackups": "No backup files found.",
+      "successCreate": "Backup created successfully.",
+      "successDelete": "Backup deleted successfully.",
+      "successRestore": "Database restored successfully.",
+      "confirmDelete": "Are you sure you want to delete this backup file?",
+      "confirmRestore": "Are you sure you want to restore from this backup? All current data will be deleted and overwritten with the backup state. You may need to log in again after restoration.",
+      "restoreWarning": "WARNING: Restoring the database will overwrite all current data. You will also need to log in again with an admin account contained in the restored database.",
+      "uploadJsonFile": "Select a JSON file",
+      "invalidFile": "Invalid backup file."
     }
   },
   "Search": {
