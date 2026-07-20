@@ -18,20 +18,40 @@ const UPLOAD_ENDPOINT = "https://www.googleapis.com/upload/drive/v3/files";
 const FILES_ENDPOINT = "https://www.googleapis.com/drive/v3/files";
 const SCOPE = "https://www.googleapis.com/auth/drive.file";
 
-interface DriveConfig {
-  clientEmail: string;
-  privateKey: string;
-  folderId: string;
-}
+/**
+ * 認証方式は 2 通りあります。
+ *
+ * oauth   … ユーザー本人の Drive に保存する方式。個人の Google アカウント向け。
+ *            ファイルは本人の所有になるので、通常の保存容量が使えます。
+ * service … サービスアカウントで保存する方式。共有ドライブが必要なため
+ *            Google Workspace 前提です。個人アカウントでは
+ *            "Service Accounts do not have storage quota" で失敗します。
+ *
+ * 両方の設定がある場合は oauth を優先します。
+ */
+type DriveConfig =
+  | { mode: "oauth"; clientId: string; clientSecret: string; refreshToken: string; folderId: string }
+  | { mode: "service"; clientEmail: string; privateKey: string; folderId: string };
 
 /** 必要なシークレットが揃っているかを確認し、設定を返します。 */
 export function getDriveConfig(): DriveConfig | null {
+  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+  if (!folderId) return null;
+
+  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
+  if (clientId && clientSecret && refreshToken) {
+    return { mode: "oauth", clientId, clientSecret, refreshToken, folderId };
+  }
+
   const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
   const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+  if (clientEmail && privateKey) {
+    return { mode: "service", clientEmail, privateKey, folderId };
+  }
 
-  if (!clientEmail || !privateKey || !folderId) return null;
-  return { clientEmail, privateKey, folderId };
+  return null;
 }
 
 function base64UrlEncode(bytes: Uint8Array): string {
@@ -70,10 +90,47 @@ async function importPrivateKey(pem: string): Promise<CryptoKey> {
   );
 }
 
+/** トークンエンドポイントに問い合わせ、アクセストークンを取り出します。 */
+async function requestAccessToken(body: URLSearchParams): Promise<string> {
+  const res = await fetch(TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
+  if (!res.ok) {
+    throw new Error(`Google token request failed (${res.status}): ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { access_token?: string };
+  if (!data.access_token) throw new Error("Google token response did not contain an access token");
+
+  return data.access_token;
+}
+
+/** 設定された方式でアクセストークンを取得します。 */
+async function getAccessToken(config: DriveConfig): Promise<string> {
+  if (config.mode === "oauth") {
+    // リフレッシュトークンは期限が無いので、毎回これで短命のアクセストークンを得る
+    return requestAccessToken(
+      new URLSearchParams({
+        grant_type: "refresh_token",
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+        refresh_token: config.refreshToken,
+      })
+    );
+  }
+
+  return getServiceAccountToken(config);
+}
+
 /**
  * サービスアカウントの JWT を自己署名し、アクセストークンと交換します。
  */
-async function getAccessToken(config: DriveConfig): Promise<string> {
+async function getServiceAccountToken(
+  config: Extract<DriveConfig, { mode: "service" }>
+): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const header = base64UrlEncodeString(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claims = base64UrlEncodeString(
@@ -97,23 +154,12 @@ async function getAccessToken(config: DriveConfig): Promise<string> {
 
   const jwt = `${signingInput}.${base64UrlEncode(new Uint8Array(signature))}`;
 
-  const res = await fetch(TOKEN_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
+  return requestAccessToken(
+    new URLSearchParams({
       grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
       assertion: jwt,
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Google token request failed (${res.status}): ${await res.text()}`);
-  }
-
-  const data = (await res.json()) as { access_token?: string };
-  if (!data.access_token) throw new Error("Google token response did not contain an access token");
-
-  return data.access_token;
+    })
+  );
 }
 
 /**
