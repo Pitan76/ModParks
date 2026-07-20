@@ -28,6 +28,12 @@ export const appSettingsSchema = z.object({
   /** 自動バックアップで残す世代数。これを超えた古いものから削除します */
   autoBackupKeepCount: z.number().int().min(1).max(90).default(14),
   /**
+   * バックアップを Google Drive にも退避するか。
+   * Cloudflare 側の障害やアカウント停止に備えた、事業者をまたぐ控えです。
+   * サービスアカウントのシークレットが未設定の場合は有効にしても動作しません。
+   */
+  driveBackupEnabled: z.boolean().default(false),
+  /**
    * 送信元メールアドレス。
    * Resend 側で検証済みのドメインでないと送信に失敗するため、変更時は注意すること。
    */
@@ -62,6 +68,7 @@ export const APP_SETTING_FIELDS: AppSettingField[] = [
   { key: "registrationEnabled", type: "boolean", labelKey: "registrationEnabled", helpKey: "registrationEnabledHelp" },
   { key: "autoBackupEnabled", type: "boolean", labelKey: "autoBackupEnabled", helpKey: "autoBackupEnabledHelp" },
   { key: "autoBackupKeepCount", type: "number", labelKey: "autoBackupKeepCount", helpKey: "autoBackupKeepCountHelp" },
+  { key: "driveBackupEnabled", type: "boolean", labelKey: "driveBackupEnabled", helpKey: "driveBackupEnabledHelp" },
   { key: "mailFromAddress", type: "string", labelKey: "mailFromAddress", helpKey: "mailFromAddressHelp" },
   { key: "mailFromName", type: "string", labelKey: "mailFromName", helpKey: "mailFromNameHelp" },
 ];

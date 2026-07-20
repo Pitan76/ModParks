@@ -18,12 +18,19 @@ export async function createBackup() {
   const actor = await getActor(db, userId);
 
   try {
-    const key = await dumpToR2(db, "backup");
+    const { key, drive } = await dumpToR2(db, "backup");
 
-    await writeAuditLog(db, { action: "create", status: "success", backupKey: key, ...actor });
+    await writeAuditLog(db, {
+      action: "create",
+      status: "success",
+      backupKey: key,
+      detail: { drive },
+      ...actor,
+    });
 
     revalidatePath("/admin/backup");
-    return { success: true, key };
+    // Drive への退避が失敗していても R2 側は成功しているので、その旨を呼び出し側に返す
+    return { success: true, key, driveError: drive?.error };
   } catch (e: any) {
     await writeAuditLog(db, {
       action: "create",
@@ -106,7 +113,7 @@ export async function deleteBackup(key: string) {
 export async function createPreRestoreSnapshot() {
   const { db, userId } = await getAdminDb();
 
-  const key = await dumpToR2(db, "snapshot");
+  const { key } = await dumpToR2(db, "snapshot");
 
   await writeAuditLog(db, {
     action: "snapshot",
@@ -140,7 +147,7 @@ async function performRestore(
 
   // 復元は既存データを全削除します。取り返しがつかないため、
   // 実行直前の状態を必ず snapshot/ に退避してから進めます。
-  const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot"));
+  const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot")).key;
 
   const rowCounts = Object.fromEntries(
     Object.entries(tables).map(([name, rows]) => [name, rows.length])
@@ -236,7 +243,7 @@ export async function applyMergeFromBackup(key: string, totpToken: string, snaps
   const { applyMerge } = await import("@/lib/backup/merge");
 
   const payload = await loadBackupFromR2(key);
-  const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot"));
+  const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot")).key;
 
   try {
     const plan = await applyMerge(db, payload);

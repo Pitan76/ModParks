@@ -223,7 +223,55 @@ export async function dumpToR2(db: any, prefix: "backup" | "snapshot") {
   const bucket = await getR2Bucket();
   await uploadToR2(bucket, key, jsonStr, "application/json");
 
-  return key;
+  // 復元前スナップショットは一時的な切り戻し用なので Drive には送りません
+  const drive = prefix === "backup" ? await mirrorToDrive(key, jsonStr) : undefined;
+
+  return { key, drive };
+}
+
+/** Drive 退避の結果。失敗しても R2 のバックアップ自体は成功扱いにします。 */
+export interface DriveMirrorResult {
+  attempted: boolean;
+  fileId?: string;
+  error?: string;
+}
+
+/**
+ * バックアップを Google Drive にも退避します。
+ *
+ * Google 側の障害で Cloudflare 側のバックアップまで失敗しては本末転倒なので、
+ * ここでの失敗は例外にせず結果として返し、監査ログに残せるようにします。
+ */
+async function mirrorToDrive(key: string, jsonStr: string): Promise<DriveMirrorResult> {
+  const { getAppSettings } = await import("@/lib/config/readSettings");
+  const settings = await getAppSettings();
+
+  if (!settings.driveBackupEnabled) return { attempted: false };
+
+  try {
+    const { uploadBackupToDrive, pruneDriveBackups, getDriveConfig } = await import(
+      "@/lib/backup/googleDrive"
+    );
+
+    if (!getDriveConfig()) {
+      return {
+        attempted: true,
+        error:
+          "Google Drive backup is enabled but GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_PRIVATE_KEY / GOOGLE_DRIVE_FOLDER_ID are not all set",
+      };
+    }
+
+    const fileName = key.split("/").pop() ?? key;
+    const fileId = await uploadBackupToDrive(fileName, jsonStr);
+
+    // R2 と同じ世代数で Drive 側も整理する
+    await pruneDriveBackups(settings.autoBackupKeepCount);
+
+    return { attempted: true, fileId };
+  } catch (e: any) {
+    console.error("[backup] Google Drive mirror failed:", e);
+    return { attempted: true, error: e?.message ?? String(e) };
+  }
 }
 
 /**
@@ -400,17 +448,17 @@ export async function runAutoBackup(db: any) {
   }
 
   try {
-    const key = await dumpToR2(db, "backup");
+    const { key, drive } = await dumpToR2(db, "backup");
     const pruned = await pruneOldBackups(settings.autoBackupKeepCount);
 
     await writeAuditLog(db, {
       action: "auto_create",
       status: "success",
       backupKey: key,
-      detail: { prunedKeys: pruned },
+      detail: { prunedKeys: pruned, drive },
     });
 
-    return { success: true, skipped: false, key, pruned };
+    return { success: true, skipped: false, key, pruned, drive };
   } catch (e: any) {
     await writeAuditLog(db, {
       action: "auto_create",

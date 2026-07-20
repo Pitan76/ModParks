@@ -1,0 +1,221 @@
+/**
+ * Google Drive へのバックアップ退避。
+ *
+ * Cloudflare 側の障害・アカウント停止でも失われない場所に控えを置くのが目的です。
+ * R2 だけだと事業者単位のリスク（アカウント停止・請求トラブル・全体障害）に対応できません。
+ *
+ * cron から呼ぶため、ユーザー同意を伴う OAuth フローは使えません。
+ * 代わりにサービスアカウントの秘密鍵で JWT を自己署名してアクセストークンを得ます。
+ *
+ * ⚠ 保存先には「共有ドライブ (Shared Drive)」のフォルダを使ってください。
+ *   通常のマイドライブに置くとファイルの所有者がサービスアカウントになりますが、
+ *   サービスアカウントはマイドライブの保存容量を持たないためアップロードに失敗します。
+ *   共有ドライブならファイルはドライブ側の所有になり、この制限を受けません。
+ */
+
+const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const UPLOAD_ENDPOINT = "https://www.googleapis.com/upload/drive/v3/files";
+const FILES_ENDPOINT = "https://www.googleapis.com/drive/v3/files";
+const SCOPE = "https://www.googleapis.com/auth/drive.file";
+
+interface DriveConfig {
+  clientEmail: string;
+  privateKey: string;
+  folderId: string;
+}
+
+/** 必要なシークレットが揃っているかを確認し、設定を返します。 */
+export function getDriveConfig(): DriveConfig | null {
+  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+
+  if (!clientEmail || !privateKey || !folderId) return null;
+  return { clientEmail, privateKey, folderId };
+}
+
+function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64UrlEncodeString(value: string): string {
+  return base64UrlEncode(new TextEncoder().encode(value));
+}
+
+/**
+ * サービスアカウントの PEM 秘密鍵を Web Crypto の鍵に変換します。
+ * 環境変数に入れる都合で改行が "\n" のままになっている場合も受け付けます。
+ */
+async function importPrivateKey(pem: string): Promise<CryptoKey> {
+  const normalized = pem.replace(/\\n/g, "\n");
+  const body = normalized
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
+    .replace(/\s+/g, "");
+
+  if (!body) throw new Error("GOOGLE_PRIVATE_KEY is empty or malformed");
+
+  const binary = atob(body);
+  const der = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) der[i] = binary.charCodeAt(i);
+
+  return crypto.subtle.importKey(
+    "pkcs8",
+    der as BufferSource,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+}
+
+/**
+ * サービスアカウントの JWT を自己署名し、アクセストークンと交換します。
+ */
+async function getAccessToken(config: DriveConfig): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const header = base64UrlEncodeString(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claims = base64UrlEncodeString(
+    JSON.stringify({
+      iss: config.clientEmail,
+      scope: SCOPE,
+      aud: TOKEN_ENDPOINT,
+      iat: now,
+      // Google の上限は 1 時間。短命にしておく。
+      exp: now + 3600,
+    })
+  );
+
+  const signingInput = `${header}.${claims}`;
+  const key = await importPrivateKey(config.privateKey);
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(signingInput) as BufferSource
+  );
+
+  const jwt = `${signingInput}.${base64UrlEncode(new Uint8Array(signature))}`;
+
+  const res = await fetch(TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: jwt,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Google token request failed (${res.status}): ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { access_token?: string };
+  if (!data.access_token) throw new Error("Google token response did not contain an access token");
+
+  return data.access_token;
+}
+
+/**
+ * バックアップ本文を Drive にアップロードします。
+ * メタデータと本文を 1 リクエストで送る multipart 形式を使います。
+ */
+export async function uploadBackupToDrive(fileName: string, content: string): Promise<string> {
+  const config = getDriveConfig();
+  if (!config) throw new Error("Google Drive backup is not configured");
+
+  const token = await getAccessToken(config);
+
+  const boundary = `boundary-${crypto.randomUUID()}`;
+  const metadata = JSON.stringify({ name: fileName, parents: [config.folderId] });
+
+  const body =
+    `--${boundary}\r\n` +
+    "Content-Type: application/json; charset=UTF-8\r\n\r\n" +
+    `${metadata}\r\n` +
+    `--${boundary}\r\n` +
+    "Content-Type: application/json\r\n\r\n" +
+    `${content}\r\n` +
+    `--${boundary}--`;
+
+  // supportsAllDrives は共有ドライブに書き込むために必須
+  const res = await fetch(`${UPLOAD_ENDPOINT}?uploadType=multipart&supportsAllDrives=true`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": `multipart/related; boundary=${boundary}`,
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    throw new Error(`Google Drive upload failed (${res.status}): ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { id?: string };
+  if (!data.id) throw new Error("Google Drive upload response did not contain a file id");
+
+  return data.id;
+}
+
+interface DriveFile {
+  id: string;
+  name: string;
+  createdTime: string;
+}
+
+/** 退避先フォルダ内のバックアップを新しい順に列挙します。 */
+export async function listDriveBackups(): Promise<DriveFile[]> {
+  const config = getDriveConfig();
+  if (!config) throw new Error("Google Drive backup is not configured");
+
+  const token = await getAccessToken(config);
+
+  const params = new URLSearchParams({
+    q: `'${config.folderId}' in parents and trashed = false`,
+    fields: "files(id,name,createdTime)",
+    orderBy: "createdTime desc",
+    pageSize: "1000",
+    supportsAllDrives: "true",
+    includeItemsFromAllDrives: "true",
+  });
+
+  const res = await fetch(`${FILES_ENDPOINT}?${params}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Google Drive list failed (${res.status}): ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { files?: DriveFile[] };
+  return data.files ?? [];
+}
+
+/**
+ * 世代数を保つため、Drive 上の古いバックアップを削除します。
+ * 削除の失敗は退避そのものを失敗させないよう、件数だけ返して続行します。
+ */
+export async function pruneDriveBackups(keepCount: number): Promise<string[]> {
+  const config = getDriveConfig();
+  if (!config) return [];
+
+  const token = await getAccessToken(config);
+  const files = await listDriveBackups();
+  const stale = files.slice(keepCount);
+
+  const deleted: string[] = [];
+  for (const file of stale) {
+    const res = await fetch(`${FILES_ENDPOINT}/${file.id}?supportsAllDrives=true`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      deleted.push(file.name);
+    } else {
+      console.error(`[drive] Failed to delete ${file.name}: ${res.status}`);
+    }
+  }
+
+  return deleted;
+}
