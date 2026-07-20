@@ -687,6 +687,7 @@
     },
     "audit": {
       "title": "Audit Logs",
+      "description": "Monitor and review logs of system configuration changes and backup actions.",
       "settingsTab": "Settings Changes",
       "backupTab": "Backup Actions",
       "scope": "Scope",

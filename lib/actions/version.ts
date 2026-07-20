@@ -172,13 +172,37 @@ export async function updateVersion(versionId: string, projectSlug: string, form
 
   await db.update(versions).set(updateData).where(eq(versions.id, versionId)).run();
 
-  // Loader と mcVersion のテーブルも更新
+  // Loader と mcVersion のテーブルも更新（入れ替え方式のため消える分を先に控える）
+  const previousLoaders = await db
+    .select({ loader: versionLoaders.loader })
+    .from(versionLoaders)
+    .where(eq(versionLoaders.versionId, versionId))
+    .all();
+
   await db.delete(versionLoaders).where(eq(versionLoaders.versionId, versionId)).run();
+  await recordDeletion(
+    db,
+    "version_loaders",
+    previousLoaders.map((l: { loader: string }) => buildRecordKey(versionId, l.loader))
+  );
+
   if (parsed.data.loaders && parsed.data.loaders.length > 0) {
     await db.insert(versionLoaders).values(parsed.data.loaders.map(loader => ({ versionId, loader }))).run();
   }
 
+  const previousMcVersions = await db
+    .select({ mcVersion: versionMcVersions.mcVersion })
+    .from(versionMcVersions)
+    .where(eq(versionMcVersions.versionId, versionId))
+    .all();
+
   await db.delete(versionMcVersions).where(eq(versionMcVersions.versionId, versionId)).run();
+  await recordDeletion(
+    db,
+    "version_mc_versions",
+    previousMcVersions.map((m: { mcVersion: string }) => buildRecordKey(versionId, m.mcVersion))
+  );
+
   if (parsed.data.mcVersions && parsed.data.mcVersions.length > 0) {
     await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId, mcVersion: mc }))).run();
   }
@@ -234,6 +258,8 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
   }
 
   await db.delete(versions).where(eq(versions.id, versionId)).run();
+  await recordDeletion(db, "versions", versionId);
+
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
 
   revalidatePath(`/projects/${projectSlug}`);

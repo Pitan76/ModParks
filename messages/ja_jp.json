@@ -695,6 +695,7 @@
     },
     "audit": {
       "title": "監査ログ",
+      "description": "システム設定の変更やバックアップ操作の履歴ログを監視します。",
       "settingsTab": "設定変更履歴",
       "backupTab": "バックアップ履歴",
       "scope": "スコープ",

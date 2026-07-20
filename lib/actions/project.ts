@@ -455,6 +455,7 @@ export async function transferOwnership(projectId: string, newOwnerId: string) {
 
   // The new owner might have been a member, we can safely remove them from members if they are
   await db.delete(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, newOwnerId)));
+  await recordDeletion(db, "project_members", buildRecordKey(projectId, newOwnerId));
 
   revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
   return { success: true };
@@ -483,8 +484,13 @@ export async function batchDeleteProjects(projectIds: string[]) {
   const isOwnerCondition = eq(projects.authorId, session.user.id);
   const conditions = session.user.role === "admin" ? inArray(projects.id, projectIds) : and(inArray(projects.id, projectIds), isOwnerCondition);
 
+  // conditions で権限のないものは除外されるため、実際に消える id を先に確定させる
+  const deletable = await db.select({ id: projects.id }).from(projects).where(conditions).all();
+
   // プロジェクトを削除（関連データも外部キー制約等でカスケード削除されるか、必要なら手動削除）
   await db.delete(projects).where(conditions).run();
+
+  await recordDeletion(db, "projects", deletable.map((p: { id: string }) => p.id));
 
   revalidatePath("/projects");
   revalidatePath("/projects/manage");
