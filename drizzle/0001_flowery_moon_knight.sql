@@ -45,7 +45,10 @@ CREATE TABLE `__new_users` (
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
-INSERT INTO `__new_users`("id", "name", "email", "emailVerified", "image", "password_hash", "github_id", "username", "display_name", "avatar_url", "bio", "role", "created_at") SELECT "id", "name", "email", "emailVerified", "image", "password_hash", "github_id", "username", "display_name", "avatar_url", "bio", "role", "created_at" FROM `users`;--> statement-breakpoint
+-- name / email / emailVerified / image / password_hash はこの migration で新設する列で、
+-- 移行元の users には存在しない。drizzle-kit の生成そのままだと
+-- 存在しない列を SELECT して "no such column" で失敗するため NULL で埋める。
+INSERT INTO `__new_users`("id", "name", "email", "emailVerified", "image", "password_hash", "github_id", "username", "display_name", "avatar_url", "bio", "role", "created_at") SELECT "id", NULL, NULL, NULL, NULL, NULL, "github_id", "username", "display_name", "avatar_url", "bio", "role", "created_at" FROM `users`;--> statement-breakpoint
 DROP TABLE `users`;--> statement-breakpoint
 ALTER TABLE `__new_users` RENAME TO `users`;--> statement-breakpoint
 PRAGMA foreign_keys=ON;--> statement-breakpoint
