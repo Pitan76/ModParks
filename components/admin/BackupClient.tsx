@@ -69,6 +69,8 @@ function formatBytes(bytes: number, decimals = 2) {
 export default function BackupClient({ initialBackups, locale }: BackupClientProps) {
   const router = useRouter();
   const tAdmin = useTranslations("Admin");
+  // cancel / delete は Admin ではなく Common 名前空間にある
+  const tCommon = useTranslations("Common");
   const [backups, setBackups] = useState<Backup[]>(initialBackups);
   const [isPending, startTransition] = useTransition();
 
@@ -591,7 +593,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setMergeDialogOpen(false)} color="inherit">
-            {tAdmin("cancel")}
+            {tCommon("cancel")}
           </Button>
           <Button onClick={handleConfirmMerge} color="info" variant="contained" disabled={!canMerge}>
             {tAdmin("backup.mergeApply")}
@@ -612,10 +614,10 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)} color="inherit">
-            {tAdmin("cancel")}
+            {tCommon("cancel")}
           </Button>
           <Button onClick={handleConfirmDelete} color="error" autoFocus>
-            {tAdmin("delete")}
+            {tCommon("delete")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -638,7 +640,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRestoreDialogOpen(false)} color="inherit">
-            {tAdmin("cancel")}
+            {tCommon("cancel")}
           </Button>
           <Button
             onClick={handleConfirmRestore}
@@ -665,7 +667,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setLocalRestoreDialogOpen(false)} color="inherit">
-            {tAdmin("cancel")}
+            {tCommon("cancel")}
           </Button>
           <Button
             onClick={handleConfirmLocalRestore}

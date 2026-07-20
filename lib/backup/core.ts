@@ -197,11 +197,16 @@ export const SUPPORTED_BACKUP_VERSIONS = ["1.0"];
  * `prefix` で保存先を分けます（通常のバックアップと復元前スナップショットの区別）。
  */
 export async function dumpToR2(db: any, prefix: "backup" | "snapshot") {
-  const backupData: Record<string, any[]> = {};
+  const { SENSITIVE_TABLES, encryptJson } = await import("@/lib/backup/crypto");
+
+  const backupData: Record<string, any> = {};
 
   for (const [tableName, tableObj] of Object.entries(SCHEMA_TABLES)) {
     const data = await db.select().from(tableObj).all();
-    backupData[tableName] = data;
+
+    // 認証情報を含むテーブルは暗号化して格納する。
+    // 鍵が未設定なら encryptJson が例外を投げ、平文のまま保存されることはない。
+    backupData[tableName] = SENSITIVE_TABLES.has(tableName) ? await encryptJson(data) : data;
   }
 
   const payload = {
@@ -225,8 +230,8 @@ export async function dumpToR2(db: any, prefix: "backup" | "snapshot") {
  * バックアップペイロードの形式を検証します。
  * 未知の世代を現行スキーマに流し込むと不整合を起こすため、バージョンを明示的に照合します。
  */
-export function validateBackupPayload(payload: unknown): Record<string, any[]> {
-  const p = payload as { version?: string; tables?: Record<string, any[]> } | null;
+export function validateBackupPayload(payload: unknown): Record<string, any> {
+  const p = payload as { version?: string; tables?: Record<string, any> } | null;
 
   if (!p || typeof p !== "object" || !p.tables) {
     throw new Error("Invalid backup file format");
@@ -245,6 +250,30 @@ export function validateBackupPayload(payload: unknown): Record<string, any[]> {
   }
 
   return p.tables;
+}
+
+/**
+ * バックアップを検証し、暗号化されたテーブルを復号して使える形にします。
+ *
+ * 暗号化を導入する前に作られたバックアップは平文の配列が入っているため、
+ * 入れ物かどうかを値の形で判定して両方を受け付けます。
+ */
+export async function loadBackupTables(payload: unknown): Promise<Record<string, any[]>> {
+  const rawTables = validateBackupPayload(payload);
+  const { isEncryptedEnvelope, decryptJson } = await import("@/lib/backup/crypto");
+
+  const tables: Record<string, any[]> = {};
+  for (const [name, value] of Object.entries(rawTables)) {
+    if (isEncryptedEnvelope(value)) {
+      tables[name] = (await decryptJson(value)) as any[];
+    } else if (Array.isArray(value)) {
+      tables[name] = value;
+    } else {
+      throw new Error(`Unexpected data shape for table: ${name}`);
+    }
+  }
+
+  return tables;
 }
 
 /**

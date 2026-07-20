@@ -6,7 +6,7 @@ import {
   dumpToR2,
   getActor,
   importBackupData,
-  validateBackupPayload,
+  loadBackupTables,
   writeAuditLog,
 } from "@/lib/backup/core";
 
@@ -125,7 +125,7 @@ async function performRestore(
   actor: { performedBy?: string; performedByEmail?: string },
   backupKey?: string
 ) {
-  const tables = validateBackupPayload(payload);
+  const tables = await loadBackupTables(payload);
 
   // 復元は既存データを全削除します。取り返しがつかないため、
   // 実行直前の状態を必ず snapshot/ に退避してから進めます。

@@ -13,7 +13,7 @@ import {
   TABLE_PRIMARY_KEYS,
   TABLE_RESTORE_ORDER,
   reviveRows,
-  validateBackupPayload,
+  loadBackupTables,
 } from "@/lib/backup/core";
 import { MERGE_POLICIES } from "@/lib/backup/mergePolicy";
 import { getTombstonedKeys, recordKeyFromRow } from "@/lib/backup/tombstone";
@@ -174,7 +174,7 @@ async function computeMerge(
  * 管理者に確認させるための要約を返します。
  */
 export async function planMerge(db: any, payload: unknown): Promise<MergePlan> {
-  const tables = validateBackupPayload(payload);
+  const tables = await loadBackupTables(payload);
   const { plan } = await computeMerge(db, tables);
   return plan;
 }
@@ -194,7 +194,7 @@ function primaryKeyCondition(tableObj: any, table: string, row: Record<string, a
  * 実際に適用した件数を返すので、確認時の要約と突き合わせられます。
  */
 export async function applyMerge(db: any, payload: unknown): Promise<MergePlan> {
-  const tables = validateBackupPayload(payload);
+  const tables = await loadBackupTables(payload);
   const { plan, operations } = await computeMerge(db, tables);
 
   const statements: any[] = [];
