@@ -180,7 +180,18 @@ async function getServiceAccountToken(
  * バックアップ本文を Drive にアップロードします。
  * メタデータと本文を 1 リクエストで送る multipart 形式を使います。
  */
-export async function uploadBackupToDrive(fileName: string, content: string): Promise<string> {
+export interface DriveUploadResult {
+  id: string;
+  /** Drive 上でそのファイルを開く URL。保存先を実際に確認するために使います */
+  webViewLink?: string;
+  /** 実際に入った親フォルダ。設定した保存先と一致するかの確認用 */
+  parents?: string[];
+}
+
+export async function uploadBackupToDrive(
+  fileName: string,
+  content: string
+): Promise<DriveUploadResult> {
   const config = getDriveConfig();
   if (!config) throw new Error("Google Drive backup is not configured");
 
@@ -198,8 +209,15 @@ export async function uploadBackupToDrive(fileName: string, content: string): Pr
     `${content}\r\n` +
     `--${boundary}--`;
 
-  // supportsAllDrives は共有ドライブに書き込むために必須
-  const res = await fetch(`${UPLOAD_ENDPOINT}?uploadType=multipart&supportsAllDrives=true`, {
+  // fields で保存先の確認に必要な情報も返させる（既定では id しか返らない）
+  const uploadParams = new URLSearchParams({
+    uploadType: "multipart",
+    // supportsAllDrives は共有ドライブに書き込むために必須
+    supportsAllDrives: "true",
+    fields: "id,name,parents,webViewLink",
+  });
+
+  const res = await fetch(`${UPLOAD_ENDPOINT}?${uploadParams}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -212,10 +230,17 @@ export async function uploadBackupToDrive(fileName: string, content: string): Pr
     throw new Error(`Google Drive upload failed (${res.status}): ${await res.text()}`);
   }
 
-  const data = (await res.json()) as { id?: string };
+  const data = (await res.json()) as DriveUploadResult & { id?: string };
   if (!data.id) throw new Error("Google Drive upload response did not contain a file id");
 
-  return data.id;
+  // 設定した保存先と実際の親が食い違っていたら、探しても見つからないので警告を残す
+  if (data.parents && !data.parents.includes(config.folderId)) {
+    console.warn(
+      `[drive] Uploaded file landed in ${JSON.stringify(data.parents)} but GOOGLE_DRIVE_FOLDER_ID is ${config.folderId}`
+    );
+  }
+
+  return { id: data.id, webViewLink: data.webViewLink, parents: data.parents };
 }
 
 interface DriveFile {

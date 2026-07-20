@@ -273,12 +273,12 @@ async function mirrorToDrive(key: string, jsonStr: string): Promise<DriveMirrorR
     }
 
     const fileName = key.split("/").pop() ?? key;
-    const fileId = await uploadBackupToDrive(fileName, jsonStr);
+    const uploaded = await uploadBackupToDrive(fileName, jsonStr);
 
     // R2 と同じ世代数で Drive 側も整理する
     await pruneDriveBackups(settings.autoBackupKeepCount);
 
-    return { attempted: true, fileId };
+    return { attempted: true, fileId: uploaded.id, webViewLink: uploaded.webViewLink };
   } catch (e: any) {
     console.error("[backup] Google Drive mirror failed:", e);
     return { attempted: true, error: e?.message ?? String(e) };

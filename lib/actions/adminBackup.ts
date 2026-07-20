@@ -83,7 +83,7 @@ export async function getEncryptionStatus() {
  */
 export async function sendBackupToDrive(
   key: string
-): Promise<{ success: true; fileId: string } | ActionError> {
+): Promise<{ success: true; fileId: string; webViewLink?: string } | ActionError> {
   const { db, userId } = await getAdminDb();
   const actor = await getActor(db, userId);
 
@@ -93,17 +93,17 @@ export async function sendBackupToDrive(
   try {
     const { uploadBackupToDrive } = await import("@/lib/backup/googleDrive");
     // R2 に入っている内容をそのまま送る（暗号化済みの形を保つ）
-    const fileId = await uploadBackupToDrive(fileName, JSON.stringify(payload));
+    const uploaded = await uploadBackupToDrive(fileName, JSON.stringify(payload));
 
     await writeAuditLog(db, {
       action: "drive_upload",
       status: "success",
       backupKey: key,
-      detail: { fileId, fileName },
+      detail: { fileId: uploaded.id, fileName, parents: uploaded.parents },
       ...actor,
     });
 
-    return { success: true as const, fileId };
+    return { success: true as const, fileId: uploaded.id, webViewLink: uploaded.webViewLink };
   } catch (e: any) {
     await writeAuditLog(db, {
       action: "drive_upload",
