@@ -20,6 +20,7 @@ export interface IdeaCardData {
   createdAt: Date | number;
   likesCount: number;
   commentsCount: number;
+  authorName: string | null;
 }
 
 /**
@@ -63,9 +64,20 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5, wordBreak: "break-word", overflowWrap: "anywhere" }}>
               {idea.title}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
               {toPlainDescription(idea.content)}
             </Typography>
+            
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5, mb: 2, minWidth: 0 }}>
+              <Typography variant="caption" color="text.secondary" noWrap sx={{ minWidth: 0 }}>
+                by {idea.authorName || "Unknown"}
+              </Typography>
+              <Typography variant="caption" color="text.disabled">•</Typography>
+              <Typography variant="caption" color="text.disabled">
+                {formatDate(idea.createdAt)}
+              </Typography>
+            </Box>
+
             <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 3 }, flexWrap: "wrap" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
                 <FavoriteIcon fontSize="small" />
@@ -81,9 +93,6 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
                 color={idea.status === "open" ? "primary" : idea.status === "in_progress" ? "warning" : "success"}
                 variant="outlined"
               />
-              <Typography variant="caption" color="text.disabled" sx={{ ml: "auto" }}>
-                {formatDate(idea.createdAt)}
-              </Typography>
             </Box>
           </Box>
         </Box>

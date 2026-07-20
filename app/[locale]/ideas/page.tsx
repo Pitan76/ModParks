@@ -73,6 +73,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
               createdAt: idea.createdAt!,
               likesCount: idea.likesCount,
               commentsCount: idea.commentsCount,
+              authorName: idea.authorName,
             }}
           />
         ))}

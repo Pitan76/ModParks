@@ -425,6 +425,7 @@
     "noFavorites": "まだお気に入りに登録したプロジェクトはありません。"
   },
   "Idea": {
+    "postedBy": "投稿者: {name}",
     "addCommentPlaceholder": "コメントを追加...",
     "like": "いいね {count}",
     "title": "アイデア",

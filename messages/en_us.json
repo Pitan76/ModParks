@@ -422,6 +422,7 @@
     "noFavorites": "No favorite projects yet."
   },
   "Idea": {
+    "postedBy": "Posted by {name}",
     "addCommentPlaceholder": "Add a comment...",
     "like": "Like {count}",
     "title": "Ideas",
