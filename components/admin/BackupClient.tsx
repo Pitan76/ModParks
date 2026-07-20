@@ -183,8 +183,12 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
   const handleSendToDrive = (key: string) => {
     startTransition(async () => {
       try {
-        await sendBackupToDrive(key);
-        showSnackbar(tAdmin("backup.driveUploadSuccess"), "success");
+        const res = await sendBackupToDrive(key);
+        if (res.success) {
+          showSnackbar(tAdmin("backup.driveUploadSuccess"), "success");
+        } else {
+          showSnackbar(tAdmin("backup.driveUploadFailed", { error: res.message }), "error");
+        }
       } catch (e: any) {
         showSnackbar(tAdmin("backup.driveUploadFailed", { error: e.message || "unknown" }), "error");
       }
@@ -218,10 +222,12 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
 
   // R2上のバックアップから復元確認
   // 再認証まわりのエラーコードを利用者向けの文言に変換する
-  const restoreErrorMessage = (e: any) => {
-    if (e?.message === "TWO_FACTOR_REQUIRED") return tAdmin("backup.twoFactorRequired");
-    if (e?.message === "INVALID_CODE") return tAdmin("backup.invalidCode");
-    return e?.message || "Error restoring database";
+  // サーバーアクションは本番で例外メッセージが秘匿されるため、
+  // 失敗はコード付きの戻り値で受け取り、それを文言に変換する
+  const actionErrorMessage = (res: { error: string; message: string }) => {
+    if (res.error === "TWO_FACTOR_REQUIRED") return tAdmin("backup.twoFactorRequired");
+    if (res.error === "INVALID_CODE") return tAdmin("backup.invalidCode");
+    return res.message || "Error";
   };
 
   // 復元ダイアログを開くたびにスナップショットの状態をリセットする
@@ -266,9 +272,11 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
           setRestoreTarget(null);
           resetSnapshotState();
           router.refresh();
+        } else {
+          showSnackbar(actionErrorMessage(res), "error");
         }
       } catch (e: any) {
-        showSnackbar(restoreErrorMessage(e), "error");
+        showSnackbar(e.message || "Error restoring database", "error");
       }
     });
   };
@@ -321,9 +329,11 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
           setLocalRestoreContent(null);
           resetSnapshotState();
           router.refresh();
+        } else {
+          showSnackbar(actionErrorMessage(res), "error");
         }
       } catch (e: any) {
-        showSnackbar(restoreErrorMessage(e), "error");
+        showSnackbar(e.message || "Error restoring database", "error");
       }
     });
   };
@@ -358,9 +368,11 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
           setMergePlan(null);
           resetSnapshotState();
           router.refresh();
+        } else {
+          showSnackbar(actionErrorMessage(res), "error");
         }
       } catch (e: any) {
-        showSnackbar(restoreErrorMessage(e), "error");
+        showSnackbar(e.message || "Error merging", "error");
       }
     });
   };

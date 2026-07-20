@@ -11,6 +11,21 @@ import {
 } from "@/lib/backup/core";
 
 /**
+ * サーバーアクションのエラーは、本番ビルドでは Next.js がメッセージを秘匿します
+ * （"An error occurred in the Server Components render..." に置き換わる）。
+ * そのため throw ではエラー内容が UI に届かず、原因調査にログが必須になってしまいます。
+ * 利用者に伝えるべきエラーは例外にせず、この形で返してください。
+ */
+export type ActionError = { success: false; error: string; message: string };
+
+function toActionError(e: any): ActionError {
+  const message = e?.message ?? String(e);
+  // 呼び出し側が分岐に使うコード。認証系は auth-helpers が投げる固定文字列。
+  const known = ["TWO_FACTOR_REQUIRED", "INVALID_CODE", "Forbidden", "Unauthorized"];
+  return { success: false, error: known.includes(message) ? message : "ERROR", message };
+}
+
+/**
  * データベースの全テーブルのデータをダンプし、JSON 形式で R2 バケットに保存します。
  */
 export async function createBackup() {
@@ -66,7 +81,9 @@ export async function getEncryptionStatus() {
  *
  * 世代整理は行いません。手動送信で他の世代が消えるのは想定外の挙動になるためです。
  */
-export async function sendBackupToDrive(key: string) {
+export async function sendBackupToDrive(
+  key: string
+): Promise<{ success: true; fileId: string } | ActionError> {
   const { db, userId } = await getAdminDb();
   const actor = await getActor(db, userId);
 
@@ -86,7 +103,7 @@ export async function sendBackupToDrive(key: string) {
       ...actor,
     });
 
-    return { success: true, fileId };
+    return { success: true as const, fileId };
   } catch (e: any) {
     await writeAuditLog(db, {
       action: "drive_upload",
@@ -95,7 +112,8 @@ export async function sendBackupToDrive(key: string) {
       detail: { error: e?.message ?? String(e) },
       ...actor,
     });
-    throw e;
+    // Google API のエラー本文は原因特定に直結するので、秘匿されないよう戻り値で返す
+    return toActionError(e);
   }
 }
 
@@ -223,19 +241,23 @@ async function performRestore(
   });
 
   revalidatePath("/admin/backup");
-  return { success: true, snapshotKey: effectiveSnapshotKey };
+  return { success: true as const, snapshotKey: effectiveSnapshotKey };
 }
 
 /**
  * R2 バケット上の指定されたバックアップファイルからデータを復元します。
  */
 export async function restoreBackup(key: string, totpToken: string, snapshotKey?: string) {
-  // 復元は取り消しの効かない全置換のため、管理者権限に加えて TOTP 再認証を要求します
-  const { db, userId } = await getReauthenticatedAdminDb(totpToken);
-  // 操作者情報は復元前に確定させます。復元後は users が入れ替わり、userId から引けなくなるためです。
-  const actor = await getActor(db, userId);
+  try {
+    // 復元は取り消しの効かない全置換のため、管理者権限に加えて TOTP 再認証を要求します
+    const { db, userId } = await getReauthenticatedAdminDb(totpToken);
+    // 操作者情報は復元前に確定させます。復元後は users が入れ替わり、userId から引けなくなるためです。
+    const actor = await getActor(db, userId);
 
-  return performRestore(db, await loadBackupFromR2(key), snapshotKey, actor, key);
+    return await performRestore(db, await loadBackupFromR2(key), snapshotKey, actor, key);
+  } catch (e: any) {
+    return toActionError(e);
+  }
 }
 
 /**
@@ -284,12 +306,21 @@ export async function planMergeFromJson(jsonStr: string) {
  * 復元と同様に TOTP 再認証と事前スナップショットを必須にしています。
  */
 export async function applyMergeFromBackup(key: string, totpToken: string, snapshotKey?: string) {
-  const { db, userId } = await getReauthenticatedAdminDb(totpToken);
-  const actor = await getActor(db, userId);
-  const { applyMerge } = await import("@/lib/backup/merge");
+  let db: any, actor: { performedBy?: string; performedByEmail?: string };
+  let payload: any, effectiveSnapshotKey: string;
 
-  const payload = await loadBackupFromR2(key);
-  const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot")).key;
+  // 再認証やバックアップ読み出しの失敗は、監査ログを書く前なので個別に処理する
+  try {
+    const ctx = await getReauthenticatedAdminDb(totpToken);
+    db = ctx.db;
+    actor = await getActor(db, ctx.userId);
+    payload = await loadBackupFromR2(key);
+    effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot")).key;
+  } catch (e: any) {
+    return toActionError(e);
+  }
+
+  const { applyMerge } = await import("@/lib/backup/merge");
 
   try {
     const plan = await applyMerge(db, payload);
@@ -304,7 +335,7 @@ export async function applyMergeFromBackup(key: string, totpToken: string, snaps
     });
 
     revalidatePath("/admin/backup");
-    return { success: true, plan, snapshotKey: effectiveSnapshotKey };
+    return { success: true as const, plan, snapshotKey: effectiveSnapshotKey };
   } catch (e: any) {
     await writeAuditLog(db, {
       action: "merge",
@@ -314,7 +345,7 @@ export async function applyMergeFromBackup(key: string, totpToken: string, snaps
       detail: { error: e?.message ?? String(e) },
       ...actor,
     });
-    throw e;
+    return toActionError(e);
   }
 }
 
@@ -322,9 +353,13 @@ export async function applyMergeFromBackup(key: string, totpToken: string, snaps
  * 送信された JSON 文字列データからデータベースを復元します。
  */
 export async function restoreBackupFromJson(jsonStr: string, totpToken: string, snapshotKey?: string) {
-  const { db, userId } = await getReauthenticatedAdminDb(totpToken);
-  const actor = await getActor(db, userId);
+  try {
+    const { db, userId } = await getReauthenticatedAdminDb(totpToken);
+    const actor = await getActor(db, userId);
 
-  // ローカルファイルからの復元では R2 上の元キーが存在しないため backupKey は null
-  return performRestore(db, JSON.parse(jsonStr), snapshotKey, actor);
+    // ローカルファイルからの復元では R2 上の元キーが存在しないため backupKey は null
+    return await performRestore(db, JSON.parse(jsonStr), snapshotKey, actor);
+  } catch (e: any) {
+    return toActionError(e);
+  }
 }
