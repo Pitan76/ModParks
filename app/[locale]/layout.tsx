@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, AppLocale } from "@/i18n/routing";
 import ThemeRegistry from "@/components/ThemeRegistry";
@@ -19,54 +19,64 @@ export const viewport: Viewport = {
   themeColor: "#121212",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "ModParks - Minecraft Mod & Plugin Platform",
-    template: "%s | ModParks",
-  },
-  description: "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
-  keywords: ["Minecraft", "Mod", "Plugin", "Java Edition", "Fabric", "Forge", "Paper"],
-  manifest: "/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "ModParks",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  openGraph: {
-    type:    "website",
-    locale:  "ja_JP",
-    url:     SITE_URL,
-    siteName: "ModParks",
-    images: [
-      {
-        url: SITE_URL + "/icon.png",
-        width: 512,
-        height: 512,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary",
-    title: "ModParks - Minecraft Mod & Plugin Platform",
-    description: "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
-    images: [
-      {
-        url: SITE_URL + "/icon.png",
-        width: 512,
-        height: 512,
-      },
-    ],
-  },
-  alternates: {
-    types: {
-      "application/rss+xml": SITE_URL + "/feed.xml",
+export async function generateMetadata({ params }: LocaleLayoutProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: t("title"),
+      template: "%s | ModParks",
     },
-  },
-};
+    description: t("description"),
+    keywords: t("keywords").split(",").map((k) => k.trim()),
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "ModParks",
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    openGraph: {
+      type: "website",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
+      url: SITE_URL,
+      siteName: "ModParks",
+      images: [
+        {
+          url: SITE_URL + "/icon.png",
+          width: 512,
+          height: 512,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary",
+      title: t("title"),
+      description: t("description"),
+      images: [
+        {
+          url: SITE_URL + "/icon.png",
+          width: 512,
+          height: 512,
+        },
+      ],
+    },
+    alternates: {
+      canonical: `${SITE_URL}/${locale}`,
+      languages: {
+        ja: `${SITE_URL}/ja`,
+        en: `${SITE_URL}/en`,
+      },
+      types: {
+        "application/rss+xml": SITE_URL + "/feed.xml",
+      },
+    },
+  };
+}
 
 import PwaRegister from "@/components/PwaRegister";
 

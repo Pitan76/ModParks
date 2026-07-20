@@ -30,7 +30,7 @@ interface ProjectDetailPageProps {
 }
 
 export async function generateMetadata({ params }: ProjectDetailPageProps) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const project = await getProjectBySlug(slug);
 
   if (!project) {
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
       title,
       description,
       type: "article",
-      url: SITE_URL + `/projects/${project.slug}`,
+      url: SITE_URL + `/${locale}/projects/${project.slug}`,
       images: [
         {
           url: imageUrl,
@@ -70,6 +70,13 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
           alt: `${project.name} Icon`,
         },
       ],
+    },
+    alternates: {
+      canonical: `${SITE_URL}/${locale}/projects/${project.slug}`,
+      languages: {
+        ja: `${SITE_URL}/ja/projects/${project.slug}`,
+        en: `${SITE_URL}/en/projects/${project.slug}`,
+      },
     },
   };
 }

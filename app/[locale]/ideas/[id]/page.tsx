@@ -20,6 +20,53 @@ import IdeaCommentItem from "@/components/idea/IdeaCommentItem";
 import { formatDate } from "@/lib/utils/format";
 import { Link } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { SITE_URL } from "@/lib/config";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string, id: string }> }) {
+  const { id, locale } = await params;
+  const d1 = await getD1();
+  const db = getDb(d1);
+
+  const idea = await db
+    .select({
+      title: ideas.title,
+      content: ideas.content,
+      visibility: ideas.visibility,
+    })
+    .from(ideas)
+    .where(eq(ideas.id, id))
+    .get();
+
+  if (!idea || idea.visibility !== "public") {
+    return { title: "Not Found" };
+  }
+
+  const title = idea.title;
+  const description = idea.content.length > 150 ? idea.content.substring(0, 150) + "..." : idea.content;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: SITE_URL + `/${locale}/ideas/${id}`,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    alternates: {
+      canonical: `${SITE_URL}/${locale}/ideas/${id}`,
+      languages: {
+        ja: `${SITE_URL}/ja/ideas/${id}`,
+        en: `${SITE_URL}/en/ideas/${id}`,
+      },
+    },
+  };
+}
 
 export default async function IdeaDetailPage({ params }: { params: Promise<{ locale: string, id: string }> }) {
   const { id, locale } = await params;

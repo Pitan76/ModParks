@@ -56,7 +56,7 @@ function getLinkIcon(url: string) {
 }
 
 export async function generateMetadata({ params }: PublicProfileProps) {
-  const { username } = await params;
+  const { locale, username } = await params;
   const d1 = await getD1();
   const db = getDb(d1);
   const user = await db.select({
@@ -82,7 +82,7 @@ export async function generateMetadata({ params }: PublicProfileProps) {
       title,
       description,
       type: "profile",
-      url: SITE_URL + `/profile/${user.username}`,
+      url: SITE_URL + `/${locale}/profile/${user.username}`,
       images: [
         {
           url: imageUrl,
@@ -104,6 +104,13 @@ export async function generateMetadata({ params }: PublicProfileProps) {
           alt: `${user.username} Avatar`,
         },
       ],
+    },
+    alternates: {
+      canonical: `${SITE_URL}/${locale}/profile/${user.username}`,
+      languages: {
+        ja: `${SITE_URL}/ja/profile/${user.username}`,
+        en: `${SITE_URL}/en/profile/${user.username}`,
+      },
     },
   };
 }

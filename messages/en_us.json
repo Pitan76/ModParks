@@ -1,4 +1,9 @@
 {
+  "Metadata": {
+    "title": "ModParks - Minecraft Mod & Plugin Platform",
+    "description": "A Japan-based platform to easily publish, search, and download Minecraft Java Edition Mods and Plugins.",
+    "keywords": "Minecraft, Mod, Plugin, Java Edition, Fabric, Forge, Paper"
+  },
   "Common": {
     "appName": "ModParks",
     "home": "Home",
