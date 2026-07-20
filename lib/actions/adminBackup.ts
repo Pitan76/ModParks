@@ -122,24 +122,26 @@ async function dumpToR2(db: any, prefix: "backup" | "snapshot") {
  * バックアップペイロードの形式を検証します。
  * 未知の世代を現行スキーマに流し込むと不整合を起こすため、バージョンを明示的に照合します。
  */
-function validateBackupPayload(payload: any): Record<string, any[]> {
-  if (!payload || typeof payload !== "object" || !payload.tables) {
+function validateBackupPayload(payload: unknown): Record<string, any[]> {
+  const p = payload as { version?: string; tables?: Record<string, any[]> } | null;
+
+  if (!p || typeof p !== "object" || !p.tables) {
     throw new Error("Invalid backup file format");
   }
-  if (!SUPPORTED_BACKUP_VERSIONS.includes(payload.version)) {
+  if (!p.version || !SUPPORTED_BACKUP_VERSIONS.includes(p.version)) {
     throw new Error(
-      `Unsupported backup version: ${payload.version ?? "(none)"}. Supported: ${SUPPORTED_BACKUP_VERSIONS.join(", ")}`
+      `Unsupported backup version: ${p.version ?? "(none)"}. Supported: ${SUPPORTED_BACKUP_VERSIONS.join(", ")}`
     );
   }
 
   // 現行スキーマに存在しないテーブルが含まれている場合、その分は復元されません。
   // 黙って落とすと気づけないため、明示的に失敗させます。
-  const unknown = Object.keys(payload.tables).filter((t) => !SCHEMA_TABLES[t]);
-  if (unknown.length > 0) {
-    throw new Error(`Backup contains tables unknown to the current schema: ${unknown.join(", ")}`);
+  const unknownTables = Object.keys(p.tables).filter((t) => !SCHEMA_TABLES[t]);
+  if (unknownTables.length > 0) {
+    throw new Error(`Backup contains tables unknown to the current schema: ${unknownTables.join(", ")}`);
   }
 
-  return payload.tables;
+  return p.tables;
 }
 
 /**
@@ -254,26 +256,47 @@ async function importBackupData(db: any, tablesData: Record<string, any[]>) {
 }
 
 /**
+ * 復元直前の状態を snapshot/ に退避し、そのキーとダウンロード URL を返します。
+ *
+ * UI 側はこれを呼んで管理者に手元へダウンロードさせてから復元に進みます。
+ * R2 上にも残りますが、R2 ごと失う障害に備えて手元コピーを促す意図です。
+ */
+export async function createPreRestoreSnapshot() {
+  const { db } = await getAdminDb();
+
+  const key = await dumpToR2(db, "snapshot");
+
+  return {
+    success: true,
+    key,
+    downloadUrl: `/api/admin/backup/download?key=${encodeURIComponent(key)}`,
+  };
+}
+
+/**
  * 検証済みのテーブルデータで DB を置換します。
  * 置換前に必ず現状のスナップショットを取得し、切り戻し元を確保します。
+ *
+ * `snapshotKey` に createPreRestoreSnapshot() の結果を渡すと、
+ * 二重にスナップショットを取らずにそれを切り戻し元として扱います。
  */
-async function performRestore(db: any, payload: any) {
+async function performRestore(db: any, payload: any, snapshotKey?: string) {
   const tables = validateBackupPayload(payload);
 
   // 復元は既存データを全削除します。取り返しがつかないため、
   // 実行直前の状態を必ず snapshot/ に退避してから進めます。
-  const snapshotKey = await dumpToR2(db, "snapshot");
+  const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot"));
 
   await importBackupData(db, tables);
 
   revalidatePath("/admin/backup");
-  return { success: true, snapshotKey };
+  return { success: true, snapshotKey: effectiveSnapshotKey };
 }
 
 /**
  * R2 バケット上の指定されたバックアップファイルからデータを復元します。
  */
-export async function restoreBackup(key: string) {
+export async function restoreBackup(key: string, snapshotKey?: string) {
   const { db } = await getAdminDb();
 
   if (!key.startsWith("backup/") && !key.startsWith("snapshot/")) {
@@ -287,14 +310,14 @@ export async function restoreBackup(key: string) {
     throw new Error("Backup file not found in R2");
   }
 
-  return performRestore(db, JSON.parse(await obj.text()));
+  return performRestore(db, JSON.parse(await obj.text()), snapshotKey);
 }
 
 /**
  * 送信された JSON 文字列データからデータベースを復元します。
  */
-export async function restoreBackupFromJson(jsonStr: string) {
+export async function restoreBackupFromJson(jsonStr: string, snapshotKey?: string) {
   const { db } = await getAdminDb();
 
-  return performRestore(db, JSON.parse(jsonStr));
+  return performRestore(db, JSON.parse(jsonStr), snapshotKey);
 }

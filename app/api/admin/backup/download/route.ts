@@ -10,7 +10,9 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const key = searchParams.get("key");
 
-    if (!key || !key.startsWith("backup/")) {
+    // snapshot/ は復元直前に自動取得される切り戻し用データ。
+    // 管理者が復元前に手元へ退避できるよう、ダウンロードを許可します。
+    if (!key || !(key.startsWith("backup/") || key.startsWith("snapshot/"))) {
       return NextResponse.json({ error: "Invalid key" }, { status: 400 });
     }
 

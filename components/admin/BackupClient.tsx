@@ -23,6 +23,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 import Snackbar from "@mui/material/Snackbar";
 import Backdrop from "@mui/material/Backdrop";
 import AddIcon from "@mui/icons-material/Add";
@@ -35,6 +36,7 @@ import {
   deleteBackup,
   restoreBackup,
   restoreBackupFromJson,
+  createPreRestoreSnapshot,
   getBackups
 } from "@/lib/actions/adminBackup";
 
@@ -84,6 +86,11 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
 
   const [localRestoreDialogOpen, setLocalRestoreDialogOpen] = useState(false);
   const [localRestoreContent, setLocalRestoreContent] = useState<string | null>(null);
+
+  // 復元前に取得する切り戻し用スナップショット。
+  // 復元は全データを置き換えるため、実行前に必ず手元へ退避させます。
+  const [snapshot, setSnapshot] = useState<{ key: string; downloadUrl: string } | null>(null);
+  const [snapshotDownloaded, setSnapshotDownloaded] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -145,7 +152,28 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
   };
 
   // R2上のバックアップから復元確認
+  // 復元ダイアログを開くたびにスナップショットの状態をリセットする
+  const resetSnapshotState = () => {
+    setSnapshot(null);
+    setSnapshotDownloaded(false);
+  };
+
+  // 現在のDBの内容をスナップショットとして保存し、ブラウザにダウンロードさせる
+  const handleDownloadCurrentData = () => {
+    startTransition(async () => {
+      try {
+        const res = await createPreRestoreSnapshot();
+        setSnapshot({ key: res.key, downloadUrl: res.downloadUrl });
+        window.open(res.downloadUrl, "_blank");
+        setSnapshotDownloaded(true);
+      } catch (e: any) {
+        showSnackbar(e.message || "Error creating snapshot", "error");
+      }
+    });
+  };
+
   const openRestoreDialog = (key: string) => {
+    resetSnapshotState();
     setRestoreTarget(key);
     setRestoreDialogOpen(true);
   };
@@ -156,7 +184,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
 
     startTransition(async () => {
       try {
-        const res = await restoreBackup(restoreTarget);
+        const res = await restoreBackup(restoreTarget, snapshot?.key);
         if (res.success) {
           showSnackbar(tAdmin("backup.successRestore"), "success");
           router.refresh();
@@ -165,6 +193,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         showSnackbar(e.message || "Error restoring database", "error");
       } finally {
         setRestoreTarget(null);
+        resetSnapshotState();
       }
     });
   };
@@ -189,6 +218,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
           showSnackbar(tAdmin("backup.invalidFile"), "error");
           return;
         }
+        resetSnapshotState();
         setLocalRestoreContent(content);
         setLocalRestoreDialogOpen(true);
       } catch {
@@ -210,7 +240,7 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
 
     startTransition(async () => {
       try {
-        const res = await restoreBackupFromJson(localRestoreContent);
+        const res = await restoreBackupFromJson(localRestoreContent, snapshot?.key);
         if (res.success) {
           showSnackbar(tAdmin("backup.successRestore"), "success");
           router.refresh();
@@ -219,9 +249,33 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         showSnackbar(e.message || "Error restoring database", "error");
       } finally {
         setLocalRestoreContent(null);
+        resetSnapshotState();
       }
     });
   };
+
+  // 復元ダイアログ共通の「現在のデータを退避する」セクション。
+  // ダウンロードを終えるまで復元ボタンは押せません。
+  const preRestoreSection = (
+    <Alert severity="info" sx={{ mt: 2 }}>
+      <AlertTitle>{tAdmin("backup.downloadCurrentData")}</AlertTitle>
+      <Box sx={{ mb: 1 }}>{tAdmin("backup.downloadCurrentDataDesc")}</Box>
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={<DownloadIcon />}
+        onClick={handleDownloadCurrentData}
+        disabled={isPending || snapshotDownloaded}
+      >
+        {tAdmin("backup.downloadCurrentData")}
+      </Button>
+      {snapshot && snapshotDownloaded && (
+        <Box sx={{ mt: 1, fontSize: "0.85em", wordBreak: "break-all" }}>
+          {tAdmin("backup.currentDataSaved", { key: snapshot.key })}
+        </Box>
+      )}
+    </Alert>
+  );
 
   return (
     <Box sx={{ width: "100%", position: "relative" }}>
@@ -382,12 +436,17 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
               {restoreTarget?.replace("backup/", "")}
             </Box>
           </DialogContentText>
+          {preRestoreSection}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRestoreDialogOpen(false)} color="inherit">
             {tAdmin("cancel")}
           </Button>
-          <Button onClick={handleConfirmRestore} color="warning" autoFocus>
+          <Button
+            onClick={handleConfirmRestore}
+            color="warning"
+            disabled={!snapshotDownloaded || isPending}
+          >
             {tAdmin("backup.restore")}
           </Button>
         </DialogActions>
@@ -403,12 +462,17 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
           <DialogContentText>
             {tAdmin("backup.confirmRestore")}
           </DialogContentText>
+          {preRestoreSection}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setLocalRestoreDialogOpen(false)} color="inherit">
             {tAdmin("cancel")}
           </Button>
-          <Button onClick={handleConfirmLocalRestore} color="warning" autoFocus>
+          <Button
+            onClick={handleConfirmLocalRestore}
+            color="warning"
+            disabled={!snapshotDownloaded || isPending}
+          >
             {tAdmin("backup.restore")}
           </Button>
         </DialogActions>

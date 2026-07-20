@@ -671,7 +671,10 @@
       "confirmRestore": "Are you sure you want to restore from this backup? All current data will be deleted and overwritten with the backup state. You may need to log in again after restoration.",
       "restoreWarning": "WARNING: Restoring the database will overwrite all current data. You will also need to log in again with an admin account contained in the restored database.",
       "uploadJsonFile": "Select a JSON file",
-      "invalidFile": "Invalid backup file."
+      "invalidFile": "Invalid backup file.",
+      "downloadCurrentData": "Download current data",
+      "downloadCurrentDataDesc": "Before restoring, save the current database to your device. This is required so you can roll back if the restore turns out to be wrong.",
+      "currentDataSaved": "Current data saved as {key}. You can now proceed with the restore."
     }
   },
   "Search": {
