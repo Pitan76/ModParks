@@ -4,6 +4,7 @@ import {
   integer,
   primaryKey,
   index,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import type { AdapterAccountType } from "next-auth/adapters";
@@ -769,9 +770,14 @@ export const settingsAudit = sqliteTable("settings_audit", {
   newValue: text("new_value"),
   /** vars の場合、作成した Pull Request の URL */
   prUrl: text("pr_url"),
-  changedBy: text("changed_by")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  /**
+   * 変更者の users.id。
+   * 外部キーは意図的に張っていません。users を参照すると、復元処理の
+   * users 全削除に連動してこの監査ログ自体がカスケード削除されるためです。
+   * 代わりに変更時点のメールアドレスを非正規化して保持します。
+   */
+  changedBy: text("changed_by").notNull(),
+  changedByEmail: text("changed_by_email"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
@@ -820,3 +826,36 @@ export const backupAudit = sqliteTable("backup_audit", {
 }));
 
 export type BackupAudit = typeof backupAudit.$inferSelect;
+
+// ─── Deleted Records (墓標) ───────────────────────────────────────────────────
+
+/**
+ * 削除された行の墓標。
+ *
+ * マージ復元で「バックアップ後に削除された行」が復活するのを防ぐために使います。
+ * 行そのものは従来通り物理削除するため、通常の読み取りクエリには影響しません
+ * （論理削除にすると全ての SELECT に isNull(deletedAt) が必要になる）。
+ *
+ * backup_audit と同じ理由で、バックアップ・復元の対象外かつ外部キーなしです。
+ * 復元をまたいで残らなければ、削除の記録としての意味がありません。
+ */
+export const deletedRecords = sqliteTable("deleted_records", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  /** 削除された行のテーブル名。adminBackup の SCHEMA_TABLES のキーと同じ表記を使う */
+  tableName: text("table_name").notNull(),
+  /**
+   * 削除された行の主キー。
+   * 複合主キーの場合は列を ":" で連結した文字列にする（例 "projectId:userId"）。
+   */
+  recordKey: text("record_key").notNull(),
+  deletedAt: integer("deleted_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  // マージ時に (テーブル, 主キー) で存在確認するための索引
+  lookupIdx: uniqueIndex("deleted_records_lookup_idx").on(table.tableName, table.recordKey),
+}));
+
+export type DeletedRecord = typeof deletedRecords.$inferSelect;

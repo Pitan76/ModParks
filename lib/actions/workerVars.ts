@@ -75,6 +75,8 @@ export async function proposeWorkerVarsChange(
         newValue: value,
         prUrl,
         changedBy: userId,
+        // authorLabel はセッション上のメールなので、そのまま監査ログにも残す
+        changedByEmail: session.user?.email ?? undefined,
       }))
     );
 

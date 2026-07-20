@@ -13,6 +13,28 @@ export async function getAuthenticatedDb() {
 }
 
 /**
+ * 監査ログに非正規化して残すためのメールアドレスを取得します。
+ *
+ * 監査ログは users への外部キーを持たない（復元時のカスケード削除を避けるため）ので、
+ * users が入れ替わってもログを読めるよう、操作時点の値を控えておきます。
+ * 取得失敗はログ記録の付加情報が欠けるだけなので、例外にせず undefined を返します。
+ */
+export async function getAuditEmail(db: any, userId: string): Promise<string | undefined> {
+  try {
+    const { users } = await import("@/db/schema");
+    const { eq } = await import("drizzle-orm");
+    const user = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, userId))
+      .get();
+    return user?.email ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * 管理者権限を必要とする操作のためのヘルパー。
  * 管理者でない場合は "Forbidden" エラーをスローします。
  */

@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdminDb, getReauthenticatedAdminDb } from "@/lib/auth-helpers";
+import { getAdminDb, getReauthenticatedAdminDb, getAuditEmail } from "@/lib/auth-helpers";
 import { settingsAudit } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import {
@@ -68,6 +68,7 @@ export async function setSecret(
       oldValue: null,
       newValue: null,
       changedBy: ctx.userId,
+      changedByEmail: await getAuditEmail(ctx.db, ctx.userId),
     });
     revalidatePath("/admin/config");
     return { success: true };
@@ -102,6 +103,7 @@ export async function removeSecret(
       oldValue: null,
       newValue: "(deleted)",
       changedBy: ctx.userId,
+      changedByEmail: await getAuditEmail(ctx.db, ctx.userId),
     });
     revalidatePath("/admin/config");
     return { success: true };

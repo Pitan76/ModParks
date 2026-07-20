@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdminDb } from "@/lib/auth-helpers";
+import { getAdminDb, getAuditEmail } from "@/lib/auth-helpers";
 import { getSettingsKV } from "@/lib/kv";
 import { settingsAudit } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -45,6 +45,8 @@ export async function updateAppSettings(
   const kv = await getSettingsKV();
   await kv.put(SETTINGS_KEY, JSON.stringify(next));
 
+  const changedByEmail = await getAuditEmail(db, userId);
+
   await db.insert(settingsAudit).values(
     changed.map((key) => ({
       scope: "app" as const,
@@ -52,6 +54,7 @@ export async function updateAppSettings(
       oldValue: JSON.stringify(current[key]),
       newValue: JSON.stringify(next[key]),
       changedBy: userId,
+      changedByEmail,
     }))
   );
 
