@@ -11,7 +11,9 @@ CREATE TABLE `__new_project_dependencies` (
 	FOREIGN KEY (`target_project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-INSERT INTO `__new_project_dependencies`("id", "project_id", "target_project_id", "external_url", "external_name", "dependency_type", "created_at") SELECT "id", "project_id", "target_project_id", "external_url", "external_name", "dependency_type", "created_at" FROM `project_dependencies`;--> statement-breakpoint
+-- external_url / external_name はこの migration で新設する列で、移行元には存在しない。
+-- drizzle-kit の生成そのままだと "no such column" で失敗するため NULL で埋める。
+INSERT INTO `__new_project_dependencies`("id", "project_id", "target_project_id", "external_url", "external_name", "dependency_type", "created_at") SELECT "id", "project_id", "target_project_id", NULL, NULL, "dependency_type", "created_at" FROM `project_dependencies`;--> statement-breakpoint
 DROP TABLE `project_dependencies`;--> statement-breakpoint
 ALTER TABLE `__new_project_dependencies` RENAME TO `project_dependencies`;--> statement-breakpoint
 PRAGMA foreign_keys=ON;--> statement-breakpoint
