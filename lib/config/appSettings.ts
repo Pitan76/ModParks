@@ -19,6 +19,14 @@ export const appSettingsSchema = z.object({
   apiMaxLimit: z.number().int().min(1).max(200).default(80),
   /** 新規ユーザー登録を受け付けるか */
   registrationEnabled: z.boolean().default(true),
+  /**
+   * cron による自動バックアップを行うか。
+   * 既定は false。バックアップには認証情報が平文で含まれるため、
+   * 内容の暗号化が入るまでは明示的に有効化した場合のみ動作させます。
+   */
+  autoBackupEnabled: z.boolean().default(false),
+  /** 自動バックアップで残す世代数。これを超えた古いものから削除します */
+  autoBackupKeepCount: z.number().int().min(1).max(90).default(14),
 });
 
 export type AppSettings = z.infer<typeof appSettingsSchema>;
@@ -39,6 +47,8 @@ export const APP_SETTING_FIELDS: AppSettingField[] = [
   { key: "apiDefaultLimit", type: "number", labelKey: "apiDefaultLimit", helpKey: "apiDefaultLimitHelp" },
   { key: "apiMaxLimit", type: "number", labelKey: "apiMaxLimit", helpKey: "apiMaxLimitHelp" },
   { key: "registrationEnabled", type: "boolean", labelKey: "registrationEnabled", helpKey: "registrationEnabledHelp" },
+  { key: "autoBackupEnabled", type: "boolean", labelKey: "autoBackupEnabled", helpKey: "autoBackupEnabledHelp" },
+  { key: "autoBackupKeepCount", type: "number", labelKey: "autoBackupKeepCount", helpKey: "autoBackupKeepCountHelp" },
 ];
 
 /**

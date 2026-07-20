@@ -7,7 +7,11 @@ main = "worker-wrapper.js"
 assets = { directory = ".open-next/assets", binding = "ASSETS" }
 
 [triggers]
-crons = ["0 * * * *"] # 毎時0分に実行
+# 式は worker-wrapper.js の CRON_ROUTES のキーと一致させること
+crons = [
+  "0 * * * *", # 毎時0分: 外部サービスとの同期
+  "0 3 * * *", # 毎日 03:00 UTC: 自動バックアップ（アプリ設定で既定は無効）
+]
 
 [[d1_databases]]
 binding        = "DB"
