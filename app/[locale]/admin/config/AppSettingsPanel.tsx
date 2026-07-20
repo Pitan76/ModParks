@@ -61,7 +61,7 @@ export default function AppSettingsPanel({ initialSettings }: { initialSettings:
                   }
                   label={t(field.labelKey)}
                 />
-                <Typography variant="caption" color="text.secondary" display="block">
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
                   {t(field.helpKey)}
                 </Typography>
               </Box>

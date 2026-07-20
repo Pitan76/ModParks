@@ -91,7 +91,6 @@ export function isStructuralOnly(rawLine: string): boolean {
  */
 export function toPlainDescription(description: string | null | undefined): string {
   if (!description) return "";
-  console.log("=== DEBUG ModParks toPlainDescription ===", JSON.stringify(description));
 
   const noHtml = stripHtml(description);
   // コードフェンス ```...``` はブロックごと除去

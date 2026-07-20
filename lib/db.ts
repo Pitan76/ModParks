@@ -8,6 +8,7 @@ export interface Env {
   DB: D1Database;
   R2: R2Bucket;
   modparks_storage: R2Bucket;
+  SETTINGS_KV: KVNamespace;
   AUTH_SECRET: string;
   AUTH_GITHUB_ID: string;
   AUTH_GITHUB_SECRET: string;
