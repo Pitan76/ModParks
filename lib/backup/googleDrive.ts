@@ -99,7 +99,21 @@ async function requestAccessToken(body: URLSearchParams): Promise<string> {
   });
 
   if (!res.ok) {
-    throw new Error(`Google token request failed (${res.status}): ${await res.text()}`);
+    const text = await res.text();
+
+    // invalid_grant はリフレッシュトークンの失効。原因が分かりにくく、
+    // 特に「OAuth 同意画面がテストモードのままだと 7 日で失効する」ことに
+    // 気づけず自動バックアップが静かに止まるため、対処法まで含めて示す。
+    if (text.includes("invalid_grant")) {
+      throw new Error(
+        "Google refresh token is no longer valid. This usually means the OAuth consent screen is still in " +
+          "Testing mode (refresh tokens expire after 7 days) or access was revoked. " +
+          "Publish the app to Production in the Google Cloud Console, then re-run scripts/google-oauth-setup.mjs " +
+          `and update GOOGLE_OAUTH_REFRESH_TOKEN. Original response: ${text}`
+      );
+    }
+
+    throw new Error(`Google token request failed (${res.status}): ${text}`);
   }
 
   const data = (await res.json()) as { access_token?: string };
