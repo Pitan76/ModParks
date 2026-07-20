@@ -83,12 +83,17 @@ const TABLE_RESTORE_ORDER = [
   "notifications",
 ];
 
-/**
- * データベースの全テーブルのデータをダンプし、JSON 形式で R2 バケットに保存します。
- */
-export async function createBackup() {
-  const { db } = await getAdminDb();
+/** バックアップファイルのフォーマット世代。復元側の互換性判定に使います。 */
+const BACKUP_FORMAT_VERSION = "1.0";
 
+/** このフォーマット世代の復元を受け付けるバージョンの一覧。 */
+const SUPPORTED_BACKUP_VERSIONS = ["1.0"];
+
+/**
+ * 全テーブルのデータをダンプして R2 に保存し、そのキーを返します。
+ * `prefix` で保存先を分けます（通常のバックアップと復元前スナップショットの区別）。
+ */
+async function dumpToR2(db: any, prefix: "backup" | "snapshot") {
   const backupData: Record<string, any[]> = {};
 
   for (const [tableName, tableObj] of Object.entries(SCHEMA_TABLES)) {
@@ -97,17 +102,53 @@ export async function createBackup() {
   }
 
   const payload = {
-    version: "1.0",
+    version: BACKUP_FORMAT_VERSION,
     timestamp: Date.now(),
     tables: backupData,
   };
 
-  const jsonStr = JSON.stringify(payload, null, 2);
-  const key = `backup/backup_${payload.timestamp}.json`;
+  // 整形インデントはファイルサイズを大きく膨らませるだけなので付けません
+  const jsonStr = JSON.stringify(payload);
+  const key = `${prefix}/${prefix}_${payload.timestamp}.json`;
 
   const { getR2Bucket, uploadToR2 } = await import("@/lib/r2");
   const bucket = await getR2Bucket();
   await uploadToR2(bucket, key, jsonStr, "application/json");
+
+  return key;
+}
+
+/**
+ * バックアップペイロードの形式を検証します。
+ * 未知の世代を現行スキーマに流し込むと不整合を起こすため、バージョンを明示的に照合します。
+ */
+function validateBackupPayload(payload: any): Record<string, any[]> {
+  if (!payload || typeof payload !== "object" || !payload.tables) {
+    throw new Error("Invalid backup file format");
+  }
+  if (!SUPPORTED_BACKUP_VERSIONS.includes(payload.version)) {
+    throw new Error(
+      `Unsupported backup version: ${payload.version ?? "(none)"}. Supported: ${SUPPORTED_BACKUP_VERSIONS.join(", ")}`
+    );
+  }
+
+  // 現行スキーマに存在しないテーブルが含まれている場合、その分は復元されません。
+  // 黙って落とすと気づけないため、明示的に失敗させます。
+  const unknown = Object.keys(payload.tables).filter((t) => !SCHEMA_TABLES[t]);
+  if (unknown.length > 0) {
+    throw new Error(`Backup contains tables unknown to the current schema: ${unknown.join(", ")}`);
+  }
+
+  return payload.tables;
+}
+
+/**
+ * データベースの全テーブルのデータをダンプし、JSON 形式で R2 バケットに保存します。
+ */
+export async function createBackup() {
+  const { db } = await getAdminDb();
+
+  const key = await dumpToR2(db, "backup");
 
   revalidatePath("/admin/backup");
   return { success: true, key };
@@ -142,6 +183,12 @@ export async function getBackups() {
 export async function deleteBackup(key: string) {
   await getAdminDb();
 
+  // key はクライアントから渡ってくるため、バックアップ以外の
+  // R2 オブジェクト（アップロード済みファイル等）を消せないよう制限します
+  if (!key.startsWith("backup/") && !key.startsWith("snapshot/")) {
+    throw new Error("Invalid backup key");
+  }
+
   const { getR2Bucket, deleteFromR2 } = await import("@/lib/r2");
   const bucket = await getR2Bucket();
 
@@ -151,36 +198,76 @@ export async function deleteBackup(key: string) {
   return { success: true };
 }
 
+// D1 が 1 ステートメントあたりに許容するバインドパラメータの上限。
+// 1 行あたりの列数からチャンクサイズを逆算するために使います。
+const D1_MAX_BOUND_PARAMS = 100;
+
+/**
+ * 行データを、D1 のバインドパラメータ上限を超えないチャンクに分割します。
+ * 列数はテーブルごとに異なるため、固定の行数ではなく列数から逆算します。
+ */
+function chunkRows(rows: any[]): any[][] {
+  const columnCount = Math.max(1, Object.keys(rows[0]).length);
+  const chunkSize = Math.max(1, Math.floor(D1_MAX_BOUND_PARAMS / columnCount));
+
+  const chunks: any[][] = [];
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    chunks.push(rows.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
 /**
  * 指定されたテーブルデータを用いてデータベースをリストアします。
- * トランザクション内で全削除および再インサートを行います。
+ *
+ * D1 は prepared statement 経由の明示的な BEGIN / COMMIT を許可しないため、
+ * drizzle の `db.transaction()` は使えません。代わりに `db.batch()` を使います。
+ * batch は内部で単一のトランザクションとして実行されるため、
+ * 「全削除したが再挿入に失敗して DB が空のまま残る」という事態を防げます。
  */
 async function importBackupData(db: any, tablesData: Record<string, any[]>) {
-  await db.transaction(async (tx: any) => {
-    // 1. 削除処理 (子から親の順 = TABLE_RESTORE_ORDER の逆順)
-    const deleteOrder = [...TABLE_RESTORE_ORDER].reverse();
-    for (const tableName of deleteOrder) {
-      const tableObj = SCHEMA_TABLES[tableName];
-      if (tableObj) {
-        await tx.delete(tableObj);
-      }
-    }
+  const statements: any[] = [];
 
-    // 2. 挿入処理 (親から子の順 = TABLE_RESTORE_ORDER の順)
-    for (const tableName of TABLE_RESTORE_ORDER) {
-      const tableObj = SCHEMA_TABLES[tableName];
-      const rows = tablesData[tableName];
-      if (tableObj && rows && rows.length > 0) {
-        // SQLite のプレースホルダーパラメータ制限に引っかからないよう、
-        // データを 100 件ずつのチャンクに分けてインサートします
-        const chunkSize = 100;
-        for (let i = 0; i < rows.length; i += chunkSize) {
-          const chunk = rows.slice(i, i + chunkSize);
-          await tx.insert(tableObj).values(chunk);
-        }
+  // 1. 削除処理 (子から親の順 = TABLE_RESTORE_ORDER の逆順)
+  for (const tableName of [...TABLE_RESTORE_ORDER].reverse()) {
+    const tableObj = SCHEMA_TABLES[tableName];
+    if (tableObj) {
+      statements.push(db.delete(tableObj));
+    }
+  }
+
+  // 2. 挿入処理 (親から子の順 = TABLE_RESTORE_ORDER の順)
+  for (const tableName of TABLE_RESTORE_ORDER) {
+    const tableObj = SCHEMA_TABLES[tableName];
+    const rows = tablesData[tableName];
+    if (tableObj && rows && rows.length > 0) {
+      for (const chunk of chunkRows(rows)) {
+        statements.push(db.insert(tableObj).values(chunk));
       }
     }
-  });
+  }
+
+  // batch は空配列を受け付けないため、念のためガードします
+  if (statements.length === 0) return;
+
+  await db.batch(statements as [any, ...any[]]);
+}
+
+/**
+ * 検証済みのテーブルデータで DB を置換します。
+ * 置換前に必ず現状のスナップショットを取得し、切り戻し元を確保します。
+ */
+async function performRestore(db: any, payload: any) {
+  const tables = validateBackupPayload(payload);
+
+  // 復元は既存データを全削除します。取り返しがつかないため、
+  // 実行直前の状態を必ず snapshot/ に退避してから進めます。
+  const snapshotKey = await dumpToR2(db, "snapshot");
+
+  await importBackupData(db, tables);
+
+  revalidatePath("/admin/backup");
+  return { success: true, snapshotKey };
 }
 
 /**
@@ -189,6 +276,10 @@ async function importBackupData(db: any, tablesData: Record<string, any[]>) {
 export async function restoreBackup(key: string) {
   const { db } = await getAdminDb();
 
+  if (!key.startsWith("backup/") && !key.startsWith("snapshot/")) {
+    throw new Error("Invalid backup key");
+  }
+
   const { getR2Bucket } = await import("@/lib/r2");
   const bucket = await getR2Bucket();
   const obj = await bucket.get(key);
@@ -196,17 +287,7 @@ export async function restoreBackup(key: string) {
     throw new Error("Backup file not found in R2");
   }
 
-  const jsonStr = await obj.text();
-  const payload = JSON.parse(jsonStr);
-
-  if (!payload.tables || !payload.version) {
-    throw new Error("Invalid backup file format");
-  }
-
-  await importBackupData(db, payload.tables);
-
-  revalidatePath("/admin/backup");
-  return { success: true };
+  return performRestore(db, JSON.parse(await obj.text()));
 }
 
 /**
@@ -215,14 +296,5 @@ export async function restoreBackup(key: string) {
 export async function restoreBackupFromJson(jsonStr: string) {
   const { db } = await getAdminDb();
 
-  const payload = JSON.parse(jsonStr);
-
-  if (!payload.tables || !payload.version) {
-    throw new Error("Invalid backup file format");
-  }
-
-  await importBackupData(db, payload.tables);
-
-  revalidatePath("/admin/backup");
-  return { success: true };
+  return performRestore(db, JSON.parse(jsonStr));
 }
