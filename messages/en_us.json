@@ -630,7 +630,11 @@
       "secretDeleted": "Secret deleted",
       "cancel": "Cancel",
       "save": "Save",
-      "delete": "Delete"
+      "delete": "Delete",
+      "mailFromAddress": "Sender email address",
+      "mailFromAddressHelp": "Must be on a domain verified in Resend, otherwise sending will fail.",
+      "mailFromName": "Sender display name",
+      "mailFromNameHelp": "e.g. ModParks. Leave blank to send with the address only."
     },
     "reports": {
       "title": "Report Management",

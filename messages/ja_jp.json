@@ -616,7 +616,11 @@
       "secretDeleted": "シークレットを削除しました",
       "cancel": "キャンセル",
       "save": "保存",
-      "delete": "削除"
+      "delete": "削除",
+      "mailFromAddress": "送信元メールアドレス",
+      "mailFromAddressHelp": "Resend で検証済みのドメインのアドレスを指定してください。未検証だと送信に失敗します。",
+      "mailFromName": "送信元の表示名",
+      "mailFromNameHelp": "例: ModParks。空にするとアドレスのみで送信します。"
     },
     "projects": {
       "title": "プロジェクト管理",
