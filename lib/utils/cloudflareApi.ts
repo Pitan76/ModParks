@@ -16,8 +16,17 @@ export type CloudflareApiConfig = {
   scriptName: string;
 };
 
-/** wrangler.toml から変更できない、認証基盤に直結するシークレット */
-export const PROTECTED_SECRETS = new Set(["AUTH_SECRET", "CLOUDFLARE_API_TOKEN"]);
+/**
+ * wrangler.toml から変更できない、認証基盤に直結するシークレット。
+ *
+ * BACKUP_ENCRYPTION_KEY は、これを失うと既存のバックアップを一切復号できなくなり、
+ * 復元手段そのものが失われるため保護対象に含めています。
+ */
+export const PROTECTED_SECRETS = new Set([
+  "AUTH_SECRET",
+  "CLOUDFLARE_API_TOKEN",
+  "BACKUP_ENCRYPTION_KEY",
+]);
 
 export function getCloudflareApiConfig(): CloudflareApiConfig | null {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;

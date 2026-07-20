@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
@@ -40,6 +40,7 @@ import {
   restoreBackup,
   restoreBackupFromJson,
   createPreRestoreSnapshot,
+  getEncryptionStatus,
   planMergeFromBackup,
   applyMergeFromBackup,
   getBackups
@@ -127,6 +128,14 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
     totpToken.trim().length > 0 &&
     confirmPhrase.trim() === MERGE_CONFIRM_PHRASE &&
     !isPending;
+
+  // 暗号鍵が未設定だとバックアップ作成が失敗するため、開いた時点で確認して警告する
+  const [encryptionConfigured, setEncryptionConfigured] = useState<boolean | null>(null);
+  useEffect(() => {
+    getEncryptionStatus()
+      .then((res) => setEncryptionConfigured(res.configured))
+      .catch(() => setEncryptionConfigured(null));
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 

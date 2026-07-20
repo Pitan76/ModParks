@@ -36,6 +36,17 @@ export async function createBackup() {
 }
 
 /**
+ * バックアップの暗号化が使える状態かを返します。
+ * 未設定だとバックアップ作成そのものが失敗するため、UI で事前に警告するために使います。
+ */
+export async function getEncryptionStatus() {
+  await getAdminDb();
+  const { isEncryptionConfigured } = await import("@/lib/backup/crypto");
+
+  return { configured: isEncryptionConfigured() };
+}
+
+/**
  * R2 バケットに保存されているバックアップファイルの一覧を取得します。
  */
 export async function getBackups() {
