@@ -171,6 +171,13 @@ export async function restoreBackup(key: string, totpToken: string, snapshotKey?
   // 操作者情報は復元前に確定させます。復元後は users が入れ替わり、userId から引けなくなるためです。
   const actor = await getActor(db, userId);
 
+  return performRestore(db, await loadBackupFromR2(key), snapshotKey, actor, key);
+}
+
+/**
+ * R2 上のバックアップを読み出します。復元・マージの入口で共用します。
+ */
+async function loadBackupFromR2(key: string) {
   if (!key.startsWith("backup/") && !key.startsWith("snapshot/")) {
     throw new Error("Invalid backup key");
   }
@@ -182,7 +189,69 @@ export async function restoreBackup(key: string, totpToken: string, snapshotKey?
     throw new Error("Backup file not found in R2");
   }
 
-  return performRestore(db, JSON.parse(await obj.text()), snapshotKey, actor, key);
+  return JSON.parse(await obj.text());
+}
+
+/**
+ * マージ内容を試算します。DBは変更しません。
+ *
+ * 全置換の復元と違い現行データを消さないため、TOTP 再認証までは求めず
+ * 管理者権限のみで試算できるようにしています。
+ */
+export async function planMergeFromBackup(key: string) {
+  const { db } = await getAdminDb();
+  const { planMerge } = await import("@/lib/backup/merge");
+
+  return planMerge(db, await loadBackupFromR2(key));
+}
+
+/** アップロードされた JSON からマージ内容を試算します。 */
+export async function planMergeFromJson(jsonStr: string) {
+  const { db } = await getAdminDb();
+  const { planMerge } = await import("@/lib/backup/merge");
+
+  return planMerge(db, JSON.parse(jsonStr));
+}
+
+/**
+ * マージを実行します。
+ *
+ * 既存データを消しはしませんが、last_write_wins による上書きが発生するため
+ * 復元と同様に TOTP 再認証と事前スナップショットを必須にしています。
+ */
+export async function applyMergeFromBackup(key: string, totpToken: string, snapshotKey?: string) {
+  const { db, userId } = await getReauthenticatedAdminDb(totpToken);
+  const actor = await getActor(db, userId);
+  const { applyMerge } = await import("@/lib/backup/merge");
+
+  const payload = await loadBackupFromR2(key);
+  const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot"));
+
+  try {
+    const plan = await applyMerge(db, payload);
+
+    await writeAuditLog(db, {
+      action: "merge",
+      status: "success",
+      backupKey: key,
+      snapshotKey: effectiveSnapshotKey,
+      detail: { totals: plan.totals },
+      ...actor,
+    });
+
+    revalidatePath("/admin/backup");
+    return { success: true, plan, snapshotKey: effectiveSnapshotKey };
+  } catch (e: any) {
+    await writeAuditLog(db, {
+      action: "merge",
+      status: "failure",
+      backupKey: key,
+      snapshotKey: effectiveSnapshotKey,
+      detail: { error: e?.message ?? String(e) },
+      ...actor,
+    });
+    throw e;
+  }
 }
 
 /**
