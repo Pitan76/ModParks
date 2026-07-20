@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
 
 interface LocaleSyncerProps {
   userLocale: string;
@@ -14,7 +13,6 @@ interface LocaleSyncerProps {
  */
 export default function LocaleSyncer({ userLocale }: LocaleSyncerProps) {
   const currentLocale = useLocale();
-  const router = useRouter();
 
   useEffect(() => {
     if (userLocale && userLocale !== currentLocale) {

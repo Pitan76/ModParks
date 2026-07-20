@@ -24,7 +24,7 @@ export default function EditableProjectIcon({ projectId, projectSlug, projectNam
   const [iconUrl, setIconUrl] = useState<string>(initialIconUrl || "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const t = useTranslations("Project");

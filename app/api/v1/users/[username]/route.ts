@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles } from "@/db/schema";
-import { validateApiKey } from "@/lib/api-auth";
 import { eq } from "drizzle-orm";
 import { ApiUser } from "@/types/api";
 
-export async function GET(request: Request, { params }: { params: Promise<{ username: string }> }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ username: string }> }) {
   const d1 = await getD1();
   const db = getDb(d1);
 

@@ -52,5 +52,5 @@ ModParksは、モダンなWeb技術をベースに構築されたフルスタッ
 - `components/` : 再利用可能なUIコンポーネント（機能ごとにディレクトリ分割）
 - `db/` : Drizzle ORMのスキーマ定義とマイグレーションファイル
 - `lib/` : ユーティリティ関数、APIクライアント、サーバーアクション等のビジネスロジック
-- `messages/` : 多言語対応用のJSONファイル (`en.json`, `ja.json`)
+- `messages/` : 多言語対応用のJSONファイル (`en_us.json`, `ja_jp.json`)
 - `docs-md/` : プラットフォーム全体のドキュメント・仕様書

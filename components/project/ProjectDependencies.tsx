@@ -49,15 +49,6 @@ export default function ProjectDependencies({ dependencies, dependents }: Projec
     }
   };
 
-  const getDepLabel = (type: string) => {
-    switch(type) {
-      case "required": return "Required";
-      case "optional": return "Optional";
-      case "incompatible": return "Incompatible";
-      case "embedded": return "Embedded";
-      default: return type;
-    }
-  };
 
   return (
     <Box>

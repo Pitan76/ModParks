@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import Typography from "@mui/material/Typography";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useRouter } from "@/i18n/routing";
 import { useSearchParams, usePathname } from "next/navigation";
@@ -42,7 +41,7 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
     setTab(getTabFromParam(tabParam));
   }, [tabParam]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     if (newValue === 4) {
       router.push(manageHref);
       return;

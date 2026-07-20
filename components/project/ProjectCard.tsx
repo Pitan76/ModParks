@@ -2,17 +2,13 @@
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import CardActionArea from "@mui/material/CardActionArea";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
-import Stack from "@mui/material/Stack";
-import DownloadIcon from "@mui/icons-material/Download";
 import ExtensionIcon from "@mui/icons-material/Extension";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import Tooltip from "@mui/material/Tooltip";
-import { Link, useRouter } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 import PersonIcon from "@mui/icons-material/Person";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";

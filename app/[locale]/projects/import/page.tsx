@@ -25,7 +25,7 @@ export default async function ImportProjectsPage({ params }: { params: Promise<{
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 4 }}>
-        外部からの一括インポート
+        {t("batchImportTitle")}
       </Typography>
 
       <BatchImportClient

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -41,7 +40,7 @@ function toDisplayError(err: unknown, fallback: string): string {
 }
 
 export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProject }: BatchImportClientProps) {
-  const router = useRouter();
+  const t = useTranslations("Project");
   const [projects, setProjects] = useState<ImportedProject[]>([]);
   const [source, setSource] = useState<"modrinth" | "curseforge">("modrinth");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -67,7 +66,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
       setSource(targetSource);
       setSelected(new Set(result.projects.map(p => p.id)));
     } catch (err) {
-      setError(toDisplayError(err, `${targetSource} の取得に失敗しました。`));
+      setError(toDisplayError(err, t("fetchFailed", { source: targetSource })));
     } finally {
       setLoading(false);
     }
@@ -97,14 +96,14 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
       const res = await importProjects(toImport, source, addExternalLink);
 
       if (!res.success) {
-        setError(res.error || "インポートに失敗しました。");
+        setError(res.error || t("importFail"));
         return;
       }
-      setSuccessMsg(`${res.importedCount}件のプロジェクトをインポートしました。`);
+      setSuccessMsg(t("importSuccess", { count: res.importedCount }));
       setProjects([]);
       setSelected(new Set());
     } catch (err) {
-      setError(toDisplayError(err, "インポートに失敗しました。"));
+      setError(toDisplayError(err, t("importFail")));
     } finally {
       setImporting(false);
     }
@@ -113,7 +112,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
   return (
     <Box>
       <Typography variant="body1" sx={{ mb: 3 }}>
-        連携済みの外部サービスからプロジェクトを一括インポートします。
+        {t("batchImportDesc")}
       </Typography>
 
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
@@ -123,16 +122,16 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
         {[
           {
             id: "modrinth" as const,
-            label: "Modrinthから取得",
+            label: t("fetchModrinth"),
             disabled: !hasModrinthKey || loading || importing,
-            warning: "※アカウント設定でAPIキーを登録してください",
+            warning: t("modrinthKeyWarning"),
             showWarning: !hasModrinthKey,
           },
           {
             id: "curseforge" as const,
-            label: "CurseForgeから取得",
+            label: t("fetchCurseForge"),
             disabled: !hasCurseForgeKey || !hasCurseForgeProject || loading || importing,
-            warning: "※アカウント設定でAPIキーとProject IDを登録してください",
+            warning: t("curseforgeKeyWarning"),
             showWarning: !hasCurseForgeKey || !hasCurseForgeProject,
           }
         ].map((config) => (
@@ -167,9 +166,9 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
                       onChange={handleToggleAll}
                     />
                   </TableCell>
-                  <TableCell>プロジェクト名</TableCell>
-                  <TableCell>Slug</TableCell>
-                  <TableCell>種類</TableCell>
+                  <TableCell>{t("fields.name")}</TableCell>
+                  <TableCell>{t("fields.slug")}</TableCell>
+                  <TableCell>{t("fields.type")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -195,7 +194,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
                 onChange={(e) => setAddExternalLink(e.target.checked)} 
                 style={{ marginRight: 8, transform: "scale(1.2)" }}
               />
-              <Typography variant="body2">元のページのリンクを外部リンクとして追加する</Typography>
+              <Typography variant="body2">{t("addExternalLink")}</Typography>
             </label>
           </Box>
 
@@ -205,7 +204,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
             onClick={handleImport} 
             disabled={selected.size === 0 || importing}
           >
-            {importing ? "インポート中..." : `${selected.size}件をインポート`}
+            {importing ? t("importing") : t("importButton", { count: selected.size })}
           </Button>
         </>
       )}

@@ -78,6 +78,18 @@
     "cta": "投稿する"
   },
   "Project": {
+    "batchImportTitle": "外部からの一括インポート",
+    "batchImportDesc": "連携済みの外部サービスからプロジェクトを一括インポートします。",
+    "fetchModrinth": "Modrinthから取得",
+    "fetchCurseForge": "CurseForgeから取得",
+    "modrinthKeyWarning": "※アカウント設定でAPIキーを登録してください",
+    "curseforgeKeyWarning": "※アカウント設定でAPIキーとProject IDを登録してください",
+    "importing": "インポート中...",
+    "addExternalLink": "元のページのリンクを外部リンクとして追加する",
+    "importButton": "{count}件をインポート",
+    "importSuccess": "{count}件のプロジェクトをインポートしました。",
+    "importFail": "インポートに失敗しました。",
+    "fetchFailed": "{source} の取得に失敗しました。",
     "type": {
       "mod": "MOD",
       "plugin": "プラグイン",

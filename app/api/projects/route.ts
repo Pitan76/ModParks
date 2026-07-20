@@ -45,8 +45,6 @@ export async function POST(req: NextRequest) {
     const modrinthId = formData.get("modrinthId") as string | null;
     const curseforgeId = formData.get("curseforgeId") as string | null;
     const issueTrackerUrl = formData.get("issueTrackerUrl") as string | null;
-    const extDlStr = formData.get("externalDownloads") as string | null;
-    const externalDownloads = extDlStr ? parseInt(extDlStr, 10) : 0;
     const ideaId = formData.get("ideaId") as string | null;
 
     await db.insert(projects).values({

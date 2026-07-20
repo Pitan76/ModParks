@@ -39,7 +39,6 @@ interface AdvancedSearchDialogProps {
 
 export default function AdvancedSearchDialog({ open, onClose, onApply, initialFilters, availableTags = [], availablePlatforms = [] }: AdvancedSearchDialogProps) {
   const t = useTranslations("Search");
-  const tCommon = useTranslations("Common");
   const tTags = useTranslations("Tags");
 
   const [tempAuthor, setTempAuthor] = useState<string>(initialFilters.author || "");

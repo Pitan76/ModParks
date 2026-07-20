@@ -6,7 +6,6 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import ReportIcon from "@mui/icons-material/Report";
 import GavelIcon from "@mui/icons-material/Gavel";
 import CodeIcon from "@mui/icons-material/Code";
 import LinkIcon from "@mui/icons-material/Link";

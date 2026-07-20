@@ -6,7 +6,7 @@ import { eq, desc, and, isNull } from "drizzle-orm";
 import { ApiVersion } from "@/types/api";
 import { createVersionSchema, isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2 } from "@/lib/r2";
+import { buildR2Key, getR2PublicUrl, uploadToR2 } from "@/lib/r2";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { extractAndUploadRecipes } from "@/lib/utils/recipe";
 import { revalidatePath } from "next/cache";

@@ -78,6 +78,18 @@
     "cta": "Submit"
   },
   "Project": {
+    "batchImportTitle": "Batch Import from External Platforms",
+    "batchImportDesc": "Import projects in bulk from your connected external services.",
+    "fetchModrinth": "Fetch from Modrinth",
+    "fetchCurseForge": "Fetch from CurseForge",
+    "modrinthKeyWarning": "* Please register your API key in your account settings",
+    "curseforgeKeyWarning": "* Please register your API key and Project ID in your account settings",
+    "importing": "Importing...",
+    "addExternalLink": "Add original page URL as an external link",
+    "importButton": "Import {count} projects",
+    "importSuccess": "Successfully imported {count} projects.",
+    "importFail": "Failed to import.",
+    "fetchFailed": "Failed to fetch from {source}.",
     "type": {
       "mod": "Mod",
       "plugin": "Plugin",

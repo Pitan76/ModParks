@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { ideas, users, userProfiles } from "@/db/schema";
-import { validateApiKey } from "@/lib/api-auth";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { eq, desc } from "drizzle-orm";
 import { ApiIdea, PaginatedResponse } from "@/types/api";

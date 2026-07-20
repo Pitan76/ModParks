@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles, apiKeys } from "@/db/schema";
-import { eq, or, sql } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { TOTP } from "otpauth";
 
