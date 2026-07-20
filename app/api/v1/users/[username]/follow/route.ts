@@ -3,6 +3,7 @@ import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { userFollows, userProfiles } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 
 export async function POST(_request: Request, { params }: { params: Promise<{ username: string }> }) {
   try {

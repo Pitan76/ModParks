@@ -7,6 +7,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
+import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 
 /** アイデアの投稿者・タイトルを取得する（通知の宛先・表示用） */
 async function getIdeaTarget(db: any, ideaId: string) {

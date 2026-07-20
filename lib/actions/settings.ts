@@ -5,6 +5,7 @@ import { users, userProfiles, userSettings, apiKeys, accounts, rateLimits } from
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { recordDeletion } from "@/lib/backup/tombstone";
 
 export async function updateProfile(data: { displayName: string, bio: string, avatarUrl: string, links: string, locale: "ja" | "en" }) {
   const { db, userId } = await getAuthenticatedDb();

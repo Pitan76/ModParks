@@ -6,6 +6,7 @@ import { collections, collectionItems, projects, users, userProfiles, projectTag
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 
 export async function createCollection(name: string, description: string | null, visibility: "public" | "unlisted" | "private") {
   const { db, userId } = await getAuthenticatedDb();

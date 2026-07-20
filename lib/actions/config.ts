@@ -4,6 +4,7 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { tags, platforms } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { recordDeletion } from "@/lib/backup/tombstone";
 
 export async function createTag(name: string, slug: string, description?: string) {
   const { db } = await getAdminDb();

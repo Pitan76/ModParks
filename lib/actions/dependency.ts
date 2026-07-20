@@ -5,6 +5,7 @@ import { getDatabase } from "@/lib/db";
 import { projectDependencies, projects, projectMembers } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { recordDeletion } from "@/lib/backup/tombstone";
 
 export type DependencyType = "required" | "optional" | "incompatible" | "embedded";
 

@@ -3,6 +3,7 @@ import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { projectComments, projects, projectMembers } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { recordDeletion } from "@/lib/backup/tombstone";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ slug: string, commentId: string }> }) {
   try {

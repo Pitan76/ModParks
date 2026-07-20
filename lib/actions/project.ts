@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
 import { notifyNewProject } from "@/lib/notifications/notify";
+import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 
 /** 下書き→公開の初回公開時のみ、作者フォロワーへ新プロジェクト通知を送る */
 async function maybeNotifyPublish(

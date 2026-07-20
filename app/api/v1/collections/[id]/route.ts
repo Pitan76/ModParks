@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { collections } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { recordDeletion } from "@/lib/backup/tombstone";
 
 export async function PUT(
   request: Request,
