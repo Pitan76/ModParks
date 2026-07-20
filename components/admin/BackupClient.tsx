@@ -162,7 +162,12 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
       try {
         const res = await createBackup();
         if (res.success) {
-          showSnackbar(tAdmin("backup.successCreate"), "success");
+          // R2 には保存できたが Drive への退避に失敗した場合は、成功で流さず警告する
+          if (res.driveError) {
+            showSnackbar(tAdmin("backup.driveMirrorFailed", { error: res.driveError }), "error");
+          } else {
+            showSnackbar(tAdmin("backup.successCreate"), "success");
+          }
           await refreshBackupList();
         }
       } catch (e: any) {
