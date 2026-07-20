@@ -6,7 +6,7 @@ ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラ
 - プロジェクトの公開と探索: MODやプラグインを検索、発見、ダウンロード。
 - バージョン管理: バージョンごとのJar/Zipファイルのアップロード、または外部URL（GitHub Releases, Modrinth, CurseForge 等）へのリンク機能。
 - 多言語対応: 日本語と英語の表示切り替え。
-- 認証: GitHub アカウントを用いたログイン。
+- 認証: 2FA対応の通常ログインとGitHubアカウントを用いたソーシャルログイン。
 - アイデアボード: ユーザーが「こんなMODが欲しい！」を投稿・議論し、実現されたプロジェクトと紐付けられる機能。
 - 記法: Markdown, PlainText, PukiWikiの文法が対応
 - インポートと同期機能: 他のプラットフォームとの連携が強み。インポートはもちろんDL数同期なども
@@ -21,6 +21,7 @@ ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラ
 - **ストレージ**: [Cloudflare R2](https://developers.cloudflare.com/r2/)
 - **認証**: [Auth.js (NextAuth v5)](https://authjs.dev/)
 - **多言語化**: [next-intl](https://next-intl-docs.vercel.app/)
+- **実行環境**: Cloudflare Workers
 
 ## ローカル開発環境のセットアップ
 
