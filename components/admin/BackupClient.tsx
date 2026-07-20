@@ -186,6 +186,8 @@ export default function BackupClient({ initialBackups, locale }: BackupClientPro
         const res = await sendBackupToDrive(key);
         if (res.success) {
           showSnackbar(tAdmin("backup.driveUploadSuccess"), "success");
+          // 保存先が分かるよう、Drive 上のファイルをそのまま開く
+          if (res.webViewLink) window.open(res.webViewLink, "_blank");
         } else {
           showSnackbar(tAdmin("backup.driveUploadFailed", { error: res.message }), "error");
         }

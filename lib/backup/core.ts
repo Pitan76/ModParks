@@ -244,6 +244,8 @@ export async function dumpToR2(db: any, prefix: "backup" | "snapshot") {
 export interface DriveMirrorResult {
   attempted: boolean;
   fileId?: string;
+  /** Drive 上でファイルを開く URL。保存先を確認するために監査ログに残します */
+  webViewLink?: string;
   error?: string;
 }
 
