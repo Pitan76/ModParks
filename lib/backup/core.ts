@@ -8,6 +8,7 @@
  * cron ハンドラなど、管理者セッションを持たない文脈からはこちらを直接使います。
  */
 import * as schema from "@/db/schema";
+import { getTableColumns } from "drizzle-orm";
 
 // DB定義のテーブルオブジェクトと、D1での実際のテーブル名（スネークケースなど）のマッピング
 export const SCHEMA_TABLES: Record<string, any> = {
@@ -246,6 +247,38 @@ export function validateBackupPayload(payload: unknown): Record<string, any[]> {
   return p.tables;
 }
 
+/**
+ * JSON から読み戻した行を、drizzle が受け付ける型に復元します。
+ *
+ * バックアップは db.select() の結果を JSON.stringify したものなので、
+ * timestamp 列は Date ではなく ISO 文字列になっています。
+ * drizzle の timestamp は書き込み時に value.getTime() を呼ぶため、
+ * 文字列のまま insert すると "value.getTime is not a function" で失敗します。
+ *
+ * boolean (true/false) と json (オブジェクト) はそのままで正しく変換されるため、
+ * ここでは timestamp 列だけを Date に戻します。
+ */
+export function reviveRows(tableObj: any, rows: Record<string, any>[]): Record<string, any>[] {
+  const columns = getTableColumns(tableObj);
+
+  const timestampColumns = Object.entries(columns)
+    .filter(([, col]: [string, any]) => col?.constructor?.name === "SQLiteTimestamp")
+    .map(([name]) => name);
+
+  if (timestampColumns.length === 0) return rows;
+
+  return rows.map((row) => {
+    const revived = { ...row };
+    for (const name of timestampColumns) {
+      const value = row[name];
+      if (value !== null && value !== undefined && !(value instanceof Date)) {
+        revived[name] = new Date(value);
+      }
+    }
+    return revived;
+  });
+}
+
 // D1 が 1 ステートメントあたりに許容するバインドパラメータの上限。
 // 1 行あたりの列数からチャンクサイズを逆算するために使います。
 const D1_MAX_BOUND_PARAMS = 100;
@@ -289,7 +322,8 @@ export async function importBackupData(db: any, tablesData: Record<string, any[]
     const tableObj = SCHEMA_TABLES[tableName];
     const rows = tablesData[tableName];
     if (tableObj && rows && rows.length > 0) {
-      for (const chunk of chunkRows(rows)) {
+      // JSON 由来の値を drizzle が受け付ける型に戻してから挿入する
+      for (const chunk of chunkRows(reviveRows(tableObj, rows))) {
         statements.push(db.insert(tableObj).values(chunk));
       }
     }
