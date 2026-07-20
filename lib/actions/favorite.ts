@@ -2,8 +2,8 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projectFavorites, projects, users, userProfiles, projectTags } from "@/db/schema";
-import { eq, and, desc, inArray, sql, getTableColumns } from "drizzle-orm";
+import { projectFavorites, projects, users, userProfiles } from "@/db/schema";
+import { eq, and, desc, sql, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";

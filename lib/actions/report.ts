@@ -1,7 +1,6 @@
 "use server";
 
 import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
-import { getDatabase } from "@/lib/db";
 import { reports, projects, users, userProfiles } from "@/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -53,7 +52,7 @@ export async function createReport(projectId: string, formData: FormData) {
 export async function updateReportStatus(
   reportId: string,
   status: "resolved" | "dismissed",
-  formData?: FormData
+  _formData?: FormData
 ) {
   const { db } = await getAdminDb();
 
@@ -75,7 +74,7 @@ export async function updateReportStatus(
  * @returns { success: boolean }
  * @throws Forbidden 管理者権限がない場合
  */
-export async function unpublishProject(projectId: string, formData?: FormData) {
+export async function unpublishProject(projectId: string, _formData?: FormData) {
   const { db } = await getAdminDb();
 
   await db

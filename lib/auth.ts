@@ -4,9 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import Resend from "next-auth/providers/resend";
 import type { NextAuthConfig } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { getDb } from "@/lib/db";
 import * as schema from "@/db/schema";
-import { users, userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 
@@ -195,7 +193,7 @@ export const authConfig = {
       }
       return true;
     },
-    async jwt({ token, user, trigger, session }: { token: any, user?: any, trigger?: any, session?: any }) {
+    async jwt({ token, user, trigger, session: _session }: { token: any, user?: any, trigger?: any, session?: any }) {
       if (user) {
         token.id = user.id;
         token.username = (user as any).username ?? null;

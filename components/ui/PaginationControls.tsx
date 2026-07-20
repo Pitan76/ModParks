@@ -31,7 +31,7 @@ export default function PaginationControls({ totalCount, currentPage, currentLim
     return params.toString();
   };
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     router.push(`${pathname}?${createQueryString("page", value.toString())}`);
   };
 

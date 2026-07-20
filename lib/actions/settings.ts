@@ -1,7 +1,6 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { getDatabase } from "@/lib/db";
 import { users, userProfiles, userSettings, apiKeys, accounts, rateLimits } from "@/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";

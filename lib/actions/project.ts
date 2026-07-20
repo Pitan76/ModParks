@@ -5,10 +5,9 @@ import { getDatabase } from "@/lib/db";
 import { projects, projectTags, projectMembers, users, userProfiles, versions, userSettings, ideas } from "@/db/schema";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, desc, and, or, like, sql, inArray, isNull, getTableColumns } from "drizzle-orm";
+import { eq, desc, and, or, sql, inArray, isNull, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { after } from "next/server";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
 import { notifyNewProject } from "@/lib/notifications/notify";
 

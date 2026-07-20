@@ -102,7 +102,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
   return (
     <>
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-        <Tabs value={filterChannel} onChange={(e, val) => setFilterChannel(val)} aria-label="Version channels">
+        <Tabs value={filterChannel} onChange={(_, val) => setFilterChannel(val)} aria-label="Version channels">
           <Tab label="All" value="all" />
           <Tab label={tVersion("channels.release")} value="release" />
           <Tab label={tVersion("channels.beta")} value="beta" />
