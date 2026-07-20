@@ -1,12 +1,11 @@
 /**
  * アプリケーション全体で利用する設定値
  */
-export const API_CONFIG = {
-  /** 一覧APIのデフォルト取得件数 */
-  DEFAULT_LIMIT: 20,
-  /** 一覧APIの最大取得件数 */
-  MAX_LIMIT: 80,
-} as const;
+/**
+ * API の取得件数は管理画面から変更できるようになったため、
+ * 既定値は lib/config/appSettings.ts に移動しました。
+ * 実行時の値は getAppSettings() で取得してください。
+ */
 
 /** サイトのベースURL */
 export const SITE_URL = "https://modparks.pitan76.net";
