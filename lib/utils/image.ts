@@ -9,7 +9,7 @@
  * @returns リサイズされた画像ファイル、または元のファイル
  */
 export async function resizeImageFile(file: File, maxWidth: number, maxHeight: number): Promise<File> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     // 画像以外のファイルはそのまま返す
     if (!file.type.startsWith("image/")) {
       return resolve(file);

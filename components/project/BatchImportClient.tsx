@@ -99,7 +99,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
         setError(res.error || t("importFail"));
         return;
       }
-      setSuccessMsg(t("importSuccess", { count: res.importedCount }));
+      setSuccessMsg(t("importSuccess", { count: res.importedCount ?? 0 }));
       setProjects([]);
       setSelected(new Set());
     } catch (err) {
