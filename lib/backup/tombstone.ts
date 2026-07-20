@@ -10,6 +10,17 @@ import { deletedRecords } from "@/db/schema";
 import { TABLE_PRIMARY_KEYS } from "@/lib/backup/core";
 
 /**
+ * 墓標を意図的に記録していない削除箇所。
+ * 新しい削除処理を書くときは、ここに当てはまらない限り recordDeletion を呼ぶこと。
+ *
+ * - verificationToken / password_reset_tokens ... mergePolicy が "skip"。
+ *   使い捨ての揮発トークンで、マージ対象外なので墓標を持つ意味がない。
+ * - rate_limits / session ......................... 同上（"skip"）。
+ * - account ....................................... mergePolicy が "manual"。
+ *   自動マージされず管理者が個別に承認するため、墓標による自動抑制を使わない。
+ */
+
+/**
  * 複合主キーを墓標用の単一文字列に変換します。
  * 列の順序で意味が変わるため、順序は TABLE_PRIMARY_KEYS の定義に必ず合わせてください。
  * 呼び出し側で順序を意識せずに済む recordKeyFromRow の利用を推奨します。
