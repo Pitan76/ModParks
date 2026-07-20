@@ -88,6 +88,54 @@ export const TABLE_RESTORE_ORDER = [
   "notifications",
 ];
 
+/**
+ * 各テーブルの主キーを構成する列（drizzle のプロパティ名）。
+ *
+ * 墓標 (deleted_records) のキー生成と、マージ復元でのバックアップ行のキー生成の
+ * 両方がこの定義を参照します。片方だけ列順がずれると墓標が一致しなくなり、
+ * 削除したはずの行が復活するため、定義はここ一箇所に集約しています。
+ *
+ * バックアップの行は db.select() の結果なので、DB の列名ではなく
+ * drizzle のプロパティ名がキーになります。
+ */
+export const TABLE_PRIMARY_KEYS: Record<string, string[]> = {
+  users: ["id"],
+  user_profiles: ["userId"],
+  user_settings: ["userId"],
+  account: ["provider", "providerAccountId"],
+  session: ["sessionToken"],
+  verificationToken: ["identifier", "token"],
+  api_keys: ["id"],
+  projects: ["id"],
+  categories: ["id"],
+  project_categories: ["projectId", "categoryId"],
+  versions: ["id"],
+  version_loaders: ["versionId", "loader"],
+  version_mc_versions: ["versionId", "mcVersion"],
+  project_tags: ["projectId", "tag"],
+  project_dependencies: ["id"],
+  project_members: ["projectId", "userId"],
+  project_favorites: ["projectId", "userId"],
+  collections: ["id"],
+  collection_items: ["collectionId", "projectId"],
+  reports: ["id"],
+  ideas: ["id"],
+  idea_likes: ["ideaId", "userId"],
+  idea_comments: ["id"],
+  version_ideas: ["versionId", "ideaId"],
+  tags: ["id"],
+  platforms: ["id"],
+  authenticator: ["userId", "credentialID"],
+  rate_limits: ["id"],
+  user_follows: ["followerId", "followingId"],
+  collection_follows: ["userId", "collectionId"],
+  project_comments: ["id"],
+  password_reset_tokens: ["id"],
+  project_subscriptions: ["userId", "projectId"],
+  developer_subscriptions: ["subscriberId", "developerId"],
+  notifications: ["id"],
+};
+
 export type AuditAction = "create" | "auto_create" | "restore" | "merge" | "delete" | "snapshot";
 
 export interface AuditEntry {

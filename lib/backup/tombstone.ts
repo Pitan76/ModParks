@@ -7,13 +7,27 @@
  * 行そのものは物理削除のままなので、通常の読み取りクエリには一切影響しません。
  */
 import { deletedRecords } from "@/db/schema";
+import { TABLE_PRIMARY_KEYS } from "@/lib/backup/core";
 
 /**
  * 複合主キーを墓標用の単一文字列に変換します。
- * 列の順序で意味が変わるため、呼び出し側は常に同じ順序で渡してください。
+ * 列の順序で意味が変わるため、順序は TABLE_PRIMARY_KEYS の定義に必ず合わせてください。
+ * 呼び出し側で順序を意識せずに済む recordKeyFromRow の利用を推奨します。
  */
 export function buildRecordKey(...parts: (string | number)[]): string {
   return parts.map(String).join(":");
+}
+
+/**
+ * 行オブジェクトから、そのテーブルの主キー定義に従って墓標キーを生成します。
+ * 列順は TABLE_PRIMARY_KEYS が単一の情報源なので、墓標側とマージ側で必ず一致します。
+ */
+export function recordKeyFromRow(tableName: string, row: Record<string, any>): string {
+  const pkColumns = TABLE_PRIMARY_KEYS[tableName];
+  if (!pkColumns) {
+    throw new Error(`No primary key definition for table: ${tableName}`);
+  }
+  return buildRecordKey(...pkColumns.map((col) => row[col]));
 }
 
 /**

@@ -22,6 +22,7 @@ export async function updateTag(id: string, name: string, slug: string, descript
 export async function deleteTag(id: string) {
   const { db } = await getAdminDb();
   await db.delete(tags).where(eq(tags.id, id));
+  await recordDeletion(db, "tags", id);
   revalidatePath("/admin/config");
   return { success: true };
 }
@@ -43,6 +44,7 @@ export async function updatePlatform(id: string, name: string, slug: string, ico
 export async function deletePlatform(id: string) {
   const { db } = await getAdminDb();
   await db.delete(platforms).where(eq(platforms.id, id));
+  await recordDeletion(db, "platforms", id);
   revalidatePath("/admin/config");
   return { success: true };
 }

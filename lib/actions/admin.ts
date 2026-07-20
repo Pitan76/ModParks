@@ -4,6 +4,7 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { recordDeletion } from "@/lib/backup/tombstone";
 
 export async function updateUserRole(targetUserId: string, newRole: "user" | "admin") {
   const { db, session } = await getAdminDb();
@@ -94,8 +95,17 @@ export async function purgeDeletedUsers() {
   const { db } = await getAdminDb();
   const { isNotNull } = await import("drizzle-orm");
 
+  // 墓標を残すため、削除前に対象の id を控えておく
+  const targets = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(isNotNull(users.deletedAt))
+    .all();
+
   // Hard delete all users where deletedAt is not null
   await db.delete(users).where(isNotNull(users.deletedAt));
+
+  await recordDeletion(db, "users", targets.map((u: { id: string }) => u.id));
 
   revalidatePath("/admin/users");
   return { success: true };
@@ -111,6 +121,8 @@ export async function hardDeleteUser(targetUserId: string) {
   // Hard delete the specific user
   await db.delete(users).where(eq(users.id, targetUserId));
 
+  await recordDeletion(db, "users", targetUserId);
+
   revalidatePath("/admin/users");
   return { success: true };
 }
@@ -120,6 +132,8 @@ export async function adminDeleteProject(projectId: string) {
   const { projects } = await import("@/db/schema");
   
   await db.delete(projects).where(eq(projects.id, projectId));
+  await recordDeletion(db, "projects", projectId);
+
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   return { success: true };
@@ -130,6 +144,8 @@ export async function adminDeleteIdea(ideaId: string) {
   const { ideas } = await import("@/db/schema");
   
   await db.delete(ideas).where(eq(ideas.id, ideaId));
+  await recordDeletion(db, "ideas", ideaId);
+
   revalidatePath("/admin/ideas");
   revalidatePath("/ideas");
   return { success: true };

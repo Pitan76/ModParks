@@ -52,6 +52,7 @@ export async function deleteCollection(id: string) {
   }
 
   await db.delete(collections).where(eq(collections.id, id));
+  await recordDeletion(db, "collections", id);
 
   revalidatePath("/[locale]/profile/[username]", "page");
   return { success: true };
@@ -74,6 +75,7 @@ export async function toggleProjectInCollection(collectionId: string, projectId:
   if (existing) {
     await db.delete(collectionItems)
       .where(and(eq(collectionItems.collectionId, collectionId), eq(collectionItems.projectId, projectId)));
+    await recordDeletion(db, "collection_items", buildRecordKey(collectionId, projectId));
   } else {
     await db.insert(collectionItems).values({ collectionId, projectId });
     added = true;
