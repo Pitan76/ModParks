@@ -16,6 +16,8 @@ import { useTranslations } from "next-intl";
 import { DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { toPlainDescription } from "@/lib/utils/plainText";
 import { useColorMode } from "@/components/ThemeRegistry";
+import ProjectTypeBadge from "./ProjectTypeBadge";
+import ProjectTagBadge from "./ProjectTagBadge";
 
 /**
  * プロジェクト一覧のカードに表示するデータの型定義
@@ -43,26 +45,14 @@ export interface ProjectCardProps {
   layout?: "list" | "grid";
 }
 
-const TYPE_COLOR: Record<ProjectCardProps["project"]["type"], "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"> = {
-  mod:          "primary",
-  plugin:       "secondary",
-  resourcepack: "success",
-  datapack:     "warning",
-  shader:       "info",
-  modpack:      "error",
-};
 
 
 
 
-/**
- * プロジェクトをカード形式で表示するコンポーネント
- * @param props ProjectCardProps プロジェクトのメタ情報や作者情報を含む
- */
+
 export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
   const tTags = useTranslations("Tags");
   const tMenu = useTranslations("ContextMenu");
-  const tProject = useTranslations("Project");
   const router = useRouter();
   const { isNewTheme } = useColorMode();
   const isGrid = layout === "grid";
@@ -148,17 +138,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 >
                   {project.name}
                 </Typography>
-                <Chip
-                  label={tProject(`type.${project.type}`)}
-                  color={TYPE_COLOR[project.type]}
-                  variant="filled"
-                  size="small"
-                  sx={{ 
-                    height: 20, 
-                    fontSize: "0.65rem", 
-                    flexShrink: 0,
-                  }}
-                />
+                <ProjectTypeBadge type={project.type} />
               </Box>
               
               <Typography
@@ -231,18 +211,15 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
             {safeTags.length > 0 && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0, flexWrap: "wrap", justifyContent: "flex-end", alignSelf: "flex-end" }}>
                 {safeTags.slice(0, isGrid ? 2 : 3).map((tag) => (
-                  <Chip
+                  <ProjectTagBadge
                     key={tag}
-                    label={getTagLabel(tag)}
-                    size="small"
-                    variant="filled"
+                    tag={tag}
                     clickable
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       router.push(`/projects?tags=${encodeURIComponent(tag)}`);
                     }}
-                    sx={{ height: 18, fontSize: "0.6rem" }}
                   />
                 ))}
                 {safeTags.length > (isGrid ? 2 : 3) && (

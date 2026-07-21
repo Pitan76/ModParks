@@ -22,7 +22,11 @@ export default function HomeProjectList({ projects }: HomeProjectListProps) {
         sx={{
           display: "grid",
           gap: 0,
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)"
+          },
         }}
       >
         {projects.map((project) => (
