@@ -156,14 +156,13 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 </Typography>
                 <Chip
                   label={TYPE_LABEL[project.type]}
-                  color={isNewTheme ? "default" : TYPE_COLOR[project.type]}
-                  variant={isNewTheme ? "outlined" : "filled"}
+                  color={TYPE_COLOR[project.type]}
+                  variant="filled"
                   size="small"
                   sx={{ 
                     height: 20, 
                     fontSize: "0.65rem", 
                     flexShrink: 0,
-                    ...(isNewTheme ? { borderColor: "divider" } : {}),
                   }}
                 />
               </Box>
@@ -207,10 +206,10 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
           <Box 
             sx={{ 
               display: "flex", 
-              flexDirection: isGrid ? "column" : { xs: "row", sm: "column" }, 
-              alignItems: isGrid ? "flex-start" : { xs: "center", sm: "flex-end" }, 
-              justifyContent: isGrid ? "flex-start" : "space-between",
-              width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
+              flexDirection: isGrid ? "column" : { xs: "column", sm: "row" }, 
+              alignItems: isGrid ? "flex-start" : { xs: "flex-start", sm: "center" }, 
+              justifyContent: "space-between",
+              width: "100%",
               gap: isGrid ? 0.75 : { xs: 2, sm: 0.5 }, 
               flexShrink: 0,
               mt: isGrid ? 1 : { xs: "auto", sm: 0 }
@@ -236,7 +235,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
             </Box>
             
             {safeTags.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0, flexWrap: "wrap", justifyContent: isGrid ? "flex-start" : "flex-end" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0, flexWrap: "wrap", justifyContent: "flex-end", alignSelf: "flex-end" }}>
                 {safeTags.slice(0, isGrid ? 2 : 3).map((tag) => (
                   <Chip
                     key={tag}
