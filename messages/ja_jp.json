@@ -427,7 +427,8 @@
   "Idea": {
     "postedBy": "投稿者: {name}",
     "addCommentPlaceholder": "コメントを追加...",
-    "like": "いいね {count}",
+    "like": "いいね",
+    "liked": "いいね済み",
     "title": "アイデア",
     "description": "マイクラのMOD、プラグインをみんなで一緒につくったり、探したりしてみませんか？",
     "postIdea": "アイデアを投稿",

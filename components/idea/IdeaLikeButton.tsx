@@ -21,16 +21,18 @@ export default function IdeaLikeButton({ ideaId, initialLiked, initialCount, isL
   const [count, setCount] = useState(initialCount);
 
   const handleToggle = () => {
-    // Optimistic UI update
+    if (isPending) return;
+
+    // 楽観的UI更新
     setLiked(!liked);
     setCount((prev) => (liked ? prev - 1 : prev + 1));
 
     startTransition(async () => {
       const res = await toggleIdeaLike(ideaId);
       if (res && res.error) {
-        // Revert on error
-        setLiked(liked);
-        setCount(count);
+        // エラー時は元に戻す
+        setLiked(initialLiked);
+        setCount(initialCount);
         alert(res.error);
       }
     });
@@ -39,19 +41,22 @@ export default function IdeaLikeButton({ ideaId, initialLiked, initialCount, isL
   return (
     <Button
       variant={liked ? "contained" : "outlined"}
-      color={liked ? "error" : "inherit"}
+      color="primary"
       startIcon={liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
       onClick={handleToggle}
       disabled={!isLoggedIn || isPending}
+      fullWidth
       sx={{ 
+        transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        transform: liked ? "scale(1.02)" : "scale(1)",
         borderRadius: 2, 
-        px: 2,
-        textTransform: "none",
+        height: "40px",
         fontWeight: "bold",
         whiteSpace: "nowrap",
       }}
     >
-      {tIdea("like", { count })}
+      {liked ? tIdea("liked") : tIdea("like")}
+      {count > 0 && ` (${count})`}
     </Button>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
@@ -11,7 +12,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { createIdeaComment } from "@/lib/actions/idea";
 import { useTranslations } from "next-intl";
 
-export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
+export default function IdeaCommentForm({ ideaId, commentsCount }: { ideaId: string; commentsCount?: number }) {
   const tIdea = useTranslations("Idea");
   const tCommon = useTranslations("Common");
   const [pending, setPending] = useState(false);
@@ -39,21 +40,42 @@ export default function IdeaCommentForm({ ideaId }: { ideaId: string }) {
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>形式</InputLabel>
-          <Select
-            value={contentFormat}
-            label="形式"
-            onChange={(e) => setContentFormat(e.target.value)}
-            disabled={pending}
-          >
-            <MenuItem value="markdown">Markdown</MenuItem>
-            <MenuItem value="plaintext">Plain Text</MenuItem>
-            <MenuItem value="pukiwiki">PukiWiki</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+      {commentsCount !== undefined ? (
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, flexWrap: "wrap", gap: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800 }}>
+            {tIdea("comments", { count: commentsCount })}
+          </Typography>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>形式</InputLabel>
+            <Select
+              value={contentFormat}
+              label="形式"
+              onChange={(e) => setContentFormat(e.target.value)}
+              disabled={pending}
+            >
+              <MenuItem value="markdown">Markdown</MenuItem>
+              <MenuItem value="plaintext">Plain Text</MenuItem>
+              <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      ) : (
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>形式</InputLabel>
+            <Select
+              value={contentFormat}
+              label="形式"
+              onChange={(e) => setContentFormat(e.target.value)}
+              disabled={pending}
+            >
+              <MenuItem value="markdown">Markdown</MenuItem>
+              <MenuItem value="plaintext">Plain Text</MenuItem>
+              <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      )}
 
       <TextField
         fullWidth

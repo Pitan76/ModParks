@@ -331,20 +331,21 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
 
       {/* Comments */}
       <Box>
-        <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>
-          {tIdea("comments", { count: comments.length })}
-        </Typography>
-
         {session?.user ? (
           <Box sx={{ mb: 4 }}>
-            <IdeaCommentForm ideaId={id} />
+            <IdeaCommentForm ideaId={id} commentsCount={comments.length} />
           </Box>
         ) : (
-          <Box sx={{ p: 3, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider", mb: 4 }}>
-            <Typography color="text.secondary">
-              {tIdea("loginToComment")}
+          <>
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>
+              {tIdea("comments", { count: comments.length })}
             </Typography>
-          </Box>
+            <Box sx={{ p: 3, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider", mb: 4 }}>
+              <Typography color="text.secondary">
+                {tIdea("loginToComment")}
+              </Typography>
+            </Box>
+          </>
         )}
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

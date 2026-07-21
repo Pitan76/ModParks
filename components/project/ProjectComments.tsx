@@ -85,27 +85,30 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
 
   return (
     <Box sx={{ mt: 4 }}>
-      <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>
-        {t("title")} ({comments.length})
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 800 }}>
+          {t("title")} ({comments.length})
+        </Typography>
+
+        {isLoggedIn && (
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>形式</InputLabel>
+            <Select
+              value={contentFormat}
+              label="形式"
+              onChange={(e) => setContentFormat(e.target.value)}
+              disabled={posting}
+            >
+              <MenuItem value="markdown">Markdown</MenuItem>
+              <MenuItem value="plaintext">Plain Text</MenuItem>
+              <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+            </Select>
+          </FormControl>
+        )}
+      </Box>
 
       {isLoggedIn ? (
         <Box sx={{ mb: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>形式</InputLabel>
-              <Select
-                value={contentFormat}
-                label="形式"
-                onChange={(e) => setContentFormat(e.target.value)}
-                disabled={posting}
-              >
-                <MenuItem value="markdown">Markdown</MenuItem>
-                <MenuItem value="plaintext">Plain Text</MenuItem>
-                <MenuItem value="pukiwiki">PukiWiki</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
           <TextField
             multiline minRows={3}
             placeholder={t("placeholder")}

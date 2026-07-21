@@ -424,7 +424,8 @@
   "Idea": {
     "postedBy": "Posted by {name}",
     "addCommentPlaceholder": "Add a comment...",
-    "like": "Like {count}",
+    "like": "Like",
+    "liked": "Liked",
     "title": "Ideas",
     "description": "Let's create and find Minecraft Mods and Plugins together!",
     "postIdea": "Post Idea",
