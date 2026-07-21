@@ -269,7 +269,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
             if (parsedLinks.length === 0 && !showGithub) return null;
 
             return (
-              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 2 }}>
+              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", justifyContent: { xs: "center", sm: "flex-start" }, gap: 2 }}>
                 {showGithub && (
                   <Link
                     href={`https://github.com/${user.githubUsername}`}
