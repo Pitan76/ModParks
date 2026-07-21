@@ -106,9 +106,9 @@
       "description": "説明",
       "icon": "アイコン",
       "type": "種類",
-      "license": "ライセンス (例: MIT)",
+      "license": "ライセンス",
       "sourceUrl": "ソースコードのURL (任意)",
-      "tags": "タグ (入力/選択)",
+      "tags": "タグ",
       "mcVersions": "対応するMinecraftのバージョン",
       "loaders": "対応するMODローダー",
       "status": "公開状態",
@@ -116,21 +116,21 @@
       "modrinthId": "Modrinth ID (任意)",
       "curseforgeId": "CurseForge ID (任意)",
       "descriptionFormat": "形式",
-      "issueTrackerUrl": "Issue Tracker URL",
-      "githubRepo": "GitHub リポジトリ",
-      "githubRepoHelper": "Release から自動でバージョンを取り込めます（例: Pitan76/item-alchemy）",
+      "issueTrackerUrl": "Issue Tracker URL (任意)",
+      "githubRepo": "GitHubリポジトリ (任意)",
+      "githubRepoHelper": "Releaseから自動でバージョンを取り込めます（例: Pitan76/item-alchemy）",
       "linksSection": "リンク",
-      "externalConnectionsTitle": "外部連携 (外部からのDL数同期などに使用されます)",
+      "externalConnectionsTitle": "外部連携",
       "customLinks": {
         "title": "カスタムリンク",
         "linkTitle": "タイトル",
         "url": "URL",
         "addLink": "リンクを追加"
       },
-      "discordWebhook": "Discord Webhook URL",
-      "discordWebhookHelper": "新しいバージョンを公開したとき、この Discord Webhook に告知を送信します（任意）。",
-      "commentsEnabled": "コメントを有効にする",
-      "recipesEnabled": "レシピタブを有効にする"
+      "discordWebhook": "Discord Webhook URL (任意)",
+      "discordWebhookHelper": "新しいバージョンを公開したとき、このDiscord Webhookに告知を送信します",
+      "commentsEnabled": "コメントを有効化",
+      "recipesEnabled": "レシピタブを有効化 (試験的機能)"
     },
     "table": {
       "version": "バージョン",
@@ -309,7 +309,7 @@
   },
   "Version": {
     "manager": {
-      "description": "アップロードされたバージョン（ファイル）の一覧と管理を行います。",
+      "description": "アップロードされたファイルの管理をします。",
       "addVersion": "バージョンを追加",
       "columns": {
         "version": "バージョン",
