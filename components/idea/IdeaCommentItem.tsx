@@ -13,13 +13,19 @@ import Stack from "@mui/material/Stack";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReplyIcon from "@mui/icons-material/Reply";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import { useTranslations } from "next-intl";
 import { updateIdeaComment, deleteIdeaComment, createIdeaComment } from "@/lib/actions/idea";
 import { Link } from "@/i18n/routing";
+import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 
 export interface IdeaCommentData {
   id: string;
   content: string;
+  contentFormat: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
   authorName: string | null;
@@ -37,12 +43,13 @@ interface IdeaCommentItemProps extends IdeaCommentData {
 }
 
 export default function IdeaCommentItem(props: IdeaCommentItemProps) {
-  const { id, content, createdAt, updatedAt, authorName, authorAvatar, authorUsername, canEdit, canDelete, ideaId, isLoggedIn, replies = [] } = props;
+  const { id, content, contentFormat, createdAt, updatedAt, authorName, authorAvatar, authorUsername, canEdit, canDelete, ideaId, isLoggedIn, replies = [] } = props;
   const t = useTranslations("Project.comments");
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [replying, setReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const [replyFormat, setReplyFormat] = useState("markdown");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,6 +84,7 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
     setPending(true);
     const fd = new FormData();
     fd.set("content", replyText);
+    fd.set("contentFormat", replyFormat);
     fd.set("parentId", id);
     await createIdeaComment(ideaId, fd);
     setReplyText("");
@@ -105,16 +113,28 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
 
         {editing ? (
           <form onSubmit={handleSave}>
-            <Stack spacing={1}>
+            <Stack spacing={2}>
               <TextField name="content" defaultValue={content} fullWidth multiline minRows={2} size="small" autoFocus error={!!error} helperText={error} disabled={pending} />
-              <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-                <Button size="small" onClick={() => { setEditing(false); setError(null); }} disabled={pending}>{t("cancel")}</Button>
-                <Button size="small" type="submit" variant="contained" disabled={pending}>{t("submit")}</Button>
+              <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between", alignItems: "center" }}>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>形式</InputLabel>
+                  <Select name="contentFormat" defaultValue={contentFormat || "markdown"} label="形式" disabled={pending}>
+                    <MenuItem value="markdown">Markdown</MenuItem>
+                    <MenuItem value="plaintext">Plain Text</MenuItem>
+                    <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+                  </Select>
+                </FormControl>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button size="small" onClick={() => { setEditing(false); setError(null); }} disabled={pending}>{t("cancel")}</Button>
+                  <Button size="small" type="submit" variant="contained" disabled={pending}>{t("submit")}</Button>
+                </Box>
               </Box>
             </Stack>
           </form>
         ) : (
-          <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>{content}</Typography>
+          <Box sx={{ mt: 0.5 }}>
+            <DescriptionRenderer content={content} format={contentFormat} />
+          </Box>
         )}
 
         {ideaId && isLoggedIn && !editing && (
@@ -124,11 +144,21 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
         )}
 
         {replying && (
-          <Stack spacing={1} sx={{ mt: 1 }}>
+          <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField multiline minRows={2} size="small" placeholder={t("replyPlaceholder")} value={replyText} onChange={(e) => setReplyText(e.target.value)} disabled={pending} />
-            <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-              <Button size="small" onClick={() => setReplying(false)} disabled={pending}>{t("cancel")}</Button>
-              <Button size="small" variant="contained" onClick={handleReply} disabled={pending || !replyText.trim()}>{t("submit")}</Button>
+            <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between", alignItems: "center" }}>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>形式</InputLabel>
+                <Select value={replyFormat} onChange={(e) => setReplyFormat(e.target.value)} label="形式" disabled={pending}>
+                  <MenuItem value="markdown">Markdown</MenuItem>
+                  <MenuItem value="plaintext">Plain Text</MenuItem>
+                  <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+                </Select>
+              </FormControl>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button size="small" onClick={() => setReplying(false)} disabled={pending}>{t("cancel")}</Button>
+                <Button size="small" variant="contained" onClick={handleReply} disabled={pending || !replyText.trim()}>{t("submit")}</Button>
+              </Box>
             </Box>
           </Stack>
         )}

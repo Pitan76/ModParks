@@ -38,6 +38,7 @@ export async function createIdea(formData: FormData) {
   const raw = {
     title:      formData.get("title"),
     content:    formData.get("content"),
+    contentFormat: formData.get("contentFormat"),
     visibility: formData.get("visibility"),
   };
 
@@ -46,7 +47,7 @@ export async function createIdea(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { title, content, visibility } = parsed.data;
+  const { title, content, contentFormat, visibility } = parsed.data;
   const id = createId();
 
   try {
@@ -54,6 +55,7 @@ export async function createIdea(formData: FormData) {
       id,
       title,
       content,
+      contentFormat,
       authorId: userId,
       status: "open",
       visibility: visibility || "public",
@@ -84,6 +86,7 @@ export async function updateIdea(ideaId: string, formData: FormData) {
   const raw = {
     title:      formData.get("title"),
     content:    formData.get("content"),
+    contentFormat: formData.get("contentFormat"),
     visibility: formData.get("visibility"),
   };
 
@@ -92,10 +95,10 @@ export async function updateIdea(ideaId: string, formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { title, content, visibility } = parsed.data;
+  const { title, content, contentFormat, visibility } = parsed.data;
 
   await db.update(ideas)
-    .set({ title, content, visibility: visibility || "public" })
+    .set({ title, content, contentFormat, visibility: visibility || "public" })
     .where(eq(ideas.id, ideaId))
     .run();
 
@@ -204,6 +207,7 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
 
   const raw = {
     content: formData.get("content"),
+    contentFormat: formData.get("contentFormat"),
   };
 
   const parsed = createIdeaCommentSchema.safeParse(raw);
@@ -211,7 +215,7 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { content } = parsed.data;
+  const { content, contentFormat } = parsed.data;
   const id = createId();
   const rawParentId = formData.get("parentId") as string | null;
 
@@ -222,6 +226,7 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
       id,
       ideaId,
       content,
+      contentFormat,
       authorId: userId,
       parentId,
     });
@@ -250,7 +255,11 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
 export async function updateIdeaComment(commentId: string, formData: FormData) {
   const { db, userId } = await getAuthenticatedDb();
 
-  const parsed = createIdeaCommentSchema.safeParse({ content: formData.get("content") });
+  const raw = {
+    content: formData.get("content"),
+    contentFormat: formData.get("contentFormat"),
+  };
+  const parsed = createIdeaCommentSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors };
   }
@@ -260,7 +269,7 @@ export async function updateIdeaComment(commentId: string, formData: FormData) {
   if (comment.authorId !== userId) return { error: { server: ["編集する権限がありません"] } };
 
   await db.update(ideaComments)
-    .set({ content: parsed.data.content, updatedAt: new Date() })
+    .set({ content: parsed.data.content, contentFormat: parsed.data.contentFormat, updatedAt: new Date() })
     .where(eq(ideaComments.id, commentId))
     .run();
 

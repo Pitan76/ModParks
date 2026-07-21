@@ -25,6 +25,7 @@ interface IdeaOwnerActionsProps {
   ideaId: string;
   initialTitle: string;
   initialContent: string;
+  initialContentFormat: string;
   initialVisibility: string;
 }
 
@@ -33,6 +34,7 @@ export default function IdeaOwnerActions({
   ideaId,
   initialTitle,
   initialContent,
+  initialContentFormat,
   initialVisibility,
 }: IdeaOwnerActionsProps) {
   const router = useRouter();
@@ -109,6 +111,14 @@ export default function IdeaOwnerActions({
                 helperText={error?.content?.[0]}
                 disabled={pending}
               />
+              <FormControl fullWidth size="small">
+                <InputLabel>形式</InputLabel>
+                <Select name="contentFormat" label="形式" defaultValue={initialContentFormat} disabled={pending}>
+                  <MenuItem value="markdown">Markdown</MenuItem>
+                  <MenuItem value="plaintext">Plain Text</MenuItem>
+                  <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+                </Select>
+              </FormControl>
               <FormControl fullWidth size="small">
                 <InputLabel>公開範囲</InputLabel>
                 <Select name="visibility" label="公開範囲" defaultValue={initialVisibility} disabled={pending}>

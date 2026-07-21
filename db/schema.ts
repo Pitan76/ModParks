@@ -431,6 +431,7 @@ export const ideas = sqliteTable("ideas", {
   id:          text("id").primaryKey(),
   title:       text("title").notNull(),
   content:     text("content").notNull(),
+  contentFormat: text("content_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull().default("markdown"),
   authorId:    text("author_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -475,6 +476,7 @@ export const ideaComments = sqliteTable("idea_comments", {
   /** 返信先の親コメントID（1階層のみ）。トップレベルなら null */
   parentId:    text("parent_id"),
   content:     text("content").notNull(),
+  contentFormat: text("content_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull().default("markdown"),
   createdAt:   integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
@@ -637,6 +639,7 @@ export const projectComments = sqliteTable("project_comments", {
   /** 返信先の親コメントID（1階層のみ）。トップレベルなら null */
   parentId:    text("parent_id"),
   content:     text("content").notNull(),
+  contentFormat: text("content_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull().default("markdown"),
   createdAt:   integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),

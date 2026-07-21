@@ -78,6 +78,20 @@ export default function NewIdeaPage() {
                 size="small"
               />
 
+              <FormControl fullWidth size="small">
+                <InputLabel>形式</InputLabel>
+                <Select
+                  name="contentFormat"
+                  label="形式"
+                  defaultValue="markdown"
+                  disabled={pending}
+                >
+                  <MenuItem value="markdown">Markdown</MenuItem>
+                  <MenuItem value="plaintext">Plain Text</MenuItem>
+                  <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+                </Select>
+              </FormControl>
+
               <TextField
                 id="content"
                 name="content"

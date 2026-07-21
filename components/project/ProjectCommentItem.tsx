@@ -9,11 +9,17 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReplyIcon from "@mui/icons-material/Reply";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import { useTranslations } from "next-intl";
+import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 
 export interface Comment {
   id: string;
   content: string;
+  contentFormat: string | null;
   createdAt: string;
   parentId: string | null;
   authorId: string;
@@ -27,20 +33,21 @@ interface Props {
   isLoggedIn: boolean;
   currentUserId?: string;
   onDelete: (id: string) => void;
-  onReply: (parentId: string, content: string) => Promise<void>;
+  onReply: (parentId: string, content: string, format: string) => Promise<void>;
 }
 
 export default function ProjectCommentItem({ comment, replies, isLoggedIn, currentUserId, onDelete, onReply }: Props) {
   const t = useTranslations("Project.comments");
   const [replying, setReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const [replyFormat, setReplyFormat] = useState("markdown");
   const [posting, setPosting] = useState(false);
 
   const submitReply = async () => {
     if (!replyText.trim()) return;
     setPosting(true);
     try {
-      await onReply(comment.id, replyText);
+      await onReply(comment.id, replyText, replyFormat);
       setReplyText("");
       setReplying(false);
     } finally {
@@ -55,7 +62,9 @@ export default function ProjectCommentItem({ comment, replies, isLoggedIn, curre
       </Avatar>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Header comment={comment} currentUserId={currentUserId} onDelete={onDelete} />
-        <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>{comment.content}</Typography>
+        <Box sx={{ mt: 0.5 }}>
+          <DescriptionRenderer content={comment.content} format={comment.contentFormat} />
+        </Box>
 
         {isLoggedIn && (
           <Button size="small" startIcon={<ReplyIcon fontSize="small" />} onClick={() => setReplying((v) => !v)} sx={{ mt: 0.5 }}>
@@ -65,6 +74,21 @@ export default function ProjectCommentItem({ comment, replies, isLoggedIn, curre
 
         {replying && (
           <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>形式</InputLabel>
+                <Select
+                  value={replyFormat}
+                  label="形式"
+                  onChange={(e) => setReplyFormat(e.target.value)}
+                  disabled={posting}
+                >
+                  <MenuItem value="markdown">Markdown</MenuItem>
+                  <MenuItem value="plaintext">Plain Text</MenuItem>
+                  <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
             <TextField
               multiline minRows={2} size="small"
               placeholder={t("replyPlaceholder")}
@@ -88,7 +112,9 @@ export default function ProjectCommentItem({ comment, replies, isLoggedIn, curre
                 <Avatar src={r.authorAvatar || undefined} sx={{ width: 32, height: 32 }}>{r.authorName?.[0] || "U"}</Avatar>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Header comment={r} currentUserId={currentUserId} onDelete={onDelete} />
-                  <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>{r.content}</Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    <DescriptionRenderer content={r.content} format={r.contentFormat} />
+                  </Box>
                 </Box>
               </Box>
             ))}

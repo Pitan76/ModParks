@@ -13,6 +13,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ sl
     const { commentId } = await params;
     const body = (await request.json()) as any;
     const content = typeof body?.content === "string" ? body.content.trim() : "";
+    const contentFormat = typeof body?.contentFormat === "string" ? body.contentFormat.trim() : "";
 
     if (!content) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
@@ -30,8 +31,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ sl
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const updateObj: any = { content, updatedAt: new Date() };
+    if (contentFormat) {
+      updateObj.contentFormat = ["markdown", "plaintext", "pukiwiki"].includes(contentFormat) ? contentFormat : "markdown";
+    }
+
     await db.update(projectComments)
-      .set({ content, updatedAt: new Date() })
+      .set(updateObj)
       .where(eq(projectComments.id, commentId))
       .run();
 

@@ -1,0 +1,6 @@
+[submodule "apt-repo"]
+	path = apt-repo
+	url = https://github.com/Pitan76/apt-repo.git
+[submodule "cli"]
+    path = cli
+    url = https://github.com/Pitan76/ModParks-CLI.git

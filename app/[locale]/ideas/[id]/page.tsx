@@ -21,6 +21,7 @@ import { formatDate } from "@/lib/utils/format";
 import { Link } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SITE_URL } from "@/lib/config";
+import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string, id: string }> }) {
   const { id, locale } = await params;
@@ -31,6 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     .select({
       title: ideas.title,
       content: ideas.content,
+      contentFormat: ideas.contentFormat,
       visibility: ideas.visibility,
     })
     .from(ideas)
@@ -84,6 +86,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       id: ideas.id,
       title: ideas.title,
       content: ideas.content,
+      contentFormat: ideas.contentFormat,
       status: ideas.status,
       visibility: ideas.visibility,
       createdAt: ideas.createdAt,
@@ -119,6 +122,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
     .select({
       id: ideaComments.id,
       content: ideaComments.content,
+      contentFormat: ideaComments.contentFormat,
       createdAt: ideaComments.createdAt,
       updatedAt: ideaComments.updatedAt,
       parentId: ideaComments.parentId,
@@ -238,6 +242,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                 ideaId={id}
                 initialTitle={ideaData.title}
                 initialContent={ideaData.content}
+                initialContentFormat={ideaData.contentFormat}
                 initialVisibility={ideaData.visibility ?? "public"}
               />
             )}
@@ -247,9 +252,9 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             {ideaData.title}
           </Typography>
 
-          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8, mb: 4 }}>
-            {ideaData.content}
-          </Typography>
+          <Box sx={{ mb: 4 }}>
+            <DescriptionRenderer content={ideaData.content} format={ideaData.contentFormat} />
+          </Box>
 
           <Box sx={{ 
             display: "flex", 
@@ -351,6 +356,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                 id={comment.id}
                 ideaId={id}
                 content={comment.content}
+                contentFormat={comment.contentFormat}
                 createdAt={comment.createdAt}
                 updatedAt={comment.updatedAt}
                 authorName={comment.authorName}
@@ -364,6 +370,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
                   .map((r) => ({
                     id: r.id,
                     content: r.content,
+                    contentFormat: r.contentFormat,
                     createdAt: r.createdAt,
                     updatedAt: r.updatedAt,
                     authorName: r.authorName,

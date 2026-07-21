@@ -6,6 +6,10 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import { useTranslations } from "next-intl";
 import ProjectCommentItem, { type Comment } from "./ProjectCommentItem";
 
@@ -20,6 +24,7 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
+  const [contentFormat, setContentFormat] = useState("markdown");
   const [posting, setPosting] = useState(false);
 
   const endpoint = `/api/v1/projects/${projectSlug}/comments`;
@@ -41,11 +46,11 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
     fetchComments();
   }, [fetchComments]);
 
-  const postComment = async (content: string, parentId?: string) => {
+  const postComment = async (content: string, parentId?: string, format: string = contentFormat) => {
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content, parentId }),
+      body: JSON.stringify({ content, parentId, contentFormat: format }),
     });
     if (res.ok) await fetchComments();
   };
@@ -86,6 +91,21 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
 
       {isLoggedIn ? (
         <Box sx={{ mb: 4, display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>形式</InputLabel>
+              <Select
+                value={contentFormat}
+                label="形式"
+                onChange={(e) => setContentFormat(e.target.value)}
+                disabled={posting}
+              >
+                <MenuItem value="markdown">Markdown</MenuItem>
+                <MenuItem value="plaintext">Plain Text</MenuItem>
+                <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
           <TextField
             multiline minRows={3}
             placeholder={t("placeholder")}
@@ -114,7 +134,7 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
             isLoggedIn={isLoggedIn}
             currentUserId={currentUserId}
             onDelete={handleDelete}
-            onReply={(parentId, content) => postComment(content, parentId)}
+            onReply={(parentId, content, format) => postComment(content, parentId, format)}
           />
         ))}
         {topLevel.length === 0 && <Typography color="text.secondary">{t("empty")}</Typography>}

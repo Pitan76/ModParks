@@ -18,6 +18,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
       .select({
         id: projectComments.id,
         content: projectComments.content,
+        contentFormat: projectComments.contentFormat,
         createdAt: projectComments.createdAt,
         parentId: projectComments.parentId,
         authorId: users.id,
@@ -44,8 +45,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { slug } = await params;
-    const body = (await request.json()) as { content?: string; parentId?: string };
-    const { content, parentId } = body;
+    const body = (await request.json()) as { content?: string; parentId?: string; contentFormat?: string };
+    const { content, parentId, contentFormat } = body;
 
     if (!content || typeof content !== "string" || content.trim().length === 0) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
@@ -71,6 +72,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       }
     }
 
+    const format = ["markdown", "plaintext", "pukiwiki"].includes(contentFormat || "") ? contentFormat : "markdown";
     const newCommentId = createId();
     await db.insert(projectComments).values({
       id: newCommentId,
@@ -78,6 +80,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       authorId: session.user.id,
       parentId: normalizedParentId,
       content: content.trim(),
+      contentFormat: format,
     }).run();
 
     const { notifyToUser, resolveActorName } = await import("@/lib/notifications/notify");
