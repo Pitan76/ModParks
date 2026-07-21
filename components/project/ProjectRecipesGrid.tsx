@@ -91,7 +91,7 @@ export default function ProjectRecipesGrid({ recipes, labels }: ProjectRecipesGr
                 src={recipe.url}
                 alt={recipe.title}
                 loading="lazy"
-                style={{ objectFit: "contain", width: "100%", height: "auto" }}
+                style={{ objectFit: "contain", width: "100%", height: "auto", imageRendering: "pixelated" }}
               />
               <Typography
                 variant="body2"

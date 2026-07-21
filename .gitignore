@@ -44,3 +44,5 @@ next-env.d.ts
 /.wrangler/
 /.open-next/
 /memo/
+/mp-recipe/
+/modparks-recipe/
