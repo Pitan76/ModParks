@@ -186,7 +186,8 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
               width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
               gap: isGrid ? 2 : { xs: 2, sm: 0.5 }, 
               flexShrink: 0,
-              mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
+              mt: isGrid ? "auto" : { xs: "auto", sm: 0 },
+              alignSelf: isGrid ? "auto" : { xs: "stretch", sm: "flex-end" }
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
