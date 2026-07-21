@@ -11,6 +11,7 @@ import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { formatDate } from "@/lib/utils/format";
 import { toPlainDescription } from "@/lib/utils/plainText";
+import { useColorMode } from "@/components/ThemeRegistry";
 
 export interface IdeaCardData {
   id: string;
@@ -30,6 +31,7 @@ export interface IdeaCardData {
 export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
   const tIdea = useTranslations("Idea");
   const tMenu = useTranslations("ContextMenu");
+  const { isNewTheme } = useColorMode();
 
   const c = useCommonItems();
   const href = `/ideas/${idea.id}`;
@@ -56,9 +58,24 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
     <Card
       variant="outlined"
       onContextMenu={onContextMenu}
-      sx={{ transition: "0.2s", "&:hover": { borderColor: "primary.main" } }}
+      sx={{ 
+        boxShadow: "none",
+        transition: "0.2s", 
+        ...(isNewTheme ? {
+          border: "none",
+          borderRadius: 0,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          background: "transparent",
+          "&:hover": {
+            backgroundColor: "action.hover",
+          }
+        } : {
+          "&:hover": { borderColor: "primary.main" }
+        })
+      }}
     >
-      <LinkCardActionArea href={href} sx={{ p: 3 }}>
+      <LinkCardActionArea href={href} sx={{ p: isNewTheme ? 2 : 3 }}>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5, wordBreak: "break-word", overflowWrap: "anywhere" }}>
