@@ -127,6 +127,11 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         availablePlatforms={availablePlatforms}
       />
 
+      {/* 上部ページネーション */}
+      {filtered.length > 0 && (
+        <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} sx={{ mt: 2, mb: 1 }} />
+      )}
+
       {/* プロジェクト一覧 */}
       <ProjectCardList
         projects={filtered as any}

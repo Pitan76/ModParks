@@ -12,9 +12,10 @@ interface PaginationControlsProps {
   totalCount: number;
   currentPage: number;
   currentLimit: number;
+  sx?: any;
 }
 
-export default function PaginationControls({ totalCount, currentPage, currentLimit }: PaginationControlsProps) {
+export default function PaginationControls({ totalCount, currentPage, currentLimit, sx }: PaginationControlsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -42,7 +43,7 @@ export default function PaginationControls({ totalCount, currentPage, currentLim
   if (totalCount === 0) return null;
 
   return (
-    <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", mt: 4, gap: 2 }}>
+    <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", mt: 4, gap: 2, ...sx }}>
       <Pagination 
         count={totalPages} 
         page={currentPage} 

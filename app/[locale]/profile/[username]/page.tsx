@@ -299,6 +299,11 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         </Box>
       </Box>
 
+      {/* 上部ページネーション */}
+      {visibleProjects.length > 0 && (
+        <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} sx={{ mt: 2, mb: 1 }} />
+      )}
+
       <ProjectCardList
         projects={visibleProjects as any}
         storageKey="profileProjectsLayout"
