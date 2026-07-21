@@ -229,7 +229,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 iconColor="text.secondary"
               />
               {/* 狭い画面・グリッド表示ではDL数の横に日付を置く */}
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 0 }}>
+              <Box sx={{ display: isGrid ? "flex" : { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.5, minWidth: 0 }}>
                 <Typography variant="caption" color="text.disabled">•</Typography>
                 <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
               </Box>
