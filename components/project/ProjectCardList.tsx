@@ -92,27 +92,13 @@ export default function ProjectCardList({
       {projects.length === 0 ? (
         emptyContent
       ) : activeLayout === "grid" ? (
-        isNewTheme ? (
-          <Box
-            sx={{
-              display: "grid",
-              gap: isNewTheme ? 0 : 2,
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            }}
-          >
-            {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} layout="grid" />
-            ))}
-          </Box>
-        ) : (
-          <Grid container spacing={2}>
-            {projects.map((project) => (
-              <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <ProjectCard project={project} layout="grid" />
-              </Grid>
-            ))}
-          </Grid>
-        )
+        <Grid container spacing={isNewTheme ? 0 : 2}>
+          {projects.map((project) => (
+            <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <ProjectCard project={project} layout="grid" />
+            </Grid>
+          ))}
+        </Grid>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: isNewTheme ? 0 : 2 }}>
           {projects.map((project) => (

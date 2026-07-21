@@ -180,13 +180,13 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
           <Box 
             sx={{ 
               display: "flex", 
-              flexDirection: isGrid ? "column" : { xs: "column", sm: "row" }, 
-              alignItems: isGrid ? "flex-start" : { xs: "flex-start", sm: "center" }, 
-              justifyContent: "space-between",
-              width: "100%",
-              gap: isGrid ? 0.75 : { xs: 2, sm: 0.5 }, 
+              flexDirection: isGrid ? "row" : { xs: "row", sm: "column" }, 
+              alignItems: isGrid ? "center" : { xs: "center", sm: "flex-end" }, 
+              justifyContent: isGrid ? "space-between" : "flex-start",
+              width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
+              gap: isGrid ? 2 : { xs: 2, sm: 0.5 }, 
               flexShrink: 0,
-              mt: isGrid ? 1 : { xs: "auto", sm: 0 }
+              mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
@@ -209,7 +209,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
             </Box>
             
             {safeTags.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0, flexWrap: "wrap", justifyContent: "flex-end", alignSelf: "flex-end" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
                 {safeTags.slice(0, isGrid ? 2 : 3).map((tag) => (
                   <ProjectTagBadge
                     key={tag}

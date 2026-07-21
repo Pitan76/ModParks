@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import LinkButton from "@/components/ui/LinkButton";
-import IdeaCard from "@/components/idea/IdeaCard";
+import IdeaCardList from "@/components/idea/IdeaCardList";
 
 export default async function IdeasPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -61,33 +61,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
         </LinkButton>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {allIdeas.map((idea) => (
-          <IdeaCard
-            key={idea.id}
-            idea={{
-              id: idea.id,
-              title: idea.title,
-              content: idea.content,
-              status: idea.status,
-              createdAt: idea.createdAt!,
-              likesCount: idea.likesCount,
-              commentsCount: idea.commentsCount,
-              authorName: idea.authorName,
-            }}
-          />
-        ))}
-        {allIdeas.length === 0 && (
-          <Box sx={{ textAlign: "center", py: 8 }}>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              {tIdea("noIdeas")}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {tIdea("postFirstIdea")}
-            </Typography>
-          </Box>
-        )}
-      </Box>
+      <IdeaCardList ideas={allIdeas as any} />
     </Container>
   );
 }

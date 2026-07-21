@@ -16,28 +16,8 @@ interface HomeProjectListProps {
 export default function HomeProjectList({ projects }: HomeProjectListProps) {
   const { isNewTheme } = useColorMode();
 
-  if (isNewTheme) {
-    return (
-      <Box
-        sx={{
-          display: "grid",
-          gap: 0,
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)"
-          },
-        }}
-      >
-        {projects.map((project) => (
-          <ProjectCard key={project.id} project={project} layout="grid" />
-        ))}
-      </Box>
-    );
-  }
-
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={isNewTheme ? 0 : 2}>
       {projects.map((project) => (
         <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
           <ProjectCard project={project} layout="grid" />
