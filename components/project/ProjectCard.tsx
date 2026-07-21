@@ -52,14 +52,7 @@ const TYPE_COLOR: Record<ProjectCardProps["project"]["type"], "default" | "prima
   modpack:      "error",
 };
 
-const TYPE_LABEL: Record<ProjectCardProps["project"]["type"], string> = {
-  mod:          "Mod",
-  plugin:       "Plugin",
-  resourcepack: "Resource Pack",
-  datapack:     "Data Pack",
-  shader:       "Shader",
-  modpack:      "Modpack",
-};
+
 
 
 /**
@@ -69,6 +62,7 @@ const TYPE_LABEL: Record<ProjectCardProps["project"]["type"], string> = {
 export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
   const tTags = useTranslations("Tags");
   const tMenu = useTranslations("ContextMenu");
+  const tProject = useTranslations("Project");
   const router = useRouter();
   const { isNewTheme } = useColorMode();
   const isGrid = layout === "grid";
@@ -155,7 +149,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                   {project.name}
                 </Typography>
                 <Chip
-                  label={TYPE_LABEL[project.type]}
+                  label={tProject(`type.${project.type}`)}
                   color={TYPE_COLOR[project.type]}
                   variant="filled"
                   size="small"
@@ -241,14 +235,14 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                     key={tag}
                     label={getTagLabel(tag)}
                     size="small"
-                    variant="outlined"
+                    variant="filled"
                     clickable
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       router.push(`/projects?tags=${encodeURIComponent(tag)}`);
                     }}
-                    sx={{ height: 18, fontSize: "0.6rem", borderColor: "divider" }}
+                    sx={{ height: 18, fontSize: "0.6rem" }}
                   />
                 ))}
                 {safeTags.length > (isGrid ? 2 : 3) && (
