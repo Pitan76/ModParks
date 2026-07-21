@@ -11,7 +11,8 @@ import { useSearchParams } from "next/navigation";
 export const ColorModeContext = React.createContext({
   mode: "dark" as "light" | "dark",
   toggleColorMode: () => {},
-  isNewTheme: false,
+  isNewTheme: true,
+  setThemeType: (theme: "new" | "legacy") => {},
 });
 
 export function useColorMode() {
@@ -31,24 +32,24 @@ function ThemeQueryChecker({ onThemeChange }: { onThemeChange: (isNew: boolean) 
     if (themeParam === "new") {
       onThemeChange(true);
       try {
-        window.sessionStorage.setItem("theme", "new");
+        window.localStorage.setItem("theme_type", "new");
       } catch (e) {
         // ignore
       }
-    } else if (themeParam === "default") {
+    } else if (themeParam === "legacy") {
       onThemeChange(false);
       try {
-        window.sessionStorage.removeItem("theme");
+        window.localStorage.setItem("theme_type", "legacy");
       } catch (e) {
         // ignore
       }
     } else {
-      // セッション中の遷移でもテーマがリセットされないようにsessionStorageを参照
+      // ローカル保存設定を参照し、明示的レガシー設定以外は新テーマにする
       try {
-        const savedTheme = window.sessionStorage.getItem("theme");
-        onThemeChange(savedTheme === "new");
+        const savedTheme = window.localStorage.getItem("theme_type");
+        onThemeChange(savedTheme !== "legacy");
       } catch (e) {
-        onThemeChange(false);
+        onThemeChange(true);
       }
     }
   }, [searchParams, onThemeChange]);
@@ -58,19 +59,21 @@ function ThemeQueryChecker({ onThemeChange }: { onThemeChange: (isNew: boolean) 
 
 export default function ThemeRegistry({ children, initialMode = "dark" }: ThemeRegistryProps) {
   const [mode, setMode] = React.useState<"light" | "dark">(initialMode);
-  const [isNewTheme, setIsNewTheme] = React.useState<boolean>(false);
+  const [isNewTheme, setIsNewTheme] = React.useState<boolean>(true);
 
-  // 初回マウント時にsessionStorageおよびURLを確認し、表示の切り替えラグを低減
+  // 初回マウント時にlocalStorageおよびURLを確認し、表示の切り替えラグを低減
   React.useEffect(() => {
     try {
-      const savedTheme = window.sessionStorage.getItem("theme");
+      const savedTheme = window.localStorage.getItem("theme_type");
       const urlParams = new URLSearchParams(window.location.search);
       const themeParam = urlParams.get("theme");
-      if (themeParam === "new" || (savedTheme === "new" && themeParam !== "default")) {
+      if (themeParam === "legacy" || (savedTheme === "legacy" && themeParam !== "new")) {
+        setIsNewTheme(false);
+      } else {
         setIsNewTheme(true);
       }
     } catch (e) {
-      // ignore
+      setIsNewTheme(true);
     }
   }, []);
 
@@ -85,6 +88,14 @@ export default function ThemeRegistry({ children, initialMode = "dark" }: ThemeR
         });
       },
       isNewTheme,
+      setThemeType: (theme: "new" | "legacy") => {
+        setIsNewTheme(theme === "new");
+        try {
+          window.localStorage.setItem("theme_type", theme);
+        } catch (e) {
+          // ignore
+        }
+      },
     }),
     [mode, isNewTheme]
   );

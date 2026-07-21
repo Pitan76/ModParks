@@ -906,6 +906,14 @@
       "defaultLicenseDesc": "新しく作成するプロジェクトの初期ライセンスを設定します。",
       "successUpdate": "投稿設定を更新しました"
     },
+    "theme": {
+      "title": "テーマ設定",
+      "label": "表示テーマ",
+      "newTheme": "デフォルトテーマ",
+      "legacyTheme": "レガシーテーマ",
+      "save": "保存する",
+      "success": "テーマ設定を更新しました"
+    },
     "integration": {
       "title": "外部連携",
       "modrinth": "Modrinth連携",

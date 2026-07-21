@@ -898,6 +898,14 @@
       "defaultLicenseDesc": "Set the initial license for newly created projects.",
       "successUpdate": "Posting settings updated successfully"
     },
+    "theme": {
+      "title": "Theme Settings",
+      "label": "Display Theme",
+      "newTheme": "Default Theme",
+      "legacyTheme": "Legacy Theme",
+      "save": "Save Changes",
+      "success": "Theme settings updated"
+    },
     "integration": {
       "title": "External Integrations",
       "modrinth": "Modrinth Integration",

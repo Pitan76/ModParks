@@ -12,6 +12,7 @@ import ApiKeysTab from "./tabs/ApiKeysTab";
 import PostingTab from "./tabs/PostingTab";
 import IntegrationTab from "./tabs/IntegrationTab";
 import NotificationsTab from "./tabs/NotificationsTab";
+import ThemeTab from "./tabs/ThemeTab";
 
 interface SettingsClientProps {
   user: { username: string; displayName: string; bio: string; email: string; avatarUrl: string; links: string; locale: string; showGithubLink: boolean };
@@ -55,6 +56,7 @@ export default function SettingsClient({
   const tabs = [
     { label: t("profile.title"), content: <ProfileTab user={user} locale={locale} /> },
     { label: t("account.title"), content: <AccountTab user={user} hasPassword={!!hasPassword} is2FAEnabled={is2FAEnabled} locale={locale} setLocale={setLocale} /> },
+    { label: t("theme.title"), content: <ThemeTab /> },
     { label: t("security.title"), content: <SecurityTab is2FAEnabled={is2FAEnabled} setIs2FAEnabled={setIs2FAEnabled} /> },
     { label: t("apiKeys.title"), content: <ApiKeysTab apiKeys={apiKeys} /> },
     { label: t("posting.title"), content: <PostingTab defaultProjectStatus={defaultProjectStatus || "draft"} defaultLicense={defaultLicense || "All Rights Reserved"} /> },
