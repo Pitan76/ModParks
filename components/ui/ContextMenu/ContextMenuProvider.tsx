@@ -88,6 +88,9 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
   const notify = React.useCallback((message: string) => setToast(message), []);
 
   const browserLabel = locale === "en" ? "Browser menu (Shift + right-click)" : "ブラウザ標準メニュー（Shift+右クリック）";
+  const browserToastLabel = locale === "en"
+    ? "To open the browser's default menu, hold down the Shift key and right-click."
+    : "ブラウザの標準メニューを開くには、Shiftキーを押しながら右クリックしてください。";
 
   const open = React.useCallback<ContextMenuContextValue["open"]>((event, items, options) => {
     const target = buildTarget(event);
@@ -158,7 +161,10 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
         {state?.includeBrowserItem && [
           <Divider key="browser-divider" />,
           // JS からネイティブメニューは開けないため、Shift+右クリックを案内する項目
-          <MenuItem key="browser-hint" onClick={close}>
+          <MenuItem key="browser-hint" onClick={() => {
+            close();
+            notify(browserToastLabel);
+          }}>
             <ListItemIcon>
               <OpenInBrowserIcon fontSize="small" />
             </ListItemIcon>

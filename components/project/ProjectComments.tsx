@@ -3,15 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import { useTranslations } from "next-intl";
 import ProjectCommentItem, { type Comment } from "./ProjectCommentItem";
+import CommentForm from "@/components/ui/CommentForm";
 
 interface Props {
   projectSlug: string;
@@ -23,9 +18,6 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
   const t = useTranslations("Project.comments");
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newComment, setNewComment] = useState("");
-  const [contentFormat, setContentFormat] = useState("markdown");
-  const [posting, setPosting] = useState(false);
 
   const endpoint = `/api/v1/projects/${projectSlug}/comments`;
 
@@ -46,24 +38,13 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
     fetchComments();
   }, [fetchComments]);
 
-  const postComment = async (content: string, parentId?: string, format: string = contentFormat) => {
+  const postComment = async (content: string, parentId?: string, format: string = "markdown") => {
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content, parentId, contentFormat: format }),
     });
     if (res.ok) await fetchComments();
-  };
-
-  const handleSubmit = async () => {
-    if (!newComment.trim()) return;
-    setPosting(true);
-    try {
-      await postComment(newComment);
-      setNewComment("");
-    } finally {
-      setPosting(false);
-    }
   };
 
   const handleDelete = async (commentId: string) => {
@@ -85,50 +66,29 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
 
   return (
     <Box sx={{ mt: 4 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 800 }}>
-          {t("title")} ({comments.length})
-        </Typography>
-
-        {isLoggedIn && (
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>形式</InputLabel>
-            <Select
-              value={contentFormat}
-              label="形式"
-              onChange={(e) => setContentFormat(e.target.value)}
-              disabled={posting}
-            >
-              <MenuItem value="markdown">Markdown</MenuItem>
-              <MenuItem value="plaintext">Plain Text</MenuItem>
-              <MenuItem value="pukiwiki">PukiWiki</MenuItem>
-            </Select>
-          </FormControl>
-        )}
-      </Box>
-
       {isLoggedIn ? (
-        <Box sx={{ mb: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField
-            multiline minRows={3}
-            placeholder={t("placeholder")}
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            disabled={posting}
-          />
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button variant="contained" onClick={handleSubmit} disabled={posting || !newComment.trim()}>
-              {t("submit")}
-            </Button>
-          </Box>
-        </Box>
+        <CommentForm
+          title={`${t("title")} (${comments.length})`}
+          placeholder={t("placeholder")}
+          submitLabel={t("submit")}
+          onSubmit={async (content, format) => {
+            await postComment(content, undefined, format);
+          }}
+        />
       ) : (
-        <Box sx={{ p: 3, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider", mb: 4 }}>
-          <Typography color="text.secondary">{t("loginPrompt")}</Typography>
-        </Box>
+        <>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+              {t("title")} ({comments.length})
+            </Typography>
+          </Box>
+          <Box sx={{ p: 3, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider", mb: 4 }}>
+            <Typography color="text.secondary">{t("loginPrompt")}</Typography>
+          </Box>
+        </>
       )}
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 4 }}>
         {topLevel.map((comment) => (
           <ProjectCommentItem
             key={comment.id}

@@ -1,26 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import type { SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReplyIcon from "@mui/icons-material/Reply";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import { useTranslations } from "next-intl";
 import { updateIdeaComment, deleteIdeaComment, createIdeaComment } from "@/lib/actions/idea";
 import { Link } from "@/i18n/routing";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
+import CommentForm from "@/components/ui/CommentForm";
 
 export interface IdeaCommentData {
   id: string;
@@ -48,26 +42,23 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [replying, setReplying] = useState(false);
-  const [replyText, setReplyText] = useState("");
-  const [replyFormat, setReplyFormat] = useState("markdown");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEdited = updatedAt && createdAt && updatedAt.getTime() - createdAt.getTime() > 1000;
 
-  const handleSave = async (e: SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setPending(true);
+  const handleEditSubmit = async (newContent: string, newFormat: string) => {
     setError(null);
-    const result = await updateIdeaComment(id, new FormData(e.currentTarget));
+    const fd = new FormData();
+    fd.set("content", newContent);
+    fd.set("contentFormat", newFormat);
+    const result = await updateIdeaComment(id, fd);
     if (result?.error) {
       const err = result.error as Record<string, string[]>;
       setError(err.content?.[0] || err.server?.[0] || "");
-      setPending(false);
-      return;
+      return false;
     }
     setEditing(false);
-    setPending(false);
     router.refresh();
   };
 
@@ -76,20 +67,6 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
     setPending(true);
     const result = await deleteIdeaComment(id);
     if (result?.error) { setPending(false); return; }
-    router.refresh();
-  };
-
-  const handleReply = async () => {
-    if (!replyText.trim() || !ideaId) return;
-    setPending(true);
-    const fd = new FormData();
-    fd.set("content", replyText);
-    fd.set("contentFormat", replyFormat);
-    fd.set("parentId", id);
-    await createIdeaComment(ideaId, fd);
-    setReplyText("");
-    setReplying(false);
-    setPending(false);
     router.refresh();
   };
 
@@ -112,25 +89,24 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
         </Box>
 
         {editing ? (
-          <form onSubmit={handleSave}>
-            <Stack spacing={2}>
-              <TextField name="content" defaultValue={content} fullWidth multiline minRows={2} size="small" autoFocus error={!!error} helperText={error} disabled={pending} />
-              <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between", alignItems: "center" }}>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel>形式</InputLabel>
-                  <Select name="contentFormat" defaultValue={contentFormat || "markdown"} label="形式" disabled={pending}>
-                    <MenuItem value="markdown">Markdown</MenuItem>
-                    <MenuItem value="plaintext">Plain Text</MenuItem>
-                    <MenuItem value="pukiwiki">PukiWiki</MenuItem>
-                  </Select>
-                </FormControl>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button size="small" onClick={() => { setEditing(false); setError(null); }} disabled={pending}>{t("cancel")}</Button>
-                  <Button size="small" type="submit" variant="contained" disabled={pending}>{t("submit")}</Button>
-                </Box>
-              </Box>
-            </Stack>
-          </form>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <CommentForm
+              initialContent={content}
+              initialFormat={contentFormat || "markdown"}
+              placeholder={t("placeholder")}
+              submitLabel={t("submit")}
+              cancelLabel={t("cancel")}
+              onSubmit={handleEditSubmit}
+              onCancel={() => { setEditing(false); setError(null); }}
+              size="small"
+              minRows={2}
+            />
+            {error && (
+              <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                {error}
+              </Typography>
+            )}
+          </Box>
         ) : (
           <Box sx={{ mt: 0.5 }}>
             <DescriptionRenderer content={content} format={contentFormat} />
@@ -144,23 +120,26 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
         )}
 
         {replying && (
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField multiline minRows={2} size="small" placeholder={t("replyPlaceholder")} value={replyText} onChange={(e) => setReplyText(e.target.value)} disabled={pending} />
-            <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between", alignItems: "center" }}>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>形式</InputLabel>
-                <Select value={replyFormat} onChange={(e) => setReplyFormat(e.target.value)} label="形式" disabled={pending}>
-                  <MenuItem value="markdown">Markdown</MenuItem>
-                  <MenuItem value="plaintext">Plain Text</MenuItem>
-                  <MenuItem value="pukiwiki">PukiWiki</MenuItem>
-                </Select>
-              </FormControl>
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Button size="small" onClick={() => setReplying(false)} disabled={pending}>{t("cancel")}</Button>
-                <Button size="small" variant="contained" onClick={handleReply} disabled={pending || !replyText.trim()}>{t("submit")}</Button>
-              </Box>
-            </Box>
-          </Stack>
+          <Box sx={{ mt: 1 }}>
+            <CommentForm
+              placeholder={t("replyPlaceholder")}
+              submitLabel={t("submit")}
+              cancelLabel={t("cancel")}
+              onSubmit={async (text, format) => {
+                if (!ideaId) return;
+                const fd = new FormData();
+                fd.set("content", text);
+                fd.set("contentFormat", format);
+                fd.set("parentId", id);
+                await createIdeaComment(ideaId, fd);
+                setReplying(false);
+                router.refresh();
+              }}
+              onCancel={() => setReplying(false)}
+              size="small"
+              minRows={2}
+            />
+          </Box>
         )}
 
         {replies.length > 0 && (

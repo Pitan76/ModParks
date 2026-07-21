@@ -10,6 +10,7 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import Tooltip from "@mui/material/Tooltip";
 import { useRouter } from "@/i18n/routing";
 import PersonIcon from "@mui/icons-material/Person";
+import DownloadIcon from "@mui/icons-material/Download";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
@@ -63,6 +64,12 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
     [
       c.open(href, tMenu("viewProject")),
       c.openNewTab(href),
+      {
+        id: "cm-download",
+        label: tMenu("download"),
+        icon: <DownloadIcon fontSize="small" />,
+        href: `/projects/${project.slug}/versions`,
+      },
       { type: "divider" },
       c.copyLink(href),
       c.share(href, project.name),

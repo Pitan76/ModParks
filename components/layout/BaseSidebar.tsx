@@ -17,8 +17,9 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import { usePathname, useRouter, Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";
+import { useContextMenuHandler, useCommonItems } from "@/components/ui/ContextMenu";
 
 export const SIDEBAR_WIDTH = 260;
 
@@ -48,6 +49,9 @@ export default function BaseSidebar({ mobileOpen, onMobileClose, navItems }: Bas
   const isMyProjects = searchParams?.get("author") === "me";
   const { mode, toggleColorMode } = useColorMode();
   const locale = useLocale();
+  const tMenu = useTranslations("ContextMenu");
+  const openMenu = useContextMenuHandler();
+  const c = useCommonItems();
 
   const handleLocaleChange = (newLocale: string) => {
     router.replace(pathname, { locale: newLocale });
@@ -82,6 +86,14 @@ export default function BaseSidebar({ mobileOpen, onMobileClose, navItems }: Bas
             <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
                 onClick={() => handleNavigation(item.path)}
+                onContextMenu={(e) => {
+                  openMenu(e, [
+                    c.open(item.path, tMenu("open")),
+                    c.openNewTab(item.path),
+                    { type: "divider" },
+                    c.copyLink(item.path),
+                  ]);
+                }}
                 selected={isSelected}
                 sx={{
                   borderRadius: 1,
