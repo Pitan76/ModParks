@@ -268,6 +268,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
               initialCount={initialCount} 
               initialLiked={initialLiked} 
               isLoggedIn={!!session} 
+              variant="icon"
             />
             <Box sx={{ 
               display: "flex", 
