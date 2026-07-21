@@ -257,22 +257,43 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
 
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box sx={{ 
+        display: "flex", 
+        flexDirection: { xs: "column", md: "row" }, 
+        justifyContent: "space-between", 
+        alignItems: { xs: "stretch", md: "center" }, 
+        gap: 2, 
+        mb: 3 
+      }}>
         <Typography variant="body2" color="text.secondary">
           {t("manager.description")}
         </Typography>
-        <Stack direction="row" spacing={1}>
+        <Stack 
+          direction={{ xs: "column", sm: "row" }} 
+          spacing={1} 
+          sx={{ 
+            width: { xs: "100%", md: "auto" },
+            alignItems: { xs: "stretch", sm: "center" },
+            flexShrink: 0
+          }}
+        >
           {githubRepo && (
             <Button
               variant="outlined"
               startIcon={<GitHubIcon />}
               onClick={handleImportGithub}
               disabled={importing}
+              sx={{ whiteSpace: "nowrap" }}
             >
               {importing ? t("manager.importing") : t("manager.importGithub")}
             </Button>
           )}
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setUploadOpen(true)}>
+          <Button 
+            variant="contained" 
+            startIcon={<AddIcon />} 
+            onClick={() => setUploadOpen(true)}
+            sx={{ whiteSpace: "nowrap" }}
+          >
             {t("manager.addVersion")}
           </Button>
         </Stack>
