@@ -105,7 +105,18 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             {title}
           </Typography>
         </Box>
-        <Typography variant="h3" sx={{ fontWeight: 800, position: "relative", zIndex: 1, fontSize: { xs: "1.75rem", sm: "3rem" } }}>
+        <Typography 
+          variant="h3" 
+          sx={{ 
+            fontWeight: 800, 
+            position: "relative", 
+            zIndex: 1, 
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem", lg: "2.5rem", xl: "3rem" },
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis"
+          }}
+        >
           {value.toLocaleString()}
         </Typography>
         <Box sx={{ 
