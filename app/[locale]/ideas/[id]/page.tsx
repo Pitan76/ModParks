@@ -14,6 +14,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import LinkButton from "@/components/ui/LinkButton";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
 import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
+import IdeaDetailCard from "@/components/idea/IdeaDetailCard";
 import IdeaOwnerActions from "@/components/idea/IdeaOwnerActions";
 import IdeaStatusControl from "@/components/idea/IdeaStatusControl";
 import IdeaCommentItem from "@/components/idea/IdeaCommentItem";
@@ -211,8 +212,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       </Box>
 
       {/* Idea Content */}
-      <Card variant="outlined" sx={{ borderRadius: 3, mb: 4 }}>
-        <CardContent sx={{ p: { xs: 3, md: 5 } }}>
+      <IdeaDetailCard>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 3 }}>
             <Link
               href={`/profile/${ideaData.authorUsername}`}
@@ -295,8 +295,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
               )}
             </Box>
           </Box>
-        </CardContent>
-      </Card>
+      </IdeaDetailCard>
 
       {/* Resolved Projects */}
       {resolvedProjects.length > 0 && (
