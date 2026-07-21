@@ -96,7 +96,7 @@ export default function ProjectCardList({
           <Box
             sx={{
               display: "grid",
-              gap: 3,
+              gap: isNewTheme ? 0 : 2,
               gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
             }}
           >
@@ -114,7 +114,7 @@ export default function ProjectCardList({
           </Grid>
         )
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: isNewTheme ? 3 : 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: isNewTheme ? 0 : 2 }}>
           {projects.map((project) => (
             <ProjectCard key={project.id} project={project} layout="list" />
           ))}

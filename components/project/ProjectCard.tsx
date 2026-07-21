@@ -111,11 +111,11 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
       <LinkCardActionArea href={`/projects/${project.slug}`} sx={{ height: "100%" }}>
         <CardContent 
           sx={{ 
-            p: isNewTheme ? 3 : 2, 
+            p: 2, 
             display: "flex", 
             flexDirection: isGrid ? "column" : { xs: "column", sm: "row" }, 
             alignItems: isGrid ? "stretch" : { xs: "stretch", sm: "center" }, 
-            gap: isNewTheme ? 3 : 2,
+            gap: 2,
             height: "100%"
           }}
         >
@@ -207,13 +207,13 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
           <Box 
             sx={{ 
               display: "flex", 
-              flexDirection: isGrid ? "row" : { xs: "row", sm: "column" }, 
-              alignItems: isGrid ? "center" : { xs: "center", sm: "flex-end" }, 
-              justifyContent: isGrid ? "space-between" : "flex-start",
+              flexDirection: isGrid ? "column" : { xs: "row", sm: "column" }, 
+              alignItems: isGrid ? "flex-start" : { xs: "center", sm: "flex-end" }, 
+              justifyContent: isGrid ? "flex-start" : "space-between",
               width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
-              gap: isGrid ? 2 : { xs: 2, sm: 0.5 }, 
+              gap: isGrid ? 0.75 : { xs: 2, sm: 0.5 }, 
               flexShrink: 0,
-              mt: isGrid ? "auto" : { xs: "auto", sm: 0 }
+              mt: isGrid ? 1 : { xs: "auto", sm: 0 }
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
@@ -229,14 +229,14 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 iconColor="text.secondary"
               />
               {/* 狭い画面・グリッド表示ではDL数の横に日付を置く */}
-              <Box sx={{ display: isGrid ? "flex" : { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.5, minWidth: 0 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 0 }}>
                 <Typography variant="caption" color="text.disabled">•</Typography>
                 <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
               </Box>
             </Box>
             
             {safeTags.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0, flexWrap: "wrap", justifyContent: isGrid ? "flex-start" : "flex-end" }}>
                 {safeTags.slice(0, isGrid ? 2 : 3).map((tag) => (
                   <Chip
                     key={tag}

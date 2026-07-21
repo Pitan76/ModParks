@@ -21,7 +21,7 @@ export default function HomeProjectList({ projects }: HomeProjectListProps) {
       <Box
         sx={{
           display: "grid",
-          gap: 3,
+          gap: 0,
           gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
         }}
       >
