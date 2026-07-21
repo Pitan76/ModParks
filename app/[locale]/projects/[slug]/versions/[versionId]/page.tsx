@@ -154,7 +154,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                   <DownloadIcon sx={{ fontSize: 16 }} />
-                  <Typography variant="body2">{version.downloads.toLocaleString()} downloads</Typography>
+                  <Typography variant="body2">{version.downloads.toLocaleString()} {tCommon("downloads")}</Typography>
                 </Box>
                 {version.fileSize && (
                   <Typography variant="body2">{formatBytes(version.fileSize)}</Typography>
