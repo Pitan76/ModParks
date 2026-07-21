@@ -10,6 +10,7 @@ import ViewListIcon from "@mui/icons-material/ViewList";
 import GridViewIcon from "@mui/icons-material/GridView";
 import { useTranslations } from "next-intl";
 import ProjectCard, { ProjectCardProps } from "@/components/project/ProjectCard";
+import { useColorMode } from "@/components/ThemeRegistry";
 
 type CardLayout = "list" | "grid";
 
@@ -45,6 +46,7 @@ export default function ProjectCardList({
   footer,
 }: ProjectCardListProps) {
   const tCommon = useTranslations("Common");
+  const { isNewTheme } = useColorMode();
   const [layout, setLayout] = useState<CardLayout>(defaultLayout);
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function ProjectCardList({
     window.localStorage.setItem(storageKey, value);
   };
 
+  const activeLayout = layout;
   const hasHeader = headerLeft || headerRight || projects.length > 0;
 
   return (
@@ -88,16 +91,30 @@ export default function ProjectCardList({
 
       {projects.length === 0 ? (
         emptyContent
-      ) : layout === "grid" ? (
-        <Grid container spacing={2}>
-          {projects.map((project) => (
-            <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={project} layout="grid" />
-            </Grid>
-          ))}
-        </Grid>
+      ) : activeLayout === "grid" ? (
+        isNewTheme ? (
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            }}
+          >
+            {projects.map((project) => (
+              <ProjectCard key={project.id} project={project} layout="grid" />
+            ))}
+          </Box>
+        ) : (
+          <Grid container spacing={2}>
+            {projects.map((project) => (
+              <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <ProjectCard project={project} layout="grid" />
+              </Grid>
+            ))}
+          </Grid>
+        )
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: isNewTheme ? 3 : 2 }}>
           {projects.map((project) => (
             <ProjectCard key={project.id} project={project} layout="list" />
           ))}

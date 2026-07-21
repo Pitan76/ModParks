@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
+import { useColorMode } from "@/components/ThemeRegistry";
 
 export interface RecipeItem {
   id: string;
@@ -28,6 +29,7 @@ interface ProjectRecipesGridProps {
 const PAGE_SIZE = 24;
 
 export default function ProjectRecipesGrid({ recipes, labels }: ProjectRecipesGridProps) {
+  const { isNewTheme } = useColorMode();
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
 
@@ -77,12 +79,14 @@ export default function ProjectRecipesGrid({ recipes, labels }: ProjectRecipesGr
         <Box
           sx={{
             display: "grid",
-            gap: 2,
-            gridTemplateColumns: {
-              xs: "repeat(1, 1fr)",
-              sm: "repeat(2, 1fr)",
-              md: "repeat(3, 1fr)",
-            },
+            gap: isNewTheme ? 3 : 2,
+            gridTemplateColumns: isNewTheme
+              ? "repeat(auto-fill, minmax(180px, 1fr))"
+              : {
+                  xs: "repeat(1, 1fr)",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
+                },
           }}
         >
           {shown.map((recipe) => (

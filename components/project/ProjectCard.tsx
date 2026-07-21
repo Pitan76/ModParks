@@ -15,6 +15,7 @@ import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
 import { DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { toPlainDescription } from "@/lib/utils/plainText";
+import { useColorMode } from "@/components/ThemeRegistry";
 
 /**
  * プロジェクト一覧のカードに表示するデータの型定義
@@ -69,6 +70,7 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
   const tTags = useTranslations("Tags");
   const tMenu = useTranslations("ContextMenu");
   const router = useRouter();
+  const { isNewTheme } = useColorMode();
   const isGrid = layout === "grid";
 
   const c = useCommonItems();
@@ -109,11 +111,11 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
       <LinkCardActionArea href={`/projects/${project.slug}`} sx={{ height: "100%" }}>
         <CardContent 
           sx={{ 
-            p: 2, 
+            p: isNewTheme ? 3 : 2, 
             display: "flex", 
             flexDirection: isGrid ? "column" : { xs: "column", sm: "row" }, 
             alignItems: isGrid ? "stretch" : { xs: "stretch", sm: "center" }, 
-            gap: 2,
+            gap: isNewTheme ? 3 : 2,
             height: "100%"
           }}
         >
@@ -154,9 +156,15 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
                 </Typography>
                 <Chip
                   label={TYPE_LABEL[project.type]}
-                  color={TYPE_COLOR[project.type]}
+                  color={isNewTheme ? "default" : TYPE_COLOR[project.type]}
+                  variant={isNewTheme ? "outlined" : "filled"}
                   size="small"
-                  sx={{ height: 20, fontSize: "0.65rem", flexShrink: 0 }}
+                  sx={{ 
+                    height: 20, 
+                    fontSize: "0.65rem", 
+                    flexShrink: 0,
+                    ...(isNewTheme ? { borderColor: "divider" } : {}),
+                  }}
                 />
               </Box>
               

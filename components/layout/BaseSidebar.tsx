@@ -60,7 +60,7 @@ export default function BaseSidebar({ mobileOpen, onMobileClose, navItems }: Bas
 
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
+      <Box sx={{ height: { xs: 56, md: 64 }, px: 2, display: "flex", alignItems: "center", gap: 1 }}>
         <Link href="/" prefetch={false} style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 8 }}>
           <Box
             component="img"
