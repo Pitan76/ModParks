@@ -912,6 +912,8 @@
       "label": "Display Theme",
       "newTheme": "Default Theme",
       "legacyTheme": "Legacy Theme",
+      "contextMenuLabel": "Context Menu",
+      "useCustomContextMenu": "Use custom context menu",
       "save": "Save Changes",
       "success": "Theme settings updated"
     },

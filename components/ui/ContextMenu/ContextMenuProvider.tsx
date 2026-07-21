@@ -93,6 +93,9 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
     : "ブラウザの標準メニューを開くには、Shiftキーを押しながら右クリックしてください。";
 
   const open = React.useCallback<ContextMenuContextValue["open"]>((event, items, options) => {
+    const isCustomMenuDisabled = typeof window !== "undefined" && window.localStorage.getItem("disable_custom_context_menu") === "true";
+    if (isCustomMenuDisabled) return; // カスタムメニュー無効時はブラウザ標準を表示
+
     const target = buildTarget(event);
     if (shouldPassthrough(event, target, options)) return; // ネイティブメニューを妨害しない
 
@@ -163,7 +166,21 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
           // JS からネイティブメニューは開けないため、Shift+右クリックを案内する項目
           <MenuItem key="browser-hint" onClick={() => {
             close();
-            notify(browserToastLabel);
+            const confirmDisable = window.confirm(
+              locale === "en"
+                ? "Would you like to disable this custom context menu and always use the browser's default menu? (You can re-enable it in Settings -> Theme Settings)"
+                : "このカスタムコンテキストメニューを無効化し、常にブラウザの標準メニューを表示しますか？（設定 -> テーマ設定から再度有効化できます）"
+            );
+            if (confirmDisable) {
+              window.localStorage.setItem("disable_custom_context_menu", "true");
+              notify(
+                locale === "en"
+                  ? "Custom context menu disabled. Please right-click again."
+                  : "カスタムコンテキストメニューを無効化しました。もう一度右クリックしてください。"
+              );
+            } else {
+              notify(browserToastLabel);
+            }
           }}>
             <ListItemIcon>
               <OpenInBrowserIcon fontSize="small" />

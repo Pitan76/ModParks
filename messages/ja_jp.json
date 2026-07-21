@@ -920,6 +920,8 @@
       "label": "表示テーマ",
       "newTheme": "デフォルトテーマ",
       "legacyTheme": "レガシーテーマ",
+      "contextMenuLabel": "コンテキストメニュー",
+      "useCustomContextMenu": "ModParksの右クリックメニューを使用する",
       "save": "保存する",
       "success": "テーマ設定を更新しました"
     },
