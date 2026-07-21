@@ -10,12 +10,14 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import { transferOwnership } from "@/lib/actions/project";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface ProjectOwnershipTransferProps {
   projectId: string;
 }
 
 export default function ProjectOwnershipTransfer({ projectId }: ProjectOwnershipTransferProps) {
+  const t = useTranslations("Project.ownership");
   const [newOwnerId, setNewOwnerId] = useState("");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -23,14 +25,14 @@ export default function ProjectOwnershipTransfer({ projectId }: ProjectOwnership
   const handleTransfer = () => {
     if (!newOwnerId.trim() || isPending) return;
 
-    if (!confirm("本当にプロジェクトのオーナー権限を譲渡しますか？\nこの操作は取り消せません。譲渡後、あなたはこのプロジェクトのオーナーではなくなります。")) {
+    if (!confirm(t("confirm"))) {
       return;
     }
 
     startTransition(async () => {
       try {
         await transferOwnership(projectId, newOwnerId.trim());
-        alert("オーナー権限を譲渡しました。");
+        alert(t("success"));
         router.push(`/projects`);
       } catch (err: any) {
         alert(err.message);
@@ -42,17 +44,16 @@ export default function ProjectOwnershipTransfer({ projectId }: ProjectOwnership
     <Card sx={{ border: "1px solid", borderColor: "error.main" }}>
       <CardContent sx={{ p: 4 }}>
         <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }} color="error">
-          Danger Zone: オーナー権限の譲渡
+          {t("transferTitle")}
         </Typography>
         <Alert severity="warning" sx={{ mb: 3 }}>
-          プロジェクトのオーナー権限を他のユーザーに譲渡します。一度譲渡すると、元に戻すことはできません。
-          譲渡先のユーザーID（username ではありません）を正確に入力してください。
+          {t("transferAlert")}
         </Alert>
 
         <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
           <TextField
             size="small"
-            label="新しいオーナーのユーザーID"
+            label={t("newOwnerId")}
             value={newOwnerId}
             onChange={e => setNewOwnerId(e.target.value)}
             disabled={isPending}
@@ -65,7 +66,7 @@ export default function ProjectOwnershipTransfer({ projectId }: ProjectOwnership
             disabled={!newOwnerId.trim() || isPending}
             sx={{ height: 40 }}
           >
-            権限を譲渡
+            {t("transferButton")}
           </Button>
         </Box>
       </CardContent>

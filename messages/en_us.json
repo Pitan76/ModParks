@@ -263,6 +263,14 @@
       "addUsername": "Add Username",
       "deleteConfirm": "Are you sure you want to remove this member?"
     },
+    "ownership": {
+      "transferTitle": "Transfer Project Ownership",
+      "transferAlert": "Transfer the project's ownership to another user. Once transferred, this action cannot be undone. Please accurately enter the destination user ID (not their username).",
+      "newOwnerId": "New Owner's User ID",
+      "transferButton": "Transfer Ownership",
+      "confirm": "Are you sure you want to transfer ownership of this project?\nThis action cannot be undone. After transferring, you will no longer be the owner of this project.",
+      "success": "Project ownership transferred successfully."
+    },
     "goToManage": "Go to Management",
     "manageTitle": "Manage Projects",
     "manageDescription": "Manage all your projects — change status, bulk delete, and more.",
