@@ -138,14 +138,14 @@
       "sizeDownloadDate": "サイズ / DL / 日付"
     },
     "iconUpload": {
-      "title": "プロジェクトアイコン (最大 400x400)",
+      "title": "アイコン",
       "select": "アイコンを選択",
       "autoResizeNote": "※大きな画像は自動的に400x400にリサイズされます",
       "error": "アイコンのアップロードに失敗しました",
       "change": "変更"
     },
     "uploadForm": {
-      "title": "プロジェクトアイコン (最大 400x400)",
+      "title": "アイコン",
       "select": "アイコンを選択",
       "autoResizeNote": "※大きな画像は自動的に400x400にリサイズされます",
       "error": "アイコンのアップロードに失敗しました"
@@ -190,7 +190,7 @@
     },
     "manage": "管理",
     "managePage": {
-      "title": "{name}を編集",
+      "title": "{name}の管理",
       "success": "プロジェクトを更新しました",
       "sync": "外部データを同期する",
       "syncing": "同期中...",
