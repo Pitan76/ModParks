@@ -11,10 +11,16 @@ const MarkdownRendererInner = dynamic(() => import("./MarkdownRendererInner"), {
   loading: () => <DescriptionSkeleton />,
 });
 
-interface MarkdownRendererProps {
+type MarkdownRendererProps = {
   content: string;
-}
+};
 
-export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
+/**
+ * マークダウンテキストをHTMLにレンダリングするコンポーネント。
+ * 重量級のマークダウンパース処理をクライアント側でのみ遅延ロード(ssr: false)して実行します。
+ */
+const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
   return <MarkdownRendererInner content={content} />;
-}
+};
+
+export default MarkdownRenderer;

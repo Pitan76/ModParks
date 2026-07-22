@@ -1,17 +1,22 @@
 import Chip from "@mui/material/Chip";
-import { SxProps, Theme } from "@mui/material/styles";
+import type { SxProps, Theme } from "@mui/material/styles";
+import type { MouseEvent } from "react";
 
-export interface BaseBadgeProps {
+export type BaseBadgeProps = {
   label: string;
   variant?: "filled" | "outlined";
   color?: "default" | "primary" | "secondary" | "success" | "warning" | "info" | "error";
   size?: "small" | "medium";
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   clickable?: boolean;
   sx?: SxProps<Theme>;
-}
+};
 
-export default function BaseBadge({
+/**
+ * プロジェクト共通で使用されるバッジ（Chip）コンポーネント。
+ * タグや状態の表示などに使用します。
+ */
+const BaseBadge = ({
   label,
   variant = "filled",
   color = "default",
@@ -19,7 +24,7 @@ export default function BaseBadge({
   onClick,
   clickable,
   sx,
-}: BaseBadgeProps) {
+}: BaseBadgeProps) => {
   return (
     <Chip
       label={label}
@@ -35,4 +40,6 @@ export default function BaseBadge({
       }}
     />
   );
-}
+};
+
+export default BaseBadge;

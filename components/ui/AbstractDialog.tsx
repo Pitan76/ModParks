@@ -1,18 +1,18 @@
-import Dialog, { DialogProps } from "@mui/material/Dialog";
+import Dialog from "@mui/material/Dialog";
+import type { DialogProps } from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
+import type { DialogTitleProps } from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { useTranslations } from "next-intl";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
-export interface AbstractDialogProps extends Omit<DialogProps, "title"> {
+export type AbstractDialogProps = Omit<DialogProps, "title"> & {
   title?: ReactNode;
-  titleProps?: any; // Additional props for DialogTitle
+  titleProps?: Partial<DialogTitleProps>;
   children?: ReactNode;
   actions?: ReactNode;
-  
-  // Common action props for quick setup
   onConfirm?: () => void;
   onCancel?: () => void;
   confirmText?: ReactNode;
@@ -23,9 +23,13 @@ export interface AbstractDialogProps extends Omit<DialogProps, "title"> {
   isSubmitting?: boolean;
   hideCancel?: boolean;
   hideActions?: boolean;
-}
+};
 
-export default function AbstractDialog({
+/**
+ * プロジェクト共通で使用されるダイアログの抽象ラッパーコンポーネント。
+ * 標準的なヘッダー、フッター（アクションボタン）、レイアウトを提供します。
+ */
+const AbstractDialog = ({
   title,
   titleProps,
   children,
@@ -41,7 +45,7 @@ export default function AbstractDialog({
   hideCancel = false,
   hideActions = false,
   ...props
-}: AbstractDialogProps) {
+}: AbstractDialogProps) => {
   const tCommon = useTranslations("Common");
 
   const renderActions = () => {
@@ -88,4 +92,6 @@ export default function AbstractDialog({
       )}
     </Dialog>
   );
-}
+};
+
+export default AbstractDialog;

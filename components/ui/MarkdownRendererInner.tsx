@@ -8,26 +8,27 @@ import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
 
-interface MarkdownRendererInnerProps {
+type MarkdownRendererInnerProps = {
   content: string;
-}
+};
+
+// iframe(YouTube 等の埋め込み)を許可するため sanitize schema を拡張
+const SCHEMA = {
+  ...defaultSchema,
+  tagNames: [...(defaultSchema.tagNames || []), "iframe"],
+  attributes: {
+    ...defaultSchema.attributes,
+    iframe: ["src", "width", "height", "allow", "allowfullscreen", "frameborder", "title", "style"],
+  },
+};
 
 /**
- * 実際の Markdown 描画本体。react-markdown / rehype / remark を静的 import するため
- * バンドルが重い。SSR では描画しない({@link MarkdownRenderer} が ssr:false で遅延ロード)
- * ことで、この重量級依存を Worker(サーバー)バンドルから除外する。
+ * 実際の Markdown 描画本体。
+ * react-markdown / rehype / remark を静的 import するためバンドルサイズが大きくなります。
+ * SSR では描画せず、MarkdownRenderer が ssr:false で遅延ロードすることにより、
+ * この重量級依存をサーバーサイドのバンドルから除外します。
  */
-export default function MarkdownRendererInner({ content }: MarkdownRendererInnerProps) {
-  // iframe(YouTube 等の埋め込み)を許可するため sanitize schema を拡張
-  const schema = {
-    ...defaultSchema,
-    tagNames: [...(defaultSchema.tagNames || []), "iframe"],
-    attributes: {
-      ...defaultSchema.attributes,
-      iframe: ["src", "width", "height", "allow", "allowfullscreen", "frameborder", "title", "style"],
-    },
-  };
-
+const MarkdownRendererInner = ({ content }: MarkdownRendererInnerProps) => {
   return (
     <Box
       sx={{
@@ -88,7 +89,7 @@ export default function MarkdownRendererInner({ content }: MarkdownRendererInner
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, [rehypeSanitize, schema]]}
+        rehypePlugins={[rehypeRaw, [rehypeSanitize, SCHEMA]]}
         components={{
           h1: ({ children }) => <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", mt: 4, mb: 2 }}>{children}</Typography>,
           h2: ({ children }) => <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mt: 3, mb: 1.5, pb: 1, borderBottom: "1px solid", borderColor: "divider" }}>{children}</Typography>,
@@ -107,4 +108,6 @@ export default function MarkdownRendererInner({ content }: MarkdownRendererInner
       </ReactMarkdown>
     </Box>
   );
-}
+};
+
+export default MarkdownRendererInner;

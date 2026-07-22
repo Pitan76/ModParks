@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { FormEvent } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -11,7 +12,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { useTranslations } from "next-intl";
 
-interface CommentFormProps {
+type CommentFormProps = {
   title?: string;
   placeholder?: string;
   submitLabel: string;
@@ -22,9 +23,13 @@ interface CommentFormProps {
   onCancel?: () => void;
   size?: "small" | "medium";
   minRows?: number;
-}
+};
 
-export default function CommentForm({
+/**
+ * コメントの作成・編集用フォームコンポーネント。
+ * マークダウン、プレーンテキスト、PukiWiki形式の選択が可能です。
+ */
+const CommentForm = ({
   title,
   placeholder,
   submitLabel,
@@ -35,14 +40,14 @@ export default function CommentForm({
   onCancel,
   size = "medium",
   minRows = 3,
-}: CommentFormProps) {
+}: CommentFormProps) => {
   const tCommon = useTranslations("Common");
   const resolvedCancelLabel = cancelLabel ?? tCommon("cancel");
   const [pending, setPending] = useState(false);
   const [content, setContent] = useState(initialContent);
   const [contentFormat, setContentFormat] = useState(initialFormat);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!content.trim() || pending) return;
 
@@ -112,4 +117,6 @@ export default function CommentForm({
       </Box>
     </Box>
   );
-}
+};
+
+export default CommentForm;

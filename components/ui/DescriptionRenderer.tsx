@@ -8,30 +8,35 @@ import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
 // @ts-ignore
 import puki2md from "puki2md";
 
-interface DescriptionRendererProps {
+type DescriptionRendererProps = {
   content: string;
   format?: string | null;
-}
+};
 
-export default function DescriptionRenderer({ content, format = "markdown" }: DescriptionRendererProps) {
+/**
+ * 形式（マークダウン、プレーンテキスト、PukiWiki）に応じて、適切なスタイルでテキストをレンダリングするコンポーネント。
+ */
+const DescriptionRenderer = ({ content, format = "markdown" }: DescriptionRendererProps) => {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const renderedContent = useMemo(() => {
     if (format === "pukiwiki") {
       try {
         return puki2md(content);
       } catch (err) {
+        // 例外時のフォールバックとして元テキストを返すため try-catch を使用
         console.error("PukiWiki to Markdown conversion failed:", err);
-        return content; // Fallback
+        return content;
       }
     }
     return content;
   }, [content, format]);
 
-  if (!mounted) {
-    return <DescriptionSkeleton />;
-  }
+  if (!mounted) return <DescriptionSkeleton />;
 
   if (format === "plaintext") {
     return (
@@ -44,4 +49,6 @@ export default function DescriptionRenderer({ content, format = "markdown" }: De
   }
 
   return <MarkdownRenderer content={renderedContent} />;
-}
+};
+
+export default DescriptionRenderer;
