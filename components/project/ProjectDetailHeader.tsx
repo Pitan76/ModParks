@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import EditableProjectIcon from "./EditableProjectIcon";
 import LinkButton from "@/components/ui/LinkButton";
-import HomeIcon from "@mui/icons-material/Home";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 import { useTranslations } from "next-intl";
 import Tooltip from "@mui/material/Tooltip";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
@@ -67,21 +67,12 @@ const ProjectDetailHeader = ({
 
   return (
     <>
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary", flexWrap: "wrap", minWidth: 0 }}>
-          <LinkButton href="/" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
-            <HomeIcon fontSize="small" />
-          </LinkButton>
-          <span>/</span>
-          <LinkButton href="/projects" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
-            {tCommon("projects")}
-          </LinkButton>
-          <span>/</span>
-          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "60vw" }}>
-            {p.name}
-          </Typography>
-        </Box>
-      </Box>
+      <Breadcrumb
+        items={[
+          { label: tCommon("projects"), href: "/projects" },
+          { label: p.name },
+        ]}
+      />
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5, justifyContent: "space-between", mb: 3 }}>
         <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", flex: "1 1 300px", minWidth: 0 }}>

@@ -10,7 +10,7 @@ import Avatar from "@mui/material/Avatar";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import HomeIcon from "@mui/icons-material/Home";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 import LinkButton from "@/components/ui/LinkButton";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
 import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
@@ -196,21 +196,12 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
 
   return (
     <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary", flexWrap: "wrap", minWidth: 0 }}>
-          <LinkButton href="/" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
-            <HomeIcon fontSize="small" />
-          </LinkButton>
-          <span>/</span>
-          <LinkButton href="/ideas" variant="text" sx={{ p: 0, minWidth: "auto", color: "text.secondary", "&:hover": { bgcolor: "transparent", color: "primary.main" } }}>
-            {tNav("ideas")}
-          </LinkButton>
-          <span>/</span>
-          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "60vw" }}>
-            {ideaData.title}
-          </Typography>
-        </Box>
-      </Box>
+      <Breadcrumb
+        items={[
+          { label: tNav("ideas"), href: "/ideas" },
+          { label: ideaData.title },
+        ]}
+      />
 
       {/* Idea Content */}
       <IdeaDetailCard>

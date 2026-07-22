@@ -3,9 +3,8 @@ import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 import AddIcon from "@mui/icons-material/Add";
-import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 import { getProjects } from "@/lib/actions/projectQuery";
 import LinkButton from "@/components/ui/LinkButton";
@@ -36,15 +35,12 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
-      <Breadcrumbs sx={{ mb: 3 }}>
-        <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
-          {tCommon("home")}
-        </Link>
-        <Link href="/projects" style={{ textDecoration: "none", color: "inherit" }}>
-          {tCommon("projects")}
-        </Link>
-        <Typography color="text.primary">{tProject("manageTitle")}</Typography>
-      </Breadcrumbs>
+      <Breadcrumb
+        items={[
+          { label: tCommon("projects"), href: "/projects" },
+          { label: tProject("manageTitle") },
+        ]}
+      />
 
       <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
         <Box sx={{ minWidth: 0 }}>

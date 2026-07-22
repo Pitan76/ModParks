@@ -12,13 +12,12 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
-import { Link } from "@/i18n/routing";
 import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
@@ -103,18 +102,14 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
-      <Breadcrumbs sx={{ mb: 3 }}>
-        <Link href={`/projects`} style={{ textDecoration: "none", color: "inherit" }}>
-          {tCommon("projects")}
-        </Link>
-        <Link href={`/projects/${project.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-          {project.name}
-        </Link>
-        <Link href={`/projects/${project.slug}?tab=files`} style={{ textDecoration: "none", color: "inherit" }}>
-          {t("versions")}
-        </Link>
-        <Typography color="text.primary">v{version.versionNumber}</Typography>
-      </Breadcrumbs>
+      <Breadcrumb
+        items={[
+          { label: tCommon("projects"), href: "/projects" },
+          { label: project.name, href: `/projects/${project.slug}` },
+          { label: t("versions"), href: `/projects/${project.slug}?tab=files` },
+          { label: `v${version.versionNumber}` },
+        ]}
+      />
 
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
         <LinkButton

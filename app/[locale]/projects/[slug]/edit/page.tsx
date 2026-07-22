@@ -1,8 +1,6 @@
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import HomeIcon from "@mui/icons-material/Home";
-import { Link } from "@/i18n/routing";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 import { notFound, redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
@@ -52,7 +50,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   }
 
   const t = await getTranslations("Project");
-  const tNav = await getTranslations("Nav");
+  const tCommon = await getTranslations("Common");
 
   const { db } = await getAuthenticatedDb();
   const rawVersions = await db
@@ -87,26 +85,13 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
-      {/* パンくずリスト */}
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary", flexWrap: "wrap", minWidth: 0 }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", color: "inherit", textDecoration: "none" }}>
-            <HomeIcon fontSize="small" style={{ color: "inherit" }} />
-          </Link>
-          <span>/</span>
-          <Link href="/projects" style={{ color: "inherit", textDecoration: "none" }}>
-            {tNav("projects")}
-          </Link>
-          <span>/</span>
-          <Link href={`/projects/${project.slug}`} style={{ color: "inherit", textDecoration: "none" }}>
-            {project.name}
-          </Link>
-          <span>/</span>
-          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>
-            {t("manage")}
-          </Typography>
-        </Box>
-      </Box>
+      <Breadcrumb
+        items={[
+          { label: tCommon("projects"), href: "/projects" },
+          { label: project.name, href: `/projects/${project.slug}` },
+          { label: t("manage") },
+        ]}
+      />
 
       <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 4 }}>
         {t("managePage.title", { name: project.name })}
