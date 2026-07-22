@@ -40,7 +40,7 @@ export async function createReport(projectId: string, formData: FormData) {
   return { success: true };
 }
 
-// ─── 管理者: 通報ステータス更新 ───────────────────────────────────────────────
+// ---- 管理者: 通報ステータス更新 ----
 
 /**
  * 管理者が通報のステータスを更新する Server Action
@@ -66,7 +66,7 @@ export async function updateReportStatus(
   return { success: true };
 }
 
-// ─── 管理者: プロジェクト非公開 ──────────────────────────────────────────────
+// ---- 管理者: プロジェクト非公開 ----
 
 /**
  * 管理者が問題のあるプロジェクトを非公開(draft)にする Server Action
@@ -88,7 +88,7 @@ export async function unpublishProject(projectId: string, _formData?: FormData) 
   return { success: true };
 }
 
-// ─── 管理者: 通報一覧取得 ───────────────────────────────────────────────────
+// ---- 管理者: 通報一覧取得 ----
 
 /**
  * 管理者向け: すべての通報一覧を取得する Server Action

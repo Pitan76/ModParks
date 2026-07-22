@@ -10,7 +10,7 @@ import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { mapProjectRow } from "@/lib/queries/projectRow";
 
-// ─── お気に入りのトグル ─────────────────────────────────────────────────────────
+// ---- お気に入りのトグル ----
 
 export async function toggleProjectFavorite(projectId: string) {
   const { db, userId } = await getAuthenticatedDb();
@@ -56,7 +56,7 @@ export async function toggleProjectFavorite(projectId: string) {
   }
 }
 
-// ─── お気に入り一覧取得 ─────────────────────────────────────────────────────────
+// ---- お気に入り一覧取得 ----
 
 export async function getFavoriteProjects(userId: string) {
   const db = await getDatabase();
@@ -88,7 +88,7 @@ export async function getFavoriteProjects(userId: string) {
   return rows.map((row) => ({ ...mapProjectRow(row), favoritedAt: row.favoritedAt }));
 }
 
-// ─── クッキーによるお気に入り (非ログイン時) ──────────────────────────────────────
+// ---- クッキーによるお気に入り (非ログイン時) ----
 
 export async function toggleCookieFavorite(projectId: string) {
   const cookieStore = await cookies();

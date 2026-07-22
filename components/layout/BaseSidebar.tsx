@@ -126,7 +126,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) 
         })}
       </List>
 
-      {/* ─── Bottom Section (Theme, Locale) - Mobile Only ─── */}
+      {/* ---- Bottom Section (Theme, Locale) - Mobile Only ---- */}
       <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", mt: "auto" }}>
         <Divider />
         <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>

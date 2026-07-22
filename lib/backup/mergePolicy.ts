@@ -30,7 +30,7 @@ export interface TablePolicy {
 }
 
 export const MERGE_POLICIES: Record<string, TablePolicy> = {
-  // ─── 認証・資格情報 ─────────────────────────────────────────────────────
+  // ---- 認証・資格情報 ----
   // 自動マージすると「消したはずのアクセス手段が復活する」ため、すべて手動。
   users: {
     strategy: "manual",
@@ -50,7 +50,7 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
     reason: "2FA の認証器登録。解除した端末が復活しうる",
   },
 
-  // ─── 揮発データ ────────────────────────────────────────────────────────
+  // ---- 揮発データ ----
   // 短命かつ再生成可能。バックアップ対象からも外して良い候補。
   session: {
     strategy: "skip",
@@ -70,7 +70,7 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
     reason: "レート制限カウンタ。expiresAt ベースで自然に再生成される",
   },
 
-  // ─── ユーザー付随データ ────────────────────────────────────────────────
+  // ---- ユーザー付随データ ----
   user_profiles: {
     strategy: "manual",
     reason: "username に UNIQUE 制約があり、機械的な上書きは衝突を起こす",
@@ -82,7 +82,7 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
     review: "updatedAt が無く LWW 不可。curseforgeVerifiedAt など「確認済み」系は現行優先が安全か",
   },
 
-  // ─── 本体コンテンツ（updatedAt あり → LWW 可能） ───────────────────────
+  // ---- 本体コンテンツ（updatedAt あり → LWW 可能） ----
   projects: {
     strategy: "last_write_wins",
     reason: "updatedAt を持つ。編集内容の新しい方を採用するのが直感に合う",
@@ -107,7 +107,7 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
     review: "削除されたコメントが復活する。モデレーションで消したものが戻る点は特に要検討",
   },
 
-  // ─── バージョン（実質イミュータブル） ──────────────────────────────────
+  // ---- バージョン（実質イミュータブル） ----
   versions: {
     strategy: "insert_missing",
     reason: "公開済みバージョンは基本的に改変されない。updatedAt も持たない",
@@ -117,12 +117,12 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
   version_mc_versions: { strategy: "insert_missing", reason: "versions に従属する複合主キーの中間テーブル" },
   version_ideas: { strategy: "insert_missing", reason: "version と idea の関連付け" },
 
-  // ─── マスタデータ ──────────────────────────────────────────────────────
+  // ---- マスタデータ ----
   tags: { strategy: "insert_missing", reason: "マスタ。不足分の補完のみで足りる" },
   platforms: { strategy: "insert_missing", reason: "マスタ。不足分の補完のみで足りる" },
   categories: { strategy: "insert_missing", reason: "マスタ。不足分の補完のみで足りる" },
 
-  // ─── 関連付け（複合主キーの中間テーブル） ──────────────────────────────
+  // ---- 関連付け（複合主キーの中間テーブル） ----
   project_categories: { strategy: "insert_missing", reason: "関連付けのみを持つ中間テーブル" },
   project_tags: { strategy: "insert_missing", reason: "関連付けのみを持つ中間テーブル" },
   project_dependencies: { strategy: "insert_missing", reason: "依存関係の宣言。上書きの必要がない" },
@@ -132,7 +132,7 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
     reason: "role 列を持ち、権限に影響する。外したメンバーが復活すると権限が戻る",
   },
 
-  // ─── ユーザー行動ログ（追記のみ） ──────────────────────────────────────
+  // ---- ユーザー行動ログ（追記のみ） ----
   project_favorites: { strategy: "insert_missing", reason: "お気に入り登録。追記のみで自然に復元できる" },
   idea_likes: { strategy: "insert_missing", reason: "いいね。追記のみで自然に復元できる" },
   user_follows: { strategy: "insert_missing", reason: "フォロー関係。追記のみで自然に復元できる" },
@@ -140,7 +140,7 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
   project_subscriptions: { strategy: "insert_missing", reason: "購読設定。追記のみで自然に復元できる" },
   developer_subscriptions: { strategy: "insert_missing", reason: "購読設定。追記のみで自然に復元できる" },
 
-  // ─── 運営データ ────────────────────────────────────────────────────────
+  // ---- 運営データ ----
   reports: {
     strategy: "insert_missing",
     reason: "通報は追記型。既存行を上書きしない",

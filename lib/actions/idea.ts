@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { ideas, ideaLikes, ideaComments } from "@/db/schema";
+import { ideas, ideaLikes, ideaComments, users } from "@/db/schema";
 import { createIdeaSchema, createIdeaCommentSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
@@ -19,6 +19,24 @@ async function getIdeaTarget(db: any, ideaId: string) {
     .get();
 }
 
+/** アイデア一覧と該当詳細ページのキャッシュを破棄する */
+const revalidateIdea = (ideaId: string) => {
+  revalidatePath("/ideas");
+  revalidatePath(`/ideas/${ideaId}`);
+};
+
+/**
+ * アイデアを取得し、操作者が管理権限を持つかを検証する。
+ * 失敗時は表示用エラーメッセージ、成功時はアイデア本体を返す。
+ */
+async function loadManageableIdea(db: any, ideaId: string, userId: string, deniedKey: string) {
+  const t = await getServerErrors();
+  const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
+  if (!idea) return { error: t("idea.notFound") };
+  if (!(await canManageIdea(db, idea.authorId, userId))) return { error: t(deniedKey) };
+  return { idea };
+}
+
 /** 返信先の正規化（1階層のみ）。親コメントIDと親投稿者IDを返す */
 async function resolveCommentParent(db: any, ideaId: string, rawParentId: string | null) {
   if (!rawParentId) return { parentId: null as string | null, parentAuthorId: null as string | null };
@@ -31,7 +49,7 @@ async function resolveCommentParent(db: any, ideaId: string, rawParentId: string
   return { parentId: parent.parentId ?? parent.id, parentAuthorId: parent.authorId };
 }
 
-// ─── アイデア作成 ─────────────────────────────────────────────────────────────
+// ---- アイデア作成 ----
 
 export async function createIdea(formData: FormData) {
   const { db, userId } = await getAuthenticatedDb();
@@ -70,20 +88,16 @@ export async function createIdea(formData: FormData) {
   }
 }
 
-// ─── アイデア編集 ─────────────────────────────────────────────────────────────
+// ---- アイデア編集 ----
 
 /**
  * アイデアを編集する。投稿者本人または管理者のみ許可。
  */
 export async function updateIdea(ideaId: string, formData: FormData) {
   const { db, userId } = await getAuthenticatedDb();
-  const t = await getServerErrors();
 
-  const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
-  if (!idea) return { error: { server: [t("idea.notFound")] } };
-  if (!(await canManageIdea(db, idea.authorId, userId))) {
-    return { error: { server: [t("idea.noEditPermission")] } };
-  }
+  const loaded = await loadManageableIdea(db, ideaId, userId, "idea.noEditPermission");
+  if (loaded.error) return { error: { server: [loaded.error] } };
 
   const raw = {
     title:      formData.get("title"),
@@ -104,28 +118,23 @@ export async function updateIdea(ideaId: string, formData: FormData) {
     .where(eq(ideas.id, ideaId))
     .run();
 
-  revalidatePath("/ideas");
-  revalidatePath(`/ideas/${ideaId}`);
+  revalidateIdea(ideaId);
   return { success: true };
 }
 
-// ─── ステータス変更 ─────────────────────────────────────────────────────────────
+// ---- ステータス変更 ----
 
 /**
  * アイデアのステータスを変更する。投稿者本人または管理者のみ許可。
  */
 export async function updateIdeaStatus(ideaId: string, status: "open" | "in_progress" | "fulfilled") {
   const { db, userId } = await getAuthenticatedDb();
-  const t = await getServerErrors();
 
-  const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
-  if (!idea) return { error: { server: [t("idea.notFound")] } };
-  if (!(await canManageIdea(db, idea.authorId, userId))) {
-    return { error: { server: [t("idea.noStatusPermission")] } };
-  }
+  const loaded = await loadManageableIdea(db, ideaId, userId, "idea.noStatusPermission");
+  if (loaded.error) return { error: { server: [loaded.error] } };
 
   if (!["open", "in_progress", "fulfilled"].includes(status)) {
-    return { error: { server: [t("idea.invalidStatus")] } };
+    return { error: { server: [(await getServerErrors())("idea.invalidStatus")] } };
   }
 
   await db.update(ideas)
@@ -133,25 +142,20 @@ export async function updateIdeaStatus(ideaId: string, status: "open" | "in_prog
     .where(eq(ideas.id, ideaId))
     .run();
 
-  revalidatePath("/ideas");
-  revalidatePath(`/ideas/${ideaId}`);
+  revalidateIdea(ideaId);
   return { success: true };
 }
 
-// ─── アイデア削除 ─────────────────────────────────────────────────────────────
+// ---- アイデア削除 ----
 
 /**
  * アイデアを削除する。投稿者本人または管理者のみ許可。
  */
 export async function deleteIdea(ideaId: string) {
   const { db, userId } = await getAuthenticatedDb();
-  const t = await getServerErrors();
 
-  const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
-  if (!idea) return { error: t("idea.notFound") };
-  if (!(await canManageIdea(db, idea.authorId, userId))) {
-    return { error: t("idea.noDeletePermission") };
-  }
+  const loaded = await loadManageableIdea(db, ideaId, userId, "idea.noDeletePermission");
+  if (loaded.error) return { error: loaded.error };
 
   await db.delete(ideas).where(eq(ideas.id, ideaId)).run();
   await recordDeletion(db, "ideas", ideaId);
@@ -163,12 +167,11 @@ export async function deleteIdea(ideaId: string) {
 /** 投稿者本人か管理者かを判定する */
 async function canManageIdea(db: any, authorId: string, userId: string): Promise<boolean> {
   if (authorId === userId) return true;
-  const { users } = await import("@/db/schema");
   const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
   return dbUser?.role === "admin";
 }
 
-// ─── いいねのトグル ─────────────────────────────────────────────────────────
+// ---- いいねのトグル ----
 
 export async function toggleIdeaLike(ideaId: string) {
   const { db, userId } = await getAuthenticatedDb();
@@ -204,7 +207,7 @@ export async function toggleIdeaLike(ideaId: string) {
   }
 }
 
-// ─── コメント作成 ─────────────────────────────────────────────────────────────
+// ---- コメント作成 ----
 
 export async function createIdeaComment(ideaId: string, formData: FormData) {
   const { db, userId } = await getAuthenticatedDb();
@@ -253,7 +256,7 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
   }
 }
 
-// ─── コメント編集 ─────────────────────────────────────────────────────────────
+// ---- コメント編集 ----
 
 /** アイデアコメントを編集する。投稿者本人のみ許可。 */
 export async function updateIdeaComment(commentId: string, formData: FormData) {
@@ -282,7 +285,7 @@ export async function updateIdeaComment(commentId: string, formData: FormData) {
   return { success: true };
 }
 
-// ─── コメント削除 ─────────────────────────────────────────────────────────────
+// ---- コメント削除 ----
 
 /** アイデアコメントを削除する。投稿者本人または管理者のみ許可。 */
 export async function deleteIdeaComment(commentId: string) {

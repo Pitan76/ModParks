@@ -37,7 +37,7 @@ export type License = (typeof LICENSES)[number];
 export { MC_VERSIONS, LICENSES };
 export type { McVersion };
 
-// ─── Project Schema ────────────────────────────────────────────────────────────
+// ---- Project Schema ----
 
 export const createProjectSchema = z.object({
   name:        z.string().min(3, "3文字以上").max(64, "64文字以内"),
@@ -73,7 +73,7 @@ export const updateProjectSchema = createProjectSchema.partial().extend({
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 
-// ─── Version Schema ────────────────────────────────────────────────────────────
+// ---- Version Schema ----
 
 export const createVersionSchema = z.object({
   versionNumber: z
@@ -113,7 +113,7 @@ export const updateVersionSchema = createVersionSchema.partial().extend({
 
 export type UpdateVersionInput = z.infer<typeof updateVersionSchema>;
 
-// ─── External URL ──────────────────────────────────────────────────────────────
+// ---- External URL ----
 
 /** 外部URLとして許可するドメインのリスト */
 export const ALLOWED_EXTERNAL_DOMAINS = [
@@ -139,7 +139,7 @@ export function isAllowedExternalUrl(url: string): boolean {
   }
 }
 
-// ─── Report Schema ─────────────────────────────────────────────────────────────
+// ---- Report Schema ----
 
 export const REPORT_REASONS = ["copyright", "malware", "spam", "other"] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
@@ -151,7 +151,7 @@ export const createReportSchema = z.object({
 
 export type CreateReportInput = z.infer<typeof createReportSchema>;
 
-// ─── Profile Schema ─────────────────────────────────────────────────────────────
+// ---- Profile Schema ----
 
 export const updateProfileSchema = z.object({
   displayName: z.string().min(1).max(64),
@@ -160,7 +160,7 @@ export const updateProfileSchema = z.object({
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
-// ─── Idea Schema ─────────────────────────────────────────────────────────────
+// ---- Idea Schema ----
 
 export const createIdeaSchema = z.object({
   title:      z.string().min(3, "3文字以上").max(100, "100文字以内"),

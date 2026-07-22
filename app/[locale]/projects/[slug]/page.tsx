@@ -139,7 +139,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
       <Grid container spacing={{ xs: 3, md: 4 }}>
-        {/* ─── 左カラム: プロジェクト情報 ──────────────────────────────── */}
+        {/* ---- 左カラム: プロジェクト情報 ---- */}
         <Grid size={{ xs: 12, md: 8 }} sx={{ minWidth: 0, maxWidth: "100%" }}>
           
           <ProjectDetailHeader 
@@ -206,7 +206,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           )}
         </Grid>
 
-        {/* ─── 右カラム: サイドバー ─────────────────────────────────────── */}
+        {/* ---- 右カラム: サイドバー ---- */}
         <Grid size={{ xs: 12, md: 4 }}>
           <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
           <Box sx={{ mt: 3 }}>
