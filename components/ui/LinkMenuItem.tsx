@@ -14,6 +14,7 @@ type LinkMenuItemProps = MenuItemProps & ComponentProps<typeof Link>;
  * MUI の MenuItem コンポーネントの見た目で、next-intl の Link 遷移を行うコンポーネント。
  */
 const LinkMenuItem = (props: LinkMenuItemProps) => {
+  // eslint-disable-next-line no-restricted-syntax
   return <MenuItem component={Link} {...props} />;
 };
 

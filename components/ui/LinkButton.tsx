@@ -14,6 +14,7 @@ type LinkButtonProps = ButtonProps & ComponentProps<typeof Link>;
  * MUI の Button コンポーネントの見た目で、next-intl の Link 遷移を行うコンポーネント。
  */
 const LinkButton = ({ prefetch = false, ...props }: LinkButtonProps) => {
+  // eslint-disable-next-line no-restricted-syntax
   return <Button component={Link} prefetch={prefetch} {...props} />;
 };
 

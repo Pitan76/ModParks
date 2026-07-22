@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import MarkdownRenderer from "./MarkdownRenderer";
 import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
-// @ts-ignore
+// @ts-expect-error - puki2md has no type declarations
 import puki2md from "puki2md";
 
 type DescriptionRendererProps = {
@@ -20,6 +20,7 @@ const DescriptionRenderer = ({ content, format = "markdown" }: DescriptionRender
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
