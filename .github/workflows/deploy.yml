@@ -26,6 +26,8 @@ jobs:
         env:
           # デプロイ間で Server Action の暗号鍵を固定する（ビルド時に焼き込まれる）
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          # Turbopack だと Server バンドルが 3 MiB を超えるため CI では webpack ビルドを使う
+          CF_WEBPACK_BUILD: "1"
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
