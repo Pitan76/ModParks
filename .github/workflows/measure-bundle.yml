@@ -27,7 +27,9 @@ jobs:
 
       - name: Switch build command to webpack
         if: matrix.bundler == 'webpack'
-        run: sed -i 's/buildCommand: "next build"/buildCommand: "next build --webpack"/' open-next.config.ts
+        run: |
+          sed -i 's/buildCommand: "next build"/buildCommand: "next build --webpack"/' open-next.config.ts
+          grep buildCommand open-next.config.ts
 
       - name: Build OpenNext
         run: npx opennextjs-cloudflare build
