@@ -14,166 +14,51 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Pagination from "@mui/material/Pagination";
-import Chip from "@mui/material/Chip";
-import Collapse from "@mui/material/Collapse";
-import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { getSettingsAudits, getBackupAudits } from "@/lib/actions/admin";
+import AuditSettingsRow from "./AuditSettingsRow";
+import AuditBackupRow from "./AuditBackupRow";
 
-interface LogsClientProps {
+type SettingsLog = {
+  id: string;
+  createdAt: string | Date;
+  changedBy: string;
+  changedByEmail: string | null;
+  scope: string;
+  key: string;
+  oldValue: unknown;
+  newValue: unknown;
+  prUrl?: string | null;
+};
+
+type BackupLog = {
+  id: string;
+  createdAt: string | Date;
+  performedBy: string | null;
+  performedByEmail: string | null;
+  action: string;
+  status: string;
+  backupKey: string | null;
+  snapshotKey: string | null;
+  detail: unknown;
+};
+
+export type LogsClientProps = {
   initialSettings: {
-    logs: any[];
+    logs: SettingsLog[];
     total: number;
   };
   initialBackups: {
-    logs: any[];
+    logs: BackupLog[];
     total: number;
   };
-}
+};
 
-function SettingsRow({ log, t }: { log: any; t: any }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell sx={{ width: 50 }}>
-          <IconButton size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell suppressHydrationWarning sx={{ minWidth: 150 }}>
-          {new Date(log.createdAt).toLocaleString()}
-        </TableCell>
-        <TableCell>{log.changedByEmail || log.changedBy}</TableCell>
-        <TableCell>
-          <Chip label={log.scope} size="small" variant="outlined" />
-        </TableCell>
-        <TableCell sx={{ fontWeight: 600 }}>{log.key}</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1, p: 2, bgcolor: "action.hover", borderRadius: 1 }}>
-              <Typography variant="subtitle2" gutterBottom component="div" sx={{ fontWeight: 700 }}>
-                {t("detail")}
-              </Typography>
-              <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", md: "row" }, mt: 1 }}>
-                {log.scope !== "secret" ? (
-                  <>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="caption" color="text.secondary">{t("oldValue")}</Typography>
-                      <Paper variant="outlined" sx={{ p: 1.5, mt: 0.5, bgcolor: "background.paper", fontFamily: "monospace", fontSize: "0.85rem", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-                        {log.oldValue !== null ? String(log.oldValue) : "NULL"}
-                      </Paper>
-                    </Box>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="caption" color="text.secondary">{t("newValue")}</Typography>
-                      <Paper variant="outlined" sx={{ p: 1.5, mt: 0.5, bgcolor: "background.paper", fontFamily: "monospace", fontSize: "0.85rem", whiteSpace: "pre-wrap", wordBreak: "break-all", borderLeft: "3px solid", borderColor: "success.main" }}>
-                        {log.newValue !== null ? String(log.newValue) : "NULL"}
-                      </Paper>
-                    </Box>
-                  </>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    シークレットの値はセキュリティ上、記録されません。
-                  </Typography>
-                )}
-              </Box>
-              {log.prUrl && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="caption" color="text.secondary">PR URL</Typography>
-                  <Typography variant="body2" sx={{ mt: 0.5 }}>
-                    <a href={log.prUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#3f51b5", textDecoration: "underline" }}>
-                      {log.prUrl}
-                    </a>
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  );
-}
-
-function BackupRow({ log, t }: { log: any; t: any }) {
-  const [open, setOpen] = useState(false);
-
-  const getActionColor = (action: string) => {
-    switch (action) {
-      case "restore": return "error";
-      case "merge": return "warning";
-      case "create": case "auto_create": return "success";
-      default: return "default";
-    }
-  };
-
-  return (
-    <>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell sx={{ width: 50 }}>
-          <IconButton size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell suppressHydrationWarning sx={{ minWidth: 150 }}>
-          {new Date(log.createdAt).toLocaleString()}
-        </TableCell>
-        <TableCell>{log.performedByEmail || log.performedBy || "System (Cron)"}</TableCell>
-        <TableCell>
-          <Chip label={log.action} size="small" color={getActionColor(log.action) as any} />
-        </TableCell>
-        <TableCell>
-          <Chip
-            label={log.status === "success" ? "SUCCESS" : "FAILURE"}
-            size="small"
-            color={log.status === "success" ? "success" : "error"}
-            variant="outlined"
-          />
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1, p: 2, bgcolor: "action.hover", borderRadius: 1 }}>
-              <Typography variant="subtitle2" gutterBottom component="div" sx={{ fontWeight: 700 }}>
-                {t("detail")}
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>
-                {log.backupKey && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Backup File Key (R2)</Typography>
-                    <Typography variant="body2" sx={{ fontFamily: "monospace", mt: 0.5 }}>{log.backupKey}</Typography>
-                  </Box>
-                )}
-                {log.snapshotKey && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Rollback Snapshot Key (R2)</Typography>
-                    <Typography variant="body2" sx={{ fontFamily: "monospace", mt: 0.5 }}>{log.snapshotKey}</Typography>
-                  </Box>
-                )}
-                {log.detail && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Execution Summary / Error Payload</Typography>
-                    <Paper variant="outlined" sx={{ p: 1.5, mt: 0.5, bgcolor: "background.paper", fontFamily: "monospace", fontSize: "0.85rem", whiteSpace: "pre-wrap", overflowX: "auto" }}>
-                      {JSON.stringify(log.detail, null, 2)}
-                    </Paper>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  );
-}
-
-export default function LogsClient({ initialSettings, initialBackups }: LogsClientProps) {
+/**
+ * 管理者向けのシステム変更監査ログおよびバックアップ実行監査ログの閲覧画面コンポーネント。
+ * タブ切り替えによって両ログの一覧表示とページネーションによる動的読み込みを提供します。
+ */
+const LogsClient = ({ initialSettings, initialBackups }: LogsClientProps) => {
   const t = useTranslations("Admin.audit");
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -187,28 +72,28 @@ export default function LogsClient({ initialSettings, initialBackups }: LogsClie
   const [backupsTotal, setBackupsTotal] = useState(initialBackups.total);
   const [loadingBackups, setLoadingBackups] = useState(false);
 
-  const handleSettingsPageChange = async (_event: any, newPage: number) => {
+  const handleSettingsPageChange = async (_event: unknown, newPage: number) => {
     setSettingsPage(newPage);
     setLoadingSettings(true);
     try {
       const res = await getSettingsAudits(10, (newPage - 1) * 10);
       setSettingsLogs(res.logs);
       setSettingsTotal(res.total);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
     } finally {
       setLoadingSettings(false);
     }
   };
 
-  const handleBackupsPageChange = async (_event: any, newPage: number) => {
+  const handleBackupsPageChange = async (_event: unknown, newPage: number) => {
     setBackupsPage(newPage);
     setLoadingBackups(true);
     try {
       const res = await getBackupAudits(10, (newPage - 1) * 10);
       setBackupsLogs(res.logs);
       setBackupsTotal(res.total);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
     } finally {
       setLoadingBackups(false);
@@ -257,7 +142,7 @@ export default function LogsClient({ initialSettings, initialBackups }: LogsClie
                   </TableRow>
                 ) : (
                   settingsLogs.map((log) => (
-                    <SettingsRow key={log.id} log={log} t={t} />
+                    <AuditSettingsRow key={log.id} log={log} t={t} />
                   ))
                 )}
               </TableBody>
@@ -306,7 +191,7 @@ export default function LogsClient({ initialSettings, initialBackups }: LogsClie
                   </TableRow>
                 ) : (
                   backupsLogs.map((log) => (
-                    <BackupRow key={log.id} log={log} t={t} />
+                    <AuditBackupRow key={log.id} log={log} t={t} />
                   ))
                 )}
               </TableBody>
@@ -327,4 +212,6 @@ export default function LogsClient({ initialSettings, initialBackups }: LogsClie
       )}
     </Box>
   );
-}
+};
+
+export default LogsClient;

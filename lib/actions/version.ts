@@ -1,7 +1,6 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { getDatabase } from "@/lib/db";
 import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
@@ -12,38 +11,15 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
-import { extractAndUploadRecipes } from "@/lib/utils/recipe";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 
-/**
- * IDを指定してバージョン詳細を取得する
- */
-export async function getVersionById(versionId: string) {
-  const db = await getDatabase();
-  
-  const version = await db
-    .select()
-    .from(versions)
-    .where(eq(versions.id, versionId))
-    .get();
-
-  if (!version) return null;
-
-  return version;
-}
+export { getVersionById } from "./versionQuery";
+export { extractRecipesFromVersion } from "./versionRecipe";
 
 /**
- * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action
- * ファイルアップロード方式と外部URL方式の両方に対応
- * @param projectSlug 対象プロジェクトのSlug
- * @param formData フォームデータ (versionNumber, mcVersions, loaders, changelog, fileUrl, fileName 等)
- * @returns { success: boolean, versionId: string } または { error: Record<string, string[]> }
- * @throws Unauthorized ログインしていない場合
- * @throws Forbidden プロジェクトの作成者ではない場合
- * @throws Error プロジェクトが見つからない場合
+ * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
  */
-export async function createVersion(projectSlug: string, formData: FormData) {
+export const createVersion = async (projectSlug: string, formData: FormData) => {
   const { db, session } = await getAuthenticatedDb();
 
   const project = await db
@@ -64,9 +40,7 @@ export async function createVersion(projectSlug: string, formData: FormData) {
   };
 
   const parsed = createVersionSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { error: parsed.error.flatten().fieldErrors };
-  }
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
   const fileUrl  = formData.get("fileUrl") as string;
   const fileName = formData.get("fileName") as string;
@@ -75,7 +49,6 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     return { error: { fileUrl: ["ファイルをアップロードするか、外部URLを入力してください"] } };
   }
 
-  // 外部URLの場合はドメインのホワイトリスト検証
   const isExternal = fileUrl.startsWith("http") && !fileUrl.includes(process.env.R2_PUBLIC_URL || "__r2__");
   if (isExternal && !isAllowedExternalUrl(fileUrl)) {
     return { error: { fileUrl: ["許可されていないドメインのURLです。GitHub, Modrinth, CurseForge のURLを使用してください。"] } };
@@ -97,7 +70,6 @@ export async function createVersion(projectSlug: string, formData: FormData) {
     projectId:     project.id,
   });
 
-  // 新バージョン登録をプロジェクトの最終更新日時に反映（「最近更新順」ソート用）
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
 
   after(async () => {
@@ -106,27 +78,21 @@ export async function createVersion(projectSlug: string, formData: FormData) {
 
   const ideaId = formData.get("ideaId") as string;
   if (ideaId) {
-    await db.insert(versionIdeas).values({
-      versionId: id,
-      ideaId,
-    }).run();
-    // アイデアを実現済みに更新
+    await db.insert(versionIdeas).values({ versionId: id, ideaId }).run();
     await db.update(ideas).set({ status: "fulfilled" }).where(eq(ideas.id, ideaId)).run();
   }
 
   revalidatePath(`/projects/${projectSlug}`);
   revalidatePath(`/ideas`);
-  if (ideaId) {
-    revalidatePath(`/ideas/${ideaId}`);
-  }
+  if (ideaId) revalidatePath(`/ideas/${ideaId}`);
 
   return { success: true, versionId: id };
-}
+};
 
 /**
- * プロジェクトのバージョン情報を更新する Server Action
+ * プロジェクトのバージョン情報を更新する Server Action。
  */
-export async function updateVersion(versionId: string, projectSlug: string, formData: FormData) {
+export const updateVersion = async (versionId: string, projectSlug: string, formData: FormData) => {
   const { db, session } = await getAuthenticatedDb();
 
   const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
@@ -148,9 +114,7 @@ export async function updateVersion(versionId: string, projectSlug: string, form
   };
 
   const parsed = updateVersionSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { error: parsed.error.flatten().fieldErrors };
-  }
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
   const updateData: any = {
     versionNumber: parsed.data.versionNumber,
@@ -165,15 +129,12 @@ export async function updateVersion(versionId: string, projectSlug: string, form
       return { error: { fileUrl: ["許可されていないドメインのURLです。GitHub, Modrinth, CurseForge のURLを使用してください。"] } };
     }
     const r2Key = getR2KeyFromUrl(version.fileUrl);
-    if (r2Key) {
-      return { error: { fileUrl: ["直接アップロードされたファイルはURLを変更できません。"] } };
-    }
+    if (r2Key) return { error: { fileUrl: ["直接アップロードされたファイルはURLを変更できません。"] } };
     updateData.fileUrl = parsed.data.fileUrl;
   }
 
   await db.update(versions).set(updateData).where(eq(versions.id, versionId)).run();
 
-  // Loader と mcVersion のテーブルも更新（入れ替え方式のため消える分を先に控える）
   const previousLoaders = await db
     .select({ loader: versionLoaders.loader })
     .from(versionLoaders)
@@ -212,15 +173,12 @@ export async function updateVersion(versionId: string, projectSlug: string, form
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
-}
+};
 
 /**
- * プロジェクトのバージョン（ファイル）を削除する Server Action
- * @param versionId 削除対象のバージョンID
- * @param projectSlug プロジェクトのSlug（権限チェックおよびリバリデーション用）
- * @returns { success: boolean } または { error: string }
+ * プロジェクトのバージョン（ファイル）を削除する Server Action。
  */
-export async function deleteVersion(versionId: string, projectSlug: string) {
+export const deleteVersion = async (versionId: string, projectSlug: string) => {
   const { db, session } = await getAuthenticatedDb();
 
   const project = await db
@@ -246,8 +204,6 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
   if (!version) return { error: "Version not found" };
   if (version.projectId !== project.id) return { error: "Forbidden: Version does not belong to this project" };
 
-  // R2 上に実体があるファイルのみ削除（外部URLはスキップ）。
-  // ストレージ削除失敗でDB削除まで巻き込まないよう境界で握りつぶす。
   const r2Key = getR2KeyFromUrl(version.fileUrl);
   if (r2Key) {
     try {
@@ -265,18 +221,12 @@ export async function deleteVersion(versionId: string, projectSlug: string) {
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
-}
+};
 
 /**
  * バージョンのアーカイブ状態を切り替える Server Action。
- * アーカイブ済みバージョンは公開一覧・APIレスポンス・ダウンロードから除外され、
- * 作者・メンバー・管理者のみが管理画面で閲覧できる。ファイル実体は削除しない。
- * @param versionId 対象のバージョンID
- * @param projectSlug プロジェクトのSlug（権限チェックおよびリバリデーション用）
- * @param archived true でアーカイブ、false でアーカイブ解除
- * @returns { success: boolean } または { error: string }
  */
-export async function setVersionArchived(versionId: string, projectSlug: string, archived: boolean) {
+export const setVersionArchived = async (versionId: string, projectSlug: string, archived: boolean) => {
   const { db, session } = await getAuthenticatedDb();
 
   const project = await db
@@ -312,98 +262,4 @@ export async function setVersionArchived(versionId: string, projectSlug: string,
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
-}
-
-export async function extractRecipesFromVersion(versionId: string, projectSlug: string) {
-  const { db, session } = await getAuthenticatedDb();
-
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.slug, projectSlug))
-    .get();
-
-  if (!project) return { error: "Project not found" };
-
-  await assertProjectAccess(db, project, session);
-
-  const version = await db
-    .select()
-    .from(versions)
-    .where(and(eq(versions.id, versionId), eq(versions.projectId, project.id)))
-    .get();
-
-  if (!version) return { error: "Version not found" };
-
-  if (!version.fileUrl) {
-    return { error: "No file URL associated with this version" };
-  }
-
-  const r2Key = getR2KeyFromUrl(version.fileUrl);
-  let arrayBuffer: ArrayBuffer;
-  let R2 = null;
-
-  try {
-    R2 = await getR2Bucket();
-
-    if (r2Key) {
-      const object = await R2.get(r2Key);
-      
-      if (!object) {
-        return { error: "File not found in R2." };
-      }
-      arrayBuffer = await object.arrayBuffer();
-    } else {
-      // 外部URLからのダウンロード
-      if (!isAllowedExternalUrl(version.fileUrl)) {
-        return { error: "Cannot extract recipes from this external URL domain." };
-      }
-      const res = await fetch(version.fileUrl);
-      if (!res.ok) {
-        return { error: `Failed to download file from external URL: ${res.statusText}` };
-      }
-      arrayBuffer = await res.arrayBuffer();
-    }
-
-    const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
-    let cdnSecret = process.env.RECIPE_CDN_SECRET;
-    
-    if (!cdnSecret) {
-      try {
-        if (process.env.NODE_ENV !== "development") {
-          const { env } = await getCloudflareContext({ async: true });
-          if ((env as any).RECIPE_CDN_SECRET) {
-            cdnSecret = (env as any).RECIPE_CDN_SECRET;
-          }
-        }
-      } catch (e) {}
-    }
-
-    const useCdnApi = process.env.USE_RECIPE_CDN_API === "true";
-
-    const { count: extractedCount, namespaces } = await extractAndUploadRecipes(
-      arrayBuffer,
-      cdnUrl,
-      cdnSecret,
-      useCdnApi,
-      R2
-    );
-
-    // 検出したネームスペースをプロジェクトへ蓄積（slug と一致しないことが多いため表示フィルタに使う）。
-    if (namespaces.length > 0) {
-      const existing = Array.isArray(project.recipeNamespaces) ? project.recipeNamespaces : [];
-      const merged = Array.from(new Set([...existing, ...namespaces])).sort();
-      if (merged.length !== existing.length) {
-        await db.update(projects).set({ recipeNamespaces: merged }).where(eq(projects.id, project.id)).run();
-      }
-    }
-
-    revalidatePath(`/projects/${projectSlug}`);
-    revalidatePath(`/[locale]/projects/${projectSlug}`, "page");
-
-    return { success: true, count: extractedCount };
-  } catch (err: any) {
-    console.error("Failed to extract recipes:", err);
-    return { error: err.message || "Failed to extract recipes" };
-  }
-}
+};

@@ -1,13 +1,25 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { users, userProfiles, userSettings, apiKeys, accounts, rateLimits } from "@/db/schema";
-import { eq, and, or } from "drizzle-orm";
+import { userProfiles, userSettings, apiKeys, accounts } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import bcrypt from "bcryptjs";
 import { recordDeletion } from "@/lib/backup/tombstone";
 
-export async function updateProfile(data: { displayName: string, bio: string, avatarUrl: string, links: string, locale: "ja" | "en" }) {
+export {
+  changeUsername,
+  changeEmail,
+  changePassword,
+  deleteAccount,
+  generateTotpSecret,
+  verifyAndEnableTotp,
+  disableTotp,
+} from "./settingsSecurity";
+
+/**
+ * プロフィール情報（表示名、Bio、アバターURL、リンク、使用言語）を更新する Server Action。
+ */
+export const updateProfile = async (data: { displayName: string, bio: string, avatarUrl: string, links: string, locale: "ja" | "en" }) => {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userProfiles).set({
@@ -24,9 +36,12 @@ export async function updateProfile(data: { displayName: string, bio: string, av
   revalidatePath("/settings");
   revalidatePath("/profile");
   return { success: true };
-}
+};
 
-export async function generateApiKey(name: string) {
+/**
+ * APIキーを生成し、SHA-256でハッシュ化した値を保存して生のキーを返す Server Action。
+ */
+export const generateApiKey = async (name: string) => {
   const { db, userId } = await getAuthenticatedDb();
 
   const rawKey = "mp_" + crypto.randomUUID().replace(/-/g, "");
@@ -45,9 +60,12 @@ export async function generateApiKey(name: string) {
 
   revalidatePath("/settings");
   return { success: true, key: rawKey };
-}
+};
 
-export async function deleteApiKey(id: string) {
+/**
+ * IDを指定してAPIキーを削除する Server Action。
+ */
+export const deleteApiKey = async (id: string) => {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.delete(apiKeys).where(and(eq(apiKeys.id, id), eq(apiKeys.userId, userId)));
@@ -55,18 +73,24 @@ export async function deleteApiKey(id: string) {
 
   revalidatePath("/settings");
   return { success: true };
-}
+};
 
-export async function disconnectGitHub() {
+/**
+ * GitHubとのOAuth連携を解除する Server Action。
+ */
+export const disconnectGitHub = async () => {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.delete(accounts).where(and(eq(accounts.userId, userId), eq(accounts.provider, "github")));
 
   revalidatePath("/settings");
   return { success: true };
-}
+};
 
-export async function toggleGithubVisibility(show: boolean) {
+/**
+ * プロフィール上でのGitHubリンク表示・非表示を切り替える Server Action。
+ */
+export const toggleGithubVisibility = async (show: boolean) => {
   const { db, userId } = await getAuthenticatedDb();
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
@@ -80,236 +104,12 @@ export async function toggleGithubVisibility(show: boolean) {
   revalidatePath("/settings");
   revalidatePath("/profile");
   return { success: true };
-}
+};
 
-export async function changeUsername(newId: string) {
-  const { db, userId } = await getAuthenticatedDb();
-
-  // Validation: format check
-  if (!/^[a-zA-Z0-9-_]+$/.test(newId)) {
-    return { error: "errorIdFormat" };
-  }
-
-  // Check if taken
-  const existing = await db.select().from(userProfiles).where(
-    or(eq(userProfiles.username, newId), eq(userProfiles.previousUsername, newId))
-  ).get();
-
-  if (existing) {
-    return { error: "errorIdTaken" };
-  }
-
-  // M-4: 30 days cooldown for username changes
-  const rateLimitId = `username_change:${userId}`;
-  const now = Date.now();
-  const rlRecord = await db.select().from(rateLimits).where(eq(rateLimits.id, rateLimitId)).get();
-  if (rlRecord && rlRecord.expiresAt.getTime() > now) {
-    return { error: "errorRateLimit" }; // Need to add translation or just fail
-  }
-
-  if (rlRecord) {
-    await db.update(rateLimits).set({ expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000) }).where(eq(rateLimits.id, rateLimitId));
-  } else {
-    await db.insert(rateLimits).values({ id: rateLimitId, expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000) });
-  }
-
-  const currentProfile = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).get();
-  
-  await db.update(userProfiles).set({
-    username: newId,
-    previousUsername: currentProfile?.username || null
-  }).where(eq(userProfiles.userId, userId));
-
-  revalidatePath("/settings");
-  return { success: true };
-}
-
-export async function changeEmail(newEmail: string, password?: string) {
-  const { db, userId } = await getAuthenticatedDb();
-
-  const user = await db.select().from(users).where(eq(users.id, userId)).get();
-  
-  if (user?.passwordHash) {
-    if (!password) return { error: "errorWrongPassword" };
-    const match = await bcrypt.compare(password, user.passwordHash);
-    if (!match) return { error: "errorWrongPassword" };
-  } else {
-    // H-2: Require OAuth users to set a password before changing their email
-    return { error: "errorSetPasswordFirst" };
-  }
-
-  const existing = await db.select().from(users).where(eq(users.email, newEmail)).get();
-  if (existing) {
-    return { error: "errorEmailTaken" };
-  }
-
-  await db.update(users).set({ email: newEmail }).where(eq(users.id, userId));
-  revalidatePath("/settings");
-  return { success: true };
-}
-
-export async function changePassword(oldPass: string, newPass: string, totpToken?: string) {
-  const { db, userId } = await getAuthenticatedDb();
-
-  const user = await db.select().from(users).where(eq(users.id, userId)).get();
-  
-  if (user?.passwordHash) {
-    const match = await bcrypt.compare(oldPass, user.passwordHash);
-    if (!match) return { error: "errorWrongPassword" };
-  }
-
-  if (user?.twoFactorEnabled && user?.twoFactorSecret) {
-    if (!totpToken) return { error: "INVALID_CODE" };
-    const { TOTP } = await import("otpauth");
-    const totp = new TOTP({ secret: user.twoFactorSecret });
-    const delta = totp.validate({ token: totpToken, window: 1 });
-    if (delta === null) return { error: "INVALID_CODE" };
-  }
-
-  const hashed = await bcrypt.hash(newPass, 8);
-  await db.update(users).set({ passwordHash: hashed }).where(eq(users.id, userId));
-
-  revalidatePath("/settings");
-  return { success: true };
-}
-
-export async function deleteAccount(passwordOrToken?: string) {
-  const { db, userId } = await getAuthenticatedDb();
-
-  const user = await db.select().from(users).where(eq(users.id, userId)).get();
-  if (!user) return { success: false };
-
-  let isAuthorized = false;
-
-  // H-3: Check password if exists
-  if (user.passwordHash) {
-    if (!passwordOrToken) return { error: "errorWrongPassword" };
-    isAuthorized = await bcrypt.compare(passwordOrToken, user.passwordHash);
-  } else {
-    // If OAuth-only and they somehow have TOTP, we check TOTP. Otherwise, reject.
-    if (!user.twoFactorEnabled) {
-       return { error: "errorSetPasswordFirst" };
-    }
-  }
-
-  // If password failed or they are OAuth-only with TOTP, check TOTP token
-  if (!isAuthorized && user.twoFactorSecret && passwordOrToken) {
-    const { TOTP } = await import("otpauth");
-    const totp = new TOTP({ secret: user.twoFactorSecret });
-    const delta = totp.validate({ token: passwordOrToken, window: 1 });
-    if (delta !== null) {
-      isAuthorized = true;
-    }
-  }
-
-  if ((user.passwordHash || user.twoFactorEnabled) && !isAuthorized) {
-    return { error: "UNAUTHORIZED" };
-  }
-
-  const timestamp = Date.now();
-  const scrambledEmail = user.email ? `deleted_${timestamp}_${user.email}` : null;
-  const scrambledGithubId = user.githubId ? `deleted_${timestamp}_${user.githubId}` : null;
-
-  await db.update(users).set({ 
-    deletedAt: new Date(),
-    email: scrambledEmail,
-    githubId: scrambledGithubId
-  }).where(eq(users.id, userId));
-
-  const profile = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).get();
-  if (profile) {
-    await db.update(userProfiles).set({
-      username: `deleted_${timestamp}_${profile.username}`
-    }).where(eq(userProfiles.userId, userId));
-  }
-
-  return { success: true };
-}
-
-export async function generateTotpSecret() {
-  const { db, session, userId } = await getAuthenticatedDb();
-  const { TOTP, Secret } = await import("otpauth");
-
-  const secret = new Secret();
-  const totp = new TOTP({
-    issuer: "ModParks",
-    label: session.user.email || session.user.username || "User",
-    algorithm: "SHA1",
-    digits: 6,
-    period: 30,
-    secret,
-  });
-
-  await db.update(users).set({ twoFactorSecret: secret.base32 }).where(eq(users.id, userId));
-
-  return { uri: totp.toString() };
-}
-
-export async function verifyAndEnableTotp(token: string) {
-  const { db, userId } = await getAuthenticatedDb();
-  const { TOTP } = await import("otpauth");
-
-  const { checkRateLimit } = await import("@/lib/rate-limit");
-  const rlRes = await checkRateLimit("2fa_verify", 10, 5 * 60 * 1000);
-  if (!rlRes.success) return { error: "TOO_MANY_REQUESTS" };
-
-  const user = await db.select().from(users).where(eq(users.id, userId)).get();
-  if (!user || !user.twoFactorSecret) {
-    return { error: "NO_SETUP" };
-  }
-
-  const totp = new TOTP({ secret: user.twoFactorSecret });
-  const delta = totp.validate({ token, window: 1 });
-
-  if (delta === null) {
-    return { error: "INVALID_CODE" };
-  }
-
-  await db.update(users).set({
-    twoFactorEnabled: true,
-  }).where(eq(users.id, userId));
-
-  revalidatePath("/settings");
-  return { success: true };
-}
-
-export async function disableTotp(passwordOrToken: string) {
-  const { db, userId } = await getAuthenticatedDb();
-  const user = await db.select().from(users).where(eq(users.id, userId)).get();
-  
-  if (!user || !user.twoFactorEnabled) return { success: true };
-
-  let isAuthorized = false;
-
-  // Check password if exists
-  if (user.passwordHash) {
-    isAuthorized = await bcrypt.compare(passwordOrToken, user.passwordHash);
-  }
-  
-  // If password failed or doesn't exist, check TOTP token
-  if (!isAuthorized && user.twoFactorSecret) {
-    const { TOTP } = await import("otpauth");
-    const totp = new TOTP({ secret: user.twoFactorSecret });
-    const delta = totp.validate({ token: passwordOrToken, window: 1 });
-    if (delta !== null) {
-      isAuthorized = true;
-    }
-  }
-
-  if (!isAuthorized) {
-    return { error: "UNAUTHORIZED" };
-  }
-
-  await db.update(users).set({
-    twoFactorEnabled: false,
-    twoFactorSecret: null,
-  }).where(eq(users.id, userId));
-
-  revalidatePath("/settings");
-  return { success: true };
-}
-
-export async function updatePostingSettings(status: "draft" | "public" | "unlisted" | "private", license: string) {
+/**
+ * デフォルトのMOD投稿設定（公開設定、既定ライセンス）を更新する Server Action。
+ */
+export const updatePostingSettings = async (status: "draft" | "public" | "unlisted" | "private", license: string) => {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userSettings).set({
@@ -319,9 +119,12 @@ export async function updatePostingSettings(status: "draft" | "public" | "unlist
 
   revalidatePath("/settings");
   return { success: true };
-}
+};
 
-export async function updateIntegrations(modrinthKey: string) {
+/**
+ * Modrinth等の外部インテグレーションAPIキーを更新する Server Action。
+ */
+export const updateIntegrations = async (modrinthKey: string) => {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userSettings).set({
@@ -330,9 +133,12 @@ export async function updateIntegrations(modrinthKey: string) {
 
   revalidatePath("/settings");
   return { success: true };
-}
+};
 
-export async function completeOnboarding() {
+/**
+ * 初回オンボーディング完了をマークする Server Action。
+ */
+export const completeOnboarding = async () => {
   const { db, userId } = await getAuthenticatedDb();
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
@@ -345,4 +151,4 @@ export async function completeOnboarding() {
 
   revalidatePath("/");
   return { success: true };
-}
+};

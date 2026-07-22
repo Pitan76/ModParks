@@ -1,162 +1,16 @@
 import NextAuth from "next-auth";
-import GitHub from "next-auth/providers/github";
-import Credentials from "next-auth/providers/credentials";
-import Resend from "next-auth/providers/resend";
 import type { NextAuthConfig } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { DEFAULT_APP_SETTINGS } from "@/lib/config/appSettings";
-
-
+import { authProviders } from "./authProviders";
 
 /**
  * NextAuthの認証設定オブジェクト。
- * GitHub OAuthの設定と、セッション情報のカスタマイズを行います。
+ * 認証プロバイダー設定と、セッション情報のカスタマイズ・データベース連携イベントを行います。
  */
 export const authConfig = {
-  providers: [
-    Resend({
-      // 実際の送信元は sendVerificationRequest 内で管理画面の設定から解決する。
-      // ここは provider の必須項目を満たすためのフォールバック。
-      from: DEFAULT_APP_SETTINGS.mailFromAddress,
-      /**
-       * 既定実装をほぼそのまま踏襲しつつ、送信元だけを KV の設定から読み出す。
-       * （provider 定義はモジュール読み込み時に評価されるため、ここで await する必要がある）
-       */
-      async sendVerificationRequest({ identifier: to, provider, url }) {
-        const { host } = new URL(url);
-        const { getAppSettings } = await import("@/lib/config/readSettings");
-        const { formatMailFrom } = await import("@/lib/config/appSettings");
-
-        const res = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${provider.apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: formatMailFrom(await getAppSettings()),
-            to,
-            subject: `Sign in to ${host}`,
-            html: `<div style="font-family: sans-serif; padding: 20px;">
-              <h2>Sign in to ${host}</h2>
-              <p><a href="${url}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Sign in</a></p>
-              <p style="color: #666; font-size: 12px;">If you did not request this email, you can safely ignore it.</p>
-            </div>`,
-            text: `Sign in to ${host}\n${url}\n\nIf you did not request this email, you can safely ignore it.\n`,
-          }),
-        });
-        if (!res.ok) throw new Error("Resend error: " + JSON.stringify(await res.json()));
-      },
-    }),
-    GitHub({
-      clientId:     process.env.AUTH_GITHUB_ID!,
-      clientSecret: process.env.AUTH_GITHUB_SECRET!,
-      profile(profile) {
-        return {
-          id: profile.id.toString(),
-          name: profile.name ?? profile.login,
-          email: profile.email,
-          image: profile.avatar_url,
-          username: profile.login,
-          displayName: profile.name ?? profile.login,
-          avatarUrl: profile.avatar_url,
-          githubId: profile.id.toString(),
-          role: "user",
-        };
-      },
-    }),
-    Credentials({
-      name: "Email and Password",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        token: { label: "2FA Token", type: "text" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          console.log("[Auth] Missing credentials");
-          return null;
-        }
-        
-        try {
-          const { checkRateLimit } = await import("@/lib/rate-limit");
-          const rlRes = await checkRateLimit("login", 10, 5 * 60 * 1000);
-          if (!rlRes.success) {
-            console.log("[Auth] Rate limited");
-            throw new Error("TOO_MANY_REQUESTS");
-          }
-
-          const { getDatabase } = await import("@/lib/db");
-          const db = await getDatabase();
-          const { users, userProfiles } = await import("@/db/schema");
-          const record = await db.select()
-            .from(users)
-            .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-            .where(eq(users.email, credentials.email as string))
-            .get();
-
-          if (!record?.users) {
-            console.log("[Auth] User not found:", credentials.email);
-            return null;
-          }
-          const user = record.users;
-          const profile = record.user_profiles;
-
-          if (!user.passwordHash) {
-            console.log("[Auth] User has no passwordHash:", credentials.email);
-            return null;
-          }
-          if (user.deletedAt) {
-            console.log("[Auth] User is deleted:", credentials.email);
-            return null;
-          }
-
-          const { default: bcrypt } = await import("bcryptjs");
-          const passwordsMatch = await bcrypt.compare(credentials.password as string, user.passwordHash);
-          if (!passwordsMatch) {
-            console.log("[Auth] Password mismatch for user:", credentials.email);
-            return null;
-          }
-
-          if (user.twoFactorEnabled) {
-            if (!credentials.token || credentials.token === "undefined") {
-              const { CredentialsSignin } = await import("next-auth");
-              class TwoFactorRequiredError extends CredentialsSignin {
-                code = "2FA_REQUIRED";
-              }
-              throw new TwoFactorRequiredError();
-            }
-            const { TOTP } = await import("otpauth");
-            const totp = new TOTP({ secret: user.twoFactorSecret as string });
-            const delta = totp.validate({ token: credentials.token as string, window: 1 });
-            if (delta === null) {
-              const { CredentialsSignin } = await import("next-auth");
-              class InvalidTwoFactorError extends CredentialsSignin {
-                code = "INVALID_2FA_TOKEN";
-              }
-              throw new InvalidTwoFactorError();
-            }
-          }
-
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            image: user.image,
-            username: profile?.username,
-            displayName: profile?.displayName,
-            avatarUrl: profile?.avatarUrl,
-            role: user.role,
-          };
-        } catch (e: any) {
-          console.error("[Auth] Error in authorize:", e);
-          throw e;
-        }
-      },
-    }),
-  ],
+  providers: authProviders,
   events: {
     async createUser({ user }: { user: any }) {
       const { getDatabase } = await import("@/lib/db");
@@ -165,8 +19,6 @@ export const authConfig = {
       const db = await getDatabase();
 
       try {
-        // UUID をそのまま username にすると公開URLが /profile/<UUID> になり
-        // ユーザー名機能が破綻するため、人間可読で一意な username を生成する
         const username = await generateUniqueUsername(db, {
           email: user.email,
           name: user.name,
@@ -181,7 +33,7 @@ export const authConfig = {
         await db.insert(userSettings).values({
           userId: user.id as string,
         }).run();
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("Failed to create profile/settings for new user:", e);
       }
     }
@@ -191,23 +43,14 @@ export const authConfig = {
       if (user?.email) {
         const { getDatabase } = await import("@/lib/db");
         const { users, userProfiles } = await import("@/db/schema");
-        const { eq } = await import("drizzle-orm");
+        const { eq: drizzleEq } = await import("drizzle-orm");
         const db = await getDatabase();
-        const dbUser = await db.select().from(users).where(eq(users.email, user.email as string)).get();
+        const dbUser = await db.select().from(users).where(drizzleEq(users.email, user.email as string)).get();
         
-        // マジックリンクログイン時、ユーザーが存在しない場合は新規作成させず登録画面へリダイレクト
-        if (account?.provider === "resend" && !dbUser) {
-          return "/ja/register";
-        }
+        if (account?.provider === "resend" && !dbUser) return "/ja/register";
+        if (dbUser?.deletedAt) return false;
 
-        // 退会済みユーザーのログインを拒否
-        if (dbUser?.deletedAt) {
-          return false;
-        }
-
-        // GitHub連携時に githubUsername を更新
         if (account?.provider === "github" && profile?.login && dbUser) {
-          // profile 未作成の稀なケースでも UUID を username にしないよう生成する
           const { generateUniqueUsername } = await import("@/lib/utils/username");
           const fallbackUsername = await generateUniqueUsername(db, {
             email: dbUser.email,
@@ -225,7 +68,7 @@ export const authConfig = {
       }
       return true;
     },
-    async jwt({ token, user, trigger, session: _session }: { token: any, user?: any, trigger?: any, session?: any }) {
+    async jwt({ token, user, trigger }: { token: any, user?: any, trigger?: any, session?: any }) {
       if (user) {
         token.id = user.id;
         token.username = (user as any).username ?? null;
@@ -235,31 +78,29 @@ export const authConfig = {
       }
       
       const now = Date.now();
-      const TTL_MS = 5 * 60 * 1000; // 5 minutes
+      const TTL_MS = 5 * 60 * 1000;
       
-      if (trigger === "update") {
-        token.lastDbCheck = 0; // Force refresh
-      }
+      if (trigger === "update") token.lastDbCheck = 0;
       
       if (token.id && (!token.lastDbCheck || now - token.lastDbCheck > TTL_MS)) {
         try {
           const { getDatabase } = await import("@/lib/db");
           const db = await getDatabase();
           if (db) {
-            const { users, userProfiles, userSettings } = await import("@/db/schema");
-            const { eq } = await import("drizzle-orm");
+            const { users, userProfiles, userSettings: schemaSettings } = await import("@/db/schema");
+            const { eq: drizzleEq } = await import("drizzle-orm");
             const dbUser = await db.select({
               role: users.role,
               deletedAt: users.deletedAt,
               avatarUrl: userProfiles.avatarUrl,
               displayName: userProfiles.displayName,
               username: userProfiles.username,
-              locale: userSettings.locale,
-              custom: userSettings.custom,
+              locale: schemaSettings.locale,
+              custom: schemaSettings.custom,
             }).from(users)
             .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-            .leftJoin(userSettings, eq(users.id, userSettings.userId))
-            .where(eq(users.id, token.id as string)).get();
+            .leftJoin(schemaSettings, eq(users.id, schemaSettings.userId))
+            .where(drizzleEq(users.id, token.id as string)).get();
             
             if (dbUser) {
               token.role = dbUser.role as string;
@@ -279,7 +120,7 @@ export const authConfig = {
             }
             token.lastDbCheck = now;
           }
-        } catch (e) {
+        } catch (e: unknown) {
           console.error("Failed to refresh user data in jwt callback", e);
         }
       }
@@ -288,9 +129,7 @@ export const authConfig = {
     },
     async session({ session, token }: { session: any, token?: any }) {
       if (session.user) {
-        if (token?.isDeleted) {
-          return { ...session, user: undefined } as any;
-        }
+        if (token?.isDeleted) return { ...session, user: undefined } as any;
         
         session.user.id = (token.sub ?? token.id) as string;
         session.user.username = (token.username ?? null) as string | null;
@@ -304,7 +143,7 @@ export const authConfig = {
     },
   },
   pages: {
-    signIn: "/ja/login", // Assuming local routing will handle this
+    signIn: "/ja/login",
   },
   session: { strategy: "jwt" },
 } satisfies NextAuthConfig;
@@ -325,7 +164,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
         }
       );
     }
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("Failed to initialize D1 for NextAuth:", e);
   }
 

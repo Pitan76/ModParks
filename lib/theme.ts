@@ -18,7 +18,7 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
       ? (mode === "light"
         ? {
             primary: {
-              main: "#1a73e8", // Google Blue
+              main: "#1a73e8",
               light: "#d2e3fc",
               dark: "#1557b0",
               contrastText: "#ffffff",
@@ -30,12 +30,12 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
               contrastText: "#ffffff",
             },
             background: {
-              default: "#f1f5f9", // Slate Light Gray
+              default: "#f1f5f9",
               paper: "#ffffff",
             },
             text: {
-              primary: "#1f1f1f", // Google Text Dark
-              secondary: "#5f6368", // Google Text Secondary
+              primary: "#1f1f1f",
+              secondary: "#5f6368",
             },
             surface: {
               main: "#ffffff",
@@ -43,7 +43,7 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
           }
         : {
             primary: {
-              main: "#8ab4f8", // Google Light Blue for Dark Mode
+              main: "#8ab4f8",
               light: "#adcbfa",
               dark: "#669df6",
               contrastText: "#1f1f1f",
@@ -55,8 +55,8 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
               contrastText: "#1f1f1f",
             },
             background: {
-              default: "#0b1329", // 紺色 (Midnight Navy)
-              paper: "#16223f", // サーフェス紺色
+              default: "#0b1329",
+              paper: "#16223f",
             },
             text: {
               primary: "#f1f5f9",
@@ -163,7 +163,6 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
         },
       },
     },
-
     MuiOutlinedInput: {
       defaultProps: { size: "small" },
     },
@@ -219,19 +218,13 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
       },
     },
     MuiTextField: {
-      defaultProps: {
-        size: "small",
-      },
+      defaultProps: { size: "small" },
     },
     MuiFormControl: {
-      defaultProps: {
-        size: "small",
-      },
+      defaultProps: { size: "small" },
     },
     MuiSelect: {
-      defaultProps: {
-        size: "small",
-      },
+      defaultProps: { size: "small" },
     },
     MuiAppBar: {
       styleOverrides: {
@@ -274,7 +267,6 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
   },
 });
 
-// TypeScript 拡張
 declare module "@mui/material/styles" {
   interface Theme {
     isNewTheme: boolean;
