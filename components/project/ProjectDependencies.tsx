@@ -14,14 +14,14 @@ import MuiLink from "@mui/material/Link";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-interface DependencyProject {
+type DependencyProject = {
   id: string;
   slug: string;
   name: string;
   iconUrl?: string | null;
-}
+};
 
-interface ProjectDependenciesProps {
+type ProjectDependenciesProps = {
   dependencies: {
     id: string;
     dependencyType: "required" | "optional" | "incompatible" | "embedded";
@@ -34,21 +34,21 @@ interface ProjectDependenciesProps {
     dependencyType: "required" | "optional" | "incompatible" | "embedded";
     project: DependencyProject;
   }[];
-}
+};
 
-export default function ProjectDependencies({ dependencies, dependents }: ProjectDependenciesProps) {
+const DEP_COLOR: Record<string, "error" | "success" | "warning" | "default"> = {
+  required: "error",
+  optional: "success",
+  incompatible: "warning",
+  embedded: "default",
+};
+
+/**
+ * プロジェクトの依存関係（前提モジュールや互換性のないモジュール）および
+ * 被依存関係（このプロジェクトに依存している他のプロジェクト）を一覧表示するコンポーネント。
+ */
+const ProjectDependencies = ({ dependencies, dependents }: ProjectDependenciesProps) => {
   const t = useTranslations("Project");
-
-  const getDepColor = (type: string) => {
-    switch(type) {
-      case "required": return "error";
-      case "optional": return "success";
-      case "incompatible": return "warning";
-      case "embedded": return "default";
-      default: return "default";
-    }
-  };
-
 
   return (
     <Box>
@@ -85,7 +85,7 @@ export default function ProjectDependencies({ dependencies, dependents }: Projec
                     </Box>
                   }
                 />
-                <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={getDepColor(dep.dependencyType) as any} />
+                <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={DEP_COLOR[dep.dependencyType] || "default"} />
               </ListItem>
             );
           })}
@@ -116,11 +116,13 @@ export default function ProjectDependencies({ dependencies, dependents }: Projec
               <ListItemText 
                 primary={dep.project.name}
               />
-              <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={getDepColor(dep.dependencyType) as any} />
+              <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={DEP_COLOR[dep.dependencyType] || "default"} />
             </ListItem>
           ))}
         </List>
       )}
     </Box>
   );
-}
+};
+
+export default ProjectDependencies;

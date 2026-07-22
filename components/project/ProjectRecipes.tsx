@@ -3,13 +3,16 @@ import Typography from "@mui/material/Typography";
 import { getTranslations } from "next-intl/server";
 import ProjectRecipesGrid from "./ProjectRecipesGrid";
 
-interface ProjectRecipesProps {
+type ProjectRecipesProps = {
   projectSlug: string;
-  /** 抽出時に検出したネームスペース一覧。slug と一致しないことが多いため優先して使う */
   namespaces?: string[] | null;
-}
+};
 
-export default async function ProjectRecipes({ projectSlug, namespaces }: ProjectRecipesProps) {
+/**
+ * プロジェクトのレシピ一覧を取得・描画するサーバーコンポーネント。
+ * CDNからレシピのリストを取得し、ネームスペースでフィルタリングしてグリッド表示します。
+ */
+const ProjectRecipes = async ({ projectSlug, namespaces }: ProjectRecipesProps) => {
   const t = await getTranslations("Project");
   const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
 
@@ -21,7 +24,6 @@ export default async function ProjectRecipes({ projectSlug, namespaces }: Projec
   let error: string | null = null;
 
   try {
-    // Fetch the index list from the CDN
     const res = await fetch(`${cdnUrl}/api/list.json`, { next: { revalidate: 60 } });
     if (!res.ok) {
       throw new Error("Failed to fetch recipes list");
@@ -30,11 +32,6 @@ export default async function ProjectRecipes({ projectSlug, namespaces }: Projec
     const data = await res.json() as { recipes?: { id: string }[] };
     const ids: string[] = data.recipes ? data.recipes.map(r => r.id) : [];
     
-    // Filter by the project's namespace.
-    // Assuming the namespace is usually similar to the project slug.
-    // The items in the list are typically format "namespace:item_id"
-    // Since we extract data/<namespace>/recipes/, we just search for matching namespace.
-    // In this case, we use the project slug as the primary guess for the namespace.
     recipes = ids
       .filter(id => nsSet.has(id.split(":")[0]))
       .map(id => {
@@ -45,9 +42,9 @@ export default async function ProjectRecipes({ projectSlug, namespaces }: Projec
           url: `${cdnUrl}/api/${namespace}/${itemId}.png`
         };
       });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to fetch recipes:", err);
-    error = err.message || "Failed to load recipes";
+    error = err instanceof Error ? err.message : "Failed to load recipes";
   }
 
   if (error) {
@@ -76,4 +73,6 @@ export default async function ProjectRecipes({ projectSlug, namespaces }: Projec
       }}
     />
   );
-}
+};
+
+export default ProjectRecipes;

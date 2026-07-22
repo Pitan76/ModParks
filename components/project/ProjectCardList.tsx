@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import ToggleButton from "@mui/material/ToggleButton";
@@ -9,34 +10,34 @@ import Tooltip from "@mui/material/Tooltip";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import GridViewIcon from "@mui/icons-material/GridView";
 import { useTranslations } from "next-intl";
-import ProjectCard, { ProjectCardProps } from "@/components/project/ProjectCard";
+import ProjectCard from "@/components/project/ProjectCard";
+import type { ProjectCardProps } from "@/components/project/ProjectCard";
 import { useColorMode } from "@/components/ThemeRegistry";
 
 type CardLayout = "list" | "grid";
 
-interface ProjectCardListProps {
+type ProjectCardListProps = {
   projects: ProjectCardProps["project"][];
   /** 表示形式の保存キー。ページごとに独立させたい場合に指定する */
   storageKey?: string;
   defaultLayout?: CardLayout;
-  headerLeft?: React.ReactNode;
-  headerRight?: React.ReactNode;
-  emptyContent?: React.ReactNode;
-  footer?: React.ReactNode;
-}
+  headerLeft?: ReactNode;
+  headerRight?: ReactNode;
+  emptyContent?: ReactNode;
+  footer?: ReactNode;
+};
 
-/** localStorageから表示形式を読み込む。未保存やSSR時はdefaultを返す */
-function readStoredLayout(storageKey: string, fallback: CardLayout): CardLayout {
+const readStoredLayout = (storageKey: string, fallback: CardLayout): CardLayout => {
   if (typeof window === "undefined") return fallback;
   const stored = window.localStorage.getItem(storageKey);
   return stored === "list" || stored === "grid" ? stored : fallback;
-}
+};
 
 /**
  * プロジェクトカード一覧をリスト/グリッドで切り替え表示するコンポーネント。
  * 選択した表示形式はlocalStorageに保存され、次回以降も維持される。
  */
-export default function ProjectCardList({
+const ProjectCardList = ({
   projects,
   storageKey = "projectCardLayout",
   defaultLayout = "list",
@@ -44,7 +45,7 @@ export default function ProjectCardList({
   headerRight,
   emptyContent,
   footer,
-}: ProjectCardListProps) {
+}: ProjectCardListProps) => {
   const tCommon = useTranslations("Common");
   const { isNewTheme } = useColorMode();
   const [layout, setLayout] = useState<CardLayout>(defaultLayout);
@@ -110,4 +111,6 @@ export default function ProjectCardList({
       {footer && <Box sx={{ mt: 3 }}>{footer}</Box>}
     </Box>
   );
-}
+};
+
+export default ProjectCardList;

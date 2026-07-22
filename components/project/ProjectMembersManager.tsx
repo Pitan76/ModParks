@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { ChangeEvent } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
@@ -21,14 +22,26 @@ import { addProjectMember, removeProjectMember } from "@/lib/actions/member";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-interface ProjectMembersManagerProps {
+type ProjectMember = {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  role: string;
+};
+
+export type ProjectMembersManagerProps = {
   projectId: string;
-  members: any[];
+  members: ProjectMember[];
   isOwner: boolean;
   currentUserId: string;
-}
+};
 
-export default function ProjectMembersManager({ projectId, members, isOwner, currentUserId }: ProjectMembersManagerProps) {
+/**
+ * プロジェクトのメンバーシップ（閲覧/編集メンバー）を管理するクライアントコンポーネント。
+ * 新規メンバーの追加、削除、およびロールの表示を行います。
+ */
+const ProjectMembersManager = ({ projectId, members, isOwner, currentUserId }: ProjectMembersManagerProps) => {
   const [username, setUsername] = useState("");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -47,8 +60,9 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
           setUsername("");
           router.refresh();
         }
-      } catch (err: any) {
-        alert(err.message);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to add member";
+        alert(message);
       }
     });
   };
@@ -60,8 +74,9 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
       try {
         await removeProjectMember(projectId, userId);
         router.refresh();
-      } catch (err: any) {
-        alert(err.message);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to remove member";
+        alert(message);
       }
     });
   };
@@ -107,7 +122,7 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
               size="small"
               label={tProject("members.addUsername")}
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
               disabled={isPending}
               sx={{ flex: 1 }}
             />
@@ -125,4 +140,6 @@ export default function ProjectMembersManager({ projectId, members, isOwner, cur
       </CardContent>
     </Card>
   );
-}
+};
+
+export default ProjectMembersManager;

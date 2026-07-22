@@ -1,15 +1,17 @@
 import BaseBadge from "@/components/ui/BaseBadge";
 import { useTranslations } from "next-intl";
+import type { MouseEvent } from "react";
 
-export interface ProjectTagBadgeProps {
+export type ProjectTagBadgeProps = {
   tag: string;
   size?: "small" | "medium";
   variant?: "filled" | "outlined";
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   clickable?: boolean;
-}
+};
 
-export default function ProjectTagBadge({ tag, size = "small", variant = "filled", onClick, clickable }: ProjectTagBadgeProps) {
+/** プロジェクトのタグを表示するバッジ。i18nのタグキーが存在すればローカライズされたラベルを表示する */
+const ProjectTagBadge = ({ tag, size = "small", variant = "filled", onClick, clickable }: ProjectTagBadgeProps) => {
   const tTags = useTranslations("Tags");
 
   const getTagLabel = (tagStr: string) => {
@@ -30,4 +32,6 @@ export default function ProjectTagBadge({ tag, size = "small", variant = "filled
       }}
     />
   );
-}
+};
+
+export default ProjectTagBadge;

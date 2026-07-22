@@ -9,26 +9,30 @@ import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
 import { useColorMode } from "@/components/ThemeRegistry";
 
-export interface RecipeItem {
+export type RecipeItem = {
   id: string;
   url: string;
   title: string;
-}
+};
 
-interface ProjectRecipesGridProps {
+type ProjectRecipesGridProps = {
   recipes: RecipeItem[];
   labels: {
     search: string;
     noMatch: string;
     showMore: string;
   };
-}
+};
 
 // 一度に描画（＝リクエスト）する枚数。段階表示でDOM上の <img> 数を制限し、
 // 画像リクエストが一気に飛ばないようにする。lazy load と併用。
 const PAGE_SIZE = 24;
 
-export default function ProjectRecipesGrid({ recipes, labels }: ProjectRecipesGridProps) {
+/**
+ * プロジェクトに含まれるレシピ画像をグリッド表示するクライアントコンポーネント。
+ * クエリでのフィルタリング、ページング表示に対応しています。
+ */
+const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
   const { isNewTheme } = useColorMode();
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -125,4 +129,6 @@ export default function ProjectRecipesGrid({ recipes, labels }: ProjectRecipesGr
       )}
     </Box>
   );
-}
+};
+
+export default ProjectRecipesGrid;

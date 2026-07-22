@@ -21,12 +21,12 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Link from "@mui/material/Link";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency, DependencyType } from "@/lib/actions/dependency";
+import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/actions/dependency";
+import type { DependencyType } from "@/lib/actions/dependency";
 import { useRouter } from "@/i18n/routing";
-
 import { useTranslations } from "next-intl";
 
-export interface ProjectDependenciesManagerProps {
+export type ProjectDependenciesManagerProps = {
   projectId: string;
   dependencies: {
     id: string;
@@ -35,9 +35,13 @@ export interface ProjectDependenciesManagerProps {
     externalUrl?: string | null;
     externalName?: string | null;
   }[];
-}
+};
 
-export default function ProjectDependenciesManager({ projectId, dependencies }: ProjectDependenciesManagerProps) {
+/**
+ * プロジェクトの依存関係を管理（追加・削除）する管理者向けクライアントコンポーネント。
+ * ModParks内部プロジェクトへの参照、または外部URLによる依存定義を切り替えて登録できます。
+ */
+const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependenciesManagerProps) => {
   const [tab, setTab] = useState(0);
   const [targetSlug, setTargetSlug] = useState("");
   const [extName, setExtName] = useState("");
@@ -52,10 +56,14 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
     setLoading(true);
     try {
       if (tab === 0) {
-        if (!targetSlug) throw new Error("Target slug is required");
+        if (!targetSlug) {
+          throw new Error("Target slug is required");
+        }
         await addProjectDependencyBySlug(projectId, targetSlug, depType);
       } else {
-        if (!extName || !extUrl) throw new Error("Name and URL are required");
+        if (!extName || !extUrl) {
+          throw new Error("Name and URL are required");
+        }
         await addExternalProjectDependency(projectId, extName, extUrl, depType);
       }
       setToast({ message: t("addSuccess"), severity: "success" });
@@ -63,8 +71,9 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
       setExtName("");
       setExtUrl("");
       router.refresh();
-    } catch (e: any) {
-      setToast({ message: e.message || t("addError"), severity: "error" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t("addError");
+      setToast({ message, severity: "error" });
     }
     setLoading(false);
   };
@@ -75,8 +84,9 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
       await removeProjectDependency(depId);
       setToast({ message: t("removeSuccess"), severity: "success" });
       router.refresh();
-    } catch (e: any) {
-      setToast({ message: e.message, severity: "error" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to remove dependency";
+      setToast({ message, severity: "error" });
     }
     setLoading(false);
   };
@@ -179,4 +189,6 @@ export default function ProjectDependenciesManager({ projectId, dependencies }: 
       </Snackbar>
     </Box>
   );
-}
+};
+
+export default ProjectDependenciesManager;

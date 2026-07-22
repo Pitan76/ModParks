@@ -11,10 +11,7 @@ import ProjectSubscribeButton from "./ProjectSubscribeButton";
 import AddToCollectionButton from "./AddToCollectionButton";
 import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 
-/**
- * プロジェクト詳細のヘッダーおよび説明文を表示するコンポーネント
- */
-export interface ProjectDetailHeaderProps {
+export type ProjectDetailHeaderProps = {
   /** 対象プロジェクトの情報 */
   project: {
     id: string;
@@ -51,9 +48,12 @@ export interface ProjectDetailHeaderProps {
   currentUserId?: string;
   /** 新リリース通知を購読しているか */
   isSubscribed?: boolean;
-}
+};
 
-export default function ProjectDetailHeader({
+/**
+ * プロジェクト詳細のヘッダーおよびメタデータ（ダウンロード数、お気に入り、作成日時等）を描画するコンポーネント。
+ */
+const ProjectDetailHeader = ({
   project: p,
   canEdit,
   isFavorited,
@@ -61,7 +61,7 @@ export default function ProjectDetailHeader({
   isLoggedIn,
   currentUserId,
   isSubscribed = false
-}: ProjectDetailHeaderProps) {
+}: ProjectDetailHeaderProps) => {
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
 
@@ -94,72 +94,74 @@ export default function ProjectDetailHeader({
           />
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 800, wordBreak: "break-word", overflowWrap: "anywhere", fontSize: { xs: "1.5rem", sm: "2.125rem" } }}>
-              {p.name}
-            </Typography>
-            <Chip
-              label={p.type === "mod" ? "Mod" : "Plugin"}
-              color={p.type === "mod" ? "primary" : "secondary"}
-              size="small"
-            />
-            {p.status !== "public" && (
+            <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 800, wordBreak: "break-word", overflowWrap: "anywhere", fontSize: { xs: "1.5rem", sm: "2.125rem" } }}>
+                {p.name}
+              </Typography>
               <Chip
-                label={tProject(`status.${p.status}`)}
-                color="warning"
+                label={p.type === "mod" ? "Mod" : "Plugin"}
+                color={p.type === "mod" ? "primary" : "secondary"}
                 size="small"
-                variant="outlined"
               />
-            )}
-            {p.sourceIdeaId && p.sourceIdeaTitle && (
-              <Tooltip title={tProject("sourceIdeaTooltip")}>
-                <LinkButton
-                  href={`/ideas/${p.sourceIdeaId}`}
-                  variant="outlined"
+              {p.status !== "public" && (
+                <Chip
+                  label={tProject(`status.${p.status}`)}
+                  color="warning"
                   size="small"
-                  sx={{ borderRadius: "16px", py: 0, px: 1, textTransform: "none", color: "text.secondary", borderColor: "divider", "&:hover": { borderColor: "primary.main", color: "primary.main", bgcolor: "transparent" } }}
-                >
-                  💡 {p.sourceIdeaTitle}
-                </LinkButton>
-              </Tooltip>
-            )}
-          </Box>
-
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-            <AuthorLabel author={p.author} />
-            <Typography variant="body2" color="text.disabled">·</Typography>
-            <DownloadLabel 
-              downloads={p.downloads} 
-              totalDownloads={p.totalDownloads} 
-              externalDownloads={p.externalDownloads} 
-              modrinthId={p.modrinthId} 
-              curseforgeId={p.curseforgeId} 
-            />
-          </Box>
-          
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, flexWrap: "wrap" }}>
-            <DateLabel date={p.createdAt} type="published" />
-            <DateLabel date={p.updatedAt} type="updated" />
-            
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: { sm: 2 } }}>
-              <ProjectFavoriteButton
-                projectId={p.id}
-                initialCount={favoritesCount}
-                initialFavorited={isFavorited}
-                isLoggedIn={isLoggedIn}
-                variant="icon"
-              />
-              {isLoggedIn && (
-                <ProjectSubscribeButton projectId={p.id} initialSubscribed={isSubscribed} />
+                  variant="outlined"
+                />
               )}
-              {isLoggedIn && currentUserId && (
-                <AddToCollectionButton projectId={p.id} userId={currentUserId} variant="icon" />
+              {p.sourceIdeaId && p.sourceIdeaTitle && (
+                <Tooltip title={tProject("sourceIdeaTooltip")}>
+                  <LinkButton
+                    href={`/ideas/${p.sourceIdeaId}`}
+                    variant="outlined"
+                    size="small"
+                    sx={{ borderRadius: "16px", py: 0, px: 1, textTransform: "none", color: "text.secondary", borderColor: "divider", "&:hover": { borderColor: "primary.main", color: "primary.main", bgcolor: "transparent" } }}
+                  >
+                    💡 {p.sourceIdeaTitle}
+                  </LinkButton>
+                </Tooltip>
               )}
             </Box>
-          </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
+              <AuthorLabel author={p.author} />
+              <Typography variant="body2" color="text.disabled">·</Typography>
+              <DownloadLabel 
+                downloads={p.downloads} 
+                totalDownloads={p.totalDownloads} 
+                externalDownloads={p.externalDownloads} 
+                modrinthId={p.modrinthId} 
+                curseforgeId={p.curseforgeId} 
+              />
+            </Box>
+            
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, flexWrap: "wrap" }}>
+              <DateLabel date={p.createdAt} type="published" />
+              <DateLabel date={p.updatedAt} type="updated" />
+              
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: { sm: 2 } }}>
+                <ProjectFavoriteButton
+                  projectId={p.id}
+                  initialCount={favoritesCount}
+                  initialFavorited={isFavorited}
+                  isLoggedIn={isLoggedIn}
+                  variant="icon"
+                />
+                {isLoggedIn && (
+                  <ProjectSubscribeButton projectId={p.id} initialSubscribed={isSubscribed} />
+                )}
+                {isLoggedIn && currentUserId && (
+                  <AddToCollectionButton projectId={p.id} userId={currentUserId} variant="icon" />
+                )}
+              </Box>
+            </Box>
           </Box>
         </Box>
       </Box>
     </>
   );
-}
+};
+
+export default ProjectDetailHeader;

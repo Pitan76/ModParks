@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { ChangeEvent } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
@@ -12,11 +13,14 @@ import { transferOwnership } from "@/lib/actions/project";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-interface ProjectOwnershipTransferProps {
+export type ProjectOwnershipTransferProps = {
   projectId: string;
-}
+};
 
-export default function ProjectOwnershipTransfer({ projectId }: ProjectOwnershipTransferProps) {
+/**
+ * プロジェクトの所有権を別ユーザーへ移譲するための危険な操作を行うクライアントコンポーネント。
+ */
+const ProjectOwnershipTransfer = ({ projectId }: ProjectOwnershipTransferProps) => {
   const t = useTranslations("Project.ownership");
   const [newOwnerId, setNewOwnerId] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -34,8 +38,9 @@ export default function ProjectOwnershipTransfer({ projectId }: ProjectOwnership
         await transferOwnership(projectId, newOwnerId.trim());
         alert(t("success"));
         router.push(`/projects`);
-      } catch (err: any) {
-        alert(err.message);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to transfer ownership";
+        alert(message);
       }
     });
   };
@@ -55,7 +60,7 @@ export default function ProjectOwnershipTransfer({ projectId }: ProjectOwnership
             size="small"
             label={t("newOwnerId")}
             value={newOwnerId}
-            onChange={e => setNewOwnerId(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setNewOwnerId(e.target.value)}
             disabled={isPending}
             sx={{ flex: 1 }}
           />
@@ -72,4 +77,6 @@ export default function ProjectOwnershipTransfer({ projectId }: ProjectOwnership
       </CardContent>
     </Card>
   );
-}
+};
+
+export default ProjectOwnershipTransfer;

@@ -1,11 +1,11 @@
 import BaseBadge from "@/components/ui/BaseBadge";
 import { useTranslations } from "next-intl";
 
-export interface ProjectTypeBadgeProps {
+export type ProjectTypeBadgeProps = {
   type: string;
   size?: "small" | "medium";
   variant?: "filled" | "outlined";
-}
+};
 
 const TYPE_COLOR: Record<string, "primary" | "secondary" | "success" | "warning" | "info" | "error" | "default"> = {
   mod:          "primary",
@@ -16,7 +16,8 @@ const TYPE_COLOR: Record<string, "primary" | "secondary" | "success" | "warning"
   modpack:      "error",
 };
 
-export default function ProjectTypeBadge({ type, size = "small", variant = "filled" }: ProjectTypeBadgeProps) {
+/** プロジェクトの種別（mod, plugin等）に応じた色分けバッジ */
+const ProjectTypeBadge = ({ type, size = "small", variant = "filled" }: ProjectTypeBadgeProps) => {
   const tProject = useTranslations("Project");
   const color = TYPE_COLOR[type] || "default";
 
@@ -33,4 +34,6 @@ export default function ProjectTypeBadge({ type, size = "small", variant = "fill
       }}
     />
   );
-}
+};
+
+export default ProjectTypeBadge;

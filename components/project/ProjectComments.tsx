@@ -8,13 +8,17 @@ import { useTranslations } from "next-intl";
 import ProjectCommentItem, { type Comment } from "./ProjectCommentItem";
 import CommentForm from "@/components/ui/CommentForm";
 
-interface Props {
+type ProjectCommentsProps = {
   projectSlug: string;
   isLoggedIn: boolean;
   currentUserId?: string;
-}
+};
 
-export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId }: Props) {
+/**
+ * プロジェクトに対するコメントスレッド全体を表示・管理するクライアントコンポーネント。
+ * 新規コメント・返信の投稿、コメントの削除、及び一覧の非同期取得を行います。
+ */
+const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId }: ProjectCommentsProps) => {
   const t = useTranslations("Comment");
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +28,9 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
   const fetchComments = useCallback(async () => {
     try {
       const res = await fetch(endpoint);
-      if (res.ok) setComments((await res.json()) as Comment[]);
+      if (res.ok) {
+        setComments((await res.json()) as Comment[]);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -44,21 +50,29 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content, parentId, contentFormat: format }),
     });
-    if (res.ok) await fetchComments();
+    if (res.ok) {
+      await fetchComments();
+    }
   };
 
   const handleDelete = async (commentId: string) => {
     if (!confirm(t("deleteConfirm"))) return;
     try {
       const res = await fetch(`${endpoint}/${commentId}`, { method: "DELETE" });
-      if (res.ok) await fetchComments();
+      if (res.ok) {
+        await fetchComments();
+      }
     } catch (err) {
       console.error(err);
     }
   };
 
   if (loading) {
-    return <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}><CircularProgress /></Box>;
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   const topLevel = comments.filter((c) => !c.parentId);
@@ -104,4 +118,6 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
       </Box>
     </Box>
   );
-}
+};
+
+export default ProjectComments;

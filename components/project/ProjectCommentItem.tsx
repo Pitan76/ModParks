@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import CommentForm from "@/components/ui/CommentForm";
 
-export interface Comment {
+export type Comment = {
   id: string;
   content: string;
   contentFormat: string | null;
@@ -21,18 +21,51 @@ export interface Comment {
   authorId: string;
   authorName: string | null;
   authorAvatar: string | null;
-}
+};
 
-interface Props {
+type ProjectCommentItemProps = {
   comment: Comment;
   replies: Comment[];
   isLoggedIn: boolean;
   currentUserId?: string;
   onDelete: (id: string) => void;
   onReply: (parentId: string, content: string, format: string) => Promise<void>;
-}
+};
 
-export default function ProjectCommentItem({ comment, replies, isLoggedIn, currentUserId, onDelete, onReply }: Props) {
+type HeaderProps = {
+  comment: Comment;
+  currentUserId?: string;
+  onDelete: (id: string) => void;
+};
+
+const Header = ({ comment, currentUserId, onDelete }: HeaderProps) => {
+  return (
+    <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.5, justifyContent: "space-between" }}>
+      <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{comment.authorName}</Typography>
+        <Typography variant="caption" color="text.secondary">{new Date(comment.createdAt).toLocaleString()}</Typography>
+      </Box>
+      {currentUserId === comment.authorId && (
+        <IconButton size="small" color="error" onClick={() => onDelete(comment.id)}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      )}
+    </Box>
+  );
+};
+
+/**
+ * プロジェクトコメントの個別アイテムを描画するコンポーネント。
+ * 返信の一覧表示と、ログインユーザーによる返信フォーム、削除機能を提供します。
+ */
+const ProjectCommentItem = ({
+  comment,
+  replies,
+  isLoggedIn,
+  currentUserId,
+  onDelete,
+  onReply,
+}: ProjectCommentItemProps) => {
   const t = useTranslations("Comment");
   const [replying, setReplying] = useState(false);
 
@@ -88,20 +121,6 @@ export default function ProjectCommentItem({ comment, replies, isLoggedIn, curre
       </Box>
     </Box>
   );
-}
+};
 
-function Header({ comment, currentUserId, onDelete }: { comment: Comment; currentUserId?: string; onDelete: (id: string) => void }) {
-  return (
-    <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.5, justifyContent: "space-between" }}>
-      <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{comment.authorName}</Typography>
-        <Typography variant="caption" color="text.secondary">{new Date(comment.createdAt).toLocaleString()}</Typography>
-      </Box>
-      {currentUserId === comment.authorId && (
-        <IconButton size="small" color="error" onClick={() => onDelete(comment.id)}>
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      )}
-    </Box>
-  );
-}
+export default ProjectCommentItem;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { ReactNode, SyntheticEvent } from "react";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -9,45 +10,63 @@ import { useRouter } from "@/i18n/routing";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-interface ProjectTabsManagerProps {
-  descriptionContent: React.ReactNode;
-  filesContent: React.ReactNode;
-  dependenciesContent: React.ReactNode;
-  recipesContent?: React.ReactNode;
+export type ProjectTabsManagerProps = {
+  descriptionContent: ReactNode;
+  filesContent: ReactNode;
+  dependenciesContent: ReactNode;
+  recipesContent?: ReactNode;
   manageHref: string;
   canEdit: boolean;
   recipesEnabled?: boolean;
   issueTrackerUrl?: string | null;
-}
+};
 
-export default function ProjectTabsManager({ descriptionContent, filesContent, dependenciesContent, recipesContent, manageHref, canEdit, recipesEnabled, issueTrackerUrl }: ProjectTabsManagerProps) {
+const TAB_DESCRIPTION = 0;
+const TAB_FILES = 1;
+const TAB_DEPENDENCIES = 2;
+const TAB_RECIPES = 3;
+const TAB_MANAGE = 4;
+const TAB_ISSUES = 5;
+
+const getTabFromParam = (param: string | null, recipesEnabled?: boolean): number => {
+  if (param === "files") return TAB_FILES;
+  if (param === "dependencies") return TAB_DEPENDENCIES;
+  if (param === "recipes" && recipesEnabled) return TAB_RECIPES;
+  return TAB_DESCRIPTION;
+};
+
+/**
+ * プロジェクト詳細ページの主要タブ（説明、ファイル一覧、依存関係、レシピ一覧、管理機能、課題管理）の切り替えを管理するクライアントコンポーネント。
+ */
+const ProjectTabsManager = ({
+  descriptionContent,
+  filesContent,
+  dependenciesContent,
+  recipesContent,
+  manageHref,
+  canEdit,
+  recipesEnabled,
+  issueTrackerUrl,
+}: ProjectTabsManagerProps) => {
   const t = useTranslations("Project");
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   
   const tabParam = searchParams?.get("tab") || null;
-  
-  const getTabFromParam = (param: string | null) => {
-    if (param === "files") return 1;
-    if (param === "dependencies") return 2;
-    if (param === "recipes" && recipesEnabled) return 3;
-    return 0;
-  };
-
-  const [tab, setTab] = useState(getTabFromParam(tabParam));
+  const [tab, setTab] = useState(getTabFromParam(tabParam, recipesEnabled));
 
   useEffect(() => {
-    setTab(getTabFromParam(tabParam));
-  }, [tabParam]);
+    setTab(getTabFromParam(tabParam, recipesEnabled));
+  }, [tabParam, recipesEnabled]);
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    if (newValue === 4) {
+  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
+    if (newValue === TAB_MANAGE) {
       router.push(manageHref);
       return;
     }
 
-    if (newValue === 5) {
+    if (newValue === TAB_ISSUES) {
       if (issueTrackerUrl) {
         window.open(issueTrackerUrl, "_blank", "noopener,noreferrer");
       }
@@ -57,11 +76,11 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
     setTab(newValue);
 
     const params = new URLSearchParams(searchParams?.toString() || "");
-    if (newValue === 1) {
+    if (newValue === TAB_FILES) {
       params.set("tab", "files");
-    } else if (newValue === 2) {
+    } else if (newValue === TAB_DEPENDENCIES) {
       params.set("tab", "dependencies");
-    } else if (newValue === 3) {
+    } else if (newValue === TAB_RECIPES) {
       params.set("tab", "recipes");
     } else {
       params.delete("tab");
@@ -70,7 +89,6 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
     const newQuery = params.toString();
     const newUrl = newQuery ? `?${newQuery}` : pathname;
     
-    // URLを更新するが、ページ全体のリロードやスクロールを発生させない
     window.history.replaceState(null, '', newUrl);
   };
 
@@ -91,10 +109,10 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
             }
           }}
         >
-          <Tab label={t("tabs.description")} value={0} />
-          <Tab label={t("tabs.files")} value={1} />
-          <Tab label={t("tabs.dependencies")} value={2} />
-          {recipesEnabled && <Tab label={t("tabs.recipes")} value={3} />}
+          <Tab label={t("tabs.description")} value={TAB_DESCRIPTION} />
+          <Tab label={t("tabs.files")} value={TAB_FILES} />
+          <Tab label={t("tabs.dependencies")} value={TAB_DEPENDENCIES} />
+          {recipesEnabled && <Tab label={t("tabs.recipes")} value={TAB_RECIPES} />}
           {issueTrackerUrl && (
             <Tab 
               label={
@@ -103,24 +121,25 @@ export default function ProjectTabsManager({ descriptionContent, filesContent, d
                   <OpenInNewIcon sx={{ fontSize: '1rem' }} />
                 </Box>
               }
-              value={5}
+              value={TAB_ISSUES}
             />
           )}
           {canEdit && (
             <Tab 
               label={t("tabs.manage")} 
-              value={4}
+              value={TAB_MANAGE}
             />
           )}
         </Tabs>
       </Box>
 
-      {/* 全タブを常時マウントし表示だけ切替。データはサーバー取得済みのため
-          再取得は発生せず、初回オープンのラグも無くなる */}
-      <Box sx={{ display: tab === 0 ? "block" : "none" }}>{descriptionContent}</Box>
-      <Box sx={{ display: tab === 1 ? "block" : "none" }}>{filesContent}</Box>
-      <Box sx={{ display: tab === 2 ? "block" : "none" }}>{dependenciesContent}</Box>
-      {recipesEnabled && <Box sx={{ display: tab === 3 ? "block" : "none" }}>{recipesContent}</Box>}
+      {/* 全タブを常時マウントし表示だけ切替 */}
+      <Box sx={{ display: tab === TAB_DESCRIPTION ? "block" : "none" }}>{descriptionContent}</Box>
+      <Box sx={{ display: tab === TAB_FILES ? "block" : "none" }}>{filesContent}</Box>
+      <Box sx={{ display: tab === TAB_DEPENDENCIES ? "block" : "none" }}>{dependenciesContent}</Box>
+      {recipesEnabled && <Box sx={{ display: tab === TAB_RECIPES ? "block" : "none" }}>{recipesContent}</Box>}
     </Box>
   );
-}
+};
+
+export default ProjectTabsManager;

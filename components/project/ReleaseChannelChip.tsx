@@ -4,17 +4,17 @@ import BaseBadge from "@/components/ui/BaseBadge";
 import { useTranslations } from "next-intl";
 import { DEFAULT_RELEASE_CHANNEL, getChannelColor, normalizeReleaseChannel } from "@/lib/releaseChannels";
 
-interface ReleaseChannelChipProps {
+type ReleaseChannelChipProps = {
   channel: string;
   size?: "small" | "medium";
   variant?: "filled" | "outlined";
-}
+};
 
 /**
  * バージョンのリリースチャネル（release / beta / alpha）を表すチップ。
  * 安定版(release)は既定表示のため描画しない。
  */
-export default function ReleaseChannelChip({ channel, size = "small", variant = "filled" }: ReleaseChannelChipProps) {
+const ReleaseChannelChip = ({ channel, size = "small", variant = "filled" }: ReleaseChannelChipProps) => {
   const t = useTranslations("Version");
 
   const normalized = normalizeReleaseChannel(channel);
@@ -30,4 +30,6 @@ export default function ReleaseChannelChip({ channel, size = "small", variant = 
       sx={{ borderRadius: "4px", fontWeight: 600 }}
     />
   );
-}
+};
+
+export default ReleaseChannelChip;

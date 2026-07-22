@@ -7,23 +7,27 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import { useState, useRef } from "react";
+import type { ChangeEvent } from "react";
 import { resizeImageFile } from "@/lib/utils/image";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 import { useTranslations } from "next-intl";
 
-export interface ProjectIconUploadProps {
+export type ProjectIconUploadProps = {
   initialIconUrl?: string | null;
   projectSlug?: string;
-}
+};
 
-export default function ProjectIconUpload({ initialIconUrl, projectSlug }: ProjectIconUploadProps) {
+/**
+ * プロジェクト新規作成フォームなどで使用される、アイコン画像のアップロードを担当するクライアントコンポーネント。
+ */
+const ProjectIconUpload = ({ initialIconUrl, projectSlug }: ProjectIconUploadProps) => {
   const t = useTranslations("Project");
   const [iconUrl, setIconUrl] = useState<string>(initialIconUrl || "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -31,7 +35,6 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
     setError(null);
 
     try {
-      // 画像の自動リサイズ (最大400x400) 後に R2 へアップロード（新規時は仮のslugを使う）
       const resizedFile = await resizeImageFile(file, 400, 400);
       const { publicUrl } = await uploadFileToR2(resizedFile, {
         type: "icon",
@@ -39,8 +42,8 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
       }, { presignError: t("iconUpload.error"), uploadError: t("iconUpload.error") });
 
       setIconUrl(publicUrl);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("iconUpload.error"));
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -100,4 +103,6 @@ export default function ProjectIconUpload({ initialIconUrl, projectSlug }: Proje
       <input type="hidden" name="iconUrl" value={iconUrl} />
     </Box>
   );
-}
+};
+
+export default ProjectIconUpload;

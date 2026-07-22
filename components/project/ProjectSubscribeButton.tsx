@@ -8,13 +8,13 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import { useTranslations } from "next-intl";
 import { toggleProjectSubscription } from "@/lib/actions/notification";
 
-interface ProjectSubscribeButtonProps {
+type ProjectSubscribeButtonProps = {
   projectId: string;
   initialSubscribed: boolean;
-}
+};
 
-/** プロジェクトの新リリース通知を購読するベルトグル（YouTube のベル相当） */
-export default function ProjectSubscribeButton({ projectId, initialSubscribed }: ProjectSubscribeButtonProps) {
+/** プロジェクトの新リリース通知を購読するベルトグル */
+const ProjectSubscribeButton = ({ projectId, initialSubscribed }: ProjectSubscribeButtonProps) => {
   const t = useTranslations("Notifications");
   const [isPending, startTransition] = useTransition();
   const [subscribed, setSubscribed] = useState(initialSubscribed);
@@ -35,4 +35,6 @@ export default function ProjectSubscribeButton({ projectId, initialSubscribed }:
       </IconButton>
     </Tooltip>
   );
-}
+};
+
+export default ProjectSubscribeButton;

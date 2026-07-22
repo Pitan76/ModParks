@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { MouseEvent } from "react";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
@@ -9,28 +10,32 @@ import Typography from "@mui/material/Typography";
 import { toggleProjectFavorite, toggleCookieFavorite } from "@/lib/actions/favorite";
 import { useTranslations } from "next-intl";
 
-interface ProjectFavoriteButtonProps {
+export type ProjectFavoriteButtonProps = {
   projectId: string;
   initialCount: number;
   initialFavorited: boolean;
   isLoggedIn: boolean;
   variant?: "icon" | "button";
-}
+};
 
-export default function ProjectFavoriteButton({
+/**
+ * プロジェクトをお気に入り登録（ブックマーク）するボタンコンポーネント。
+ * ログイン状態および未ログイン（クッキー保存）の両方をサポートします。
+ */
+const ProjectFavoriteButton = ({
   projectId,
   initialCount,
   initialFavorited,
   isLoggedIn,
   variant = "button"
-}: ProjectFavoriteButtonProps) {
+}: ProjectFavoriteButtonProps) => {
   const [isPending, startTransition] = useTransition();
   const [isMutating, setIsMutating] = useState(false);
   const [favorited, setFavorited] = useState(initialFavorited);
   const [count, setCount] = useState(initialCount);
   const t = useTranslations("Project");
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     e.preventDefault();
     if (isPending || isMutating) return;
 
@@ -51,7 +56,7 @@ export default function ProjectFavoriteButton({
         } else {
           // 成功した場合、DB側の最新状態と同期する
           if ("favorited" in result && result.favorited !== undefined) {
-              setFavorited(result.favorited);
+            setFavorited(result.favorited);
           }
         }
       } finally {
@@ -100,4 +105,6 @@ export default function ProjectFavoriteButton({
       {count > 0 && ` (${count})`}
     </Button>
   );
-}
+};
+
+export default ProjectFavoriteButton;

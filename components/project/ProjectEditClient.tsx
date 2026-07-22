@@ -2,24 +2,26 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import TabbedPanel from "@/components/ui/TabbedPanel";
+import type { ReactNode } from "react";
 
-export interface ProjectEditClientProps {
+export type ProjectEditClientProps = {
   isOwner: boolean;
-  basicInfoForm: React.ReactNode;
-  versionsManager: React.ReactNode;
-  membersManager: React.ReactNode;
-  dependenciesManager: React.ReactNode;
-  ownershipTransfer?: React.ReactNode;
-}
+  basicInfoForm: ReactNode;
+  versionsManager: ReactNode;
+  membersManager: ReactNode;
+  dependenciesManager: ReactNode;
+  ownershipTransfer?: ReactNode;
+};
 
-export default function ProjectEditClient({
+/** プロジェクト編集画面のタブ切り替えを管理するクライアントコンポーネント */
+const ProjectEditClient = ({
   isOwner,
   basicInfoForm,
   versionsManager,
   membersManager,
   dependenciesManager,
   ownershipTransfer
-}: ProjectEditClientProps) {
+}: ProjectEditClientProps) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -48,4 +50,6 @@ export default function ProjectEditClient({
   };
 
   return <TabbedPanel items={tabs} value={activeIndex} onChange={handleTabChange} />;
-}
+};
+
+export default ProjectEditClient;
