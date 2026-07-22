@@ -12,11 +12,13 @@ import { revalidatePath } from "next/cache";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
  */
 export const createVersion = async (projectSlug: string, formData: FormData) => {
+  const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
   const project = await db
@@ -43,12 +45,12 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
   const fileName = formData.get("fileName") as string;
 
   if (!fileUrl || !fileName) {
-    return { error: { fileUrl: ["ファイルをアップロードするか、外部URLを入力してください"] } };
+    return { error: { fileUrl: [t("version.fileRequired")] } };
   }
 
   const isExternal = fileUrl.startsWith("http") && !fileUrl.includes(process.env.R2_PUBLIC_URL || "__r2__");
   if (isExternal && !isAllowedExternalUrl(fileUrl)) {
-    return { error: { fileUrl: ["許可されていないドメインのURLです。GitHub, Modrinth, CurseForge のURLを使用してください。"] } };
+    return { error: { fileUrl: [t("version.disallowedDomain")] } };
   }
 
   const id = createId();
@@ -90,6 +92,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
  * プロジェクトのバージョン情報を更新する Server Action。
  */
 export const updateVersion = async (versionId: string, projectSlug: string, formData: FormData) => {
+  const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
   const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
@@ -123,10 +126,10 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
 
   if (parsed.data.fileUrl) {
     if (!isAllowedExternalUrl(parsed.data.fileUrl)) {
-      return { error: { fileUrl: ["許可されていないドメインのURLです。GitHub, Modrinth, CurseForge のURLを使用してください。"] } };
+      return { error: { fileUrl: [t("version.disallowedDomain")] } };
     }
     const r2Key = getR2KeyFromUrl(version.fileUrl);
-    if (r2Key) return { error: { fileUrl: ["直接アップロードされたファイルはURLを変更できません。"] } };
+    if (r2Key) return { error: { fileUrl: [t("version.uploadedFileUrlImmutable")] } };
     updateData.fileUrl = parsed.data.fileUrl;
   }
 

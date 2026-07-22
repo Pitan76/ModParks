@@ -7,6 +7,7 @@ import { eq, and, desc, sql, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 // ─── お気に入りのトグル ─────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ export async function toggleProjectFavorite(projectId: string) {
     return { success: true, favorited: !existing };
   } catch (error) {
     console.error("Failed to toggle project favorite:", error);
-    return { success: false, error: "お気に入りの操作に失敗しました" };
+    return { success: false, error: (await getServerErrors())("favorite.toggleFailed") };
   }
 }
 

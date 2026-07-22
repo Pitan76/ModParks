@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { revalidatePath } from "next/cache";
 import { fetchCfAuthorProjects } from "@/lib/curseforge";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 export interface ImportedProject {
   id: string;
@@ -67,7 +68,7 @@ async function loadModrinthProjects(): Promise<ImportedProject[]> {
     const errorText = await userRes.text().catch(() => "Could not read error body");
     console.error("Modrinth API Error (User Fetch):", userRes.status, errorText);
     if (userRes.status === 401) {
-      throw new ImportError("Modrinthの認証に失敗しました。設定画面に登録したAPIキー (Personal Access Token) が正しいか確認してください。PATは 'mrp_' から始まります。");
+      throw new ImportError((await getServerErrors())("import.modrinthAuthFailed"));
     }
     throw new ImportError(`Failed to fetch Modrinth user. Status: ${userRes.status}`);
   }
@@ -128,7 +129,7 @@ async function loadCurseForgeProjects(): Promise<ImportedProject[]> {
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
   if (!settings?.curseforgeVerifiedAt || !settings.curseforgeAuthorId) {
-    throw new ImportError("CurseForge の所有確認が未完了です。設定画面で所有確認を行ってください。");
+    throw new ImportError((await getServerErrors())("import.curseforgeNotVerifiedDetail"));
   }
 
   // 所有確認済みの作者IDに紐づくプロジェクトのみを一覧する
@@ -178,7 +179,7 @@ export async function importProjects(selectedProjects: ImportedProject[], source
   if (source === "curseforge") {
     const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
     if (!settings?.curseforgeVerifiedAt || !settings.curseforgeAuthorId) {
-      return { success: false, error: "CurseForge の所有確認が未完了です。" };
+      return { success: false, error: (await getServerErrors())("import.curseforgeNotVerified") };
     }
     const owned = await fetchCfAuthorProjects(settings.curseforgeAuthorId);
     cfAllowedProjectIds = new Set(owned.map((p) => p.id.toString()));

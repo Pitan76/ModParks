@@ -8,6 +8,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 /** アイデアの投稿者・タイトルを取得する（通知の宛先・表示用） */
 async function getIdeaTarget(db: any, ideaId: string) {
@@ -65,7 +66,7 @@ export async function createIdea(formData: FormData) {
     return { success: true, id };
   } catch (error: any) {
     console.error("Failed to create idea:", error);
-    return { error: { server: ["アイデアの投稿に失敗しました"] } };
+    return { error: { server: [(await getServerErrors())("idea.createFailed")] } };
   }
 }
 
@@ -76,11 +77,12 @@ export async function createIdea(formData: FormData) {
  */
 export async function updateIdea(ideaId: string, formData: FormData) {
   const { db, userId } = await getAuthenticatedDb();
+  const t = await getServerErrors();
 
   const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
-  if (!idea) return { error: { server: ["アイデアが見つかりません"] } };
+  if (!idea) return { error: { server: [t("idea.notFound")] } };
   if (!(await canManageIdea(db, idea.authorId, userId))) {
-    return { error: { server: ["編集する権限がありません"] } };
+    return { error: { server: [t("idea.noEditPermission")] } };
   }
 
   const raw = {
@@ -114,15 +116,16 @@ export async function updateIdea(ideaId: string, formData: FormData) {
  */
 export async function updateIdeaStatus(ideaId: string, status: "open" | "in_progress" | "fulfilled") {
   const { db, userId } = await getAuthenticatedDb();
+  const t = await getServerErrors();
 
   const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
-  if (!idea) return { error: { server: ["アイデアが見つかりません"] } };
+  if (!idea) return { error: { server: [t("idea.notFound")] } };
   if (!(await canManageIdea(db, idea.authorId, userId))) {
-    return { error: { server: ["ステータスを変更する権限がありません"] } };
+    return { error: { server: [t("idea.noStatusPermission")] } };
   }
 
   if (!["open", "in_progress", "fulfilled"].includes(status)) {
-    return { error: { server: ["無効なステータスです"] } };
+    return { error: { server: [t("idea.invalidStatus")] } };
   }
 
   await db.update(ideas)
@@ -142,11 +145,12 @@ export async function updateIdeaStatus(ideaId: string, status: "open" | "in_prog
  */
 export async function deleteIdea(ideaId: string) {
   const { db, userId } = await getAuthenticatedDb();
+  const t = await getServerErrors();
 
   const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
-  if (!idea) return { error: "アイデアが見つかりません" };
+  if (!idea) return { error: t("idea.notFound") };
   if (!(await canManageIdea(db, idea.authorId, userId))) {
-    return { error: "削除する権限がありません" };
+    return { error: t("idea.noDeletePermission") };
   }
 
   await db.delete(ideas).where(eq(ideas.id, ideaId)).run();
@@ -196,7 +200,7 @@ export async function toggleIdeaLike(ideaId: string) {
     return { success: true, liked: !existing };
   } catch (error) {
     console.error("Failed to toggle like:", error);
-    return { success: false, error: "いいねの操作に失敗しました" };
+    return { success: false, error: (await getServerErrors())("idea.likeFailed") };
   }
 }
 
@@ -245,7 +249,7 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
     return { success: true };
   } catch (error) {
     console.error("Failed to create comment:", error);
-    return { error: { server: ["コメントの投稿に失敗しました"] } };
+    return { error: { server: [(await getServerErrors())("idea.commentCreateFailed")] } };
   }
 }
 
@@ -264,9 +268,10 @@ export async function updateIdeaComment(commentId: string, formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
+  const t = await getServerErrors();
   const comment = await db.select().from(ideaComments).where(eq(ideaComments.id, commentId)).get();
-  if (!comment) return { error: { server: ["コメントが見つかりません"] } };
-  if (comment.authorId !== userId) return { error: { server: ["編集する権限がありません"] } };
+  if (!comment) return { error: { server: [t("idea.commentNotFound")] } };
+  if (comment.authorId !== userId) return { error: { server: [t("idea.noEditPermission")] } };
 
   await db.update(ideaComments)
     .set({ content: parsed.data.content, contentFormat: parsed.data.contentFormat, updatedAt: new Date() })
@@ -283,8 +288,9 @@ export async function updateIdeaComment(commentId: string, formData: FormData) {
 export async function deleteIdeaComment(commentId: string) {
   const { db, userId } = await getAuthenticatedDb();
 
+  const t = await getServerErrors();
   const comment = await db.select().from(ideaComments).where(eq(ideaComments.id, commentId)).get();
-  if (!comment) return { error: "コメントが見つかりません" };
+  if (!comment) return { error: t("idea.commentNotFound") };
 
   // 削除はコメント投稿者本人・管理者に加え、アイデア所有者によるモデレーションも許可
   let allowed = await canManageIdea(db, comment.authorId, userId);
@@ -292,7 +298,7 @@ export async function deleteIdeaComment(commentId: string) {
     const idea = await db.select({ authorId: ideas.authorId }).from(ideas).where(eq(ideas.id, comment.ideaId)).get();
     allowed = idea?.authorId === userId;
   }
-  if (!allowed) return { error: "削除する権限がありません" };
+  if (!allowed) return { error: t("idea.noDeletePermission") };
 
   await db.delete(ideaComments).where(eq(ideaComments.id, commentId)).run();
   await recordDeletion(db, "idea_comments", commentId);

@@ -41,10 +41,11 @@ export async function sendRegistrationEmail(formData: FormData) {
   // Send Email using Resend
   const link = `${SITE_URL}/${locale}/register/complete?token=${token}&email=${encodeURIComponent(email)}`;
   
-  const subject = locale === "ja" ? "【ModParks】ご登録を完了してください" : "Complete your ModParks registration";
-  const html = locale === "ja" 
-    ? `<p>ModParksへのご登録ありがとうございます。</p><p>以下のリンクをクリックして、ユーザー名とパスワードを設定して登録を完了してください：</p><p><a href="${link}">${link}</a></p><p>このリンクは24時間有効です。</p>`
-    : `<p>Thank you for registering on ModParks.</p><p>Please click the link below to set your username and password and complete your registration:</p><p><a href="${link}">${link}</a></p><p>This link is valid for 24 hours.</p>`;
+  const { getTranslations } = await import("next-intl/server");
+  const tRegister = await getTranslations({ locale, namespace: "Auth.register" });
+
+  const subject = tRegister("emailSubject");
+  const html = `<p>${tRegister("emailIntro")}</p><p>${tRegister("emailInstruction")}</p><p><a href="${link}">${link}</a></p><p>${tRegister("emailExpiry")}</p>`;
 
   try {
     const res = await fetch("https://api.resend.com/emails", {

@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { notifyNewProject } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 type PublishProject = {
   slug: string;
@@ -66,7 +67,10 @@ export const createProject = async (formData: FormData) => {
   const id = createId();
 
   const existingProject = await db.select().from(projects).where(eq(projects.slug, slug)).get();
-  if (existingProject) return { error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } };
+  if (existingProject) {
+    const t = await getServerErrors();
+    return { error: { slug: [t("project.slugTaken")] } };
+  }
 
   await db.insert(projects).values({
     id,
@@ -133,12 +137,13 @@ export const updateProject = async (projectId: string, formData: FormData) => {
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
   const { tags, githubRepo, discordWebhookUrl, ...fields } = parsed.data;
+  const t = await getServerErrors();
 
   let normalizedWebhook: string | null = null;
   if (discordWebhookUrl) {
     const { isValidDiscordWebhookUrl } = await import("@/lib/notifications/discord");
     if (!isValidDiscordWebhookUrl(discordWebhookUrl)) {
-      return { error: { discordWebhookUrl: ["Discord の Webhook URL を入力してください。"] } };
+      return { error: { discordWebhookUrl: [t("project.invalidDiscordWebhook")] } };
     }
     normalizedWebhook = discordWebhookUrl;
   }
@@ -148,14 +153,14 @@ export const updateProject = async (projectId: string, formData: FormData) => {
     const { normalizeGithubRepo } = await import("@/lib/utils/github");
     normalizedGithubRepo = normalizeGithubRepo(githubRepo);
     if (!normalizedGithubRepo) {
-      return { error: { githubRepo: ["'owner/repo' 形式、または GitHub リポジトリの URL を入力してください。"] } };
+      return { error: { githubRepo: [t("project.invalidGithubRepo")] } };
     }
   }
 
   let previousSlugToSet: string | undefined = undefined;
   if (fields.slug && fields.slug !== project.slug) {
     const existingSlug = await db.select().from(projects).where(eq(projects.slug, fields.slug)).get();
-    if (existingSlug) return { error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } };
+    if (existingSlug) return { error: { slug: [t("project.slugTaken")] } };
     previousSlugToSet = project.slug;
   }
 

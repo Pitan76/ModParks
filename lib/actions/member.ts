@@ -6,6 +6,7 @@ import { projects, projectMembers, users, userProfiles } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 /**
  * プロジェクトのメンバー一覧を取得する
@@ -56,6 +57,7 @@ export async function getProjectMembers(projectId: string) {
  * プロジェクトにメンバーを追加する
  */
 export async function addProjectMember(projectId: string, username: string) {
+  const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
   // 権限チェック（オーナーのみ追加可能）
@@ -67,18 +69,18 @@ export async function addProjectMember(projectId: string, username: string) {
   // 追加対象ユーザーを探す
   const targetProfile = await db.select().from(userProfiles).where(eq(userProfiles.username, username)).get();
   if (!targetProfile) {
-    return { error: "ユーザーが見つかりません" };
+    return { error: t("member.userNotFound") };
   }
   const targetUser = { id: targetProfile.userId };
 
   if (targetUser.id === project.authorId) {
-    return { error: "既にオーナーです" };
+    return { error: t("member.alreadyOwner") };
   }
 
   // 既存メンバーかチェック
   const existing = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, targetUser.id))).get();
   if (existing) {
-    return { error: "既に追加されています" };
+    return { error: t("member.alreadyMember") };
   }
 
   // 追加

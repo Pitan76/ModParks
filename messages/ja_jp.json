@@ -560,7 +560,11 @@
       "error": {
         "passwordLength": "パスワードは8文字以上である必要があります",
         "registrationFailed": "アカウント作成に失敗しました。"
-      }
+      },
+      "emailSubject": "【ModParks】ご登録を完了してください",
+      "emailIntro": "ModParksへのご登録ありがとうございます。",
+      "emailInstruction": "以下のリンクをクリックして、ユーザー名とパスワードを設定して登録を完了してください：",
+      "emailExpiry": "このリンクは24時間有効です。"
     },
     "fields": {
       "username": "ユーザー名",
@@ -1126,5 +1130,45 @@
     "download": "ダウンロード",
     "edit": "編集",
     "viewProject": "プロジェクトを開く"
+  },
+  "ServerErrors": {
+    "common": {
+      "notFound": "対象が見つかりません",
+      "forbidden": "権限がありません"
+    },
+    "project": {
+      "slugTaken": "このスラッグは既に他のプロジェクトで使用されています。",
+      "invalidDiscordWebhook": "Discord の Webhook URL を入力してください。",
+      "invalidGithubRepo": "'owner/repo' 形式、または GitHub リポジトリの URL を入力してください。"
+    },
+    "version": {
+      "fileRequired": "ファイルをアップロードするか、外部URLを入力してください",
+      "disallowedDomain": "許可されていないドメインのURLです。GitHub, Modrinth, CurseForge のURLを使用してください。",
+      "uploadedFileUrlImmutable": "直接アップロードされたファイルはURLを変更できません。"
+    },
+    "member": {
+      "userNotFound": "ユーザーが見つかりません",
+      "alreadyOwner": "既にオーナーです",
+      "alreadyMember": "既に追加されています"
+    },
+    "idea": {
+      "createFailed": "アイデアの投稿に失敗しました",
+      "notFound": "アイデアが見つかりません",
+      "noEditPermission": "編集する権限がありません",
+      "noStatusPermission": "ステータスを変更する権限がありません",
+      "invalidStatus": "無効なステータスです",
+      "noDeletePermission": "削除する権限がありません",
+      "likeFailed": "いいねの操作に失敗しました",
+      "commentCreateFailed": "コメントの投稿に失敗しました",
+      "commentNotFound": "コメントが見つかりません"
+    },
+    "favorite": {
+      "toggleFailed": "お気に入りの操作に失敗しました"
+    },
+    "import": {
+      "modrinthAuthFailed": "Modrinthの認証に失敗しました。設定画面に登録したAPIキー (Personal Access Token) が正しいか確認してください。PATは 'mrp_' から始まります。",
+      "curseforgeNotVerifiedDetail": "CurseForge の所有確認が未完了です。設定画面で所有確認を行ってください。",
+      "curseforgeNotVerified": "CurseForge の所有確認が未完了です。"
+    }
   }
 }

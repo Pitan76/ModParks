@@ -552,7 +552,11 @@
       "error": {
         "passwordLength": "Password must be at least 8 characters long",
         "registrationFailed": "Failed to create account."
-      }
+      },
+      "emailSubject": "Complete your ModParks registration",
+      "emailIntro": "Thank you for registering on ModParks.",
+      "emailInstruction": "Please click the link below to set your username and password and complete your registration:",
+      "emailExpiry": "This link is valid for 24 hours."
     },
     "fields": {
       "username": "Username",
@@ -1118,5 +1122,45 @@
     "download": "Download",
     "edit": "Edit",
     "viewProject": "Open project"
+  },
+  "ServerErrors": {
+    "common": {
+      "notFound": "Not found",
+      "forbidden": "You do not have permission"
+    },
+    "project": {
+      "slugTaken": "This slug is already used by another project.",
+      "invalidDiscordWebhook": "Enter a valid Discord webhook URL.",
+      "invalidGithubRepo": "Enter it as 'owner/repo' or as a GitHub repository URL."
+    },
+    "version": {
+      "fileRequired": "Upload a file or enter an external URL.",
+      "disallowedDomain": "That domain is not allowed. Use a GitHub, Modrinth or CurseForge URL.",
+      "uploadedFileUrlImmutable": "The URL of a directly uploaded file cannot be changed."
+    },
+    "member": {
+      "userNotFound": "User not found",
+      "alreadyOwner": "This user is already the owner",
+      "alreadyMember": "This user has already been added"
+    },
+    "idea": {
+      "createFailed": "Failed to post the idea",
+      "notFound": "Idea not found",
+      "noEditPermission": "You do not have permission to edit this",
+      "noStatusPermission": "You do not have permission to change the status",
+      "invalidStatus": "Invalid status",
+      "noDeletePermission": "You do not have permission to delete this",
+      "likeFailed": "Failed to update the like",
+      "commentCreateFailed": "Failed to post the comment",
+      "commentNotFound": "Comment not found"
+    },
+    "favorite": {
+      "toggleFailed": "Failed to update the favorite"
+    },
+    "import": {
+      "modrinthAuthFailed": "Modrinth authentication failed. Check that the API key (Personal Access Token) saved in settings is correct. A PAT starts with 'mrp_'.",
+      "curseforgeNotVerifiedDetail": "CurseForge ownership is not verified yet. Verify ownership in settings.",
+      "curseforgeNotVerified": "CurseForge ownership is not verified yet."
+    }
   }
 }
