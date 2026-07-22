@@ -7,7 +7,8 @@ import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Autocomplete, { AutocompleteRenderGetTagProps } from "@mui/material/Autocomplete";
+import Autocomplete from "@mui/material/Autocomplete";
+import type { AutocompleteRenderGetTagProps } from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -16,29 +17,35 @@ import Switch from "@mui/material/Switch";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LinkIcon from "@mui/icons-material/Link";
 import { useState, useRef } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
-import { getLoaderInfo } from "@/lib/loaders";
 import { MC_VERSIONS } from "@/lib/validations";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";
-
 import { useTranslations } from "next-intl";
+import LoaderAutocomplete from "./LoaderAutocomplete";
+
+type OptionItem = {
+  slug: string;
+  name: string;
+};
+
+export type VersionUploadFormProps = {
+  slug: string;
+  openIdeas: { id: string; title: string }[];
+  availablePlatforms?: OptionItem[];
+};
+
+const MB_LIMIT = 5;
+const FILE_SIZE_LIMIT = MB_LIMIT * 1024 * 1024;
 
 /**
  * プロジェクトの新バージョン（ファイル）をアップロードするフォームコンポーネント。
  * R2への署名付きアップロードと、DBへのバージョン情報登録を行います。
  */
-export interface VersionUploadFormProps {
-  /** バージョンを追加する対象のプロジェクトSlug */
-  slug: string;
-  /** 関連付け可能なオープン状態のアイデア一覧 */
-  openIdeas: { id: string; title: string }[];
-  availablePlatforms?: { slug: string; name: string }[];
-}
-
-export default function VersionUploadForm({ slug, openIdeas, availablePlatforms = [] }: VersionUploadFormProps) {
+const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: VersionUploadFormProps) => {
   const router = useRouter();
   const tVersion = useTranslations("Version");
   const tCommon = useTranslations("Common");
@@ -56,7 +63,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
   const [parsing, setParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile);
     if (!selectedFile) return;
@@ -87,7 +94,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
    * 2. R2ストレージへのファイルアップロード
    * 3. DBへのバージョン登録 (Server Action)
    */
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (uploadMode === "file" && !file) {
       setError({ fileUrl: [tVersion("uploadForm.error.fileRequired")] });
@@ -104,8 +111,6 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
     try {
       const formData = new FormData(e.currentTarget);
       
-      // SelectやAutocompleteのデフォルトのHidden Inputによって値が不正なカンマ区切りになるのを防ぐため、
-      // 既存の値を一度削除してから手動で追加し直します
       formData.delete("mcVersions");
       formData.delete("loaders");
       
@@ -115,7 +120,7 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
       formData.set("extractRecipes", extractRecipes ? "true" : "false");
 
       if (uploadMode === "file" && file) {
-        if (file.size > 5 * 1024 * 1024) {
+        if (file.size > FILE_SIZE_LIMIT) {
           setError({ fileUrl: [tVersion("uploadForm.error.fileTooLarge")] });
           setPending(false);
           return;
@@ -129,7 +134,6 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
         formData.append("fileName", file.name);
         formData.append("fileSize", file.size.toString());
       } else {
-        // External URL
         formData.append("fileUrl", externalUrl);
         formData.append("fileName", externalUrl.split('/').pop() || "external-file");
       }
@@ -142,9 +146,9 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
       } else {
         router.push(`/projects/${slug}`);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError({ fileUrl: [err.message || tVersion("uploadForm.error.uploadError")] });
+      setError({ fileUrl: [err instanceof Error ? err.message : tVersion("uploadForm.error.uploadError")] });
     } finally {
       setPending(false);
     }
@@ -220,9 +224,6 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
             <Autocomplete
               options={openIdeas}
               getOptionLabel={(option) => option.title}
-              onChange={(_, _newValue) => {
-                // To keep compatibility with form submission, we can use a hidden input or name property.
-              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -291,57 +292,13 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
             )}
           />
 
-          <Autocomplete
-            multiple
-            disableCloseOnSelect
-            options={availablePlatforms}
-            getOptionLabel={(option) => {
-              if (typeof option === "string") return option;
-              return option.name || option.slug || "";
-            }}
-            value={availablePlatforms.filter(p => loaders.includes(p.slug)) as any}
-            onChange={(_, newValue: any[]) => setLoaders(newValue.map(v => typeof v === "string" ? v : v.slug))}
-            renderOption={(props: React.HTMLAttributes<HTMLLIElement>, option: any) => {
-              const slug = typeof option === "string" ? option : option.slug;
-              const name = typeof option === "string" ? option : option.name;
-              const info = getLoaderInfo(slug);
-              return (
-                <li {...props} key={slug}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    {info.icon}
-                    {name}
-                  </Box>
-                </li>
-              );
-            }}
-            // @ts-ignore
-            renderTags={(val: any[], getTagProps: any) => val.map((option, index: number) => {
-                const slug = typeof option === "string" ? option : option.slug;
-                const name = typeof option === "string" ? option : option.name;
-                const info = getLoaderInfo(slug);
-                const { key, ...tagProps } = getTagProps({ index });
-                return (
-                  <Chip
-                    variant="outlined"
-                    label={name}
-                    size="small"
-                    icon={info.icon}
-                    color={info.color}
-                    {...tagProps}
-                    key={key}
-                  />
-                );
-              })
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={tVersion("fields.loaders")}
-                error={!!error?.loaders}
-                helperText={error?.loaders?.[0]}
-                required={loaders.length === 0}
-              />
-            )}
+          <LoaderAutocomplete
+            availablePlatforms={availablePlatforms}
+            loaders={loaders}
+            onChange={setLoaders}
+            label={tVersion("fields.loaders")}
+            error={!!error?.loaders}
+            helperText={error?.loaders?.[0]}
           />
 
           <TextField
@@ -353,7 +310,6 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
             error={!!error?.changelog}
             helperText={error?.changelog?.[0]}
           />
-
 
           <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
@@ -367,4 +323,6 @@ export default function VersionUploadForm({ slug, openIdeas, availablePlatforms 
       </CardContent>
     </Card>
   );
-}
+};
+
+export default VersionUploadForm;

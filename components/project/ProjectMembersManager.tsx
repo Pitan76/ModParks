@@ -24,7 +24,7 @@ import { useTranslations } from "next-intl";
 
 type ProjectMember = {
   id: string;
-  username: string;
+  username: string | null;
   displayName: string | null;
   avatarUrl: string | null;
   role: string;
@@ -95,8 +95,8 @@ const ProjectMembersManager = ({ projectId, members, isOwner, currentUserId }: P
                 <Avatar src={member.avatarUrl || undefined} />
               </ListItemAvatar>
               <ListItemText 
-                primary={member.displayName || member.username} 
-                secondary={`@${member.username}`} 
+                primary={member.displayName || member.username || ""} 
+                secondary={member.username ? `@${member.username}` : ""} 
               />
               <ListItemSecondaryAction>
                 {member.role === "owner" ? (

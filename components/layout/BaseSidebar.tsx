@@ -23,26 +23,31 @@ import { useContextMenuHandler, useCommonItems } from "@/components/ui/ContextMe
 
 export const SIDEBAR_WIDTH = 260;
 
-export interface NavItem {
+export type NavItem = {
   id: string;
   label: string;
   path: string;
   icon: React.ReactNode;
-}
+};
 
-interface BaseSidebarProps {
+export type BaseSidebarProps = {
   mobileOpen: boolean;
   onMobileClose: () => void;
   navItems: NavItem[];
-}
+};
 
-function getIsSelected(itemId: string, itemPath: string, pathname: string, isMyProjects: boolean): boolean {
+const getIsSelected = (itemId: string, itemPath: string, pathname: string, isMyProjects: boolean): boolean => {
   if (itemId === "projects") return pathname === "/projects" && !isMyProjects;
   if (itemId === "myProjects") return pathname === "/projects" && isMyProjects;
   return pathname === itemPath;
-}
+};
 
-export default function BaseSidebar({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) {
+/**
+ * サイト全体の共通サイドバーコンポーネント。
+ * デスクトップ表示（常時固定表示）とモバイル表示（ハンバーガーメニューからの一時Drawer表示）の双方に対応し、
+ * ナビゲーションメニュー、言語切替、ダークモード切替などのコントロールを提供します。
+ */
+const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -129,7 +134,7 @@ export default function BaseSidebar({ mobileOpen, onMobileClose, navItems }: Bas
             <Select
               id="locale-select-sidebar"
               value={locale}
-              onChange={(e) => handleLocaleChange(e.target.value)}
+              onChange={(e) => handleLocaleChange(e.target.value as string)}
               size="small"
               variant="outlined"
               renderValue={(v) => (
@@ -189,4 +194,6 @@ export default function BaseSidebar({ mobileOpen, onMobileClose, navItems }: Bas
       </Drawer>
     </Box>
   );
-}
+};
+
+export default BaseSidebar;
