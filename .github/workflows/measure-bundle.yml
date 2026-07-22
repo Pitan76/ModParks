@@ -50,3 +50,12 @@ jobs:
           echo "=== /tmp/dry ==="
           du -sh /tmp/dry
           ls -la /tmp/dry
+
+      # 不要物がバンドル実体に混入していないかを判定する。
+      - name: Analyze bundle composition
+        run: node .github/scripts/analyze-bundle.mjs /tmp/dry/worker-wrapper.js
+
+      - name: Report Next.js server chunks
+        run: |
+          du -k .next/server/chunks/*.js .next/server/*.js 2>/dev/null \
+            | sort -rn | head -25 || true
