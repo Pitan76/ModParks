@@ -33,7 +33,6 @@ const HomePage = async ({ params }: HomePageProps) => {
       <HomeHero
         labels={{
           title: t("hero.title"),
-          titleHighlight: t("hero.titleHighlight"),
           description: t("hero.description"),
           search: tc("search"),
           cta: t("cta"),

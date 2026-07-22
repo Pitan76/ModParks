@@ -13,7 +13,6 @@ import { getLoaderInfo } from "@/lib/loaders";
 interface HomeHeroProps {
   labels: {
     title: string;
-    titleHighlight: string;
     description: string;
     search: string;
     cta: string;
@@ -31,7 +30,7 @@ export default function HomeHero({ labels }: HomeHeroProps) {
     <Box
       sx={{
         position:   "relative",
-        py:         { xs: 8, md: 14 },
+        py:         { xs: 6, md: 10 },
         overflow:   "hidden",
         "&::before": {
           content:  '""',
@@ -46,27 +45,13 @@ export default function HomeHero({ labels }: HomeHeroProps) {
             variant="h2"
             component="h1"
             sx={{
-              fontWeight:   900,
+              fontWeight:   800,
               mb:           2,
-              lineHeight:   1.15,
-              fontSize:     { xs: "2rem", md: "3rem" },
+              lineHeight:   1.25,
+              fontSize:     { xs: "1.75rem", md: "2.5rem" },
             }}
           >
-            {labels.title}{" "}
-            <Box
-              component="span"
-              sx={(theme) => ({
-                background: theme.isNewTheme
-                  ? (theme.palette.mode === "light"
-                    ? "linear-gradient(135deg, #171717, #2563eb)"
-                    : "linear-gradient(135deg, #f5f5f5, #3b82f6)")
-                  : "linear-gradient(135deg, #4ade80, #818cf8)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              })}
-            >
-              {labels.titleHighlight}
-            </Box>
+            {labels.title}
           </Typography>
 
           <Typography

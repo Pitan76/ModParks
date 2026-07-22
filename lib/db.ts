@@ -96,8 +96,9 @@ export const getDatabase = async (): Promise<DrizzleD1Database<typeof schema>> =
           
           // @ts-expect-error - node:sqlite is available in Node 22+ but might miss types in some environments
           const { DatabaseSync } = await import("node:sqlite");
-          // @ts-expect-error - drizzle-orm/node-sqlite typing may not be resolved in this project setup
-          const { drizzle: drizzleNodeSqlite } = await import("drizzle-orm/node-sqlite");
+          // Use eval("require") to completely hide this optional driver from Turbopack/Webpack static analysis
+          const req = eval("require");
+          const { drizzle: drizzleNodeSqlite } = req("drizzle-orm/node-sqlite");
           
           const sqlite = new DatabaseSync(sqlitePath);
           const db = drizzleNodeSqlite(sqlite, { schema });

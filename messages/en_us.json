@@ -87,9 +87,8 @@
   },
   "Home": {
     "hero": {
-      "title": "Discover & Share Minecraft",
-      "titleHighlight": "Mods & Plugins",
-      "description": "ModParks is a Japan-based platform for Minecraft Java Edition Mods and Plugins.",
+      "title": "Minecraft mod & plugin hosting",
+      "description": "Publish, search, and download. Japanese-first.",
       "searchPlaceholder": "Search Mods & Plugins..."
     },
     "newProjects": "Newest",
@@ -452,11 +451,10 @@
   },
   "Idea": {
     "postedBy": "Posted by {name}",
-    "addCommentPlaceholder": "Add a comment...",
     "like": "Like",
     "liked": "Liked",
     "title": "Ideas",
-    "description": "Let's create and find Minecraft Mods and Plugins together!",
+    "description": "Post the mod you wish existed, and find someone who can build it.",
     "postIdea": "Post Idea",
     "status": {
       "open": "Open",
