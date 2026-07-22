@@ -29,6 +29,16 @@ jobs:
           # Turbopack だと Server バンドルが 3 MiB を超えるため CI では webpack ビルドを使う
           CF_WEBPACK_BUILD: "1"
 
+      # メイン Worker が Service Binding するため、先にサイドカーを配置する
+      - name: Deploy JAR worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.100.0"
+          workingDirectory: workers/jar
+          command: deploy
+
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
