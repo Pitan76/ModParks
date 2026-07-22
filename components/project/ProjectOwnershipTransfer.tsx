@@ -28,10 +28,7 @@ const ProjectOwnershipTransfer = ({ projectId }: ProjectOwnershipTransferProps) 
 
   const handleTransfer = () => {
     if (!newOwnerId.trim() || isPending) return;
-
-    if (!confirm(t("confirm"))) {
-      return;
-    }
+    if (!confirm(t("confirm"))) return;
 
     startTransition(async () => {
       try {

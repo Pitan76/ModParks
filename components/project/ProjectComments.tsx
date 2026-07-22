@@ -28,9 +28,7 @@ const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId }: ProjectComm
   const fetchComments = useCallback(async () => {
     try {
       const res = await fetch(endpoint);
-      if (res.ok) {
-        setComments((await res.json()) as Comment[]);
-      }
+      if (res.ok) setComments((await res.json()) as Comment[]);
     } catch (err) {
       console.error(err);
     } finally {
@@ -50,18 +48,14 @@ const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId }: ProjectComm
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content, parentId, contentFormat: format }),
     });
-    if (res.ok) {
-      await fetchComments();
-    }
+    if (res.ok) await fetchComments();
   };
 
   const handleDelete = async (commentId: string) => {
     if (!confirm(t("deleteConfirm"))) return;
     try {
       const res = await fetch(`${endpoint}/${commentId}`, { method: "DELETE" });
-      if (res.ok) {
-        await fetchComments();
-      }
+      if (res.ok) await fetchComments();
     } catch (err) {
       console.error(err);
     }

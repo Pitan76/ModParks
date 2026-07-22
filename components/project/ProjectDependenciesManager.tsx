@@ -56,14 +56,10 @@ const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependen
     setLoading(true);
     try {
       if (tab === 0) {
-        if (!targetSlug) {
-          throw new Error("Target slug is required");
-        }
+        if (!targetSlug) throw new Error("Target slug is required");
         await addProjectDependencyBySlug(projectId, targetSlug, depType);
       } else {
-        if (!extName || !extUrl) {
-          throw new Error("Name and URL are required");
-        }
+        if (!extName || !extUrl) throw new Error("Name and URL are required");
         await addExternalProjectDependency(projectId, extName, extUrl, depType);
       }
       setToast({ message: t("addSuccess"), severity: "success" });

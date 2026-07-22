@@ -76,15 +76,10 @@ const ProjectTabsManager = ({
     setTab(newValue);
 
     const params = new URLSearchParams(searchParams?.toString() || "");
-    if (newValue === TAB_FILES) {
-      params.set("tab", "files");
-    } else if (newValue === TAB_DEPENDENCIES) {
-      params.set("tab", "dependencies");
-    } else if (newValue === TAB_RECIPES) {
-      params.set("tab", "recipes");
-    } else {
-      params.delete("tab");
-    }
+    if (newValue === TAB_FILES) params.set("tab", "files");
+    else if (newValue === TAB_DEPENDENCIES) params.set("tab", "dependencies");
+    else if (newValue === TAB_RECIPES) params.set("tab", "recipes");
+    else params.delete("tab");
     
     const newQuery = params.toString();
     const newUrl = newQuery ? `?${newQuery}` : pathname;

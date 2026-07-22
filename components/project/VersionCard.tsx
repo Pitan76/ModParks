@@ -14,10 +14,7 @@ import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useLocale, useTranslations } from "next-intl";
 
-/**
- * バージョン一覧の各カードに表示するデータの型定義
- */
-interface VersionCardProps {
+export type VersionCardProps = {
   version: {
     id:            string;
     versionNumber: string;
@@ -32,20 +29,22 @@ interface VersionCardProps {
     createdAt:     Date | number;
   };
   projectSlug: string;
-}
+};
 
-function formatBytes(bytes: number): string {
-  if (bytes < 1024)        return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
+const KB = 1024;
+const MB = KB * KB;
 
+const formatBytes = (bytes: number): string => {
+  if (bytes < KB) return `${bytes} B`;
+  if (bytes < MB) return `${(bytes / KB).toFixed(1)} KB`;
+  return `${(bytes / MB).toFixed(2)} MB`;
+};
 
 /**
- * プロジェクトの特定バージョンをカード形式で表示するコンポーネント
+ * プロジェクトの特定バージョンをカード形式で表示するコンポーネント。
  * ダウンロードボタン、対応MCバージョン、ローダー等を整理して表示します。
  */
-export default function VersionCard({ version, projectSlug }: VersionCardProps) {
+const VersionCard = ({ version, projectSlug }: VersionCardProps) => {
   const locale = useLocale();
   const t = useTranslations("Project");
   const tMenu = useTranslations("ContextMenu");
@@ -59,7 +58,9 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
       id: "cm-version-download",
       label: tMenu("download"),
       icon: <DownloadIcon fontSize="small" />,
-      onClick: () => { window.location.href = downloadUrl; },
+      onClick: () => {
+        window.location.href = downloadUrl;
+      },
     },
     c.copyLink(downloadUrl),
     c.copyText(version.versionNumber, `v${version.versionNumber}`),
@@ -94,7 +95,6 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
                 v{version.versionNumber}
               </Typography>
               <ReleaseChannelChip channel={version.releaseChannel} />
-
 
               {/* ローダー */}
               <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", mt: 1 }}>
@@ -185,4 +185,6 @@ export default function VersionCard({ version, projectSlug }: VersionCardProps) 
       </CardContent>
     </Card>
   );
-}
+};
+
+export default VersionCard;

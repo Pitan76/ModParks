@@ -4,7 +4,6 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import Tooltip from "@mui/material/Tooltip";
@@ -20,10 +19,7 @@ import { useColorMode } from "@/components/ThemeRegistry";
 import ProjectTypeBadge from "./ProjectTypeBadge";
 import ProjectTagBadge from "./ProjectTagBadge";
 
-/**
- * プロジェクト一覧のカードに表示するデータの型定義
- */
-export interface ProjectCardProps {
+export type ProjectCardProps = {
   project: {
     id:          string;
     slug:        string;
@@ -44,14 +40,13 @@ export interface ProjectCardProps {
     updatedAt:   Date | number;
   };
   layout?: "list" | "grid";
-}
+};
 
-
-
-
-
-
-export default function ProjectCard({ project, layout = "list" }: ProjectCardProps) {
+/**
+ * プロジェクト一覧などで個々のプロジェクト概要を表示するカードコンポーネント。
+ * リスト表示とグリッド表示の2レイアウトに対応し、コンテキストメニュー機能も備えます。
+ */
+const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
   const tTags = useTranslations("Tags");
   const tMenu = useTranslations("ContextMenu");
   const router = useRouter();
@@ -247,4 +242,6 @@ export default function ProjectCard({ project, layout = "list" }: ProjectCardPro
       </LinkCardActionArea>
     </Card>
   );
-}
+};
+
+export default ProjectCard;

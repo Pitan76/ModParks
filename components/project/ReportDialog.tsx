@@ -1,6 +1,7 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
+import type { ChangeEvent } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -17,18 +18,21 @@ import { useTranslations } from "next-intl";
 import { createReport } from "@/lib/actions/report";
 import { REPORT_REASONS } from "@/lib/validations";
 
-interface ReportDialogProps {
+export type ReportDialogProps = {
   projectId: string;
-}
+};
 
-export default function ReportDialog({ projectId }: ReportDialogProps) {
+/**
+ * プロジェクトの問題（コンテンツ違反、バグなど）を通報するダイアログコンポーネント。
+ */
+const ReportDialog = ({ projectId }: ReportDialogProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Report");
-  const [open,    setOpen]    = React.useState(false);
-  const [reason,  setReason]  = React.useState<string>(REPORT_REASONS[0]);
-  const [detail,  setDetail]  = React.useState("");
-  const [success, setSuccess] = React.useState(false);
-  const [pending, setPending] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState<string>(REPORT_REASONS[0]);
+  const [detail, setDetail] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [pending, setPending] = useState(false);
 
   const handleSubmit = async () => {
     setPending(true);
@@ -44,7 +48,10 @@ export default function ReportDialog({ projectId }: ReportDialogProps) {
     <>
       <Button
         id="report-btn"
-        onClick={() => { setOpen(true); setSuccess(false); }}
+        onClick={() => {
+          setOpen(true);
+          setSuccess(false);
+        }}
         startIcon={<FlagIcon />}
         size="small"
         color="error"
@@ -92,7 +99,7 @@ export default function ReportDialog({ projectId }: ReportDialogProps) {
                 rows={3}
                 fullWidth
                 value={detail}
-                onChange={(e) => setDetail(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setDetail(e.target.value)}
                 sx={{ mt: 2 }}
                 slotProps={{ htmlInput: { maxLength: 1000 } }}
               />
@@ -118,4 +125,6 @@ export default function ReportDialog({ projectId }: ReportDialogProps) {
       </Dialog>
     </>
   );
-}
+};
+
+export default ReportDialog;

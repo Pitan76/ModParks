@@ -17,24 +17,7 @@ import ReportDialog from "@/components/project/ReportDialog";
 import { Link } from "@/i18n/routing";
 import { parseLinks } from "@/lib/utils/links";
 
-// Simple mapping for custom links
-const getLinkIcon = (url: string) => {
-  try {
-    const hostname = new URL(url).hostname;
-    if (hostname.includes("discord.com") || hostname.includes("discord.gg")) return <img src="/discord-icon.svg" alt="Discord" style={{width: 20, height: 20}} />; // We might not have MUI discord icon, just use Link for now or text
-    if (hostname.includes("x.com") || hostname.includes("twitter.com")) return <XIcon />;
-    if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return <YouTubeIcon color="error" />;
-    if (hostname.includes("github.com")) return <GitHubIcon />;
-    if (hostname.includes("modrinth.com")) return <img src="https://modrinth.com/favicon.ico" alt="Modrinth" style={{width: 16, height: 16}} />;
-    if (hostname.includes("curseforge.com")) return <img src="https://www.curseforge.com/favicon.ico" alt="CurseForge" style={{width: 16, height: 16}} />;
-  } catch {}
-  return <LanguageIcon />;
-};
-
-/**
- * プロジェクト詳細のサイドバーを表示するコンポーネント
- */
-export interface ProjectSidebarProps {
+export type ProjectSidebarProps = {
   /** 対象プロジェクトの情報 */
   project: {
     id: string;
@@ -45,9 +28,28 @@ export interface ProjectSidebarProps {
   };
   /** ログイン済みか (通報ボタンの表示判定用) */
   isAuthenticated: boolean;
-}
+};
 
-export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectSidebarProps) {
+const getLinkIcon = (url: string) => {
+  try {
+    const hostname = new URL(url).hostname;
+    if (hostname.includes("discord.com") || hostname.includes("discord.gg")) return <img src="/discord-icon.svg" alt="Discord" style={{ width: 20, height: 20 }} />;
+    if (hostname.includes("x.com") || hostname.includes("twitter.com")) return <XIcon />;
+    if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return <YouTubeIcon color="error" />;
+    if (hostname.includes("github.com")) return <GitHubIcon />;
+    if (hostname.includes("modrinth.com")) return <img src="https://modrinth.com/favicon.ico" alt="Modrinth" style={{ width: 16, height: 16 }} />;
+    if (hostname.includes("curseforge.com")) return <img src="https://www.curseforge.com/favicon.ico" alt="CurseForge" style={{ width: 16, height: 16 }} />;
+  } catch {
+    // 無効なURLなどの場合はフォールバックアイコンへ移行
+  }
+  return <LanguageIcon />;
+};
+
+/**
+ * プロジェクト詳細ページのサイドバーコンポーネント。
+ * ライセンス、ソースコード、カスタム外部リンク、関連タグ、及び通報ダイアログへの導線を表示します。
+ */
+const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) => {
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
 
@@ -143,7 +145,7 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
             {t("sidebar.tags")}
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
-            {p.tags.map((tag: string) => (
+            {p.tags.map((tag) => (
               <Link key={tag} href={`/projects?tags=${encodeURIComponent(tag)}`} prefetch={false} style={{ textDecoration: "none" }}>
                 <Chip
                   label={getTagLabel(tag)}
@@ -166,4 +168,6 @@ export default function ProjectSidebar({ project: p, isAuthenticated }: ProjectS
       )}
     </Box>
   );
-}
+};
+
+export default ProjectSidebar;
