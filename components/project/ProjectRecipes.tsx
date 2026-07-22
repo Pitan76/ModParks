@@ -61,7 +61,7 @@ export default async function ProjectRecipes({ projectSlug, namespaces }: Projec
   if (recipes.length === 0) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography color="text.secondary">{t("noRecipes", { defaultValue: "レシピが見つかりません。" })}</Typography>
+        <Typography color="text.secondary">{t("noRecipes")}</Typography>
       </Box>
     );
   }
@@ -70,9 +70,9 @@ export default async function ProjectRecipes({ projectSlug, namespaces }: Projec
     <ProjectRecipesGrid
       recipes={recipes}
       labels={{
-        search: t("searchRecipes", { defaultValue: "レシピを検索" }),
-        noMatch: t("noRecipeMatch", { defaultValue: "一致するレシピがありません。" }),
-        showMore: t("showMore", { defaultValue: "もっと見る" }),
+        search: t("searchRecipes"),
+        noMatch: t("noRecipeMatch"),
+        showMore: t("showMore"),
       }}
     />
   );

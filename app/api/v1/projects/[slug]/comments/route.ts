@@ -72,7 +72,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       }
     }
 
-    const format = ["markdown", "plaintext", "pukiwiki"].includes(contentFormat || "") ? contentFormat : "markdown";
+    const format = (["markdown", "plaintext", "pukiwiki"].includes(contentFormat || "") ? contentFormat : "markdown") as "markdown" | "plaintext" | "pukiwiki";
     const newCommentId = createId();
     await db.insert(projectComments).values({
       id: newCommentId,

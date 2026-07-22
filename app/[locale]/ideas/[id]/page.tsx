@@ -76,6 +76,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
   setRequestLocale(locale);
   const tIdea = await getTranslations("Idea");
   const tNav = await getTranslations("Nav");
+  const tComment = await getTranslations("Comment");
   const session = await auth();
 
   const d1 = await getD1();
@@ -338,11 +339,11 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
         ) : (
           <>
             <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>
-              {tIdea("comments", { count: comments.length })}
+              {tComment("titleWithCount", { count: comments.length })}
             </Typography>
             <Box sx={{ p: 3, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider", mb: 4 }}>
               <Typography color="text.secondary">
-                {tIdea("loginToComment")}
+                {tComment("loginPrompt")}
               </Typography>
             </Box>
           </>
@@ -384,7 +385,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             );
           })}
           {comments.length === 0 && (
-            <Typography color="text.secondary">{tIdea("noComments")}</Typography>
+            <Typography color="text.secondary">{tComment("empty")}</Typography>
           )}
         </Box>
       </Box>

@@ -333,7 +333,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
                     {format.dateTime(v.date, { dateStyle: "short", timeStyle: "short" })}
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title={t("manager.extractRecipes", { defaultValue: "レシピを抽出" })}>
+                    <Tooltip title={t("manager.extractRecipes")}>
                       <span>
                         <IconButton 
                           color="secondary" 
@@ -417,7 +417,7 @@ export default function ProjectVersionsManager({ projectSlug, versions: initialV
 
           {isExternalEdit && (
             <FormTextField
-              label={t("fields.fileUrl", { defaultValue: "ファイル URL (外部リンク)" })}
+              label={t("fields.fileUrl")}
               value={editFileUrl}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditFileUrl(e.target.value)}
               fullWidth

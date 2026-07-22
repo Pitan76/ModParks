@@ -19,6 +19,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useTranslations } from "next-intl";
 import { updateIdea, deleteIdea } from "@/lib/actions/idea";
 
 interface IdeaOwnerActionsProps {
@@ -38,6 +39,8 @@ export default function IdeaOwnerActions({
   initialVisibility,
 }: IdeaOwnerActionsProps) {
   const router = useRouter();
+  const tCommon = useTranslations("Common");
+  const tIdea = useTranslations("Idea");
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -71,10 +74,10 @@ export default function IdeaOwnerActions({
   return (
     <>
       <Box sx={{ display: "flex", gap: 0.5 }}>
-        <IconButton size="small" aria-label="編集" onClick={() => setEditOpen(true)}>
+        <IconButton size="small" aria-label={tCommon("edit")} onClick={() => setEditOpen(true)}>
           <EditIcon fontSize="small" />
         </IconButton>
-        <IconButton size="small" aria-label="削除" color="error" onClick={() => setDeleteOpen(true)}>
+        <IconButton size="small" aria-label={tCommon("delete")} color="error" onClick={() => setDeleteOpen(true)}>
           <DeleteIcon fontSize="small" />
         </IconButton>
       </Box>
@@ -82,7 +85,7 @@ export default function IdeaOwnerActions({
       {/* 編集ダイアログ */}
       <Dialog open={editOpen} onClose={() => !pending && setEditOpen(false)} maxWidth="sm" fullWidth>
         <form onSubmit={handleEdit}>
-          <DialogTitle>アイデアを編集</DialogTitle>
+          <DialogTitle>{tIdea("editModal.title")}</DialogTitle>
           <DialogContent>
             <Stack spacing={3} sx={{ mt: 1 }}>
               {error?.server && (
@@ -90,7 +93,7 @@ export default function IdeaOwnerActions({
               )}
               <TextField
                 name="title"
-                label="タイトル"
+                label={tIdea("fields.title")}
                 defaultValue={initialTitle}
                 fullWidth
                 required
@@ -101,7 +104,7 @@ export default function IdeaOwnerActions({
               />
               <TextField
                 name="content"
-                label="内容"
+                label={tIdea("fields.content")}
                 defaultValue={initialContent}
                 fullWidth
                 required
@@ -112,28 +115,28 @@ export default function IdeaOwnerActions({
                 disabled={pending}
               />
               <FormControl fullWidth size="small">
-                <InputLabel>形式</InputLabel>
-                <Select name="contentFormat" label="形式" defaultValue={initialContentFormat} disabled={pending}>
-                  <MenuItem value="markdown">Markdown</MenuItem>
-                  <MenuItem value="plaintext">Plain Text</MenuItem>
-                  <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+                <InputLabel>{tCommon("format")}</InputLabel>
+                <Select name="contentFormat" label={tCommon("format")} defaultValue={initialContentFormat} disabled={pending}>
+                  <MenuItem value="markdown">{tCommon("formatOptions.markdown")}</MenuItem>
+                  <MenuItem value="plaintext">{tCommon("formatOptions.plaintext")}</MenuItem>
+                  <MenuItem value="pukiwiki">{tCommon("formatOptions.pukiwiki")}</MenuItem>
                 </Select>
               </FormControl>
               <FormControl fullWidth size="small">
-                <InputLabel>公開範囲</InputLabel>
-                <Select name="visibility" label="公開範囲" defaultValue={initialVisibility} disabled={pending}>
-                  <MenuItem value="public">公開</MenuItem>
-                  <MenuItem value="unlisted">限定公開</MenuItem>
-                  <MenuItem value="private">非公開</MenuItem>
-                  <MenuItem value="draft">下書き</MenuItem>
+                <InputLabel>{tIdea("fields.visibility")}</InputLabel>
+                <Select name="visibility" label={tIdea("fields.visibility")} defaultValue={initialVisibility} disabled={pending}>
+                  <MenuItem value="public">{tCommon("visibility.public")}</MenuItem>
+                  <MenuItem value="unlisted">{tCommon("visibility.unlisted")}</MenuItem>
+                  <MenuItem value="private">{tCommon("visibility.private")}</MenuItem>
+                  <MenuItem value="draft">{tCommon("visibility.draft")}</MenuItem>
                 </Select>
               </FormControl>
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setEditOpen(false)} disabled={pending}>キャンセル</Button>
+            <Button onClick={() => setEditOpen(false)} disabled={pending}>{tCommon("cancel")}</Button>
             <Button type="submit" variant="contained" disabled={pending}>
-              {pending ? "保存中..." : "保存"}
+              {pending ? tCommon("saving") : tCommon("save")}
             </Button>
           </DialogActions>
         </form>
@@ -141,16 +144,16 @@ export default function IdeaOwnerActions({
 
       {/* 削除確認ダイアログ */}
       <Dialog open={deleteOpen} onClose={() => !pending && setDeleteOpen(false)}>
-        <DialogTitle>アイデアを削除しますか？</DialogTitle>
+        <DialogTitle>{tIdea("editModal.deleteTitle")}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
-            この操作は取り消せません。関連するコメントやいいねもすべて削除されます。
+            {tIdea("editModal.deleteConfirmDesc")}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteOpen(false)} disabled={pending}>キャンセル</Button>
+          <Button onClick={() => setDeleteOpen(false)} disabled={pending}>{tCommon("cancel")}</Button>
           <Button onClick={handleDelete} color="error" variant="contained" disabled={pending}>
-            {pending ? "削除中..." : "削除"}
+            {pending ? tCommon("saving") : tCommon("delete")}
           </Button>
         </DialogActions>
       </Dialog>

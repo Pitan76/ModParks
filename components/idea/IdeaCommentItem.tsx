@@ -38,7 +38,7 @@ interface IdeaCommentItemProps extends IdeaCommentData {
 
 export default function IdeaCommentItem(props: IdeaCommentItemProps) {
   const { id, content, contentFormat, createdAt, updatedAt, authorName, authorAvatar, authorUsername, canEdit, canDelete, ideaId, isLoggedIn, replies = [] } = props;
-  const t = useTranslations("Project.comments");
+  const t = useTranslations("Comment");
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [replying, setReplying] = useState(false);

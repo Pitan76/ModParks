@@ -45,7 +45,27 @@
     "view": {
       "list": "リスト表示",
       "grid": "グリッド表示"
+    },
+    "format": "形式",
+    "formatOptions": {
+      "markdown": "Markdown",
+      "plaintext": "Plain Text",
+      "pukiwiki": "PukiWiki"
     }
+  },
+  "Comment": {
+    "title": "コメント",
+    "titleWithCount": "コメント ({count})",
+    "placeholder": "コメントを入力...",
+    "projectPlaceholder": "プロジェクトについてコメントする...",
+    "ideaPlaceholder": "アイデアについてコメントする...",
+    "submit": "投稿する",
+    "loginPrompt": "コメントするにはログインが必要です。",
+    "empty": "まだコメントはありません。",
+    "deleteConfirm": "このコメントを削除しますか？",
+    "reply": "返信",
+    "replyPlaceholder": "返信を入力...",
+    "cancel": "キャンセル"
   },
   "Ads": {
     "label": "広告",
@@ -278,6 +298,7 @@
       "success": "オーナー権限を譲渡しました。"
     },
     "goToManage": "プロジェクト管理画面へ",
+    "sourceIdeaTooltip": "このアイデアから生まれたプロジェクト",
     "manageTitle": "プロジェクト管理",
     "manageDescription": "あなたのすべてのプロジェクトを管理し、ステータス変更や一括削除などの操作を行えます。",
     "batchImport": "一括インポート",
@@ -465,8 +486,15 @@
     "resolvedBy": "このアイデアを実現したMOD",
     "viewProject": "プロジェクトを見る",
     "comments": "コメント ({count})",
+    "commentTitle": "コメント",
+    "addCommentPlaceholder": "アイデアについてコメントする...",
     "loginToComment": "コメントするにはログインが必要です。",
     "noComments": "まだコメントはありません。",
+    "editModal": {
+      "title": "アイデアを編集",
+      "deleteTitle": "アイデアを削除しますか？",
+      "deleteConfirmDesc": "この操作は取り消せません。関連するコメントやいいねもすべて削除されます。"
+    },
     "error": {
       "submitFailed": "アイデアの投稿に失敗しました",
       "likeFailed": "いいねの操作に失敗しました",
@@ -543,7 +571,8 @@
       "email": "メールアドレス",
       "password": "パスワード",
       "passwordWithRule": "パスワード (8文字以上)",
-      "twoFactorToken": "2FA トークン"
+      "twoFactorToken": "2FA トークン",
+      "passwordOrToken": "パスワードまたは認証コード"
     },
     "or": "または",
     "error": {

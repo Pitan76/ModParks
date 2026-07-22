@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import { useTranslations } from "next-intl";
 import AddToCollectionModal from "./AddToCollectionModal";
 
 interface AddToCollectionButtonProps {
@@ -14,12 +15,13 @@ interface AddToCollectionButtonProps {
 }
 
 export default function AddToCollectionButton({ projectId, userId, variant = "button" }: AddToCollectionButtonProps) {
+  const tList = useTranslations("List");
   const [open, setOpen] = useState(false);
 
   return (
     <>
       {variant === "icon" ? (
-        <Tooltip title="リストに保存">
+        <Tooltip title={tList("saveToList")}>
           <IconButton onClick={() => setOpen(true)} color="default">
             <PlaylistAddIcon />
           </IconButton>
@@ -33,7 +35,7 @@ export default function AddToCollectionButton({ projectId, userId, variant = "bu
           fullWidth
           sx={{ borderRadius: 2, height: "40px" }}
         >
-          リストに保存
+          {tList("saveToList")}
         </Button>
       )}
       {open && (

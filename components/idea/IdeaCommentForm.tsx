@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import CommentForm from "@/components/ui/CommentForm";
 
 export default function IdeaCommentForm({ ideaId, commentsCount }: { ideaId: string; commentsCount: number }) {
-  const tIdea = useTranslations("Idea");
+  const tComment = useTranslations("Comment");
   const tCommon = useTranslations("Common");
 
   const handleSubmit = async (content: string, format: string) => {
@@ -23,9 +23,9 @@ export default function IdeaCommentForm({ ideaId, commentsCount }: { ideaId: str
 
   return (
     <CommentForm
-      title={tIdea("comments", { count: commentsCount })}
-      placeholder={tIdea("addCommentPlaceholder")}
-      submitLabel={tCommon("submit")}
+      title={tComment("titleWithCount", { count: commentsCount })}
+      placeholder={tComment("ideaPlaceholder")}
+      submitLabel={tComment("submit")}
       onSubmit={handleSubmit}
     />
   );

@@ -79,16 +79,16 @@ export default function NewIdeaPage() {
               />
 
               <FormControl fullWidth size="small">
-                <InputLabel>形式</InputLabel>
+                <InputLabel>{tCommon("format")}</InputLabel>
                 <Select
                   name="contentFormat"
-                  label="形式"
+                  label={tCommon("format")}
                   defaultValue="markdown"
                   disabled={pending}
                 >
-                  <MenuItem value="markdown">Markdown</MenuItem>
-                  <MenuItem value="plaintext">Plain Text</MenuItem>
-                  <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+                  <MenuItem value="markdown">{tCommon("formatOptions.markdown")}</MenuItem>
+                  <MenuItem value="plaintext">{tCommon("formatOptions.plaintext")}</MenuItem>
+                  <MenuItem value="pukiwiki">{tCommon("formatOptions.pukiwiki")}</MenuItem>
                 </Select>
               </FormControl>
 

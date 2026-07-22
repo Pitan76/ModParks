@@ -33,7 +33,7 @@ interface Props {
 }
 
 export default function ProjectCommentItem({ comment, replies, isLoggedIn, currentUserId, onDelete, onReply }: Props) {
-  const t = useTranslations("Project.comments");
+  const t = useTranslations("Comment");
   const [replying, setReplying] = useState(false);
 
   return (

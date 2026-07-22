@@ -26,6 +26,7 @@ interface AccountTabProps {
 export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, setLocale }: AccountTabProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
+  const tAuth = useTranslations("Auth");
   const { message, flash } = useFlashMessage(4000);
 
   const [username, setUsername] = useState(user.username);
@@ -192,7 +193,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
           type="password"
           value={deletePasswordOrToken}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeletePasswordOrToken(e.target.value)}
-          placeholder="パスワードまたは認証コード"
+          placeholder={tAuth("fields.passwordOrToken")}
           disabled={isDeletingAccount}
           autoComplete="off"
         />

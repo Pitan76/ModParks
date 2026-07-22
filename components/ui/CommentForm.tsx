@@ -9,6 +9,7 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import { useTranslations } from "next-intl";
 
 interface CommentFormProps {
   title?: string;
@@ -27,7 +28,7 @@ export default function CommentForm({
   title,
   placeholder,
   submitLabel,
-  cancelLabel = "キャンセル",
+  cancelLabel,
   initialContent = "",
   initialFormat = "markdown",
   onSubmit,
@@ -35,6 +36,8 @@ export default function CommentForm({
   size = "medium",
   minRows = 3,
 }: CommentFormProps) {
+  const tCommon = useTranslations("Common");
+  const resolvedCancelLabel = cancelLabel ?? tCommon("cancel");
   const [pending, setPending] = useState(false);
   const [content, setContent] = useState(initialContent);
   const [contentFormat, setContentFormat] = useState(initialFormat);
@@ -57,24 +60,24 @@ export default function CommentForm({
   const isSmall = size === "small";
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: isSmall ? 1 : 2 }}>
-      <Box sx={{ display: "flex", justifyContent: title ? "space-between" : "flex-end", alignItems: "center", mb: title ? 3 : 0, flexWrap: "wrap", gap: 2 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: isSmall ? 1 : 1 }}>
+      <Box sx={{ display: "flex", justifyContent: title ? "space-between" : "flex-end", alignItems: "center", mb: 0, flexWrap: "wrap", gap: 2 }}>
         {title && (
           <Typography variant="h6" sx={{ fontWeight: 800 }}>
             {title}
           </Typography>
         )}
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>形式</InputLabel>
+          <InputLabel>{tCommon("format")}</InputLabel>
           <Select
             value={contentFormat}
-            label="形式"
+            label={tCommon("format")}
             onChange={(e) => setContentFormat(e.target.value)}
             disabled={pending}
           >
-            <MenuItem value="markdown">Markdown</MenuItem>
-            <MenuItem value="plaintext">Plain Text</MenuItem>
-            <MenuItem value="pukiwiki">PukiWiki</MenuItem>
+            <MenuItem value="markdown">{tCommon("formatOptions.markdown")}</MenuItem>
+            <MenuItem value="plaintext">{tCommon("formatOptions.plaintext")}</MenuItem>
+            <MenuItem value="pukiwiki">{tCommon("formatOptions.pukiwiki")}</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -97,7 +100,7 @@ export default function CommentForm({
             onClick={onCancel}
             disabled={pending}
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </Button>
         )}
         <Button 

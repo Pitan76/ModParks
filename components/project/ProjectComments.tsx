@@ -15,7 +15,7 @@ interface Props {
 }
 
 export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId }: Props) {
-  const t = useTranslations("Project.comments");
+  const t = useTranslations("Comment");
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,8 +68,8 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
     <Box sx={{ mt: 4 }}>
       {isLoggedIn ? (
         <CommentForm
-          title={`${t("title")} (${comments.length})`}
-          placeholder={t("placeholder")}
+          title={t("titleWithCount", { count: comments.length })}
+          placeholder={t("projectPlaceholder")}
           submitLabel={t("submit")}
           onSubmit={async (content, format) => {
             await postComment(content, undefined, format);
@@ -79,7 +79,7 @@ export default function ProjectComments({ projectSlug, isLoggedIn, currentUserId
         <>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 2 }}>
             <Typography variant="h6" sx={{ fontWeight: 800 }}>
-              {t("title")} ({comments.length})
+              {t("titleWithCount", { count: comments.length })}
             </Typography>
           </Box>
           <Box sx={{ p: 3, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider", mb: 4 }}>

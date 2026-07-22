@@ -45,7 +45,27 @@
     "view": {
       "list": "List view",
       "grid": "Grid view"
+    },
+    "format": "Format",
+    "formatOptions": {
+      "markdown": "Markdown",
+      "plaintext": "Plain Text",
+      "pukiwiki": "PukiWiki"
     }
+  },
+  "Comment": {
+    "title": "Comments",
+    "titleWithCount": "Comments ({count})",
+    "placeholder": "Write a comment...",
+    "projectPlaceholder": "Comment on this project...",
+    "ideaPlaceholder": "Comment on this idea...",
+    "submit": "Submit",
+    "loginPrompt": "Please sign in to comment.",
+    "empty": "No comments yet.",
+    "deleteConfirm": "Are you sure you want to delete this comment?",
+    "reply": "Reply",
+    "replyPlaceholder": "Write a reply...",
+    "cancel": "Cancel"
   },
   "Ads": {
     "label": "Advertisement",
@@ -271,7 +291,8 @@
       "confirm": "Are you sure you want to transfer ownership of this project?\nThis action cannot be undone. After transferring, you will no longer be the owner of this project.",
       "success": "Project ownership transferred successfully."
     },
-    "goToManage": "Go to Management",
+    "goToManage": "Go to Project Management",
+    "sourceIdeaTooltip": "Project created from this idea",
     "manageTitle": "Manage Projects",
     "manageDescription": "Manage all your projects — change status, bulk delete, and more.",
     "batchImport": "Bulk Import",
@@ -462,8 +483,15 @@
     "resolvedBy": "Mod that resolved this idea",
     "viewProject": "View Project",
     "comments": "Comments ({count})",
+    "commentTitle": "Comments",
+    "addCommentPlaceholder": "Comment on this idea...",
     "loginToComment": "You must be logged in to comment.",
     "noComments": "No comments yet.",
+    "editModal": {
+      "title": "Edit Idea",
+      "deleteTitle": "Delete Idea?",
+      "deleteConfirmDesc": "This action cannot be undone. All related comments and likes will also be deleted."
+    },
     "createProject": "Create Project"
   },
   "Auth": {
@@ -535,7 +563,8 @@
       "email": "Email Address",
       "password": "Password",
       "passwordWithRule": "Password (8+ characters)",
-      "twoFactorToken": "2FA Token"
+      "twoFactorToken": "2FA Token",
+      "passwordOrToken": "Password or authentication code"
     },
     "or": "or",
     "error": {

@@ -112,7 +112,7 @@ export default function ProjectDetailHeader({
               />
             )}
             {p.sourceIdeaId && p.sourceIdeaTitle && (
-              <Tooltip title="このアイデアから生まれたプロジェクト">
+              <Tooltip title={tProject("sourceIdeaTooltip")}>
                 <LinkButton
                   href={`/ideas/${p.sourceIdeaId}`}
                   variant="outlined"
