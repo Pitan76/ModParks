@@ -57,10 +57,8 @@ export default function CommentForm({
     }
   };
 
-  const isSmall = size === "small";
-
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: isSmall ? 1 : 1 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
       <Box sx={{ display: "flex", justifyContent: title ? "space-between" : "flex-end", alignItems: "center", mb: 0, flexWrap: "wrap", gap: 2 }}>
         {title && (
           <Typography variant="h6" sx={{ fontWeight: 800 }}>

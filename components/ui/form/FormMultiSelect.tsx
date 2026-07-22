@@ -48,7 +48,7 @@ export default function FormMultiSelect({
     >
       {label && <InputLabel id={labelId}>{label}</InputLabel>}
       <Select
-        labelId={label ? labelId : undefined}
+        labelId={labelId}
         id={id}
         multiple
         value={currentValues}

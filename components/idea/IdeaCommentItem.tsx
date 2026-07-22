@@ -89,7 +89,7 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
         </Box>
 
         {editing ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <>
             <CommentForm
               initialContent={content}
               initialFormat={contentFormat || "markdown"}
@@ -102,11 +102,11 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
               minRows={2}
             />
             {error && (
-              <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+              <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
                 {error}
               </Typography>
             )}
-          </Box>
+          </>
         ) : (
           <Box sx={{ mt: 0.5 }}>
             <DescriptionRenderer content={content} format={contentFormat} />

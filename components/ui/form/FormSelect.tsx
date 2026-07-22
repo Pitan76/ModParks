@@ -36,7 +36,7 @@ export default function FormSelect({
     >
       {label && <InputLabel id={labelId}>{label}</InputLabel>}
       <Select
-        labelId={label ? labelId : undefined}
+        labelId={labelId}
         id={id}
         label={label}
         {...props}
