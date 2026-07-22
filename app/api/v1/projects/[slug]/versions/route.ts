@@ -8,7 +8,7 @@ import { createVersionSchema, isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { buildR2Key, getR2PublicUrl, uploadToR2 } from "@/lib/r2";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { extractAndUploadRecipes } from "@/lib/utils/recipe";
+import { extractRecipes } from "@/lib/services/jar";
 import { revalidatePath } from "next/cache";
 import { withPublicCache } from "@/lib/http/cache";
 
@@ -155,36 +155,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       fileName = file.name;
       fileSize = file.size;
 
-      const extractRecipes = formData.get("extractRecipes") === "true";
-      if (extractRecipes && (file.name.endsWith(".jar") || file.name.endsWith(".zip"))) {
+      const shouldExtract = formData.get("extractRecipes") === "true";
+      if (shouldExtract && (file.name.endsWith(".jar") || file.name.endsWith(".zip"))) {
         try {
-          // Resolve environment variables for the CDN
-          let cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
-          let cdnSecret = process.env.RECIPE_CDN_SECRET || "";
-
-          if (!cdnSecret) {
-            // Try to get from cloudflare context if not in process.env
-            try {
-              const { env } = await getCloudflareContext({ async: true });
-              if ((env as any).RECIPE_CDN_SECRET) {
-                cdnSecret = (env as any).RECIPE_CDN_SECRET;
-              }
-            } catch (e) {
-              // ignore
-            }
-          }
-
+          const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
           const useCdnApi = process.env.USE_RECIPE_CDN_API === "true";
 
-          const uploadedCount = await extractAndUploadRecipes(
-            arrayBuffer,
-            cdnUrl,
-            cdnSecret,
-            useCdnApi,
-            R2
-          );
-          
-          console.log(`Extracted and uploaded ${uploadedCount} recipe/tag/texture files (CDN API: ${useCdnApi}).`);
+          // 直前に R2 へ置いたので、バイト列ではなくキーを渡して Worker に読ませる
+          const { count } = await extractRecipes({ kind: "r2", key }, cdnUrl, useCdnApi);
+
+          console.log(`Extracted and uploaded ${count} recipe/tag/texture files (CDN API: ${useCdnApi}).`);
         } catch (zipErr) {
           console.error("Failed to extract recipes from jar:", zipErr);
           // Don't fail the whole upload if recipe extraction fails

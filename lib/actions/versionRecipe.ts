@@ -4,6 +4,7 @@ import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { versions, projects } from "@/db/schema";
 import { getR2KeyFromUrl } from "@/lib/r2";
 import { isAllowedExternalUrl } from "@/lib/validations";
+import { extractRecipes, type JarSource } from "@/lib/services/jar";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -34,51 +35,20 @@ export const extractRecipesFromVersion = async (versionId: string, projectSlug: 
   if (!version.fileUrl) return { error: "No file URL associated with this version" };
 
   const r2Key = getR2KeyFromUrl(version.fileUrl);
-  let arrayBuffer: ArrayBuffer;
-  let R2 = null;
+  if (!r2Key && !isAllowedExternalUrl(version.fileUrl)) {
+    return { error: "Cannot extract recipes from this external URL domain." };
+  }
+
+  // ファイルの取得も解析も modparks-jar Worker 側で行う（jszip を本体に載せないため）
+  const source: JarSource = r2Key
+    ? { kind: "r2", key: r2Key }
+    : { kind: "url", url: version.fileUrl };
 
   try {
-    const { getR2Bucket } = await import("@/lib/r2");
-    R2 = await getR2Bucket();
-
-    if (r2Key) {
-      const object = await R2.get(r2Key);
-      if (!object) return { error: "File not found in R2." };
-      arrayBuffer = await object.arrayBuffer();
-    } else {
-      if (!isAllowedExternalUrl(version.fileUrl)) {
-        return { error: "Cannot extract recipes from this external URL domain." };
-      }
-      const res = await fetch(version.fileUrl);
-      if (!res.ok) return { error: `Failed to download file from external URL: ${res.statusText}` };
-      arrayBuffer = await res.arrayBuffer();
-    }
-
     const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
-    let cdnSecret = process.env.RECIPE_CDN_SECRET;
-    
-    if (!cdnSecret) {
-      try {
-        if (process.env.NODE_ENV !== "development") {
-          const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-          const { env } = await getCloudflareContext({ async: true });
-          if ((env as any).RECIPE_CDN_SECRET) {
-            cdnSecret = (env as any).RECIPE_CDN_SECRET;
-          }
-        }
-      } catch (e) {}
-    }
-
     const useCdnApi = process.env.USE_RECIPE_CDN_API === "true";
-    const { extractAndUploadRecipes } = await import("@/lib/utils/recipe");
 
-    const { count: extractedCount, namespaces } = await extractAndUploadRecipes(
-      arrayBuffer,
-      cdnUrl,
-      cdnSecret,
-      useCdnApi,
-      R2
-    );
+    const { count: extractedCount, namespaces } = await extractRecipes(source, cdnUrl, useCdnApi);
 
     if (namespaces.length > 0) {
       const existing = Array.isArray(project.recipeNamespaces) ? project.recipeNamespaces : [];

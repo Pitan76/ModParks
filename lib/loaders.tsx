@@ -1,6 +1,7 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Image from "next/image";
+import { LOADERS_DATA, AVAILABLE_LOADERS, type LoaderColor } from "@/lib/data/loaderIds";
 
 /** ローダーアイコンの共通スタイル */
 const LOADER_ICON_STYLE = { objectFit: "contain" as const, borderRadius: "2px" };
@@ -27,22 +28,9 @@ LoaderIcon.displayName = "LoaderIcon";
 export interface LoaderInfo {
   id: string;
   name: string;
-  color: "default" | "primary" | "secondary" | "warning" | "error" | "info" | "success";
+  color: LoaderColor;
   icon?: React.ReactElement;
 }
-
-/** ローダー定義データ（アイコンは遅延生成） */
-const LOADERS_DATA: { id: string; name: string; color: LoaderInfo["color"] }[] = [
-  { id: "fabric",    name: "Fabric",    color: "primary"   },
-  { id: "forge",     name: "Forge",     color: "warning"   },
-  { id: "neoforge",  name: "NeoForge",  color: "warning"   },
-  { id: "quilt",     name: "Quilt",     color: "secondary" },
-  { id: "spigot",    name: "Spigot",    color: "default"   },
-  { id: "paper",     name: "Paper",     color: "default"   },
-  { id: "purpur",    name: "Purpur",    color: "default"   },
-  { id: "velocity",  name: "Velocity",  color: "info"      },
-  { id: "waterfall", name: "Waterfall", color: "info"      },
-];
 
 export const LOADERS_MAP: Record<string, LoaderInfo> = Object.fromEntries(
   LOADERS_DATA.map(({ id, name, color }) => [
@@ -51,7 +39,7 @@ export const LOADERS_MAP: Record<string, LoaderInfo> = Object.fromEntries(
   ])
 );
 
-export const AVAILABLE_LOADERS = Object.keys(LOADERS_MAP);
+export { AVAILABLE_LOADERS };
 
 export const getLoaderInfo = (id: string): LoaderInfo => {
   const normalizedId = id.toLowerCase();

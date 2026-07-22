@@ -1,8 +1,10 @@
 import JSZip from "jszip";
 import { parse as parseToml } from "smol-toml";
 import semver from "semver";
-import { MC_VERSIONS } from "@/lib/validations";
-import { AVAILABLE_LOADERS } from "@/lib/loaders";
+// 純粋データ側を参照する。@/lib/loaders 経由だと MUI/React が
+// この解析コードのバンドルに巻き込まれるため。
+import { MC_VERSIONS } from "@/lib/data/minecraftVersions";
+import { AVAILABLE_LOADERS } from "@/lib/data/loaderIds";
 
 export interface ParsedModInfo {
   detectedVersion: string;

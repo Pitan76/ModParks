@@ -10,7 +10,7 @@ import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2 } from "@/lib/r2";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { channelFromGithubPrerelease } from "@/lib/releaseChannels";
-import { parseModJar } from "@/lib/utils/modParser";
+import { parseModJar } from "@/lib/services/jar";
 import {
   fetchGithubReleases,
   fetchLatestGithubRelease,
@@ -105,7 +105,8 @@ export async function importGithubReleaseSystem(
 
   let parsed = { detectedVersion: "", detectedLoaders: [] as string[], detectedMcVersions: [] as string[] };
   try {
-    parsed = await parseModJar(arrayBuffer);
+    // Service Binding 越しに巨大なバイト列を渡さず、URL を渡して Worker 側に取得させる
+    parsed = await parseModJar({ kind: "url", url: asset.browser_download_url });
   } catch {
     // 解析失敗時はタグ名などのフォールバックで続行
   }

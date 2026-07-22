@@ -23,6 +23,11 @@ migrations_dir = "drizzle"
 binding = "SETTINGS_KV"
 id = "75c45e724c144cc18b629dd2dca50a7e"
 
+# JAR 解析サイドカー。jszip はこちらにのみ存在する（本体の 3 MiB 制限対策）
+[[services]]
+binding = "JAR"
+service = "modparks-jar"
+
 [[r2_buckets]]
 bucket_name = "modparks-storage"
 binding = "modparks_storage"
