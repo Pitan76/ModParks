@@ -1,0 +1,14 @@
+name = "modparks-jar"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Service Binding 経由でのみ到達させる。公開URLを持たせない。
+workers_dev = false
+
+# メインアプリと同一バケット（レシピ/テクスチャの書き込み先）
+[[r2_buckets]]
+binding = "modparks_storage"
+bucket_name = "modparks-storage"
+
+# RECIPE_CDN_SECRET は `wrangler secret put RECIPE_CDN_SECRET` で設定する
