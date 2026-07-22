@@ -9,7 +9,7 @@ import HomeProjectList from "@/components/project/HomeProjectList";
 import HomeHero from "@/components/layout/HomeHero";
 import AdSlot from "@/components/ads/AdSlot";
 
-import { getProjects } from "@/lib/actions/project";
+import { getProjects } from "@/lib/actions/projectQuery";
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;

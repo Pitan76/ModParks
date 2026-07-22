@@ -1,5 +1,3 @@
-"use server";
-
 import { getDatabase } from "@/lib/db";
 import { projects, projectTags, users, userProfiles, versions, ideas } from "@/db/schema";
 import { eq, desc, and, or, sql, isNull, getTableColumns } from "drizzle-orm";

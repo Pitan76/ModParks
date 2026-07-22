@@ -6,7 +6,7 @@ import { Link } from "@/i18n/routing";
 import { notFound, redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
-import { getProjectBySlug } from "@/lib/actions/project";
+import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import ProjectEditForm from "@/components/project/ProjectEditForm";
 import ProjectMembersManager from "@/components/project/ProjectMembersManager";
 import ProjectOwnershipTransfer from "@/components/project/ProjectOwnershipTransfer";

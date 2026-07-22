@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
-import { getProjectBySlug } from "@/lib/actions/project";
-import { getVersionById } from "@/lib/actions/version";
+import { getProjectBySlug } from "@/lib/actions/projectQuery";
+import { getVersionById } from "@/lib/actions/versionQuery";
 import { getProjectMembers } from "@/lib/actions/member";
 import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";

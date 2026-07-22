@@ -1,5 +1,3 @@
-"use server";
-
 import { getDatabase } from "@/lib/db";
 import { versions } from "@/db/schema";
 import { eq } from "drizzle-orm";

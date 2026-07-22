@@ -6,15 +6,6 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
 
-export {
-  changeUsername,
-  changeEmail,
-  changePassword,
-  deleteAccount,
-  generateTotpSecret,
-  verifyAndEnableTotp,
-  disableTotp,
-} from "./settingsSecurity";
 
 /**
  * プロフィール情報（表示名、Bio、アバターURL、リンク、使用言語）を更新する Server Action。

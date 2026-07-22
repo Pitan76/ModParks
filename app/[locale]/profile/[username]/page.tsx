@@ -16,7 +16,7 @@ import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import ProjectCardList from "@/components/project/ProjectCardList";
 import ProfileSortSelect from "@/components/profile/ProfileSortSelect";
-import { getProjects } from "@/lib/actions/project";
+import { getProjects } from "@/lib/actions/projectQuery";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
 import { getUserCollections } from "@/lib/actions/collection";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -193,7 +193,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
     getProjects({ authorId: user.id, limit, offset, sort: sort as any, calculateTotal: true }),
     getFavoriteProjects(user.id),
     getUserCollections(user.id, session?.user?.id),
-    import("@/lib/actions/project").then(m => m.getUserProjectStats(user.id))
+    import("@/lib/actions/projectQuery").then(m => m.getUserProjectStats(user.id))
   ]);
   const visibleProjects = allProjects.filter(p => isOwner ? true : p.status === "public");
 

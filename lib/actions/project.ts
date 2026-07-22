@@ -10,9 +10,6 @@ import { redirect } from "next/navigation";
 import { notifyNewProject } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 
-export { getProjects, getProjectBySlug, getUserProjectStats } from "./projectQuery";
-export { syncExternalProjectDataSystem, syncExternalProjectData } from "./projectSync";
-
 type PublishProject = {
   slug: string;
   name: string;

@@ -2,16 +2,8 @@
 
 import { getAdminDb, getReauthenticatedAdminDb } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
-import {
-  dumpToR2,
-  getActor,
-  importBackupData,
-  loadBackupTables,
-  writeAuditLog,
-} from "@/lib/backup/core";
+import { dumpToR2, getActor, importBackupData, loadBackupTables, writeAuditLog } from "@/lib/backup/core";
 import { loadBackupFromR2 } from "./adminBackupQuery";
-
-export { getBackups, getEncryptionStatus, planMergeFromBackup, planMergeFromJson } from "./adminBackupQuery";
 
 export type ActionError = { success: false; error: string; message: string };
 

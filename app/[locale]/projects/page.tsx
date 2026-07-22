@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import ProjectCardList from "@/components/project/ProjectCardList";
 import LinkButton from "@/components/ui/LinkButton";
 import ProjectSearchBar from "@/components/project/ProjectSearchBar";
-import { getProjects } from "@/lib/actions/project";
+import { getProjects } from "@/lib/actions/projectQuery";
 import { auth } from "@/lib/auth";
 import PaginationControls from "@/components/ui/PaginationControls";
 import AdSlot from "@/components/ads/AdSlot";

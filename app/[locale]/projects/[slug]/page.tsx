@@ -10,7 +10,7 @@ import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { projectFavorites, projectSubscriptions } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import { getProjectBySlug } from "@/lib/actions/project";
+import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectSidebar from "@/components/project/ProjectSidebar";

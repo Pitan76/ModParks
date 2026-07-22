@@ -13,9 +13,6 @@ import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 
-export { getVersionById } from "./versionQuery";
-export { extractRecipesFromVersion } from "./versionRecipe";
-
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
  */

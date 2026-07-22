@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getDatabase } from "@/lib/db";
-import { getUserProjectStats } from "@/lib/actions/project";
+import { getUserProjectStats } from "@/lib/actions/projectQuery";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";

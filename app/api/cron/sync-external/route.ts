@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { projects, userSettings } from "@/db/schema";
 import { eq, isNotNull, or } from "drizzle-orm";
-import { syncExternalProjectDataSystem } from "@/lib/actions/project";
+import { syncExternalProjectDataSystem } from "@/lib/actions/projectSync";
 
 export const dynamic = "force-dynamic";
 

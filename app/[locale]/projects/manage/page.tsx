@@ -7,7 +7,7 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import AddIcon from "@mui/icons-material/Add";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
-import { getProjects } from "@/lib/actions/project";
+import { getProjects } from "@/lib/actions/projectQuery";
 import LinkButton from "@/components/ui/LinkButton";
 import BatchProjectOperationsClient from "@/components/project/BatchProjectOperationsClient";
 
