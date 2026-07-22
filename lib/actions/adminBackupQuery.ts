@@ -1,3 +1,5 @@
+"use server";
+
 import { getAdminDb } from "@/lib/auth-helpers";
 
 /**

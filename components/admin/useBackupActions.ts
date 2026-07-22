@@ -8,12 +8,14 @@ import {
   restoreBackup,
   restoreBackupFromJson,
   createPreRestoreSnapshot,
-  getEncryptionStatus,
   sendBackupToDrive,
-  planMergeFromBackup,
   applyMergeFromBackup,
-  getBackups
 } from "@/lib/actions/adminBackup";
+import {
+  getEncryptionStatus,
+  planMergeFromBackup,
+  getBackups,
+} from "@/lib/actions/adminBackupQuery";
 import type { MergePlan } from "@/lib/backup/merge";
 
 type Backup = {
