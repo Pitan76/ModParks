@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import type { ChangeEvent } from "react";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
@@ -17,19 +18,29 @@ import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { getUserCollectionsWithProjectStatus, toggleProjectInCollection, createCollection } from "@/lib/actions/collection";
 
-interface AddToCollectionModalProps {
+export type AddToCollectionModalProps = {
   open: boolean;
   onClose: () => void;
   projectId: string;
   userId: string;
-}
+};
 
-export default function AddToCollectionModal({ open, onClose, projectId, userId }: AddToCollectionModalProps) {
-  const tProject = useTranslations("Project"); // fallback translations
+type CollectionItem = {
+  id: string;
+  name: string;
+  containsProject: boolean;
+  visibility: string;
+};
+
+/**
+ * プロジェクトをユーザーのコレクション（ブックマークリスト）に保存・整理するためのモーダルコンポーネント。
+ */
+const AddToCollectionModal = ({ open, onClose, projectId, userId }: AddToCollectionModalProps) => {
+  const tProject = useTranslations("Project");
   const tList = useTranslations("List");
   const tCommon = useTranslations("Common");
   
-  const [collections, setCollections] = useState<any[]>([]);
+  const [collections, setCollections] = useState<CollectionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
   const [creating, setCreating] = useState(false);
@@ -42,7 +53,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
       setCreating(false);
       setNewCollectionName("");
       getUserCollectionsWithProjectStatus(userId, projectId).then(data => {
-        setCollections(data);
+        setCollections(data as CollectionItem[]);
         setLoading(false);
       }).catch(err => {
         console.error(err);
@@ -80,7 +91,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
           await toggleProjectInCollection(result.id, projectId);
           // Refresh list
           const data = await getUserCollectionsWithProjectStatus(userId, projectId);
-          setCollections(data);
+          setCollections(data as CollectionItem[]);
           setCreating(false);
           setNewCollectionName("");
         }
@@ -157,7 +168,7 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
               size="small"
               fullWidth
               value={newCollectionName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCollectionName(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNewCollectionName(e.target.value)}
               sx={{ mb: 2 }}
               disabled={isPending}
             />
@@ -186,4 +197,6 @@ export default function AddToCollectionModal({ open, onClose, projectId, userId 
       </Box>
     </AbstractDialog>
   );
-}
+};
+
+export default AddToCollectionModal;

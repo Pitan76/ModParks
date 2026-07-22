@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
@@ -23,22 +24,24 @@ import { Link } from "@/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/project";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 
-interface ProjectForManagement {
+type ProjectForManagement = {
   id: string;
   slug: string;
   name: string;
   type: string;
   status: string;
   downloads: number | null;
-  // externalDownloads は JSON オブジェクトのため合算には集計済みの totalDownloads を使う
   totalDownloads: number | null;
-}
+};
 
-interface BatchProjectOperationsClientProps {
+export type BatchProjectOperationsClientProps = {
   projects: ProjectForManagement[];
-}
+};
 
-export default function BatchProjectOperationsClient({ projects }: BatchProjectOperationsClientProps) {
+/**
+ * 管理画面で複数プロジェクトの一括公開ステータス変更、または一括削除操作を提供するクライアントコンポーネント。
+ */
+const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClientProps) => {
   const router = useRouter();
   const t = useTranslations("Project.batch");
   const tCommon = useTranslations("Common");
@@ -47,7 +50,6 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
-  // Menu state for status change
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleToggle = (id: string) => {
@@ -65,7 +67,7 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
     }
   };
 
-  const handleStatusClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleStatusClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -84,8 +86,8 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
       await batchUpdateProjectStatus(ids, status);
       setSelected(new Set());
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || t("statusUpdateError"));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("statusUpdateError"));
     } finally {
       setLoading(false);
     }
@@ -102,8 +104,8 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
       setSelected(new Set());
       setDeleteDialogOpen(false);
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || t("deleteError"));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("deleteError"));
     } finally {
       setLoading(false);
     }
@@ -223,4 +225,6 @@ export default function BatchProjectOperationsClient({ projects }: BatchProjectO
       />
     </Box>
   );
-}
+};
+
+export default BatchProjectOperationsClient;

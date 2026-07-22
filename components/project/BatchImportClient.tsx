@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ChangeEvent } from "react";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -15,31 +16,26 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import { fetchModrinthProjects, fetchCurseForgeProjects, importProjects, ImportedProject } from "@/lib/actions/import";
+import { fetchModrinthProjects, fetchCurseForgeProjects, importProjects } from "@/lib/actions/import";
+import type { ImportedProject } from "@/lib/actions/import";
 
-interface BatchImportClientProps {
+export type BatchImportClientProps = {
   hasModrinthKey: boolean;
   hasCurseForgeKey: boolean;
   hasCurseForgeProject: boolean;
-}
+};
+
+const toDisplayError = (err: unknown, fallback: string): string => {
+  const raw = err instanceof Error ? err.message : String(err);
+  if (raw.includes("Failed to find Server Action")) return "新しいバージョンが公開されたようです。ページを再読み込みしてからもう一度お試しください。";
+  if (raw.includes("Server Components render") || raw.includes("digest")) return "サーバー側でエラーが発生しました。時間をおいて再度お試しください。解決しない場合は運営者にお問い合わせください。";
+  return raw || fallback;
+};
 
 /**
- * catch で受けた例外を、UIに出せる分かりやすい文言へ整形する。
- * production の Server Action はエラー本文を秘匿するため、生の技術メッセージは
- * ユーザーに見せず原因別の案内へ変換する。
+ * 外部プラットフォーム（Modrinth, CurseForge）からのプロジェクトの一括インポート操作を管理するクライアントコンポーネント。
  */
-function toDisplayError(err: unknown, fallback: string): string {
-  const raw = err instanceof Error ? err.message : String(err);
-  if (raw.includes("Failed to find Server Action")) {
-    return "新しいバージョンが公開されたようです。ページを再読み込みしてからもう一度お試しください。";
-  }
-  if (raw.includes("Server Components render") || raw.includes("digest")) {
-    return "サーバー側でエラーが発生しました。時間をおいて再度お試しください。解決しない場合は運営者にお問い合わせください。";
-  }
-  return raw || fallback;
-}
-
-export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProject }: BatchImportClientProps) {
+const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProject }: BatchImportClientProps) => {
   const t = useTranslations("Project");
   const [projects, setProjects] = useState<ImportedProject[]>([]);
   const [source, setSource] = useState<"modrinth" | "curseforge">("modrinth");
@@ -65,7 +61,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
       setProjects(result.projects);
       setSource(targetSource);
       setSelected(new Set(result.projects.map(p => p.id)));
-    } catch (err) {
+    } catch (err: unknown) {
       setError(toDisplayError(err, t("fetchFailed", { source: targetSource })));
     } finally {
       setLoading(false);
@@ -102,7 +98,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
       setSuccessMsg(t("importSuccess", { count: res.importedCount ?? 0 }));
       setProjects([]);
       setSelected(new Set());
-    } catch (err) {
+    } catch (err: unknown) {
       setError(toDisplayError(err, t("importFail")));
     } finally {
       setImporting(false);
@@ -191,7 +187,7 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
               <input 
                 type="checkbox" 
                 checked={addExternalLink} 
-                onChange={(e) => setAddExternalLink(e.target.checked)} 
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setAddExternalLink(e.target.checked)} 
                 style={{ marginRight: 8, transform: "scale(1.2)" }}
               />
               <Typography variant="body2">{t("addExternalLink")}</Typography>
@@ -210,4 +206,6 @@ export default function BatchImportClient({ hasModrinthKey, hasCurseForgeKey, ha
       )}
     </Box>
   );
-}
+};
+
+export default BatchImportClient;
