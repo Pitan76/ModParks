@@ -13,6 +13,7 @@ import { getLoaderInfo } from "@/lib/loaders";
 interface HomeHeroProps {
   labels: {
     title: string;
+    titleHighlight: string;
     description: string;
     search: string;
     cta: string;
@@ -52,6 +53,16 @@ export default function HomeHero({ labels }: HomeHeroProps) {
             }}
           >
             {labels.title}
+            <Box
+              component="span"
+              sx={{
+                background: "linear-gradient(135deg, #4ade80, #818cf8)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              {labels.titleHighlight}
+            </Box>
           </Typography>
 
           <Typography

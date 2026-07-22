@@ -87,7 +87,8 @@
   },
   "Home": {
     "hero": {
-      "title": "マイクラのMOD/プラグイン配布プラットフォーム",
+      "title": "マイクラのMOD/プラグイン",
+      "titleHighlight": "配布プラットフォーム",
       "description": "みんなで一緒につくったり、探したりしてみませんか？",
       "searchPlaceholder": "MOD/プラグインを検索..."
     },

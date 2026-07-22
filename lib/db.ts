@@ -48,11 +48,9 @@ export const getD1 = async (): Promise<D1Database> => {
     process.env.NEXT_RUNTIME === "nodejs"
   ) {
     if (!globalForD1.localD1Proxy) {
-      console.time("[D1 Proxy] Initialize platform proxy");
       const { getCachedPlatformProxy } = await import("./proxy");
       const proxy = await getCachedPlatformProxy();
       globalForD1.localD1Proxy = proxy.env.DB;
-      console.timeEnd("[D1 Proxy] Initialize platform proxy");
     }
     return globalForD1.localD1Proxy;
   }
@@ -64,8 +62,9 @@ export const getD1 = async (): Promise<D1Database> => {
   return db;
 };
 
+// 同時リクエストで初期化が多重実行されないよう、値ではなくPromiseをキャッシュする
 const globalForDb = globalThis as unknown as {
-  cachedDb?: DrizzleD1Database<typeof schema> | any;
+  cachedDbPromise?: Promise<DrizzleD1Database<typeof schema>>;
 };
 
 /**
@@ -76,45 +75,32 @@ const globalForDb = globalThis as unknown as {
  * .wranglerディレクトリ内のSQLiteファイルを直接 node:sqlite でオープンします。
  */
 export const getDatabase = async (): Promise<DrizzleD1Database<typeof schema>> => {
-  if (globalForDb.cachedDb) return globalForDb.cachedDb;
-  
+  if (!globalForDb.cachedDbPromise) {
+    // 失敗したPromiseを残すと以降のリクエストが永続的に失敗するため破棄する
+    globalForDb.cachedDbPromise = initDatabase().catch((err) => {
+      globalForDb.cachedDbPromise = undefined;
+      throw err;
+    });
+  }
+  return globalForDb.cachedDbPromise;
+};
+
+/** getDatabase の実体。キャッシュ判定を持たない初期化処理。 */
+const initDatabase = async (): Promise<DrizzleD1Database<typeof schema>> => {
   if (
     process.env.NODE_ENV === "development" &&
     process.env.NEXT_RUNTIME === "nodejs"
   ) {
     try {
-      const fs = await import("node:fs");
-      const path = await import("node:path");
-      
-      const dir = path.join(process.cwd(), ".wrangler/state/v3/d1/miniflare-D1DatabaseObject");
-      if (fs.existsSync(dir)) {
-        const files = fs.readdirSync(dir);
-        const sqliteFile = files.find(f => f.endsWith(".sqlite") && f !== "metadata.sqlite");
-        if (sqliteFile) {
-          const sqlitePath = path.join(dir, sqliteFile);
-          console.log(`[D1 Local] Connecting directly to SQLite: ${sqlitePath}`);
-          
-          // @ts-expect-error - node:sqlite is available in Node 22+ but might miss types in some environments
-          const { DatabaseSync } = await import("node:sqlite");
-          // Use eval("require") to completely hide this optional driver from Turbopack/Webpack static analysis
-          const req = eval("require");
-          const { drizzle: drizzleNodeSqlite } = req("drizzle-orm/node-sqlite");
-          
-          const sqlite = new DatabaseSync(sqlitePath);
-          const db = drizzleNodeSqlite(sqlite, { schema });
-          globalForDb.cachedDb = db;
-          return globalForDb.cachedDb;
-        }
-      }
+      const { createLocalSqliteDb } = await import("./db-local");
+      const localDb = await createLocalSqliteDb();
+      if (localDb) return localDb as unknown as DrizzleD1Database<typeof schema>;
     } catch (err) {
       console.warn("[D1 Local] Failed to connect directly to SQLite, falling back to wrangler proxy:", err);
     }
   }
 
-  const d1 = await getD1();
-  const db = getDb(d1);
-  globalForDb.cachedDb = db;
-  return db;
+  return getDb(await getD1());
 };
 
 

@@ -87,7 +87,8 @@
   },
   "Home": {
     "hero": {
-      "title": "Minecraft mod & plugin hosting",
+      "title": "Minecraft mod & plugin ",
+      "titleHighlight": "hosting",
       "description": "Publish, search, and download. Japanese-first.",
       "searchPlaceholder": "Search Mods & Plugins..."
     },
