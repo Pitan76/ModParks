@@ -2,6 +2,7 @@ import { getDatabase } from "@/lib/db";
 import { projects, projectTags, users, userProfiles, versions, ideas } from "@/db/schema";
 import { eq, desc, and, or, sql, isNull, getTableColumns } from "drizzle-orm";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
+import { mapProjectRow } from "@/lib/queries/projectRow";
 
 type GetProjectsParams = {
   q?: string;
@@ -81,25 +82,7 @@ export const getProjects = async (params: GetProjectsParams) => {
     throw err;
   }
 
-  const data = rows.map((row) => {
-    let parsedTags: string[] = [];
-    if (row.project.tagsJson) {
-      try {
-        const t = JSON.parse(row.project.tagsJson);
-        if (Array.isArray(t) && t.length > 0 && t[0] !== null) parsedTags = t;
-      } catch (e) {}
-    }
-    
-    const { tagsJson, ...projectData } = row.project;
-
-    return {
-      ...projectData,
-      authorUsername: row.author?.username,
-      authorDisplayName: row.author?.displayName ?? row.author?.username,
-      authorAvatarUrl: row.author?.avatarUrl,
-      tags: parsedTags,
-    };
-  });
+  const data = rows.map(mapProjectRow);
 
   return { data, totalCount };
 };

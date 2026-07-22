@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
+import { mapProjectRow } from "@/lib/queries/projectRow";
 
 // ─── お気に入りのトグル ─────────────────────────────────────────────────────────
 
@@ -84,28 +85,7 @@ export async function getFavoriteProjects(userId: string) {
     .orderBy(desc(projectFavorites.createdAt))
     .all();
 
-  return rows.map((row) => {
-    let parsedTags: string[] = [];
-    if (row.project.tagsJson) {
-      try {
-        const t = JSON.parse(row.project.tagsJson);
-        if (Array.isArray(t) && t.length > 0 && t[0] !== null) {
-          parsedTags = t;
-        }
-      } catch(e) {}
-    }
-    
-    const { tagsJson, ...projectData } = row.project;
-
-    return {
-      ...projectData,
-      authorUsername: row.author?.username,
-      authorDisplayName: row.author?.displayName ?? row.author?.username,
-      authorAvatarUrl: row.author?.avatarUrl,
-      tags: parsedTags,
-      favoritedAt: row.favoritedAt
-    };
-  });
+  return rows.map((row) => ({ ...mapProjectRow(row), favoritedAt: row.favoritedAt }));
 }
 
 // ─── クッキーによるお気に入り (非ログイン時) ──────────────────────────────────────

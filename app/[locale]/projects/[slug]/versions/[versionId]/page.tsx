@@ -23,6 +23,7 @@ import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
 import { SITE_URL } from "@/lib/config";
+import { formatBytes, toStringArray } from "@/lib/utils/format";
 
 interface VersionDetailPageProps {
   params: Promise<{ locale: string; slug: string; versionId: string }>;
@@ -55,12 +56,6 @@ export async function generateMetadata({ params }: VersionDetailPageProps) {
       description,
     },
   };
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024)        return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 export default async function VersionDetailPage({ params }: VersionDetailPageProps) {
@@ -96,8 +91,8 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
   const t = await getTranslations("Project");
   const tCommon = await getTranslations("Common");
 
-  const parsedLoaders = Array.isArray(version.loaders) ? version.loaders : (JSON.parse(version.loaders || "[]") as string[]);
-  const parsedMcVersions = Array.isArray(version.mcVersions) ? version.mcVersions : (JSON.parse(version.mcVersions || "[]") as string[]);
+  const parsedLoaders = toStringArray(version.loaders);
+  const parsedMcVersions = toStringArray(version.mcVersions);
   const dateStr = new Date(typeof version.createdAt === "number" ? version.createdAt * 1000 : version.createdAt).toLocaleDateString(locale);
 
   return (

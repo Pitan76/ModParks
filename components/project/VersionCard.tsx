@@ -13,6 +13,7 @@ import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useLocale, useTranslations } from "next-intl";
+import { formatBytes, toStringArray } from "@/lib/utils/format";
 
 export type VersionCardProps = {
   version: {
@@ -29,15 +30,6 @@ export type VersionCardProps = {
     createdAt:     Date | number;
   };
   projectSlug: string;
-};
-
-const KB = 1024;
-const MB = KB * KB;
-
-const formatBytes = (bytes: number): string => {
-  if (bytes < KB) return `${bytes} B`;
-  if (bytes < MB) return `${(bytes / KB).toFixed(1)} KB`;
-  return `${(bytes / MB).toFixed(2)} MB`;
 };
 
 /**
@@ -72,13 +64,8 @@ const VersionCard = ({ version, projectSlug }: VersionCardProps) => {
       : version.createdAt
   );
 
-  const parsedLoaders = Array.isArray(version.loaders)
-    ? version.loaders
-    : (JSON.parse(version.loaders || "[]") as string[]);
-
-  const parsedMcVersions = Array.isArray(version.mcVersions)
-    ? version.mcVersions
-    : (JSON.parse(version.mcVersions || "[]") as string[]);
+  const parsedLoaders = toStringArray(version.loaders);
+  const parsedMcVersions = toStringArray(version.mcVersions);
 
   return (
     <Card

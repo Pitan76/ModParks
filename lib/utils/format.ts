@@ -1,3 +1,24 @@
+const KB = 1024;
+const MB = KB * KB;
+
+/**
+ * ファイルサイズを B / KB / MB にフォーマットします。
+ */
+export function formatBytes(bytes: number): string {
+  if (bytes < KB) return `${bytes} B`;
+  if (bytes < MB) return `${(bytes / KB).toFixed(1)} KB`;
+  return `${(bytes / MB).toFixed(2)} MB`;
+}
+
+/**
+ * DBに JSON 文字列で保存された配列カラム（mcVersions, loaders 等）を string[] に正規化します。
+ * 既に配列化されている場合はそのまま返します。
+ */
+export function toStringArray(value: string | string[] | null | undefined): string[] {
+  if (Array.isArray(value)) return value;
+  return JSON.parse(value || "[]") as string[];
+}
+
 /**
  * 日付を YYYY/MM/DD 形式にフォーマットします。
  */

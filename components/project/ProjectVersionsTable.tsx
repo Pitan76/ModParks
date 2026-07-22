@@ -21,7 +21,7 @@ import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 import { useState, useMemo } from "react";
 import type { MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { compactMcVersions } from "@/lib/utils/format";
+import { compactMcVersions, formatBytes, toStringArray } from "@/lib/utils/format";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Card from "@mui/material/Card";
@@ -45,15 +45,6 @@ export type ProjectVersionsTableProps = {
     createdAt:     Date | number;
   }[];
   projectSlug: string;
-};
-
-const KB = 1024;
-const MB = KB * KB;
-
-const formatBytes = (bytes: number): string => {
-  if (bytes < KB) return `${bytes} B`;
-  if (bytes < MB) return `${(bytes / KB).toFixed(1)} KB`;
-  return `${(bytes / MB).toFixed(2)} MB`;
 };
 
 /**
@@ -91,13 +82,12 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
 
   const parsedVersions = useMemo(() => {
     return versions.map((version) => {
-      const rawMcVersions = Array.isArray(version.mcVersions) ? version.mcVersions : (JSON.parse(version.mcVersions || "[]") as string[]);
       return {
         ...version,
         releaseChannel: normalizeReleaseChannel(version.releaseChannel),
         date: new Date(typeof version.createdAt === "number" ? version.createdAt * 1000 : version.createdAt),
-        parsedLoaders: Array.isArray(version.loaders) ? version.loaders : (JSON.parse(version.loaders || "[]") as string[]),
-        parsedMcVersions: compactMcVersions(rawMcVersions),
+        parsedLoaders: toStringArray(version.loaders),
+        parsedMcVersions: compactMcVersions(toStringArray(version.mcVersions)),
       };
     });
   }, [versions]);
