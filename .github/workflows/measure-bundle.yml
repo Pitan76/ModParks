@@ -1,0 +1,50 @@
+name: Measure Worker bundle size
+
+# Turbopack と webpack のどちらが Cloudflare Workers の 3 MiB 制限に収まるかを
+# CI 上で実測するための一時的なワークフロー。デプロイは一切行わない。
+on:
+  workflow_dispatch:
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bundler: [turbopack, webpack]
+    name: ${{ matrix.bundler }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Switch build command to webpack
+        if: matrix.bundler == 'webpack'
+        run: sed -i 's/buildCommand: "next build"/buildCommand: "next build --webpack"/' open-next.config.ts
+
+      - name: Build OpenNext
+        run: npx opennextjs-cloudflare build
+        env:
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+
+      - name: Measure bundle size
+        run: npx wrangler deploy --dry-run --outdir /tmp/dry
+
+      # バンドルに取り込まれず実行時に require される chunk が残っていないかを見る。
+      # 残っている場合、サイズは小さく出るのにデプロイ後に落ちる。
+      - name: Report emitted chunks
+        run: |
+          echo "=== .open-next/server-functions/default ==="
+          du -sh .open-next/server-functions/default
+          find .open-next/server-functions/default -name '*.js' -o -name '*.mjs' \
+            | xargs du -k 2>/dev/null | sort -rn | head -20
+          echo "=== /tmp/dry ==="
+          du -sh /tmp/dry
+          ls -la /tmp/dry
