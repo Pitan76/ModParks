@@ -29,7 +29,7 @@ interface BatchImportClientProps {
  * ユーザーに見せず原因別の案内へ変換する。
  */
 function toDisplayError(err: unknown, fallback: string): string {
-  const raw = err instanceof Error ? err.message : String(err ?? "");
+  const raw = err instanceof Error ? err.message : String(err);
   if (raw.includes("Failed to find Server Action")) {
     return "新しいバージョンが公開されたようです。ページを再読み込みしてからもう一度お試しください。";
   }
