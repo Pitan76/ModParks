@@ -19,17 +19,18 @@ import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import { useContextMenuHandler, useCommonItems } from "@/components/ui/ContextMenu";
 import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 import { useState, useMemo } from "react";
+import type { MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { compactMcVersions } from "@/lib/utils/format";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import { Link } from "@/i18n/routing";
+import { normalizeReleaseChannel } from "@/lib/releaseChannels";
 
-interface ProjectVersionsTableProps {
+export type ProjectVersionsTableProps = {
   versions: {
     id:            string;
     versionNumber: string;
@@ -44,17 +45,21 @@ interface ProjectVersionsTableProps {
     createdAt:     Date | number;
   }[];
   projectSlug: string;
-}
+};
 
-function formatBytes(bytes: number): string {
-  if (bytes < 1024)        return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
+const KB = 1024;
+const MB = KB * KB;
 
-import { normalizeReleaseChannel } from "@/lib/releaseChannels";
+const formatBytes = (bytes: number): string => {
+  if (bytes < KB) return `${bytes} B`;
+  if (bytes < MB) return `${(bytes / KB).toFixed(1)} KB`;
+  return `${(bytes / MB).toFixed(2)} MB`;
+};
 
-export default function ProjectVersionsTable({ versions, projectSlug }: ProjectVersionsTableProps) {
+/**
+ * プロジェクト詳細ページの「バージョン」タブで、リリースバージョンの一覧をデスクトップ向けテーブル及びモバイル向けカードで表示するコンポーネント。
+ */
+const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTableProps) => {
   const locale = useLocale();
   const t = useTranslations("Project");
   const tVersion = useTranslations("Version");
@@ -63,6 +68,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
 
   const openMenu = useContextMenuHandler();
   const c = useCommonItems();
+  
   const versionMenu = (versionId: string, versionNumber: string): ContextMenuItem[] => {
     const versionUrl = `/projects/${projectSlug}/versions/${versionId}`;
     const downloadUrl = `/api/download?versionId=${versionId}`;
@@ -74,7 +80,9 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
         id: "cm-version-download",
         label: tMenu("download"),
         icon: <DownloadIcon fontSize="small" />,
-        onClick: () => { window.location.href = downloadUrl; },
+        onClick: () => {
+          window.location.href = downloadUrl;
+        },
       },
       c.copyLink(versionUrl),
       c.copyText(versionNumber, `v${versionNumber}`),
@@ -110,7 +118,6 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
         </Tabs>
       </Box>
 
-
       {/* Desktop Table View */}
       <TableContainer component={Paper} variant="outlined" sx={{ mb: 2, display: { xs: "none", md: "block" }, width: "100%", maxWidth: "100%", overflowX: "auto" }}>
         <Table sx={{ minWidth: 650 }}>
@@ -135,7 +142,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
                 <TableRow
                   key={version.id}
                   hover
-                  onContextMenu={(e) => openMenu(e, versionMenu(version.id, version.versionNumber))}
+                  onContextMenu={(e: MouseEvent<HTMLTableRowElement>) => openMenu(e, versionMenu(version.id, version.versionNumber))}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell>
@@ -243,7 +250,7 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
             <Card
               key={version.id}
               variant="outlined"
-              onContextMenu={(e) => openMenu(e, versionMenu(version.id, version.versionNumber))}
+              onContextMenu={(e: MouseEvent<HTMLDivElement>) => openMenu(e, versionMenu(version.id, version.versionNumber))}
             >
               <CardContent sx={{ pb: 1 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
@@ -314,4 +321,6 @@ export default function ProjectVersionsTable({ versions, projectSlug }: ProjectV
       </Stack>
     </>
   );
-}
+};
+
+export default ProjectVersionsTable;

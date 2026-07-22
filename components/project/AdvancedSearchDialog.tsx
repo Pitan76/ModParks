@@ -15,8 +15,9 @@ import { useTranslations } from "next-intl";
 import { MC_VERSIONS } from "@/lib/validations";
 import { getLoaderInfo } from "@/lib/loaders";
 import { useState, useEffect } from "react";
+import type { ChangeEvent } from "react";
 
-export interface AdvancedSearchFilters {
+export type AdvancedSearchFilters = {
   author?: string;
   loaders: string[];
   mcVersions: string[];
@@ -26,18 +27,35 @@ export interface AdvancedSearchFilters {
   includeTags: boolean;
   includeAuthor: boolean;
   includeExtDl: boolean;
-}
+};
 
-interface AdvancedSearchDialogProps {
+type OptionItem = {
+  slug: string;
+  name: string;
+  inputValue?: string;
+};
+
+type AdvancedSearchDialogProps = {
   open: boolean;
   onClose: () => void;
   onApply: (filters: AdvancedSearchFilters) => void;
   initialFilters: AdvancedSearchFilters;
-  availableTags?: { slug: string; name: string }[];
-  availablePlatforms?: { slug: string; name: string }[];
-}
+  availableTags?: OptionItem[];
+  availablePlatforms?: OptionItem[];
+};
 
-export default function AdvancedSearchDialog({ open, onClose, onApply, initialFilters, availableTags = [], availablePlatforms = [] }: AdvancedSearchDialogProps) {
+/**
+ * プロジェクト詳細検索用のモーダルダイアログ。
+ * 対応ローダー、MCバージョン、タグ、作者名、および検索条件（AND/ORや説明文含めるか等）を指定できます。
+ */
+const AdvancedSearchDialog = ({
+  open,
+  onClose,
+  onApply,
+  initialFilters,
+  availableTags = [],
+  availablePlatforms = []
+}: AdvancedSearchDialogProps) => {
   const t = useTranslations("Search");
   const tTags = useTranslations("Tags");
 
@@ -51,7 +69,6 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
   const [tempIncludeAuthor, setTempIncludeAuthor] = useState(initialFilters.includeAuthor);
   const [tempIncludeExtDl, setTempIncludeExtDl] = useState(initialFilters.includeExtDl);
 
-  // Sync local state when dialog opens
   useEffect(() => {
     if (open) {
       setTempAuthor(initialFilters.author || "");
@@ -131,7 +148,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           label={t("author") || "Author (Username)"}
           size="small"
           value={tempAuthor}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTempAuthor(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setTempAuthor(e.target.value)}
           placeholder="e.g. pitan76"
           fullWidth
         />
@@ -140,15 +157,15 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
         <FormAutocomplete
           multiple
           options={availablePlatforms}
-          getOptionLabel={(option: any) => {
+          getOptionLabel={(option: OptionItem | string) => {
             if (typeof option === "string") return option;
             return option.name || option.slug || "";
           }}
           value={availablePlatforms.filter(p => tempLoaders.includes(p.slug)) as any}
-          onChange={(_, val: any[]) => setTempLoaders(val.map(v => typeof v === "string" ? v : v.slug))}
+          onChange={(_, val: (OptionItem | string)[]) => setTempLoaders(val.map(v => typeof v === "string" ? v : v.slug))}
           label={t("platforms")}
           renderInputProps={{ size: "small" }}
-          renderOption={(props, option: any) => {
+          renderOption={(props, option: OptionItem | string) => {
             const slug = typeof option === "string" ? option : option.slug;
             const name = typeof option === "string" ? option : option.name;
             const info = getLoaderInfo(slug);
@@ -161,7 +178,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
             );
           }}
           // @ts-ignore
-          renderTags={(val: any[], getTagProps) => val.map((option, idx) => {
+          renderTags={(val: (OptionItem | string)[], getTagProps) => val.map((option, idx) => {
             const slug = typeof option === "string" ? option : option.slug;
             const name = typeof option === "string" ? option : option.name;
             const info = getLoaderInfo(slug);
@@ -199,7 +216,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
           multiple
           freeSolo
           options={availableTags}
-          getOptionLabel={(option: any) => {
+          getOptionLabel={(option: OptionItem | string) => {
             const slug = typeof option === "string" ? option : option.slug;
             try {
               const translated = tTags(slug as any);
@@ -209,10 +226,10 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
             return option.name || option.slug || "";
           }}
           value={tempTags as any}
-          onChange={(_, val: any[]) => setTempTags(val.map(v => typeof v === "string" ? v : v.slug || v.inputValue || ""))}
+          onChange={(_, val: (OptionItem | string)[]) => setTempTags(val.map(v => typeof v === "string" ? v : v.slug || v.inputValue || ""))}
           label={t("tags")}
           renderInputProps={{ size: "small" }}
-          renderOption={(props, option: any) => {
+          renderOption={(props, option: OptionItem | string) => {
             const slug = typeof option === "string" ? option : option.slug;
             let label = typeof option === "string" ? option : option.name;
             try {
@@ -223,7 +240,7 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
             return <li key={key} {...otherProps}>{label}</li>;
           }}
           // @ts-ignore
-          renderTags={(val: any[], getTagProps) => val.map((option, idx) => {
+          renderTags={(val: (OptionItem | string)[], getTagProps) => val.map((option, idx) => {
             const slug = typeof option === "string" ? option : option.slug;
             const foundObj = availableTags.find(tObj => tObj.slug === slug);
             let label = foundObj ? foundObj.name : slug;
@@ -239,4 +256,6 @@ export default function AdvancedSearchDialog({ open, onClose, onApply, initialFi
       </Box>
     </AbstractDialog>
   );
-}
+};
+
+export default AdvancedSearchDialog;

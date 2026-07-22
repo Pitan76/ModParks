@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import type { ChangeEvent, ReactNode } from "react";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
@@ -12,9 +14,13 @@ import ProjectIconUpload from "./ProjectIconUpload";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
 import { useLinksEditor } from "@/lib/hooks/useLinksEditor";
 
+type OptionItem = {
+  slug: string;
+  name: string;
+  inputValue?: string;
+};
 
-
-export interface ProjectFormFieldsProps {
+export type ProjectFormFieldsProps = {
   error: { [key: string]: string[] } | null;
   project?: {
     name?: string;
@@ -31,13 +37,17 @@ export interface ProjectFormFieldsProps {
     githubRepo?: string | null;
     discordWebhookUrl?: string | null;
     tags?: string[];
+    issueTrackerUrl?: string | null;
   };
-  availableTags?: { slug: string; name: string }[];
+  availableTags?: OptionItem[];
   defaultLicense?: string;
-  children?: React.ReactNode;
-}
+  children?: ReactNode;
+};
 
-export default function ProjectFormFields({ error, project, availableTags = [], defaultLicense, children }: ProjectFormFieldsProps) {
+/**
+ * 新規作成や編集ページにおいて、プロジェクトの基本情報（名称、説明、タグ、ライセンス、リンク等）を編集するフォームフィールド群コンポーネント。
+ */
+const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense, children }: ProjectFormFieldsProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
@@ -131,7 +141,7 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
         disableCloseOnSelect
         // @ts-ignore
         options={availableTags}
-        getOptionLabel={(option: any) => {
+        getOptionLabel={(option: OptionItem | string) => {
           const slug = typeof option === "string" ? option : option.slug;
           try {
             const translated = tTags(slug as any);
@@ -142,14 +152,14 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
         }}
         value={tags}
         onChange={(_, newValue) => {
-          const stringValues = newValue.map((v: any) => {
+          const stringValues = (newValue as (OptionItem | string)[]).map((v) => {
             if (typeof v === "string") return v;
             return v.slug || v.inputValue || "";
           });
           setTags(stringValues.filter(Boolean));
         }}
         // @ts-ignore
-        renderTags={(tagValue: readonly any[], getTagProps: any) =>
+        renderTags={(tagValue: readonly (OptionItem | string)[], getTagProps) =>
           tagValue.map((option, index) => {
             const optionSlug = typeof option === "string" ? option : (option.slug || option.inputValue);
             const foundObj = availableTags.find((tObj) => tObj.slug === optionSlug);
@@ -158,7 +168,8 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
               const translated = tTags(optionSlug as any);
               if (translated && !translated.includes(".")) label = translated;
             } catch {}
-            return <Chip variant="outlined" label={label} {...getTagProps({ index })} key={`tag-${index}`} />;
+            const { key, ...tagProps } = getTagProps({ index });
+            return <Chip variant="outlined" label={label} {...tagProps} key={key} />;
           })
         }
         label={t("fields.tags")}
@@ -193,7 +204,7 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
           name="issueTrackerUrl"
           label={t("fields.issueTrackerUrl")}
           fullWidth
-          defaultValue={(project as any)?.issueTrackerUrl || ""}
+          defaultValue={project?.issueTrackerUrl || ""}
           errorMessages={error?.issueTrackerUrl}
         />
       </Stack>
@@ -245,14 +256,14 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
             label={t("fields.customLinks.linkTitle")}
             size="small"
             value={link.title}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => changeLink(idx, "title", e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => changeLink(idx, "title", e.target.value)}
             sx={{ width: 150 }}
           />
           <FormTextField
             label={t("fields.customLinks.url")}
             size="small"
             value={link.url}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => changeLink(idx, "url", e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => changeLink(idx, "url", e.target.value)}
             sx={{ flex: 1 }}
           />
           <Chip label={tCommon("delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer" }} />
@@ -264,4 +275,6 @@ export default function ProjectFormFields({ error, project, availableTags = [], 
       <input type="hidden" name="links" value={JSON.stringify(links)} />
     </>
   );
-}
+};
+
+export default ProjectFormFields;

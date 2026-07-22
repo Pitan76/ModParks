@@ -11,9 +11,11 @@ import FormSelect from "@/components/ui/form/FormSelect";
 import FormMultiSelect from "@/components/ui/form/FormMultiSelect";
 import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition, useEffect, useRef } from "react";
-import AdvancedSearchDialog, { AdvancedSearchFilters } from "./AdvancedSearchDialog";
+import type { ChangeEvent } from "react";
+import AdvancedSearchDialog from "./AdvancedSearchDialog";
+import type { AdvancedSearchFilters } from "./AdvancedSearchDialog";
 
-interface ProjectSearchBarProps {
+export type ProjectSearchBarProps = {
   initialQ?: string;
   initialAuthor?: string;
   initialTypes?: string[];
@@ -28,9 +30,13 @@ interface ProjectSearchBarProps {
   initialIncludeExtDl?: boolean;
   availableTags?: { slug: string; name: string }[];
   availablePlatforms?: { slug: string; name: string }[];
-}
+};
 
-export default function ProjectSearchBar({ 
+/**
+ * プロジェクト一覧の検索・フィルターバーコンポーネント。
+ * キーワード入力、タイプフィルター、ソート変更、および詳細検索ダイアログへのアクセスを提供します。
+ */
+const ProjectSearchBar = ({ 
   initialQ = "", 
   initialAuthor = "",
   initialTypes = ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"],
@@ -45,7 +51,7 @@ export default function ProjectSearchBar({
   initialIncludeExtDl = false,
   availableTags = [],
   availablePlatforms = []
-}: ProjectSearchBarProps) {
+}: ProjectSearchBarProps) => {
   const t = useTranslations("Search");
   const router = useRouter();
   const pathname = usePathname();
@@ -54,11 +60,9 @@ export default function ProjectSearchBar({
   const [q, setQ] = useState(initialQ);
   const [debouncedQ, setDebouncedQ] = useState(initialQ);
   
-  // Real-time state for UI outside dialog
   const [types, setTypes] = useState<string[]>(initialTypes);
   const [appliedSort, setAppliedSort] = useState(initialSort);
 
-  // Advanced search filters state
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>({
     author: initialAuthor,
     loaders: initialLoaders,
@@ -137,7 +141,7 @@ export default function ProjectSearchBar({
           fullWidth
           placeholder={t("placeholder")}
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
           slotProps={{
             input: {
               startAdornment: (
@@ -180,8 +184,7 @@ export default function ProjectSearchBar({
             ]}
             renderSelected={(selected) => {
               if (selected.length === 6) return t("filters.all");
-              if (selected.length >= 4)
-                return selected.slice(0, 3).map((v) => t(`filters.${v}`)).join(", ") + "...";
+              if (selected.length >= 4) return selected.slice(0, 3).map((v) => t(`filters.${v}`)).join(", ") + "...";
               return selected.map((v) => t(`filters.${v}`)).join(", ");
             }}
           />
@@ -216,4 +219,6 @@ export default function ProjectSearchBar({
       />
     </Box>
   );
-}
+};
+
+export default ProjectSearchBar;
