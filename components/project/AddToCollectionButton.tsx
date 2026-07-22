@@ -8,13 +8,14 @@ import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "next-intl";
 import AddToCollectionModal from "./AddToCollectionModal";
 
-interface AddToCollectionButtonProps {
+type AddToCollectionButtonProps = {
   projectId: string;
   userId: string;
   variant?: "button" | "icon";
-}
+};
 
-export default function AddToCollectionButton({ projectId, userId, variant = "button" }: AddToCollectionButtonProps) {
+/** プロジェクトをコレクションに追加するボタン。アイコンモードとボタンモードを切り替え可能 */
+const AddToCollectionButton = ({ projectId, userId, variant = "button" }: AddToCollectionButtonProps) => {
   const tList = useTranslations("List");
   const [open, setOpen] = useState(false);
 
@@ -48,4 +49,6 @@ export default function AddToCollectionButton({ projectId, userId, variant = "bu
       )}
     </>
   );
-}
+};
+
+export default AddToCollectionButton;

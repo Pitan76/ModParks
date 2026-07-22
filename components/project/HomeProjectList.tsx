@@ -3,17 +3,18 @@
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import { useColorMode } from "@/components/ThemeRegistry";
-import ProjectCard, { ProjectCardProps } from "@/components/project/ProjectCard";
+import ProjectCard from "@/components/project/ProjectCard";
+import type { ProjectCardProps } from "@/components/project/ProjectCard";
 
-interface HomeProjectListProps {
+type HomeProjectListProps = {
   projects: ProjectCardProps["project"][];
-}
+};
 
 /**
  * ホームページ用のプロジェクト一覧表示コンポーネント。
  * 新テーマ時は3列グリッドではなく、リスト（縦並び）で表示する。
  */
-export default function HomeProjectList({ projects }: HomeProjectListProps) {
+const HomeProjectList = ({ projects }: HomeProjectListProps) => {
   const { isNewTheme } = useColorMode();
 
   return (
@@ -25,4 +26,6 @@ export default function HomeProjectList({ projects }: HomeProjectListProps) {
       ))}
     </Grid>
   );
-}
+};
+
+export default HomeProjectList;
