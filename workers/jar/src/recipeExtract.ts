@@ -30,16 +30,22 @@ const TEXTURE_PATH = /^assets\/([^/]+)\/textures\/((?:item|block)\/.+)\.png$/;
 // チェインを辿って実テクスチャを解決するために必要。
 const MODEL_PATH = /^assets\/([^/]+)\/models\/((?:item|block)\/.+)\.json$/;
 
+/** レシピ JSON のうち、インデックス生成に使う部分だけの最小形 */
+interface RecipeJson {
+  type?: unknown;
+  result?: unknown;
+}
+
 const isCraftingType = (type: unknown): boolean => {
   if (typeof type !== "string") return false;
   const t = type.replace(/^minecraft:/, "");
   return t === "crafting_shaped" || t === "crafting_shapeless";
 };
 
-function resultItemOf(data: any): string | null {
-  const r = data?.result;
+function resultItemOf(data: RecipeJson): string | null {
+  const r = data.result;
   if (!r) return null;
-  const id = typeof r === "string" ? r : r.id || r.item || null;
+  const id = typeof r === "string" ? r : (r as { id?: string; item?: string }).id ?? (r as { item?: string }).item;
   if (!id || typeof id !== "string") return null;
   return id.includes(":") ? id : `minecraft:${id}`;
 }
@@ -98,13 +104,13 @@ export async function extractRecipes(arrayBuffer: ArrayBuffer): Promise<Extracte
 
 /** クラフティングレシピならインデックス用の要約を積む。壊れた JSON は黙って飛ばす。 */
 function collectCrafting(out: RecipeSummary[], ns: string, id: string, content: string): void {
-  let data: any;
+  let data: RecipeJson;
   try {
-    data = JSON.parse(content);
+    data = JSON.parse(content) as RecipeJson;
   } catch {
     return;
   }
-  if (!isCraftingType(data?.type)) return;
+  if (!isCraftingType(data.type)) return;
   out.push({
     id: `${ns}:${id}`,
     result: resultItemOf(data),

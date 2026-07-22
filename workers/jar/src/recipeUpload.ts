@@ -133,13 +133,13 @@ async function readIndex(r2: R2Bucket): Promise<RecipeSummary[]> {
   const obj = await r2.get("index/recipes.json");
   if (!obj) return [];
 
-  let idx: any = {};
+  let idx: { recipes?: unknown; ids?: unknown };
   try {
     idx = JSON.parse(await obj.text());
   } catch {
     return [];
   }
-  if (Array.isArray(idx.recipes)) return idx.recipes;
+  if (Array.isArray(idx.recipes)) return idx.recipes as RecipeSummary[];
   // 旧形式: ID のみの配列だった頃のインデックスからの移行
   if (Array.isArray(idx.ids)) return idx.ids.map((i: string) => ({ id: i, result: i, type: "" }));
   return [];

@@ -45,7 +45,7 @@ const ROUTES: Record<string, (req: Request, env: JarWorkerEnv) => Promise<unknow
   "/extract-recipes": handleExtractRecipes,
 };
 
-export default {
+const worker = {
   async fetch(req: Request, env: JarWorkerEnv): Promise<Response> {
     const handler = ROUTES[new URL(req.url).pathname];
     if (!handler) return json({ error: "Not found" }, 404);
@@ -59,3 +59,5 @@ export default {
     }
   },
 };
+
+export default worker;

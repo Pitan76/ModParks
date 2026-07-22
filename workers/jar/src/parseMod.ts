@@ -14,6 +14,24 @@ interface Detection {
 
 type Zip = Awaited<ReturnType<JSZip["loadAsync"]>>;
 
+/** ローダー記述子の最小形。値はいずれも信用できないため unknown で受ける。 */
+interface FabricModJson {
+  version?: unknown;
+  depends?: { minecraft?: unknown };
+}
+
+interface TomlModsFile {
+  mods?: { version?: unknown }[];
+  dependencies?: Record<string, { modId?: string; versionRange?: string }[]>;
+}
+
+interface QuiltModJson {
+  quilt_loader?: {
+    version?: unknown;
+    depends?: { id?: string; versions?: unknown }[];
+  };
+}
+
 /** `${...}` を含むバージョンはビルド前のプレースホルダなので採用しない */
 const isConcreteVersion = (v: unknown): v is string =>
   typeof v === "string" && v.length > 0 && !v.includes("${");
@@ -35,24 +53,24 @@ function matchByRange(ranges: string[]): string[] {
 const matchBySubstring = (ranges: string[]): string[] =>
   MC_VERSIONS.filter((v) => ranges.some((r) => typeof r === "string" && r.includes(v)));
 
-async function readJson(zip: Zip, path: string): Promise<any | null> {
+async function readJson<T>(zip: Zip, path: string): Promise<T | null> {
   const entry = zip.file(path);
   if (!entry) return null;
   const content = await entry.async("string");
   try {
-    return JSON.parse(content);
+    return JSON.parse(content) as T;
   } catch (e) {
     console.warn(`Invalid JSON in ${path}`, e);
     return null;
   }
 }
 
-async function readToml(zip: Zip, path: string): Promise<any | null> {
+async function readToml<T>(zip: Zip, path: string): Promise<T | null> {
   const entry = zip.file(path);
   if (!entry) return null;
   const content = await entry.async("string");
   try {
-    return parseToml(content);
+    return parseToml(content) as T;
   } catch (e) {
     console.warn(`Invalid TOML in ${path}`, e);
     return null;
@@ -60,11 +78,13 @@ async function readToml(zip: Zip, path: string): Promise<any | null> {
 }
 
 async function detectFabric(zip: Zip): Promise<Detection | null> {
-  const parsed = await readJson(zip, "fabric.mod.json");
+  const parsed = await readJson<FabricModJson>(zip, "fabric.mod.json");
   if (!parsed) return null;
 
   const mcDep = parsed.depends?.minecraft;
-  const ranges = typeof mcDep === "string" ? [mcDep] : Array.isArray(mcDep) ? mcDep : [];
+  const ranges = (typeof mcDep === "string" ? [mcDep] : Array.isArray(mcDep) ? mcDep : []).filter(
+    (r): r is string => typeof r === "string"
+  );
 
   return {
     loader: "fabric",
@@ -75,11 +95,11 @@ async function detectFabric(zip: Zip): Promise<Detection | null> {
 
 /** Forge / NeoForge は mods.toml の書式が共通なので検出器を共有する */
 async function detectToml(zip: Zip, path: string, loader: string): Promise<Detection | null> {
-  const parsed = await readToml(zip, path);
+  const parsed = await readToml<TomlModsFile>(zip, path);
   if (!parsed) return null;
 
   const modVersion = parsed.mods?.[0]?.version;
-  const deps = Object.values(parsed.dependencies ?? {}).flat() as any[];
+  const deps = Object.values(parsed.dependencies ?? {}).flat();
   const mcDep = deps.find((d) => d?.modId === "minecraft");
 
   return {
@@ -90,13 +110,15 @@ async function detectToml(zip: Zip, path: string, loader: string): Promise<Detec
 }
 
 async function detectQuilt(zip: Zip): Promise<Detection | null> {
-  const parsed = await readJson(zip, "quilt.mod.json");
+  const parsed = await readJson<QuiltModJson>(zip, "quilt.mod.json");
   if (!parsed) return null;
 
   const ql = parsed.quilt_loader;
-  const mcDep = (ql?.depends as any[] | undefined)?.find((d) => d?.id === "minecraft");
-  const range = typeof mcDep === "object" ? mcDep?.versions : undefined;
-  const ranges = Array.isArray(range) ? range : range ? [range] : [];
+  const mcDep = ql?.depends?.find((d) => d?.id === "minecraft");
+  const range = mcDep?.versions;
+  const ranges = (Array.isArray(range) ? range : range ? [range] : []).filter(
+    (r): r is string => typeof r === "string"
+  );
 
   return {
     loader: "quilt",
