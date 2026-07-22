@@ -25,16 +25,12 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
-      - name: Switch build command to webpack
-        if: matrix.bundler == 'webpack'
-        run: |
-          sed -i 's/buildCommand: "next build"/buildCommand: "next build --webpack"/' open-next.config.ts
-          grep buildCommand open-next.config.ts
-
       - name: Build OpenNext
         run: npx opennextjs-cloudflare build
         env:
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          # open-next.config.ts がこの変数で next build --webpack に切り替える
+          CF_WEBPACK_BUILD: ${{ matrix.bundler == 'webpack' && '1' || '0' }}
 
       - name: Measure bundle size
         run: npx wrangler deploy --dry-run --outdir /tmp/dry
