@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
-import { changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settings";
+import { changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settingsSecurity";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import FormTextField from "@/components/ui/form/FormTextField";

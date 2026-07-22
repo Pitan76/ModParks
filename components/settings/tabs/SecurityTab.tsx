@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
-import { generateTotpSecret, verifyAndEnableTotp, disableTotp } from "@/lib/actions/settings";
+import { generateTotpSecret, verifyAndEnableTotp, disableTotp } from "@/lib/actions/settingsSecurity";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import FormTextField from "@/components/ui/form/FormTextField";
