@@ -11,7 +11,12 @@ import RssFeedIcon from "@mui/icons-material/RssFeed";
 import { Link as NextLink } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
-export default function AppFooter() {
+/**
+ * アプリケーションの共通フッターコンポーネント。
+ * コピーライト表記、ドキュメントWikiへのリンク、RSSフィード、GitHubリポジトリへのリンク、
+ * 利用規約およびプライバシーポリシーへのリンクを表示します。
+ */
+const AppFooter = () => {
   const year = new Date().getFullYear();
   const t = useTranslations("Footer");
 
@@ -122,4 +127,6 @@ export default function AppFooter() {
       </Container>
     </Box>
   );
-}
+};
+
+export default AppFooter;

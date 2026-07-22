@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 /** Cloudflare Workers バインディングの型 */
-export interface Env {
+export type Env = {
   DB: D1Database;
   R2: R2Bucket;
   modparks_storage: R2Bucket;
@@ -22,16 +22,14 @@ export interface Env {
   AUTH_SECRET: string;
   AUTH_GITHUB_ID: string;
   AUTH_GITHUB_SECRET: string;
-}
+};
 
 /**
  * 取得したD1バインディングから、Drizzle ORM のインスタンスを生成します。
  * @param d1 Cloudflare D1データベースのバインディング
  * @returns schemaを設定済みの Drizzle D1 Database インスタンス
  */
-export function getDb(d1: D1Database): DrizzleD1Database<typeof schema> {
-  return drizzle(d1, { schema });
-}
+export const getDb = (d1: D1Database): DrizzleD1Database<typeof schema> => drizzle(d1, { schema });
 
 // HMRで localD1Proxy が消失しないよう、globalThisにキャッシュする
 const globalForD1 = globalThis as unknown as {
@@ -43,7 +41,7 @@ const globalForD1 = globalThis as unknown as {
  * 開発環境 (development) の場合は wrangler proxy を経由して D1 を取得し、
  * 本番環境では getCloudflareContext() から取得します。
  */
-export async function getD1(): Promise<D1Database> {
+export const getD1 = async (): Promise<D1Database> => {
   // 開発環境かつ Node.js ランタイムの場合のみ Wrangler の Proxy を利用
   if (
     process.env.NODE_ENV === "development" &&
@@ -64,10 +62,10 @@ export async function getD1(): Promise<D1Database> {
   const db = (env as unknown as Env).DB;
   if (!db) throw new Error("D1 binding not found in CloudflareContext");
   return db;
-}
+};
 
 const globalForDb = globalThis as unknown as {
-  cachedDb?: any;
+  cachedDb?: DrizzleD1Database<typeof schema> | any;
 };
 
 /**
@@ -77,10 +75,8 @@ const globalForDb = globalThis as unknown as {
  * ローカル開発環境では、Wrangler Proxyの通信オーバーヘッドを避けるため、
  * .wranglerディレクトリ内のSQLiteファイルを直接 node:sqlite でオープンします。
  */
-export async function getDatabase(): Promise<DrizzleD1Database<typeof schema>> {
-  if (globalForDb.cachedDb) {
-    return globalForDb.cachedDb;
-  }
+export const getDatabase = async (): Promise<DrizzleD1Database<typeof schema>> => {
+  if (globalForDb.cachedDb) return globalForDb.cachedDb;
   
   if (
     process.env.NODE_ENV === "development" &&
@@ -98,12 +94,14 @@ export async function getDatabase(): Promise<DrizzleD1Database<typeof schema>> {
           const sqlitePath = path.join(dir, sqliteFile);
           console.log(`[D1 Local] Connecting directly to SQLite: ${sqlitePath}`);
           
+          // @ts-expect-error - node:sqlite is available in Node 22+ but might miss types in some environments
           const { DatabaseSync } = await import("node:sqlite");
+          // @ts-expect-error - drizzle-orm/node-sqlite typing may not be resolved in this project setup
           const { drizzle: drizzleNodeSqlite } = await import("drizzle-orm/node-sqlite");
           
           const sqlite = new DatabaseSync(sqlitePath);
           const db = drizzleNodeSqlite(sqlite, { schema });
-          globalForDb.cachedDb = db as any;
+          globalForDb.cachedDb = db;
           return globalForDb.cachedDb;
         }
       }
@@ -116,7 +114,7 @@ export async function getDatabase(): Promise<DrizzleD1Database<typeof schema>> {
   const db = getDb(d1);
   globalForDb.cachedDb = db;
   return db;
-}
+};
 
 
 

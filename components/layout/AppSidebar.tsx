@@ -10,19 +10,25 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useTranslations } from "next-intl";
 import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
+import type { NavItem } from "./BaseSidebar";
 
 export { SIDEBAR_WIDTH };
 
-interface AppSidebarProps {
+export type AppSidebarProps = {
   mobileOpen: boolean;
   onMobileClose: () => void;
   session: Session | null;
-}
+};
 
-export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSidebarProps) {
+/**
+ * 一般ユーザー向けポータル用の共通サイドバーコンポーネント。
+ * ホーム、プロジェクト検索、アイデアといったパブリックメニューに加え、
+ * ログイン中ユーザーに対しては通知、ダッシュボード、マイプロジェクト、マイプロファイルを表示します。
+ */
+const AppSidebar = ({ mobileOpen, onMobileClose, session }: AppSidebarProps) => {
   const t = useTranslations("Nav");
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { id: "home", label: t("home"), path: "/", icon: <HomeIcon /> },
     { id: "projects", label: t("projects"), path: "/projects", icon: <SearchIcon /> },
     { id: "ideas", label: t("ideas"), path: "/ideas", icon: <LightbulbIcon /> },
@@ -36,4 +42,6 @@ export default function AppSidebar({ mobileOpen, onMobileClose, session }: AppSi
   }
 
   return <BaseSidebar navItems={navItems} mobileOpen={mobileOpen} onMobileClose={onMobileClose} />;
-}
+};
+
+export default AppSidebar;

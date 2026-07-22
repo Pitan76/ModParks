@@ -1,6 +1,7 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
+import type { MouseEvent } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -24,25 +25,28 @@ import LinkButton from "@/components/ui/LinkButton";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import { useColorMode } from "@/components/ThemeRegistry";
 import NotificationBell from "@/components/notification/NotificationBell";
-
 import type { Session } from "next-auth";
 
-interface AppHeaderProps {
+export type AppHeaderProps = {
   session: Session | null;
   onMenuClick?: () => void;
-}
+};
 
-export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
+/**
+ * アプリケーションの共通ヘッダーコンポーネント。
+ * ロゴ、検索、新規プロジェクト作成ボタン、通知ベル、テーマ切り替え、言語切り替え、
+ * およびユーザーのアバター（ログインメニュー）を提供します。
+ */
+const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
   const t        = useTranslations("Nav");
   const locale   = useLocale();
   const pathname = usePathname();
   const router   = useRouter();
   const { mode, toggleColorMode } = useColorMode();
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleAvatarClick = (e: React.MouseEvent<HTMLElement>) =>
-    setAnchorEl(e.currentTarget);
+  const handleAvatarClick = (e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
   const handleLocaleChange = (newLocale: string) => {
@@ -141,7 +145,7 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
           <Select
             id="locale-select"
             value={locale}
-            onChange={(e) => handleLocaleChange(e.target.value)}
+            onChange={(e) => handleLocaleChange(e.target.value as string)}
             size="small"
             variant="outlined"
             renderValue={(v) => (
@@ -262,4 +266,6 @@ export default function AppHeader({ session, onMenuClick }: AppHeaderProps) {
       </Toolbar>
     </AppBar>
   );
-}
+};
+
+export default AppHeader;
