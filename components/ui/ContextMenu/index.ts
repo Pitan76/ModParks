@@ -1,4 +1,4 @@
-export { default as ContextMenuProvider } from "./ContextMenuProvider";
+export { default as ContextMenuProvider, useContextMenuContext } from "./ContextMenuProvider";
 export { useContextMenu, useContextMenuHandler } from "./useContextMenu";
 export { useCommonItems } from "./useCommonItems";
 export type {

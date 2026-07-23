@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
 import { Link as RoutingLink } from "@/i18n/routing";
-import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
+import { useContextMenu, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
 import { toPlainDescription } from "@/lib/utils/plainText";
 
@@ -21,6 +21,7 @@ interface CollectionCardProps {
 
 export default function CollectionCard({ collection }: CollectionCardProps) {
   const tCommon = useTranslations("Common");
+  const { isDisabled } = useContextMenuContext();
 
   const c = useCommonItems();
   const href = `/lists/${collection.id}`;
@@ -40,6 +41,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
       <Box
         onContextMenu={onContextMenu}
         sx={{
+          WebkitTouchCallout: isDisabled ? "default" : "none",
           p: 2.5,
           border: "1px solid",
           borderColor: "divider",

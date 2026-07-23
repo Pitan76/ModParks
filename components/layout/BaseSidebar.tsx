@@ -19,7 +19,7 @@ import { usePathname, useRouter, Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";
-import { useContextMenuHandler, useCommonItems } from "@/components/ui/ContextMenu";
+import { useContextMenuHandler, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 
 export const SIDEBAR_WIDTH = 260;
 
@@ -56,6 +56,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) 
   const locale = useLocale();
   const tMenu = useTranslations("ContextMenu");
   const openMenu = useContextMenuHandler();
+  const { isDisabled } = useContextMenuContext();
   const c = useCommonItems();
 
   const handleLocaleChange = (newLocale: string) => {
@@ -101,6 +102,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) 
                 }}
                 selected={isSelected}
                 sx={{
+                  WebkitTouchCallout: isDisabled ? "default" : "none",
                   borderRadius: 1,
                   "&.Mui-selected": {
                     bgcolor: "primary.main",

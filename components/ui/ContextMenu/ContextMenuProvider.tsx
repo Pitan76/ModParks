@@ -34,6 +34,8 @@ interface ContextMenuContextValue {
   ) => void;
   /** 共有・コピー等の完了通知を出す */
   notify: (message: string) => void;
+  isDisabled: boolean;
+  setIsDisabled: (disabled: boolean) => void;
 }
 
 const ContextMenuContext = React.createContext<ContextMenuContextValue | null>(null);
@@ -82,19 +84,52 @@ export function useContextMenuContext(): ContextMenuContextValue {
 export default function ContextMenuProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<OpenState | null>(null);
   const [toast, setToast] = React.useState<string | null>(null);
+  const [isDisabled, setIsDisabled] = React.useState<boolean>(false);
   const locale = useLocale();
   const router = useRouter();
 
   const notify = React.useCallback((message: string) => setToast(message), []);
+
+  React.useEffect(() => {
+    try {
+      const disabled = window.localStorage.getItem("disable_custom_context_menu") === "true";
+      setIsDisabled(disabled);
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   const browserLabel = locale === "en" ? "Browser menu (Shift + right-click)" : "ブラウザ標準メニュー（Shift+右クリック）";
   const browserToastLabel = locale === "en"
     ? "To open the browser's default menu, hold down the Shift key and right-click."
     : "ブラウザの標準メニューを開くには、Shiftキーを押しながら右クリックしてください。";
 
+  const lastTouchRef = React.useRef<{ x: number; y: number } | null>(null);
+
+  React.useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (touch) {
+        lastTouchRef.current = { x: touch.clientX, y: touch.clientY };
+      }
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (touch) {
+        lastTouchRef.current = { x: touch.clientX, y: touch.clientY };
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, []);
+
   const open = React.useCallback<ContextMenuContextValue["open"]>((event, items, options) => {
-    const isCustomMenuDisabled = typeof window !== "undefined" && window.localStorage.getItem("disable_custom_context_menu") === "true";
-    if (isCustomMenuDisabled) return; // カスタムメニュー無効時はブラウザ標準を表示
+    if (isDisabled) return; // カスタムメニュー無効時はブラウザ標準を表示
 
     const target = buildTarget(event);
     if (shouldPassthrough(event, target, options)) return; // ネイティブメニューを妨害しない
@@ -105,17 +140,29 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
     const resolved = typeof items === "function" ? items(target) : items;
     if (resolved.length === 0) return;
 
+    let clientX = event.clientX;
+    let clientY = event.clientY;
+
+    // iOS Safariなどで長押し時に clientX/Y が 0 になる問題への対策
+    if (clientX === 0 && clientY === 0 && lastTouchRef.current) {
+      clientX = lastTouchRef.current.x;
+      clientY = lastTouchRef.current.y;
+    }
+
     setState({
-      position: { top: event.clientY, left: event.clientX },
+      position: { top: clientY, left: clientX },
       items: resolved,
       target,
       includeBrowserItem: options?.includeBrowserItem ?? true,
     });
-  }, []);
+  }, [isDisabled]);
 
   const close = React.useCallback(() => setState(null), []);
 
-  const value = React.useMemo<ContextMenuContextValue>(() => ({ open, notify }), [open, notify]);
+  const value = React.useMemo<ContextMenuContextValue>(
+    () => ({ open, notify, isDisabled, setIsDisabled }),
+    [open, notify, isDisabled],
+  );
 
   return (
     <ContextMenuContext.Provider value={value}>
@@ -173,6 +220,7 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
             );
             if (confirmDisable) {
               window.localStorage.setItem("disable_custom_context_menu", "true");
+              setIsDisabled(true);
               notify(
                 locale === "en"
                   ? "Custom context menu disabled. Please right-click again."

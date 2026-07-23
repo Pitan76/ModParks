@@ -8,7 +8,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
 import { useTranslations } from "next-intl";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
-import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
+import { useContextMenu, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 import { formatDate } from "@/lib/utils/format";
 import { toPlainDescription } from "@/lib/utils/plainText";
 import { useColorMode } from "@/components/ThemeRegistry";
@@ -32,6 +32,7 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
   const tIdea = useTranslations("Idea");
   const tMenu = useTranslations("ContextMenu");
   const { isNewTheme } = useColorMode();
+  const { isDisabled } = useContextMenuContext();
 
   const c = useCommonItems();
   const href = `/ideas/${idea.id}`;
@@ -59,6 +60,7 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
       variant="outlined"
       onContextMenu={onContextMenu}
       sx={{ 
+        WebkitTouchCallout: isDisabled ? "default" : "none",
         boxShadow: "none",
         transition: "0.2s", 
         ...(isNewTheme ? {

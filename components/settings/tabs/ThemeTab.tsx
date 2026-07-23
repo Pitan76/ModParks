@@ -12,6 +12,7 @@ import Radio from "@mui/material/Radio";
 import Checkbox from "@mui/material/Checkbox";
 import Alert from "@mui/material/Alert";
 import { useColorMode } from "@/components/ThemeRegistry";
+import { useContextMenuContext } from "@/components/ui/ContextMenu";
 
 /**
  * テーマ設定タブコンポーネント。
@@ -20,6 +21,7 @@ import { useColorMode } from "@/components/ThemeRegistry";
 export default function ThemeTab() {
   const t = useTranslations("Settings.theme");
   const { isNewTheme, setThemeType } = useColorMode();
+  const { setIsDisabled } = useContextMenuContext();
   const [selectedTheme, setSelectedTheme] = useState<"new" | "legacy">(
     isNewTheme ? "new" : "legacy"
   );
@@ -39,6 +41,7 @@ export default function ThemeTab() {
     setThemeType(selectedTheme);
     try {
       window.localStorage.setItem("disable_custom_context_menu", useCustomContextMenu ? "false" : "true");
+      setIsDisabled(!useCustomContextMenu);
     } catch (e) {
       // ignore
     }
