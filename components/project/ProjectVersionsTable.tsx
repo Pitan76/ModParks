@@ -1,5 +1,6 @@
 "use client";
 
+import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
@@ -64,7 +65,7 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
   
   const versionMenu = (versionId: string, versionNumber: string): ContextMenuItem[] => {
     const versionUrl = `/projects/${projectSlug}/versions/${versionId}`;
-    const downloadUrl = `/api/download?versionId=${versionId}`;
+    const downloadUrl = buildVersionDownloadUrl(versionId);
     return [
       c.open(versionUrl, tMenu("open")),
       c.openNewTab(versionUrl),
@@ -218,7 +219,7 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
                         color="primary"
                         size="small"
                         aria-label={t("download")}
-                        href={`/api/download?versionId=${version.id}`}
+                        href={buildVersionDownloadUrl(version.id)}
                       >
                         <DownloadIcon />
                       </IconButton>
@@ -303,7 +304,7 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
                   variant="contained"
                   fullWidth
                   startIcon={<DownloadIcon />}
-                  href={`/api/download?versionId=${version.id}`}
+                  href={buildVersionDownloadUrl(version.id)}
                 >
                   {t("download")}
                 </Button>

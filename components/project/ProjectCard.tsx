@@ -15,6 +15,8 @@ import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
 import { DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { toPlainDescription } from "@/lib/utils/plainText";
+import { buildProjectDownloadUrl } from "@/lib/utils/downloadUrl";
+import { useDownloadPreference } from "@/lib/hooks/useDownloadPreference";
 import { useColorMode } from "@/components/ThemeRegistry";
 import ProjectTypeBadge from "./ProjectTypeBadge";
 import ProjectTagBadge from "./ProjectTagBadge";
@@ -55,6 +57,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
 
   const c = useCommonItems();
   const href = `/projects/${project.slug}`;
+  const downloadUrl = buildProjectDownloadUrl(project.slug, useDownloadPreference());
   const onContextMenu = useContextMenu(
     [
       c.open(href, tMenu("viewProject")),
@@ -63,7 +66,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
         id: "cm-download",
         label: tMenu("download"),
         icon: <DownloadIcon fontSize="small" />,
-        href: `/api/download?slug=${project.slug}`,
+        href: downloadUrl,
       },
       { type: "divider" },
       c.copyLink(href),

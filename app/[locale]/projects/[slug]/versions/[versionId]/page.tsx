@@ -1,3 +1,4 @@
+import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
@@ -156,7 +157,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
               variant="contained"
               size="large"
               startIcon={<DownloadIcon />}
-              href={`/api/download?versionId=${version.id}`}
+              href={buildVersionDownloadUrl(version.id)}
               sx={{ py: 1.5, px: 4, borderRadius: 2, fontWeight: 700, width: { xs: "100%", sm: "auto" } }}
             >
               {t("download")}

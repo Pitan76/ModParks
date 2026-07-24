@@ -1,5 +1,6 @@
 "use client";
 
+import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
@@ -43,7 +44,7 @@ const VersionCard = ({ version, projectSlug }: VersionCardProps) => {
   const tMenu = useTranslations("ContextMenu");
 
   const c = useCommonItems();
-  const downloadUrl = `/api/download?versionId=${version.id}`;
+  const downloadUrl = buildVersionDownloadUrl(version.id);
   const onContextMenu = useContextMenu([
     c.open(`/projects/${projectSlug}`, tMenu("viewProject")),
     { type: "divider" },
@@ -164,7 +165,7 @@ const VersionCard = ({ version, projectSlug }: VersionCardProps) => {
                 color="primary"
                 size="small"
                 aria-label={t("download")}
-                href={`/api/download?versionId=${version.id}`}
+                href={buildVersionDownloadUrl(version.id)}
               >
                 <DownloadIcon />
               </IconButton>

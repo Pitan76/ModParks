@@ -6,6 +6,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getR2PublicUrl } from "@/lib/r2";
 import { auth } from "@/lib/auth";
 import { validateApiKey } from "@/lib/api-auth";
+import { toStringArray } from "@/lib/utils/format";
+import { parseCsvParam, type DownloadPreference } from "@/lib/utils/downloadUrl";
 
 /** 未公開扱いのステータス（直リンクでも認可が必要） */
 const RESTRICTED_STATUSES = new Set(["draft", "private"]);
@@ -48,22 +50,39 @@ async function isProjectInsider(
   return !!member;
 }
 
+/** バージョンが絞り込み条件（ローダー / MCバージョン）に合致するか */
+function matchesPreference(
+  version: { loaders: string | null; mcVersions: string | null },
+  pref: DownloadPreference
+): boolean {
+  const loaderOk = !pref.loaders?.length
+    || toStringArray(version.loaders).some((l) => pref.loaders!.includes(l));
+  const mcOk = !pref.mcVersions?.length
+    || toStringArray(version.mcVersions).some((v) => pref.mcVersions!.includes(v));
+
+  return loaderOk && mcOk;
+}
+
 /**
  * プロジェクトの最新（アーカイブ済みを除く）バージョンを取得する。
+ * 絞り込み条件に合致するものを優先し、無ければ単純な最新版を返す。
  */
 async function getLatestVersion(
   db: Awaited<ReturnType<typeof getDatabase>>,
-  slug: string
+  slug: string,
+  pref: DownloadPreference
 ) {
   const project = await db.select({ id: projects.id }).from(projects).where(eq(projects.slug, slug)).get();
   if (!project) return undefined;
 
-  return db
+  const candidates = await db
     .select()
     .from(versions)
     .where(and(eq(versions.projectId, project.id), isNull(versions.archivedAt)))
     .orderBy(desc(versions.createdAt))
-    .get();
+    .all();
+
+  return candidates.find((v) => matchesPreference(v, pref)) ?? candidates[0];
 }
 
 /** GET /api/download?versionId=... | ?slug=...
@@ -84,7 +103,10 @@ export async function GET(req: NextRequest) {
     // バージョンを取得
     const version = versionIdParam
       ? await db.select().from(versions).where(eq(versions.id, versionIdParam)).get()
-      : await getLatestVersion(db, slug!);
+      : await getLatestVersion(db, slug!, {
+          loaders:    parseCsvParam(req.nextUrl.searchParams.get("loaders")),
+          mcVersions: parseCsvParam(req.nextUrl.searchParams.get("mcVersions")),
+        });
 
     if (!version) {
       return NextResponse.json({ error: "Version not found" }, { status: 404 });
