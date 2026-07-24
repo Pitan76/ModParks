@@ -138,7 +138,6 @@ const ProjectDetailHeader = ({
                 <ShareMenuButton 
                   url={`${SITE_URL}/projects/${p.slug}`}
                   title={p.name}
-                  text={p.description ? p.description.slice(0, 100) + (p.description.length > 100 ? "..." : "") : undefined}
                 />
                 <ProjectFavoriteButton
                   projectId={p.id}

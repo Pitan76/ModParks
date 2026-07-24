@@ -267,7 +267,6 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
               <ShareMenuButton
                 url={`${SITE_URL}/ideas/${id}`}
                 title={ideaData.title}
-                text={ideaData.content.length > 100 ? ideaData.content.slice(0, 100) + "..." : ideaData.content}
               />
             </Box>
             <Box sx={{ 
