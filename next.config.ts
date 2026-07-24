@@ -24,8 +24,9 @@ const nextConfig: NextConfig = {
         hostname: "*.r2.cloudflarestorage.com",
       },
       {
+        // R2 カスタムドメイン（R2_PUBLIC_URL）
         protocol: "https",
-        hostname: "files.modparks.dev",
+        hostname: "files.modparks.pitan76.net",
       },
     ],
   },

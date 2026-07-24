@@ -50,3 +50,7 @@ NEXT_PUBLIC_RECIPE_CDN_URL = "https://recipe.modparks.pitan76.net"
 USE_RECIPE_CDN_API = "true"
 GITHUB_CONFIG_REPO = "Pitan76/ModParks"
 CLOUDFLARE_ACCOUNT_ID = "70a9b16c9396a3ab84c4ce7719800373"
+# R2 公開URL。これを設定すると画像/アイコン/mod の配信が R2 エッジ直になり、
+# /api/r2 プロキシ（Worker 経由）を通らなくなる＝Worker の継続負荷が消える。
+# modparks-storage バケットに接続したカスタムドメイン（Cloudflare CDN キャッシュ対象）。
+R2_PUBLIC_URL = "https://files.modparks.pitan76.net"

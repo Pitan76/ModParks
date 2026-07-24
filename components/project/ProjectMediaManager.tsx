@@ -51,7 +51,14 @@ const ProjectMediaManager = ({ projectId, projectSlug, media }: ProjectMediaMana
     setBusy(true);
     setError(null);
     try {
-      const { publicUrl } = await uploadFileToR2(file, { type: "media", projectSlug });
+      // presigned URL 経路ではサーバー側の 5MB 上限が効かないため、
+      // クライアントで長辺 1920 にリサイズして転送量とサイズを抑える。
+      const resized = await resizeImageFile(file, 1920, 1920);
+      if (resized.size > 5 * 1024 * 1024) {
+        setError(t("errors.uploadFailed"));
+        return;
+      }
+      const { publicUrl } = await uploadFileToR2(resized, { type: "media", projectSlug });
       const res = await addProjectMedia(projectId, publicUrl);
       if ("error" in res) {
         setError(t(`errors.${res.error}`));
