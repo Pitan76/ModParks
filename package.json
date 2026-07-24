@@ -30,6 +30,7 @@
     "@simplewebauthn/browser": "^9.0.1",
     "@simplewebauthn/server": "^9.0.3",
     "@types/bcryptjs": "^2.4.6",
+    "aws4fetch": "^1.0.20",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
     "js-cookie": "^3.0.8",

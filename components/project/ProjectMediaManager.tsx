@@ -13,6 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { useTranslations } from "next-intl";
 import { uploadFileToR2 } from "@/lib/utils/upload";
+import { resizeImageFile } from "@/lib/utils/image";
 import { addProjectMedia, deleteProjectMedia, toggleMediaFeatured } from "@/lib/actions/projectMedia";
 import type { ProjectMedia } from "@/db/schema";
 

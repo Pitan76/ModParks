@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { buildR2Key, getR2PublicUrl } from "@/lib/r2";
+import { getR2S3Config, createPresignedPutUrl } from "@/lib/r2Presign";
 import { createId } from "@paralleldrive/cuid2";
 
 /** POST /api/upload/presign
@@ -74,8 +75,22 @@ export async function POST(req: NextRequest) {
   const slugOrId = type === "avatar" ? session.user.id : projectSlug!;
   const key = buildR2Key(type, slugOrId, `${uniqueId}/${safeFileName}`);
 
-  // 開発環境では署名付きURLの代わりに直接アップロードURLを返す
-  // 本番: Cloudflare Workers の R2 バインディングから createPresignedUrl を使用
+  // 本番: R2 の S3 互換 API で presigned URL を発行し、ブラウザ → R2 へ直接 PUT させる。
+  // これによりアップロードのバイト転送が OpenNext Worker を一切通らず、Worker 負荷が発生しない。
+  // クライアント側（uploadFileToR2）は PUT 先が変わるだけで無改造で動く。
+  const s3Config = getR2S3Config();
+  if (s3Config) {
+    try {
+      const uploadUrl = await createPresignedPutUrl(key, s3Config);
+      return NextResponse.json({ key, uploadUrl, publicUrl: getR2PublicUrl(key) });
+    } catch (err) {
+      // 署名失敗時はフォールバックせず可視化する（設定ミスを黙って握りつぶさない）
+      console.error("Failed to create presigned URL:", err);
+      return NextResponse.json({ error: "Failed to create upload URL" }, { status: 500 });
+    }
+  }
+
+  // フォールバック（開発 / S3 クレデンシャル未設定時）: Worker 経由の直接アップロード。
   return NextResponse.json({
     key,
     uploadUrl: `/api/upload/direct?key=${encodeURIComponent(key)}`,

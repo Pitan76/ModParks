@@ -198,7 +198,8 @@ export default function ProjectMediaTab({ media }: ProjectMediaTabProps) {
                   src={selectedItem.url}
                   alt={selectedItem.caption || "Project media"}
                   sx={{
-                    width: "100%",
+                    maxWidth: "100%",
+                    width: "auto",
                     maxHeight: "80vh",
                     objectFit: "contain",
                     display: "block",
