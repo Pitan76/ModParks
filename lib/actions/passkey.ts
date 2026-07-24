@@ -1,13 +1,10 @@
 "use server";
 
-import {
-  generateRegistrationOptions,
-  verifyRegistrationResponse,
-} from "@simplewebauthn/server";
-import { isoBase64URL } from "@simplewebauthn/server/helpers";
 import type { RegistrationResponseJSON } from "@simplewebauthn/types";
+import type { AuthenticatorTransportFuture } from "@simplewebauthn/server";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { generateRegistrationOptions, verifyRegistration } from "@/lib/services/auth";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { authenticators } from "@/db/schema";
 import { getRpContext } from "@/lib/webauthn/config";
@@ -34,6 +31,10 @@ export const listPasskeys = async (): Promise<PasskeyInfo[]> => {
 /**
  * パスキー登録用の PublicKeyCredentialCreationOptions を生成する。
  * 既存パスキーは excludeCredentials で重複登録を防ぐ。
+ *
+ * @deprecated 廃止予定。option 生成は modparks-auth サイドカー
+ * （lib/services/auth.ts）へ移設済み。この関数は DB 参照＋サイドカー呼び出しを
+ * 束ねる互換ラッパーとして残している。
  */
 export const startPasskeyRegistration = async () => {
   const { db, session, userId } = await getAuthenticatedDb();
@@ -47,13 +48,10 @@ export const startPasskeyRegistration = async () => {
     userID: userId,
     userName: session.user.email || session.user.username || userId,
     userDisplayName: session.user.displayName || session.user.username || userId,
-    attestationType: "none",
     excludeCredentials: existing.map((a) => ({
-      id: isoBase64URL.toBuffer(a.credentialID),
-      type: "public-key" as const,
-      transports: a.transports ? (JSON.parse(a.transports) as AuthenticatorTransport[]) : undefined,
+      id: a.credentialID,
+      transports: a.transports ? (JSON.parse(a.transports) as AuthenticatorTransportFuture[]) : undefined,
     })),
-    authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
   });
 
   await setChallenge("reg", options.challenge);
@@ -62,6 +60,10 @@ export const startPasskeyRegistration = async () => {
 
 /**
  * ブラウザから返された登録レスポンスを検証し、パスキーを保存する。
+ *
+ * @deprecated 廃止予定。暗号検証は modparks-auth サイドカー
+ * （lib/services/auth.ts）へ移設済み。この関数は検証結果を DB へ保存する
+ * 互換ラッパーとして残している。
  */
 export const finishPasskeyRegistration = async (response: RegistrationResponseJSON, name: string) => {
   const { db, userId } = await getAuthenticatedDb();
@@ -70,7 +72,7 @@ export const finishPasskeyRegistration = async (response: RegistrationResponseJS
   const expectedChallenge = await getChallenge("reg");
   if (!expectedChallenge) return { error: "CHALLENGE_EXPIRED" };
 
-  const verification = await verifyRegistrationResponse({
+  const verification = await verifyRegistration({
     response,
     expectedChallenge,
     expectedOrigin: origin,
@@ -82,10 +84,10 @@ export const finishPasskeyRegistration = async (response: RegistrationResponseJS
 
   const info = verification.registrationInfo;
   await db.insert(authenticators).values({
-    credentialID: isoBase64URL.fromBuffer(info.credentialID),
+    credentialID: info.credentialID,
     userId,
     providerAccountId: userId,
-    credentialPublicKey: isoBase64URL.fromBuffer(info.credentialPublicKey),
+    credentialPublicKey: info.credentialPublicKey,
     counter: info.counter,
     credentialDeviceType: info.credentialDeviceType,
     credentialBackedUp: info.credentialBackedUp,

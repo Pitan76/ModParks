@@ -1,0 +1,7 @@
+name = "modparks-auth"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Service Binding 経由でのみ到達させる。公開URLを持たせない。
+workers_dev = false

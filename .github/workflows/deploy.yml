@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      deploy_jar:
+        description: "サイドカー(JAR worker)も強制デプロイする"
+        type: boolean
+        default: false
 
 jobs:
   deploy:
@@ -12,6 +18,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # サイドカー（JAR worker）に変更があるかを判定する
+      - name: Detect changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            jar:
+              - 'workers/jar/**'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,7 +45,9 @@ jobs:
           CF_WEBPACK_BUILD: "1"
 
       # メイン Worker が Service Binding するため、先にサイドカーを配置する
+      # サイドカー自体に変更があったときだけ再デプロイする（それ以外は既存のものを再利用）
       - name: Deploy JAR worker
+        if: steps.changes.outputs.jar == 'true' || inputs.deploy_jar == true
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
