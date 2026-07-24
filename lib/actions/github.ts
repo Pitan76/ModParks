@@ -11,6 +11,7 @@ import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { channelFromGithubPrerelease } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/services/jar";
+import { scanVersionFile } from "@/lib/actions/versionScan";
 import {
   fetchGithubReleases,
   fetchLatestGithubRelease,
@@ -159,6 +160,7 @@ export async function importGithubReleaseSystem(
   const fullProject = await db.select().from(projects).where(eq(projects.id, project.id)).get();
   if (fullProject) {
     after(async () => {
+      await scanVersionFile(db, id, getR2PublicUrl(key), asset.name);
       await notifyNewVersion(db, fullProject, versionNumber);
     });
   }

@@ -4,6 +4,7 @@ import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
+import { scanVersionFile } from "@/lib/actions/versionScan";
 import { createVersionSchema, updateVersionSchema } from "@/lib/validations";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -72,6 +73,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
   await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
 
   after(async () => {
+    await scanVersionFile(db, id, fileUrl, fileName);
     await notifyNewVersion(db, project, parsed.data.versionNumber);
   });
 

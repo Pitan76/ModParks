@@ -139,6 +139,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
+    // スキャンで malicious 判定のファイルは配布しない。
+    // 誤検知の可能性があるため、作者・メンバー・管理者は検証目的で取得できる。
+    if (version.scanStatus === "malicious" && !isInsider) {
+      return NextResponse.json({ error: "Download blocked by security scan" }, { status: 403 });
+    }
+
     // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）。
     // 作者・メンバー・管理者による自己ダウンロード（テスト等）は集計から除外する。
     const rlRes = isInsider
