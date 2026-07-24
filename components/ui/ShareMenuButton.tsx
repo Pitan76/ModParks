@@ -20,7 +20,7 @@ export type ShareMenuButtonProps = {
 
 export default function ShareMenuButton({ url, title, text, variant = "icon" }: ShareMenuButtonProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const t = useTranslations("Common");
+  const t = useTranslations("ContextMenu");
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {

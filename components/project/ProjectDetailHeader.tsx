@@ -9,7 +9,9 @@ import Tooltip from "@mui/material/Tooltip";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
 import ProjectSubscribeButton from "./ProjectSubscribeButton";
 import AddToCollectionButton from "./AddToCollectionButton";
+import ShareMenuButton from "@/components/ui/ShareMenuButton";
 import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
+import { SITE_URL } from "@/lib/config";
 
 export type ProjectDetailHeaderProps = {
   /** 対象プロジェクトの情報 */
@@ -133,6 +135,11 @@ const ProjectDetailHeader = ({
               <DateLabel date={p.updatedAt} type="updated" />
               
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: { sm: 2 } }}>
+                <ShareMenuButton 
+                  url={`${SITE_URL}/projects/${p.slug}`}
+                  title={p.name}
+                  text={p.description ? p.description.slice(0, 100) + (p.description.length > 100 ? "..." : "") : undefined}
+                />
                 <ProjectFavoriteButton
                   projectId={p.id}
                   initialCount={favoritesCount}

@@ -63,7 +63,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
         id: "cm-download",
         label: tMenu("download"),
         icon: <DownloadIcon fontSize="small" />,
-        href: `/projects/${project.slug}/versions`,
+        href: `${href}?tab=files`,
       },
       { type: "divider" },
       c.copyLink(href),
