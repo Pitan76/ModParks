@@ -74,6 +74,32 @@
     "label": "Advertisement",
     "previewLabel": "Ad space (preview)"
   },
+  "Scan": {
+    "appeal": "Appeal",
+    "appealSubmitted": "Your appeal has been submitted. Please wait for an administrator to review it.",
+    "appealDialogTitle": "Appeal scan result",
+    "appealDialogDesc": "Explain why you believe this result is incorrect. An administrator will review it.",
+    "appealReasonPlaceholder": "e.g. The bundled .dll is a legitimate LWJGL native library",
+    "submitAppeal": "Submit",
+    "cancel": "Cancel",
+    "status": {
+      "suspicious": {
+        "title": "Security scan flagged this file",
+        "body": "Potentially concerning traits were found. You can still download it, but please review the contents."
+      },
+      "malicious": {
+        "title": "Distribution blocked by security scan",
+        "body": "Malware-like structures were detected, so distribution to the public has been blocked."
+      }
+    },
+    "errors": {
+      "reasonRequired": "Please enter a reason.",
+      "notFound": "Target not found.",
+      "notAppealable": "This version is not eligible for an appeal.",
+      "alreadyPending": "There is already a pending appeal.",
+      "Forbidden": "You do not have permission."
+    }
+  },
   "Nav": {
     "home": "Home",
     "projects": "Discover",

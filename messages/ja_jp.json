@@ -74,6 +74,32 @@
     "label": "広告",
     "previewLabel": "広告スペース（プレビュー）"
   },
+  "Scan": {
+    "appeal": "異議を申請",
+    "appealSubmitted": "異議を申請しました。管理者の確認をお待ちください。",
+    "appealDialogTitle": "スキャン判定への異議申請",
+    "appealDialogDesc": "この判定が誤りだと考える理由を記入してください。管理者が内容を確認します。",
+    "appealReasonPlaceholder": "例: 同梱の .dll は LWJGL の正規ネイティブライブラリです",
+    "submitAppeal": "申請する",
+    "cancel": "キャンセル",
+    "status": {
+      "suspicious": {
+        "title": "セキュリティスキャンで注意が検出されました",
+        "body": "このファイルには注意すべき兆候が見つかりました。ダウンロードは可能ですが、内容をご確認ください。"
+      },
+      "malicious": {
+        "title": "セキュリティスキャンにより配布が停止されています",
+        "body": "このファイルにはマルウェアの疑いのある構造が検出されたため、一般ユーザーへの配布を停止しています。"
+      }
+    },
+    "errors": {
+      "reasonRequired": "理由を入力してください。",
+      "notFound": "対象が見つかりません。",
+      "notAppealable": "このバージョンは異議申請の対象ではありません。",
+      "alreadyPending": "既に保留中の異議申請があります。",
+      "Forbidden": "権限がありません。"
+    }
+  },
   "Nav": {
     "home": "ホーム",
     "projects": "探す",

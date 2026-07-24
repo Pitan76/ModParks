@@ -105,20 +105,6 @@ export default function ConfigClient({ initialTags, initialPlatforms }: { initia
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      
-      {/* --- General Settings Section --- */}
-      <Card>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>{tAdmin("general")}</Typography>
-          <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 3, maxWidth: 600 }}>
-            <TextField label={tAdmin("siteName")} defaultValue="ModParks" size="small" />
-            <TextField label={tAdmin("siteDesc")} defaultValue="Minecraft Mod & Plugin Platform" size="small" multiline rows={3} />
-            <Button variant="contained" sx={{ alignSelf: "flex-start" }} onClick={() => alert("General settings mock saved!")}>
-              {tAdmin("saveBtn")}
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
 
       {/* --- Tags Section --- */}
       <Card>
