@@ -67,7 +67,7 @@ export async function deleteFromR2(
  * R2 のキーとして使用するプレフィックス一覧。
  * buildR2Key() で生成されるキーは必ずこのいずれかで始まる。
  */
-const R2_KEY_PREFIXES = ["mod/", "icon/", "avatar/"] as const;
+const R2_KEY_PREFIXES = ["mod/", "icon/", "avatar/", "media/"] as const;
 
 /**
  * 保存済みの fileUrl から R2 オブジェクトキーを逆算します。
@@ -113,7 +113,7 @@ export function getR2KeyFromUrl(fileUrl: string): string | null {
  * @returns R2のキー文字列 (例: `avatar/userid/123456789_filename.png`)
  */
 export function buildR2Key(
-  type: "icon" | "mod" | "avatar",
+  type: "icon" | "mod" | "avatar" | "media",
   id: string,
   filename: string
 ): string {
