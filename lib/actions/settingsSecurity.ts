@@ -4,7 +4,7 @@ import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { users, userProfiles, userSettings, rateLimits } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { hashPassword, comparePassword } from "@/lib/services/auth";
+import { hashPassword, comparePassword, validateTotpToken, provisionTotp } from "@/lib/services/auth";
 
 /**
  * ユーザー名の変更を行う Server Action。
@@ -81,10 +81,7 @@ export const changePassword = async (oldPass: string, newPass: string, totpToken
 
   if (user?.twoFactorEnabled && user?.twoFactorSecret) {
     if (!totpToken) return { error: "INVALID_CODE" };
-    const { TOTP } = await import("otpauth");
-    const totp = new TOTP({ secret: user.twoFactorSecret });
-    const delta = totp.validate({ token: totpToken, window: 1 });
-    if (delta === null) return { error: "INVALID_CODE" };
+    if (!(await validateTotpToken(user.twoFactorSecret, totpToken))) return { error: "INVALID_CODE" };
   }
 
   const hashed = await hashPassword(newPass, 8);
@@ -113,10 +110,7 @@ export const deleteAccount = async (passwordOrToken?: string) => {
   }
 
   if (!isAuthorized && user.twoFactorSecret && passwordOrToken) {
-    const { TOTP } = await import("otpauth");
-    const totp = new TOTP({ secret: user.twoFactorSecret });
-    const delta = totp.validate({ token: passwordOrToken, window: 1 });
-    if (delta !== null) isAuthorized = true;
+    if (await validateTotpToken(user.twoFactorSecret, passwordOrToken)) isAuthorized = true;
   }
 
   if ((user.passwordHash || user.twoFactorEnabled) && !isAuthorized) return { error: "UNAUTHORIZED" };
@@ -146,21 +140,14 @@ export const deleteAccount = async (passwordOrToken?: string) => {
  */
 export const generateTotpSecret = async () => {
   const { db, session, userId } = await getAuthenticatedDb();
-  const { TOTP, Secret } = await import("otpauth");
 
-  const secret = new Secret();
-  const totp = new TOTP({
-    issuer: "ModParks",
-    label: session.user.email || session.user.username || "User",
-    algorithm: "SHA1",
-    digits: 6,
-    period: 30,
-    secret,
-  });
+  const { base32, uri } = await provisionTotp(
+    session.user.email || session.user.username || "User"
+  );
 
-  await db.update(users).set({ twoFactorSecret: secret.base32 }).where(eq(users.id, userId));
+  await db.update(users).set({ twoFactorSecret: base32 }).where(eq(users.id, userId));
 
-  return { uri: totp.toString() };
+  return { uri };
 };
 
 /**
@@ -168,7 +155,6 @@ export const generateTotpSecret = async () => {
  */
 export const verifyAndEnableTotp = async (token: string) => {
   const { db, userId } = await getAuthenticatedDb();
-  const { TOTP } = await import("otpauth");
 
   const { checkRateLimit } = await import("@/lib/rate-limit");
   const rlRes = await checkRateLimit("2fa_verify", 10, 5 * 60 * 1000);
@@ -177,10 +163,7 @@ export const verifyAndEnableTotp = async (token: string) => {
   const user = await db.select().from(users).where(eq(users.id, userId)).get();
   if (!user || !user.twoFactorSecret) return { error: "NO_SETUP" };
 
-  const totp = new TOTP({ secret: user.twoFactorSecret });
-  const delta = totp.validate({ token, window: 1 });
-
-  if (delta === null) return { error: "INVALID_CODE" };
+  if (!(await validateTotpToken(user.twoFactorSecret, token))) return { error: "INVALID_CODE" };
 
   await db.update(users).set({ twoFactorEnabled: true }).where(eq(users.id, userId));
 
@@ -204,10 +187,7 @@ export const disableTotp = async (passwordOrToken: string) => {
   }
   
   if (!isAuthorized && user.twoFactorSecret) {
-    const { TOTP } = await import("otpauth");
-    const totp = new TOTP({ secret: user.twoFactorSecret });
-    const delta = totp.validate({ token: passwordOrToken, window: 1 });
-    if (delta !== null) isAuthorized = true;
+    if (await validateTotpToken(user.twoFactorSecret, passwordOrToken)) isAuthorized = true;
   }
 
   if (!isAuthorized) return { error: "UNAUTHORIZED" };

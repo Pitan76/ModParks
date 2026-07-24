@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles, apiKeys } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
-import { comparePassword } from "@/lib/services/auth";
-import { TOTP } from "otpauth";
+import { comparePassword, validateTotpToken } from "@/lib/services/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 const LOGIN_RATE_LIMIT = 10;
@@ -66,17 +65,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "2FA is enabled but secret is missing." }, { status: 500 });
       }
 
-      const totp = new TOTP({
-        issuer: "ModParks",
-        label: identifier,
-        algorithm: "SHA1",
-        digits: 6,
-        period: 30,
-        secret: user.twoFactorSecret,
-      });
-
-      const delta = totp.validate({ token: totpCode, window: 1 });
-      if (delta === null) {
+      const valid = await validateTotpToken(user.twoFactorSecret, totpCode);
+      if (!valid) {
         return NextResponse.json({ error: "Invalid 2FA code." }, { status: 401 });
       }
     }

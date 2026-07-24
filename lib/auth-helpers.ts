@@ -69,9 +69,8 @@ export async function getReauthenticatedAdminDb(totpToken: string) {
   }
   if (!totpToken) throw new Error("INVALID_CODE");
 
-  const { TOTP } = await import("otpauth");
-  const totp = new TOTP({ secret: user.twoFactorSecret });
-  if (totp.validate({ token: totpToken, window: 1 }) === null) {
+  const { validateTotpToken } = await import("@/lib/services/auth");
+  if (!(await validateTotpToken(user.twoFactorSecret, totpToken))) {
     throw new Error("INVALID_CODE");
   }
 

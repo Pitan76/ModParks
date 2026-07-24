@@ -116,10 +116,9 @@ export const authProviders = [
             }
             throw new TwoFactorRequiredError();
           }
-          const { TOTP } = await import("otpauth");
-          const totp = new TOTP({ secret: user.twoFactorSecret as string });
-          const delta = totp.validate({ token: credentials.token as string, window: 1 });
-          if (delta === null) {
+          const { validateTotpToken } = await import("@/lib/services/auth");
+          const totpValid = await validateTotpToken(user.twoFactorSecret as string, credentials.token as string);
+          if (!totpValid) {
             const { CredentialsSignin } = await import("next-auth");
             class InvalidTwoFactorError extends CredentialsSignin {
               code = "INVALID_2FA_TOKEN";

@@ -90,3 +90,28 @@ export interface BcryptCompareRequest {
 export interface BcryptCompareResult {
   match: boolean;
 }
+
+// ── /totp-validate ─────────────────────────────────────────────────────
+export interface TotpValidateRequest {
+  /** base32 シークレット（DB の twoFactorSecret） */
+  secret: string;
+  token: string;
+  /** 許容する時間窓（前後ステップ数）。既定 1 */
+  window?: number;
+}
+export interface TotpValidateResult {
+  /** validate が delta を返した（= トークンが有効）か */
+  valid: boolean;
+}
+
+// ── /totp-provision ────────────────────────────────────────────────────
+export interface TotpProvisionRequest {
+  /** otpauth URI に載せる label（メール/ユーザー名など） */
+  label: string;
+}
+export interface TotpProvisionResult {
+  /** DB に保存する base32 シークレット */
+  base32: string;
+  /** 認証アプリ登録用の otpauth:// URI */
+  uri: string;
+}

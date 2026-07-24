@@ -9,6 +9,8 @@ import type {
   VerifyAuthenticationResult,
   BcryptHashResult,
   BcryptCompareResult,
+  TotpValidateResult,
+  TotpProvisionResult,
 } from "@/workers/auth/src/types";
 
 export type {
@@ -98,4 +100,21 @@ export async function hashPassword(password: string, rounds = 8): Promise<string
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
   const { match } = await callAuthWorker<BcryptCompareResult>("/bcrypt-compare", { password, hash });
   return match;
+}
+
+/**
+ * TOTP トークンを検証する。otpauth を本体バンドルから外すためサイドカーで実行する。
+ * @returns トークンが有効なら true
+ */
+export async function validateTotpToken(secret: string, token: string, window = 1): Promise<boolean> {
+  const { valid } = await callAuthWorker<TotpValidateResult>("/totp-validate", { secret, token, window });
+  return valid;
+}
+
+/**
+ * TOTP シークレット（base32）と認証アプリ登録用 otpauth URI を生成する。
+ * label は otpauth URI に載る表示名（メール/ユーザー名など）。
+ */
+export function provisionTotp(label: string): Promise<TotpProvisionResult> {
+  return callAuthWorker<TotpProvisionResult>("/totp-provision", { label });
 }

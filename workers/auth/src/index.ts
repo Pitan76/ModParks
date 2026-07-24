@@ -6,6 +6,7 @@ import {
 } from "@simplewebauthn/server";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
 import bcrypt from "bcryptjs";
+import { TOTP, Secret } from "otpauth";
 import type { AuthWorkerEnv } from "./env";
 import type {
   RegistrationOptionsRequest,
@@ -20,6 +21,10 @@ import type {
   BcryptHashResult,
   BcryptCompareRequest,
   BcryptCompareResult,
+  TotpValidateRequest,
+  TotpValidateResult,
+  TotpProvisionRequest,
+  TotpProvisionResult,
 } from "./types";
 
 const json = (body: unknown, status = 200) =>
@@ -112,6 +117,27 @@ async function handleBcryptCompare(req: Request): Promise<BcryptCompareResult> {
   return { match: await bcrypt.compare(b.password, b.hash) };
 }
 
+async function handleTotpValidate(req: Request): Promise<TotpValidateResult> {
+  const b = (await req.json()) as TotpValidateRequest;
+  const totp = new TOTP({ secret: b.secret });
+  const delta = totp.validate({ token: b.token, window: b.window ?? 1 });
+  return { valid: delta !== null };
+}
+
+async function handleTotpProvision(req: Request): Promise<TotpProvisionResult> {
+  const b = (await req.json()) as TotpProvisionRequest;
+  const secret = new Secret();
+  const totp = new TOTP({
+    issuer: "ModParks",
+    label: b.label,
+    algorithm: "SHA1",
+    digits: 6,
+    period: 30,
+    secret,
+  });
+  return { base32: secret.base32, uri: totp.toString() };
+}
+
 const ROUTES: Record<string, (req: Request) => Promise<unknown>> = {
   "/registration-options": handleRegistrationOptions,
   "/authentication-options": handleAuthenticationOptions,
@@ -119,6 +145,8 @@ const ROUTES: Record<string, (req: Request) => Promise<unknown>> = {
   "/verify-authentication": handleVerifyAuthentication,
   "/bcrypt-hash": handleBcryptHash,
   "/bcrypt-compare": handleBcryptCompare,
+  "/totp-validate": handleTotpValidate,
+  "/totp-provision": handleTotpProvision,
 };
 
 const worker = {
