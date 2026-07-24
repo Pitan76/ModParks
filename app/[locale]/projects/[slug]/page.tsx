@@ -13,6 +13,8 @@ import { eq, and, sql } from "drizzle-orm";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
+import ProjectMediaCarousel from "@/components/project/ProjectMediaCarousel";
+import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 import ProjectTabsManager from "@/components/project/ProjectTabsManager";
@@ -105,13 +107,16 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   const db = await getDatabase();
-  const [favoritesData, userFavoriteData, dependencies, dependents, userSubscription] = await Promise.all([
+  const [favoritesData, userFavoriteData, dependencies, dependents, userSubscription, media] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(projectFavorites).where(eq(projectFavorites.projectId, project.id)).get(),
     session?.user?.id ? db.select().from(projectFavorites).where(and(eq(projectFavorites.projectId, project.id), eq(projectFavorites.userId, session.user.id))).get() : null,
     getProjectDependencies(project.id),
     getProjectDependents(project.id),
     session?.user?.id ? db.select().from(projectSubscriptions).where(and(eq(projectSubscriptions.projectId, project.id), eq(projectSubscriptions.userId, session.user.id))).get() : null,
+    getPublicProjectMedia(project.id),
   ]);
+
+  const featuredMedia = media.filter((m) => m.featured);
 
   const isSubscribed = !!userSubscription;
 
@@ -152,7 +157,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             isSubscribed={isSubscribed}
           />
 
-          <ProjectTabsManager 
+          <ProjectMediaCarousel items={featuredMedia.map((m) => ({ id: m.id, url: m.url, caption: m.caption }))} />
+
+          <ProjectTabsManager
             canEdit={canEdit}
             manageHref={`/projects/${p.slug}/edit`}
             issueTrackerUrl={p.issueTrackerUrl}
