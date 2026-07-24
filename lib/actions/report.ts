@@ -6,6 +6,7 @@ import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 
 /**
  * ユーザーがプロジェクトを通報する Server Action
@@ -54,13 +55,20 @@ export async function updateReportStatus(
   status: "resolved" | "dismissed",
   _formData?: FormData
 ) {
-  const { db } = await getAdminDb();
+  const { db, userId } = await getAdminDb();
 
   await db
     .update(reports)
     .set({ status })
     .where(eq(reports.id, reportId))
     .run();
+
+  await recordModerationAudit(
+    db,
+    status === "resolved" ? "report_resolve" : "report_dismiss",
+    reportId,
+    userId
+  );
 
   revalidatePath("/admin/reports");
   return { success: true };
@@ -75,13 +83,15 @@ export async function updateReportStatus(
  * @throws Forbidden 管理者権限がない場合
  */
 export async function unpublishProject(projectId: string, _formData?: FormData) {
-  const { db } = await getAdminDb();
+  const { db, userId } = await getAdminDb();
 
   await db
     .update(projects)
     .set({ status: "draft" })
     .where(eq(projects.id, projectId))
     .run();
+
+  await recordModerationAudit(db, "project_unpublish", projectId, userId);
 
   revalidatePath("/admin/reports");
   revalidatePath("/projects");

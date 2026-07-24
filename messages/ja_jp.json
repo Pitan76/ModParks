@@ -602,9 +602,22 @@
       "projects": "プロジェクト管理",
       "ideas": "アイデア管理",
       "reports": "通報管理",
+      "appeals": "スキャン異議",
       "config": "システム設定",
       "backup": "バックアップ",
       "audit": "監査ログ"
+    },
+    "appeals": {
+      "listTitle": "スキャン異議申請",
+      "empty": "保留中の異議申請はありません。",
+      "appellant": "申請者: {name}",
+      "notePlaceholder": "裁定コメント（任意・申請者に表示されます）",
+      "approve": "承認（配布を許可）",
+      "reject": "却下",
+      "reviewed": {
+        "approved": "{name} の異議を承認しました。",
+        "rejected": "{name} の異議を却下しました。"
+      }
     },
     "users": {
       "title": "ユーザー管理",

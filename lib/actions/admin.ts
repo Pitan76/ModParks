@@ -5,6 +5,7 @@ import { users, settingsAudit, backupAudit } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 
 export async function updateUserRole(targetUserId: string, newRole: "user" | "admin") {
   const { db, session } = await getAdminDb();
@@ -15,6 +16,7 @@ export async function updateUserRole(targetUserId: string, newRole: "user" | "ad
   }
 
   await db.update(users).set({ role: newRole }).where(eq(users.id, targetUserId));
+  await recordModerationAudit(db, "role_change", targetUserId, session.user.id, { newRole });
   revalidatePath("/admin/users");
   return { success: true };
 }

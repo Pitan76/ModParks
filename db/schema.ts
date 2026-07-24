@@ -867,6 +867,43 @@ export const backupAudit = sqliteTable("backup_audit", {
 
 export type BackupAudit = typeof backupAudit.$inferSelect;
 
+// ─── Moderation Audit ─────────────────────────────────────────────────────────
+
+/**
+ * 管理者によるモデレーション操作（通報対応・非公開化・権限変更・スキャン異議裁定など）の監査ログ。
+ *
+ * settingsAudit / backupAudit と同じ理由で users への外部キーは張らず、
+ * 操作時点のメールアドレスを非正規化して保持する。
+ */
+export const moderationAudit = sqliteTable("moderation_audit", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  action: text("action", {
+    enum: [
+      "report_resolve",
+      "report_dismiss",
+      "project_unpublish",
+      "role_change",
+      "scan_appeal_approve",
+      "scan_appeal_reject",
+    ],
+  }).notNull(),
+  /** 操作対象の識別子（projectId / userId / versionId など） */
+  targetId: text("target_id").notNull(),
+  /** 追加情報（変更前後の値・理由など）を JSON で保持する */
+  detail: text("detail", { mode: "json" }).$type<Record<string, unknown>>(),
+  performedBy: text("performed_by").notNull(),
+  performedByEmail: text("performed_by_email"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  actionIdx: index("moderation_audit_action_idx").on(table.action, table.createdAt),
+}));
+
+export type ModerationAudit = typeof moderationAudit.$inferSelect;
+
 // ─── Deleted Records (墓標) ───────────────────────────────────────────────────
 
 /**

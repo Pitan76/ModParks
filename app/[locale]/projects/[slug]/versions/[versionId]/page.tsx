@@ -22,6 +22,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import FileHashChip from "@/components/project/FileHashChip";
+import ScanStatusBanner from "@/components/project/ScanStatusBanner";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
 import { SITE_URL } from "@/lib/config";
@@ -129,6 +130,13 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
         )}
       </Box>
 
+      <ScanStatusBanner
+        versionId={version.id}
+        scanStatus={version.scanStatus}
+        scanFindings={canEdit ? version.scanFindings : null}
+        canAppeal={canEdit}
+      />
+
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
           <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, mb: 3, gap: 2 }}>
@@ -157,15 +165,17 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
               </Box>
             </Box>
 
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<DownloadIcon />}
-              href={buildVersionDownloadUrl(version.id)}
-              sx={{ py: 1.5, px: 4, borderRadius: 2, fontWeight: 700, width: { xs: "100%", sm: "auto" } }}
-            >
-              {t("download")}
-            </Button>
+            {!(version.scanStatus === "malicious" && !canEdit) && (
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<DownloadIcon />}
+                href={buildVersionDownloadUrl(version.id)}
+                sx={{ py: 1.5, px: 4, borderRadius: 2, fontWeight: 700, width: { xs: "100%", sm: "auto" } }}
+              >
+                {t("download")}
+              </Button>
+            )}
           </Box>
 
           <Box sx={{ mb: 3 }}>

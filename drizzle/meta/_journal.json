@@ -316,6 +316,13 @@
       "when": 1784864701766,
       "tag": "0044_tough_supreme_intelligence",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "6",
+      "when": 1784864894910,
+      "tag": "0045_new_nightcrawler",
+      "breakpoints": true
     }
   ]
 }
