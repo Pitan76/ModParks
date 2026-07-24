@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
-import RecipeAdminClient from "./RecipeAdminClient";
+import RecipeAdminClient from "./RecipeAdminClientLazy";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
