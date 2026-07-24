@@ -130,8 +130,8 @@ export async function registerUser(formData: FormData) {
     return { error: "usernameTaken" };
   }
 
-  const { default: bcrypt } = await import("bcryptjs");
-  const passwordHash = await bcrypt.hash(password, 8);
+  const { hashPassword } = await import("@/lib/services/auth");
+  const passwordHash = await hashPassword(password, 8);
   const id = createId();
 
   await db.insert(users).values({
@@ -242,8 +242,8 @@ export async function resetPasswordWithToken(formData: FormData) {
   if (!resetToken) return { error: "invalidToken" };
   if (resetToken.expiresAt.getTime() < Date.now()) return { error: "tokenExpired" };
 
-  const { default: bcrypt } = await import("bcryptjs");
-  const passwordHash = await bcrypt.hash(newPassword, 8); // Using 8 to avoid Cloudflare Workers 50ms CPU limit
+  const { hashPassword } = await import("@/lib/services/auth");
+  const passwordHash = await hashPassword(newPassword, 8); // Using 8 to avoid Cloudflare Workers 50ms CPU limit
 
   await db.update(users).set({ passwordHash }).where(eq(users.id, resetToken.userId)).run();
   await db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, resetToken.id)).run();

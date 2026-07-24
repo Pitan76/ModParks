@@ -5,6 +5,7 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import bcrypt from "bcryptjs";
 import type { AuthWorkerEnv } from "./env";
 import type {
   RegistrationOptionsRequest,
@@ -15,6 +16,10 @@ import type {
   VerifyRegistrationResult,
   VerifyAuthenticationRequest,
   VerifyAuthenticationResult,
+  BcryptHashRequest,
+  BcryptHashResult,
+  BcryptCompareRequest,
+  BcryptCompareResult,
 } from "./types";
 
 const json = (body: unknown, status = 200) =>
@@ -97,11 +102,23 @@ async function handleVerifyAuthentication(req: Request): Promise<VerifyAuthentic
   };
 }
 
+async function handleBcryptHash(req: Request): Promise<BcryptHashResult> {
+  const b = (await req.json()) as BcryptHashRequest;
+  return { hash: await bcrypt.hash(b.password, b.rounds) };
+}
+
+async function handleBcryptCompare(req: Request): Promise<BcryptCompareResult> {
+  const b = (await req.json()) as BcryptCompareRequest;
+  return { match: await bcrypt.compare(b.password, b.hash) };
+}
+
 const ROUTES: Record<string, (req: Request) => Promise<unknown>> = {
   "/registration-options": handleRegistrationOptions,
   "/authentication-options": handleAuthenticationOptions,
   "/verify-registration": handleVerifyRegistration,
   "/verify-authentication": handleVerifyAuthentication,
+  "/bcrypt-hash": handleBcryptHash,
+  "/bcrypt-compare": handleBcryptCompare,
 };
 
 const worker = {

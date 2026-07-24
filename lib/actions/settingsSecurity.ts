@@ -4,7 +4,7 @@ import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { users, userProfiles, userSettings, rateLimits } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import bcrypt from "bcryptjs";
+import { hashPassword, comparePassword } from "@/lib/services/auth";
 
 /**
  * ユーザー名の変更を行う Server Action。
@@ -52,7 +52,7 @@ export const changeEmail = async (newEmail: string, password?: string) => {
   
   if (user?.passwordHash) {
     if (!password) return { error: "errorWrongPassword" };
-    const match = await bcrypt.compare(password, user.passwordHash);
+    const match = await comparePassword(password, user.passwordHash);
     if (!match) return { error: "errorWrongPassword" };
   } else {
     return { error: "errorSetPasswordFirst" };
@@ -75,7 +75,7 @@ export const changePassword = async (oldPass: string, newPass: string, totpToken
   const user = await db.select().from(users).where(eq(users.id, userId)).get();
   
   if (user?.passwordHash) {
-    const match = await bcrypt.compare(oldPass, user.passwordHash);
+    const match = await comparePassword(oldPass, user.passwordHash);
     if (!match) return { error: "errorWrongPassword" };
   }
 
@@ -87,7 +87,7 @@ export const changePassword = async (oldPass: string, newPass: string, totpToken
     if (delta === null) return { error: "INVALID_CODE" };
   }
 
-  const hashed = await bcrypt.hash(newPass, 8);
+  const hashed = await hashPassword(newPass, 8);
   await db.update(users).set({ passwordHash: hashed }).where(eq(users.id, userId));
 
   revalidatePath("/settings");
@@ -107,7 +107,7 @@ export const deleteAccount = async (passwordOrToken?: string) => {
 
   if (user.passwordHash) {
     if (!passwordOrToken) return { error: "errorWrongPassword" };
-    isAuthorized = await bcrypt.compare(passwordOrToken, user.passwordHash);
+    isAuthorized = await comparePassword(passwordOrToken, user.passwordHash);
   } else {
     if (!user.twoFactorEnabled) return { error: "errorSetPasswordFirst" };
   }
@@ -200,7 +200,7 @@ export const disableTotp = async (passwordOrToken: string) => {
   let isAuthorized = false;
 
   if (user.passwordHash) {
-    isAuthorized = await bcrypt.compare(passwordOrToken, user.passwordHash);
+    isAuthorized = await comparePassword(passwordOrToken, user.passwordHash);
   }
   
   if (!isAuthorized && user.twoFactorSecret) {

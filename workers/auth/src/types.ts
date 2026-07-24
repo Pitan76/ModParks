@@ -71,3 +71,22 @@ export interface VerifyAuthenticationResult {
   /** verified が true のときのみ意味を持つ更新後カウンタ */
   newCounter: number;
 }
+
+// ── /bcrypt-hash ───────────────────────────────────────────────────────
+export interface BcryptHashRequest {
+  password: string;
+  /** salt rounds（Cloudflare Workers の CPU 制限を考慮し呼び出し側で指定） */
+  rounds: number;
+}
+export interface BcryptHashResult {
+  hash: string;
+}
+
+// ── /bcrypt-compare ────────────────────────────────────────────────────
+export interface BcryptCompareRequest {
+  password: string;
+  hash: string;
+}
+export interface BcryptCompareResult {
+  match: boolean;
+}

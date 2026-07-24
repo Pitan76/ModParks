@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles, apiKeys } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
-import bcrypt from "bcryptjs";
+import { comparePassword } from "@/lib/services/auth";
 import { TOTP } from "otpauth";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     // パスワードの検証
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    const isPasswordValid = await comparePassword(password, user.passwordHash);
     if (!isPasswordValid) {
       return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
     }

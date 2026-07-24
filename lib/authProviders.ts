@@ -101,8 +101,8 @@ export const authProviders = [
           return null;
         }
 
-        const { default: bcrypt } = await import("bcryptjs");
-        const passwordsMatch = await bcrypt.compare(credentials.password as string, user.passwordHash);
+        const { comparePassword } = await import("@/lib/services/auth");
+        const passwordsMatch = await comparePassword(credentials.password as string, user.passwordHash);
         if (!passwordsMatch) {
           console.log("[Auth] Password mismatch for user:", credentials.email);
           return null;

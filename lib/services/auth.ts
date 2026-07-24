@@ -7,6 +7,8 @@ import type {
   VerifyRegistrationResult,
   VerifyAuthenticationRequest,
   VerifyAuthenticationResult,
+  BcryptHashResult,
+  BcryptCompareResult,
 } from "@/workers/auth/src/types";
 
 export type {
@@ -80,4 +82,20 @@ export function verifyAuthentication(
   req: VerifyAuthenticationRequest
 ): Promise<VerifyAuthenticationResult> {
   return callAuthWorker<VerifyAuthenticationResult>("/verify-authentication", req);
+}
+
+/**
+ * パスワードを bcrypt でハッシュ化する。
+ * bcrypt(gzip ~9 KiB)を本体バンドルから外すためサイドカーで実行する。
+ * rounds は Cloudflare Workers の CPU 制限を踏まえ呼び出し側で指定（既定 8）。
+ */
+export async function hashPassword(password: string, rounds = 8): Promise<string> {
+  const { hash } = await callAuthWorker<BcryptHashResult>("/bcrypt-hash", { password, rounds });
+  return hash;
+}
+
+/** 平文パスワードと bcrypt ハッシュを比較する */
+export async function comparePassword(password: string, hash: string): Promise<boolean> {
+  const { match } = await callAuthWorker<BcryptCompareResult>("/bcrypt-compare", { password, hash });
+  return match;
 }
