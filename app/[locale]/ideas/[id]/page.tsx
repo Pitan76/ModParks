@@ -18,6 +18,7 @@ import IdeaDetailCard from "@/components/idea/IdeaDetailCard";
 import IdeaOwnerActions from "@/components/idea/IdeaOwnerActions";
 import IdeaStatusControl from "@/components/idea/IdeaStatusControl";
 import IdeaCommentItem from "@/components/idea/IdeaCommentItem";
+import ShareMenuButton from "@/components/ui/ShareMenuButton";
 import { formatDate } from "@/lib/utils/format";
 import { Link } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -255,13 +256,20 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
             flexDirection: { xs: "column", sm: "row" },
             gap: 2
           }}>
-            <IdeaLikeButton 
-              ideaId={id} 
-              initialCount={initialCount} 
-              initialLiked={initialLiked} 
-              isLoggedIn={!!session} 
-              variant="icon"
-            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <IdeaLikeButton 
+                ideaId={id} 
+                initialCount={initialCount} 
+                initialLiked={initialLiked} 
+                isLoggedIn={!!session} 
+                variant="icon"
+              />
+              <ShareMenuButton
+                url={`${SITE_URL}/ideas/${id}`}
+                title={ideaData.title}
+                text={ideaData.content.length > 100 ? ideaData.content.slice(0, 100) + "..." : ideaData.content}
+              />
+            </Box>
             <Box sx={{ 
               display: "flex", 
               alignItems: "center", 

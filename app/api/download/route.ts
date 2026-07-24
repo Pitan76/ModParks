@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { versions, projects, projectMembers, users } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, desc, isNull } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getR2PublicUrl } from "@/lib/r2";
 import { auth } from "@/lib/auth";
@@ -48,27 +48,49 @@ async function isProjectInsider(
   return !!member;
 }
 
-/** GET /api/download/[versionId]
+/**
+ * プロジェクトの最新（アーカイブ済みを除く）バージョンを取得する。
+ */
+async function getLatestVersion(
+  db: Awaited<ReturnType<typeof getDatabase>>,
+  slug: string
+) {
+  const project = await db.select({ id: projects.id }).from(projects).where(eq(projects.slug, slug)).get();
+  if (!project) return undefined;
+
+  return db
+    .select()
+    .from(versions)
+    .where(and(eq(versions.projectId, project.id), isNull(versions.archivedAt)))
+    .orderBy(desc(versions.createdAt))
+    .get();
+}
+
+/** GET /api/download?versionId=... | ?slug=...
+ * - versionId 指定で該当バージョン、slug 指定でそのプロジェクトの最新バージョン
  * - ダウンロードカウントをインクリメント
  * - R2 のファイル URL または外部URLにリダイレクト
  */
 export async function GET(req: NextRequest) {
-  const versionId = req.nextUrl.searchParams.get("versionId");
-  if (!versionId) return NextResponse.json({ error: "Missing versionId" }, { status: 400 });
+  const versionIdParam = req.nextUrl.searchParams.get("versionId");
+  const slug = req.nextUrl.searchParams.get("slug");
+  if (!versionIdParam && !slug) {
+    return NextResponse.json({ error: "Missing versionId or slug" }, { status: 400 });
+  }
 
   try {
     const db = await getDatabase();
 
     // バージョンを取得
-    const version = await db
-      .select()
-      .from(versions)
-      .where(eq(versions.id, versionId))
-      .get();
+    const version = versionIdParam
+      ? await db.select().from(versions).where(eq(versions.id, versionIdParam)).get()
+      : await getLatestVersion(db, slug!);
 
     if (!version) {
       return NextResponse.json({ error: "Version not found" }, { status: 404 });
     }
+
+    const versionId = version.id;
 
     // プロジェクトが公開されているか確認
     const project = await db
