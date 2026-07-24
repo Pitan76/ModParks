@@ -4,9 +4,11 @@ import type {
   JarSource,
   ParseModRequest,
   ParsedModInfo,
+  ScanJarRequest,
+  ScanJarResult,
 } from "@/workers/jar/src/types";
 
-export type { JarSource, ParsedModInfo, ExtractRecipesResult };
+export type { JarSource, ParsedModInfo, ExtractRecipesResult, ScanJarResult };
 
 /**
  * modparks-jar Worker のクライアント。
@@ -61,4 +63,9 @@ export function extractRecipes(
     cdnUrl,
     useCdnApi,
   } satisfies ExtractRecipesRequest);
+}
+
+/** JAR をヒューリスティックに検査し、マルウェア的な構造の兆候を返す */
+export function scanJar(source: JarSource): Promise<ScanJarResult> {
+  return callJarWorker<ScanJarResult>("/scan-jar", { source } satisfies ScanJarRequest);
 }

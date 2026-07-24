@@ -230,6 +230,11 @@ export const versions = sqliteTable("versions", {
   fileSize:      integer("file_size"),
   fileSha256:    text("file_sha256"),
   downloads:     integer("downloads").notNull().default(0),
+  /** jar ヒューリスティック検査の判定: pending / clean / suspicious / malicious / skipped */
+  scanStatus:    text("scan_status").notNull().default("pending"),
+  /** JSON: ScanFinding[] — 検出内容。作者・管理者にのみ開示する */
+  scanFindings:  text("scan_findings"),
+  scanAt:        integer("scan_at", { mode: "timestamp" }),
   /** アーカイブ日時。null でなければアーカイブ済み（公開一覧・DLから除外、作者のみ閲覧可） */
   archivedAt:    integer("archived_at", { mode: "timestamp" }),
   projectId:     text("project_id")
@@ -423,6 +428,38 @@ export const reports = sqliteTable("reports", {
 }, (table) => ({
   reporterIdx: index("reports_reporter_idx").on(table.reporterId),
   projectIdx:  index("reports_project_idx").on(table.projectId),
+}));
+
+// ─── Scan Appeals ─────────────────────────────────────────────────────────────
+
+/**
+ * jar スキャンの判定に対する作者からの異議申請。
+ * ヒューリスティック検査は誤検知するため、人の目で覆せる経路を必ず用意する。
+ */
+export const scanAppeals = sqliteTable("scan_appeals", {
+  id:        text("id").primaryKey(),
+  reason:    text("reason").notNull(),
+  status:    text("status", {
+    enum: ["pending", "approved", "rejected"],
+  }).notNull().default("pending"),
+  /** 管理者が却下・承認時に残すコメント。作者に開示する */
+  reviewNote: text("review_note"),
+  versionId: text("version_id")
+    .notNull()
+    .references(() => versions.id, { onDelete: "cascade" }),
+  appellantId: text("appellant_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  reviewedById: text("reviewed_by_id")
+    .references(() => users.id, { onDelete: "set null" }),
+  reviewedAt: integer("reviewed_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  versionIdx:   index("scan_appeals_version_idx").on(table.versionId),
+  statusIdx:    index("scan_appeals_status_idx").on(table.status),
+  appellantIdx: index("scan_appeals_appellant_idx").on(table.appellantId),
 }));
 
 // ─── Ideas ────────────────────────────────────────────────────────────────────
