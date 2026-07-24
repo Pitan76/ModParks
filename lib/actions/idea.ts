@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { ideas, ideaLikes, ideaComments, users } from "@/db/schema";
+import { ideas, ideaLikes, ideaComments } from "@/db/schema";
 import { createIdeaSchema, createIdeaCommentSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
@@ -9,45 +9,13 @@ import { revalidatePath } from "next/cache";
 import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-
-/** アイデアの投稿者・タイトルを取得する（通知の宛先・表示用） */
-async function getIdeaTarget(db: any, ideaId: string) {
-  return db
-    .select({ authorId: ideas.authorId, title: ideas.title })
-    .from(ideas)
-    .where(eq(ideas.id, ideaId))
-    .get();
-}
-
-/** アイデア一覧と該当詳細ページのキャッシュを破棄する */
-const revalidateIdea = (ideaId: string) => {
-  revalidatePath("/ideas");
-  revalidatePath(`/ideas/${ideaId}`);
-};
-
-/**
- * アイデアを取得し、操作者が管理権限を持つかを検証する。
- * 失敗時は表示用エラーメッセージ、成功時はアイデア本体を返す。
- */
-async function loadManageableIdea(db: any, ideaId: string, userId: string, deniedKey: string) {
-  const t = await getServerErrors();
-  const idea = await db.select().from(ideas).where(eq(ideas.id, ideaId)).get();
-  if (!idea) return { error: t("idea.notFound") };
-  if (!(await canManageIdea(db, idea.authorId, userId))) return { error: t(deniedKey) };
-  return { idea };
-}
-
-/** 返信先の正規化（1階層のみ）。親コメントIDと親投稿者IDを返す */
-async function resolveCommentParent(db: any, ideaId: string, rawParentId: string | null) {
-  if (!rawParentId) return { parentId: null as string | null, parentAuthorId: null as string | null };
-  const parent = await db
-    .select({ id: ideaComments.id, authorId: ideaComments.authorId, parentId: ideaComments.parentId })
-    .from(ideaComments)
-    .where(and(eq(ideaComments.id, rawParentId), eq(ideaComments.ideaId, ideaId)))
-    .get();
-  if (!parent) return { parentId: null, parentAuthorId: null };
-  return { parentId: parent.parentId ?? parent.id, parentAuthorId: parent.authorId };
-}
+import {
+  getIdeaTarget,
+  revalidateIdea,
+  canManageIdea,
+  loadManageableIdea,
+  resolveCommentParent,
+} from "./ideaShared";
 
 // ---- アイデア作成 ----
 
@@ -162,13 +130,6 @@ export async function deleteIdea(ideaId: string) {
 
   revalidatePath("/ideas");
   return { success: true };
-}
-
-/** 投稿者本人か管理者かを判定する */
-async function canManageIdea(db: any, authorId: string, userId: string): Promise<boolean> {
-  if (authorId === userId) return true;
-  const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
-  return dbUser?.role === "admin";
 }
 
 // ---- いいねのトグル ----
