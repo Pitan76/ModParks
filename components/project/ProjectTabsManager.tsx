@@ -15,6 +15,7 @@ export type ProjectTabsManagerProps = {
   filesContent: ReactNode;
   dependenciesContent: ReactNode;
   recipesContent?: ReactNode;
+  mediaContent?: ReactNode;
   manageHref: string;
   canEdit: boolean;
   recipesEnabled?: boolean;
@@ -25,24 +26,27 @@ const TAB_DESCRIPTION = 0;
 const TAB_FILES = 1;
 const TAB_DEPENDENCIES = 2;
 const TAB_RECIPES = 3;
-const TAB_MANAGE = 4;
-const TAB_ISSUES = 5;
+const TAB_MEDIA = 4;
+const TAB_MANAGE = 5;
+const TAB_ISSUES = 6;
 
-const getTabFromParam = (param: string | null, recipesEnabled?: boolean): number => {
+const getTabFromParam = (param: string | null, recipesEnabled?: boolean, mediaEnabled?: boolean): number => {
   if (param === "files") return TAB_FILES;
   if (param === "dependencies") return TAB_DEPENDENCIES;
   if (param === "recipes" && recipesEnabled) return TAB_RECIPES;
+  if (param === "media" && mediaEnabled) return TAB_MEDIA;
   return TAB_DESCRIPTION;
 };
 
 /**
- * プロジェクト詳細ページの主要タブ（説明、ファイル一覧、依存関係、レシピ一覧、管理機能、課題管理）の切り替えを管理するクライアントコンポーネント。
+ * プロジェクト詳細ページの主要タブ（説明、ファイル一覧、依存関係、レシピ一覧、メディア一覧、管理機能、課題管理）の切り替えを管理するクライアントコンポーネント。
  */
 const ProjectTabsManager = ({
   descriptionContent,
   filesContent,
   dependenciesContent,
   recipesContent,
+  mediaContent,
   manageHref,
   canEdit,
   recipesEnabled,
@@ -53,12 +57,13 @@ const ProjectTabsManager = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   
+  const hasMedia = !!mediaContent;
   const tabParam = searchParams?.get("tab") || null;
-  const [tab, setTab] = useState(getTabFromParam(tabParam, recipesEnabled));
+  const [tab, setTab] = useState(getTabFromParam(tabParam, recipesEnabled, hasMedia));
 
   useEffect(() => {
-    setTab(getTabFromParam(tabParam, recipesEnabled));
-  }, [tabParam, recipesEnabled]);
+    setTab(getTabFromParam(tabParam, recipesEnabled, hasMedia));
+  }, [tabParam, recipesEnabled, hasMedia]);
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
     if (newValue === TAB_MANAGE) {
@@ -79,6 +84,7 @@ const ProjectTabsManager = ({
     if (newValue === TAB_FILES) params.set("tab", "files");
     else if (newValue === TAB_DEPENDENCIES) params.set("tab", "dependencies");
     else if (newValue === TAB_RECIPES) params.set("tab", "recipes");
+    else if (newValue === TAB_MEDIA) params.set("tab", "media");
     else params.delete("tab");
     
     const newQuery = params.toString();
@@ -108,6 +114,7 @@ const ProjectTabsManager = ({
           <Tab label={t("tabs.files")} value={TAB_FILES} />
           <Tab label={t("tabs.dependencies")} value={TAB_DEPENDENCIES} />
           {recipesEnabled && <Tab label={t("tabs.recipes")} value={TAB_RECIPES} />}
+          {hasMedia && <Tab label={t("tabs.media")} value={TAB_MEDIA} />}
           {issueTrackerUrl && (
             <Tab 
               label={
@@ -133,6 +140,7 @@ const ProjectTabsManager = ({
       <Box sx={{ display: tab === TAB_FILES ? "block" : "none" }}>{filesContent}</Box>
       <Box sx={{ display: tab === TAB_DEPENDENCIES ? "block" : "none" }}>{dependenciesContent}</Box>
       {recipesEnabled && <Box sx={{ display: tab === TAB_RECIPES ? "block" : "none" }}>{recipesContent}</Box>}
+      {hasMedia && <Box sx={{ display: tab === TAB_MEDIA ? "block" : "none" }}>{mediaContent}</Box>}
     </Box>
   );
 };

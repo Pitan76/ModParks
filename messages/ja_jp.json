@@ -75,13 +75,16 @@
     "previewLabel": "広告スペース（プレビュー）"
   },
   "Media": {
-    "description": "スクリーンショットを追加できます。",
+    "description": "スクリーンショット画像をアップロードするか、YouTube動画のURLを追加できます。「おすすめ」に設定された画像は、プロジェクトページ上部のカルーセルに表示されます。",
     "upload": "画像を追加",
+    "addUrl": "URLから追加",
+    "addUrlPlaceholder": "画像、YouTube、またはニコニコ動画のURLを入力",
     "empty": "まだ画像がありません。",
     "featured": "カルーセルに表示",
     "delete": "削除",
     "errors": {
       "uploadFailed": "アップロードに失敗しました。",
+      "invalidUrl": "無効なURLです。有効な画像URL、YouTubeのURL、またはニコニコ動画のURLを入力してください。",
       "limitReached": "画像の上限に達しています。",
       "notFound": "対象が見つかりません。",
       "Forbidden": "権限がありません。"
@@ -310,6 +313,7 @@
       "files": "ファイル",
       "dependencies": "依存関係",
       "recipes": "レシピ",
+      "media": "メディア",
       "issues": "問題報告",
       "manage": "管理",
       "underConstruction": "工事中",

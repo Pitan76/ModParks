@@ -18,6 +18,7 @@ import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 import ProjectTabsManager from "@/components/project/ProjectTabsManager";
+import ProjectMediaTab from "@/components/project/ProjectMediaTab";
 import ProjectDependencies from "@/components/project/ProjectDependencies";
 import ProjectComments from "@/components/project/ProjectComments";
 import ProjectRecipes from "@/components/project/ProjectRecipes";
@@ -164,6 +165,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             manageHref={`/projects/${p.slug}/edit`}
             issueTrackerUrl={p.issueTrackerUrl}
             recipesEnabled={p.recipesEnabled}
+            mediaContent={
+              media.length > 0 ? (
+                <ProjectMediaTab media={media} />
+              ) : undefined
+            }
             recipesContent={
               <Box sx={{ mt: 2 }}>
                 <ProjectRecipes projectSlug={p.slug} namespaces={p.recipeNamespaces} />

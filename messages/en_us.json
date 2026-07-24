@@ -75,13 +75,16 @@
     "previewLabel": "Ad space (preview)"
   },
   "Media": {
-    "description": "Add screenshots.",
+    "description": "Upload screenshots or add YouTube video URLs. Screenshots marked as 'Show in carousel' will be shown in the carousel at the top of the project page.",
     "upload": "Add image",
+    "addUrl": "Add from URL",
+    "addUrlPlaceholder": "Enter image, YouTube, or NicoNico URL",
     "empty": "No images yet.",
     "featured": "Show in carousel",
     "delete": "Delete",
     "errors": {
       "uploadFailed": "Upload failed.",
+      "invalidUrl": "Invalid URL. Please enter a valid image URL, YouTube URL, or NicoNico URL.",
       "limitReached": "Image limit reached.",
       "notFound": "Target not found.",
       "Forbidden": "You do not have permission."
@@ -304,6 +307,7 @@
       "files": "Files",
       "dependencies": "Dependencies",
       "recipes": "Recipes",
+      "media": "Media",
       "issues": "Issues",
       "manage": "Manage",
       "underConstruction": "Under Construction",
