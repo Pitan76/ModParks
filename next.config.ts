@@ -6,9 +6,6 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const nextConfig: NextConfig = {
   // Cloudflare Workers (Edge Runtime) 向け設定
   output: "standalone",
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   experimental: {
     optimizePackageImports: ["@mui/icons-material", "@mui/material"],
   },
