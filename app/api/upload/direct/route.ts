@@ -79,14 +79,14 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // R2 の put() は長さ不明の ReadableStream を受け付けない（"known length" 必須）ため、
-    // 5MB 上限のファイルを一度バッファに読み切ってから渡す。
-    const arrayBuffer = await req.arrayBuffer();
-    if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 413 });
+    // Content-Length が付いたリクエストボディは「長さ既知の ReadableStream」なので、
+    // 全体をバッファに読み込まず、そのまま R2 へストリームで流す（Worker のメモリ/CPU 負荷を回避）。
+    // ※長さ不明のストリームは R2 put() が受け付けないため、Content-Length 必須。
+    if (!contentLengthStr || Number.isNaN(contentLength) || contentLength <= 0) {
+      return NextResponse.json({ error: "Missing or invalid Content-Length" }, { status: 411 });
     }
 
-    await uploadToR2(R2, key, arrayBuffer, contentType);
+    await uploadToR2(R2, key, req.body, contentType);
 
     return NextResponse.json({ success: true, key });
   } catch (err: any) {
