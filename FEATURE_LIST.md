@@ -29,8 +29,7 @@
 - ファイル SHA-256 の算出/表示
 
 ## 対応コンテンツ
-
-Mod/Plugin/Resource Pack/Data Pack/Shader/Modpack
+MOD/プラグイン/リソースパック/データパック/シェーダ/MODパック
 
 ## 検索/閲覧
 
