@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { startAuthentication } from "@simplewebauthn/browser";
+import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/types";
 import Button from "@mui/material/Button";
 import KeyIcon from "@mui/icons-material/Key";
 
@@ -28,7 +29,7 @@ export default function PasskeyLoginButton({ onError }: Props) {
       const optRes = await fetch("/api/auth/passkey/authenticate", { method: "POST" });
       if (!optRes.ok) throw new Error("options");
 
-      const options = await optRes.json();
+      const options = (await optRes.json()) as PublicKeyCredentialRequestOptionsJSON;
       const assertion = await startAuthentication(options);
 
       const res = await signIn("passkey", { response: JSON.stringify(assertion), redirect: false });

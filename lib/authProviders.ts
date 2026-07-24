@@ -1,7 +1,7 @@
 import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import Resend from "next-auth/providers/resend";
-import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
+import type { AuthenticationResponseJSON } from "@simplewebauthn/types";
 import { DEFAULT_APP_SETTINGS } from "@/lib/config/appSettings";
 import { eq } from "drizzle-orm";
 

@@ -560,6 +560,7 @@
       "registrationComplete": "登録が完了しました。ログインしてください。",
       "loggingIn": "ログイン中...",
       "loginWithGithub": "GitHub でログイン",
+      "loginWithPasskey": "パスキーでログイン",
       "loginWithEmail": "マジックリンクでログイン",
       "forgotPassword": "パスワードをお忘れですか？",
       "forgotPasswordTitle": "パスワードの再設定",
@@ -591,7 +592,8 @@
       "registerLink": "新規登録",
       "error": {
         "invalidCredentials": "メールアドレスまたはパスワードが間違っています",
-        "invalidTwoFactor": "2段階認証コードが間違っています"
+        "invalidTwoFactor": "2段階認証コードが間違っています",
+        "passkeyFailed": "パスキーでのログインに失敗しました"
       },
       "twoFactorDesc": "認証アプリで生成された6桁のコードを入力してください。",
       "verify": "認証する",
@@ -1067,7 +1069,14 @@
       "passkeys": "パスキー",
       "passkeysDesc": "生体認証やセキュリティキーなどを用いてログインします。",
       "registerPasskey": "パスキーを登録",
-      "noPasskeys": "登録されているパスキーはありません"
+      "noPasskeys": "登録されているパスキーはありません",
+      "passkeyUnnamed": "名称未設定のパスキー",
+      "passkeyRegistered": "パスキーを登録しました",
+      "passkeyRegisterError": "パスキーの登録に失敗しました",
+      "passkeyDeleted": "パスキーを削除しました",
+      "passkeyNameTitle": "パスキーの名前を入力",
+      "passkeyName": "パスキー名",
+      "passkeyNamePlaceholder": "例: 自分のノートPC"
     },
     "account": {
       "title": "アカウント管理",

@@ -552,6 +552,7 @@
       "registrationComplete": "Registration complete. Please log in.",
       "loggingIn": "Logging in...",
       "loginWithGithub": "Log in with GitHub",
+      "loginWithPasskey": "Log in with Passkey",
       "loginWithEmail": "Log in with Magic Link",
       "forgotPassword": "Forgot your password?",
       "forgotPasswordTitle": "Reset Password",
@@ -583,7 +584,8 @@
       "registerLink": "Register",
       "error": {
         "invalidCredentials": "Invalid email or password",
-        "invalidTwoFactor": "Invalid 2FA code"
+        "invalidTwoFactor": "Invalid 2FA code",
+        "passkeyFailed": "Passkey login failed"
       },
       "twoFactorDesc": "Enter the 6-digit code from your authenticator app.",
       "verify": "Verify",
@@ -1059,7 +1061,14 @@
       "passkeys": "Passkeys (WebAuthn)",
       "passkeysDesc": "Login using biometrics (fingerprint, face ID) or security keys.",
       "registerPasskey": "Register Passkey",
-      "noPasskeys": "No passkeys registered"
+      "noPasskeys": "No passkeys registered",
+      "passkeyUnnamed": "Unnamed passkey",
+      "passkeyRegistered": "Passkey registered",
+      "passkeyRegisterError": "Failed to register passkey",
+      "passkeyDeleted": "Passkey deleted",
+      "passkeyNameTitle": "Name this passkey",
+      "passkeyName": "Passkey name",
+      "passkeyNamePlaceholder": "e.g. My laptop"
     },
     "account": {
       "title": "Account Management",

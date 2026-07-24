@@ -5,7 +5,7 @@ import {
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import type { RegistrationResponseJSON } from "@simplewebauthn/server";
+import type { RegistrationResponseJSON } from "@simplewebauthn/types";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";

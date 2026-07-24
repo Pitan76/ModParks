@@ -1,6 +1,6 @@
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
+import type { AuthenticationResponseJSON } from "@simplewebauthn/types";
 import { eq } from "drizzle-orm";
 import { getRpContext } from "./config";
 import { getChallenge, clearChallenge } from "./challenge";
