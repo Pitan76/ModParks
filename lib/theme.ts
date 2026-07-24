@@ -264,6 +264,28 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
         },
       },
     },
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          scrollbarColor: mode === "dark" ? "#334155 #0f172a" : "#cbd5e1 #f1f5f9",
+          scrollbarWidth: "thin",
+        },
+        "::-webkit-scrollbar": {
+          width: "8px",
+          height: "8px",
+        },
+        "::-webkit-scrollbar-track": {
+          background: mode === "dark" ? "#0f172a" : "#f1f5f9",
+        },
+        "::-webkit-scrollbar-thumb": {
+          background: mode === "dark" ? "#334155" : "#cbd5e1",
+          borderRadius: "4px",
+        },
+        "::-webkit-scrollbar-thumb:hover": {
+          background: mode === "dark" ? "#38bdf8" : "#94a3b8",
+        },
+      },
+    },
   },
 });
 

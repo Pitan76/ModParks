@@ -106,7 +106,7 @@ export default function ThemeRegistry({ children, initialMode = "dark" }: ThemeR
     <ColorModeContext.Provider value={colorMode}>
       <AppRouterCacheProvider options={{ enableCssLayer: true }}>
         <ThemeProvider theme={theme}>
-          <CssBaseline />
+          <CssBaseline enableColorScheme />
           {children}
           <React.Suspense fallback={null}>
             <ThemeQueryChecker onThemeChange={setIsNewTheme} />
