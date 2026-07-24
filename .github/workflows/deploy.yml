@@ -7,7 +7,11 @@ on:
   workflow_dispatch:
     inputs:
       deploy_jar:
-        description: "サイドカー(JAR worker)も強制デプロイする"
+        description: "JAR workerも強制デプロイする"
+        type: boolean
+        default: false
+      deploy_auth:
+        description: "auth workerも強制デプロイする"
         type: boolean
         default: false
 
@@ -19,7 +23,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # サイドカー（JAR worker）に変更があるかを判定する
+      # 各ターゲットに変更があるかを判定する
+      # main は workers/jar・workers/auth 以外に変更があった場合のみ（バインドは名前参照のため）
       - name: Detect changes
         id: changes
         uses: dorny/paths-filter@v3
@@ -27,16 +32,25 @@ jobs:
           filters: |
             jar:
               - 'workers/jar/**'
+            auth:
+              - 'workers/auth/**'
+            main:
+              - '**'
+              - '!workers/jar/**'
+              - '!workers/auth/**'
 
       - name: Setup Node.js
+        if: steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Install dependencies
+        if: steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch'
         run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Build OpenNext
+        if: steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch'
         run: npx opennextjs-cloudflare build
         env:
           # デプロイ間で Server Action の暗号鍵を固定する（ビルド時に焼き込まれる）
@@ -56,7 +70,20 @@ jobs:
           workingDirectory: workers/jar
           command: deploy
 
+      # auth worker（独立サイドカー）。変更があったときだけデプロイする
+      - name: Deploy auth worker
+        if: steps.changes.outputs.auth == 'true' || inputs.deploy_auth == true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.100.0"
+          workingDirectory: workers/auth
+          command: deploy
+
+      # 本体（ModParks）。本体側に変更があったとき、または手動実行時にデプロイする
       - name: Deploy to Cloudflare
+        if: steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
