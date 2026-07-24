@@ -9,6 +9,8 @@ import type {
   ExtractRecipesResult,
   ParseModRequest,
   ParsedModInfo,
+  ScanJarRequest,
+  ScanJarResult,
 } from "./types";
 
 const json = (body: unknown, status = 200) =>
