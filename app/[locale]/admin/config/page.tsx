@@ -6,7 +6,7 @@ import { tags, platforms } from "@/db/schema";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { listWorkerVars } from "@/lib/actions/workerVars";
 import { listSecrets } from "@/lib/actions/workerSecrets";
-import ConfigClient from "./ConfigClient";
+import ConfigClient from "./ConfigClientLazy";
 import ConfigTabs from "./ConfigTabs";
 import AppSettingsPanel from "./AppSettingsPanel";
 import WorkerVarsPanel from "./WorkerVarsPanel";

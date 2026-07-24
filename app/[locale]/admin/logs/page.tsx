@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getSettingsAudits, getBackupAudits } from "@/lib/actions/admin";
-import LogsClient from "@/components/admin/LogsClient";
+import LogsClient from "@/components/admin/LogsClientLazy";
 
 interface LogsPageProps {
   params: Promise<{ locale: string }>;

@@ -2,7 +2,7 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { users, userProfiles } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
-import UsersClient from "./UsersClient";
+import UsersClient from "./UsersClientLazy";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export default async function AdminUsersPage({ params }: { params: Promise<{ locale: string }> }) {

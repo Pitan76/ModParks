@@ -2,7 +2,7 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getBackups } from "@/lib/actions/adminBackupQuery";
-import BackupClient from "@/components/admin/BackupClient";
+import BackupClient from "@/components/admin/BackupClientLazy";
 
 interface BackupPageProps {
   params: Promise<{ locale: string }>;

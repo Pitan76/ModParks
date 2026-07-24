@@ -3,7 +3,7 @@ import { ideas, users, userProfiles } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import IdeasClient from "./IdeasClient";
+import IdeasClient from "./IdeasClientLazy";
 
 export default async function AdminIdeasPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

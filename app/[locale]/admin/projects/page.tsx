@@ -3,7 +3,7 @@ import { projects, users, userProfiles } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import ProjectsClient from "./ProjectsClient";
+import ProjectsClient from "./ProjectsClientLazy";
 
 export default async function AdminProjectsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
