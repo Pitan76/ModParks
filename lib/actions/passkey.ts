@@ -1,0 +1,124 @@
+"use server";
+
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+} from "@simplewebauthn/server";
+import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import type { RegistrationResponseJSON } from "@simplewebauthn/server";
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { authenticators } from "@/db/schema";
+import { getRpContext } from "@/lib/webauthn/config";
+import { setChallenge, getChallenge, clearChallenge } from "@/lib/webauthn/challenge";
+
+export interface PasskeyInfo {
+  credentialID: string;
+  name: string | null;
+  createdAt: Date | null;
+}
+
+/**
+ * ログインユーザーの登録済みパスキー一覧を返す。
+ */
+export const listPasskeys = async (): Promise<PasskeyInfo[]> => {
+  const { db, userId } = await getAuthenticatedDb();
+  const rows = await db
+    .select({ credentialID: authenticators.credentialID, name: authenticators.name, createdAt: authenticators.createdAt })
+    .from(authenticators)
+    .where(eq(authenticators.userId, userId));
+  return rows;
+};
+
+/**
+ * パスキー登録用の PublicKeyCredentialCreationOptions を生成する。
+ * 既存パスキーは excludeCredentials で重複登録を防ぐ。
+ */
+export const startPasskeyRegistration = async () => {
+  const { db, session, userId } = await getAuthenticatedDb();
+  const { rpId, rpName } = await getRpContext();
+
+  const existing = await db.select().from(authenticators).where(eq(authenticators.userId, userId));
+
+  const options = await generateRegistrationOptions({
+    rpName,
+    rpID: rpId,
+    userID: userId,
+    userName: session.user.email || session.user.username || userId,
+    userDisplayName: session.user.displayName || session.user.username || userId,
+    attestationType: "none",
+    excludeCredentials: existing.map((a) => ({
+      id: isoBase64URL.toBuffer(a.credentialID),
+      type: "public-key" as const,
+      transports: a.transports ? (JSON.parse(a.transports) as AuthenticatorTransport[]) : undefined,
+    })),
+    authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
+  });
+
+  await setChallenge("reg", options.challenge);
+  return options;
+};
+
+/**
+ * ブラウザから返された登録レスポンスを検証し、パスキーを保存する。
+ */
+export const finishPasskeyRegistration = async (response: RegistrationResponseJSON, name: string) => {
+  const { db, userId } = await getAuthenticatedDb();
+  const { rpId, origin } = await getRpContext();
+
+  const expectedChallenge = await getChallenge("reg");
+  if (!expectedChallenge) return { error: "CHALLENGE_EXPIRED" };
+
+  const verification = await verifyRegistrationResponse({
+    response,
+    expectedChallenge,
+    expectedOrigin: origin,
+    expectedRPID: rpId,
+  });
+
+  await clearChallenge("reg");
+  if (!verification.verified || !verification.registrationInfo) return { error: "VERIFICATION_FAILED" };
+
+  const info = verification.registrationInfo;
+  await db.insert(authenticators).values({
+    credentialID: isoBase64URL.fromBuffer(info.credentialID),
+    userId,
+    providerAccountId: userId,
+    credentialPublicKey: isoBase64URL.fromBuffer(info.credentialPublicKey),
+    counter: info.counter,
+    credentialDeviceType: info.credentialDeviceType,
+    credentialBackedUp: info.credentialBackedUp,
+    transports: response.response.transports ? JSON.stringify(response.response.transports) : null,
+    name: name.trim() || null,
+    createdAt: new Date(),
+  });
+
+  revalidatePath("/settings");
+  return { success: true };
+};
+
+/**
+ * 指定したパスキーの表示名を変更する。
+ */
+export const renamePasskey = async (credentialID: string, name: string) => {
+  const { db, userId } = await getAuthenticatedDb();
+  await db
+    .update(authenticators)
+    .set({ name: name.trim() || null })
+    .where(and(eq(authenticators.userId, userId), eq(authenticators.credentialID, credentialID)));
+  revalidatePath("/settings");
+  return { success: true };
+};
+
+/**
+ * 指定したパスキーを削除する。
+ */
+export const deletePasskey = async (credentialID: string) => {
+  const { db, userId } = await getAuthenticatedDb();
+  await db
+    .delete(authenticators)
+    .where(and(eq(authenticators.userId, userId), eq(authenticators.credentialID, credentialID)));
+  revalidatePath("/settings");
+  return { success: true };
+};
