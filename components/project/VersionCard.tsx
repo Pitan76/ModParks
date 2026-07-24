@@ -5,7 +5,8 @@ import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
-import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -157,16 +158,17 @@ const VersionCard = ({ version, projectSlug }: VersionCardProps) => {
 
           {/* 右: DLボタン */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Button
-              id={`download-btn-${version.id}`}
-              variant="contained"
-              size="small"
-              startIcon={<DownloadIcon />}
-              href={`/api/download?versionId=${version.id}`}
-              sx={{ whiteSpace: "nowrap" }}
-            >
-              {t("download")}
-            </Button>
+            <Tooltip title={t("download")}>
+              <IconButton
+                id={`download-btn-${version.id}`}
+                color="primary"
+                size="small"
+                aria-label={t("download")}
+                href={`/api/download?versionId=${version.id}`}
+              >
+                <DownloadIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Box>
       </CardContent>
