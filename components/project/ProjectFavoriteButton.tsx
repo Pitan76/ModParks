@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import type { MouseEvent } from "react";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import Typography from "@mui/material/Typography";
@@ -67,22 +68,24 @@ const ProjectFavoriteButton = ({
 
   if (variant === "icon") {
     return (
-      <IconButton 
-        onClick={handleClick} 
-        disabled={isPending || isMutating}
-        color={favorited ? "primary" : "default"}
-        sx={{ 
-          transition: "transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-          transform: favorited ? "scale(1.1)" : "scale(1)",
-        }}
-      >
-        {favorited ? <BookmarkIcon /> : <BookmarkBorderIcon />}
-        {count > 0 && (
-          <Typography variant="caption" sx={{ ml: 0.5, fontWeight: "bold" }}>
-            {count}
-          </Typography>
-        )}
-      </IconButton>
+      <Tooltip title={favorited ? t("favorite.favorited") : t("favorite.favorite")}>
+        <IconButton 
+          onClick={handleClick} 
+          disabled={isPending || isMutating}
+          color={favorited ? "primary" : "default"}
+          sx={{ 
+            transition: "transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+            transform: favorited ? "scale(1.1)" : "scale(1)",
+          }}
+        >
+          {favorited ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+          {count > 0 && (
+            <Typography variant="caption" sx={{ ml: 0.5, fontWeight: "bold" }}>
+              {count}
+            </Typography>
+          )}
+        </IconButton>
+      </Tooltip>
     );
   }
 
