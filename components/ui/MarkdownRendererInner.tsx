@@ -7,6 +7,11 @@ import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
+import { createContext, useContext } from "react";
+import ZoomableImage from "./ZoomableImage";
+
+// リンク内の画像はクリックでリンク遷移させたいので、拡大表示を無効化するためのフラグ
+const InsideLinkContext = createContext(false);
 
 type MarkdownRendererInnerProps = {
   content: string;
@@ -20,6 +25,17 @@ const SCHEMA = {
     ...defaultSchema.attributes,
     iframe: ["src", "width", "height", "allow", "allowfullscreen", "frameborder", "title", "style"],
   },
+};
+
+/**
+ * Markdown 内の画像。リンクの中にある場合のみ拡大せず通常の画像として描画します。
+ */
+const MarkdownImage = ({ src, alt }: { src?: string; alt?: string }) => {
+  const insideLink = useContext(InsideLinkContext);
+  if (!src) return null;
+  // eslint-disable-next-line @next/next/no-img-element
+  if (insideLink) return <img src={src} alt={alt || ""} />;
+  return <ZoomableImage src={src} alt={alt} />;
 };
 
 /**
@@ -96,7 +112,12 @@ const MarkdownRendererInner = ({ content }: MarkdownRendererInnerProps) => {
           h3: ({ children }) => <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mt: 2, mb: 1 }}>{children}</Typography>,
           h4: ({ children }) => <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: "bold" }}>{children}</Typography>,
           p: ({ children }) => <Typography variant="body1" sx={{ lineHeight: 1.8, mb: 2 }}>{children}</Typography>,
-          a: ({ href, children }) => <Link href={href} target="_blank" rel="noopener noreferrer">{children}</Link>,
+          a: ({ href, children }) => (
+            <Link href={href} target="_blank" rel="noopener noreferrer">
+              <InsideLinkContext.Provider value={true}>{children}</InsideLinkContext.Provider>
+            </Link>
+          ),
+          img: ({ src, alt }) => <MarkdownImage src={typeof src === "string" ? src : undefined} alt={alt} />,
           li: ({ children }) => (
             <Typography component="li" variant="body1" sx={{ lineHeight: 1.8 }}>
               {children}

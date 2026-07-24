@@ -8,6 +8,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
 import { useColorMode } from "@/components/ThemeRegistry";
+import ZoomableImage from "@/components/ui/ZoomableImage";
 
 export type RecipeItem = {
   id: string;
@@ -95,11 +96,12 @@ const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
         >
           {shown.map((recipe) => (
             <Box key={recipe.id}>
-              <img
+              <ZoomableImage
                 src={recipe.url}
                 alt={recipe.title}
                 loading="lazy"
-                style={{ objectFit: "contain", width: "100%", height: "auto", imageRendering: "pixelated" }}
+                pixelated
+                style={{ objectFit: "contain", width: "100%", height: "auto" }}
               />
               <Typography
                 variant="body2"
