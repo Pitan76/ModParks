@@ -632,6 +632,8 @@ export const authenticators = sqliteTable(
       mode: "boolean",
     }).notNull(),
     transports: text("transports"),
+    name: text("name"),
+    createdAt: integer("created_at", { mode: "timestamp" }),
   },
   (authenticator) => ({
     compositePK: primaryKey({

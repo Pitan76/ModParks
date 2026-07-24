@@ -323,6 +323,20 @@
       "when": 1784864894910,
       "tag": "0045_new_nightcrawler",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "6",
+      "when": 1784865573254,
+      "tag": "0046_easy_kitty_pryde",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "6",
+      "when": 1785000000000,
+      "tag": "0047_passkey_metadata",
+      "breakpoints": true
     }
   ]
 }
