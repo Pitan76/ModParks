@@ -9,6 +9,7 @@ import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import BackupIcon from "@mui/icons-material/Backup";
 import HistoryIcon from "@mui/icons-material/History";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { useTranslations } from "next-intl";
 import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
@@ -40,6 +41,7 @@ const AdminSidebar = ({ mobileOpen, onMobileClose, session }: AdminSidebarProps)
       { id: "admin-ideas", label: tAdmin("sidebar.ideas"), path: "/admin/ideas", icon: <LightbulbIcon /> },
       { id: "admin-reports", label: tAdmin("sidebar.reports"), path: "/admin/reports", icon: <ReportIcon /> },
       { id: "admin-appeals", label: tAdmin("sidebar.appeals"), path: "/admin/appeals", icon: <GppMaybeIcon /> },
+      { id: "admin-recipe", label: tAdmin("sidebar.recipe"), path: "/admin/recipe", icon: <MenuBookIcon /> },
       { id: "admin-config", label: tAdmin("sidebar.config"), path: "/admin/config", icon: <SettingsIcon /> },
       { id: "admin-backup", label: tAdmin("sidebar.backup"), path: "/admin/backup", icon: <BackupIcon /> },
       { id: "admin-logs", label: tAdmin("sidebar.audit"), path: "/admin/logs", icon: <HistoryIcon /> },

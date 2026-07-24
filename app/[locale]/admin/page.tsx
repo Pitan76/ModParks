@@ -11,6 +11,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import FlagIcon from "@mui/icons-material/Flag";
 import HistoryIcon from "@mui/icons-material/History";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 interface AdminDashboardProps {
   params: Promise<{ locale: string }>;
@@ -70,6 +71,27 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                   <LinkButton variant="outlined" href="/admin/config">
                     {tAdmin("sidebar.config")}
+                  </LinkButton>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card>
+            <CardContent>
+              <Stack spacing={2}>
+                <MenuBookIcon sx={{ fontSize: 40, color: "warning.main" }} />
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{tAdmin("recipe.cardTitle")}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {tAdmin("recipe.cardDesc")}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <LinkButton variant="outlined" href="/admin/recipe">
+                    {tAdmin("sidebar.recipe")}
                   </LinkButton>
                 </Box>
               </Stack>

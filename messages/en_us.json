@@ -646,7 +646,47 @@
       "appeals": "Scan Appeals",
       "config": "Config",
       "backup": "Backup",
-      "audit": "Audit Logs"
+      "audit": "Audit Logs",
+      "recipe": "Recipe Management"
+    },
+    "recipe": {
+      "title": "Recipe Management",
+      "desc": "Perform administrative operations for modparks-recipe, such as cache purging and index rebuilding.",
+      "cardTitle": "Recipe Management",
+      "cardDesc": "Perform administrative operations for modparks-recipe caches, indices, and sessions.",
+      "reindex": {
+        "title": "Reindex Recipes",
+        "desc": "Scans all recipe JSONs in R2 and rebuilds the public index.",
+        "btn": "Run Reindex"
+      },
+      "purge": {
+        "title": "Purge Cache",
+        "desc": "Deletes cached 3D block icons for the specified namespace and bumps the asset version.",
+        "placeholder": "Namespace (e.g. itemalchemy)",
+        "btn": "Purge Cache"
+      },
+      "sweep": {
+        "title": "Sweep Ingest Sessions",
+        "desc": "Cleans up old, stale recipe ingestion sessions that were left incomplete.",
+        "btn": "Run Sweep"
+      },
+      "clean": {
+        "title": "Clean Old Assets",
+        "desc": "Permanently deletes old asset files under the specified namespace and folder.",
+        "placeholder": "Namespace (e.g. itemalchemy)",
+        "folderPlaceholder": "Folder Name (e.g. items, blocks)",
+        "btn": "Run Cleanup"
+      },
+      "seed": {
+        "title": "Seed Versions",
+        "desc": "Assigns initial versions to namespaces that do not have versions set.",
+        "btn": "Run Seed"
+      },
+      "result": "Execution Result:",
+      "success": "Success",
+      "error": "Error",
+      "loading": "Processing...",
+      "resultPlaceholder": "Logs of executed actions will be displayed here."
     },
     "appeals": {
       "listTitle": "Scan Appeals",
