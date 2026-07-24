@@ -620,9 +620,22 @@
       "projects": "Projects",
       "ideas": "Ideas",
       "reports": "Reports",
+      "appeals": "Scan Appeals",
       "config": "Config",
       "backup": "Backup",
       "audit": "Audit Logs"
+    },
+    "appeals": {
+      "listTitle": "Scan Appeals",
+      "empty": "No pending appeals.",
+      "appellant": "Appellant: {name}",
+      "notePlaceholder": "Review note (optional, shown to the appellant)",
+      "approve": "Approve (allow distribution)",
+      "reject": "Reject",
+      "reviewed": {
+        "approved": "Approved the appeal for {name}.",
+        "rejected": "Rejected the appeal for {name}."
+      }
     },
     "users": {
       "title": "User Management",
