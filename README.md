@@ -16,6 +16,7 @@ ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラ
 - 記法: Markdown, PlainText, PukiWikiの文法が対応
 - インポートと同期機能: 他のプラットフォームとの連携が強み。インポートはもちろんDL数同期なども
 - レシピ抽出機能: レシピをjarから抽出して一覧として表示する (https://recipe.modparks.pitan76.net/)
+- 絞り込み連動ダウンロード: 検索中のローダー・MCバージョン条件に合う版を、一覧から直接ワンクリックで取得。
 
 ## 技術スタック
 - **フレームワーク**: [Next.js](https://nextjs.org/) (App Router, v15)
