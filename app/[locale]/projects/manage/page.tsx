@@ -8,7 +8,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { auth } from "@/lib/auth";
 import { getProjects } from "@/lib/actions/projectQuery";
 import LinkButton from "@/components/ui/LinkButton";
-import BatchProjectOperationsClient from "@/components/project/BatchProjectOperationsClient";
+import BatchProjectOperationsClient from "@/components/project/BatchProjectOperationsClientLazy";
 
 interface ManageProjectsPageProps {
   params: Promise<{ locale: string }>;

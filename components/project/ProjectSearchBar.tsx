@@ -12,8 +12,11 @@ import FormMultiSelect from "@/components/ui/form/FormMultiSelect";
 import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition, useEffect, useRef } from "react";
 import type { ChangeEvent } from "react";
-import AdvancedSearchDialog from "./AdvancedSearchDialog";
+import dynamic from "next/dynamic";
 import type { AdvancedSearchFilters } from "./AdvancedSearchDialog";
+
+// ダイアログは開くまで不要なので client 専用で遅延ロードし、サーバーバンドルから外す。
+const AdvancedSearchDialog = dynamic(() => import("./AdvancedSearchDialog"), { ssr: false });
 
 export type ProjectSearchBarProps = {
   initialQ?: string;

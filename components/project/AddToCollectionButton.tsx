@@ -6,7 +6,10 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "next-intl";
-import AddToCollectionModal from "./AddToCollectionModal";
+import dynamic from "next/dynamic";
+
+// モーダルは開くまで不要なので client 専用で遅延ロードし、サーバーバンドルから外す。
+const AddToCollectionModal = dynamic(() => import("./AddToCollectionModal"), { ssr: false });
 
 type AddToCollectionButtonProps = {
   projectId: string;

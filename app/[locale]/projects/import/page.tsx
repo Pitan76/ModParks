@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import BatchImportClient from "@/components/project/BatchImportClient";
+import BatchImportClient from "@/components/project/BatchImportClientLazy";
 import { redirect } from "next/navigation";
 
 export default async function ImportProjectsPage({ params }: { params: Promise<{ locale: string }> }) {
