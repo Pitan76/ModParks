@@ -690,6 +690,21 @@
         "desc": "バージョンが未設定のネームスペースに対して、初期のバージョンを割り当てます。",
         "btn": "初期化を実行"
       },
+      "ls": {
+        "title": "R2オブジェクトリストの確認",
+        "desc": "R2バケット内のオブジェクト（レシピファイルやテクスチャなど）のリストを検索・確認します。",
+        "placeholder": "プレフィックス (例: assets/)",
+        "limitPlaceholder": "取得件数 (最大1000)",
+        "btn": "リスト取得"
+      },
+      "render3d": {
+        "title": "3Dアイコンのレンダリング確認",
+        "desc": "指定したブロックの3Dアイコンをその場でレンダリングし、プレビューを表示します。",
+        "namespacePlaceholder": "ネームスペース (例: itemalchemy)",
+        "pathPlaceholder": "パス (例: blocks/alchemical_chest)",
+        "btn": "レンダリング実行",
+        "preview": "レンダリングプレビュー:"
+      },
       "result": "実行結果:",
       "success": "成功",
       "error": "エラー",

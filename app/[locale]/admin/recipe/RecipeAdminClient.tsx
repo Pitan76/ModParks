@@ -18,6 +18,8 @@ import {
   sweepIngestsAction,
   cleanNamespaceFolderAction,
   seedAssetVersionsAction,
+  listR2ObjectsAction,
+  render3dIconAction,
 } from "@/lib/actions/adminRecipe";
 
 type LogEntry = {
@@ -35,6 +37,13 @@ export default function RecipeAdminClient() {
   const [purgeNamespace, setPurgeNamespace] = useState("");
   const [cleanNamespace, setCleanNamespace] = useState("");
   const [cleanFolder, setCleanFolder] = useState("");
+
+  const [lsPrefix, setLsPrefix] = useState("");
+  const [lsLimit, setLsLimit] = useState<number>(200);
+  const [renderNamespace, setRenderNamespace] = useState("");
+  const [renderPath, setRenderPath] = useState("");
+  const [renderFormat, setRenderFormat] = useState<"png" | "svg">("png");
+  const [previewImage, setPreviewImage] = useState<{ format: "png" | "svg"; data: string } | null>(null);
 
   const addLog = (type: "success" | "error" | "info", message: string, details?: any) => {
     setLogs((prev) => [
@@ -86,6 +95,35 @@ export default function RecipeAdminClient() {
       `${t("clean.title")} (${cleanNamespace}/${cleanFolder})`,
       cleanNamespaceFolderAction(cleanNamespace, cleanFolder)
     );
+  };
+
+  const runLs = () => {
+    handleAction(
+      `${t("ls.title")} (prefix: ${lsPrefix || "(none)"}, limit: ${lsLimit})`,
+      listR2ObjectsAction(lsPrefix || undefined, lsLimit)
+    );
+  };
+
+  const runRender3d = async () => {
+    if (!renderNamespace || !renderPath) return;
+    setLoading(true);
+    const actionName = `${t("render3d.title")} (${renderNamespace}:${renderPath})`;
+    addLog("info", `${actionName} ${t("loading")}`);
+    try {
+      const res = await render3dIconAction(renderNamespace, renderPath, renderFormat);
+      if (res.error) {
+        addLog("error", `${actionName} ${t("error")}: ${res.error}`);
+        setPreviewImage(null);
+      } else {
+        addLog("success", `${actionName} ${t("success")}`);
+        setPreviewImage({ format: res.format as "png" | "svg", data: res.data ?? "" });
+      }
+    } catch (err: any) {
+      addLog("error", `${actionName} ${t("error")}: ${err.message}`);
+      setPreviewImage(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -199,6 +237,97 @@ export default function RecipeAdminClient() {
 
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                  {t("ls.title")}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {t("ls.desc")}
+                </Typography>
+                <Stack spacing={2}>
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                      size="small"
+                      label={t("ls.placeholder")}
+                      value={lsPrefix}
+                      onChange={(e) => setLsPrefix(e.target.value)}
+                      disabled={loading}
+                      sx={{ flexGrow: 2 }}
+                    />
+                    <TextField
+                      size="small"
+                      type="number"
+                      label={t("ls.limitPlaceholder")}
+                      value={lsLimit}
+                      onChange={(e) => setLsLimit(Number(e.target.value))}
+                      disabled={loading}
+                      sx={{ flexGrow: 1 }}
+                    />
+                  </Box>
+                  <Button variant="contained" onClick={runLs} disabled={loading}>
+                    {t("ls.btn")}
+                  </Button>
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                  {t("render3d.title")}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {t("render3d.desc")}
+                </Typography>
+                <Stack spacing={2}>
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                      size="small"
+                      label={t("render3d.namespacePlaceholder")}
+                      value={renderNamespace}
+                      onChange={(e) => setRenderNamespace(e.target.value)}
+                      disabled={loading}
+                      sx={{ flexGrow: 1 }}
+                    />
+                    <TextField
+                      size="small"
+                      label={t("render3d.pathPlaceholder")}
+                      value={renderPath}
+                      onChange={(e) => setRenderPath(e.target.value)}
+                      disabled={loading}
+                      sx={{ flexGrow: 2 }}
+                    />
+                  </Box>
+                  <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                    <TextField
+                      select
+                      size="small"
+                      value={renderFormat}
+                      onChange={(e) => setRenderFormat(e.target.value as "png" | "svg")}
+                      disabled={loading}
+                      slotProps={{
+                        select: {
+                          native: true
+                        }
+                      }}
+                      sx={{ minWidth: 100 }}
+                    >
+                      <option value="png">PNG</option>
+                      <option value="svg">SVG</option>
+                    </TextField>
+                    <Button
+                      variant="contained"
+                      onClick={runRender3d}
+                      disabled={loading || !renderNamespace || !renderPath}
+                    >
+                      {t("render3d.btn")}
+                    </Button>
+                  </Box>
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                   {t("seed.title")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -227,6 +356,24 @@ export default function RecipeAdminClient() {
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
               {t("result")}
             </Typography>
+            {previewImage && (
+              <Box sx={{ mb: 3, p: 2, border: "1px dashed", borderColor: "divider", borderRadius: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
+                  {t("render3d.preview")}
+                </Typography>
+                <Box sx={{ display: "flex", justifyContent: "center", p: 2, bgcolor: "rgba(0,0,0,0.02)" }}>
+                  {previewImage.format === "svg" ? (
+                    <Box
+                      dangerouslySetInnerHTML={{ __html: previewImage.data }}
+                      sx={{ width: 128, height: 128, "& svg": { width: "100%", height: "100%" } }}
+                    />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previewImage.data} alt="Preview" style={{ width: 128, height: 128, objectFit: "contain" }} />
+                  )}
+                </Box>
+              </Box>
+            )}
             {loading && logs.length > 0 && logs[0].type === "info" && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <CircularProgress size={20} />

@@ -682,6 +682,21 @@
         "desc": "Assigns initial versions to namespaces that do not have versions set.",
         "btn": "Run Seed"
       },
+      "ls": {
+        "title": "Check R2 Object List",
+        "desc": "Search and check the list of objects (recipe files, textures, etc.) in the R2 bucket.",
+        "placeholder": "Prefix (e.g. assets/)",
+        "limitPlaceholder": "Limit (max 1000)",
+        "btn": "Get List"
+      },
+      "render3d": {
+        "title": "Preview 3D Icon Rendering",
+        "desc": "Renders a 3D icon for the specified block on the fly and shows a preview.",
+        "namespacePlaceholder": "Namespace (e.g. itemalchemy)",
+        "pathPlaceholder": "Path (e.g. blocks/alchemical_chest)",
+        "btn": "Run Render",
+        "preview": "Rendering Preview:"
+      },
       "result": "Execution Result:",
       "success": "Success",
       "error": "Error",

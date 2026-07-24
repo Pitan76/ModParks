@@ -103,3 +103,59 @@ export async function seedAssetVersionsAction() {
     return { error: err.message };
   }
 }
+
+/**
+ * R2内のオブジェクト一覧を取得します。
+ */
+export async function listR2ObjectsAction(prefix?: string, limit?: number, cursor?: string) {
+  const params: Record<string, string> = {};
+  if (prefix) params.prefix = prefix;
+  if (limit) params.limit = String(limit);
+  if (cursor) params.cursor = cursor;
+
+  try {
+    const data = await callRecipeAdminApi("/admin/ls", params);
+    return { success: true, data };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+/**
+ * 3Dアイコンのレンダリングをテストし、画像データURLまたはSVGソースを返します。
+ */
+export async function render3dIconAction(namespace: string, path: string, format?: "svg" | "png") {
+  if (!namespace || !path) return { error: "Namespace and path are required" };
+
+  try {
+    await getAdminDb();
+
+    const baseUrl = getCdnUrl();
+    const secret = getCdnSecret();
+    const url = new URL(`/admin/render3d/${namespace}/${path}`, baseUrl);
+    url.searchParams.set("secret", secret);
+    if (format) url.searchParams.set("format", format);
+
+    const res = await fetch(url.toString(), {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`API failed: ${res.status} ${res.statusText} - ${text}`);
+    }
+
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("image/svg+xml")) {
+      const svgText = await res.text();
+      return { success: true, format: "svg", data: svgText };
+    } else {
+      const buffer = await res.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
+      return { success: true, format: "png", data: `data:image/png;base64,${base64}` };
+    }
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
