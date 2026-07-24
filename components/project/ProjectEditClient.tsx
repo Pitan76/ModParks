@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import TabbedPanel from "@/components/ui/TabbedPanel";
 import type { ReactNode } from "react";
 
@@ -8,6 +9,7 @@ export type ProjectEditClientProps = {
   isOwner: boolean;
   basicInfoForm: ReactNode;
   versionsManager: ReactNode;
+  mediaManager: ReactNode;
   membersManager: ReactNode;
   dependenciesManager: ReactNode;
   ownershipTransfer?: ReactNode;
@@ -18,10 +20,12 @@ const ProjectEditClient = ({
   isOwner,
   basicInfoForm,
   versionsManager,
+  mediaManager,
   membersManager,
   dependenciesManager,
   ownershipTransfer
 }: ProjectEditClientProps) => {
+  const tProject = useTranslations("Project");
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -29,11 +33,12 @@ const ProjectEditClient = ({
   const tabQuery = searchParams?.get("tab");
 
   const tabs = [
-    { id: "info", label: "基本情報", content: basicInfoForm },
-    { id: "files", label: "ファイル管理", content: versionsManager },
-    { id: "members", label: "メンバー管理", content: membersManager },
-    { id: "dependencies", label: "依存関係", content: dependenciesManager },
-    { id: "ownership", label: "権限移譲", content: ownershipTransfer, hidden: !isOwner },
+    { id: "info", label: tProject("editTabs.info"), content: basicInfoForm },
+    { id: "files", label: tProject("editTabs.files"), content: versionsManager },
+    { id: "media", label: tProject("editTabs.media"), content: mediaManager },
+    { id: "members", label: tProject("editTabs.members"), content: membersManager },
+    { id: "dependencies", label: tProject("editTabs.dependencies"), content: dependenciesManager },
+    { id: "ownership", label: tProject("editTabs.ownership"), content: ownershipTransfer, hidden: !isOwner },
   ];
 
   const visibleTabs = tabs.filter(t => !t.hidden);

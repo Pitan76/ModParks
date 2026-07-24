@@ -74,6 +74,19 @@
     "label": "広告",
     "previewLabel": "広告スペース（プレビュー）"
   },
+  "Media": {
+    "description": "スクリーンショットを追加できます。カルーセルに流す画像はスイッチで選べます（動画は非対応）。",
+    "upload": "画像を追加",
+    "empty": "まだ画像がありません。",
+    "featured": "カルーセルに表示",
+    "delete": "削除",
+    "errors": {
+      "uploadFailed": "アップロードに失敗しました。",
+      "limitReached": "画像の上限に達しています。",
+      "notFound": "対象が見つかりません。",
+      "Forbidden": "権限がありません。"
+    }
+  },
   "Scan": {
     "appeal": "異議を申請",
     "appealSubmitted": "異議を申請しました。管理者の確認をお待ちください。",
@@ -130,6 +143,14 @@
     "copyHash": "ハッシュをコピー",
     "hashCopied": "コピーしました",
     "editVersion": "バージョンの編集",
+    "editTabs": {
+      "info": "基本情報",
+      "files": "ファイル管理",
+      "media": "スクリーンショット",
+      "members": "メンバー管理",
+      "dependencies": "依存関係",
+      "ownership": "権限移譲"
+    },
     "batchImportTitle": "外部からの一括インポート",
     "batchImportDesc": "連携済みの外部サービスからプロジェクトを一括インポートします。",
     "fetchModrinth": "Modrinthから取得",

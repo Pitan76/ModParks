@@ -74,6 +74,19 @@
     "label": "Advertisement",
     "previewLabel": "Ad space (preview)"
   },
+  "Media": {
+    "description": "Add screenshots. Use the switch to choose which images appear in the carousel (videos are not supported).",
+    "upload": "Add image",
+    "empty": "No images yet.",
+    "featured": "Show in carousel",
+    "delete": "Delete",
+    "errors": {
+      "uploadFailed": "Upload failed.",
+      "limitReached": "Image limit reached.",
+      "notFound": "Target not found.",
+      "Forbidden": "You do not have permission."
+    }
+  },
   "Scan": {
     "appeal": "Appeal",
     "appealSubmitted": "Your appeal has been submitted. Please wait for an administrator to review it.",
@@ -130,6 +143,14 @@
     "copyHash": "Copy hash",
     "hashCopied": "Copied",
     "editVersion": "Edit version",
+    "editTabs": {
+      "info": "Basic Info",
+      "files": "Files",
+      "media": "Screenshots",
+      "members": "Members",
+      "dependencies": "Dependencies",
+      "ownership": "Ownership"
+    },
     "batchImportTitle": "Batch Import from External Platforms",
     "batchImportDesc": "Import projects in bulk from your connected external services.",
     "fetchModrinth": "Fetch from Modrinth",

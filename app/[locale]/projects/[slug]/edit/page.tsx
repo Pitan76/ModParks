@@ -9,6 +9,8 @@ import ProjectEditForm from "@/components/project/ProjectEditForm";
 import ProjectMembersManager from "@/components/project/ProjectMembersManager";
 import ProjectOwnershipTransfer from "@/components/project/ProjectOwnershipTransfer";
 import ProjectVersionsManager from "@/components/project/ProjectVersionsManager";
+import ProjectMediaManager from "@/components/project/ProjectMediaManager";
+import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import ProjectEditClient from "@/components/project/ProjectEditClient";
 import ProjectDependenciesManager from "@/components/project/ProjectDependenciesManager";
 import { getProjectMembers } from "@/lib/actions/member";
@@ -76,6 +78,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     .all();
 
   const dependencies = await getProjectDependencies(project.id);
+  const media = await getPublicProjectMedia(project.id);
 
   const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
   const [availableTags, availablePlatforms] = await Promise.all([
@@ -101,6 +104,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         isOwner={isOwner}
         basicInfoForm={<ProjectEditForm project={project} availableTags={availableTags} />}
         versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} githubRepo={project.githubRepo} />}
+        mediaManager={<ProjectMediaManager projectId={project.id} projectSlug={project.slug} media={media} />}
         membersManager={
           <ProjectMembersManager 
             projectId={project.id} 
