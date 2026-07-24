@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getDatabase } from "@/lib/db";
-import { users, userProfiles, userSettings, apiKeys, accounts } from "@/db/schema";
+import { users, userProfiles, userSettings, apiKeys, accounts, authenticators } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import SettingsClient from "@/components/settings/SettingsClient";
 import Container from "@mui/material/Container";
@@ -34,6 +34,10 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
   const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
   const userApiKeys = await db.select().from(apiKeys).where(eq(apiKeys.userId, session.user.id));
   const userAccounts = await db.select().from(accounts).where(eq(accounts.userId, session.user.id));
+  const userPasskeys = await db
+    .select({ credentialID: authenticators.credentialID, name: authenticators.name, createdAt: authenticators.createdAt })
+    .from(authenticators)
+    .where(eq(authenticators.userId, session.user.id));
 
   const isGitHubConnected = userAccounts.some(acc => acc.provider === "github");
 
@@ -57,6 +61,7 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
         isGitHubConnected={isGitHubConnected}
         hasPassword={!!userRecord?.passwordHash}
         twoFactorEnabled={!!userRecord?.twoFactorEnabled}
+        passkeys={userPasskeys}
         defaultProjectStatus={settingsRecord?.defaultProjectStatus || "draft"}
         defaultLicense={settingsRecord?.defaultLicense || "All Rights Reserved"}
         modrinthApiKey={settingsRecord?.modrinthApiKey || ""}

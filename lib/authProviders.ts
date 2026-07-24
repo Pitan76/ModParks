@@ -1,6 +1,7 @@
 import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import Resend from "next-auth/providers/resend";
+import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import { DEFAULT_APP_SETTINGS } from "@/lib/config/appSettings";
 import { eq } from "drizzle-orm";
 
@@ -139,6 +140,26 @@ export const authProviders = [
         };
       } catch (e: unknown) {
         console.error("[Auth] Error in authorize:", e);
+        throw e;
+      }
+    },
+  }),
+  Credentials({
+    id: "passkey",
+    name: "Passkey",
+    credentials: { response: { label: "Passkey Response", type: "text" } },
+    async authorize(credentials) {
+      if (!credentials?.response) return null;
+      try {
+        const { checkRateLimit } = await import("@/lib/rate-limit");
+        const rlRes = await checkRateLimit("passkey-login", 20, 5 * 60 * 1000);
+        if (!rlRes.success) throw new Error("TOO_MANY_REQUESTS");
+
+        const parsed = JSON.parse(credentials.response as string) as AuthenticationResponseJSON;
+        const { verifyPasskeyLogin } = await import("@/lib/webauthn/verifyLogin");
+        return await verifyPasskeyLogin(parsed);
+      } catch (e: unknown) {
+        console.error("[Auth] Error in passkey authorize:", e);
         throw e;
       }
     },

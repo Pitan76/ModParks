@@ -13,13 +13,16 @@ import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import DialogContentText from "@mui/material/DialogContentText";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
+import PasskeyManager from "@/components/settings/passkey/PasskeyManager";
+import type { PasskeyInfo } from "@/lib/actions/passkey";
 
 interface SecurityTabProps {
   is2FAEnabled: boolean;
   setIs2FAEnabled: (enabled: boolean) => void;
+  passkeys: PasskeyInfo[];
 }
 
-export default function SecurityTab({ is2FAEnabled, setIs2FAEnabled }: SecurityTabProps) {
+export default function SecurityTab({ is2FAEnabled, setIs2FAEnabled, passkeys }: SecurityTabProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const { message, flash, setMessage } = useFlashMessage();
@@ -110,12 +113,7 @@ export default function SecurityTab({ is2FAEnabled, setIs2FAEnabled }: SecurityT
 
       <Divider sx={{ my: 4 }} />
 
-      <Box sx={{ p: 3, border: "1px solid", borderColor: "divider", borderRadius: 2, mb: 2 }}>
-        <Typography variant="h6" sx={{ mb: 1 }}>{t("security.passkeys")}</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>{t("security.passkeysDesc")}</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: "italic" }}>{t("security.noPasskeys")}</Typography>
-        <Button variant="outlined" disabled>{t("security.registerPasskey")}</Button>
-      </Box>
+      <PasskeyManager initialPasskeys={passkeys} />
     </Box>
   );
 }

@@ -13,6 +13,7 @@ import PostingTab from "./tabs/PostingTab";
 import IntegrationTab from "./tabs/IntegrationTab";
 import NotificationsTab from "./tabs/NotificationsTab";
 import ThemeTab from "./tabs/ThemeTab";
+import type { PasskeyInfo } from "@/lib/actions/passkey";
 
 interface SettingsClientProps {
   user: { username: string; displayName: string; bio: string; email: string; avatarUrl: string; links: string; locale: string; showGithubLink: boolean };
@@ -20,6 +21,7 @@ interface SettingsClientProps {
   isGitHubConnected: boolean;
   hasPassword?: boolean;
   twoFactorEnabled?: boolean;
+  passkeys?: PasskeyInfo[];
   defaultProjectStatus?: string;
   defaultLicense?: string;
   modrinthApiKey?: string;
@@ -36,6 +38,7 @@ export default function SettingsClient({
   isGitHubConnected,
   hasPassword,
   twoFactorEnabled,
+  passkeys,
   defaultProjectStatus,
   defaultLicense,
   modrinthApiKey,
@@ -57,7 +60,7 @@ export default function SettingsClient({
     { label: t("profile.title"), content: <ProfileTab user={user} locale={locale} /> },
     { label: t("account.title"), content: <AccountTab user={user} hasPassword={!!hasPassword} is2FAEnabled={is2FAEnabled} locale={locale} setLocale={setLocale} /> },
     { label: t("theme.title"), content: <ThemeTab /> },
-    { label: t("security.title"), content: <SecurityTab is2FAEnabled={is2FAEnabled} setIs2FAEnabled={setIs2FAEnabled} /> },
+    { label: t("security.title"), content: <SecurityTab is2FAEnabled={is2FAEnabled} setIs2FAEnabled={setIs2FAEnabled} passkeys={passkeys ?? []} /> },
     { label: t("apiKeys.title"), content: <ApiKeysTab apiKeys={apiKeys} /> },
     { label: t("posting.title"), content: <PostingTab defaultProjectStatus={defaultProjectStatus || "draft"} defaultLicense={defaultLicense || "All Rights Reserved"} /> },
     { label: t("notifications.title"), content: <NotificationsTab initialPrefs={notificationPrefs ?? null} /> },

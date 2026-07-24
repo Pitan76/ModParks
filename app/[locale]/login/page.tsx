@@ -14,6 +14,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import PasskeyLoginButton from "@/components/auth/PasskeyLoginButton";
 import { Link } from "@/i18n/routing";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -166,6 +167,8 @@ export default function LoginPage() {
         >
           {tAuth("login.loginWithGithub")}
         </Button>
+
+        <PasskeyLoginButton onError={setError} />
 
         <form onSubmit={(e) => {
           e.preventDefault();
