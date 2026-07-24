@@ -24,14 +24,15 @@ export async function PUT(req: NextRequest) {
   const allowedPrefixes = [
     `avatar/${session.user.id}/`,
     `icon/`,
-    `mod/`
+    `mod/`,
+    `media/`
   ];
   const isAllowedPrefix = allowedPrefixes.some(prefix => key.startsWith(prefix));
   if (!isAllowedPrefix) {
     return NextResponse.json({ error: "Forbidden: Invalid key prefix" }, { status: 403 });
   }
 
-  if (key.startsWith("icon/") || key.startsWith("mod/")) {
+  if (key.startsWith("icon/") || key.startsWith("mod/") || key.startsWith("media/")) {
     const parts = key.split("/");
     if (parts.length < 3) {
       return NextResponse.json({ error: "Forbidden: Invalid key format" }, { status: 403 });

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   const { fileName, contentType, type, projectSlug } = body as {
     fileName:    string;
     contentType: string;
-    type:        "icon" | "mod" | "avatar";
+    type:        "icon" | "mod" | "avatar" | "media";
     projectSlug?: string;
   };
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
   if (type === "mod" && !ALLOWED_MOD_TYPES.includes(contentType) && !isAllowedModExtension) {
     return NextResponse.json({ error: "Invalid file type for mod" }, { status: 400 });
   }
-  if ((type === "icon" || type === "avatar") && !ALLOWED_ICON_TYPES.includes(contentType)) {
+  if ((type === "icon" || type === "avatar" || type === "media") && !ALLOWED_ICON_TYPES.includes(contentType)) {
     return NextResponse.json({ error: `Invalid file type for ${type}` }, { status: 400 });
   }
 

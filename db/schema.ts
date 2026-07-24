@@ -340,6 +340,33 @@ export const projectMembers = sqliteTable(
 
 // ─── Project Favorites ────────────────────────────────────────────────────────
 
+// ─── Project Media (スクリーンショット) ────────────────────────────────────────
+
+/**
+ * プロジェクトのスクリーンショット画像。
+ * featured=true のものだけをプロジェクトページ上部のカルーセルに流す。
+ * 動画は無料枠での配信負荷が大きいため対象外（画像のみ）。
+ */
+export const projectMedia = sqliteTable("project_media", {
+  id:        text("id").primaryKey(),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  url:       text("url").notNull(),
+  caption:   text("caption"),
+  /** 表示順。昇順で並べる */
+  sortOrder: integer("sort_order").notNull().default(0),
+  /** カルーセルに流すか。false のものは画像タブでのみ表示 */
+  featured:  integer("featured", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  projectIdx: index("project_media_project_idx").on(table.projectId, table.sortOrder),
+}));
+
+export type ProjectMedia = typeof projectMedia.$inferSelect;
+
 export const projectFavorites = sqliteTable(
   "project_favorites",
   {

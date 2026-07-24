@@ -5,7 +5,7 @@
  */
 
 export interface UploadTarget {
-  type: "icon" | "mod" | "avatar";
+  type: "icon" | "mod" | "avatar" | "media";
   /** icon / mod では必須。新規プロジェクト作成時は "new-project" を渡す */
   projectSlug?: string;
 }
