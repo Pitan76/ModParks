@@ -1,4 +1,5 @@
 import { parseModJar } from "./parseMod";
+import { scanJar } from "./scanJar";
 import { extractRecipes } from "./recipeExtract";
 import { uploadViaCdn, uploadDirectToR2, updateRecipeIndex } from "./recipeUpload";
 import { resolveJarSource } from "./source";
@@ -40,9 +41,16 @@ async function handleExtractRecipes(
   return { count, namespaces };
 }
 
+async function handleScanJar(req: Request, env: JarWorkerEnv): Promise<ScanJarResult> {
+  const { source } = (await req.json()) as ScanJarRequest;
+  const arrayBuffer = await resolveJarSource(source, env);
+  return scanJar(arrayBuffer);
+}
+
 const ROUTES: Record<string, (req: Request, env: JarWorkerEnv) => Promise<unknown>> = {
   "/parse-mod": handleParseMod,
   "/extract-recipes": handleExtractRecipes,
+  "/scan-jar": handleScanJar,
 };
 
 const worker = {
