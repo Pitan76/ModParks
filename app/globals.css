@@ -43,3 +43,15 @@
     color: inherit;
   }
 }
+
+/* ---- iOS 長押しカスタムメニュー ---- */
+/* iOS Safari のリンク/画像プレビュー（コールアウト）を抑止し、独自メニューを出す */
+body[data-custom-context-menu='on'] {
+  -webkit-touch-callout: none;
+}
+
+body[data-custom-context-menu='on'] input,
+body[data-custom-context-menu='on'] textarea,
+body[data-custom-context-menu='on'] [contenteditable='true'] {
+  -webkit-touch-callout: default;
+}

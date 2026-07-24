@@ -98,6 +98,9 @@
     "cta": "投稿する"
   },
   "Project": {
+    "copyHash": "ハッシュをコピー",
+    "hashCopied": "コピーしました",
+    "editVersion": "バージョンの編集",
     "batchImportTitle": "外部からの一括インポート",
     "batchImportDesc": "連携済みの外部サービスからプロジェクトを一括インポートします。",
     "fetchModrinth": "Modrinthから取得",

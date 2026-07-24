@@ -11,6 +11,7 @@ import Snackbar from "@mui/material/Snackbar";
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
 import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
+import { isLongPressEvent, useLongPressContextMenu } from "./useLongPressContextMenu";
 
 import type {
   ContextMenuItem,
@@ -104,35 +105,20 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
     ? "To open the browser's default menu, hold down the Shift key and right-click."
     : "ブラウザの標準メニューを開くには、Shiftキーを押しながら右クリックしてください。";
 
-  const lastTouchRef = React.useRef<{ x: number; y: number } | null>(null);
+  const lastTouchRef = useLongPressContextMenu(!isDisabled);
 
   React.useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      if (touch) {
-        lastTouchRef.current = { x: touch.clientX, y: touch.clientY };
-      }
-    };
-    const handleTouchMove = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      if (touch) {
-        lastTouchRef.current = { x: touch.clientX, y: touch.clientY };
-      }
-    };
-
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
-    return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, []);
+    document.body.dataset.customContextMenu = isDisabled ? "off" : "on";
+  }, [isDisabled]);
 
   const open = React.useCallback<ContextMenuContextValue["open"]>((event, items, options) => {
     if (isDisabled) return; // カスタムメニュー無効時はブラウザ標準を表示
 
+    const longPress = isLongPressEvent(event);
     const target = buildTarget(event);
-    if (shouldPassthrough(event, target, options)) return; // ネイティブメニューを妨害しない
+    // 長押しはリンク/画像上でこそ使いたいので、入力欄以外は素通しさせない
+    if (longPress && target.editable) return;
+    if (!longPress && shouldPassthrough(event, target, options)) return; // ネイティブメニューを妨害しない
 
     event.preventDefault();
     event.stopPropagation();
@@ -153,7 +139,8 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
       position: { top: clientY, left: clientX },
       items: resolved,
       target,
-      includeBrowserItem: options?.includeBrowserItem ?? true,
+      // Shift+右クリックの案内はタッチ長押しでは意味がない
+      includeBrowserItem: longPress ? false : (options?.includeBrowserItem ?? true),
     });
   }, [isDisabled]);
 

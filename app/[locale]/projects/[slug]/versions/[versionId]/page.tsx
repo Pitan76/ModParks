@@ -21,6 +21,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
 import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
+import FileHashChip from "@/components/project/FileHashChip";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
 import { SITE_URL } from "@/lib/config";
@@ -123,7 +124,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
             variant="outlined"
             size="small"
           >
-            バージョンの編集
+            {t("editVersion")}
           </LinkButton>
         )}
       </Box>
@@ -151,6 +152,9 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
                   <Typography variant="body2">{formatBytes(version.fileSize)}</Typography>
                 )}
               </Stack>
+              <Box sx={{ mt: 1 }}>
+                <FileHashChip sha256={version.fileSha256} />
+              </Box>
             </Box>
 
             <Button

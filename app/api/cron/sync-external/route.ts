@@ -3,6 +3,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { projects, userSettings } from "@/db/schema";
 import { eq, isNotNull, or } from "drizzle-orm";
 import { syncExternalProjectDataSystem } from "@/lib/actions/projectSync";
+import { purgeExpiredRateLimits } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,8 @@ export async function GET(request: Request) {
 
     const d1 = await getD1();
     const db = getDb(d1);
+
+    await purgeExpiredRateLimits();
 
     const threeDaysAgoMs = Date.now() - (3 * 24 * 60 * 60 * 1000);
 

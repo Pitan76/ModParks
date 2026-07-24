@@ -4,6 +4,10 @@ import { users, userProfiles, apiKeys } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { TOTP } from "otpauth";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const LOGIN_RATE_LIMIT = 10;
+const LOGIN_RATE_WINDOW_MS = 15 * 60 * 1000;
 
 export async function POST(request: Request) {
   try {
@@ -12,6 +16,12 @@ export async function POST(request: Request) {
 
     if (!identifier || !password) {
       return NextResponse.json({ error: "Identifier and password are required." }, { status: 400 });
+    }
+
+    // identifier を含めてキーにすることで、共有IP環境で無関係な利用者を巻き込まない
+    const limit = await checkRateLimit("v1-auth-login", LOGIN_RATE_LIMIT, LOGIN_RATE_WINDOW_MS, identifier);
+    if (!limit.success) {
+      return NextResponse.json({ error: "Too many login attempts. Please try again later." }, { status: 429 });
     }
 
     const d1 = await getD1();

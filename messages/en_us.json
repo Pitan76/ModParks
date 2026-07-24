@@ -98,6 +98,9 @@
     "cta": "Submit"
   },
   "Project": {
+    "copyHash": "Copy hash",
+    "hashCopied": "Copied",
+    "editVersion": "Edit version",
     "batchImportTitle": "Batch Import from External Platforms",
     "batchImportDesc": "Import projects in bulk from your connected external services.",
     "fetchModrinth": "Fetch from Modrinth",

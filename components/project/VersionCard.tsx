@@ -13,6 +13,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
+import FileHashChip from "@/components/project/FileHashChip";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { useLocale, useTranslations } from "next-intl";
 import { formatBytes, toStringArray } from "@/lib/utils/format";
@@ -28,6 +29,7 @@ export type VersionCardProps = {
     fileUrl:       string;
     fileName:      string;
     fileSize:      number | null;
+    fileSha256?:   string | null;
     downloads:     number;
     createdAt:     Date | number;
   };
@@ -155,6 +157,10 @@ const VersionCard = ({ version, projectSlug }: VersionCardProps) => {
                 </Typography>
               )}
             </Stack>
+
+            <Box sx={{ mt: 0.5 }}>
+              <FileHashChip sha256={version.fileSha256} />
+            </Box>
           </Box>
 
           {/* 右: DLボタン */}
