@@ -54,16 +54,28 @@ export async function uploadViaCdn(
     }
   };
 
-  for (const [ns, bucket] of Object.entries(byNs)) {
-    // JSON 系（レシピ/タグ/モデル）は小さいので件数だけで分割
-    for (const c of chunkRecord(bucket.recipes, 200)) await postBulk(ns, { recipes: c }, Object.keys(c).length);
-    for (const c of chunkRecord(bucket.tags, 200)) await postBulk(ns, { tags: c }, Object.keys(c).length);
-    for (const c of chunkRecord(bucket.models, 200)) await postBulk(ns, { models: c }, Object.keys(c).length);
-    // テクスチャは base64 で嵩むため件数とバイト数の両方で分割
-    for (const c of chunkRecord(bucket.textures, 80, 6_000_000)) {
-      await postBulk(ns, { textures: c }, Object.keys(c).length);
+  const entries = Object.entries(byNs);
+  // テクスチャは base64 で嵩むため件数とバイト数の両方で分割。JSON 系は件数だけ
+  const phase = async (
+    pick: (b: NsBucket) => Record<string, string>,
+    wrap: (c: Record<string, string>) => Partial<NsBucket>,
+    maxCount: number,
+    maxBytes?: number
+  ) => {
+    for (const [ns, bucket] of entries) {
+      for (const c of chunkRecord(pick(bucket), maxCount, maxBytes)) {
+        await postBulk(ns, wrap(c), Object.keys(c).length);
+      }
     }
-  }
+  };
+
+  // レシピが先に入るとテクスチャ未着の透明アイコンが焼き付く。依存される側から送る。
+  // 名前空間をまたぐ参照（mod のレシピが minecraft: を参照）があるため、
+  // ns ごとではなく全 ns を通したフェーズ単位で進める
+  await phase((b) => b.textures, (c) => ({ textures: c }), 80, 6_000_000);
+  await phase((b) => b.models, (c) => ({ models: c }), 200);
+  await phase((b) => b.tags, (c) => ({ tags: c }), 200);
+  await phase((b) => b.recipes, (c) => ({ recipes: c }), 200);
   return uploaded;
 }
 
@@ -92,20 +104,23 @@ export async function uploadDirectToR2(
     }
   };
 
-  for (const [ns, bucket] of Object.entries(byNs)) {
-    for (const [id, c] of Object.entries(bucket.recipes)) {
-      await write(`data/${ns}/recipe/${id}.json`, c, "application/json");
+  const entries = Object.entries(byNs);
+  const phase = async (
+    pick: (b: NsBucket) => Record<string, string>,
+    key: (ns: string, p: string) => string,
+    type: string,
+    body: (v: string) => ArrayBuffer | string = (v) => v
+  ) => {
+    for (const [ns, bucket] of entries) {
+      for (const [p, v] of Object.entries(pick(bucket))) await write(key(ns, p), body(v), type);
     }
-    for (const [p, c] of Object.entries(bucket.tags)) {
-      await write(`data/${ns}/tags/${p}.json`, c, "application/json");
-    }
-    for (const [p, b64] of Object.entries(bucket.textures)) {
-      await write(`assets/${ns}/textures/${p}`, base64ToBytes(b64), "image/png");
-    }
-    for (const [p, c] of Object.entries(bucket.models)) {
-      await write(`assets/${ns}/models/${p}.json`, c, "application/json");
-    }
-  }
+  };
+
+  // uploadViaCdn と同じ理由で、依存される側から書き、レシピを最後にする
+  await phase((b) => b.textures, (ns, p) => `assets/${ns}/textures/${p}`, "image/png", base64ToBytes);
+  await phase((b) => b.models, (ns, p) => `assets/${ns}/models/${p}.json`, "application/json");
+  await phase((b) => b.tags, (ns, p) => `data/${ns}/tags/${p}.json`, "application/json");
+  await phase((b) => b.recipes, (ns, id) => `data/${ns}/recipe/${id}.json`, "application/json");
   return uploaded;
 }
 

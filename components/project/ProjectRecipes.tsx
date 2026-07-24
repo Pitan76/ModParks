@@ -29,17 +29,23 @@ const ProjectRecipes = async ({ projectSlug, namespaces }: ProjectRecipesProps) 
       throw new Error("Failed to fetch recipes list");
     }
     
-    const data = await res.json() as { recipes?: { id: string }[] };
+    const data = await res.json() as {
+      recipes?: { id: string }[];
+      versions?: Record<string, string>;
+    };
     const ids: string[] = data.recipes ? data.recipes.map(r => r.id) : [];
-    
+
     recipes = ids
       .filter(id => nsSet.has(id.split(":")[0]))
       .map(id => {
         const [namespace, itemId] = id.split(":");
+        // URL にアセットバージョンを埋めると CDN 側がバージョン参照の R2 往復を省略でき、
+        // レスポンスが immutable になるため再訪時はネットワークに出なくなる。
+        const v = data.versions?.[namespace];
         return {
           id,
           title: itemId.replace(/_/g, " "),
-          url: `${cdnUrl}/api/${namespace}/${itemId}.png`
+          url: `${cdnUrl}/api/${namespace}/${itemId}.png${v ? `?v=${encodeURIComponent(v)}` : ""}`
         };
       });
   } catch (err: unknown) {
