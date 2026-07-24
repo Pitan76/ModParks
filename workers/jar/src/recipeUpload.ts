@@ -172,7 +172,35 @@ export async function uploadDirectToR2(
   await phase((b) => b.models, (ns, p) => `assets/${ns}/models/${p}.json`, "application/json");
   await phase((b) => b.tags, (ns, p) => `data/${ns}/tags/${p}.json`, "application/json");
   await phase((b) => b.recipes, (ns, id) => `data/${ns}/recipe/${id}.json`, "application/json");
+
+  // この経路は CDN Worker を通らないため、バージョン更新も自前で行う必要がある。
+  // これを怠ると、データは更新されたのに CDN 側のキャッシュが古いまま残る。
+  await bumpVersionsDirect(r2, entries.map(([ns]) => ns));
   return uploaded;
+}
+
+/**
+ * meta/versions.json を直接読み書きしてバージョンを上げる。
+ * mp-recipe 側の bumpAssetVersion と同一のフォーマット・意味を持つ（直書き経路専用）。
+ */
+async function bumpVersionsDirect(r2: R2Bucket, namespaces: string[]): Promise<void> {
+  try {
+    const obj = await r2.get("meta/versions.json");
+    let versions: Record<string, string> = {};
+    if (obj) {
+      try {
+        const parsed = JSON.parse(await obj.text());
+        if (parsed && typeof parsed === "object") versions = parsed;
+      } catch {
+        // 壊れていれば作り直す
+      }
+    }
+    const stamp = Date.now().toString(36);
+    for (const ns of namespaces) versions[ns] = stamp;
+    await put(r2, "meta/versions.json", JSON.stringify(versions), "application/json");
+  } catch (e) {
+    console.warn("Direct version bump failed:", e);
+  }
 }
 
 /**
