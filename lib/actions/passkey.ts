@@ -1,7 +1,6 @@
 "use server";
 
-import type { RegistrationResponseJSON } from "@simplewebauthn/types";
-import type { AuthenticatorTransportFuture } from "@simplewebauthn/server";
+import type { RegistrationResponseJSON, AuthenticatorTransportFuture } from "@simplewebauthn/types";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { generateRegistrationOptions, verifyRegistration } from "@/lib/services/auth";

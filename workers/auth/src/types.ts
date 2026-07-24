@@ -4,7 +4,7 @@ import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
   AuthenticatorTransportFuture,
-} from "@simplewebauthn/server";
+} from "@simplewebauthn/types";
 
 // このファイルは型のみ（実行時 import 禁止）。メインアプリと sidecar の両方から
 // 読み込まれるため、値を import すると @simplewebauthn/server がメイン Worker の
