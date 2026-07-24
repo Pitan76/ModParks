@@ -75,7 +75,7 @@
     "previewLabel": "広告スペース（プレビュー）"
   },
   "Media": {
-    "description": "スクリーンショットを追加できます。カルーセルに流す画像はスイッチで選べます（動画は非対応）。",
+    "description": "スクリーンショットを追加できます。",
     "upload": "画像を追加",
     "empty": "まだ画像がありません。",
     "featured": "カルーセルに表示",
@@ -146,7 +146,7 @@
     "editTabs": {
       "info": "基本情報",
       "files": "ファイル管理",
-      "media": "スクリーンショット",
+      "media": "メディア",
       "members": "メンバー管理",
       "dependencies": "依存関係",
       "ownership": "権限移譲"

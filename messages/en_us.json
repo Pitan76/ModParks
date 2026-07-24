@@ -75,7 +75,7 @@
     "previewLabel": "Ad space (preview)"
   },
   "Media": {
-    "description": "Add screenshots. Use the switch to choose which images appear in the carousel (videos are not supported).",
+    "description": "Add screenshots.",
     "upload": "Add image",
     "empty": "No images yet.",
     "featured": "Show in carousel",
@@ -146,7 +146,7 @@
     "editTabs": {
       "info": "Basic Info",
       "files": "Files",
-      "media": "Screenshots",
+      "media": "Media",
       "members": "Members",
       "dependencies": "Dependencies",
       "ownership": "Ownership"
