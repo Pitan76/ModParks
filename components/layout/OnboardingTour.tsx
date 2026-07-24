@@ -26,50 +26,25 @@ export default function OnboardingTour() {
 
   const syncAttempted = useRef(false);
 
+  // 未ログインユーザーには表示せず、アカウント単位で1回のみ表示する
   useEffect(() => {
-    if (status === "loading") return;
-
-    const isCompletedLocal = localStorage.getItem("onboardingCompleted") === "true";
-
-    if (status === "authenticated" && session?.user) {
-      const isCompletedDb = (session.user as any).onboardingCompleted;
-      
-      if (!isCompletedDb) {
-        if (isCompletedLocal) {
-          // Locally completed, sync to DB without showing dialog
-          if (!syncAttempted.current) {
-            syncAttempted.current = true;
-            completeOnboarding().then(() => update()).catch(console.error);
-          }
-        } else {
-          setOpen(true);
-        }
-      } else {
-        // DB completed, sync to local if missing
-        if (!isCompletedLocal) {
-          localStorage.setItem("onboardingCompleted", "true");
-        }
-        setOpen(false);
-      }
-    } else if (status === "unauthenticated") {
-      setOpen(!isCompletedLocal);
+    if (status !== "authenticated" || !session?.user) {
+      setOpen(false);
+      return;
     }
-  }, [status, session, update]);
+    setOpen(!session.user.onboardingCompleted);
+  }, [status, session]);
 
   const handleClose = async () => {
     setOpen(false);
-    localStorage.setItem("onboardingCompleted", "true");
-    
-    if (status === "authenticated") {
-      if (!syncAttempted.current) {
-        syncAttempted.current = true;
-        try {
-          await completeOnboarding();
-          await update();
-        } catch (e) {
-          console.error("Failed to update onboarding status:", e);
-        }
-      }
+    if (syncAttempted.current) return;
+
+    syncAttempted.current = true;
+    try {
+      await completeOnboarding();
+      await update();
+    } catch (e) {
+      console.error("Failed to update onboarding status:", e);
     }
   };
 

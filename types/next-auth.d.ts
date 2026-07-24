@@ -18,6 +18,7 @@ declare module "next-auth" {
       displayName: string | null;
       avatarUrl:   string | null;
       role:        string;
+      onboardingCompleted: boolean;
       name?:       string | null;
       email?:      string | null;
       image?:      string | null;
@@ -31,5 +32,6 @@ declare module "next-auth/jwt" {
     displayName?: string | null;
     avatarUrl?:   string | null;
     role?:        string;
+    onboardingCompleted?: boolean;
   }
 }
