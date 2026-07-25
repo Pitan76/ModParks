@@ -171,3 +171,37 @@ Next.js server runtime + React + OpenNext shim   ← 削れないベースライ
 4. **【方針確定】アプリ3分割（apps/user・developer・admin）は非推奨のまま。** 分離は既に Service Bindings（AUTH/PUSH/JAR）で外科的に実施済みで、その延長（Drizzle/重い業務ロジックの追加外出し）が正道。
 
 > **一次データに基づく総括**: 「3 MiB を超えてデプロイできない」の直接原因として、少なくとも main では **型エラーによるビルド失敗**という別要因が混在していた。サイズ問題そのものは Linux CI 上での実測（手順2）で確定させるべきで、Windows ローカルの数値で判断してはいけない。
+
+---
+
+## 6. Linux CI 実測結果（measure-bundle.yml, 確定値）
+
+`measure-bundle.yml`（`workflow_dispatch`）を CI(ubuntu-latest) で実行して得た**本番相当の確定値**。`wrangler deploy --dry-run`（minify なし）ベース。
+
+| ビルド | Total Upload | **gzip** | 3,072 KiB 制限 |
+|---|---|---:|---|
+| **Turbopack (Linux)** | 16,301.8 KiB | **3,450.3 KiB** | ❌ 超過 |
+| **webpack (Linux, minifyなし)** | 14,286.9 KiB | **3,068.4 KiB** | ⚠️ 残り約 4 KiB |
+| (参考) Windows Turbopack ローカル | 4,639.1 KiB | 842.2 KiB | ― |
+
+### 6.1 確定した事実
+
+1. **Turbopack-on-Linux は依然として肥大（gzip 3,450 = 超過）。** 「Turbopack へ一本化して解決」は**否定**。CI で webpack を使う判断（`open-next.config.ts` / `CF_WEBPACK_BUILD=1`）は正当で、webpack は外せない。
+2. **Windows Turbopack の 842 KiB はアンダーカウントで信用不可。** 同一コードで Linux Turbopack が 3,450 KiB（約4倍）。`measure-bundle.yml` が警告する「バンドルに取り込まれず実行時 require される chunk」で小さく見えていただけ。**今後 Windows 数値でサイズ判断してはいけない。**
+3. **main 本番（webpack・minifyなし）は gzip 3,068 KiB ＝ 制限まで残り約 4 KiB の崖。** 機能を1つ足せば即超過する状態だった。
+4. **混入検査（`analyze-bundle.mjs`）はほぼクリーン**：final bundle に dev react-dom / next-devtools / fontkit / crypto-browserify の混入なし（terser 13 箇所のみ、軽微）。＝「不要物を消すだけ」の簡単な大勝ちは無く、中身は正規のフレームワーク＋MUI＋アプリコード。
+
+### 6.2 本コミットで実施した対策（Cプランの main への移植）
+
+separation ブランチで検証済みだが **main に未適用**だった2点を移植：
+
+- `next.config.ts`：サーバービルドで `config.devtool = false`（インライン source map 排除）。
+- `.github/workflows/deploy.yml`：本体デプロイを `deploy` → **`deploy --minify`**。
+
+これにより webpack ビルドは **gzip 約 3,068 → 約 2,712 KiB（残ヘッドルーム約 360 KiB）** になる見込み（§2 の separation 実測と整合）。**崖から一歩下がるための応急・確定対策**。
+
+### 6.3 残る構造的課題と方針
+
+- ヘッドルーム 360 KiB は薄く、機能追加で再逼迫する。**恒久的に削れる大物は MUI（final bundle に @mui 参照 699 箇所）** と、業務ロジックの追加 Service Binding 外出し（auth/push/jar は実施済み）。
+- **アプリ3分割（apps/）は引き続き非推奨**。分離は Service Bindings で外科的に達成済みで、その延長が正道。
+- 次の恒久策候補：MUI の import 面積削減 / 重量ページの表示戦略見直し / Drizzle+重い業務ロジックの追加外出し。いずれも着手前後で `measure-bundle.yml`（Linux）で効果を実測すること。

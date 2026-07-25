@@ -109,4 +109,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.100.0"
-          command: deploy
+          # --minify で本体 Worker を圧縮する。webpack(no minify) では gzip 約 3,068 KiB と
+          # 3 MiB 上限まで残り数 KiB しかないため、minify で約 2,712 KiB まで落として余裕を確保する。
+          command: deploy --minify
