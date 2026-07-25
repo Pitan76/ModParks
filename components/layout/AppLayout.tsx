@@ -43,6 +43,7 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
         <Box
           sx={{
             flexGrow: 1,
+            minWidth: 0,
             display: "flex",
             flexDirection: "column",
             width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },

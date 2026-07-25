@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
+import { alpha } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -117,7 +118,7 @@ const LogsClient = ({ initialSettings, initialBackups }: LogsClientProps) => {
       {tabIndex === 0 && (
         <Box sx={{ position: "relative" }}>
           {loadingSettings && (
-            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", justifyContent: "center", alignItems: "center", bgcolor: "rgba(255,255,255,0.4)", zIndex: 1 }}>
+            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", justifyContent: "center", alignItems: "center", bgcolor: (theme) => alpha(theme.palette.background.paper, 0.6), zIndex: 1 }}>
               <CircularProgress />
             </Box>
           )}
@@ -166,7 +167,7 @@ const LogsClient = ({ initialSettings, initialBackups }: LogsClientProps) => {
       {tabIndex === 1 && (
         <Box sx={{ position: "relative" }}>
           {loadingBackups && (
-            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", justifyContent: "center", alignItems: "center", bgcolor: "rgba(255,255,255,0.4)", zIndex: 1 }}>
+            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", justifyContent: "center", alignItems: "center", bgcolor: (theme) => alpha(theme.palette.background.paper, 0.6), zIndex: 1 }}>
               <CircularProgress />
             </Box>
           )}
