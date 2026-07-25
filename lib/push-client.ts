@@ -44,7 +44,7 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
   let vapidKey: string | undefined;
   try {
     const keyRes = await fetch("/api/notifications/push");
-    if (keyRes.ok) vapidKey = (await keyRes.json())?.vapidPublicKey;
+    if (keyRes.ok) vapidKey = ((await keyRes.json()) as { vapidPublicKey?: string })?.vapidPublicKey;
   } catch {
     /* ignore */
   }
