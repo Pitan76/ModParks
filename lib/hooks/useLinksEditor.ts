@@ -15,5 +15,15 @@ export function useLinksEditor(rawInitial?: string | null) {
   const changeLink = (idx: number, field: keyof LinkItem, val: string) =>
     setLinks((prev) => prev.map((item, i) => (i === idx ? { ...item, [field]: val } : item)));
 
-  return { links, setLinks, addLink, removeLink, changeLink };
+  /** リンクを1つ上/下へ入れ替えて並び替える。範囲外の移動は無視する。 */
+  const moveLink = (idx: number, dir: -1 | 1) =>
+    setLinks((prev) => {
+      const target = idx + dir;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
+
+  return { links, setLinks, addLink, removeLink, changeLink, moveLink };
 }
