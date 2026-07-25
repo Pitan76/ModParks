@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { updateProject } from "@/lib/actions/project";
 import { syncExternalProjectData } from "@/lib/actions/projectSync";
+import ActionRow from "@/components/ui/ActionRow";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 import SyncIcon from "@mui/icons-material/Sync";
 import Snackbar from "@mui/material/Snackbar";
@@ -145,18 +146,18 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
             label={t("fields.recipesEnabled")}
           />
 
-          <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
-            <Button 
-              variant="text" 
-              color="primary" 
-              startIcon={<SyncIcon />} 
-              onClick={handleSync} 
+          <ActionRow align="center" sx={{ mt: 2, justifyContent: { sm: "space-between" } }}>
+            <Button
+              variant="text"
+              color="primary"
+              startIcon={<SyncIcon />}
+              onClick={handleSync}
               disabled={syncing || pending}
             >
               {syncing ? tManage("syncing") : tManage("sync")}
             </Button>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
               <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
                 {tCommon("cancel")}
               </Button>
@@ -164,7 +165,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
                 {pending ? tCommon("saving") : tCommon("save")}
               </Button>
             </Box>
-          </Box>
+          </ActionRow>
         </Box>
       </CardContent>
 

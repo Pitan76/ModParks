@@ -21,6 +21,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Link from "@mui/material/Link";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import ActionRow from "@/components/ui/ActionRow";
 import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/actions/dependency";
 import type { DependencyType } from "@/lib/actions/dependency";
 import { useRouter } from "@/i18n/routing";
@@ -110,7 +111,7 @@ const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependen
         </Tabs>
       </Box>
       
-      <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "flex-end", flexWrap: "wrap" }}>
+      <ActionRow align="flex-end" wrap sx={{ mb: 4 }}>
         {tab === 0 ? (
           <TextField
             label={t("targetSlug")}
@@ -153,7 +154,7 @@ const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependen
         <Button variant="contained" onClick={handleAdd} disabled={loading || (tab === 0 ? !targetSlug : (!extName || !extUrl))}>
           {t("add")}
         </Button>
-      </Box>
+      </ActionRow>
 
       <Typography variant="h6" gutterBottom>{t("current")}</Typography>
       <List>

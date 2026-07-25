@@ -18,6 +18,7 @@ import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ActionRow from "@/components/ui/ActionRow";
 import { addProjectMember, removeProjectMember } from "@/lib/actions/member";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -117,7 +118,7 @@ const ProjectMembersManager = ({ projectId, members, isOwner, currentUserId }: P
         </List>
 
         {isOwner && (
-          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+          <ActionRow>
             <TextField
               size="small"
               label={tProject("members.addUsername")}
@@ -135,7 +136,7 @@ const ProjectMembersManager = ({ projectId, members, isOwner, currentUserId }: P
             >
               {tCommon("add")}
             </Button>
-          </Box>
+          </ActionRow>
         )}
       </CardContent>
     </Card>

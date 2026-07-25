@@ -251,13 +251,18 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
 
       <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.customLinks.title")}</Typography>
       {links.map((link, idx) => (
-        <Stack direction="row" spacing={2} key={idx} sx={{ alignItems: "center" }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          key={idx}
+          sx={{ alignItems: { xs: "stretch", sm: "center" } }}
+        >
           <FormTextField
             label={t("fields.customLinks.linkTitle")}
             size="small"
             value={link.title}
             onChange={(e: ChangeEvent<HTMLInputElement>) => changeLink(idx, "title", e.target.value)}
-            sx={{ width: 150 }}
+            sx={{ width: { xs: "100%", sm: 150 } }}
           />
           <FormTextField
             label={t("fields.customLinks.url")}
@@ -266,7 +271,7 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
             onChange={(e: ChangeEvent<HTMLInputElement>) => changeLink(idx, "url", e.target.value)}
             sx={{ flex: 1 }}
           />
-          <Chip label={tCommon("delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer" }} />
+          <Chip label={tCommon("delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer", alignSelf: { xs: "flex-end", sm: "center" }, flexShrink: 0 }} />
         </Stack>
       ))}
       <Box>

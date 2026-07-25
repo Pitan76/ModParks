@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
+import ActionRow from "@/components/ui/ActionRow";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import TextField from "@mui/material/TextField";
@@ -174,7 +175,7 @@ const NewProjectForm = ({
         <Card sx={{ mb: 4, bgcolor: "background.default" }}>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2 }}>{t("create.import.title")}</Typography>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+            <ActionRow align="center" wrap>
               <FormControl size="small" sx={{ flex: "1 1 120px" }}>
                 <InputLabel>{t("create.import.platform")}</InputLabel>
                 <Select value={importPlatform} label={t("create.import.platform")} onChange={(e) => setImportPlatform(e.target.value as any)}>
@@ -182,17 +183,17 @@ const NewProjectForm = ({
                   <MenuItem value="curseforge">CurseForge</MenuItem>
                 </Select>
               </FormControl>
-              <TextField 
-                label={t("create.import.idLabel")} 
-                size="small" 
-                value={importId} 
-                onChange={(e) => setImportId(e.target.value)} 
+              <TextField
+                label={t("create.import.idLabel")}
+                size="small"
+                value={importId}
+                onChange={(e) => setImportId(e.target.value)}
                 sx={{ flex: "2 1 200px" }}
               />
               <Button variant="contained" onClick={handleImport} disabled={importing || !importId} sx={{ flex: "1 1 auto" }}>
                 {importing ? <CircularProgress size={24} /> : t("create.import.fetchData")}
               </Button>
-            </Box>
+            </ActionRow>
             {importPlatform === "modrinth" && !hasModrinthKey && (
               <Alert severity="warning" sx={{ mt: 2 }}>{t("create.import.modrinthKeyWarning")}</Alert>
             )}

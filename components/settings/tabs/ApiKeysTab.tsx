@@ -18,6 +18,7 @@ import TableRow from "@mui/material/TableRow";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ActionRow from "@/components/ui/ActionRow";
 
 interface ApiKeysTabProps {
   apiKeys: { id: string; name: string; createdAt: Date; lastUsedAt: Date | null }[];
@@ -67,9 +68,11 @@ export default function ApiKeysTab({ apiKeys }: ApiKeysTabProps) {
         </Alert>
       )}
 
-      <Box component="form" onSubmit={handleGenerateKey} sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 4 }}>
-        <TextField label={t("apiKeys.name")} size="small" value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} required sx={{ flex: "1 1 200px" }} />
-        <Button type="submit" variant="contained" sx={{ height: 40, flexShrink: 0 }}>{t("apiKeys.generate")}</Button>
+      <Box component="form" onSubmit={handleGenerateKey} sx={{ mb: 4 }}>
+        <ActionRow>
+          <TextField label={t("apiKeys.name")} size="small" value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} required sx={{ flex: "1 1 200px" }} />
+          <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("apiKeys.generate")}</Button>
+        </ActionRow>
       </Box>
 
       <TableContainer component={Paper} variant="outlined">
