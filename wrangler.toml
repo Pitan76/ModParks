@@ -58,8 +58,8 @@ GITHUB_CONFIG_REPO = "Pitan76/ModParks"
 # Web Push の VAPID 公開鍵（base64url）。クライアントの購読にも使うため公開してよい。
 # 秘密鍵とサブジェクトは秘匿値: `wrangler secret put VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
 # 鍵ペアは `node scripts/generate-vapid.mjs` で生成する。
-NEXT_PUBLIC_VAPID_PUBLIC_KEY = ""
-VAPID_PUBLIC_KEY = ""
+NEXT_PUBLIC_VAPID_PUBLIC_KEY = "BF-bDjyywR9aPnv3tY_CqAyonXqq0qBPvkt0Ycr5NSoBXVJOR_P6FznPIVd4sdoV3E1LhcngfMI0nBnzezsTDhE"
+VAPID_PUBLIC_KEY = "BF-bDjyywR9aPnv3tY_CqAyonXqq0qBPvkt0Ycr5NSoBXVJOR_P6FznPIVd4sdoV3E1LhcngfMI0nBnzezsTDhE"
 CLOUDFLARE_ACCOUNT_ID = "70a9b16c9396a3ab84c4ce7719800373"
 # R2 公開URL。これを設定すると画像/アイコン/mod の配信が R2 エッジ直になり、
 # /api/r2 プロキシ（Worker 経由）を通らなくなる＝Worker の継続負荷が消える。

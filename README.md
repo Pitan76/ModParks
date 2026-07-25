@@ -133,6 +133,43 @@ npx wrangler deploy
 npx wrangler secret put RECIPE_CDN_SECRET
 ```
 
+## プッシュ通知 (PWA / Web Push)
+
+アプリ内通知（`dispatchNotifications`）に相乗りして、ブラウザ/ホーム画面アプリへ Web Push を配信します。種別ごとの受信可否は既存の通知設定（`notificationPrefs`）を尊重し、端末単位の ON/OFF は設定 →「通知」タブのトグルで行います。
+
+- 本文暗号化（RFC 8291 aes128gcm）と VAPID 署名（RFC 8292）は Node crypto 依存の `web-push` が Workers で動かないため、`workers/push`（`modparks-push`）サイドカーに Web Crypto 実装として隔離しています。
+- **iPhone/iPad はホーム画面に追加した PWA でのみ**プッシュを受信できます（iOS 16.4+、Safari のタブ状態では不可）。
+
+### セットアップ
+
+1. VAPID 鍵ペアを生成:
+
+   ```bash
+   node scripts/generate-vapid.mjs
+   ```
+
+2. 公開鍵を `wrangler.toml` の `[vars]` に設定（クライアント購読に使うため公開してよい）:
+
+   ```toml
+   NEXT_PUBLIC_VAPID_PUBLIC_KEY = "B..."
+   VAPID_PUBLIC_KEY             = "B..."
+   ```
+
+3. 秘密鍵とサブジェクトはシークレットとして登録:
+
+   ```bash
+   npx wrangler secret put VAPID_PRIVATE_KEY
+   npx wrangler secret put VAPID_SUBJECT   # mailto: か https: の連絡先
+   ```
+
+4. サイドカーを**先に**デプロイしてから本体をデプロイ（Service Binding 解決のため）:
+
+   ```bash
+   cd workers/push && npx wrangler deploy
+   ```
+
+VAPID が未設定の場合、Web Push はスキップされアプリ内通知だけが動きます。ローカル開発では `wrangler dev` のシークレット供給（`.dev.vars`）に同じ値を入れてください。
+
 ## 右クリックメニュー
 
 `components/ui/ContextMenu/` に、右クリックで独自コンテキストメニューを出す基盤があります（Chrome のネイティブメニューを妨害しない設計）。詳細・使い方はそちらの 
