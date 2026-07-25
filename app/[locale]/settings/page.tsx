@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getDatabase } from "@/lib/db";
 import { users, userProfiles, userSettings, apiKeys, accounts, authenticators } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import SettingsClient from "@/components/settings/SettingsClient";
+import SettingsClient from "@/components/settings/SettingsClientLazy";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 
