@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { userProfiles, userSettings, apiKeys, accounts } from "@/db/schema";
+import { users, userProfiles, userSettings, apiKeys, accounts } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
@@ -26,6 +26,22 @@ export const updateProfile = async (data: { displayName: string, bio: string, av
 
   revalidatePath("/settings");
   revalidatePath("/profile");
+  return { success: true };
+};
+
+/**
+ * アバター画像のみを更新する Server Action。
+ * プロフィールページ上でアイコンをタップした際の即時反映に使う。
+ */
+export const updateAvatar = async (avatarUrl: string) => {
+  const { db, userId } = await getAuthenticatedDb();
+
+  const url = avatarUrl?.trim() || null;
+  await db.update(userProfiles).set({ avatarUrl: url }).where(eq(userProfiles.userId, userId));
+  await db.update(users).set({ image: url }).where(eq(users.id, userId));
+
+  revalidatePath("/settings");
+  revalidatePath("/[locale]/profile/[username]", "page");
   return { success: true };
 };
 

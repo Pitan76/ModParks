@@ -515,7 +515,8 @@
     "pinned": "ピン留め",
     "ideas": "投稿したアイデア",
     "showIdeas": "プロフィールにアイデアを表示",
-    "noIdeasPosted": "まだアイデアを投稿していません"
+    "noIdeasPosted": "まだアイデアを投稿していません",
+    "changeAvatar": "アイコンを変更"
   },
   "Idea": {
     "postedBy": "投稿者: {name}",

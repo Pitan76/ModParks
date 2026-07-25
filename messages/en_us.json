@@ -512,7 +512,8 @@
     "pinned": "Pinned",
     "ideas": "Posted Ideas",
     "showIdeas": "Show ideas on profile",
-    "noIdeasPosted": "No ideas posted yet"
+    "noIdeasPosted": "No ideas posted yet",
+    "changeAvatar": "Change avatar"
   },
   "Idea": {
     "postedBy": "Posted by {name}",

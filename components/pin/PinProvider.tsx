@@ -34,14 +34,16 @@ export default function PinProvider({ children }: { children: React.ReactNode })
   const [toast, setToast] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (!enabled) {
-      setPinned(new Set());
-      return;
-    }
     let cancelled = false;
-    getMyPins().then((pins: PinRef[]) => {
+    // ここで保持するのは「ログイン中の本人が自分の何をピン留め済みか」だけ。
+    // 用途は右クリックメニューのラベル切替と6件上限判定に限られる。
+    // （プロフィールへの公開表示は別途サーバー側 getPinnedItems が全員向けに描画する）
+    // 未ログイン時は自分でピン留めできないため空。ログイン時はサーバーから取得。
+    // いずれも非同期コールバック内で setState し、エフェクト本体からの同期 setState を避ける。
+    (async () => {
+      const pins: PinRef[] = enabled ? await getMyPins() : [];
       if (!cancelled) setPinned(new Set(pins.map((p) => keyOf(p.itemType, p.itemId))));
-    });
+    })();
     return () => {
       cancelled = true;
     };
