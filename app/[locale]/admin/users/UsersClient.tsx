@@ -74,7 +74,7 @@ export default function UsersClient({ users }: { users: User[] }) {
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "flex-end" }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, justifyContent: "space-between", mb: 2, alignItems: { xs: "stretch", sm: "flex-end" } }}>
         <Tabs value={tabIndex} onChange={(_, newVal) => setTabIndex(newVal)}>
           <Tab label={tAdmin("activeUsers", { count: activeUsers.length })} />
           <Tab label={tAdmin("ghostUsers", { count: deletedUsers.length })} />

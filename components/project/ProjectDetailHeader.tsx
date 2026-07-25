@@ -110,9 +110,12 @@ const ProjectDetailHeader = ({
                     href={`/ideas/${p.sourceIdeaId}`}
                     variant="outlined"
                     size="small"
-                    sx={{ borderRadius: "16px", py: 0, px: 1, textTransform: "none", color: "text.secondary", borderColor: "divider", "&:hover": { borderColor: "primary.main", color: "primary.main", bgcolor: "transparent" } }}
+                    sx={{ borderRadius: "16px", py: 0, px: 1, textTransform: "none", color: "text.secondary", borderColor: "divider", maxWidth: { xs: 200, sm: 320 }, minWidth: 0, "&:hover": { borderColor: "primary.main", color: "primary.main", bgcolor: "transparent" } }}
                   >
-                    💡 {p.sourceIdeaTitle}
+                    <Box component="span" sx={{ mr: 0.5, flexShrink: 0 }}>💡</Box>
+                    <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                      {p.sourceIdeaTitle}
+                    </Box>
                   </LinkButton>
                 </Tooltip>
               )}

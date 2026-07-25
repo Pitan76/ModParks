@@ -131,7 +131,7 @@ const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProj
             showWarning: !hasCurseForgeKey || !hasCurseForgeProject,
           }
         ].map((config) => (
-          <Box key={config.id} sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Box key={config.id} sx={{ display: "flex", flexWrap: "wrap", gap: 2, alignItems: "center" }}>
             <Button 
               variant="contained" 
               onClick={() => handleFetch(config.id)} 

@@ -67,9 +67,9 @@ export default function ApiKeysTab({ apiKeys }: ApiKeysTabProps) {
         </Alert>
       )}
 
-      <Box component="form" onSubmit={handleGenerateKey} sx={{ display: "flex", gap: 2, mb: 4 }}>
-        <TextField label={t("apiKeys.name")} size="small" value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} required />
-        <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("apiKeys.generate")}</Button>
+      <Box component="form" onSubmit={handleGenerateKey} sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 4 }}>
+        <TextField label={t("apiKeys.name")} size="small" value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} required sx={{ flex: "1 1 200px" }} />
+        <Button type="submit" variant="contained" sx={{ height: 40, flexShrink: 0 }}>{t("apiKeys.generate")}</Button>
       </Box>
 
       <TableContainer component={Paper} variant="outlined">
