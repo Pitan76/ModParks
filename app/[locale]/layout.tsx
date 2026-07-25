@@ -95,6 +95,8 @@ type LocaleLayoutProps = {
  * @param params 言語を含むパラメータ
  * @returns 言語別レイアウト
  */
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }

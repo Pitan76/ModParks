@@ -7,7 +7,13 @@ import { checkRateLimit } from "@/lib/rate-limit";
 const RATE_LIMIT = 60;
 const RATE_WINDOW_MS = 60_000;
 
-/** ベル用: 未読件数と最近の通知一覧をセッション認証で返す */
+/**
+ * ベル用: 未読件数と最近の通知一覧をセッション認証で返す。
+ *
+ * 旧 `/api/notifications`(GET) から移設。旧URLはポーリングする古いクライアントが
+ * 叩き続けるため廃止し、正規クライアントはこの新URLのみを使う（旧URLはエッジで
+ * 遠慮なくブロックできる状態にするための分離）。
+ */
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {

@@ -26,7 +26,7 @@ export default function NotificationBell() {
 
   const load = React.useCallback(async () => {
     try {
-      const res = await fetch("/api/notifications");
+      const res = await fetch("/api/notifications/feed");
       if (!res.ok) return;
       const data = (await res.json()) as { items?: Notification[]; unreadCount?: number };
       setItems(data.items ?? []);
