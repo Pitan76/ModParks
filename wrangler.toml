@@ -65,3 +65,7 @@ CLOUDFLARE_ACCOUNT_ID = "70a9b16c9396a3ab84c4ce7719800373"
 # /api/r2 プロキシ（Worker 経由）を通らなくなる＝Worker の継続負荷が消える。
 # modparks-storage バケットに接続したカスタムドメイン（Cloudflare CDN キャッシュ対象）。
 R2_PUBLIC_URL = "https://files.modparks.pitan76.net"
+
+[observability.logs]
+enabled = true
+invocation_logs = true
