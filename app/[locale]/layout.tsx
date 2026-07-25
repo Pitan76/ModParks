@@ -95,6 +95,16 @@ type LocaleLayoutProps = {
  * @param params 言語を含むパラメータ
  * @returns 言語別レイアウト
  */
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+/**
+ * 言語別ルートのレイアウト
+ * @param children ページコンテンツ
+ * @param params 言語を含むパラメータ
+ * @returns 言語別レイアウト
+ */
 const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   const { locale } = await params;
 
@@ -102,16 +112,17 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   if (!routing.locales.includes(locale as AppLocale)) notFound();
 
   const messages = await getMessages();
-  const session  = await auth();
+  // 検証用一時モック: 動的APIの呼び出しを停止し、型エラーを防ぐため any キャスト
+  const session  = null as any; // await auth();
 
   let userLocale = null;
   if (session?.user?.id) {
-    // 最新情報は auth.ts の jwt コールバックで 5分TTL キャッシュされているものを利用
     userLocale = (session.user as any).locale;
   }
 
-  const cookieStore = await cookies();
-  const themeMode = (cookieStore.get("theme_mode")?.value as "light" | "dark") || "dark";
+  // 検証用一時モック: 動的APIの呼び出しを停止
+  // const cookieStore = await cookies();
+  const themeMode = "dark"; // (cookieStore.get("theme_mode")?.value as "light" | "dark") || "dark";
 
   return (
     <html lang={locale} suppressHydrationWarning>
