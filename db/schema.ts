@@ -814,6 +814,35 @@ export const notifications = sqliteTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 
+// ─── Push Subscriptions (Web Push / PWA プッシュ通知) ─────────────────────────
+
+/**
+ * ブラウザ/PWA の PushManager 購読情報。1 ユーザーが複数端末（endpoint）を持ちうる。
+ * endpoint がプッシュの宛先で、p256dh/auth は本文暗号化（aes128gcm）に使う公開鍵。
+ * 送信時に 404/410 が返った購読は失効しているため削除する。
+ */
+export const pushSubscriptions = sqliteTable("push_subscriptions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  /** プッシュサービスの宛先 URL。端末ごとに一意 */
+  endpoint: text("endpoint").notNull().unique(),
+  /** 本文暗号化用のクライアント公開鍵（base64url） */
+  p256dh: text("p256dh").notNull(),
+  /** 本文暗号化用の認証シークレット（base64url） */
+  auth: text("auth").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  userIdx: index("push_subscriptions_user_idx").on(table.userId),
+}));
+
+export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
+
 // ─── Settings Audit ───────────────────────────────────────────────────────────
 
 /**

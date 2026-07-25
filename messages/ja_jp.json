@@ -1227,7 +1227,15 @@
     "notifications": {
       "title": "通知設定",
       "description": "受け取る通知の種類を選択できます。",
-      "successUpdate": "通知設定を更新しました。"
+      "successUpdate": "通知設定を更新しました。",
+      "pushTitle": "プッシュ通知",
+      "pushDescription": "この端末のブラウザ/ホーム画面アプリにプッシュ通知を届けます。iPhone はホーム画面に追加したアプリでのみ利用できます。",
+      "pushToggle": "この端末でプッシュ通知を受け取る",
+      "pushUnsupported": "このブラウザ/端末はプッシュ通知に対応していません。",
+      "pushEnabled": "プッシュ通知を有効にしました。",
+      "pushDisabled": "プッシュ通知を無効にしました。",
+      "pushDenied": "通知の許可がブロックされています。ブラウザの設定で許可してください。",
+      "pushError": "プッシュ通知の設定に失敗しました。"
     }
   },
   "Legal": {

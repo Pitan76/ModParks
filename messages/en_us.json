@@ -1219,7 +1219,15 @@
     "notifications": {
       "title": "Notifications",
       "description": "Choose which types of notifications you want to receive.",
-      "successUpdate": "Notification settings updated."
+      "successUpdate": "Notification settings updated.",
+      "pushTitle": "Push notifications",
+      "pushDescription": "Deliver push notifications to this device's browser or home-screen app. On iPhone, this only works from an app added to the Home Screen.",
+      "pushToggle": "Receive push notifications on this device",
+      "pushUnsupported": "This browser/device does not support push notifications.",
+      "pushEnabled": "Push notifications enabled.",
+      "pushDisabled": "Push notifications disabled.",
+      "pushDenied": "Notification permission is blocked. Please allow it in your browser settings.",
+      "pushError": "Failed to configure push notifications."
     }
   },
   "Legal": {

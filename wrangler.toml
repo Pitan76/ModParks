@@ -34,6 +34,12 @@ service = "modparks-jar"
 binding = "AUTH"
 service = "modparks-auth"
 
+# Web Push 配送サイドカー。aes128gcm 暗号化 + VAPID 署名を Web Crypto で実行する
+# （web-push npm は Node crypto 依存で Workers では動かないため隔離）
+[[services]]
+binding = "PUSH"
+service = "modparks-push"
+
 [[r2_buckets]]
 bucket_name = "modparks-storage"
 binding = "modparks_storage"
@@ -49,6 +55,11 @@ NEXT_PUBLIC_APP_URL = "https://modparks.pitan76.net"
 NEXT_PUBLIC_RECIPE_CDN_URL = "https://recipe.modparks.pitan76.net"
 USE_RECIPE_CDN_API = "true"
 GITHUB_CONFIG_REPO = "Pitan76/ModParks"
+# Web Push の VAPID 公開鍵（base64url）。クライアントの購読にも使うため公開してよい。
+# 秘密鍵とサブジェクトは秘匿値: `wrangler secret put VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
+# 鍵ペアは `node scripts/generate-vapid.mjs` で生成する。
+NEXT_PUBLIC_VAPID_PUBLIC_KEY = ""
+VAPID_PUBLIC_KEY = ""
 CLOUDFLARE_ACCOUNT_ID = "70a9b16c9396a3ab84c4ce7719800373"
 # R2 公開URL。これを設定すると画像/アイコン/mod の配信が R2 エッジ直になり、
 # /api/r2 プロキシ（Worker 経由）を通らなくなる＝Worker の継続負荷が消える。
