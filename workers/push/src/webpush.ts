@@ -96,7 +96,7 @@ async function encryptPayload(sub: PushSubscriptionJSON, payload: Uint8Array): P
   const asKeyPair = (await crypto.subtle.generateKey(
     { name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"],
   )) as CryptoKeyPair;
-  const asPublic = new Uint8Array(await crypto.subtle.exportKey("raw", asKeyPair.publicKey)); // 65byte
+  const asPublic = new Uint8Array(await crypto.subtle.exportKey("raw", asKeyPair.publicKey) as ArrayBuffer); // 65byte
 
   // ECDH 共有秘密
   const uaPublicKey = await crypto.subtle.importKey(
