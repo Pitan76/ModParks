@@ -11,7 +11,7 @@ async function getVapidPublicKey(): Promise<string | undefined> {
   try {
     if (process.env.NODE_ENV === "development" && process.release?.name === "node") {
       const { getCachedPlatformProxy } = await import("@/lib/proxy");
-      const env = (await getCachedPlatformProxy()).env as Record<string, string | undefined>;
+      const env = (await getCachedPlatformProxy()).env as unknown as Record<string, string | undefined>;
       key = env.VAPID_PUBLIC_KEY;
     } else {
       const { getCloudflareContext } = await import("@opennextjs/cloudflare");
