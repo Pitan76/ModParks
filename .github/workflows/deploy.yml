@@ -89,8 +89,10 @@ jobs:
           command: deploy
 
       # push worker
+      # 本体が Service Binding するため、本体をデプロイする回は必ず先に用意する
+      # （未作成だと binding 解決に失敗するため main 変更時も無条件で流す＝ブートストラップ兼冪等）
       - name: Deploy push worker
-        if: steps.changes.outputs.push == 'true' || inputs.deploy_push == true
+        if: steps.changes.outputs.push == 'true' || steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch' || inputs.deploy_push == true
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
