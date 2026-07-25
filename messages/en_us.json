@@ -201,7 +201,10 @@
         "title": "Custom Links",
         "linkTitle": "Title",
         "url": "URL",
-        "addLink": "Add Link"
+        "addLink": "Add Link",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "removeLink": "Remove link"
       },
       "discordWebhook": "Discord Webhook URL",
       "discordWebhookHelper": "Send a notification to this Discord webhook when a new version is published (optional).",
@@ -1073,7 +1076,10 @@
       "uploadFailed": "Failed to upload",
       "customLinks": "Custom Links",
       "linkTitle": "Title",
-      "addLink": "Add Link"
+      "addLink": "Add Link",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "removeLink": "Remove link"
     },
     "apiKeys": {
       "title": "API Keys",
