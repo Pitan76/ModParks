@@ -5,7 +5,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { getNotifications } from "@/lib/queries/notifications";
-import NotificationList from "@/components/notification/NotificationList";
+import NotificationList from "@/components/notification/NotificationListLazy";
 import MarkAllReadButton from "@/components/notification/MarkAllReadButton";
 
 export default async function NotificationsPage({ params }: { params: Promise<{ locale: string }> }) {

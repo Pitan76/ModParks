@@ -9,7 +9,7 @@ import { getTranslations } from "next-intl/server";
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles, accounts } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import ProfileForm from "./ProfileForm";
+import ProfileForm from "./ProfileFormLazy";
 
 interface ProfilePageProps {
   params: Promise<{ locale: string }>;
