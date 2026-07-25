@@ -97,4 +97,3 @@ export async function toggleDeveloperSubscription(developerId: string) {
   return { success: true, subscribed: true };
 }
 
-export type { NotificationType };
