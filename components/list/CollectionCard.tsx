@@ -67,7 +67,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
         )}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5, gap: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
               {collection.name}
             </Typography>
             <Chip 
