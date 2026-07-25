@@ -5,7 +5,7 @@ import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import { useTranslations } from "next-intl";
 import { usePins } from "./PinProvider";
-import type { PinItemType } from "@/lib/actions/profilePins";
+import type { PinItemType } from "@/lib/pins";
 import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 
 /**

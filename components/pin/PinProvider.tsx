@@ -4,7 +4,8 @@ import * as React from "react";
 import Snackbar from "@mui/material/Snackbar";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { getMyPins, togglePin, MAX_PINS, type PinItemType, type PinRef } from "@/lib/actions/profilePins";
+import { getMyPins, togglePin } from "@/lib/actions/profilePins";
+import { MAX_PINS, type PinItemType, type PinRef } from "@/lib/pins";
 
 interface PinContextValue {
   /** ログイン中か（未ログインならピン留めメニューを出さない） */
