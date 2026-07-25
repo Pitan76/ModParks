@@ -230,7 +230,7 @@ const NewProjectForm = ({
         </Card>
       )}
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}>
         {ideaId && <input type="hidden" name="ideaId" value={ideaId} />}
         {importData?.modrinthId && <input type="hidden" name="modrinthId" value={importData.modrinthId} />}
         {importData?.curseforgeId && <input type="hidden" name="curseforgeId" value={importData.curseforgeId} />}

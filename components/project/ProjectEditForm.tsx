@@ -115,7 +115,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
 
   return (
     <>
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}>
           <ProjectFormFields error={error} project={project as any} availableTags={availableTags}>
             <FormControl fullWidth required>
               <InputLabel id="project-status-label">{t("fields.status")}</InputLabel>

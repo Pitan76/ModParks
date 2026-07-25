@@ -153,7 +153,7 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}>
       <Box>
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
           {tVersion("uploadForm.uploadMode")}
