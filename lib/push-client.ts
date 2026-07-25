@@ -39,7 +39,15 @@ export async function getPushSubscription(): Promise<PushSubscription | null> {
 export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
   if (!isPushSupported()) return { ok: false, reason: "unsupported" };
 
-  const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  // VAPID 公開鍵はビルド時定数(NEXT_PUBLIC_*)ではなく実行時にサーバから取得する。
+  // wrangler [vars] はランタイム値でビルド時に埋め込めないため。
+  let vapidKey: string | undefined;
+  try {
+    const keyRes = await fetch("/api/notifications/push");
+    if (keyRes.ok) vapidKey = (await keyRes.json())?.vapidPublicKey;
+  } catch {
+    /* ignore */
+  }
   if (!vapidKey) return { ok: false, reason: "no-vapid-key" };
 
   const permission = await Notification.requestPermission();

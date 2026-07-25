@@ -4,6 +4,39 @@ import { getDatabase } from "@/lib/db";
 import { pushSubscriptions } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
+/** ランタイム env（wrangler [vars]）から VAPID 公開鍵を取得する。dev は wrangler proxy 経由。 */
+async function getVapidPublicKey(): Promise<string | undefined> {
+  let key = process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (key) return key;
+  try {
+    if (process.env.NODE_ENV === "development" && process.release?.name === "node") {
+      const { getCachedPlatformProxy } = await import("@/lib/proxy");
+      key = (await getCachedPlatformProxy()).env.VAPID_PUBLIC_KEY as string | undefined;
+    } else {
+      const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+      key = (await getCloudflareContext({ async: true })).env
+        .VAPID_PUBLIC_KEY as unknown as string | undefined;
+    }
+  } catch {
+    /* ignore */
+  }
+  return key;
+}
+
+/**
+ * VAPID 公開鍵を返す（クライアントの購読に必要）。
+ * NEXT_PUBLIC_* はビルド時埋め込みが必要で wrangler [vars]（ランタイム）と噛み合わないため、
+ * クライアントはビルド時定数ではなく実行時にこのエンドポイントから鍵を取得する。
+ * 公開鍵なので認証不要。
+ */
+export async function GET() {
+  const vapidPublicKey = await getVapidPublicKey();
+  if (!vapidPublicKey) {
+    return NextResponse.json({ error: "Push not configured" }, { status: 503 });
+  }
+  return NextResponse.json({ vapidPublicKey });
+}
+
 /** クライアントの PushManager 購読を保存/更新する（同一 endpoint は upsert） */
 export async function POST(req: Request) {
   const session = await auth();
