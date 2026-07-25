@@ -139,7 +139,6 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       minWidth: 0,
-                      flex: 1,
                     }}
                   >
                     {project.name}
