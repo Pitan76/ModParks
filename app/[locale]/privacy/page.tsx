@@ -4,11 +4,6 @@ import Box from "@mui/material/Box";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import { SITE_URL } from "@/lib/config";
-import { routing } from "@/i18n/routing";
-
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
