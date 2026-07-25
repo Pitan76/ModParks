@@ -40,16 +40,44 @@ async function getVapid(): Promise<{ publicKey: string; privateKey: string; subj
   return { publicKey, privateKey, subject };
 }
 
+/**
+ * プッシュ本文テンプレート（種別 → 文言）。
+ * 意図的にインライン定義し、全 i18n メッセージJSON（~127KB）をメイン Worker の
+ * バンドルに巻き込まないようにしている（本体は 3 MiB 制限に張り付いているため）。
+ * messages/*.json の Notifications.message と表現を揃えること。
+ */
+const PUSH_TEMPLATES: Record<"ja" | "en", Record<string, string>> = {
+  ja: {
+    new_project: "{authorName} が新しいプロジェクト「{projectName}」を公開しました",
+    new_version: "「{projectName}」の新しいバージョン {versionNumber} が公開されました",
+    project_comment: "{actorName} が「{projectName}」にコメントしました",
+    idea_comment: "{actorName} がアイデア「{ideaTitle}」にコメントしました",
+    idea_like: "{actorName} がアイデア「{ideaTitle}」にいいねしました",
+    project_favorite: "{actorName} が「{projectName}」をお気に入りに登録しました",
+    follow: "{actorName} があなたをフォローしました",
+    list_add: "{actorName} が「{projectName}」をリスト「{collectionName}」に追加しました",
+    comment_reply: "{actorName} があなたのコメントに返信しました",
+  },
+  en: {
+    new_project: '{authorName} published a new project "{projectName}"',
+    new_version: 'New version {versionNumber} of "{projectName}" is available',
+    project_comment: '{actorName} commented on "{projectName}"',
+    idea_comment: '{actorName} commented on idea "{ideaTitle}"',
+    idea_like: '{actorName} liked your idea "{ideaTitle}"',
+    project_favorite: '{actorName} favorited "{projectName}"',
+    follow: "{actorName} started following you",
+    list_add: '{actorName} added "{projectName}" to list "{collectionName}"',
+    comment_reply: "{actorName} replied to your comment",
+  },
+};
+
 /** payload の文字列を通知テンプレートに差し込む */
 function interpolate(template: string, payload: NotificationPayload): string {
   return template.replace(/\{(\w+)\}/g, (_, key) => payload[key] ?? "");
 }
 
-async function loadTemplates(locale: string): Promise<Record<string, string>> {
-  const file = locale === "en" ? "en_us.json" : "ja_jp.json";
-  const mod = await import(`@/messages/${file}`);
-  const messages = (mod.default ?? mod) as { Notifications?: { message?: Record<string, string> } };
-  return messages.Notifications?.message ?? {};
+function getTemplates(locale: string): Record<string, string> {
+  return PUSH_TEMPLATES[locale === "en" ? "en" : "ja"];
 }
 
 /** 通知種別ごとの遷移先 URL を決める */
@@ -97,13 +125,6 @@ export async function sendPushToRecipients(
     settingRows.map((r: { userId: string; locale: string }) => [r.userId, r.locale]),
   );
 
-  // ロケールごとにテンプレートを一度だけ読む
-  const templateCache = new Map<string, Record<string, string>>();
-  const getTemplates = async (locale: string) => {
-    if (!templateCache.has(locale)) templateCache.set(locale, await loadTemplates(locale));
-    return templateCache.get(locale)!;
-  };
-
   const expiredIds: string[] = [];
 
   await Promise.all(
@@ -111,7 +132,7 @@ export async function sendPushToRecipients(
       id: string; userId: string; endpoint: string; p256dh: string; auth: string;
     }) => {
       const locale = localeByUser.get(sub.userId) || "ja";
-      const templates = await getTemplates(locale);
+      const templates = getTemplates(locale);
       const body = interpolate(templates[type] ?? "", payload) || "ModParks";
 
       const message = JSON.stringify({
