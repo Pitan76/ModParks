@@ -264,9 +264,9 @@
       "title": "プロジェクト編集",
       "success": "プロジェクトを更新しました"
     },
-    "manage": "管理",
+    "manage": "編集",
     "managePage": {
-      "title": "{name}の管理",
+      "title": "{name} の編集",
       "success": "プロジェクトを更新しました",
       "sync": "外部データを同期する",
       "syncing": "同期中...",
