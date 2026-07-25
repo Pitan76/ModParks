@@ -230,28 +230,24 @@ const NewProjectForm = ({
         </Card>
       )}
 
-      <Card sx={{ boxShadow: { xs: "none", sm: undefined }, bgcolor: { xs: "transparent", sm: undefined } }}>
-        <CardContent sx={{ p: { xs: 0, sm: 4 }, "&:last-child": { pb: { xs: 0, sm: 4 } } }}>
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {ideaId && <input type="hidden" name="ideaId" value={ideaId} />}
-            {importData?.modrinthId && <input type="hidden" name="modrinthId" value={importData.modrinthId} />}
-            {importData?.curseforgeId && <input type="hidden" name="curseforgeId" value={importData.curseforgeId} />}
-            {importData?.externalDownloads !== undefined && <input type="hidden" name="externalDownloads" value={importData.externalDownloads} />}
-            {importData?.issueTrackerUrl && <input type="hidden" name="issueTrackerUrl" value={importData.issueTrackerUrl} />}
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        {ideaId && <input type="hidden" name="ideaId" value={ideaId} />}
+        {importData?.modrinthId && <input type="hidden" name="modrinthId" value={importData.modrinthId} />}
+        {importData?.curseforgeId && <input type="hidden" name="curseforgeId" value={importData.curseforgeId} />}
+        {importData?.externalDownloads !== undefined && <input type="hidden" name="externalDownloads" value={importData.externalDownloads} />}
+        {importData?.issueTrackerUrl && <input type="hidden" name="issueTrackerUrl" value={importData.issueTrackerUrl} />}
 
-            <ProjectFormFields key={formKey} error={error} project={importData || undefined} availableTags={availableTags} defaultLicense={defaultLicense} />
+        <ProjectFormFields key={formKey} error={error} project={importData || undefined} availableTags={availableTags} defaultLicense={defaultLicense} />
 
-            <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
-                {tCommon("cancel")}
-              </Button>
-              <Button type="submit" variant="contained" disabled={pending}>
-                {pending ? t("create.creating") : t("create.submit")}
-              </Button>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+          <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
+            {tCommon("cancel")}
+          </Button>
+          <Button type="submit" variant="contained" disabled={pending}>
+            {pending ? t("create.creating") : t("create.submit")}
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };

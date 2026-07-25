@@ -4,8 +4,6 @@ import { useState, useTransition } from "react";
 import type { ChangeEvent } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
@@ -83,11 +81,10 @@ const ProjectMembersManager = ({ projectId, members, isOwner, currentUserId }: P
   };
 
   return (
-    <Card sx={{ mb: 4 }}>
-      <CardContent sx={{ p: 4 }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-          {tProject("members.title")}
-        </Typography>
+    <Box sx={{ mb: 4 }}>
+      <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+        {tProject("members.title")}
+      </Typography>
 
         <List sx={{ mb: 3 }}>
           {members.map(member => (
@@ -138,8 +135,7 @@ const ProjectMembersManager = ({ projectId, members, isOwner, currentUserId }: P
             </Button>
           </ActionRow>
         )}
-      </CardContent>
-    </Card>
+    </Box>
   );
 };
 

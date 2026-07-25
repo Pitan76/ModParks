@@ -4,8 +4,8 @@ import { useState, useTransition } from "react";
 import type { ChangeEvent } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import Panel from "@/components/ui/Panel";
+import ActionRow from "@/components/ui/ActionRow";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
@@ -43,36 +43,34 @@ const ProjectOwnershipTransfer = ({ projectId }: ProjectOwnershipTransferProps) 
   };
 
   return (
-    <Card sx={{ border: "1px solid", borderColor: "error.main" }}>
-      <CardContent sx={{ p: 4 }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }} color="error">
-          {t("transferTitle")}
-        </Typography>
-        <Alert severity="warning" sx={{ mb: 3 }}>
-          {t("transferAlert")}
-        </Alert>
+    <Panel pad={[2, 4]} sx={{ border: "1px solid", borderColor: "error.main", borderRadius: 2 }}>
+      <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }} color="error">
+        {t("transferTitle")}
+      </Typography>
+      <Alert severity="warning" sx={{ mb: 3 }}>
+        {t("transferAlert")}
+      </Alert>
 
-        <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-          <TextField
-            size="small"
-            label={t("newOwnerId")}
-            value={newOwnerId}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setNewOwnerId(e.target.value)}
-            disabled={isPending}
-            sx={{ flex: 1 }}
-          />
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleTransfer}
-            disabled={!newOwnerId.trim() || isPending}
-            sx={{ height: 40 }}
-          >
-            {t("transferButton")}
-          </Button>
-        </Box>
-      </CardContent>
-    </Card>
+      <ActionRow>
+        <TextField
+          size="small"
+          label={t("newOwnerId")}
+          value={newOwnerId}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setNewOwnerId(e.target.value)}
+          disabled={isPending}
+          sx={{ flex: 1 }}
+        />
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleTransfer}
+          disabled={!newOwnerId.trim() || isPending}
+          sx={{ height: 40 }}
+        >
+          {t("transferButton")}
+        </Button>
+      </ActionRow>
+    </Panel>
   );
 };
 
