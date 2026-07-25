@@ -508,7 +508,11 @@
     "visibility": {},
     "noLists": "No lists created yet.",
     "favorites": "Favorites",
-    "noFavorites": "No favorite projects yet."
+    "noFavorites": "No favorite projects yet.",
+    "pinned": "Pinned",
+    "ideas": "Posted Ideas",
+    "showIdeas": "Show ideas on profile",
+    "noIdeasPosted": "No ideas posted yet"
   },
   "Idea": {
     "postedBy": "Posted by {name}",
@@ -1310,7 +1314,12 @@
     "report": "Report",
     "download": "Download",
     "edit": "Edit",
-    "viewProject": "Open project"
+    "viewProject": "Open project",
+    "pin": "Pin to profile",
+    "unpin": "Unpin",
+    "pinned": "Pinned",
+    "unpinned": "Unpinned",
+    "pinLimit": "You can pin up to {max} items"
   },
   "ServerErrors": {
     "common": {

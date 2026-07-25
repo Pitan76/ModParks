@@ -13,8 +13,11 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { Link as RoutingLink } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/config";
+import IdeaCardList from "@/components/idea/IdeaCardList";
 import { getProfileMeta, resolveProfileUser, getProfileContent } from "./profileData";
 import ProfileHeader from "./ProfileHeader";
+import ProfilePinnedSection from "./ProfilePinnedSection";
+import IdeasVisibilityToggle from "./IdeasVisibilityToggle";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -72,7 +75,9 @@ export default async function PublicProfilePage({ params, searchParams }: Public
   const session = await auth();
   const isOwner = session?.user?.id === user.id;
   const content = await getProfileContent(user, session?.user?.id, isOwner, { limit, offset, sort });
-  const { totalCount, visibleProjects, favoritedProjects, userCollections, stats, displayTotalProjects } = content;
+  const { totalCount, visibleProjects, favoritedProjects, userCollections, stats, displayTotalProjects, pinnedItems, authorIdeas, showIdeas } = content;
+
+  const showIdeasSection = isOwner || (showIdeas && authorIdeas.length > 0);
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
@@ -86,6 +91,8 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         isSubscribed={content.isSubscribed}
         stats={stats}
       />
+
+      <ProfilePinnedSection items={pinnedItems} />
 
       {visibleProjects.length > 0 && (
         <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} sx={{ mt: 2, mb: 1 }} />
@@ -146,6 +153,22 @@ export default async function PublicProfilePage({ params, searchParams }: Public
         }
         emptyContent={<Alert severity="info" sx={{ mt: 2 }}>{t("noFavorites")}</Alert>}
       />
+
+      {showIdeasSection && (
+        <Box sx={{ mt: 6 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, flexWrap: "wrap", mb: 3 }}>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {t("ideas")}
+            </Typography>
+            {isOwner && <IdeasVisibilityToggle initial={showIdeas} />}
+          </Box>
+          {authorIdeas.length > 0 ? (
+            <IdeaCardList ideas={authorIdeas as any} />
+          ) : (
+            <Alert severity="info">{t("noIdeasPosted")}</Alert>
+          )}
+        </Box>
+      )}
     </Container>
   );
 }

@@ -9,6 +9,7 @@ import CommentIcon from "@mui/icons-material/Comment";
 import { useTranslations } from "next-intl";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useContextMenu, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
+import { usePinMenuItem } from "@/components/pin/usePinMenuItem";
 import { formatDate } from "@/lib/utils/format";
 import { toPlainDescription } from "@/lib/utils/plainText";
 import { useColorMode } from "@/components/ThemeRegistry";
@@ -35,6 +36,7 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
   const { isDisabled } = useContextMenuContext();
 
   const c = useCommonItems();
+  const pinItem = usePinMenuItem("idea", idea.id);
   const href = `/ideas/${idea.id}`;
   const onContextMenu = useContextMenu(
     [
@@ -44,6 +46,7 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
       c.copyLink(href),
       c.share(href, idea.title),
       c.copyText(idea.title, tMenu("copyText")),
+      ...(pinItem ? ([{ type: "divider" }, pinItem] as const) : []),
     ],
     { passthrough: { links: false } },
   );

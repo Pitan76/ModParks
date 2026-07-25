@@ -511,7 +511,11 @@
     "visibility": {},
     "noLists": "まだリストは作成されていません。",
     "favorites": "お気に入り",
-    "noFavorites": "まだお気に入りに登録したプロジェクトはありません。"
+    "noFavorites": "まだお気に入りに登録したプロジェクトはありません。",
+    "pinned": "ピン留め",
+    "ideas": "投稿したアイデア",
+    "showIdeas": "プロフィールにアイデアを表示",
+    "noIdeasPosted": "まだアイデアを投稿していません"
   },
   "Idea": {
     "postedBy": "投稿者: {name}",
@@ -1318,7 +1322,12 @@
     "report": "報告",
     "download": "ダウンロード",
     "edit": "編集",
-    "viewProject": "プロジェクトを開く"
+    "viewProject": "プロジェクトを開く",
+    "pin": "プロフィールにピン留め",
+    "unpin": "ピン留めを解除",
+    "pinned": "ピン留めしました",
+    "unpinned": "ピン留めを解除しました",
+    "pinLimit": "ピン留めは最大{max}件までです"
   },
   "ServerErrors": {
     "common": {
