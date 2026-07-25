@@ -57,13 +57,14 @@ async function importVapidSigningKey(vapid: VapidKeys): Promise<CryptoKey> {
   const d = vapid.privateKey;
   const x = bytesToB64url(pub.slice(1, 33));
   const y = bytesToB64url(pub.slice(33, 65));
-  return crypto.subtle.importKey(
+  // workers-types の importKey は jwk 用オーバーロードが raw と衝突するため any 経由で渡す
+  return (crypto.subtle.importKey as any)(
     "jwk",
     { kty: "EC", crv: "P-256", x, y, d, ext: true },
     { name: "ECDSA", namedCurve: "P-256" },
     false,
     ["sign"],
-  );
+  ) as Promise<CryptoKey>;
 }
 
 /** endpoint の origin を aud として ES256 JWT を発行し、Authorization ヘッダ値を返す */
@@ -92,9 +93,9 @@ async function encryptPayload(sub: PushSubscriptionJSON, payload: Uint8Array): P
   const authSecret = b64urlToBytes(sub.keys.auth); // 16byte
 
   // アプリサーバの一時 ECDH 鍵ペア
-  const asKeyPair = await crypto.subtle.generateKey(
+  const asKeyPair = (await crypto.subtle.generateKey(
     { name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"],
-  );
+  )) as CryptoKeyPair;
   const asPublic = new Uint8Array(await crypto.subtle.exportKey("raw", asKeyPair.publicKey)); // 65byte
 
   // ECDH 共有秘密
@@ -102,7 +103,7 @@ async function encryptPayload(sub: PushSubscriptionJSON, payload: Uint8Array): P
     "raw", uaPublic, { name: "ECDH", namedCurve: "P-256" }, false, [],
   );
   const ecdhSecret = new Uint8Array(await crypto.subtle.deriveBits(
-    { name: "ECDH", public: uaPublicKey }, asKeyPair.privateKey, 256,
+    { name: "ECDH", public: uaPublicKey } as any, asKeyPair.privateKey, 256,
   ));
 
   // RFC 8291 §3.4: IKM 導出
