@@ -230,8 +230,8 @@ const NewProjectForm = ({
         </Card>
       )}
 
-      <Card>
-        <CardContent sx={{ p: 4 }}>
+      <Card sx={{ boxShadow: { xs: "none", sm: undefined }, bgcolor: { xs: "transparent", sm: undefined } }}>
+        <CardContent sx={{ p: { xs: 0, sm: 4 }, "&:last-child": { pb: { xs: 0, sm: 4 } } }}>
           <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {ideaId && <input type="hidden" name="ideaId" value={ideaId} />}
             {importData?.modrinthId && <input type="hidden" name="modrinthId" value={importData.modrinthId} />}

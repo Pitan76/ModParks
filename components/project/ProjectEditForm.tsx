@@ -116,8 +116,8 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
   };
 
   return (
-    <Card>
-      <CardContent sx={{ p: 4 }}>
+    <Card sx={{ border: { xs: "none", sm: undefined }, boxShadow: { xs: "none", sm: undefined }, bgcolor: { xs: "transparent", sm: undefined } }}>
+      <CardContent sx={{ p: { xs: 0, sm: 4 }, "&:last-child": { pb: { xs: 0, sm: 4 } } }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <ProjectFormFields error={error} project={project as any} availableTags={availableTags}>
             <FormControl fullWidth required>
