@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     config.resolve.symlinks = false;
     if (isServer) {
       // サーバーサイド（Worker）ビルド時には、重量級マークダウンレンダラーを空のダミーコンポーネントに置換
@@ -39,6 +39,12 @@ const nextConfig: NextConfig = {
           "components/ui/MarkdownRendererEmpty.tsx"
         ),
       };
+      // react-markdown 関連の依存パッケージ群をサーバービルドから完全に排除（空モジュール化）
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^(react-markdown|rehype-raw|rehype-sanitize|remark-gfm|micromark|mdast-util-to-hast|unist-util-visit|vfile)/,
+        })
+      );
     }
     return config;
   },
