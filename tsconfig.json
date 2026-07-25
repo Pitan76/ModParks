@@ -43,6 +43,7 @@
     "node_modules",
     ".next",
     "modparks-recipe",
-    "mp-recipe"
+    "mp-recipe",
+    "workers"
   ]
 }
