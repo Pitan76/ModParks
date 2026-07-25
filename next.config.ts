@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import path from "path";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
@@ -27,8 +28,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.resolve.symlinks = false;
+    if (isServer) {
+      // サーバーサイド（Worker）ビルド時には、重量級マークダウンレンダラーを空のダミーコンポーネントに置換
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        "@/components/ui/MarkdownRendererInner": path.resolve(
+          __dirname,
+          "components/ui/MarkdownRendererEmpty.tsx"
+        ),
+      };
+    }
     return config;
   },
   async headers() {
