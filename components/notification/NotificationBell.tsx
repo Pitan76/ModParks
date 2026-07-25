@@ -17,8 +17,6 @@ import type { Notification } from "@/db/schema";
 import { renderNotification } from "./renderNotification";
 import { markAllNotificationsRead } from "@/lib/actions/notification";
 
-const POLL_INTERVAL_MS = 60_000;
-
 export default function NotificationBell() {
   const t = useTranslations("Notifications");
   const router = useRouter();
@@ -34,16 +32,15 @@ export default function NotificationBell() {
       setItems(data.items ?? []);
       setUnread(data.unreadCount ?? 0);
     } catch {
-      // ポーリングの失敗は無視
+      // 取得失敗は無視
     }
   }, []);
 
   React.useEffect(() => {
+    // ページを開いたときに1回だけ取得する（ポーリングはしない）
     // load は非同期 fetch のため setState は同期実行されない（false positive 回避）
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
-    const id = setInterval(load, POLL_INTERVAL_MS);
-    return () => clearInterval(id);
   }, [load]);
 
   const handleOpen = async (e: React.MouseEvent<HTMLElement>) => {
