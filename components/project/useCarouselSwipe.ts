@@ -28,13 +28,15 @@ export const useCarouselSwipe = (go: (delta: number) => void): SwipeState => {
     startX.current = e.clientX;
     moved.current = false;
     setDragging(true);
-    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (startX.current === null) return;
     const dx = e.clientX - startX.current;
-    if (Math.abs(dx) > 4) moved.current = true;
+    if (!moved.current && Math.abs(dx) > 10) {
+      moved.current = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
     setDragX(dx);
   };
 
