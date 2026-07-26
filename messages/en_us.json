@@ -155,6 +155,7 @@
       "media": "Media",
       "members": "Members",
       "dependencies": "Dependencies",
+      "recipes": "Recipes",
       "ownership": "Ownership"
     },
     "batchImportTitle": "Batch Import from External Platforms",
@@ -297,6 +298,16 @@
     "noVersions": "No versions available yet.",
     "noRecipes": "No recipes found.",
     "recipesUnavailable": "Could not load recipes. Please try again later.",
+    "recipeManager": {
+      "desc": "Choose which recipes appear on the project page. Recipes themselves are extracted from the JAR, so only visibility can be changed here.",
+      "search": "Search recipes",
+      "hideAll": "Hide all shown",
+      "showAll": "Show all shown",
+      "hiddenCount": "{count} of {total} hidden",
+      "hidden": "Hidden",
+      "visible": "Visible",
+      "empty": "No recipes yet. Extract them from the files tab of a version."
+    },
     "searchRecipes": "Search recipes",
     "noRecipeMatch": "No matching recipes.",
     "showMore": "Show more",

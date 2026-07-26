@@ -155,6 +155,7 @@
       "media": "メディア",
       "members": "メンバー管理",
       "dependencies": "依存関係",
+      "recipes": "レシピ",
       "ownership": "権限移譲"
     },
     "batchImportTitle": "外部からの一括インポート",
@@ -303,6 +304,16 @@
     "noVersions": "バージョンがまだありません",
     "noRecipes": "レシピが見つかりません。",
     "recipesUnavailable": "レシピを読み込めませんでした。時間をおいて再度お試しください。",
+    "recipeManager": {
+      "desc": "プロジェクトページに表示するレシピを選びます。レシピ自体はJARから抽出されるため、ここでは表示・非表示のみ変更できます。",
+      "search": "レシピを検索",
+      "hideAll": "表示中をすべて非表示",
+      "showAll": "表示中をすべて表示",
+      "hiddenCount": "{count} / {total} 件を非表示にしています",
+      "hidden": "非表示",
+      "visible": "表示",
+      "empty": "レシピがありません。バージョンのファイル管理から抽出してください。"
+    },
     "searchRecipes": "レシピを検索",
     "noRecipeMatch": "一致するレシピがありません。",
     "showMore": "もっと見る",

@@ -14,7 +14,7 @@ import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import ProjectEditClient from "@/components/project/ProjectEditClient";
 import ProjectDependenciesManager from "@/components/project/ProjectDependenciesManager";
 import ProjectRecipesManager from "@/components/project/ProjectRecipesManager";
-import { fetchRecipeLists } from "@/lib/services/recipeList";
+import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
 import { getProjectMembers } from "@/lib/actions/member";
 import { getProjectDependencies } from "@/lib/actions/dependency";
@@ -83,6 +83,18 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   const dependencies = await getProjectDependencies(project.id);
   const media = await getPublicProjectMedia(project.id);
 
+  // 非表示にしたレシピも管理画面には並べる必要があるため、CDNの索引は絞り込まずに全件取る。
+  const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
+  const recipeNamespaces =
+    project.recipeNamespaces && project.recipeNamespaces.length > 0
+      ? project.recipeNamespaces
+      : [project.slug];
+  const [recipeLists, hiddenRecipeIds] = await Promise.all([
+    fetchRecipeLists(cdnUrl, recipeNamespaces, locale),
+    getHiddenRecipeIds(project.id),
+  ]);
+  const managedRecipes = toRecipeItems(cdnUrl, recipeLists);
+
   const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
   const [availableTags, availablePlatforms] = await Promise.all([
     getAvailableTags(),
@@ -118,6 +130,13 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         }
         dependenciesManager={
           <ProjectDependenciesManager projectId={project.id} dependencies={dependencies} />
+        }
+        recipesManager={
+          <ProjectRecipesManager
+            projectSlug={project.slug}
+            recipes={managedRecipes}
+            hiddenIds={[...hiddenRecipeIds]}
+          />
         }
         ownershipTransfer={<ProjectOwnershipTransfer projectId={project.id} />}
       />
