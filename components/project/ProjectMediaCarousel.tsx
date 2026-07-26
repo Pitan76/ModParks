@@ -8,6 +8,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useTranslations } from "next-intl";
 import ZoomableImage from "@/components/ui/ZoomableImage";
+import { useCarouselSwipe } from "./useCarouselSwipe";
 
 export type MediaItem = {
   id: string;
@@ -41,10 +42,25 @@ const ProjectMediaCarousel = ({ items }: { items: MediaItem[] }) => {
   const ytId = getYouTubeId(current.url);
   const nicoId = getNicoVideoId(current.url);
   const go = (delta: number) => setIndex((i) => (i + delta + items.length) % items.length);
+  const swipe = useCarouselSwipe(go);
+  const isEmbed = Boolean(ytId || nicoId);
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Box sx={{ position: "relative", borderRadius: 2, overflow: "hidden", bgcolor: "background.default" }}>
+      <Box
+        onPointerDown={isEmbed ? undefined : swipe.onPointerDown}
+        onPointerUp={isEmbed ? undefined : swipe.onPointerUp}
+        onClickCapture={isEmbed ? undefined : swipe.onClickCapture}
+        sx={{
+          position: "relative",
+          borderRadius: 2,
+          overflow: "hidden",
+          bgcolor: "background.default",
+          touchAction: isEmbed ? undefined : "pan-y",
+          cursor: !isEmbed && items.length > 1 ? "grab" : undefined,
+          "&:active": !isEmbed && items.length > 1 ? { cursor: "grabbing" } : undefined,
+        }}
+      >
         {ytId ? (
           <Box sx={{ width: "100%", aspectRatio: "16/9", maxHeight: 480, display: "block" }}>
             <iframe
