@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { getTranslations, getLocale } from "next-intl/server";
 import ProjectRecipesGrid from "./ProjectRecipesGrid";
-import { fetchItemNames } from "@/lib/services/itemNames";
+import { fetchRecipeLists } from "@/lib/services/recipeList";
 
 type ProjectRecipesProps = {
   projectSlug: string;
@@ -11,7 +11,7 @@ type ProjectRecipesProps = {
 
 /**
  * プロジェクトのレシピ一覧を取得・描画するサーバーコンポーネント。
- * CDNからレシピのリストを取得し、ネームスペースでフィルタリングしてグリッド表示します。
+ * CDNからこのプロジェクトのネームスペース分だけの索引を取得し、グリッド表示します。
  */
 const ProjectRecipes = async ({ projectSlug, namespaces }: ProjectRecipesProps) => {
   const t = await getTranslations("Project");
@@ -20,46 +20,23 @@ const ProjectRecipes = async ({ projectSlug, namespaces }: ProjectRecipesProps) 
 
   // 保存済みネームスペースがあればそれで絞り込む。無ければ後方互換で slug を使う。
   const nsList = namespaces && namespaces.length > 0 ? namespaces : [projectSlug];
-  const nsSet = new Set(nsList);
 
-  let recipes: { id: string; url: string; title: string }[] = [];
-  let error: string | null = null;
+  // ネームスペース単位の索引はアイテム名まで同梱されて返るため、これ1回で一覧が組める。
+  const lists = await fetchRecipeLists(cdnUrl, nsList, locale);
 
-  try {
-    const res = await fetch(`${cdnUrl}/api/list.json`, { next: { revalidate: 60 } });
-    if (!res.ok) {
-      throw new Error("Failed to fetch recipes list");
-    }
-    
-    const data = await res.json() as {
-      recipes?: { id: string; result?: string | null }[];
-      versions?: Record<string, string>;
-    };
-    const entries = (data.recipes ?? []).filter(r => nsSet.has(r.id.split(":")[0]));
+  // レシピが0件でも索引自体は返るため、1つも取れないのは取得失敗を意味する。
+  const error = lists.length === 0 ? t("recipesUnavailable") : null;
 
-    // レシピIDではなく完成品のアイテムIDに対して名前を引く。
-    const names = await fetchItemNames(
-      cdnUrl,
-      entries.map(r => r.result).filter((r): r is string => !!r),
-      locale
-    );
-
-    recipes = entries.map(({ id, result }) => {
+  const recipes = lists.flatMap(({ version, recipes: entries }) =>
+    entries.map(({ id, name }) => {
       const [namespace, itemId] = id.split(":");
       // URL にアセットバージョンを埋めると CDN 側がバージョン参照の R2 往復を省略でき、
       // レスポンスが immutable になるため再訪時はネットワークに出なくなる。
-      const v = data.versions?.[namespace];
-      return {
-        id,
-        // 名前が未翻訳のアイテムはIDから読める形を作って出す。
-        title: (result && names[result]) || itemId.replace(/_/g, " "),
-        url: `${cdnUrl}/api/${namespace}/${itemId}.png${v ? `?v=${encodeURIComponent(v)}` : ""}`
-      };
-    });
-  } catch (err: unknown) {
-    console.error("Failed to fetch recipes:", err);
-    error = err instanceof Error ? err.message : "Failed to load recipes";
-  }
+      // 未設定を意味する "0" のときに付けると、まだ何も入っていない画像を1年間焼き付けてしまう。
+      const pin = version && version !== "0" ? `?v=${encodeURIComponent(version)}` : "";
+      return { id, title: name, url: `${cdnUrl}/api/${namespace}/${itemId}.png${pin}` };
+    })
+  );
 
   if (error) {
     return (

@@ -302,6 +302,7 @@
     "versions": "バージョン",
     "noVersions": "バージョンがまだありません",
     "noRecipes": "レシピが見つかりません。",
+    "recipesUnavailable": "レシピを読み込めませんでした。時間をおいて再度お試しください。",
     "searchRecipes": "レシピを検索",
     "noRecipeMatch": "一致するレシピがありません。",
     "showMore": "もっと見る",
