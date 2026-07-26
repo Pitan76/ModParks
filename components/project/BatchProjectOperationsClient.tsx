@@ -24,6 +24,8 @@ import { Link } from "@/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/project";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
+import SortableTableCell from "@/components/ui/SortableTableCell";
+import { useTableSort } from "@/lib/hooks/useTableSort";
 
 type ProjectForManagement = {
   id: string;
@@ -52,6 +54,14 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const { sorted, order, orderBy, handleSort } = useTableSort(projects, {
+    name: (p) => p.name,
+    slug: (p) => p.slug,
+    type: (p) => p.type,
+    status: (p) => p.status,
+    downloads: (p) => p.totalDownloads || 0,
+  });
 
   const handleToggle = (id: string) => {
     const next = new Set(selected);
@@ -170,11 +180,11 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
                   onChange={handleToggleAll}
                 />
               </TableCell>
-              <TableCell>{t("colName")}</TableCell>
-              <TableCell>{t("colSlug")}</TableCell>
-              <TableCell>{t("colType")}</TableCell>
-              <TableCell>{t("colStatus")}</TableCell>
-              <TableCell align="right">{t("colDownloads")}</TableCell>
+              <SortableTableCell columnKey="name" activeKey={orderBy} order={order} onSort={handleSort}>{t("colName")}</SortableTableCell>
+              <SortableTableCell columnKey="slug" activeKey={orderBy} order={order} onSort={handleSort}>{t("colSlug")}</SortableTableCell>
+              <SortableTableCell columnKey="type" activeKey={orderBy} order={order} onSort={handleSort}>{t("colType")}</SortableTableCell>
+              <SortableTableCell columnKey="status" activeKey={orderBy} order={order} onSort={handleSort}>{t("colStatus")}</SortableTableCell>
+              <SortableTableCell columnKey="downloads" activeKey={orderBy} order={order} onSort={handleSort} align="right">{t("colDownloads")}</SortableTableCell>
               <TableCell align="center">{t("colActions")}</TableCell>
             </TableRow>
           </TableHead>
@@ -186,7 +196,7 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
                 </TableCell>
               </TableRow>
             ) : (
-              projects.map((p) => {
+              sorted.map((p) => {
                 const totalDl = p.totalDownloads || 0;
                 return (
                   <TableRow key={p.id} hover>

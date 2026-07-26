@@ -21,6 +21,8 @@ import { useFormatter, useTranslations } from "next-intl";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import type { ParsedVersion, ProjectVersion } from "./useVersionsManager";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
+import SortableTableCell from "@/components/ui/SortableTableCell";
+import { useTableSort } from "@/lib/hooks/useTableSort";
 
 type Props = {
   parsedVersions: ParsedVersion[];
@@ -46,20 +48,32 @@ export default function VersionsManagerTable({
   const format = useFormatter();
   const t = useTranslations("Version");
 
+  const { sorted, order, orderBy, handleSort } = useTableSort(parsedVersions, {
+    version: (v) => v.versionNumber,
+    downloads: (v) => v.downloads,
+    date: (v) => v.date,
+  });
+
   return (
     <TableContainer component={Paper} sx={tableContainerSx}>
       <Table size="small" sx={[tableRootSx, { minWidth: 650 }]}>
         <TableHead sx={tableHeadSx}>
           <TableRow>
-            <TableCell>{t("manager.columns.version")}</TableCell>
+            <SortableTableCell columnKey="version" activeKey={orderBy} order={order} onSort={handleSort}>
+              {t("manager.columns.version")}
+            </SortableTableCell>
             <TableCell>{t("manager.columns.mc")}</TableCell>
-            <TableCell>{t("manager.columns.downloads")}</TableCell>
-            <TableCell>{t("manager.columns.date")}</TableCell>
+            <SortableTableCell columnKey="downloads" activeKey={orderBy} order={order} onSort={handleSort}>
+              {t("manager.columns.downloads")}
+            </SortableTableCell>
+            <SortableTableCell columnKey="date" activeKey={orderBy} order={order} onSort={handleSort}>
+              {t("manager.columns.date")}
+            </SortableTableCell>
             <TableCell align="right">{t("manager.columns.actions")}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {parsedVersions.map((v) => {
+          {sorted.map((v) => {
             const isArchived = !!v.archivedAt;
             return (
               <TableRow key={v.id} sx={isArchived ? { opacity: 0.6, bgcolor: "action.hover" } : undefined}>

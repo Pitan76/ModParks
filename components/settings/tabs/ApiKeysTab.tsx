@@ -20,6 +20,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ActionRow from "@/components/ui/ActionRow";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
+import SortableTableCell from "@/components/ui/SortableTableCell";
+import { useTableSort } from "@/lib/hooks/useTableSort";
 
 interface ApiKeysTabProps {
   apiKeys: { id: string; name: string; createdAt: Date; lastUsedAt: Date | null }[];
@@ -33,6 +35,11 @@ export default function ApiKeysTab({ apiKeys }: ApiKeysTabProps) {
   const [newKeyName, setNewKeyName] = useState("");
   const [generatedKey, setGeneratedKey] = useState("");
   const [apiKeyMsg, setApiKeyMsg] = useState("");
+
+  const { sorted, order, orderBy, handleSort } = useTableSort(apiKeys, {
+    name: (k) => k.name,
+    lastUsed: (k) => (k.lastUsedAt ? new Date(k.lastUsedAt) : null),
+  });
 
   const handleGenerateKey = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,13 +87,13 @@ export default function ApiKeysTab({ apiKeys }: ApiKeysTabProps) {
         <Table sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
           <TableHead sx={tableHeadSx}>
             <TableRow>
-              <TableCell>{t("apiKeys.name")}</TableCell>
-              <TableCell>{t("apiKeys.lastUsed")}</TableCell>
+              <SortableTableCell columnKey="name" activeKey={orderBy} order={order} onSort={handleSort}>{t("apiKeys.name")}</SortableTableCell>
+              <SortableTableCell columnKey="lastUsed" activeKey={orderBy} order={order} onSort={handleSort}>{t("apiKeys.lastUsed")}</SortableTableCell>
               <TableCell align="right">{tCommon("delete")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {apiKeys.map((k) => (
+            {sorted.map((k) => (
               <TableRow key={k.id} hover>
                 <TableCell>{k.name}</TableCell>
                 <TableCell>{k.lastUsedAt ? format.dateTime(new Date(k.lastUsedAt), { dateStyle: "short" }) : t("apiKeys.neverUsed")}</TableCell>
