@@ -217,7 +217,15 @@
     "table": {
       "version": "バージョン",
       "platformMcVersion": "プラットフォーム / MCバージョン",
-      "sizeDownloadDate": "サイズ / DL / 日付"
+      "sizeDownloadDate": "サイズ / DL / 日付",
+      "filters": {
+        "channel": "チャンネル",
+        "loader": "ローダー",
+        "mc": "MCバージョン",
+        "all": "すべて"
+      },
+      "sortBy": "並び替え",
+      "noVersionsInChannel": "該当するバージョンがありません。"
     },
     "iconUpload": {
       "title": "アイコン",

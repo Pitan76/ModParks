@@ -217,7 +217,15 @@
     "table": {
       "version": "Version",
       "platformMcVersion": "Platform / MC Version",
-      "sizeDownloadDate": "Size / DLs / Date"
+      "sizeDownloadDate": "Size / DLs / Date",
+      "filters": {
+        "channel": "Channel",
+        "loader": "Loader",
+        "mc": "MC Version",
+        "all": "All"
+      },
+      "sortBy": "Sort",
+      "noVersionsInChannel": "No versions found."
     },
     "iconUpload": {
       "title": "Project Icon (Max 400x400)",
