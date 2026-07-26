@@ -5,6 +5,7 @@ import { projects, projectHiddenRecipes } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
+import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 
 /** 1文に載せるレシピIDの数。D1 のバインド変数上限に当たらないよう分割する。 */
 const CHUNK_SIZE = 90;
@@ -125,5 +126,27 @@ export async function getHiddenRecipeIdsAction(projectId: string) {
     return { success: true, hiddenIds: Array.from(hiddenSet) };
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Failed to fetch hidden recipes" };
+  }
+}
+
+/**
+ * プロジェクトに関連付けられたレシピの一覧を取得します（CORS回避のためサーバーサイドでフェッチします）。
+ * @param recipeNamespaces レシピのネームスペース配列
+ * @param projectSlug プロジェクトのスラッグ
+ * @param locale 言語ロケール
+ */
+export async function getProjectRecipesAction(
+  recipeNamespaces: string[] | null | undefined,
+  projectSlug: string,
+  locale: string
+) {
+  try {
+    const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
+    const nsList = recipeNamespaces && recipeNamespaces.length > 0 ? recipeNamespaces : [projectSlug];
+    const lists = await fetchRecipeLists(cdnUrl, nsList, locale);
+    const recipes = toRecipeItems(cdnUrl, lists);
+    return { success: true, recipes };
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : "Failed to fetch recipes" };
   }
 }

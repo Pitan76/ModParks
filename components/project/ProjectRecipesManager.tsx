@@ -11,8 +11,12 @@ import Alert from "@mui/material/Alert";
 import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useTranslations } from "next-intl";
-import { setRecipeHiddenAction, setRecipesHiddenAction, getHiddenRecipeIdsAction } from "@/lib/actions/projectRecipe";
-import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
+import {
+  setRecipeHiddenAction,
+  setRecipesHiddenAction,
+  getHiddenRecipeIdsAction,
+  getProjectRecipesAction,
+} from "@/lib/actions/projectRecipe";
 
 /** 編集画面に並べる1レシピ。名前と画像URLはレシピCDNの索引から来る。 */
 export type ManagedRecipe = {
@@ -102,7 +106,7 @@ const ProjectRecipesManager = ({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // マウント時にクライアントサイドで必要なアセットと非表示設定を非同期ロードする
+  // マウント時にサーバーアクション経由でレシピ一覧と非表示設定をロードする（CORS回避のため）
   useEffect(() => {
     let isMounted = true;
 
@@ -111,22 +115,21 @@ const ProjectRecipesManager = ({
         setLoading(true);
         setError(null);
 
-        const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
-        const nsList = recipeNamespaces && recipeNamespaces.length > 0 ? recipeNamespaces : [projectSlug];
-
-        const [lists, hiddenRes] = await Promise.all([
-          fetchRecipeLists(cdnUrl, nsList, locale),
+        const [recipesRes, hiddenRes] = await Promise.all([
+          getProjectRecipesAction(recipeNamespaces, projectSlug, locale),
           getHiddenRecipeIdsAction(projectId),
         ]);
 
         if (!isMounted) return;
 
+        if (recipesRes.error) {
+          throw new Error(recipesRes.error);
+        }
         if (hiddenRes.error) {
           throw new Error(hiddenRes.error);
         }
 
-        const items = toRecipeItems(cdnUrl, lists);
-        setRecipes(items);
+        setRecipes(recipesRes.recipes || []);
         setHidden(new Set(hiddenRes.hiddenIds || []));
       } catch (err: unknown) {
         if (isMounted) {
