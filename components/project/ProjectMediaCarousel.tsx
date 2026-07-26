@@ -6,10 +6,8 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CloseIcon from "@mui/icons-material/Close";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
 import { useTranslations } from "next-intl";
+import ZoomableImage from "@/components/ui/ZoomableImage";
 
 export type MediaItem = {
   id: string;
@@ -36,7 +34,6 @@ const getNicoVideoId = (url: string): string | null => {
 const ProjectMediaCarousel = ({ items }: { items: MediaItem[] }) => {
   const t = useTranslations("Common");
   const [index, setIndex] = useState(0);
-  const [open, setOpen] = useState(false);
 
   if (items.length === 0) return null;
 
@@ -68,14 +65,11 @@ const ProjectMediaCarousel = ({ items }: { items: MediaItem[] }) => {
             />
           </Box>
         ) : (
-          <Box
-            component="img"
+          <ZoomableImage
             src={current.url}
             alt={current.caption ?? ""}
             loading="lazy"
-            decoding="async"
-            onClick={() => setOpen(true)}
-            sx={{ display: "block", width: "100%", maxHeight: 480, objectFit: "contain", cursor: "pointer" }}
+            style={{ display: "block", width: "100%", maxHeight: 480, objectFit: "contain" }}
           />
         )}
 
@@ -116,60 +110,6 @@ const ProjectMediaCarousel = ({ items }: { items: MediaItem[] }) => {
           ))}
         </Box>
       )}
-
-      {/* 拡大表示ダイアログ */}
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        maxWidth="lg"
-        fullWidth
-        slotProps={{
-          paper: {
-            sx: {
-              bgcolor: "background.default",
-              backgroundImage: "none",
-              borderRadius: 2,
-              overflow: "hidden",
-              position: "relative",
-            },
-          },
-        }}
-      >
-        <IconButton
-          onClick={() => setOpen(false)}
-          sx={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            color: "common.white",
-            bgcolor: "rgba(0, 0, 0, 0.5)",
-            "&:hover": { bgcolor: "rgba(0, 0, 0, 0.7)" },
-            zIndex: 10,
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-        <DialogContent sx={{ p: 0, display: "flex", flexDirection: "column", bgcolor: "#000" }}>
-          <Box
-            component="img"
-            src={current.url}
-            alt={current.caption || "Project media"}
-            sx={{
-              maxWidth: "100%",
-              width: "auto",
-              maxHeight: "80vh",
-              objectFit: "contain",
-              display: "block",
-              mx: "auto",
-            }}
-          />
-          {current.caption && (
-            <Box sx={{ p: 2, bgcolor: "background.paper", color: "text.primary" }}>
-              <Typography variant="body1">{current.caption}</Typography>
-            </Box>
-          )}
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 };

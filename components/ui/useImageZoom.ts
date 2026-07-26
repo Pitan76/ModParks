@@ -39,13 +39,19 @@ export const useImageZoom = () => {
     setTransform({ scale: fitScaleRef.current, x: 0, y: 0 });
   }, []);
 
-  const handleImageLoad = useCallback(
-    (event: React.SyntheticEvent<HTMLImageElement>) => {
-      const image = event.currentTarget;
+  /** 画像の原寸を取り込みフィット表示する。読み込み済み画像にも使える */
+  const measureImage = useCallback(
+    (image: HTMLImageElement) => {
+      if (!image.naturalWidth) return;
       naturalRef.current = { width: image.naturalWidth, height: image.naturalHeight };
       fit();
     },
     [fit],
+  );
+
+  const handleImageLoad = useCallback(
+    (event: React.SyntheticEvent<HTMLImageElement>) => measureImage(event.currentTarget),
+    [measureImage],
   );
 
   /** origin はビューポート中心からの相対座標。指定なしなら中心基準 */
@@ -110,6 +116,7 @@ export const useImageZoom = () => {
   return {
     viewportRef,
     transform,
+    measureImage,
     handleImageLoad,
     handleWheel,
     handlePointerDown,

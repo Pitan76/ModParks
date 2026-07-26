@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
@@ -34,7 +34,15 @@ const ZoomableImage = ({ src, alt, pixelated, className, style, loading }: Zooma
   const t = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const zoom = useImageZoom();
+  const dialogImgRef = useRef<HTMLImageElement | null>(null);
   const rendering = pixelated ? "pixelated" : undefined;
+  const { measureImage } = zoom;
+
+  // キャッシュ済み画像は onLoad が発火せずフィットされないため、開いた時点で計測する
+  useEffect(() => {
+    const img = dialogImgRef.current;
+    if (open && img?.complete) measureImage(img);
+  }, [open, measureImage]);
 
   return (
     <>
@@ -70,6 +78,7 @@ const ZoomableImage = ({ src, alt, pixelated, className, style, loading }: Zooma
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            ref={dialogImgRef}
             src={src}
             alt={alt || ""}
             onLoad={zoom.handleImageLoad}
