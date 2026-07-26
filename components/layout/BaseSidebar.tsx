@@ -75,7 +75,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* デスクトップはヘッダーにロゴを常設するため空スペーサー。モバイルはドロワーが前面に出るためロゴを表示 */}
-      <Box sx={{ height: { xs: 56, md: 64 }, px: 2, display: "flex", alignItems: "center", gap: 1 }}>
+      <Box sx={{ height: { xs: 56, sm: 64 }, px: 2, display: "flex", alignItems: "center", gap: 1 }}>
         <Link
           href="/"
           prefetch={false}
