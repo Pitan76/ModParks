@@ -56,7 +56,7 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
 
   return (
     <Box>
-      <Box component="form" onSubmit={handleIntegrationSubmit}>
+      <Box component="form" onSubmit={handleIntegrationSubmit} sx={{ p: "2px" }}>
         {message && <Alert severity={message.type} sx={{ mb: 3 }}>{message.text}</Alert>}
 
         <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.modrinth")}</Typography>

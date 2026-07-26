@@ -98,37 +98,41 @@ const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
         {/* デスクトップナビ（アクションのみ） */}
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, alignItems: "center" }} />
 
-        {/* 新規プロジェクトボタン (全画面・未ログインでも表示) */}
-        <LinkButton
-          href="/projects/new"
-          id="nav-new-project-desktop"
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          sx={{ ml: 1, display: { xs: "none", sm: "flex" } }}
-        >
-          <Box component="span" sx={{ mt: "1px" }}>
-            {t("newProject")}
-          </Box>
-        </LinkButton>
-
-        {/* スマホ向け: 正方形のアイコンボタン */}
-        <Box sx={{ display: { xs: "flex", sm: "none" }, ml: 0 }}>
-          <Link href="/projects/new" prefetch={false} style={{ display: "flex", textDecoration: "none" }} id="nav-new-project-mobile">
-            <IconButton
+        {/* 新規プロジェクトボタン (ログイン時のみ表示) */}
+        {session?.user && (
+          <>
+            <LinkButton
+              href="/projects/new"
+              id="nav-new-project-desktop"
+              variant="contained"
               size="small"
-              sx={{ 
-                bgcolor: "primary.main",
-                color: "primary.contrastText",
-                "&:hover": { bgcolor: "primary.dark" },
-                borderRadius: 1,
-                p: "6px"
-              }}
+              startIcon={<AddIcon />}
+              sx={{ ml: 1, display: { xs: "none", sm: "flex" } }}
             >
-              <AddIcon fontSize="small" />
-            </IconButton>
-          </Link>
-        </Box>
+              <Box component="span" sx={{ mt: "1px" }}>
+                {t("newProject")}
+              </Box>
+            </LinkButton>
+
+            {/* スマホ向け: 正方形のアイコンボタン */}
+            <Box sx={{ display: { xs: "flex", sm: "none" }, ml: 0 }}>
+              <Link href="/projects/new" prefetch={false} style={{ display: "flex", textDecoration: "none" }} id="nav-new-project-mobile">
+                <IconButton
+                  size="small"
+                  sx={{
+                    bgcolor: "primary.main",
+                    color: "primary.contrastText",
+                    "&:hover": { bgcolor: "primary.dark" },
+                    borderRadius: 1,
+                    p: "6px"
+                  }}
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </Link>
+            </Box>
+          </>
+        )}
 
         {/* 通知ベル (ログイン時のみ) */}
         {session?.user && <NotificationBell />}
@@ -140,7 +144,8 @@ const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
           </IconButton>
         </Tooltip>
 
-        {/* 言語切替 */}
+        {/* 言語切替 (非ログイン時のみ。ログイン時は設定から変更) */}
+        {!session?.user && (
         <Tooltip title="Language">
           <Select
             id="locale-select"
@@ -168,6 +173,7 @@ const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
             <MenuItem value="en">🇺🇸 English</MenuItem>
           </Select>
         </Tooltip>
+        )}
 
         {/* ログイン / アバター */}
         {session?.user ? (
@@ -244,24 +250,36 @@ const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
             </Menu>
           </>
         ) : (
-          <LinkButton
-            id="login-button"
-            href="/login"
-            variant="outlined"
-            size="small"
-            sx={{
-              borderColor: "primary.main",
-              color:        "primary.main",
-              "&:hover": {
-                background:   "rgba(56,189,248,0.08)",
-                borderColor:  "primary.light",
-              },
-            }}
-          >
-            <Box component="span" sx={{ mt: "1px" }}>
-              {t("login")}
-            </Box>
-          </LinkButton>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <LinkButton
+              id="login-button"
+              href="/login"
+              variant="outlined"
+              size="small"
+              sx={{
+                borderColor: "primary.main",
+                color:        "primary.main",
+                "&:hover": {
+                  background:   "rgba(56,189,248,0.08)",
+                  borderColor:  "primary.light",
+                },
+              }}
+            >
+              <Box component="span" sx={{ mt: "1px" }}>
+                {t("login")}
+              </Box>
+            </LinkButton>
+            <LinkButton
+              id="register-button"
+              href="/register"
+              variant="contained"
+              size="small"
+            >
+              <Box component="span" sx={{ mt: "1px" }}>
+                {t("register")}
+              </Box>
+            </LinkButton>
+          </Box>
         )}
       </Toolbar>
     </AppBar>

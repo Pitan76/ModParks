@@ -126,6 +126,7 @@
     "settings": "設定",
     "admin": "システム管理",
     "login": "ログイン",
+    "register": "新規登録",
     "logout": "ログアウト",
     "dashboard": "ダッシュボード",
     "notifications": "通知"

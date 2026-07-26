@@ -32,7 +32,7 @@ export default function NotificationsTab({ initialPrefs }: Props) {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: "2px" }}>
       {message && <Alert severity={message.type} sx={{ mb: 3 }}>{message.text}</Alert>}
 
       <Typography variant="h6" sx={{ mb: 1 }}>{t("notifications.title")}</Typography>

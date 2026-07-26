@@ -45,7 +45,7 @@ export default function ProfileTab({ user, locale }: ProfileTabProps) {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: "2px" }}>
       {message && <Alert severity={message.type} sx={{ mb: 3 }}>{message.text}</Alert>}
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 4 }}>

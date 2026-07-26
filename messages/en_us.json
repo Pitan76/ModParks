@@ -126,6 +126,7 @@
     "settings": "Settings",
     "admin": "Admin",
     "login": "Sign in",
+    "register": "Sign up",
     "logout": "Sign out",
     "dashboard": "Dashboard",
     "notifications": "Notifications"

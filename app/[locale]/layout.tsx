@@ -12,6 +12,7 @@ import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { SessionProvider } from "@/components/SessionProvider";
 import AppLayout from "@/components/layout/AppLayout";
+import PinProvider from "@/components/pin/PinProvider";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
 import { SITE_URL } from "@/lib/config";
@@ -94,6 +95,16 @@ type LocaleLayoutProps = {
  * @param params 言語を含むパラメータ
  * @returns 言語別レイアウト
  */
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+/**
+ * 言語別ルートのレイアウト
+ * @param children ページコンテンツ
+ * @param params 言語を含むパラメータ
+ * @returns 言語別レイアウト
+ */
 const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   const { locale } = await params;
 
@@ -136,10 +147,12 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
           <SessionProvider session={session} refetchOnWindowFocus={false}>
             <NextIntlClientProvider messages={messages}>
               {userLocale && <LocaleSyncer userLocale={userLocale} />}
-              <AppLayout session={session}>
-                {children}
-                <AppFooter />
-              </AppLayout>
+              <PinProvider>
+                <AppLayout session={session}>
+                  {children}
+                  <AppFooter />
+                </AppLayout>
+              </PinProvider>
             </NextIntlClientProvider>
           </SessionProvider>
         </ThemeRegistry>

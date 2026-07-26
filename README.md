@@ -133,6 +133,43 @@ npx wrangler deploy
 npx wrangler secret put RECIPE_CDN_SECRET
 ```
 
+## プッシュ通知 (PWA / Web Push)
+
+アプリ内通知（`dispatchNotifications`）に相乗りして、ブラウザ/ホーム画面アプリへ Web Push を配信します。種別ごとの受信可否は既存の通知設定（`notificationPrefs`）を尊重し、端末単位の ON/OFF は設定 →「通知」タブのトグルで行います。
+
+- 本文暗号化（RFC 8291 aes128gcm）と VAPID 署名（RFC 8292）は Node crypto 依存の `web-push` が Workers で動かないため、`workers/push`（`modparks-push`）サイドカーに Web Crypto 実装として隔離しています。
+- **iPhone/iPad はホーム画面に追加した PWA でのみ**プッシュを受信できます（iOS 16.4+、Safari のタブ状態では不可）。
+
+### セットアップ
+
+1. VAPID 鍵ペアを生成:
+
+   ```bash
+   node scripts/generate-vapid.mjs
+   ```
+
+2. 公開鍵を `wrangler.toml` の `[vars]` に設定（クライアント購読に使うため公開してよい）:
+
+   ```toml
+   NEXT_PUBLIC_VAPID_PUBLIC_KEY = "B..."
+   VAPID_PUBLIC_KEY             = "B..."
+   ```
+
+3. 秘密鍵とサブジェクトはシークレットとして登録:
+
+   ```bash
+   npx wrangler secret put VAPID_PRIVATE_KEY
+   npx wrangler secret put VAPID_SUBJECT   # mailto: か https: の連絡先
+   ```
+
+4. サイドカーを**先に**デプロイしてから本体をデプロイ（Service Binding 解決のため）:
+
+   ```bash
+   cd workers/push && npx wrangler deploy
+   ```
+
+VAPID が未設定の場合、Web Push はスキップされアプリ内通知だけが動きます。ローカル開発では `wrangler dev` のシークレット供給（`.dev.vars`）に同じ値を入れてください。
+
 ## 右クリックメニュー
 
 `components/ui/ContextMenu/` に、右クリックで独自コンテキストメニューを出す基盤があります（Chrome のネイティブメニューを妨害しない設計）。詳細・使い方はそちらの 
@@ -147,3 +184,32 @@ npx wrangler secret put RECIPE_CDN_SECRET
 - **プロジェクト詳細ヘッダー** — お気に入り・購読・共有
 
 いずれも `useContextMenu` + `useCommonItems` で数行。owner限定操作は `items` の関数形式 `(target) => [...]` で出し分ける。
+
+## メモ
+なるべく無料で運用するためにCloudflare Workers圧縮後3MBのスクリプトサイズ制限を守ったメモ (以下AI執筆あり)
+（正直、jar, push, authをメインから分岐してサイドカーに持っていったりしたが, やっぱ限界が来たので）
+
+当初は依存ライブラリの削減を疑い、`jszip` の分離や `unenv` の削減、`@mui/icons-material` の最適化、Dynamic Import などを実施したが、大きな改善は得られなかった。
+
+次に、SSR を減らせば Worker サイズも減ると考え、設定画面などを **SSR → SSG + API** 構成へ変更する実験を行った。しかし、実際の削減量は約 **13KB** に留まり、OpenNext のバンドルは一部ページを静的化しただけではほとんど小さくならないことが分かった。
+
+さらに、Cloudflare Workers を維持するために「完全SPA化」や「Pages + API Worker 分離」などのアーキテクチャ変更も検討したが、ModParks は検索流入や SNS シェアを重視するサービスであるため、**SEO や動的 OGP を失うことは許容できない**と判断し、大規模なリファクタリングは見送った。
+
+最終的には、OpenNext のビルド設定を詳しく調査し、
+
+* サーバーサイド Source Map の無効化
+* `wrangler deploy --minify` の適用
+
+というデプロイ設定の最適化を実施した。
+
+その結果、`wrangler deploy --dry-run --minify` による測定では、
+
+* **変更前:** gzip 約 **3071 KiB**
+* **変更後:** gzip 約 **2693 KiB**
+
+となり、**約379 KiB の余裕**を確保した状態で Cloudflare Workers 無料プランへデプロイできるようになった。(普通にこんな変わるとは思わんかった)
+
+この対応により、**SSR・Server Actions・動的 OGP・SEO・多言語対応（next-intl）を一切犠牲にすることなく**、無料プランでの運用を継続できた。
+
+今回の経験を通じて、「思い込みで設計変更する」のではなく、**実際にビルドサイズを測定し、仮説と検証を繰り返しながら問題を切り分ける重要性**を学んだ。(いやminifyを追加するだけでこうなるとは思わんかった。どうせ追加しても...って思ってたから最初からやることさぼってたのがよくない)
+

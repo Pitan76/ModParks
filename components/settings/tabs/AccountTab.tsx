@@ -94,9 +94,9 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
 
   return (
     <Box>
-      {message && <Alert severity={message.type} sx={{ mb: 4 }}>{message.text}</Alert>}
+      {message && <Alert severity={message.type} sx={{ mb: 4, p: "2px" }}>{message.text}</Alert>}
 
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4, p: "2px" }}>
         <Typography variant="h6" sx={{ mb: 2 }}>{t("account.language")}</Typography>
         <FormSelect
           size="small"
@@ -113,7 +113,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
       </Box>
       <Divider sx={{ my: 4 }} />
 
-      <Box component="form" onSubmit={handleUsernameChange} sx={{ mb: 4 }}>
+      <Box component="form" onSubmit={handleUsernameChange} sx={{ mb: 4, p: "2px" }}>
         <Typography variant="h6" sx={{ mb: 1 }}>{t("account.changeId")}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.changeIdDesc")}</Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
@@ -124,7 +124,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
 
       <Divider sx={{ my: 4 }} />
 
-      <Box component="form" onSubmit={handleEmailChange} sx={{ mb: 4 }}>
+      <Box component="form" onSubmit={handleEmailChange} sx={{ mb: 4, p: "2px" }}>
         <Typography variant="h6" sx={{ mb: 2 }}>{t("account.changeEmail")}</Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
           <FormTextField label={t("account.newEmail")} size="small" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} required />
@@ -135,7 +135,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
 
       <Divider sx={{ my: 4 }} />
 
-      <Box component="form" onSubmit={handlePasswordChange} sx={{ mb: 4 }}>
+      <Box component="form" onSubmit={handlePasswordChange} sx={{ mb: 4, p: "2px" }}>
         <Typography variant="h6" sx={{ mb: 2 }}>{hasPassword ? t("account.changePassword") : t("account.setPassword")}</Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 300 }}>
           {hasPassword && <FormTextField label={t("account.currentPassword")} type="password" size="small" value={oldPass} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOldPass(e.target.value)} required />}

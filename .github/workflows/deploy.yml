@@ -14,6 +14,10 @@ on:
         description: "auth workerも強制デプロイする"
         type: boolean
         default: false
+      deploy_push:
+        description: "push workerも強制デプロイする"
+        type: boolean
+        default: false
 
 jobs:
   deploy:
@@ -24,20 +28,23 @@ jobs:
         uses: actions/checkout@v4
 
       # 各ターゲットに変更があるかを判定する
-      # main は workers/jar・workers/auth 以外に変更があった場合のみ（バインドは名前参照のため）
+      # main は workers/jar, workers/auth, workers/push 以外に変更があった場合のみ（バインドは名前参照のため）
       - name: Detect changes
         id: changes
         uses: dorny/paths-filter@v3
         with:
           filters: |
             jar:
-              - 'workers/jar/**'
+              - "workers/jar/**"
             auth:
-              - 'workers/auth/**'
+              - "workers/auth/**"
+            push:
+              - "workers/push/**"
             main:
-              - '**'
-              - '!workers/jar/**'
-              - '!workers/auth/**'
+              - "**"
+              - "!workers/jar/**"
+              - "!workers/auth/**"
+              - "!workers/push/**"
 
       - name: Setup Node.js
         if: steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch'
@@ -81,6 +88,19 @@ jobs:
           workingDirectory: workers/auth
           command: deploy
 
+      # push worker
+      # 本体が Service Binding するため、本体をデプロイする回は必ず先に用意する
+      # （未作成だと binding 解決に失敗するため main 変更時も無条件で流す＝ブートストラップ兼冪等）
+      - name: Deploy push worker
+        if: steps.changes.outputs.push == 'true' || steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch' || inputs.deploy_push == true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.100.0"
+          workingDirectory: workers/push
+          command: deploy
+
       # 本体（ModParks）。本体側に変更があったとき、または手動実行時にデプロイする
       - name: Deploy to Cloudflare
         if: steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch'
@@ -89,4 +109,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.100.0"
-          command: deploy
+          # --minify で本体 Worker を圧縮する。webpack(no minify) では gzip 約 3,068 KiB と
+          # 3 MiB 上限まで残り数 KiB しかないため、minify で約 2,712 KiB まで落として余裕を確保する。
+          command: deploy --minify

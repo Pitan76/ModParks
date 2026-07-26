@@ -1,13 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
 import { Link as RoutingLink } from "@/i18n/routing";
 import FollowUserButton from "@/components/user/FollowUserButton";
 import { DownloadLabel } from "@/components/ui/ProjectInfoLabels";
 import ProfileLinks from "./ProfileLinks";
+import ProfileAvatar from "./ProfileAvatar";
 import type { ProfileUser } from "./profileData";
 
 type Stats = { totalDownloads: number; nativeDownloads: number; modrinthDownloads: number; curseforgeDownloads: number };
@@ -46,7 +46,12 @@ export default async function ProfileHeader({
         mb: { xs: 4, md: 6 },
       }}
     >
-      <Avatar src={user.avatarUrl || ""} sx={{ width: { xs: 88, sm: 100 }, height: { xs: 88, sm: 100 }, flexShrink: 0 }} />
+      <ProfileAvatar
+        initialSrc={user.avatarUrl || ""}
+        alt={user.displayName || user.username}
+        isOwner={isOwner}
+        size={100}
+      />
       <Box sx={{ flex: 1, width: "100%", minWidth: 0 }}>
         <Box
           sx={{
