@@ -161,7 +161,10 @@ const ProjectRecipesManager = ({ projectSlug, recipes, hiddenIds }: ProjectRecip
               <Typography variant="caption" color="text.secondary" noWrap title={recipe.id} sx={{ display: "block" }}>
                 {recipe.id}
               </Typography>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack
+                direction="row"
+                sx={{ alignItems: "center", justifyContent: "space-between" }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   {isHidden ? t("hidden") : t("visible")}
                 </Typography>
@@ -170,7 +173,7 @@ const ProjectRecipesManager = ({ projectSlug, recipes, hiddenIds }: ProjectRecip
                   checked={!isHidden}
                   onChange={() => toggle(recipe.id)}
                   disabled={busy}
-                  inputProps={{ "aria-label": recipe.name }}
+                  slotProps={{ input: { "aria-label": recipe.name } }}
                 />
               </Stack>
             </Box>
