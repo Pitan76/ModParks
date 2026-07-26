@@ -94,7 +94,7 @@ const ProjectMediaCarousel = ({ items }: { items: MediaItem[] }) => {
         onClickCapture={multiple ? swipe.onClickCapture : undefined}
         sx={{
           position: "relative",
-          borderRadius: 2,
+          borderRadius: 0,
           overflow: "hidden",
           bgcolor: "background.default",
           touchAction: multiple ? "pan-y" : undefined,

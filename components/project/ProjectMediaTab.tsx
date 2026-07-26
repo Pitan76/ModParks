@@ -59,14 +59,9 @@ export default function ProjectMediaTab({ media }: ProjectMediaTabProps) {
               <Card
                 sx={{
                   position: "relative",
-                  borderRadius: 2,
+                  borderRadius: 0,
                   overflow: "hidden",
                   boxShadow: 2,
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 4,
-                  },
                 }}
               >
                 <CardActionArea onClick={() => handleOpen(item)}>
