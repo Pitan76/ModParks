@@ -61,14 +61,18 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
   };
 
   return (
-    <AppBar position="sticky" id="app-header" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+    <AppBar
+      position="sticky"
+      id="app-header"
+      sx={{ zIndex: (theme) => ({ xs: theme.zIndex.appBar, md: theme.zIndex.drawer + 1 }) }}
+    >
       {/* サイドバー右端の縦線をヘッダーまで延長し、上端から連続して見せる */}
       <Box
         sx={{
           position: "absolute",
           top: 0,
           bottom: 0,
-          left: `${SIDEBAR_WIDTH}px`,
+          left: `${SIDEBAR_WIDTH - 1}px`,
           width: "1px",
           bgcolor: borderColor,
           display: { xs: "none", md: "block" },
