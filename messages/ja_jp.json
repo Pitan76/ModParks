@@ -129,7 +129,9 @@
     "register": "新規登録",
     "logout": "ログアウト",
     "dashboard": "ダッシュボード",
-    "notifications": "通知"
+    "notifications": "通知",
+    "collapseSidebar": "サイドバーを閉じる",
+    "expandSidebar": "サイドバーを開く"
   },
   "Home": {
     "hero": {

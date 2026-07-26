@@ -21,6 +21,8 @@ export type AdminSidebarProps = {
   mobileOpen: boolean;
   onMobileClose: () => void;
   session: Session | null;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 };
 
 /**
@@ -28,7 +30,7 @@ export type AdminSidebarProps = {
  * 管理者権限（role === "admin"）を持つユーザーに対して、ダッシュボード、ユーザー一覧、プロジェクト一覧、
  * アイデア、通報、構成、バックアップ、監査ログなどの管理用リンクを表示します。
  */
-const AdminSidebar = ({ mobileOpen, onMobileClose, session }: AdminSidebarProps) => {
+const AdminSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleCollapse }: AdminSidebarProps) => {
   const tAdmin = useTranslations("Admin");
 
   let navItems: NavItem[] = [];
@@ -48,7 +50,7 @@ const AdminSidebar = ({ mobileOpen, onMobileClose, session }: AdminSidebarProps)
     ];
   }
 
-  return <BaseSidebar navItems={navItems} mobileOpen={mobileOpen} onMobileClose={onMobileClose} />;
+  return <BaseSidebar navItems={navItems} mobileOpen={mobileOpen} onMobileClose={onMobileClose} collapsed={collapsed} onToggleCollapse={onToggleCollapse} />;
 };
 
 export default AdminSidebar;

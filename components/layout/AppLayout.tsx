@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";
 import AdminSidebar from "./AdminSidebar";
 import AppHeader from "./AppHeader";
@@ -21,13 +24,29 @@ export type AppLayoutProps = {
  * サイドバー（管理用/通常用）、ヘッダー、メインコンテンツ、コンテキストメニュー、
  * およびオンボーディングツアーの連携を行います。
  */
+const COLLAPSE_STORAGE_KEY = "sidebarCollapsed";
+
 const AppLayout = ({ children, session }: AppLayoutProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname() || "";
   const isAdminPage = pathname.includes("/admin");
+  const tNav = useTranslations("Nav");
+
+  useEffect(() => {
+    setCollapsed(localStorage.getItem(COLLAPSE_STORAGE_KEY) === "1");
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleToggleCollapse = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(COLLAPSE_STORAGE_KEY, next ? "1" : "0");
+      return next;
+    });
   };
 
   const SidebarComponent = isAdminPage ? AdminSidebar : AppSidebar;
@@ -39,14 +58,37 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
           mobileOpen={mobileOpen}
           onMobileClose={() => setMobileOpen(false)}
           session={session}
+          collapsed={collapsed}
+          onToggleCollapse={handleToggleCollapse}
         />
+        {collapsed && (
+          <IconButton
+            onClick={handleToggleCollapse}
+            aria-label={tNav("expandSidebar")}
+            size="small"
+            sx={{
+              display: { xs: "none", md: "flex" },
+              position: "fixed",
+              bottom: 12,
+              left: 12,
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: 1,
+              "&:hover": { bgcolor: "action.hover" },
+            }}
+          >
+            <ChevronRightIcon fontSize="small" />
+          </IconButton>
+        )}
         <Box
           sx={{
             flexGrow: 1,
             minWidth: 0,
             display: "flex",
             flexDirection: "column",
-            width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
+            width: { md: collapsed ? "100%" : `calc(100% - ${SIDEBAR_WIDTH}px)` },
           }}
         >
           <AppHeader session={session} onMenuClick={handleDrawerToggle} />

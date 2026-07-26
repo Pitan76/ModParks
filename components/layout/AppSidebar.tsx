@@ -18,6 +18,8 @@ export type AppSidebarProps = {
   mobileOpen: boolean;
   onMobileClose: () => void;
   session: Session | null;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 };
 
 /**
@@ -25,7 +27,7 @@ export type AppSidebarProps = {
  * ホーム、プロジェクト検索、アイデアといったパブリックメニューに加え、
  * ログイン中ユーザーに対しては通知、ダッシュボード、マイプロジェクト、マイプロファイルを表示します。
  */
-const AppSidebar = ({ mobileOpen, onMobileClose, session }: AppSidebarProps) => {
+const AppSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleCollapse }: AppSidebarProps) => {
   const t = useTranslations("Nav");
 
   const navItems: NavItem[] = [
@@ -41,7 +43,7 @@ const AppSidebar = ({ mobileOpen, onMobileClose, session }: AppSidebarProps) => 
     navItems.push({ id: "profile", label: t("profile"), path: `/profile/${session.user.username}`, icon: <AccountCircleIcon /> });
   }
 
-  return <BaseSidebar navItems={navItems} mobileOpen={mobileOpen} onMobileClose={onMobileClose} />;
+  return <BaseSidebar navItems={navItems} mobileOpen={mobileOpen} onMobileClose={onMobileClose} collapsed={collapsed} onToggleCollapse={onToggleCollapse} />;
 };
 
 export default AppSidebar;

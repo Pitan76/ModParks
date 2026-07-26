@@ -12,6 +12,7 @@ import Typography from "@mui/material/Typography";
 import LanguageIcon from "@mui/icons-material/Language";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
@@ -34,6 +35,8 @@ export type BaseSidebarProps = {
   mobileOpen: boolean;
   onMobileClose: () => void;
   navItems: NavItem[];
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 };
 
 const getIsSelected = (itemId: string, itemPath: string, pathname: string, isMyProjects: boolean): boolean => {
@@ -47,7 +50,7 @@ const getIsSelected = (itemId: string, itemPath: string, pathname: string, isMyP
  * デスクトップ表示（常時固定表示）とモバイル表示（ハンバーガーメニューからの一時Drawer表示）の双方に対応し、
  * ナビゲーションメニュー、言語切替、ダークモード切替などのコントロールを提供します。
  */
-const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) => {
+const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, onToggleCollapse }: BaseSidebarProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,6 +58,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) 
   const { mode, toggleColorMode } = useColorMode();
   const locale = useLocale();
   const tMenu = useTranslations("ContextMenu");
+  const tNav = useTranslations("Nav");
   const openMenu = useContextMenuHandler();
   const { isDisabled } = useContextMenuContext();
   const c = useCommonItems();
@@ -128,6 +132,20 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) 
         })}
       </List>
 
+      {/* ---- Collapse Button - Desktop Only ---- */}
+      {onToggleCollapse && (
+        <Box sx={{ display: { xs: "none", md: "flex" }, mt: "auto", p: 1, justifyContent: "flex-start" }}>
+          <IconButton
+            onClick={onToggleCollapse}
+            size="small"
+            aria-label={tNav("collapseSidebar")}
+            sx={{ color: "text.secondary" }}
+          >
+            <ChevronLeftIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      )}
+
       {/* ---- Bottom Section (Theme, Locale) - Mobile Only ---- */}
       <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", mt: "auto" }}>
         <Divider />
@@ -169,7 +187,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) 
   );
 
   return (
-    <Box component="nav" sx={{ width: { md: SIDEBAR_WIDTH }, flexShrink: { md: 0 } }}>
+    <Box component="nav" sx={{ width: { md: collapsed ? 0 : SIDEBAR_WIDTH }, flexShrink: { md: 0 } }}>
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -185,7 +203,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems }: BaseSidebarProps) 
       <Drawer
         variant="permanent"
         sx={{
-          display: { xs: "none", md: "block" },
+          display: { xs: "none", md: collapsed ? "none" : "block" },
           width: SIDEBAR_WIDTH,
           flexShrink: 0,
           "& .MuiDrawer-paper": { width: SIDEBAR_WIDTH, boxSizing: "border-box" },
