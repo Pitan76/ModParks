@@ -89,9 +89,14 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
             display: "flex",
             flexDirection: "column",
             width: { md: collapsed ? "100%" : `calc(100% - ${SIDEBAR_WIDTH}px)` },
+            transition: (theme) =>
+              theme.transitions.create("width", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
           }}
         >
-          <AppHeader session={session} onMenuClick={handleDrawerToggle} />
+          <AppHeader session={session} onMenuClick={handleDrawerToggle} showLogo={collapsed} />
           <Box component="main" sx={{ flexGrow: 1 }}>
             {children}
           </Box>

@@ -30,6 +30,7 @@ import type { Session } from "next-auth";
 export type AppHeaderProps = {
   session: Session | null;
   onMenuClick?: () => void;
+  showLogo?: boolean;
 };
 
 /**
@@ -37,7 +38,7 @@ export type AppHeaderProps = {
  * ロゴ、検索、新規プロジェクト作成ボタン、通知ベル、テーマ切り替え、言語切り替え、
  * およびユーザーのアバター（ログインメニュー）を提供します。
  */
-const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
+const AppHeader = ({ session, onMenuClick, showLogo = false }: AppHeaderProps) => {
   const t        = useTranslations("Nav");
   const locale   = useLocale();
   const pathname = usePathname();
@@ -70,7 +71,7 @@ const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
 
         {/* ロゴ (モバイルでのみ表示、デスクトップはサイドバーに表示) */}
         <Link href="/" prefetch={false} style={{ textDecoration: "none", color: "inherit" }}>
-          <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: { xs: "flex", md: showLogo ? "flex" : "none" }, alignItems: "center", gap: 1 }}>
             <Box
               component="img"
               src="/icon.svg"

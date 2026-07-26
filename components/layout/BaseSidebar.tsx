@@ -187,7 +187,18 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
   );
 
   return (
-    <Box component="nav" sx={{ width: { md: collapsed ? 0 : SIDEBAR_WIDTH }, flexShrink: { md: 0 } }}>
+    <Box
+      component="nav"
+      sx={{
+        width: { md: collapsed ? 0 : SIDEBAR_WIDTH },
+        flexShrink: { md: 0 },
+        transition: (theme) =>
+          theme.transitions.create("width", {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+      }}
+    >
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -203,10 +214,19 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
       <Drawer
         variant="permanent"
         sx={{
-          display: { xs: "none", md: collapsed ? "none" : "block" },
+          display: { xs: "none", md: "block" },
           width: SIDEBAR_WIDTH,
           flexShrink: 0,
-          "& .MuiDrawer-paper": { width: SIDEBAR_WIDTH, boxSizing: "border-box" },
+          "& .MuiDrawer-paper": {
+            width: SIDEBAR_WIDTH,
+            boxSizing: "border-box",
+            transform: collapsed ? `translateX(-${SIDEBAR_WIDTH}px)` : "none",
+            transition: (theme) =>
+              theme.transitions.create("transform", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
+          },
         }}
         open
       >
