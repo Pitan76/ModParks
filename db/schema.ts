@@ -367,6 +367,33 @@ export const projectMedia = sqliteTable("project_media", {
 
 export type ProjectMedia = typeof projectMedia.$inferSelect;
 
+/**
+ * プロジェクトページで非表示にするレシピ。
+ *
+ * レシピの実体は jar 由来でレシピCDN（mp-recipe）が持つため、ここでは「出さない」判断だけを持つ。
+ * 中間生成物や見せたくないレシピが jar に含まれていても、再抽出のたびに復活しないようにするための表。
+ */
+export const projectHiddenRecipes = sqliteTable(
+  "project_hidden_recipes",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    /** 完全修飾レシピID（例 "mymod:widget"）。CDN の索引が返す id と同じ表記 */
+    recipeId: text("recipe_id").notNull(),
+    hiddenBy: text("hidden_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.projectId, t.recipeId] }),
+    projectIdx: index("project_hidden_recipes_project_idx").on(t.projectId),
+  })
+);
+
+export type ProjectHiddenRecipe = typeof projectHiddenRecipes.$inferSelect;
+
 export const projectFavorites = sqliteTable(
   "project_favorites",
   {
