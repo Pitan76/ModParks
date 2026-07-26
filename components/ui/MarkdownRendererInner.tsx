@@ -1,30 +1,17 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
-import { createContext, useContext } from "react";
 import ZoomableImage from "./ZoomableImage";
+import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
 
 // リンク内の画像はクリックでリンク遷移させたいので、拡大表示を無効化するためのフラグ
 const InsideLinkContext = createContext(false);
 
 type MarkdownRendererInnerProps = {
   content: string;
-};
-
-// iframe(YouTube 等の埋め込み)を許可するため sanitize schema を拡張
-const SCHEMA = {
-  ...defaultSchema,
-  tagNames: [...(defaultSchema.tagNames || []), "iframe"],
-  attributes: {
-    ...defaultSchema.attributes,
-    iframe: ["src", "width", "height", "allow", "allowfullscreen", "frameborder", "title", "style"],
-  },
 };
 
 /**
@@ -40,11 +27,55 @@ const MarkdownImage = ({ src, alt }: { src?: string; alt?: string }) => {
 
 /**
  * 実際の Markdown 描画本体。
- * react-markdown / rehype / remark を静的 import するためバンドルサイズが大きくなります。
- * SSR では描画せず、MarkdownRenderer が ssr:false で遅延ロードすることにより、
- * この重量級依存をサーバーサイドのバンドルから除外します。
+ * react-markdown / rehype / remark を動的 import に変更し、
+ * サーバーサイドのバンドルから完全に除外します。
  */
 const MarkdownRendererInner = ({ content }: MarkdownRendererInnerProps) => {
+  const [modules, setModules] = useState<{
+    ReactMarkdown: any;
+    remarkGfm: any;
+    rehypeRaw: any;
+    rehypeSanitize: any;
+    defaultSchema: any;
+  } | null>(null);
+
+  useEffect(() => {
+    Promise.all([
+      import("react-markdown"),
+      import("remark-gfm"),
+      import("rehype-raw"),
+      import("rehype-sanitize"),
+    ])
+      .then(([reactMarkdown, remarkGfm, rehypeRaw, rehypeSanitize]) => {
+        setModules({
+          ReactMarkdown: reactMarkdown.default,
+          remarkGfm: remarkGfm.default,
+          rehypeRaw: rehypeRaw.default,
+          rehypeSanitize: rehypeSanitize.default,
+          defaultSchema: rehypeSanitize.defaultSchema,
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to load markdown renderer modules dynamically:", err);
+      });
+  }, []);
+
+  if (!modules) {
+    return <DescriptionSkeleton />;
+  }
+
+  const { ReactMarkdown, remarkGfm, rehypeRaw, rehypeSanitize, defaultSchema } = modules;
+
+  // iframe(YouTube 等の埋め込み)を許可するため sanitize schema を拡張
+  const SCHEMA = {
+    ...defaultSchema,
+    tagNames: [...(defaultSchema.tagNames || []), "iframe"],
+    attributes: {
+      ...defaultSchema.attributes,
+      iframe: ["src", "width", "height", "allow", "allowfullscreen", "frameborder", "title", "style"],
+    },
+  };
+
   return (
     <Box
       sx={{
@@ -107,18 +138,18 @@ const MarkdownRendererInner = ({ content }: MarkdownRendererInnerProps) => {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, [rehypeSanitize, SCHEMA]]}
         components={{
-          h1: ({ children }) => <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", mt: 4, mb: 2 }}>{children}</Typography>,
-          h2: ({ children }) => <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mt: 3, mb: 1.5, pb: 1, borderBottom: "1px solid", borderColor: "divider" }}>{children}</Typography>,
-          h3: ({ children }) => <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mt: 2, mb: 1 }}>{children}</Typography>,
-          h4: ({ children }) => <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: "bold" }}>{children}</Typography>,
-          p: ({ children }) => <Typography variant="body1" sx={{ lineHeight: 1.8, mb: 2 }}>{children}</Typography>,
-          a: ({ href, children }) => (
+          h1: ({ children }: { children?: ReactNode }) => <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", mt: 4, mb: 2 }}>{children}</Typography>,
+          h2: ({ children }: { children?: ReactNode }) => <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", mt: 3, mb: 1.5, pb: 1, borderBottom: "1px solid", borderColor: "divider" }}>{children}</Typography>,
+          h3: ({ children }: { children?: ReactNode }) => <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mt: 2, mb: 1 }}>{children}</Typography>,
+          h4: ({ children }: { children?: ReactNode }) => <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: "bold" }}>{children}</Typography>,
+          p: ({ children }: { children?: ReactNode }) => <Typography variant="body1" sx={{ lineHeight: 1.8, mb: 2 }}>{children}</Typography>,
+          a: ({ href, children }: { href?: string; children?: ReactNode }) => (
             <Link href={href} target="_blank" rel="noopener noreferrer">
               <InsideLinkContext.Provider value={true}>{children}</InsideLinkContext.Provider>
             </Link>
           ),
-          img: ({ src, alt }) => <MarkdownImage src={typeof src === "string" ? src : undefined} alt={alt} />,
-          li: ({ children }) => (
+          img: ({ src, alt }: { src?: string; alt?: string }) => <MarkdownImage src={typeof src === "string" ? src : undefined} alt={alt} />,
+          li: ({ children }: { children?: ReactNode }) => (
             <Typography component="li" variant="body1" sx={{ lineHeight: 1.8 }}>
               {children}
             </Typography>

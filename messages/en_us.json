@@ -202,7 +202,10 @@
         "title": "Custom Links",
         "linkTitle": "Title",
         "url": "URL",
-        "addLink": "Add Link"
+        "addLink": "Add Link",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "removeLink": "Remove link"
       },
       "discordWebhook": "Discord Webhook URL",
       "discordWebhookHelper": "Send a notification to this Discord webhook when a new version is published (optional).",
@@ -259,9 +262,9 @@
       "title": "Edit Project",
       "success": "Project updated successfully"
     },
-    "manage": "Manage",
+    "manage": "Edit",
     "managePage": {
-      "title": "Manage {name}",
+      "title": "Edit {name}",
       "success": "Project updated successfully",
       "sync": "Sync External Data",
       "syncing": "Syncing...",
@@ -506,7 +509,12 @@
     "visibility": {},
     "noLists": "No lists created yet.",
     "favorites": "Favorites",
-    "noFavorites": "No favorite projects yet."
+    "noFavorites": "No favorite projects yet.",
+    "pinned": "Pinned",
+    "ideas": "Posted Ideas",
+    "showIdeas": "Show ideas on profile",
+    "noIdeasPosted": "No ideas posted yet",
+    "changeAvatar": "Change avatar"
   },
   "Idea": {
     "postedBy": "Posted by {name}",
@@ -1074,7 +1082,10 @@
       "uploadFailed": "Failed to upload",
       "customLinks": "Custom Links",
       "linkTitle": "Title",
-      "addLink": "Add Link"
+      "addLink": "Add Link",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "removeLink": "Remove link"
     },
     "apiKeys": {
       "title": "API Keys",
@@ -1214,7 +1225,15 @@
     "notifications": {
       "title": "Notifications",
       "description": "Choose which types of notifications you want to receive.",
-      "successUpdate": "Notification settings updated."
+      "successUpdate": "Notification settings updated.",
+      "pushTitle": "Push notifications",
+      "pushDescription": "Deliver push notifications to this device's browser or home-screen app. On iPhone, this only works from an app added to the Home Screen.",
+      "pushToggle": "Receive push notifications on this device",
+      "pushUnsupported": "This browser/device does not support push notifications.",
+      "pushEnabled": "Push notifications enabled.",
+      "pushDisabled": "Push notifications disabled.",
+      "pushDenied": "Notification permission is blocked. Please allow it in your browser settings.",
+      "pushError": "Failed to configure push notifications."
     }
   },
   "Legal": {
@@ -1297,7 +1316,12 @@
     "report": "Report",
     "download": "Download",
     "edit": "Edit",
-    "viewProject": "Open project"
+    "viewProject": "Open project",
+    "pin": "Pin to profile",
+    "unpin": "Unpin",
+    "pinned": "Pinned",
+    "unpinned": "Unpinned",
+    "pinLimit": "You can pin up to {max} items"
   },
   "ServerErrors": {
     "common": {

@@ -13,8 +13,11 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface ProfileTabProps {
@@ -30,7 +33,7 @@ export default function ProfileTab({ user, locale }: ProfileTabProps) {
   const [bio, setBio] = useState(user.bio);
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
 
-  const { links, addLink, removeLink, changeLink } = useLinksEditor(user.links);
+  const { links, addLink, removeLink, changeLink, moveLink } = useLinksEditor(user.links);
 
   const { uploading, fileInputRef, handleFileChange } = useAvatarUpload({
     onUploaded: setAvatarUrl,
@@ -67,13 +70,21 @@ export default function ProfileTab({ user, locale }: ProfileTabProps) {
       <Divider sx={{ my: 4 }} />
       <Typography variant="h6" sx={{ mb: 2 }}>{t("profile.customLinks")}</Typography>
       {links.map((link, idx) => (
-        <Box key={idx} sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>
-          <TextField label={t("profile.linkTitle")} size="small" value={link.title} onChange={(e) => changeLink(idx, "title", e.target.value)} sx={{ width: 150 }} />
+        <Stack key={idx} direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2, alignItems: { xs: "stretch", sm: "center" } }}>
+          <TextField label={t("profile.linkTitle")} size="small" value={link.title} onChange={(e) => changeLink(idx, "title", e.target.value)} sx={{ width: { xs: "100%", sm: 150 } }} />
           <TextField label="URL" size="small" value={link.url} onChange={(e) => changeLink(idx, "url", e.target.value)} sx={{ flex: 1 }} />
-          <IconButton color="error" onClick={() => removeLink(idx)}>
-            <DeleteIcon />
-          </IconButton>
-        </Box>
+          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end", flexShrink: 0 }}>
+            <IconButton size="small" aria-label={t("profile.moveUp")} disabled={idx === 0} onClick={() => moveLink(idx, -1)}>
+              <ArrowUpwardIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" aria-label={t("profile.moveDown")} disabled={idx === links.length - 1} onClick={() => moveLink(idx, 1)}>
+              <ArrowDownwardIcon fontSize="small" />
+            </IconButton>
+            <IconButton color="error" size="small" aria-label={t("profile.removeLink")} onClick={() => removeLink(idx)}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Stack>
       ))}
       <Button startIcon={<AddIcon />} variant="outlined" size="small" onClick={addLink} sx={{ mb: 4 }}>
         {t("profile.addLink")}

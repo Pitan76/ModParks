@@ -12,6 +12,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import DownloadIcon from "@mui/icons-material/Download";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
+import { usePinMenuItem } from "@/components/pin/usePinMenuItem";
 import { useTranslations } from "next-intl";
 import { DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { toPlainDescription } from "@/lib/utils/plainText";
@@ -56,6 +57,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
   const isGrid = layout === "grid";
 
   const c = useCommonItems();
+  const pinItem = usePinMenuItem("project", project.id);
   const href = `/projects/${project.slug}`;
   const downloadUrl = buildProjectDownloadUrl(project.slug, useDownloadPreference());
   const onContextMenu = useContextMenu(
@@ -82,6 +84,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
             },
           ] as const)
         : []),
+      ...(pinItem ? ([{ type: "divider" }, pinItem] as const) : []),
     ],
     // カード全体が LinkCardActionArea（<a>）なのでリンク素通しは無効化
     { passthrough: { links: false } },
@@ -126,23 +129,24 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
             </Avatar>
 
             {/* メイン情報（タイトル・説明・作者） */}
-            <Box sx={{ flex: 1, minWidth: 120, display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", minWidth: 0 }}>
-                <Typography 
-                  variant="subtitle1" 
-                  component="h3" 
-                  title={project.name}
-                  sx={{ 
-                    fontWeight: 600, 
-                    lineHeight: 1.2,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    minWidth: 0
-                  }}
-                >
-                  {project.name}
-                </Typography>
+                <Tooltip title={project.name} arrow placement="top">
+                  <Typography
+                    variant="subtitle1"
+                    component="h3"
+                    sx={{
+                      fontWeight: 600,
+                      lineHeight: 1.2,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      minWidth: 0,
+                    }}
+                  >
+                    {project.name}
+                  </Typography>
+                </Tooltip>
                 <ProjectTypeBadge type={project.type} />
               </Box>
               

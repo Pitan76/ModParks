@@ -3,6 +3,7 @@ import { eq, inArray } from "drizzle-orm";
 import type { Project } from "@/db/schema";
 import { sendDiscordVersionNotification } from "@/lib/notifications/discord";
 import { isTypeEnabled, type NotificationType, type NotificationPayload } from "@/lib/notifications/types";
+import { sendPushToRecipients } from "@/lib/notifications/push";
 
 /**
  * 通知の中央ディスパッチャ。受信者候補それぞれの通知設定を確認し、
@@ -20,6 +21,14 @@ export async function dispatchNotifications(
   await db.insert(notifications).values(
     targets.map((userId) => ({ userId, type, payload })),
   ).run();
+
+  // アプリ内通知に相乗りして Web Push（PWA プッシュ通知）も配信する。
+  // prefs フィルタ済みの受信者に対してのみ送る。配信失敗はアプリ内通知を妨げない。
+  try {
+    await sendPushToRecipients(db, targets, type, payload);
+  } catch (e) {
+    console.error("web push dispatch failed:", e);
+  }
 }
 
 function dedupe(ids: string[]): string[] {

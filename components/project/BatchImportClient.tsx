@@ -16,6 +16,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import ActionRow from "@/components/ui/ActionRow";
 import { fetchModrinthProjects, fetchCurseForgeProjects, importProjects } from "@/lib/actions/import";
 import type { ImportedProject } from "@/lib/actions/import";
 
@@ -131,12 +132,12 @@ const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProj
             showWarning: !hasCurseForgeKey || !hasCurseForgeProject,
           }
         ].map((config) => (
-          <Box key={config.id} sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            <Button 
-              variant="contained" 
-              onClick={() => handleFetch(config.id)} 
+          <ActionRow key={config.id} align="center">
+            <Button
+              variant="contained"
+              onClick={() => handleFetch(config.id)}
               disabled={config.disabled}
-              sx={{ width: 250 }}
+              sx={{ minWidth: { sm: 250 } }}
             >
               {loading && source === config.id ? <CircularProgress size={24} /> : config.label}
             </Button>
@@ -145,7 +146,7 @@ const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProj
                 {config.warning}
               </Typography>
             )}
-          </Box>
+          </ActionRow>
         ))}
       </Box>
 

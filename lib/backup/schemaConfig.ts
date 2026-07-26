@@ -38,6 +38,7 @@ export const SCHEMA_TABLES: Record<string, any> = {
   developer_subscriptions: schema.developerSubscriptions,
   notifications: schema.notifications,
   scan_appeals: schema.scanAppeals,
+  profile_pins: schema.profilePins,
 };
 
 export const TABLE_RESTORE_ORDER = [
@@ -78,6 +79,7 @@ export const TABLE_RESTORE_ORDER = [
   "developer_subscriptions",
   "notifications",
   "scan_appeals",
+  "profile_pins",
 ];
 
 export const TABLE_PRIMARY_KEYS: Record<string, string[]> = {
@@ -118,4 +120,5 @@ export const TABLE_PRIMARY_KEYS: Record<string, string[]> = {
   developer_subscriptions: ["subscriberId", "developerId"],
   notifications: ["id"],
   scan_appeals: ["id"],
+  profile_pins: ["userId", "itemType", "itemId"],
 };

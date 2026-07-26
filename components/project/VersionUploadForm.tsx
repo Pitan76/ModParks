@@ -2,8 +2,6 @@
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -155,13 +153,11 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
   };
 
   return (
-    <Card>
-      <CardContent sx={{ p: 4 }}>
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              {tVersion("uploadForm.uploadMode")}
-            </Typography>
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}>
+      <Box>
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          {tVersion("uploadForm.uploadMode")}
+        </Typography>
             <ToggleButtonGroup
               color="primary"
               value={uploadMode}
@@ -318,10 +314,8 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
             <Button type="submit" variant="contained" disabled={pending || (uploadMode === "file" ? !file : !externalUrl)}>
               {pending ? <CircularProgress size={24} color="inherit" /> : tVersion("uploadForm.publish")}
             </Button>
-          </Box>
         </Box>
-      </CardContent>
-    </Card>
+      </Box>
   );
 };
 

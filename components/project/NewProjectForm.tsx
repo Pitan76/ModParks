@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
+import ActionRow from "@/components/ui/ActionRow";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import TextField from "@mui/material/TextField";
@@ -174,7 +175,7 @@ const NewProjectForm = ({
         <Card sx={{ mb: 4, bgcolor: "background.default" }}>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2 }}>{t("create.import.title")}</Typography>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+            <ActionRow align="center" wrap>
               <FormControl size="small" sx={{ flex: "1 1 120px" }}>
                 <InputLabel>{t("create.import.platform")}</InputLabel>
                 <Select value={importPlatform} label={t("create.import.platform")} onChange={(e) => setImportPlatform(e.target.value as any)}>
@@ -182,17 +183,17 @@ const NewProjectForm = ({
                   <MenuItem value="curseforge">CurseForge</MenuItem>
                 </Select>
               </FormControl>
-              <TextField 
-                label={t("create.import.idLabel")} 
-                size="small" 
-                value={importId} 
-                onChange={(e) => setImportId(e.target.value)} 
+              <TextField
+                label={t("create.import.idLabel")}
+                size="small"
+                value={importId}
+                onChange={(e) => setImportId(e.target.value)}
                 sx={{ flex: "2 1 200px" }}
               />
               <Button variant="contained" onClick={handleImport} disabled={importing || !importId} sx={{ flex: "1 1 auto" }}>
                 {importing ? <CircularProgress size={24} /> : t("create.import.fetchData")}
               </Button>
-            </Box>
+            </ActionRow>
             {importPlatform === "modrinth" && !hasModrinthKey && (
               <Alert severity="warning" sx={{ mt: 2 }}>{t("create.import.modrinthKeyWarning")}</Alert>
             )}
@@ -229,28 +230,24 @@ const NewProjectForm = ({
         </Card>
       )}
 
-      <Card>
-        <CardContent sx={{ p: 4 }}>
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {ideaId && <input type="hidden" name="ideaId" value={ideaId} />}
-            {importData?.modrinthId && <input type="hidden" name="modrinthId" value={importData.modrinthId} />}
-            {importData?.curseforgeId && <input type="hidden" name="curseforgeId" value={importData.curseforgeId} />}
-            {importData?.externalDownloads !== undefined && <input type="hidden" name="externalDownloads" value={importData.externalDownloads} />}
-            {importData?.issueTrackerUrl && <input type="hidden" name="issueTrackerUrl" value={importData.issueTrackerUrl} />}
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}>
+        {ideaId && <input type="hidden" name="ideaId" value={ideaId} />}
+        {importData?.modrinthId && <input type="hidden" name="modrinthId" value={importData.modrinthId} />}
+        {importData?.curseforgeId && <input type="hidden" name="curseforgeId" value={importData.curseforgeId} />}
+        {importData?.externalDownloads !== undefined && <input type="hidden" name="externalDownloads" value={importData.externalDownloads} />}
+        {importData?.issueTrackerUrl && <input type="hidden" name="issueTrackerUrl" value={importData.issueTrackerUrl} />}
 
-            <ProjectFormFields key={formKey} error={error} project={importData || undefined} availableTags={availableTags} defaultLicense={defaultLicense} />
+        <ProjectFormFields key={formKey} error={error} project={importData || undefined} availableTags={availableTags} defaultLicense={defaultLicense} />
 
-            <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
-                {tCommon("cancel")}
-              </Button>
-              <Button type="submit" variant="contained" disabled={pending}>
-                {pending ? t("create.creating") : t("create.submit")}
-              </Button>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+          <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
+            {tCommon("cancel")}
+          </Button>
+          <Button type="submit" variant="contained" disabled={pending}>
+            {pending ? t("create.creating") : t("create.submit")}
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };

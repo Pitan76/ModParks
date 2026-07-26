@@ -202,7 +202,10 @@
         "title": "カスタムリンク",
         "linkTitle": "タイトル",
         "url": "URL",
-        "addLink": "リンクを追加"
+        "addLink": "リンクを追加",
+        "moveUp": "上へ移動",
+        "moveDown": "下へ移動",
+        "removeLink": "リンクを削除"
       },
       "discordWebhook": "Discord Webhook URL",
       "discordWebhookHelper": "新しいバージョンを公開したとき、このDiscord Webhookに告知を送信します",
@@ -265,9 +268,9 @@
       "title": "プロジェクト編集",
       "success": "プロジェクトを更新しました"
     },
-    "manage": "管理",
+    "manage": "編集",
     "managePage": {
-      "title": "{name}の管理",
+      "title": "{name} の編集",
       "success": "プロジェクトを更新しました",
       "sync": "外部データを同期する",
       "syncing": "同期中...",
@@ -509,7 +512,12 @@
     "visibility": {},
     "noLists": "まだリストは作成されていません。",
     "favorites": "お気に入り",
-    "noFavorites": "まだお気に入りに登録したプロジェクトはありません。"
+    "noFavorites": "まだお気に入りに登録したプロジェクトはありません。",
+    "pinned": "ピン留め",
+    "ideas": "投稿したアイデア",
+    "showIdeas": "プロフィールにアイデアを表示",
+    "noIdeasPosted": "まだアイデアを投稿していません",
+    "changeAvatar": "アイコンを変更"
   },
   "Idea": {
     "postedBy": "投稿者: {name}",
@@ -1082,7 +1090,10 @@
       "uploadFailed": "アップロードに失敗しました",
       "customLinks": "カスタムリンク",
       "linkTitle": "タイトル",
-      "addLink": "リンクを追加"
+      "addLink": "リンクを追加",
+      "moveUp": "上へ移動",
+      "moveDown": "下へ移動",
+      "removeLink": "リンクを削除"
     },
     "apiKeys": {
       "title": "APIキー",
@@ -1222,7 +1233,15 @@
     "notifications": {
       "title": "通知設定",
       "description": "受け取る通知の種類を選択できます。",
-      "successUpdate": "通知設定を更新しました。"
+      "successUpdate": "通知設定を更新しました。",
+      "pushTitle": "プッシュ通知",
+      "pushDescription": "この端末のブラウザ/ホーム画面アプリにプッシュ通知を届けます。iPhone はホーム画面に追加したアプリでのみ利用できます。",
+      "pushToggle": "この端末でプッシュ通知を受け取る",
+      "pushUnsupported": "このブラウザ/端末はプッシュ通知に対応していません。",
+      "pushEnabled": "プッシュ通知を有効にしました。",
+      "pushDisabled": "プッシュ通知を無効にしました。",
+      "pushDenied": "通知の許可がブロックされています。ブラウザの設定で許可してください。",
+      "pushError": "プッシュ通知の設定に失敗しました。"
     }
   },
   "Legal": {
@@ -1305,7 +1324,12 @@
     "report": "報告",
     "download": "ダウンロード",
     "edit": "編集",
-    "viewProject": "プロジェクトを開く"
+    "viewProject": "プロジェクトを開く",
+    "pin": "プロフィールにピン留め",
+    "unpin": "ピン留めを解除",
+    "pinned": "ピン留めしました",
+    "unpinned": "ピン留めを解除しました",
+    "pinLimit": "ピン留めは最大{max}件までです"
   },
   "ServerErrors": {
     "common": {

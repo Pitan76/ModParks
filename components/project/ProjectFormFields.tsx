@@ -5,6 +5,9 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import FormTextField from "@/components/ui/form/FormTextField";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
@@ -53,7 +56,7 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
   const tTags = useTranslations("Tags");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
   
-  const { links, addLink, removeLink, changeLink } = useLinksEditor(project?.links);
+  const { links, addLink, removeLink, changeLink, moveLink } = useLinksEditor(project?.links);
 
   return (
     <>
@@ -251,13 +254,18 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
 
       <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 600 }}>{t("fields.customLinks.title")}</Typography>
       {links.map((link, idx) => (
-        <Stack direction="row" spacing={2} key={idx} sx={{ alignItems: "center" }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          key={idx}
+          sx={{ alignItems: { xs: "stretch", sm: "center" } }}
+        >
           <FormTextField
             label={t("fields.customLinks.linkTitle")}
             size="small"
             value={link.title}
             onChange={(e: ChangeEvent<HTMLInputElement>) => changeLink(idx, "title", e.target.value)}
-            sx={{ width: 150 }}
+            sx={{ width: { xs: "100%", sm: 150 } }}
           />
           <FormTextField
             label={t("fields.customLinks.url")}
@@ -266,7 +274,15 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
             onChange={(e: ChangeEvent<HTMLInputElement>) => changeLink(idx, "url", e.target.value)}
             sx={{ flex: 1 }}
           />
-          <Chip label={tCommon("delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer" }} />
+          <Box sx={{ display: "flex", gap: 0.5, alignItems: "center", justifyContent: "flex-end", alignSelf: { xs: "flex-end", sm: "center" }, flexShrink: 0 }}>
+            <IconButton size="small" aria-label={t("fields.customLinks.moveUp")} disabled={idx === 0} onClick={() => moveLink(idx, -1)}>
+              <ArrowUpwardIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" aria-label={t("fields.customLinks.moveDown")} disabled={idx === links.length - 1} onClick={() => moveLink(idx, 1)}>
+              <ArrowDownwardIcon fontSize="small" />
+            </IconButton>
+            <Chip label={tCommon("delete")} color="error" variant="outlined" onClick={() => removeLink(idx)} sx={{ cursor: "pointer" }} />
+          </Box>
         </Stack>
       ))}
       <Box>

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import path from "path";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
@@ -27,8 +28,27 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config) => {
+  webpack: (config, { isServer, webpack }) => {
     config.resolve.symlinks = false;
+    if (isServer) {
+      // サーバー(Worker)バンドルにインライン source map を焼き込ませない。
+      // Cloudflare Workers の 3 MiB 制限に対する肥大要因になるため明示的に無効化する。
+      config.devtool = false;
+      // サーバーサイド（Worker）ビルド時には、重量級マークダウンレンダラーを空のダミーコンポーネントに置換
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        "@/components/ui/MarkdownRendererInner": path.resolve(
+          __dirname,
+          "components/ui/MarkdownRendererEmpty.tsx"
+        ),
+      };
+      // react-markdown 関連の依存パッケージ群をサーバービルドから完全に排除（空モジュール化）
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^(react-markdown|rehype-raw|rehype-sanitize|remark-gfm|micromark|mdast-util-to-hast|unist-util-visit|vfile)/,
+        })
+      );
+    }
     return config;
   },
   async headers() {

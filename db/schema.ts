@@ -569,6 +569,39 @@ export const versionIdeas = sqliteTable(
   })
 );
 
+// ─── Profile Pins (プロフィールのピン留め) ────────────────────────────────────
+
+/**
+ * プロフィール上部にピン留めするアイテム。プロジェクトまたはアイデアを指す。
+ * 1 ユーザーあたり最大 6 件（上限はアプリ側の Server Action で担保する）。
+ *
+ * itemId はプロジェクト/アイデアどちらも指しうる多相参照のため外部キーは張らない。
+ * 対象が削除された場合はピンが宙に浮くが、表示クエリの内部結合で自然に除外される。
+ */
+export const profilePins = sqliteTable(
+  "profile_pins",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** ピン留め対象の種別 */
+    itemType: text("item_type", { enum: ["project", "idea"] }).notNull(),
+    /** projects.id または ideas.id */
+    itemId: text("item_id").notNull(),
+    /** 表示順。昇順で並べる */
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.itemType, t.itemId] }),
+    userIdx: index("profile_pins_user_idx").on(t.userId),
+  })
+);
+
+export type ProfilePin = typeof profilePins.$inferSelect;
+
 // ─── Tags & Platforms ────────────────────────────────────────────────────────
 
 export const tags = sqliteTable("tags", {
@@ -813,6 +846,35 @@ export const notifications = sqliteTable("notifications", {
 }));
 
 export type Notification = typeof notifications.$inferSelect;
+
+// ─── Push Subscriptions (Web Push / PWA プッシュ通知) ─────────────────────────
+
+/**
+ * ブラウザ/PWA の PushManager 購読情報。1 ユーザーが複数端末（endpoint）を持ちうる。
+ * endpoint がプッシュの宛先で、p256dh/auth は本文暗号化（aes128gcm）に使う公開鍵。
+ * 送信時に 404/410 が返った購読は失効しているため削除する。
+ */
+export const pushSubscriptions = sqliteTable("push_subscriptions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  /** プッシュサービスの宛先 URL。端末ごとに一意 */
+  endpoint: text("endpoint").notNull().unique(),
+  /** 本文暗号化用のクライアント公開鍵（base64url） */
+  p256dh: text("p256dh").notNull(),
+  /** 本文暗号化用の認証シークレット（base64url） */
+  auth: text("auth").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  userIdx: index("push_subscriptions_user_idx").on(table.userId),
+}));
+
+export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
 
 // ─── Settings Audit ───────────────────────────────────────────────────────────
 

@@ -1,8 +1,6 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -13,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { updateProject } from "@/lib/actions/project";
 import { syncExternalProjectData } from "@/lib/actions/projectSync";
+import ActionRow from "@/components/ui/ActionRow";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 import SyncIcon from "@mui/icons-material/Sync";
 import Snackbar from "@mui/material/Snackbar";
@@ -115,9 +114,8 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
   };
 
   return (
-    <Card>
-      <CardContent sx={{ p: 4 }}>
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}>
           <ProjectFormFields error={error} project={project as any} availableTags={availableTags}>
             <FormControl fullWidth required>
               <InputLabel id="project-status-label">{t("fields.status")}</InputLabel>
@@ -145,18 +143,18 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
             label={t("fields.recipesEnabled")}
           />
 
-          <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
-            <Button 
-              variant="text" 
-              color="primary" 
-              startIcon={<SyncIcon />} 
-              onClick={handleSync} 
+          <ActionRow align="center" sx={{ mt: 2, justifyContent: { sm: "space-between" } }}>
+            <Button
+              variant="text"
+              color="primary"
+              startIcon={<SyncIcon />}
+              onClick={handleSync}
               disabled={syncing || pending}
             >
               {syncing ? tManage("syncing") : tManage("sync")}
             </Button>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
               <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
                 {tCommon("cancel")}
               </Button>
@@ -164,15 +162,14 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
                 {pending ? tCommon("saving") : tCommon("save")}
               </Button>
             </Box>
-          </Box>
-        </Box>
-      </CardContent>
+          </ActionRow>
+      </Box>
 
       <Snackbar open={!!toast} autoHideDuration={6000} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         <Alert onClose={() => setToast(null)} severity={toast?.severity} sx={{ width: '100%' }}>
           {toast?.message}
         </Alert>
       </Snackbar>
-    </Card>
+    </>
   );
 }
