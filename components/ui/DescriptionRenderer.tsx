@@ -7,6 +7,7 @@ import MarkdownRenderer from "./MarkdownRenderer";
 import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
 // @ts-expect-error - puki2md has no type declarations
 import puki2md from "puki2md";
+import { toPlainDescription } from "@/lib/utils/plainText";
 
 type DescriptionRendererProps = {
   content: string;
@@ -37,7 +38,19 @@ const DescriptionRenderer = ({ content, format = "markdown" }: DescriptionRender
     return content;
   }, [content, format]);
 
-  if (!mounted) return <DescriptionSkeleton />;
+  const summaryText = useMemo(() => {
+    const plain = toPlainDescription(renderedContent);
+    return plain.length > 200 ? plain.substring(0, 200) + "..." : plain;
+  }, [renderedContent]);
+
+  if (!mounted) {
+    if (!summaryText) return <DescriptionSkeleton />;
+    return (
+      <Typography sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word", color: "text.secondary", lineHeight: 1.6 }}>
+        {summaryText}
+      </Typography>
+    );
+  }
 
   if (format === "plaintext") {
     return (

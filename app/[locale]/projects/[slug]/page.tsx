@@ -24,6 +24,7 @@ import ProjectComments from "@/components/project/ProjectComments";
 import ProjectRecipes from "@/components/project/ProjectRecipes";
 import LinkButton from "@/components/ui/LinkButton";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
+import { toPlainDescription } from "@/lib/utils/plainText";
 import AdSlot from "@/components/ads/AdSlot";
 import AddIcon from "@mui/icons-material/Add";
 import { SITE_URL } from "@/lib/config";
@@ -41,7 +42,8 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
   }
 
   const title = `${project.name}`;
-  const description = project.description || "Minecraft Java Edition向けのMOD/プラグイン";
+  const plainDesc = toPlainDescription(project.description);
+  const description = plainDesc.length > 150 ? plainDesc.substring(0, 150) + "..." : plainDesc || "Minecraft Java Edition向けのMOD/プラグイン";
   const imageUrl = project.iconUrl || SITE_URL + "/icon.png";
 
   return {
