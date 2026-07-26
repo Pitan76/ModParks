@@ -96,7 +96,7 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
               }),
           }}
         >
-          <AppHeader session={session} onMenuClick={handleDrawerToggle} showLogo={collapsed} />
+          <AppHeader session={session} onMenuClick={handleDrawerToggle} />
           <Box component="main" sx={{ flexGrow: 1 }}>
             {children}
           </Box>
