@@ -16,7 +16,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
-import { usePathname, useRouter } from "@/i18n/routing";
+import { usePathname, useRouter, Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";
@@ -74,8 +74,25 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
 
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* ヘッダー高さ分のスペーサー（ロゴはヘッダーに常設） */}
-      <Box sx={{ height: { xs: 56, md: 64 } }} />
+      {/* デスクトップはヘッダーにロゴを常設するため空スペーサー。モバイルはドロワーが前面に出るためロゴを表示 */}
+      <Box sx={{ height: { xs: 56, md: 64 }, px: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <Link
+          href="/"
+          prefetch={false}
+          onClick={onMobileClose}
+          style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 8 }}
+        >
+          <Box
+            component="img"
+            src="/icon.svg"
+            alt="ModParks Logo"
+            sx={{ display: { xs: "block", md: "none" }, width: 32, height: 32, borderRadius: "8px", objectFit: "cover" }}
+          />
+          <Box sx={{ display: { xs: "block", md: "none" }, fontWeight: 800, fontSize: "1.1rem", letterSpacing: "-0.5px" }}>
+            ModParks
+          </Box>
+        </Link>
+      </Box>
       <Divider />
       <List sx={{ px: 1, py: 2 }}>
         {navItems.map((item) => {
