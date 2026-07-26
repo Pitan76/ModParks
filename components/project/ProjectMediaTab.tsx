@@ -13,6 +13,7 @@ import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 import type { ProjectMedia } from "@/db/schema";
+import ZoomableImage from "@/components/ui/ZoomableImage";
 
 interface ProjectMediaTabProps {
   media: ProjectMedia[];
@@ -53,6 +54,7 @@ export default function ProjectMediaTab({ media }: ProjectMediaTabProps) {
           const thumbnailUrl = ytId
             ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`
             : item.url;
+          const isVideo = !!(ytId || nicoId);
 
           return (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
@@ -62,36 +64,90 @@ export default function ProjectMediaTab({ media }: ProjectMediaTabProps) {
                   borderRadius: 0,
                   overflow: "hidden",
                   boxShadow: 2,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
-                <CardActionArea onClick={() => handleOpen(item)}>
-                  <Box sx={{ position: "relative", pt: "56.25%", bgcolor: "#1e1e1e" }}>
-                    {nicoId ? (
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          p: 2,
-                        }}
-                      >
-                        <PlayCircleFilledIcon sx={{ fontSize: 50, color: "#fff", opacity: 0.8, mb: 0.5 }} />
-                        <Typography variant="caption" sx={{ color: "#aaa", fontWeight: "bold", fontSize: "0.7rem", letterSpacing: 0.5 }}>
-                          NICONICO VIDEO
+                {isVideo ? (
+                  <CardActionArea
+                    onClick={() => handleOpen(item)}
+                    sx={{
+                      flexGrow: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "stretch",
+                    }}
+                  >
+                    <Box sx={{ position: "relative", pt: "56.25%", bgcolor: "#1e1e1e", width: "100%" }}>
+                      {nicoId ? (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            p: 2,
+                          }}
+                        >
+                          <PlayCircleFilledIcon sx={{ fontSize: 50, color: "#fff", opacity: 0.8, mb: 0.5 }} />
+                          <Typography variant="caption" sx={{ color: "#aaa", fontWeight: "bold", fontSize: "0.7rem", letterSpacing: 0.5 }}>
+                            NICONICO VIDEO
+                          </Typography>
+                         </Box>
+                      ) : (
+                        <CardMedia
+                          component="img"
+                          image={thumbnailUrl}
+                          alt={item.caption || "Project media"}
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      )}
+                      {ytId && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: "rgba(0, 0, 0, 0.3)",
+                          }}
+                        >
+                          <PlayCircleFilledIcon sx={{ fontSize: 60, color: "common.white", opacity: 0.9 }} />
+                        </Box>
+                      )}
+                    </Box>
+                    {item.caption && (
+                      <Box sx={{ p: 1.5, borderTop: "1px solid", borderColor: "divider", flexGrow: 1, width: "100%" }}>
+                        <Typography variant="body2" noWrap color="text.secondary">
+                          {item.caption}
                         </Typography>
                       </Box>
-                    ) : (
-                      <CardMedia
-                        component="img"
-                        image={thumbnailUrl}
+                    )}
+                  </CardActionArea>
+                ) : (
+                  <Box sx={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
+                    <Box sx={{ position: "relative", pt: "56.25%", bgcolor: "#1e1e1e", width: "100%" }}>
+                      <ZoomableImage
+                        src={item.url}
                         alt={item.caption || "Project media"}
-                        sx={{
+                        style={{
                           position: "absolute",
                           top: 0,
                           left: 0,
@@ -100,40 +156,23 @@ export default function ProjectMediaTab({ media }: ProjectMediaTabProps) {
                           objectFit: "cover",
                         }}
                       />
-                    )}
-                    {ytId && (
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          bgcolor: "rgba(0, 0, 0, 0.3)",
-                        }}
-                      >
-                        <PlayCircleFilledIcon sx={{ fontSize: 60, color: "common.white", opacity: 0.9 }} />
+                    </Box>
+                    {item.caption && (
+                      <Box sx={{ p: 1.5, borderTop: "1px solid", borderColor: "divider", flexGrow: 1 }}>
+                        <Typography variant="body2" noWrap color="text.secondary">
+                          {item.caption}
+                        </Typography>
                       </Box>
                     )}
                   </Box>
-                  {item.caption && (
-                    <Box sx={{ p: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
-                      <Typography variant="body2" noWrap color="text.secondary">
-                        {item.caption}
-                      </Typography>
-                    </Box>
-                  )}
-                </CardActionArea>
+                )}
               </Card>
             </Grid>
           );
         })}
       </Grid>
 
-      {/* ライトボックスダイアログ */}
+      {/* ライトボックスダイアログ (動画再生用) */}
       <Dialog
         open={!!selectedItem}
         onClose={handleClose}
@@ -187,21 +226,7 @@ export default function ProjectMediaTab({ media }: ProjectMediaTabProps) {
                     allowFullScreen
                   />
                 </Box>
-              ) : (
-                <Box
-                  component="img"
-                  src={selectedItem.url}
-                  alt={selectedItem.caption || "Project media"}
-                  sx={{
-                    maxWidth: "100%",
-                    width: "auto",
-                    maxHeight: "80vh",
-                    objectFit: "contain",
-                    display: "block",
-                    mx: "auto",
-                  }}
-                />
-              )}
+              ) : null}
               {selectedItem.caption && (
                 <Box sx={{ p: 2, bgcolor: "background.paper", color: "text.primary" }}>
                   <Typography variant="body1">{selectedItem.caption}</Typography>
@@ -214,3 +239,4 @@ export default function ProjectMediaTab({ media }: ProjectMediaTabProps) {
     </Box>
   );
 }
+
