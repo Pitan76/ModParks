@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import TabbedPanel from "@/components/ui/TabbedPanel";
 import { type ReactNode, useTransition, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
-import Skeleton from "@mui/material/Skeleton";
+
 import dynamic from "next/dynamic";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -23,15 +23,7 @@ export type ProjectEditClientProps = {
   locale: string;
 };
 
-const TabSkeleton = () => {
-  return (
-    <Box sx={{ width: "100%", mt: 2 }}>
-      <Skeleton variant="text" sx={{ fontSize: "2rem", width: "60%", mb: 2 }} />
-      <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1, mb: 2 }} />
-      <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 1 }} />
-    </Box>
-  );
-};
+
 
 const ProjectRecipesManager = dynamic(() => import("@/components/project/ProjectRecipesManager"), {
   ssr: false,
@@ -111,13 +103,11 @@ const ProjectEditClient = ({
     }
   };
 
-  // トランジションが完了するまでの間、コンテンツをスケルトンでプレースホルダー表示する
-  const processedTabs = visibleTabs.map((t, idx) => {
-    const content = idx === localActiveIndex && isPending ? <TabSkeleton /> : t.content;
-    return { ...t, content };
-  });
-
-  return <TabbedPanel items={processedTabs} value={localActiveIndex} onChange={handleTabChange} />;
+  return (
+    <Box sx={{ opacity: isPending ? 0.6 : 1, transition: "opacity 0.2s", pointerEvents: isPending ? "none" : "auto" }}>
+      <TabbedPanel items={visibleTabs} value={localActiveIndex} onChange={handleTabChange} />
+    </Box>
+  );
 };
 
 export default ProjectEditClient;

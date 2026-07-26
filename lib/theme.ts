@@ -224,7 +224,17 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
       defaultProps: { size: "small" },
     },
     MuiSelect: {
-      defaultProps: { size: "small" },
+      defaultProps: {
+        size: "small",
+        MenuProps: {
+          disablePortal: true,
+        },
+      },
+    },
+    MuiAutocomplete: {
+      defaultProps: {
+        disablePortal: true,
+      },
     },
     MuiAppBar: {
       styleOverrides: {
