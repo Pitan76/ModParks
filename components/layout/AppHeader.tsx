@@ -25,11 +25,13 @@ import LinkButton from "@/components/ui/LinkButton";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import { useColorMode } from "@/components/ThemeRegistry";
 import NotificationBell from "@/components/notification/NotificationBell";
+import { SIDEBAR_WIDTH } from "./BaseSidebar";
 import type { Session } from "next-auth";
 
 export type AppHeaderProps = {
   session: Session | null;
   onMenuClick?: () => void;
+  collapsed?: boolean;
 };
 
 /**
@@ -37,7 +39,7 @@ export type AppHeaderProps = {
  * ロゴ、検索、新規プロジェクト作成ボタン、通知ベル、テーマ切り替え、言語切り替え、
  * およびユーザーのアバター（ログインメニュー）を提供します。
  */
-const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
+const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) => {
   const t        = useTranslations("Nav");
   const locale   = useLocale();
   const pathname = usePathname();
@@ -55,6 +57,24 @@ const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
 
   return (
     <AppBar position="sticky" id="app-header" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      {/* サイドバー右端の縦線をヘッダーまで延長し、上端から連続して見せる */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: `${SIDEBAR_WIDTH}px`,
+          width: "1px",
+          bgcolor: "divider",
+          display: { xs: "none", md: "block" },
+          opacity: collapsed ? 0 : 1,
+          transition: (theme) =>
+            theme.transitions.create("opacity", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+        }}
+      />
       <Toolbar sx={{ gap: 1 }}>
         {/* ハンバーガーメニュー（モバイル） */}
         <IconButton

@@ -54,7 +54,7 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
   return (
     <ContextMenuProvider>
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <AppHeader session={session} onMenuClick={handleDrawerToggle} />
+        <AppHeader session={session} onMenuClick={handleDrawerToggle} collapsed={collapsed} />
         <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0 }}>
           <SidebarComponent
             mobileOpen={mobileOpen}
