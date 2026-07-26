@@ -1,2 +1,2 @@
-ALTER TABLE `authenticator` ADD `name` text;--> statement-breakpoint
-ALTER TABLE `authenticator` ADD `created_at` integer;
+-- No-op: authenticator.name / created_at は 0046 で追加済みのため重複エラー回避
+SELECT 1;
