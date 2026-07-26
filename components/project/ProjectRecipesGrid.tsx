@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
-import Button from "@mui/material/Button";
+import Pagination from "@mui/material/Pagination";
 import SearchIcon from "@mui/icons-material/Search";
 import { useColorMode } from "@/components/ThemeRegistry";
 import ZoomableImage from "@/components/ui/ZoomableImage";
@@ -25,6 +25,38 @@ type ProjectRecipesGridProps = {
   };
 };
 
+type RecipeGridItemProps = {
+  recipe: RecipeItem;
+};
+
+const RecipeGridItem = ({ recipe }: RecipeGridItemProps) => {
+  return (
+    <Box>
+      <ZoomableImage
+        src={recipe.url}
+        alt={recipe.title}
+        loading="lazy"
+        pixelated
+        style={{ objectFit: "contain", width: "100%", height: "auto" }}
+      />
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{
+          mt: 0.5,
+          textAlign: "center",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        title={recipe.title}
+      >
+        {recipe.title}
+      </Typography>
+    </Box>
+  );
+};
+
 // 一度に描画（＝リクエスト）する枚数。段階表示でDOM上の <img> 数を制限し、
 // 画像リクエストが一気に飛ばないようにする。lazy load と併用。
 const PAGE_SIZE = 24;
@@ -36,7 +68,7 @@ const PAGE_SIZE = 24;
 const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
   const { isNewTheme } = useColorMode();
   const [query, setQuery] = useState("");
-  const [visible, setVisible] = useState(PAGE_SIZE);
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -46,8 +78,11 @@ const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
     );
   }, [recipes, query]);
 
-  const shown = filtered.slice(0, visible);
-  const hasMore = filtered.length > shown.length;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+
+  const shown = useMemo(() => {
+    return filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  }, [filtered, page]);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -57,7 +92,7 @@ const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            setVisible(PAGE_SIZE);
+            setPage(1);
           }}
           placeholder={labels.search}
           slotProps={{
@@ -72,7 +107,7 @@ const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
           sx={{ flex: "1 1 240px", maxWidth: 360 }}
         />
         <Typography variant="body2" color="text.secondary">
-          {shown.length} / {filtered.length}
+          {shown.length + (page - 1) * PAGE_SIZE} / {filtered.length}
         </Typography>
       </Box>
 
@@ -95,38 +130,19 @@ const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
           }}
         >
           {shown.map((recipe) => (
-            <Box key={recipe.id}>
-              <ZoomableImage
-                src={recipe.url}
-                alt={recipe.title}
-                loading="lazy"
-                pixelated
-                style={{ objectFit: "contain", width: "100%", height: "auto" }}
-              />
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  mt: 0.5,
-                  textAlign: "center",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-                title={recipe.title}
-              >
-                {recipe.title}
-              </Typography>
-            </Box>
+            <RecipeGridItem key={recipe.id} recipe={recipe} />
           ))}
         </Box>
       )}
 
-      {hasMore && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-          <Button variant="outlined" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
-            {labels.showMore}
-          </Button>
+      {totalPages > 1 && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_e, p) => setPage(p)}
+            color="primary"
+          />
         </Box>
       )}
     </Box>

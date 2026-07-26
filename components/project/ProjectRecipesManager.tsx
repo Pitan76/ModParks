@@ -8,6 +8,7 @@ import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
+import Pagination from "@mui/material/Pagination";
 import { useTranslations } from "next-intl";
 import { setRecipeHiddenAction, setRecipesHiddenAction } from "@/lib/actions/projectRecipe";
 
@@ -24,6 +25,61 @@ export type ProjectRecipesManagerProps = {
   hiddenIds: string[];
 };
 
+type RecipeCardProps = {
+  recipe: ManagedRecipe;
+  isHidden: boolean;
+  busy: boolean;
+  onToggle: () => void;
+  labelVisible: string;
+  labelHidden: string;
+};
+
+const RecipeCard = ({ recipe, isHidden, busy, onToggle, labelVisible, labelHidden }: RecipeCardProps) => {
+  return (
+    <Box
+      sx={{
+        p: 1,
+        border: 1,
+        borderColor: "divider",
+        borderRadius: 1,
+        opacity: isHidden ? 0.45 : 1,
+      }}
+    >
+      {/* レシピ画像はCDNが生成した固定サイズのPNG。next/image を通す利点がないため img で出す */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={recipe.url}
+        alt={recipe.name}
+        loading="lazy"
+        style={{ width: "100%", height: "auto", imageRendering: "pixelated" }}
+      />
+      <Typography variant="body2" noWrap title={recipe.name} sx={{ mt: 0.5 }}>
+        {recipe.name}
+      </Typography>
+      <Typography variant="caption" color="text.secondary" noWrap title={recipe.id} sx={{ display: "block" }}>
+        {recipe.id}
+      </Typography>
+      <Stack
+        direction="row"
+        sx={{ alignItems: "center", justifyContent: "space-between" }}
+      >
+        <Typography variant="caption" color="text.secondary">
+          {isHidden ? labelHidden : labelVisible}
+        </Typography>
+        <Switch
+          size="small"
+          checked={!isHidden}
+          onChange={onToggle}
+          disabled={busy}
+          slotProps={{ input: { "aria-label": recipe.name } }}
+        />
+      </Stack>
+    </Box>
+  );
+};
+
+const PAGE_SIZE = 24;
+
 /**
  * プロジェクトのレシピ表示管理。
  * レシピ自体は jar 由来でCDNが持つため、ここで行えるのは公開ページに出すかどうかの切り替えのみ。
@@ -32,6 +88,7 @@ const ProjectRecipesManager = ({ projectSlug, recipes, hiddenIds }: ProjectRecip
   const t = useTranslations("Project.recipeManager");
   const [hidden, setHidden] = useState<Set<string>>(new Set(hiddenIds));
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +97,13 @@ const ProjectRecipesManager = ({ projectSlug, recipes, hiddenIds }: ProjectRecip
     if (!q) return recipes;
     return recipes.filter((r) => r.name.toLowerCase().includes(q) || r.id.toLowerCase().includes(q));
   }, [recipes, query]);
+
+  const totalPages = Math.ceil(shown.length / PAGE_SIZE);
+
+  // 1ページ分のレシピのみを切り出してDOM描画の負荷を抑える
+  const paginatedShown = useMemo(() => {
+    return shown.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  }, [shown, page]);
 
   /** 1件の表示・非表示を切り替える。失敗したら元の状態に戻す。 */
   const toggle = async (id: string) => {
@@ -110,7 +174,10 @@ const ProjectRecipesManager = ({ projectSlug, recipes, hiddenIds }: ProjectRecip
           size="small"
           label={t("search")}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setPage(1);
+          }}
           sx={{ flexGrow: 1 }}
         />
         <Stack direction="row" spacing={1}>
@@ -132,54 +199,32 @@ const ProjectRecipesManager = ({ projectSlug, recipes, hiddenIds }: ProjectRecip
           display: "grid",
           gap: 2,
           gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+          mb: 3,
         }}
       >
-        {shown.map((recipe) => {
-          const isHidden = hidden.has(recipe.id);
-          return (
-            <Box
-              key={recipe.id}
-              sx={{
-                p: 1,
-                border: 1,
-                borderColor: "divider",
-                borderRadius: 1,
-                opacity: isHidden ? 0.45 : 1,
-              }}
-            >
-              {/* レシピ画像はCDNが生成した固定サイズのPNG。next/image を通す利点がないため img で出す */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={recipe.url}
-                alt={recipe.name}
-                loading="lazy"
-                style={{ width: "100%", height: "auto", imageRendering: "pixelated" }}
-              />
-              <Typography variant="body2" noWrap title={recipe.name} sx={{ mt: 0.5 }}>
-                {recipe.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap title={recipe.id} sx={{ display: "block" }}>
-                {recipe.id}
-              </Typography>
-              <Stack
-                direction="row"
-                sx={{ alignItems: "center", justifyContent: "space-between" }}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  {isHidden ? t("hidden") : t("visible")}
-                </Typography>
-                <Switch
-                  size="small"
-                  checked={!isHidden}
-                  onChange={() => toggle(recipe.id)}
-                  disabled={busy}
-                  slotProps={{ input: { "aria-label": recipe.name } }}
-                />
-              </Stack>
-            </Box>
-          );
-        })}
+        {paginatedShown.map((recipe) => (
+          <RecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            isHidden={hidden.has(recipe.id)}
+            busy={busy}
+            onToggle={() => toggle(recipe.id)}
+            labelVisible={t("visible")}
+            labelHidden={t("hidden")}
+          />
+        ))}
       </Box>
+
+      {totalPages > 1 && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_e, p) => setPage(p)}
+            color="primary"
+          />
+        </Box>
+      )}
     </Box>
   );
 };
