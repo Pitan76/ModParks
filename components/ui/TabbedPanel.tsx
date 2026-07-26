@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -33,16 +33,28 @@ export default function TabbedPanel({ items, defaultTab = 0, value, onChange }: 
     }
   };
 
-
   // 隠されていないタブだけを抽出
   const visibleItems = items.filter(item => !item.hidden);
+
+  // もし現在の activeTab がインデックス範囲外になっていたら調整
+  const safeActiveTab = activeTab >= visibleItems.length ? 0 : activeTab;
+
+  // 訪れたタブインデックスをキャッシュする状態
+  const [visitedTabs, setVisitedTabs] = useState<Set<number>>(new Set([safeActiveTab]));
+
+  // 現在表示されているタブを訪問済みに登録
+  useEffect(() => {
+    setVisitedTabs((prev) => {
+      if (prev.has(safeActiveTab)) return prev;
+      const next = new Set(prev);
+      next.add(safeActiveTab);
+      return next;
+    });
+  }, [safeActiveTab]);
 
   if (visibleItems.length === 0) {
     return null;
   }
-
-  // もし現在の activeTab がインデックス範囲外になっていたら調整
-  const safeActiveTab = activeTab >= visibleItems.length ? 0 : activeTab;
 
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
@@ -67,9 +79,20 @@ export default function TabbedPanel({ items, defaultTab = 0, value, onChange }: 
         </Tabs>
       </Box>
 
-      {/* 選択されたタブのコンテンツのみを描画 */}
+      {/* 訪れたタブのみを描画し、アクティブでなければ display: none で状態を維持する */}
       <Box>
-        {visibleItems[safeActiveTab].content}
+        {visibleItems.map((item, index) => {
+          const isVisited = visitedTabs.has(index);
+          const isActive = index === safeActiveTab;
+
+          if (!isVisited) return null;
+
+          return (
+            <Box key={index} sx={{ display: isActive ? "block" : "none" }}>
+              {item.content}
+            </Box>
+          );
+        })}
       </Box>
     </Box>
   );
