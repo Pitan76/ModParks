@@ -28,6 +28,46 @@ const getNicoVideoId = (url: string): string | null => {
   return match ? match[2] : null;
 };
 
+const EmbedFrame = ({ src, title }: { src: string; title: string }) => (
+  <Box sx={{ width: "100%", aspectRatio: "16/9", maxHeight: 480, display: "block" }}>
+    <iframe
+      src={src}
+      title={title}
+      style={{ border: 0, width: "100%", height: "100%" }}
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    />
+  </Box>
+);
+
+const Slide = ({ item }: { item: MediaItem }) => {
+  const ytId = getYouTubeId(item.url);
+  const nicoId = getNicoVideoId(item.url);
+
+  if (ytId) return <EmbedFrame src={`https://www.youtube.com/embed/${ytId}`} title={item.caption || "YouTube video"} />;
+  if (nicoId) return <EmbedFrame src={`https://embed.nicovideo.jp/watch/${nicoId}`} title={item.caption || "NicoNico video"} />;
+
+  return (
+    <ZoomableImage
+      src={item.url}
+      alt={item.caption ?? ""}
+      loading="lazy"
+      style={{ display: "block", width: "100%", maxHeight: 480, objectFit: "contain" }}
+    />
+  );
+};
+
+const navBtnSx = (side: "left" | "right") => ({
+  position: "absolute" as const,
+  top: "50%",
+  [side]: 8,
+  transform: "translateY(-50%)",
+  bgcolor: "rgba(0,0,0,0.4)",
+  color: "#fff",
+  "&:hover": { bgcolor: "rgba(0,0,0,0.6)" },
+  zIndex: 1,
+});
+
 /**
  * プロジェクトのスクリーンショットをカルーセル表示する。
  * featured 指定された画像のみをここに渡す想定。
@@ -35,74 +75,53 @@ const getNicoVideoId = (url: string): string | null => {
 const ProjectMediaCarousel = ({ items }: { items: MediaItem[] }) => {
   const t = useTranslations("Common");
   const [index, setIndex] = useState(0);
+  const go = (delta: number) => setIndex((i) => (i + delta + items.length) % items.length);
+  const swipe = useCarouselSwipe(go);
 
   if (items.length === 0) return null;
 
+  const multiple = items.length > 1;
   const current = items[index];
-  const ytId = getYouTubeId(current.url);
-  const nicoId = getNicoVideoId(current.url);
-  const go = (delta: number) => setIndex((i) => (i + delta + items.length) % items.length);
-  const swipe = useCarouselSwipe(go);
-  const isEmbed = Boolean(ytId || nicoId);
+  const trackX = `calc(${-index * 100}% + ${swipe.dragX}px)`;
 
   return (
     <Box sx={{ mb: 3 }}>
       <Box
-        onPointerDown={isEmbed ? undefined : swipe.onPointerDown}
-        onPointerUp={isEmbed ? undefined : swipe.onPointerUp}
-        onClickCapture={isEmbed ? undefined : swipe.onClickCapture}
+        onPointerDown={multiple ? swipe.onPointerDown : undefined}
+        onPointerMove={multiple ? swipe.onPointerMove : undefined}
+        onPointerUp={multiple ? swipe.onPointerUp : undefined}
+        onPointerCancel={multiple ? swipe.onPointerUp : undefined}
+        onClickCapture={multiple ? swipe.onClickCapture : undefined}
         sx={{
           position: "relative",
           borderRadius: 2,
           overflow: "hidden",
           bgcolor: "background.default",
-          touchAction: isEmbed ? undefined : "pan-y",
-          cursor: !isEmbed && items.length > 1 ? "grab" : undefined,
-          "&:active": !isEmbed && items.length > 1 ? { cursor: "grabbing" } : undefined,
+          touchAction: multiple ? "pan-y" : undefined,
+          cursor: multiple ? "grab" : undefined,
+          "&:active": multiple ? { cursor: "grabbing" } : undefined,
         }}
       >
-        {ytId ? (
-          <Box sx={{ width: "100%", aspectRatio: "16/9", maxHeight: 480, display: "block" }}>
-            <iframe
-              src={`https://www.youtube.com/embed/${ytId}`}
-              title={current.caption || "YouTube video"}
-              style={{ border: 0, width: "100%", height: "100%" }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </Box>
-        ) : nicoId ? (
-          <Box sx={{ width: "100%", aspectRatio: "16/9", maxHeight: 480, display: "block" }}>
-            <iframe
-              src={`https://embed.nicovideo.jp/watch/${nicoId}`}
-              title={current.caption || "NicoNico video"}
-              style={{ border: 0, width: "100%", height: "100%" }}
-              allowFullScreen
-            />
-          </Box>
-        ) : (
-          <ZoomableImage
-            src={current.url}
-            alt={current.caption ?? ""}
-            loading="lazy"
-            style={{ display: "block", width: "100%", maxHeight: 480, objectFit: "contain" }}
-          />
-        )}
+        <Box
+          sx={{
+            display: "flex",
+            transform: `translateX(${trackX})`,
+            transition: swipe.dragging ? "none" : "transform 0.35s ease",
+          }}
+        >
+          {items.map((item) => (
+            <Box key={item.id} sx={{ flex: "0 0 100%", minWidth: 0 }}>
+              <Slide item={item} />
+            </Box>
+          ))}
+        </Box>
 
-        {items.length > 1 && (
+        {multiple && (
           <>
-            <IconButton
-              aria-label={t("back")}
-              onClick={() => go(-1)}
-              sx={{ position: "absolute", top: "50%", left: 8, transform: "translateY(-50%)", bgcolor: "rgba(0,0,0,0.4)", color: "#fff", "&:hover": { bgcolor: "rgba(0,0,0,0.6)" }, zIndex: 1 }}
-            >
+            <IconButton aria-label={t("back")} onClick={() => go(-1)} sx={navBtnSx("left")}>
               <ChevronLeftIcon />
             </IconButton>
-            <IconButton
-              aria-label={t("next")}
-              onClick={() => go(1)}
-              sx={{ position: "absolute", top: "50%", right: 8, transform: "translateY(-50%)", bgcolor: "rgba(0,0,0,0.4)", color: "#fff", "&:hover": { bgcolor: "rgba(0,0,0,0.6)" }, zIndex: 1 }}
-            >
+            <IconButton aria-label={t("next")} onClick={() => go(1)} sx={navBtnSx("right")}>
               <ChevronRightIcon />
             </IconButton>
           </>
@@ -115,7 +134,7 @@ const ProjectMediaCarousel = ({ items }: { items: MediaItem[] }) => {
         </Typography>
       )}
 
-      {items.length > 1 && (
+      {multiple && (
         <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 1 }}>
           {items.map((item, i) => (
             <Box
