@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -9,8 +9,10 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import Pagination from "@mui/material/Pagination";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useTranslations } from "next-intl";
-import { setRecipeHiddenAction, setRecipesHiddenAction } from "@/lib/actions/projectRecipe";
+import { setRecipeHiddenAction, setRecipesHiddenAction, getHiddenRecipeIdsAction } from "@/lib/actions/projectRecipe";
+import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 
 /** 編集画面に並べる1レシピ。名前と画像URLはレシピCDNの索引から来る。 */
 export type ManagedRecipe = {
@@ -20,9 +22,10 @@ export type ManagedRecipe = {
 };
 
 export type ProjectRecipesManagerProps = {
+  projectId: string;
   projectSlug: string;
-  recipes: ManagedRecipe[];
-  hiddenIds: string[];
+  recipeNamespaces?: string[] | null;
+  locale: string;
 };
 
 type RecipeCardProps = {
@@ -84,13 +87,63 @@ const PAGE_SIZE = 24;
  * プロジェクトのレシピ表示管理。
  * レシピ自体は jar 由来でCDNが持つため、ここで行えるのは公開ページに出すかどうかの切り替えのみ。
  */
-const ProjectRecipesManager = ({ projectSlug, recipes, hiddenIds }: ProjectRecipesManagerProps) => {
+const ProjectRecipesManager = ({
+  projectId,
+  projectSlug,
+  recipeNamespaces,
+  locale,
+}: ProjectRecipesManagerProps) => {
   const t = useTranslations("Project.recipeManager");
-  const [hidden, setHidden] = useState<Set<string>>(new Set(hiddenIds));
+  const [recipes, setRecipes] = useState<ManagedRecipe[]>([]);
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // マウント時にクライアントサイドで必要なアセットと非表示設定を非同期ロードする
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
+        const nsList = recipeNamespaces && recipeNamespaces.length > 0 ? recipeNamespaces : [projectSlug];
+
+        const [lists, hiddenRes] = await Promise.all([
+          fetchRecipeLists(cdnUrl, nsList, locale),
+          getHiddenRecipeIdsAction(projectId),
+        ]);
+
+        if (!isMounted) return;
+
+        if (hiddenRes.error) {
+          throw new Error(hiddenRes.error);
+        }
+
+        const items = toRecipeItems(cdnUrl, lists);
+        setRecipes(items);
+        setHidden(new Set(hiddenRes.hiddenIds || []));
+      } catch (err: unknown) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Failed to load recipes");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+    return () => {
+      isMounted = false;
+    };
+  }, [projectId, projectSlug, recipeNamespaces, locale]);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -148,6 +201,14 @@ const ProjectRecipesManager = ({ projectSlug, recipes, hiddenIds }: ProjectRecip
       return next;
     });
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   if (recipes.length === 0) {
     return (

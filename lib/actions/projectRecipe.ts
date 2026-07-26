@@ -4,6 +4,7 @@ import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { projects, projectHiddenRecipes } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
 
 /** 1文に載せるレシピIDの数。D1 のバインド変数上限に当たらないよう分割する。 */
 const CHUNK_SIZE = 90;
@@ -111,5 +112,18 @@ export async function setRecipesHiddenAction(slug: string, recipeIds: string[], 
     return { success: true, hidden };
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Failed to update recipe visibility" };
+  }
+}
+
+/**
+ * プロジェクトで非表示設定されているレシピのID一覧を取得します。
+ * @param projectId プロジェクトID
+ */
+export async function getHiddenRecipeIdsAction(projectId: string) {
+  try {
+    const hiddenSet = await getHiddenRecipeIds(projectId);
+    return { success: true, hiddenIds: Array.from(hiddenSet) };
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : "Failed to fetch hidden recipes" };
   }
 }
