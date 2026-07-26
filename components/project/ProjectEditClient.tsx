@@ -12,6 +12,7 @@ export type ProjectEditClientProps = {
   mediaManager: ReactNode;
   membersManager: ReactNode;
   dependenciesManager: ReactNode;
+  recipesManager: ReactNode;
   ownershipTransfer?: ReactNode;
 };
 
@@ -23,6 +24,7 @@ const ProjectEditClient = ({
   mediaManager,
   membersManager,
   dependenciesManager,
+  recipesManager,
   ownershipTransfer
 }: ProjectEditClientProps) => {
   const tProject = useTranslations("Project");
@@ -38,6 +40,7 @@ const ProjectEditClient = ({
     { id: "media", label: tProject("editTabs.media"), content: mediaManager },
     { id: "members", label: tProject("editTabs.members"), content: membersManager },
     { id: "dependencies", label: tProject("editTabs.dependencies"), content: dependenciesManager },
+    { id: "recipes", label: tProject("editTabs.recipes"), content: recipesManager },
     { id: "ownership", label: tProject("editTabs.ownership"), content: ownershipTransfer, hidden: !isOwner },
   ];
 

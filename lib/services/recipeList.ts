@@ -19,7 +19,7 @@ export type RecipeListEntry = {
 };
 
 /** ネームスペース1つ分の索引。 */
-type NamespaceList = {
+export type NamespaceList = {
   namespace: string;
   version: string;
   recipes: RecipeListEntry[];
@@ -33,6 +33,33 @@ type NamespaceList = {
  */
 export function toMinecraftLocale(locale: string): string | null {
   return localeToFileMap[locale as AppLocale] ?? null;
+}
+
+/** 表示に必要な形にほぐした1レシピ。 */
+export type RecipeItem = {
+  id: string;
+  /** 完成品のアイテム名。未翻訳ならアイテムIDが入る */
+  name: string;
+  /** レシピ画像のURL */
+  url: string;
+};
+
+/**
+ * 索引を表示用のレシピ一覧に変換します。
+ * @param cdnUrl レシピCDNのベースURL
+ * @param lists ネームスペース単位の索引
+ */
+export function toRecipeItems(cdnUrl: string, lists: NamespaceList[]): RecipeItem[] {
+  return lists.flatMap(({ version, recipes }) =>
+    recipes.map(({ id, name }) => {
+      const [namespace, itemId] = id.split(":");
+      // URL にアセットバージョンを埋めると CDN 側がバージョン参照の R2 往復を省略でき、
+      // レスポンスが immutable になるため再訪時はネットワークに出なくなる。
+      // 未設定を意味する "0" のときに付けると、まだ何も入っていない画像を1年間焼き付けてしまう。
+      const pin = version && version !== "0" ? `?v=${encodeURIComponent(version)}` : "";
+      return { id, name, url: `${cdnUrl}/api/${namespace}/${itemId}.png${pin}` };
+    })
+  );
 }
 
 /**
