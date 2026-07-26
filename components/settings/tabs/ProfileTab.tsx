@@ -18,14 +18,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface ProfileTabProps {
   user: { username: string; displayName: string; bio: string; avatarUrl: string; links: string };
   locale: "ja" | "en";
+  showGithubLink: boolean;
+  githubUsername: string;
 }
 
-export default function ProfileTab({ user, locale }: ProfileTabProps) {
+export default function ProfileTab({ user, locale, showGithubLink, githubUsername }: ProfileTabProps) {
   const t = useTranslations("Settings");
   const { message, flash } = useFlashMessage();
 
@@ -69,6 +72,17 @@ export default function ProfileTab({ user, locale }: ProfileTabProps) {
 
       <Divider sx={{ my: 4 }} />
       <Typography variant="h6" sx={{ mb: 2 }}>{t("profile.customLinks")}</Typography>
+      {showGithubLink && (
+        <Box sx={{ mb: 2 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { xs: "stretch", sm: "center" } }}>
+            <TextField label={t("profile.linkTitle")} size="small" value="GitHub" disabled sx={{ width: { xs: "100%", sm: 150 } }} />
+            <TextField label="URL" size="small" value={`https://github.com/${githubUsername}`} disabled slotProps={{ input: { startAdornment: <GitHubIcon fontSize="small" sx={{ mr: 1, opacity: 0.6 }} /> } }} sx={{ flex: 1 }} />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+            {t("profile.githubLinkManaged")}
+          </Typography>
+        </Box>
+      )}
       {links.map((link, idx) => (
         <Stack key={idx} direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2, alignItems: { xs: "stretch", sm: "center" } }}>
           <TextField label={t("profile.linkTitle")} size="small" value={link.title} onChange={(e) => changeLink(idx, "title", e.target.value)} sx={{ width: { xs: "100%", sm: 150 } }} />

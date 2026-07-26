@@ -1085,7 +1085,8 @@
       "addLink": "Add Link",
       "moveUp": "Move up",
       "moveDown": "Move down",
-      "removeLink": "Remove link"
+      "removeLink": "Remove link",
+      "githubLinkManaged": "Your GitHub link is shown via the \"Integrations\" tab. You can toggle its visibility there."
     },
     "apiKeys": {
       "title": "API Keys",

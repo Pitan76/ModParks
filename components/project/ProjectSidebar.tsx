@@ -99,6 +99,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
             fullWidth
             variant="outlined"
             size="small"
+            sx={{ justifyContent: "flex-start", color: "text.primary", borderColor: "divider" }}
           >
             GitHub
           </Button>

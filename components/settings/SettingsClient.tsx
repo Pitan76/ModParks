@@ -16,7 +16,7 @@ import ThemeTab from "./tabs/ThemeTab";
 import type { PasskeyInfo } from "@/lib/actions/passkey";
 
 interface SettingsClientProps {
-  user: { username: string; displayName: string; bio: string; email: string; avatarUrl: string; links: string; locale: string; showGithubLink: boolean };
+  user: { username: string; displayName: string; bio: string; email: string; avatarUrl: string; links: string; locale: string; githubUsername: string; showGithubLink: boolean };
   apiKeys: { id: string; name: string; createdAt: Date; lastUsedAt: Date | null }[];
   isGitHubConnected: boolean;
   hasPassword?: boolean;
@@ -57,7 +57,7 @@ export default function SettingsClient({
   const [is2FAEnabled, setIs2FAEnabled] = useState(!!twoFactorEnabled);
 
   const tabs = [
-    { label: t("profile.title"), content: <ProfileTab user={user} locale={locale} /> },
+    { label: t("profile.title"), content: <ProfileTab user={user} locale={locale} showGithubLink={user.showGithubLink && !!user.githubUsername} githubUsername={user.githubUsername} /> },
     { label: t("account.title"), content: <AccountTab user={user} hasPassword={!!hasPassword} is2FAEnabled={is2FAEnabled} locale={locale} setLocale={setLocale} /> },
     { label: t("theme.title"), content: <ThemeTab /> },
     { label: t("security.title"), content: <SecurityTab is2FAEnabled={is2FAEnabled} setIs2FAEnabled={setIs2FAEnabled} passkeys={passkeys ?? []} /> },

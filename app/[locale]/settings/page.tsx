@@ -55,6 +55,7 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
           avatarUrl: profileRecord?.avatarUrl || "",
           links: profileRecord?.links || "[]",
           locale: settingsRecord?.locale || "ja",
+          githubUsername: profileRecord?.githubUsername || "",
           showGithubLink: (settingsRecord?.custom as Record<string, any>)?.showGithubLink ?? true,
         }}
         apiKeys={userApiKeys}
