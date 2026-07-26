@@ -44,7 +44,12 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
   const locale   = useLocale();
   const pathname = usePathname();
   const router   = useRouter();
-  const { mode, toggleColorMode } = useColorMode();
+  const { mode, toggleColorMode, isNewTheme } = useColorMode();
+
+  // Drawer/Divider と同一の枠線色（theme.ts と一致させる）
+  const borderColor = isNewTheme
+    ? (mode === "light" ? "#e0e0e0" : "#3c4043")
+    : (mode === "light" ? "#e2e8f0" : "#334155");
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -65,7 +70,7 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
           bottom: 0,
           left: `${SIDEBAR_WIDTH}px`,
           width: "1px",
-          bgcolor: "divider",
+          bgcolor: borderColor,
           display: { xs: "none", md: "block" },
           opacity: collapsed ? 0 : 1,
           transition: (theme) =>
