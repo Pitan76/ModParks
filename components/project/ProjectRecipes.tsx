@@ -1,7 +1,8 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import ProjectRecipesGrid from "./ProjectRecipesGrid";
+import { fetchItemNames } from "@/lib/services/itemNames";
 
 type ProjectRecipesProps = {
   projectSlug: string;
@@ -14,6 +15,7 @@ type ProjectRecipesProps = {
  */
 const ProjectRecipes = async ({ projectSlug, namespaces }: ProjectRecipesProps) => {
   const t = await getTranslations("Project");
+  const locale = await getLocale();
   const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
 
   // 保存済みネームスペースがあればそれで絞り込む。無ければ後方互換で slug を使う。
@@ -30,24 +32,30 @@ const ProjectRecipes = async ({ projectSlug, namespaces }: ProjectRecipesProps) 
     }
     
     const data = await res.json() as {
-      recipes?: { id: string }[];
+      recipes?: { id: string; result?: string | null }[];
       versions?: Record<string, string>;
     };
-    const ids: string[] = data.recipes ? data.recipes.map(r => r.id) : [];
+    const entries = (data.recipes ?? []).filter(r => nsSet.has(r.id.split(":")[0]));
 
-    recipes = ids
-      .filter(id => nsSet.has(id.split(":")[0]))
-      .map(id => {
-        const [namespace, itemId] = id.split(":");
-        // URL にアセットバージョンを埋めると CDN 側がバージョン参照の R2 往復を省略でき、
-        // レスポンスが immutable になるため再訪時はネットワークに出なくなる。
-        const v = data.versions?.[namespace];
-        return {
-          id,
-          title: itemId.replace(/_/g, " "),
-          url: `${cdnUrl}/api/${namespace}/${itemId}.png${v ? `?v=${encodeURIComponent(v)}` : ""}`
-        };
-      });
+    // レシピIDではなく完成品のアイテムIDに対して名前を引く。
+    const names = await fetchItemNames(
+      cdnUrl,
+      entries.map(r => r.result).filter((r): r is string => !!r),
+      locale
+    );
+
+    recipes = entries.map(({ id, result }) => {
+      const [namespace, itemId] = id.split(":");
+      // URL にアセットバージョンを埋めると CDN 側がバージョン参照の R2 往復を省略でき、
+      // レスポンスが immutable になるため再訪時はネットワークに出なくなる。
+      const v = data.versions?.[namespace];
+      return {
+        id,
+        // 名前が未翻訳のアイテムはIDから読める形を作って出す。
+        title: (result && names[result]) || itemId.replace(/_/g, " "),
+        url: `${cdnUrl}/api/${namespace}/${itemId}.png${v ? `?v=${encodeURIComponent(v)}` : ""}`
+      };
+    });
   } catch (err: unknown) {
     console.error("Failed to fetch recipes:", err);
     error = err instanceof Error ? err.message : "Failed to load recipes";

@@ -84,6 +84,8 @@ export async function uploadViaCdn(
     await phase((b) => b.textures, (c) => ({ textures: c }), 80, 6_000_000);
     await phase((b) => b.models, (c) => ({ models: c }), 200);
     await phase((b) => b.tags, (c) => ({ tags: c }), 200);
+    // 言語ファイルは1件が大きくなりうるため、テクスチャ同様バイト数でも分割する
+    await phase((b) => b.langs, (c) => ({ langs: c }), 10, 6_000_000);
     await phase((b) => b.recipes, (c) => ({ recipes: c }), 200);
 
     for (const [ns, session] of sessions) await endSession(cdnUrl, ns, session, "commit", headers);
@@ -171,6 +173,7 @@ export async function uploadDirectToR2(
   await phase((b) => b.textures, (ns, p) => `assets/${ns}/textures/${p}`, "image/png", base64ToBytes);
   await phase((b) => b.models, (ns, p) => `assets/${ns}/models/${p}.json`, "application/json");
   await phase((b) => b.tags, (ns, p) => `data/${ns}/tags/${p}.json`, "application/json");
+  await phase((b) => b.langs, (ns, l) => `assets/${ns}/lang/${l}.json`, "application/json");
   await phase((b) => b.recipes, (ns, id) => `data/${ns}/recipe/${id}.json`, "application/json");
 
   // この経路は CDN Worker を通らないため、バージョン更新も自前で行う必要がある。

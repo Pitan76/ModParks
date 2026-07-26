@@ -7,6 +7,8 @@ export interface NsBucket {
   /** base64 エンコード済み PNG */
   textures: Record<string, string>;
   models: Record<string, string>;
+  /** ロケール名（ja_jp など）をキーとした言語ファイル。アイテム名の表示に使う */
+  langs: Record<string, string>;
 }
 
 /** index/recipes.json に載せるクラフティングレシピの要約 */
@@ -29,6 +31,9 @@ const TEXTURE_PATH = /^assets\/([^/]+)\/textures\/((?:item|block)\/.+)\.png$/;
 // モデルJSON は、テクスチャ名 != アイテムID のとき CDN が parent/textures
 // チェインを辿って実テクスチャを解決するために必要。
 const MODEL_PATH = /^assets\/([^/]+)\/models\/((?:item|block)\/.+)\.json$/;
+// 言語ファイル。ロケールを絞らず jar にあるものを全て取り込むため、対応言語を
+// 増やすときにこちらを変更する必要がない。
+const LANG_PATH = /^assets\/([^/]+)\/lang\/([a-z]{2,8}(?:_[a-z0-9]{2,8})?)\.json$/;
 
 /** レシピ JSON のうち、インデックス生成に使う部分だけの最小形 */
 interface RecipeJson {
@@ -66,7 +71,7 @@ export async function extractRecipes(arrayBuffer: ArrayBuffer): Promise<Extracte
 
   const byNs: Record<string, NsBucket> = {};
   const ensureNs = (ns: string): NsBucket =>
-    (byNs[ns] ||= { recipes: {}, tags: {}, textures: {}, models: {} });
+    (byNs[ns] ||= { recipes: {}, tags: {}, textures: {}, models: {}, langs: {} });
 
   const namespaces = new Set<string>();
   const craftingRecipes: RecipeSummary[] = [];
@@ -96,7 +101,13 @@ export async function extractRecipes(arrayBuffer: ArrayBuffer): Promise<Extracte
     }
 
     const model = path.match(MODEL_PATH);
-    if (model) ensureNs(model[1]).models[model[2]] = await zip.files[path].async("string");
+    if (model) {
+      ensureNs(model[1]).models[model[2]] = await zip.files[path].async("string");
+      continue;
+    }
+
+    const lang = path.match(LANG_PATH);
+    if (lang) ensureNs(lang[1]).langs[lang[2]] = await zip.files[path].async("string");
   }
 
   return { byNs, namespaces: [...namespaces], craftingRecipes };
