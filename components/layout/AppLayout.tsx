@@ -53,51 +53,50 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
 
   return (
     <ContextMenuProvider>
-      <Box sx={{ display: "flex", minHeight: "100vh" }}>
-        <SidebarComponent
-          mobileOpen={mobileOpen}
-          onMobileClose={() => setMobileOpen(false)}
-          session={session}
-          collapsed={collapsed}
-          onToggleCollapse={handleToggleCollapse}
-        />
-        {collapsed && (
-          <IconButton
-            onClick={handleToggleCollapse}
-            aria-label={tNav("expandSidebar")}
-            size="small"
+      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <AppHeader session={session} onMenuClick={handleDrawerToggle} />
+        <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0 }}>
+          <SidebarComponent
+            mobileOpen={mobileOpen}
+            onMobileClose={() => setMobileOpen(false)}
+            session={session}
+            collapsed={collapsed}
+            onToggleCollapse={handleToggleCollapse}
+          />
+          {collapsed && (
+            <IconButton
+              onClick={handleToggleCollapse}
+              aria-label={tNav("expandSidebar")}
+              size="small"
+              sx={{
+                display: { xs: "none", md: "flex" },
+                position: "fixed",
+                bottom: 12,
+                left: 12,
+                zIndex: (theme) => theme.zIndex.drawer + 1,
+                bgcolor: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
+                boxShadow: 1,
+                "&:hover": { bgcolor: "action.hover" },
+              }}
+            >
+              <ChevronRightIcon fontSize="small" />
+            </IconButton>
+          )}
+          <Box
+            component="main"
             sx={{
-              display: { xs: "none", md: "flex" },
-              position: "fixed",
-              bottom: 12,
-              left: 12,
-              zIndex: (theme) => theme.zIndex.drawer + 1,
-              bgcolor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
-              boxShadow: 1,
-              "&:hover": { bgcolor: "action.hover" },
+              flexGrow: 1,
+              minWidth: 0,
+              width: { md: collapsed ? "100%" : `calc(100% - ${SIDEBAR_WIDTH}px)` },
+              transition: (theme) =>
+                theme.transitions.create("width", {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
             }}
           >
-            <ChevronRightIcon fontSize="small" />
-          </IconButton>
-        )}
-        <Box
-          sx={{
-            flexGrow: 1,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            width: { md: collapsed ? "100%" : `calc(100% - ${SIDEBAR_WIDTH}px)` },
-            transition: (theme) =>
-              theme.transitions.create("width", {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
-          }}
-        >
-          <AppHeader session={session} onMenuClick={handleDrawerToggle} />
-          <Box component="main" sx={{ flexGrow: 1 }}>
             {children}
           </Box>
         </Box>

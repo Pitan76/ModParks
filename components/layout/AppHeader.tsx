@@ -54,7 +54,7 @@ const AppHeader = ({ session, onMenuClick }: AppHeaderProps) => {
   };
 
   return (
-    <AppBar position="sticky" id="app-header">
+    <AppBar position="sticky" id="app-header" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar sx={{ gap: 1 }}>
         {/* ハンバーガーメニュー（モバイル） */}
         <IconButton
