@@ -19,6 +19,7 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ActionRow from "@/components/ui/ActionRow";
+import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
 
 interface ApiKeysTabProps {
   apiKeys: { id: string; name: string; createdAt: Date; lastUsedAt: Date | null }[];
@@ -75,9 +76,9 @@ export default function ApiKeysTab({ apiKeys }: ApiKeysTabProps) {
         </ActionRow>
       </Box>
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table>
-          <TableHead>
+      <TableContainer component={Paper} sx={tableContainerSx}>
+        <Table sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
+          <TableHead sx={tableHeadSx}>
             <TableRow>
               <TableCell>{t("apiKeys.name")}</TableCell>
               <TableCell>{t("apiKeys.lastUsed")}</TableCell>
@@ -86,7 +87,7 @@ export default function ApiKeysTab({ apiKeys }: ApiKeysTabProps) {
           </TableHead>
           <TableBody>
             {apiKeys.map((k) => (
-              <TableRow key={k.id}>
+              <TableRow key={k.id} hover>
                 <TableCell>{k.name}</TableCell>
                 <TableCell>{k.lastUsedAt ? format.dateTime(new Date(k.lastUsedAt), { dateStyle: "short" }) : t("apiKeys.neverUsed")}</TableCell>
                 <TableCell align="right">

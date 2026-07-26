@@ -18,6 +18,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Link } from "@/i18n/routing";
 import { adminDeleteProject } from "@/lib/actions/admin";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
+import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
 
 interface AdminProject {
   id: string;
@@ -51,9 +52,9 @@ export default function ProjectsClient({ projects }: { projects: AdminProject[] 
   return (
     <Box>
       {msg && <Alert severity={msg.type} sx={{ mb: 2 }}>{msg.text}</Alert>}
-      <TableContainer component={Paper} variant="outlined">
-        <Table size="small">
-          <TableHead>
+      <TableContainer component={Paper} sx={tableContainerSx}>
+        <Table size="small" sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
+          <TableHead sx={tableHeadSx}>
             <TableRow>
               <TableCell>Project Name</TableCell>
               <TableCell>Slug</TableCell>
@@ -66,7 +67,7 @@ export default function ProjectsClient({ projects }: { projects: AdminProject[] 
             {projects.map((project) => {
               const createdDate = new Date(typeof project.createdAt === "number" ? project.createdAt * 1000 : project.createdAt);
               return (
-                <TableRow key={project.id}>
+                <TableRow key={project.id} hover>
                   <TableCell>
                     <Typography variant="body2" sx={{ fontWeight: "bold" }}>
                       {project.name}

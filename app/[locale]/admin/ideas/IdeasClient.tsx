@@ -17,6 +17,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Link } from "@/i18n/routing";
 import { adminDeleteIdea } from "@/lib/actions/admin";
 import { useTranslations } from "next-intl";
+import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
 
 interface AdminIdea {
   id: string;
@@ -45,9 +46,9 @@ export default function IdeasClient({ ideas }: { ideas: AdminIdea[] }) {
   return (
     <Box>
       {msg && <Alert severity={msg.type} sx={{ mb: 2 }}>{msg.text}</Alert>}
-      <TableContainer component={Paper} variant="outlined">
-        <Table size="small">
-          <TableHead>
+      <TableContainer component={Paper} sx={tableContainerSx}>
+        <Table size="small" sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
+          <TableHead sx={tableHeadSx}>
             <TableRow>
               <TableCell>{tAdmin("titleName")}</TableCell>
               <TableCell>{tAdmin("status")}</TableCell>
@@ -60,7 +61,7 @@ export default function IdeasClient({ ideas }: { ideas: AdminIdea[] }) {
             {ideas.map((idea) => {
               const createdDate = new Date(typeof idea.createdAt === "number" ? idea.createdAt * 1000 : idea.createdAt);
               return (
-                <TableRow key={idea.id}>
+                <TableRow key={idea.id} hover>
                   <TableCell>
                     <Typography variant="body2" sx={{ fontWeight: "bold" }}>
                       {idea.title}

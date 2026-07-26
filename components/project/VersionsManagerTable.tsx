@@ -20,6 +20,7 @@ import Stack from "@mui/material/Stack";
 import { useFormatter, useTranslations } from "next-intl";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import type { ParsedVersion, ProjectVersion } from "./useVersionsManager";
+import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 
 type Props = {
   parsedVersions: ParsedVersion[];
@@ -46,9 +47,9 @@ export default function VersionsManagerTable({
   const t = useTranslations("Version");
 
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ width: "100%", maxWidth: "100%", overflowX: "auto" }}>
-      <Table size="small" sx={{ minWidth: 650 }}>
-        <TableHead>
+    <TableContainer component={Paper} sx={tableContainerSx}>
+      <Table size="small" sx={[tableRootSx, { minWidth: 650 }]}>
+        <TableHead sx={tableHeadSx}>
           <TableRow>
             <TableCell>{t("manager.columns.version")}</TableCell>
             <TableCell>{t("manager.columns.mc")}</TableCell>

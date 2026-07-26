@@ -14,6 +14,7 @@ import MergeIcon from "@mui/icons-material/CallMerge";
 import RestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslations } from "next-intl";
+import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 
 type Backup = {
   key: string;
@@ -60,14 +61,14 @@ const BackupTable = ({
   const tAdmin = useTranslations("Admin");
 
   return (
-    <TableContainer component={Paper} elevation={2}>
-      <Table sx={{ minWidth: 650 }}>
-        <TableHead>
+    <TableContainer component={Paper} sx={tableContainerSx}>
+      <Table sx={[tableRootSx, { minWidth: 650 }]}>
+        <TableHead sx={tableHeadSx}>
           <TableRow>
-            <TableCell sx={{ fontWeight: 700 }}>{tAdmin("backup.tableName")}</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>{tAdmin("backup.created")}</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>{tAdmin("backup.size")}</TableCell>
-            <TableCell align="right" sx={{ fontWeight: 700 }}>{tAdmin("backup.actions")}</TableCell>
+            <TableCell>{tAdmin("backup.tableName")}</TableCell>
+            <TableCell>{tAdmin("backup.created")}</TableCell>
+            <TableCell>{tAdmin("backup.size")}</TableCell>
+            <TableCell align="right">{tAdmin("backup.actions")}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

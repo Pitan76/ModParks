@@ -19,6 +19,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { getSettingsAudits, getBackupAudits } from "@/lib/actions/admin";
 import AuditSettingsRow from "./AuditSettingsRow";
 import AuditBackupRow from "./AuditBackupRow";
+import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
 
 type SettingsLog = {
   id: string;
@@ -123,9 +124,9 @@ const LogsClient = ({ initialSettings, initialBackups }: LogsClientProps) => {
             </Box>
           )}
 
-          <TableContainer component={Paper} variant="outlined" sx={{ opacity: loadingSettings ? 0.6 : 1 }}>
-            <Table>
-              <TableHead>
+          <TableContainer component={Paper} sx={[tableContainerSx, { opacity: loadingSettings ? 0.6 : 1 }]}>
+            <Table sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
+              <TableHead sx={tableHeadSx}>
                 <TableRow>
                   <TableCell />
                   <TableCell>{t("date")}</TableCell>
@@ -172,9 +173,9 @@ const LogsClient = ({ initialSettings, initialBackups }: LogsClientProps) => {
             </Box>
           )}
 
-          <TableContainer component={Paper} variant="outlined" sx={{ opacity: loadingBackups ? 0.6 : 1 }}>
-            <Table>
-              <TableHead>
+          <TableContainer component={Paper} sx={[tableContainerSx, { opacity: loadingBackups ? 0.6 : 1 }]}>
+            <Table sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
+              <TableHead sx={tableHeadSx}>
                 <TableRow>
                   <TableCell />
                   <TableCell>{t("date")}</TableCell>

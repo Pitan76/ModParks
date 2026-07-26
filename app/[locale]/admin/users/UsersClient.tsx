@@ -25,6 +25,7 @@ import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { useUsersState } from "./hooks/useUsersState";
 import UserDetailsDialog from "./components/UserDetailsDialog";
 import UserEditDialog from "./components/UserEditDialog";
+import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
 
 export interface User {
   id: string;
@@ -91,9 +92,9 @@ export default function UsersClient({ users }: { users: User[] }) {
       </Box>
       
       {msg && <Alert severity={msg.type} sx={{ mb: 2 }}>{msg.text}</Alert>}
-      <TableContainer component={Paper} variant="outlined">
-        <Table size="small">
-          <TableHead>
+      <TableContainer component={Paper} sx={tableContainerSx}>
+        <Table size="small" sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
+          <TableHead sx={tableHeadSx}>
             <TableRow>
               <TableCell>{tAdmin("user")}</TableCell>
               <TableCell>{tAdmin("email")}</TableCell>
@@ -106,7 +107,7 @@ export default function UsersClient({ users }: { users: User[] }) {
             {displayedUsers.map((user) => {
               const joinedDate = new Date(typeof user.createdAt === "number" ? user.createdAt * 1000 : user.createdAt);
               return (
-                <TableRow key={user.id} sx={{ opacity: user.deletedAt ? 0.5 : 1 }}>
+                <TableRow key={user.id} hover sx={{ opacity: user.deletedAt ? 0.5 : 1 }}>
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Avatar src={user.avatarUrl || undefined} sx={{ width: 32, height: 32 }} />

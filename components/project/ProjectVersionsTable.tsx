@@ -32,6 +32,7 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import { Link } from "@/i18n/routing";
 import { normalizeReleaseChannel } from "@/lib/releaseChannels";
+import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 
 export type ProjectVersionsTableProps = {
   versions: {
@@ -112,9 +113,9 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
       </Box>
 
       {/* Desktop Table View */}
-      <TableContainer component={Paper} variant="outlined" sx={{ mb: 2, display: { xs: "none", md: "block" }, width: "100%", maxWidth: "100%", overflowX: "auto" }}>
-        <Table sx={{ minWidth: 650 }}>
-          <TableHead>
+      <TableContainer component={Paper} sx={[tableContainerSx, { mb: 2, display: { xs: "none", md: "block" } }]}>
+        <Table sx={[tableRootSx, { minWidth: 650 }]}>
+          <TableHead sx={tableHeadSx}>
             <TableRow>
               <TableCell>{t("table.version")}</TableCell>
               <TableCell>{t("table.platformMcVersion")}</TableCell>

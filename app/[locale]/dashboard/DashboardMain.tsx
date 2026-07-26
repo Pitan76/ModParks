@@ -18,6 +18,7 @@ import Link from "next/link";
 import LinkButton from "@/components/ui/LinkButton";
 import type { DashboardData } from "./dashboardData";
 import { getProjectStatusColor, getIdeaStatusColor } from "./statusColors";
+import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 
 function SectionHeader({
   icon,
@@ -67,15 +68,15 @@ export default async function DashboardMain({ locale, recentProjects, myIdeas }:
             href="/projects/manage"
             viewAll={t("viewAll")}
           />
-          <Card sx={{ borderRadius: 3 }}>
+          <Card sx={tableContainerSx}>
             <TableContainer>
-              <Table sx={{ minWidth: 480 }}>
-                <TableHead sx={{ bgcolor: "action.hover" }}>
+              <Table sx={[tableRootSx, { minWidth: 480 }]}>
+                <TableHead sx={tableHeadSx}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold" }}>{t("table.projectName")}</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>{t("table.status")}</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>{t("table.downloads")}</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>{t("table.updated")}</TableCell>
+                    <TableCell>{t("table.projectName")}</TableCell>
+                    <TableCell>{t("table.status")}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{t("table.downloads")}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{t("table.updated")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -116,14 +117,14 @@ export default async function DashboardMain({ locale, recentProjects, myIdeas }:
             href="/ideas?author=me"
             viewAll={t("viewAll")}
           />
-          <Card sx={{ borderRadius: 3 }}>
+          <Card sx={tableContainerSx}>
             <TableContainer>
-              <Table sx={{ minWidth: 420 }}>
-                <TableHead sx={{ bgcolor: "action.hover" }}>
+              <Table sx={[tableRootSx, { minWidth: 420 }]}>
+                <TableHead sx={tableHeadSx}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold" }}>{t("table.ideaTitle")}</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>{t("table.status")}</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", textAlign: "right" }}>{t("table.created")}</TableCell>
+                    <TableCell>{t("table.ideaTitle")}</TableCell>
+                    <TableCell>{t("table.status")}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{t("table.created")}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

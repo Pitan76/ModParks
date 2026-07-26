@@ -23,6 +23,7 @@ import { formatCompactNumber } from "@/lib/utils/format";
 import { Link } from "@/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/project";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
+import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 
 type ProjectForManagement = {
   id: string;
@@ -158,9 +159,9 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
         )}
       </Box>
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table sx={{ minWidth: 640 }}>
-          <TableHead>
+      <TableContainer component={Paper} sx={tableContainerSx}>
+        <Table sx={[tableRootSx, { minWidth: 640 }]}>
+          <TableHead sx={tableHeadSx}>
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox

@@ -19,6 +19,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import ActionRow from "@/components/ui/ActionRow";
 import { fetchModrinthProjects, fetchCurseForgeProjects, importProjects } from "@/lib/actions/import";
 import type { ImportedProject } from "@/lib/actions/import";
+import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
 
 export type BatchImportClientProps = {
   hasModrinthKey: boolean;
@@ -152,9 +153,9 @@ const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProj
 
       {projects.length > 0 && (
         <>
-          <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
-            <Table>
-              <TableHead>
+          <TableContainer component={Paper} sx={[tableContainerSx, { mb: 3 }]}>
+            <Table sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
+              <TableHead sx={tableHeadSx}>
                 <TableRow>
                   <TableCell padding="checkbox">
                     <Checkbox
