@@ -94,9 +94,9 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
 
   return (
     <Box>
-      {message && <Alert severity={message.type} sx={{ mb: 4, p: "2px" }}>{message.text}</Alert>}
+      {message && <Alert severity={message.type} sx={{ mb: 4 }}>{message.text}</Alert>}
 
-      <Box sx={{ mb: 4, p: "2px" }}>
+      <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>{t("account.language")}</Typography>
         <FormSelect
           size="small"
