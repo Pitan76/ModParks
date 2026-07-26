@@ -6,6 +6,8 @@ import TabbedPanel from "@/components/ui/TabbedPanel";
 import { type ReactNode, useTransition, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import dynamic from "next/dynamic";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export type ProjectEditClientProps = {
   isOwner: boolean;
@@ -14,8 +16,11 @@ export type ProjectEditClientProps = {
   mediaManager: ReactNode;
   membersManager: ReactNode;
   dependenciesManager: ReactNode;
-  recipesManager: ReactNode;
   ownershipTransfer?: ReactNode;
+  projectId: string;
+  projectSlug: string;
+  recipeNamespaces?: string[] | null;
+  locale: string;
 };
 
 const TabSkeleton = () => {
@@ -28,6 +33,15 @@ const TabSkeleton = () => {
   );
 };
 
+const ProjectRecipesManager = dynamic(() => import("@/components/project/ProjectRecipesManager"), {
+  ssr: false,
+  loading: () => (
+    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+      <CircularProgress />
+    </Box>
+  ),
+});
+
 /** プロジェクト編集画面のタブ切り替えを管理するクライアントコンポーネント */
 const ProjectEditClient = ({
   isOwner,
@@ -36,8 +50,11 @@ const ProjectEditClient = ({
   mediaManager,
   membersManager,
   dependenciesManager,
-  recipesManager,
-  ownershipTransfer
+  ownershipTransfer,
+  projectId,
+  projectSlug,
+  recipeNamespaces,
+  locale
 }: ProjectEditClientProps) => {
   const tProject = useTranslations("Project");
   const [isPending, startTransition] = useTransition();
@@ -53,7 +70,18 @@ const ProjectEditClient = ({
     { id: "media", label: tProject("editTabs.media"), content: mediaManager },
     { id: "members", label: tProject("editTabs.members"), content: membersManager },
     { id: "dependencies", label: tProject("editTabs.dependencies"), content: dependenciesManager },
-    { id: "recipes", label: tProject("editTabs.recipes"), content: recipesManager },
+    {
+      id: "recipes",
+      label: tProject("editTabs.recipes"),
+      content: (
+        <ProjectRecipesManager
+          projectId={projectId}
+          projectSlug={projectSlug}
+          recipeNamespaces={recipeNamespaces}
+          locale={locale}
+        />
+      ),
+    },
     { id: "ownership", label: tProject("editTabs.ownership"), content: ownershipTransfer, hidden: !isOwner },
   ];
 

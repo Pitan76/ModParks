@@ -14,18 +14,6 @@ import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import ProjectEditClient from "@/components/project/ProjectEditClient";
 import ProjectDependenciesManager from "@/components/project/ProjectDependenciesManager";
 import { getProjectMembers } from "@/lib/actions/member";
-import dynamic from "next/dynamic";
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
-
-const ProjectRecipesManager = dynamic(() => import("@/components/project/ProjectRecipesManager"), {
-  ssr: false,
-  loading: () => (
-    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-      <CircularProgress />
-    </Box>
-  ),
-});
 import { getProjectDependencies } from "@/lib/actions/dependency";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { versions, ideas } from "@/db/schema";
@@ -128,14 +116,10 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         dependenciesManager={
           <ProjectDependenciesManager projectId={project.id} dependencies={dependencies} />
         }
-        recipesManager={
-          <ProjectRecipesManager
-            projectId={project.id}
-            projectSlug={project.slug}
-            recipeNamespaces={project.recipeNamespaces}
-            locale={locale}
-          />
-        }
+        projectId={project.id}
+        projectSlug={project.slug}
+        recipeNamespaces={project.recipeNamespaces}
+        locale={locale}
         ownershipTransfer={<ProjectOwnershipTransfer projectId={project.id} />}
       />
     </Container>
