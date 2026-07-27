@@ -12,6 +12,7 @@ import AddToCollectionButton from "./AddToCollectionButton";
 import ShareMenuButton from "@/components/ui/ShareMenuButton";
 import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { SITE_URL } from "@/lib/config";
+import ProjectTypeBadge from "./ProjectTypeBadge";
 
 export type ProjectDetailHeaderProps = {
   /** 対象プロジェクトの情報 */
@@ -91,11 +92,7 @@ const ProjectDetailHeader = ({
               <Typography variant="h4" component="h1" sx={{ fontWeight: 800, wordBreak: "break-word", overflowWrap: "anywhere", fontSize: { xs: "1.5rem", sm: "2.125rem" } }}>
                 {p.name}
               </Typography>
-              <Chip
-                label={p.type === "mod" ? "Mod" : "Plugin"}
-                color={p.type === "mod" ? "primary" : "secondary"}
-                size="small"
-              />
+              <ProjectTypeBadge type={p.type} size="small" />
               {p.status !== "public" && (
                 <Chip
                   label={tProject(`status.${p.status}`)}
