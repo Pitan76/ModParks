@@ -1054,3 +1054,35 @@ export const deletedRecords = sqliteTable("deleted_records", {
 }));
 
 export type DeletedRecord = typeof deletedRecords.$inferSelect;
+
+// ─── DDoS Defense (自動DDoS防御システム) ──────────────────────────────────────
+
+export const ddosSlices = sqliteTable("ddos_slices", {
+  sliceTime:          integer("slice_time").notNull(),       // 10秒単位のEpoch秒
+  isolateId:          text("isolate_id").notNull(),          // Worker IsolateのランダムID
+  requestCount:       integer("request_count").notNull(),    // 期間内の総アクセス数
+  downloadCount:      integer("download_count").notNull(),   // /api/download アクセス数
+  uniqueIpCount:      integer("unique_ip_count").notNull(),  // Isolate内ユニークIP数 (上限1000)
+  uniqueCountryCount: integer("unique_country_count").notNull(), // Isolate内ユニーク国数
+  topSlug:            text("top_slug"),                       // 最多アクセスのslug
+  topSlugCount:       integer("top_slug_count"),              // そのslugへのアクセス数
+}, (t) => [
+  primaryKey({ columns: [t.sliceTime, t.isolateId] })
+]);
+
+export type DdosSlice = typeof ddosSlices.$inferSelect;
+
+export const ddosState = sqliteTable("ddos_state", {
+  stateKey:             text("state_key").primaryKey(),       // 値は常に 'global'
+  currentState:         text("current_state").notNull(),      // ステータス名
+  attackDetectedAt:     integer("attack_detected_at").notNull(),
+  underAttackEnabledAt: integer("under_attack_enabled_at").notNull(),
+  scheduledDisableAt:   integer("scheduled_disable_at").notNull(),
+  cooldownUntil:        integer("cooldown_until").notNull(),
+  updatedAt:            integer("updated_at").notNull(),
+  protectionDuration:   integer("protection_duration").notNull(), // 防護適用時間 (ms)
+  lastNormalAt:         integer("last_normal_at").notNull(),  // 最終 NORMAL 遷移時刻 (ms)
+});
+
+export type DdosStateModel = typeof ddosState.$inferSelect;
+
