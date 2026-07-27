@@ -284,30 +284,9 @@ async function evaluateAndTriggerDdos(env, sliceTime) {
 }
 
 // 統計のフラッシュ
-async function flushIsolateStats(env, sliceTime) {
+async function flushIsolateStats(env, sliceTime, stats) {
   if (isFlushing) return;
   isFlushing = true;
-
-  const requestCount = localRequestCount;
-  const downloadCount = localDownloadCount;
-  const uniqueIpCount = localIPs.size;
-  const uniqueCountryCount = localCountries.size;
-
-  let topSlug = null;
-  let topSlugCount = 0;
-  for (const [slug, count] of Object.entries(localSlugs)) {
-    if (count > topSlugCount) {
-      topSlug = slug;
-      topSlugCount = count;
-    }
-  }
-
-  // リセット
-  localRequestCount = 0;
-  localDownloadCount = 0;
-  localIPs.clear();
-  localCountries.clear();
-  localSlugs = {};
 
   try {
     // ON CONFLICT DO UPDATE
@@ -322,10 +301,10 @@ async function flushIsolateStats(env, sliceTime) {
          top_slug = CASE WHEN excluded.top_slug_count > top_slug_count THEN excluded.top_slug ELSE top_slug END,
          top_slug_count = max(top_slug_count, excluded.top_slug_count)`
     ).bind(
-      sliceTime, ISOLATE_ID, requestCount, downloadCount, uniqueIpCount, uniqueCountryCount, topSlug, topSlugCount
+      sliceTime, ISOLATE_ID, stats.requestCount, stats.downloadCount, stats.uniqueIpCount, stats.uniqueCountryCount, stats.topSlug, stats.topSlugCount
     ).run();
 
-    console.log(`[DDOS-GUARD] Flushed stats: reqs=${requestCount}, dls=${downloadCount}, IPs=${uniqueIpCount}, top=${topSlug}(${topSlugCount})`);
+    console.log(`[DDOS-GUARD] Flushed stats for bucket=${sliceTime}: reqs=${stats.requestCount}, dls=${stats.downloadCount}, IPs=${stats.uniqueIpCount}, top=${stats.topSlug}(${stats.topSlugCount})`);
     
     // フラッシュに成功したIsolateのみがその直後に評価を実行する (D1読み込み負荷軽減)
     await evaluateAndTriggerDdos(env, sliceTime);
@@ -335,6 +314,31 @@ async function flushIsolateStats(env, sliceTime) {
   } finally {
     isFlushing = false;
   }
+}
+
+function getAndResetStats() {
+  const requestCount = localRequestCount;
+  const downloadCount = localDownloadCount;
+  const uniqueIpCount = localIPs.size;
+  const uniqueCountryCount = localCountries.size;
+
+  let topSlug = null;
+  let topSlugCount = 0;
+  for (const [slug, count] of Object.entries(localSlugs)) {
+    if (count > topSlugCount) {
+      topSlug = slug;
+      topSlugCount = count;
+    }
+  }
+
+  // Reset
+  localRequestCount = 0;
+  localDownloadCount = 0;
+  localIPs.clear();
+  localCountries.clear();
+  localSlugs = {};
+
+  return { requestCount, downloadCount, uniqueIpCount, uniqueCountryCount, topSlug, topSlugCount };
 }
 
 // 定期監視とクリーンアップ (毎分Cron)
@@ -468,6 +472,11 @@ export default {
           const bucket = Math.floor(now / 10000) * 10; // 10秒バケット
           
           if (currentBucket !== bucket) {
+            // バケット境界を跨いだら、未フラッシュの統計があればフラッシュする
+            if (localRequestCount > 0) {
+              const stats = getAndResetStats();
+              ctx.waitUntil(flushIsolateStats(env, currentBucket, stats));
+            }
             currentBucket = bucket;
             localRequestCount = 0;
             localDownloadCount = 0;
@@ -504,7 +513,8 @@ export default {
             // 警告閾値: 30リクエスト かつ 前回のフラッシュから5秒以上経過で非同期フラッシュ
             if (localRequestCount >= 30 && (now - lastFlushTime >= 5000)) {
               lastFlushTime = now;
-              ctx.waitUntil(flushIsolateStats(env, bucket));
+              const stats = getAndResetStats();
+              ctx.waitUntil(flushIsolateStats(env, bucket, stats));
             }
           }
         }
@@ -522,7 +532,7 @@ export default {
     // DDoS用のCronとクリーンアップ処理の実行
     await handleDdosCron(controller, env, ctx);
 
-    // 既存の同期等 Next.js cron ルートの呼び出し
+    // 既存 of Cron routes
     const path = CRON_ROUTES[controller.cron];
     if (path) {
       console.log(`Cron triggered (${controller.cron}): invoking ${path}`);
