@@ -48,7 +48,11 @@ export const authConfig = {
         const dbUser = await db.select().from(users).where(drizzleEq(users.email, user.email as string)).get();
         
         if (account?.provider === "resend" && !dbUser) return "/ja/register";
-        if (dbUser?.deletedAt) return false;
+        if (dbUser?.deletedAt || dbUser?.suspendedAt) return false;
+
+        if (dbUser?.deactivatedAt) {
+          await db.update(users).set({ deactivatedAt: null }).where(eq(users.id, dbUser.id)).run();
+        }
 
         if (account?.provider === "github" && profile?.login && dbUser) {
           const { generateUniqueUsername } = await import("@/lib/utils/username");
@@ -92,6 +96,8 @@ export const authConfig = {
             const dbUser = await db.select({
               role: users.role,
               deletedAt: users.deletedAt,
+              deactivatedAt: users.deactivatedAt,
+              suspendedAt: users.suspendedAt,
               avatarUrl: userProfiles.avatarUrl,
               displayName: userProfiles.displayName,
               username: userProfiles.username,
@@ -105,6 +111,8 @@ export const authConfig = {
             if (dbUser) {
               token.role = dbUser.role as string;
               token.isDeleted = !!dbUser.deletedAt;
+              token.isDeactivated = !!dbUser.deactivatedAt;
+              token.isSuspended = !!dbUser.suspendedAt;
               if (dbUser.avatarUrl) token.avatarUrl = dbUser.avatarUrl;
               if (dbUser.displayName) token.displayName = dbUser.displayName;
               if (dbUser.username) token.username = dbUser.username;
@@ -129,7 +137,7 @@ export const authConfig = {
     },
     async session({ session, token }: { session: any, token?: any }) {
       if (session.user) {
-        if (token?.isDeleted) return { ...session, user: undefined } as any;
+        if (token?.isDeleted || token?.isDeactivated || token?.isSuspended) return { ...session, user: undefined } as any;
         
         session.user.id = (token.sub ?? token.id) as string;
         session.user.username = (token.username ?? null) as string | null;

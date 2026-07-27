@@ -27,7 +27,7 @@ interface PublicProfileProps {
 export async function generateMetadata({ params }: PublicProfileProps) {
   const { locale, username } = await params;
   const user = await getProfileMeta(username);
-  if (!user || user.deletedAt) return { title: "Not Found" };
+  if (!user || user.deletedAt || user.suspendedAt || user.deactivatedAt) return { title: "Not Found" };
 
   const title = `${user.displayName || user.username} (@${user.username})`;
   const description = user.bio || `${user.displayName || user.username} のプロフィールページです。`;
@@ -67,6 +67,26 @@ export default async function PublicProfilePage({ params, searchParams }: Public
       <Container maxWidth="md" sx={{ py: 10, textAlign: "center" }}>
         <Typography variant="h5" color="text.secondary">
           {t("accountDeleted")}
+        </Typography>
+      </Container>
+    );
+  }
+
+  if (user.suspendedAt) {
+    return (
+      <Container maxWidth="md" sx={{ py: 10, textAlign: "center" }}>
+        <Typography variant="h5" color="text.secondary">
+          {t("accountSuspended")}
+        </Typography>
+      </Container>
+    );
+  }
+
+  if (user.deactivatedAt) {
+    return (
+      <Container maxWidth="md" sx={{ py: 10, textAlign: "center" }}>
+        <Typography variant="h5" color="text.secondary">
+          {t("accountDeactivated")}
         </Typography>
       </Container>
     );

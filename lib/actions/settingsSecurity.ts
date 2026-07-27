@@ -136,6 +136,35 @@ export const deleteAccount = async (passwordOrToken?: string) => {
 };
 
 /**
+ * アカウントの自己無効化を行う Server Action。
+ */
+export const deactivateAccount = async (passwordOrToken?: string) => {
+  const { db, userId } = await getAuthenticatedDb();
+
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+  if (!user) return { success: false };
+
+  let isAuthorized = false;
+
+  if (user.passwordHash) {
+    if (!passwordOrToken) return { error: "errorWrongPassword" };
+    isAuthorized = await comparePassword(passwordOrToken, user.passwordHash);
+  } else {
+    if (!user.twoFactorEnabled) return { error: "errorSetPasswordFirst" };
+  }
+
+  if (!isAuthorized && user.twoFactorSecret && passwordOrToken) {
+    if (await validateTotpToken(user.twoFactorSecret, passwordOrToken)) isAuthorized = true;
+  }
+
+  if ((user.passwordHash || user.twoFactorEnabled) && !isAuthorized) return { error: "UNAUTHORIZED" };
+
+  await db.update(users).set({ deactivatedAt: new Date() }).where(eq(users.id, userId));
+
+  return { success: true };
+};
+
+/**
  * TOTP(2段階認証)シークレットキーと登録用URIを生成する Server Action。
  */
 export const generateTotpSecret = async () => {

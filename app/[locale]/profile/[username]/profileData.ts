@@ -16,6 +16,8 @@ export async function getProfileMeta(username: string) {
       bio: userProfiles.bio,
       avatarUrl: userProfiles.avatarUrl,
       deletedAt: users.deletedAt,
+      deactivatedAt: users.deactivatedAt,
+      suspendedAt: users.suspendedAt,
     })
     .from(users)
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
@@ -35,6 +37,8 @@ function fetchProfileUser(db: ReturnType<typeof getDb>, username: string) {
       githubUsername: userProfiles.githubUsername,
       custom: userSettings.custom,
       deletedAt: users.deletedAt,
+      deactivatedAt: users.deactivatedAt,
+      suspendedAt: users.suspendedAt,
     })
     .from(users)
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))

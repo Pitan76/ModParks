@@ -100,6 +100,10 @@ export const authProviders = [
           console.log("[Auth] User is deleted:", credentials.email);
           return null;
         }
+        if (user.suspendedAt) {
+          console.log("[Auth] User is suspended:", credentials.email);
+          return null;
+        }
 
         const { comparePassword } = await import("@/lib/services/auth");
         const passwordsMatch = await comparePassword(credentials.password as string, user.passwordHash);

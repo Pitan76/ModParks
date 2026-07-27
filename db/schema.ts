@@ -29,6 +29,8 @@ export const users = sqliteTable("users", {
   twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).notNull().default(false),
   twoFactorSecret: text("two_factor_secret"),
   deletedAt:     integer("deleted_at", { mode: "timestamp" }),
+  deactivatedAt: integer("deactivated_at", { mode: "timestamp" }),
+  suspendedAt:   integer("suspended_at", { mode: "timestamp" }),
   createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
@@ -1005,6 +1007,8 @@ export const moderationAudit = sqliteTable("moderation_audit", {
       "role_change",
       "scan_appeal_approve",
       "scan_appeal_reject",
+      "suspend_user",
+      "unsuspend_user",
     ],
   }).notNull(),
   /** 操作対象の識別子（projectId / userId / versionId など） */

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
-import { changeUsername, changeEmail, changePassword, deleteAccount } from "@/lib/actions/settingsSecurity";
+import { changeUsername, changeEmail, changePassword, deleteAccount, deactivateAccount } from "@/lib/actions/settingsSecurity";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import FormTextField from "@/components/ui/form/FormTextField";
@@ -39,6 +39,9 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [deletePasswordOrToken, setDeletePasswordOrToken] = useState("");
+  const [deactivateOpen, setDeactivateOpen] = useState(false);
+  const [isDeactivatingAccount, setIsDeactivatingAccount] = useState(false);
+  const [deactivatePasswordOrToken, setDeactivatePasswordOrToken] = useState("");
 
   const showAccMsg = (type: "success" | "error", key: string) => flash(type, t(`account.${key}`));
 
@@ -86,6 +89,19 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
       setDeleteOpen(false);
     }
     setIsDeletingAccount(false);
+  };
+
+  const handleDeactivateAccount = async () => {
+    setIsDeactivatingAccount(true);
+    const res = await deactivateAccount(deactivatePasswordOrToken);
+    if (res.success) {
+      setDeactivateOpen(false);
+      signOut({ callbackUrl: "/" });
+    } else {
+      showAccMsg("error", res.error || "errorWrongPassword");
+      setDeactivateOpen(false);
+    }
+    setIsDeactivatingAccount(false);
   };
 
   const handleExportData = (format: string) => {
@@ -161,6 +177,14 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
 
       <Divider sx={{ my: 4 }} />
 
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" color="warning.main" sx={{ mb: 1 }}>{t("account.deactivateAccount")}</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.deactivateAccountDesc")}</Typography>
+        <Button variant="outlined" color="warning" onClick={() => setDeactivateOpen(true)}>{t("account.deactivateBtn")}</Button>
+      </Box>
+
+      <Divider sx={{ my: 4 }} />
+
       <Box>
         <Typography variant="h6" color="error" sx={{ mb: 1 }}>{t("account.deleteAccount")}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.deleteAccountDesc")}</Typography>
@@ -195,6 +219,38 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeletePasswordOrToken(e.target.value)}
           placeholder={tAuth("fields.passwordOrToken")}
           disabled={isDeletingAccount}
+          autoComplete="off"
+        />
+      </AbstractDialog>
+
+      <AbstractDialog 
+        open={deactivateOpen} 
+        onClose={() => !isDeactivatingAccount && setDeactivateOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        title={t("account.deactivateAccount")}
+        titleProps={{ sx: { color: "warning.main", fontWeight: "bold" } }}
+        onCancel={() => setDeactivateOpen(false)}
+        onConfirm={handleDeactivateAccount}
+        confirmText={t("account.deactivateBtn")}
+        confirmColor="warning"
+        isSubmitting={isDeactivatingAccount}
+        confirmDisabled={!deactivatePasswordOrToken}
+        cancelText={tCommon("cancel")}
+      >
+        <DialogContentText sx={{ mb: 2 }}>{t("account.deactivateAccountConfirm")}</DialogContentText>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          アカウントを無効化するには、パスワード（または2要素認証コード）を入力してください。
+        </Typography>
+        <FormTextField
+          autoFocus
+          fullWidth
+          variant="outlined"
+          type="password"
+          value={deactivatePasswordOrToken}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeactivatePasswordOrToken(e.target.value)}
+          placeholder={tAuth("fields.passwordOrToken")}
+          disabled={isDeactivatingAccount}
           autoComplete="off"
         />
       </AbstractDialog>

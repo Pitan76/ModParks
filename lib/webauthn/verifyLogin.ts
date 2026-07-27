@@ -62,7 +62,7 @@ export const verifyPasskeyLogin = async (response: AuthenticationResponseJSON): 
     .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(users.id, auth.userId))
     .get();
-  if (!record?.users || record.users.deletedAt) return null;
+  if (!record?.users || record.users.deletedAt || record.users.suspendedAt) return null;
 
   const user = record.users;
   const profile = record.user_profiles;
