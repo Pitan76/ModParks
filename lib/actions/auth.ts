@@ -22,6 +22,11 @@ export async function sendRegistrationEmail(formData: FormData) {
 
   if (!email) return { error: "emailRequired" };
 
+  const { isBlockedEmailDomain } = await import("@/lib/validations");
+  if (isBlockedEmailDomain(email, appSettings.blockedEmailDomains)) {
+    return { error: "errorDisposableEmail" };
+  }
+
   const db = await getDatabase();
   const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
   if (existingUser) {

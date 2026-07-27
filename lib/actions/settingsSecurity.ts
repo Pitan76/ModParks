@@ -61,6 +61,13 @@ export const changeEmail = async (newEmail: string, password?: string) => {
   const existing = await db.select().from(users).where(eq(users.email, newEmail)).get();
   if (existing) return { error: "errorEmailTaken" };
 
+  const { getAppSettings } = await import("@/lib/config/readSettings");
+  const appSettings = await getAppSettings();
+  const { isBlockedEmailDomain } = await import("@/lib/validations");
+  if (isBlockedEmailDomain(newEmail, appSettings.blockedEmailDomains)) {
+    return { error: "errorDisposableEmail" };
+  }
+
   await db.update(users).set({ email: newEmail }).where(eq(users.id, userId));
   revalidatePath("/settings");
   return { success: true };

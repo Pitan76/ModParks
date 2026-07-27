@@ -669,7 +669,8 @@
       "usernameTaken": "This username is already taken.",
       "submitFailed": "An error occurred.",
       "unauthorized": "Unauthorized access.",
-      "registrationDisabled": "New registrations are currently disabled."
+      "registrationDisabled": "New registrations are currently disabled.",
+      "errorDisposableEmail": "This email address (disposable email) is blocked and cannot be used."
     }
   },
   "Admin": {
@@ -887,7 +888,9 @@
       "mailFromAddress": "Sender email address",
       "mailFromAddressHelp": "Must be on a domain verified in Resend, otherwise sending will fail.",
       "mailFromName": "Sender display name",
-      "mailFromNameHelp": "e.g. ModParks. Leave blank to send with the address only."
+      "mailFromNameHelp": "e.g. ModParks. Leave blank to send with the address only.",
+      "blockedEmailDomains": "Blocked email domains",
+      "blockedEmailDomainsHelp": "List of domains to block (comma/space-separated, e.g. tempmail.com, 10minutemail.com)"
     },
     "reports": {
       "title": "Report Management",
@@ -1247,6 +1250,7 @@
       "errorIdTaken": "This ID is already taken",
       "errorIdFormat": "ID can only contain letters, numbers, hyphens, and underscores",
       "errorEmailTaken": "This email address is already in use",
+      "errorDisposableEmail": "This email address (disposable email) is blocked and cannot be used",
       "updateBtn": "Update",
       "deleteBtn": "Delete Account",
       "passwordMismatch": "New passwords do not match",

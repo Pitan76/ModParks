@@ -176,3 +176,25 @@ export const createIdeaCommentSchema = z.object({
 
 export type CreateIdeaInput = z.infer<typeof createIdeaSchema>;
 export type CreateIdeaCommentInput = z.infer<typeof createIdeaCommentSchema>;
+
+/**
+ * メールアドレスのドメインがブロックリストに登録されているか判定する
+ */
+export function isBlockedEmailDomain(email: string, blockedDomainsString: string): boolean {
+  if (!email || !blockedDomainsString) return false;
+  try {
+    const domain = email.split("@")[1]?.toLowerCase();
+    if (!domain) return false;
+
+    const blockedDomains = blockedDomainsString
+      .split(/[\s,]+/)
+      .map((d) => d.trim().toLowerCase())
+      .filter(Boolean);
+
+    return blockedDomains.some(
+      (d) => domain === d || domain.endsWith(`.${d}`)
+    );
+  } catch {
+    return false;
+  }
+}

@@ -41,6 +41,11 @@ export const authConfig = {
   callbacks: {
     async signIn({ user, account, profile }: { user: any, account?: any, profile?: any }) {
       if (user?.email) {
+        const { getAppSettings } = await import("@/lib/config/readSettings");
+        const appSettings = await getAppSettings();
+        const { isBlockedEmailDomain } = await import("@/lib/validations");
+        if (isBlockedEmailDomain(user.email as string, appSettings.blockedEmailDomains)) return false;
+
         const { getDatabase } = await import("@/lib/db");
         const { users, userProfiles } = await import("@/db/schema");
         const { eq: drizzleEq } = await import("drizzle-orm");

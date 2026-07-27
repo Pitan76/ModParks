@@ -677,7 +677,8 @@
       "usernameTaken": "このユーザーネームは既に使用されています。",
       "submitFailed": "エラーが発生しました。",
       "unauthorized": "認証に失敗しました。",
-      "registrationDisabled": "現在、新規ユーザー登録を停止しています。"
+      "registrationDisabled": "現在、新規ユーザー登録を停止しています。",
+      "errorDisposableEmail": "このメールアドレス（使い捨てメール等）は登録に使用できません。"
     }
   },
   "Admin": {
@@ -873,7 +874,9 @@
       "mailFromAddress": "送信元メールアドレス",
       "mailFromAddressHelp": "Resend で検証済みのドメインのアドレスを指定してください。未検証だと送信に失敗します。",
       "mailFromName": "送信元の表示名",
-      "mailFromNameHelp": "例: ModParks。空にするとアドレスのみで送信します。"
+      "mailFromNameHelp": "例: ModParks。空にするとアドレスのみで送信します。",
+      "blockedEmailDomains": "拒否するメールアドレスドメイン",
+      "blockedEmailDomainsHelp": "新規ユーザー登録やアドレス変更で拒否する使い捨て等のドメイン（カンマやスペース区切り、例: tempmail.com, 10minutemail.com）"
     },
     "projects": {
       "title": "プロジェクト管理",
@@ -1255,6 +1258,7 @@
       "errorIdTaken": "そのIDはすでに使われています",
       "errorIdFormat": "IDは半角英数字とハイフン、アンダースコアのみ使用できます",
       "errorEmailTaken": "そのメールアドレスはすでに使われています",
+      "errorDisposableEmail": "このメールアドレス（使い捨てメール等）は登録に使用できません",
       "updateBtn": "更新する",
       "deleteBtn": "退会する",
       "passwordMismatch": "新しいパスワードが一致しません",

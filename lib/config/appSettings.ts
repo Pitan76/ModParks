@@ -40,6 +40,8 @@ export const appSettingsSchema = z.object({
   mailFromAddress: z.email().default("no-reply@modparks.pitan76.net"),
   /** 送信元の表示名。空にするとアドレスのみで送信します */
   mailFromName: z.string().max(64).default("ModParks"),
+  /** ブロックするメールアドレスドメイン */
+  blockedEmailDomains: z.string().default(""),
 });
 
 /** `"名前 <address>"` 形式の From ヘッダを組み立てる */
@@ -71,6 +73,7 @@ export const APP_SETTING_FIELDS: AppSettingField[] = [
   { key: "driveBackupEnabled", type: "boolean", labelKey: "driveBackupEnabled", helpKey: "driveBackupEnabledHelp" },
   { key: "mailFromAddress", type: "string", labelKey: "mailFromAddress", helpKey: "mailFromAddressHelp" },
   { key: "mailFromName", type: "string", labelKey: "mailFromName", helpKey: "mailFromNameHelp" },
+  { key: "blockedEmailDomains", type: "string", labelKey: "blockedEmailDomains", helpKey: "blockedEmailDomainsHelp" },
 ];
 
 /**
