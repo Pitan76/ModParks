@@ -144,13 +144,13 @@ export default function DdosPanel({
           </Box>
 
           <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Card variant="outlined" sx={{ p: 2 }}>
                 <Typography variant="caption" color="text.secondary">{t("ddosCurrentState")}</Typography>
                 <Typography variant="h6" sx={{ mt: 0.5, fontWeight: "bold" }}>{state.currentState}</Typography>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Card variant="outlined" sx={{ p: 2 }}>
                 <Typography variant="caption" color="text.secondary">
                   {state.currentState === "UNDER_ATTACK" ? t("ddosActiveRemaining") : t("ddosCooldownRemaining")}
@@ -160,7 +160,7 @@ export default function DdosPanel({
                 </Typography>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Card variant="outlined" sx={{ p: 2 }}>
                 <Typography variant="caption" color="text.secondary">{t("ddosProtectionDuration")}</Typography>
                 <Typography variant="h6" sx={{ mt: 0.5, fontWeight: "bold" }}>
@@ -186,7 +186,7 @@ export default function DdosPanel({
                     label={t("ddosDurationInput")}
                     value={durationMin}
                     onChange={(e) => setDurationMin(Math.max(1, Number(e.target.value)))}
-                    inputProps={{ min: 1, max: 1440 }}
+                    slotProps={{ htmlInput: { min: 1, max: 1440 } }}
                     size="small"
                     sx={{ width: 150 }}
                   />
@@ -240,7 +240,7 @@ export default function DdosPanel({
               helperText={t("ddosThresholdDownloadRatioHelp")}
               value={settings.ddosThresholdDownloadRatio}
               onChange={(e) => setSettings({ ...settings, ddosThresholdDownloadRatio: Number(e.target.value) })}
-              inputProps={{ step: 0.05, min: 0, max: 1 }}
+              slotProps={{ htmlInput: { step: 0.05, min: 0, max: 1 } }}
               fullWidth
             />
 
@@ -250,7 +250,7 @@ export default function DdosPanel({
               helperText={t("ddosThresholdTopSlugRatioHelp")}
               value={settings.ddosThresholdTopSlugRatio}
               onChange={(e) => setSettings({ ...settings, ddosThresholdTopSlugRatio: Number(e.target.value) })}
-              inputProps={{ step: 0.05, min: 0, max: 1 }}
+              slotProps={{ htmlInput: { step: 0.05, min: 0, max: 1 } }}
               fullWidth
             />
 
@@ -260,7 +260,7 @@ export default function DdosPanel({
               helperText={t("ddosThresholdIpRepeatRateHelp")}
               value={settings.ddosThresholdIpRepeatRate}
               onChange={(e) => setSettings({ ...settings, ddosThresholdIpRepeatRate: Number(e.target.value) })}
-              inputProps={{ step: 0.5, min: 1 }}
+              slotProps={{ htmlInput: { step: 0.5, min: 1 } }}
               fullWidth
             />
 

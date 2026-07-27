@@ -50,7 +50,17 @@ export default async function AdminConfigPage({ params }: { params: Promise<{ lo
           />
         }
         taxonomy={<ConfigClient initialTags={allTags} initialPlatforms={allPlatforms} />}
-        ddos={<DdosPanel initialState={ddosStateVal} initialSettings={appSettings} />}
+        ddos={<DdosPanel initialState={ddosStateVal ?? {
+          stateKey: "global",
+          currentState: "NORMAL",
+          attackDetectedAt: 0,
+          underAttackEnabledAt: 0,
+          scheduledDisableAt: 0,
+          cooldownUntil: 0,
+          protectionDuration: 600000,
+          lastNormalAt: 0,
+          updatedAt: 0,
+        }} initialSettings={appSettings} />}
       />
     </Box>
   );
