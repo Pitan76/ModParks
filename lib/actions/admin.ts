@@ -1,7 +1,7 @@
 "use server";
 
 import { getAdminDb } from "@/lib/auth-helpers";
-import { users, settingsAudit, backupAudit } from "@/db/schema";
+import { users, settingsAudit, backupAudit, ddosState } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
@@ -208,4 +208,115 @@ export async function getBackupAudits(limit = 50, offset = 0) {
     .get();
 
   return { logs, total: countRes?.count ?? 0 };
+}
+
+// ─── Cloudflare WAF PATCH Action ───
+async function toggleWaf(enable: boolean, topSlug = "") {
+  const isDryRun = process.env.DRY_RUN === "true";
+  console.log(`[DDOS-ACTION] toggleWaf: enable=${enable}, topSlug=${topSlug}, dryRun=${isDryRun}`);
+
+  if (isDryRun) {
+    return { success: true };
+  }
+
+  const token = process.env.CF_WAF_API_TOKEN;
+  const zoneId = process.env.CF_ZONE_ID;
+  const rulesetId = process.env.CF_RULESET_ID;
+  const ruleId = process.env.CF_WAF_RULE_ID;
+
+  if (!token || !zoneId || !rulesetId || !ruleId) {
+    console.error("[DDOS-ACTION] Missing Cloudflare API configuration environment variables");
+    return { success: false, error: "Missing config" };
+  }
+
+  const url = `https://api.cloudflare.com/client/v4/zones/${zoneId}/rulesets/${rulesetId}/rules/${ruleId}`;
+
+  const isSafeSlug = topSlug && /^[a-z0-9-]{1,64}$/.test(topSlug);
+  const expression = (enable && isSafeSlug)
+    ? `(http.request.uri.path contains "/api/download" and http.request.uri.args["slug"][0] eq "${topSlug}")`
+    : `(http.request.uri.path contains "/api/download")`;
+
+  const body = enable
+    ? { enabled: true, expression }
+    : { enabled: false, expression: `(http.request.uri.path eq "/dev/null")` };
+
+  try {
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    const data: any = await res.json();
+    if (!res.ok || !data.success) {
+      const errMsg = data.errors ? JSON.stringify(data.errors) : `HTTP ${res.status}`;
+      return { success: false, error: errMsg };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getDdosStateAction() {
+  const { db } = await getAdminDb();
+  let state = await db.select().from(ddosState).where(eq(ddosState.stateKey, "global")).get();
+  if (!state) {
+    const now = Date.now();
+    await db.insert(ddosState).values({
+      stateKey: "global",
+      currentState: "NORMAL",
+      attackDetectedAt: 0,
+      underAttackEnabledAt: 0,
+      scheduledDisableAt: 0,
+      cooldownUntil: 0,
+      updatedAt: now,
+      protectionDuration: 600000,
+      lastNormalAt: 0,
+    }).run();
+    state = await db.select().from(ddosState).where(eq(ddosState.stateKey, "global")).get();
+  }
+  return state;
+}
+
+export async function toggleManualUnderAttack(enable: boolean, durationMinutes = 10) {
+  const { db } = await getAdminDb();
+  const now = Date.now();
+
+  const apiRes = await toggleWaf(enable, "");
+  if (!apiRes.success) {
+    return { error: `Cloudflare API error: ${apiRes.error}` };
+  }
+
+  if (enable) {
+    const durationMs = durationMinutes * 60 * 1000;
+    const scheduledDisableAt = now + durationMs;
+
+    await db.update(ddosState)
+      .set({
+        currentState: "UNDER_ATTACK",
+        attackDetectedAt: now,
+        underAttackEnabledAt: now,
+        scheduledDisableAt: scheduledDisableAt,
+        protectionDuration: durationMs,
+        updatedAt: now,
+      })
+      .where(eq(ddosState.stateKey, "global"))
+      .run();
+  } else {
+    await db.update(ddosState)
+      .set({
+        currentState: "NORMAL",
+        updatedAt: now,
+        scheduledDisableAt: 0,
+        protectionDuration: 600000,
+      })
+      .where(eq(ddosState.stateKey, "global"))
+      .run();
+  }
+
+  revalidatePath("/admin/config");
+  return { success: true };
 }

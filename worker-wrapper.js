@@ -154,6 +154,29 @@ async function getDdosState(db) {
   return { currentState: "NORMAL", lastNormalAt: 0, protectionDuration: 600000 };
 }
 
+// KV から動的設定を取得
+async function getDdosConfig(env) {
+  try {
+    const raw = await env.SETTINGS_KV.get("app:settings", "json");
+    return {
+      thresholdRequests: raw?.ddosThresholdRequests ?? 1000,
+      thresholdDownloadRatio: raw?.ddosThresholdDownloadRatio ?? 0.8,
+      thresholdTopSlugRatio: raw?.ddosThresholdTopSlugRatio ?? 0.75,
+      thresholdIpRepeatRate: raw?.ddosThresholdIpRepeatRate ?? 5.0,
+      defaultDuration: raw?.ddosDefaultProtectionDuration ?? 600000,
+    };
+  } catch (e) {
+    console.error("[DDOS-GUARD] Failed to read app settings from KV:", e);
+    return {
+      thresholdRequests: 1000,
+      thresholdDownloadRatio: 0.8,
+      thresholdTopSlugRatio: 0.75,
+      thresholdIpRepeatRate: 5.0,
+      defaultDuration: 600000,
+    };
+  }
+}
+
 // 判定処理とWAF有効化
 async function evaluateAndTriggerDdos(env, sliceTime) {
   if (isTransitioning) return;
@@ -191,12 +214,14 @@ async function evaluateAndTriggerDdos(env, sliceTime) {
 
     console.log(`[DDOS-GUARD] Evaluation: reqs=${totalRequests}, dls=${totalDownloads}(${(downloadRatio*100).toFixed(1)}%), dispersion=${dispersionScore}, repeatRate=${ipRepeatRate.toFixed(2)}, topSlug=${topSlug}(${(topSlugRatio*100).toFixed(1)}%)`);
 
+    const config = await getDdosConfig(env);
+
     // 攻撃検知5条件の検証
     const isAttack =
-      totalRequests >= 1000 &&
-      downloadRatio >= 0.8 &&
-      topSlugRatio >= 0.75 &&
-      ipRepeatRate >= 5.0;
+      totalRequests >= config.thresholdRequests &&
+      downloadRatio >= config.thresholdDownloadRatio &&
+      topSlugRatio >= config.thresholdTopSlugRatio &&
+      ipRepeatRate >= config.thresholdIpRepeatRate;
 
     if (isAttack) {
       console.log(`[DDOS-GUARD] Attack detected! Reqs=${totalRequests}, IPrepeat=${ipRepeatRate.toFixed(2)}, slug=${topSlug}`);
@@ -212,7 +237,7 @@ async function evaluateAndTriggerDdos(env, sliceTime) {
         
         // 直近状態の再取得 (最新の protection_duration / last_normal_at のため)
         const currentStateRecord = await env.DB.prepare("SELECT protection_duration, last_normal_at FROM ddos_state WHERE state_key = 'global'").first();
-        let protectionDuration = 600000; // 10分
+        let protectionDuration = config.defaultDuration;
         if (currentStateRecord) {
           const lastNormal = currentStateRecord.last_normal_at;
           const currentDuration = currentStateRecord.protection_duration;

@@ -56,7 +56,7 @@ export default function AppSettingsPanel({ initialSettings }: { initialSettings:
         )}
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {APP_SETTING_FIELDS.map((field) =>
+          {APP_SETTING_FIELDS.filter((f) => !f.key.startsWith("ddos")).map((field) =>
             field.type === "boolean" ? (
               <Box key={field.key}>
                 <FormControlLabel

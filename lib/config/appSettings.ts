@@ -42,6 +42,11 @@ export const appSettingsSchema = z.object({
   mailFromName: z.string().max(64).default("ModParks"),
   /** ブロックするメールアドレスドメイン */
   blockedEmailDomains: z.string().default(""),
+  ddosThresholdRequests: z.number().int().default(1000),
+  ddosThresholdDownloadRatio: z.number().default(0.8),
+  ddosThresholdTopSlugRatio: z.number().default(0.75),
+  ddosThresholdIpRepeatRate: z.number().default(5.0),
+  ddosDefaultProtectionDuration: z.number().int().default(600000),
 });
 
 /** `"名前 <address>"` 形式の From ヘッダを組み立てる */
@@ -74,6 +79,11 @@ export const APP_SETTING_FIELDS: AppSettingField[] = [
   { key: "mailFromAddress", type: "string", labelKey: "mailFromAddress", helpKey: "mailFromAddressHelp" },
   { key: "mailFromName", type: "string", labelKey: "mailFromName", helpKey: "mailFromNameHelp" },
   { key: "blockedEmailDomains", type: "string", labelKey: "blockedEmailDomains", helpKey: "blockedEmailDomainsHelp" },
+  { key: "ddosThresholdRequests", type: "number", labelKey: "ddosThresholdRequests", helpKey: "ddosThresholdRequestsHelp" },
+  { key: "ddosThresholdDownloadRatio", type: "number", labelKey: "ddosThresholdDownloadRatio", helpKey: "ddosThresholdDownloadRatioHelp" },
+  { key: "ddosThresholdTopSlugRatio", type: "number", labelKey: "ddosThresholdTopSlugRatio", helpKey: "ddosThresholdTopSlugRatioHelp" },
+  { key: "ddosThresholdIpRepeatRate", type: "number", labelKey: "ddosThresholdIpRepeatRate", helpKey: "ddosThresholdIpRepeatRateHelp" },
+  { key: "ddosDefaultProtectionDuration", type: "number", labelKey: "ddosDefaultProtectionDuration", helpKey: "ddosDefaultProtectionDurationHelp" },
 ];
 
 /**

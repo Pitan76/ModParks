@@ -11,16 +11,18 @@ export default function ConfigTabs({
   workerVars,
   secrets,
   taxonomy,
+  ddos,
 }: {
   appSettings: ReactNode;
   workerVars: ReactNode;
   secrets: ReactNode;
   taxonomy: ReactNode;
+  ddos: ReactNode;
 }) {
   const t = useTranslations("Admin.config");
   const [tab, setTab] = useState(0);
 
-  const panels = [appSettings, workerVars, secrets, taxonomy];
+  const panels = [appSettings, workerVars, secrets, taxonomy, ddos];
 
   return (
     <Box>
@@ -29,6 +31,7 @@ export default function ConfigTabs({
         <Tab label={t("workerVars")} />
         <Tab label={t("secrets")} />
         <Tab label={t("tagsManagement")} />
+        <Tab label={t("ddosDefense")} />
       </Tabs>
       {panels.map((panel, i) => (
         <Box key={i} hidden={tab !== i}>

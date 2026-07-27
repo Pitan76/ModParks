@@ -6,11 +6,13 @@ import { tags, platforms } from "@/db/schema";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { listWorkerVars } from "@/lib/actions/workerVars";
 import { listSecrets } from "@/lib/actions/workerSecrets";
+import { getDdosStateAction } from "@/lib/actions/admin";
 import ConfigClient from "./ConfigClientLazy";
 import ConfigTabs from "./ConfigTabs";
 import AppSettingsPanel from "./AppSettingsPanel";
 import WorkerVarsPanel from "./WorkerVarsPanel";
 import SecretsPanel from "./SecretsPanel";
+import DdosPanel from "./DdosPanel";
 
 export default async function AdminConfigPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -19,12 +21,13 @@ export default async function AdminConfigPage({ params }: { params: Promise<{ lo
 
   const { db } = await getAdminDb();
 
-  const [allTags, allPlatforms, appSettings, varsResult, secretsResult] = await Promise.all([
+  const [allTags, allPlatforms, appSettings, varsResult, secretsResult, ddosStateVal] = await Promise.all([
     db.select().from(tags).all(),
     db.select().from(platforms).all(),
     getAppSettings(),
     listWorkerVars(),
     listSecrets(),
+    getDdosStateAction(),
   ]);
 
   return (
@@ -47,6 +50,7 @@ export default async function AdminConfigPage({ params }: { params: Promise<{ lo
           />
         }
         taxonomy={<ConfigClient initialTags={allTags} initialPlatforms={allPlatforms} />}
+        ddos={<DdosPanel initialState={ddosStateVal} initialSettings={appSettings} />}
       />
     </Box>
   );
