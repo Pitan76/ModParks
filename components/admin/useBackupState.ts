@@ -39,6 +39,9 @@ export function useBackupState(initialBackups: Backup[]) {
   const [totpToken, setTotpToken] = useState("");
   const [confirmPhrase, setConfirmPhrase] = useState("");
 
+  const [restoreMode, setRestoreMode] = useState<"all" | "downloads_only" | "selected_tables">("all");
+  const [selectedTables, setSelectedTables] = useState<string[]>([]);
+
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
   const [mergeTarget, setMergeTarget] = useState<string | null>(null);
   const [mergePlan, setMergePlan] = useState<MergePlan | null>(null);
@@ -63,6 +66,8 @@ export function useBackupState(initialBackups: Backup[]) {
     setSnapshotDownloaded(false);
     setTotpToken("");
     setConfirmPhrase("");
+    setRestoreMode("all");
+    setSelectedTables([]);
   };
 
   const refreshBackupList = async () => {
@@ -105,6 +110,10 @@ export function useBackupState(initialBackups: Backup[]) {
     setTotpToken,
     confirmPhrase,
     setConfirmPhrase,
+    restoreMode,
+    setRestoreMode,
+    selectedTables,
+    setSelectedTables,
     mergeDialogOpen,
     setMergeDialogOpen,
     mergeTarget,

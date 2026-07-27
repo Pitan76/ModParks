@@ -2,7 +2,7 @@
 
 import { getAdminDb, getReauthenticatedAdminDb } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
-import { dumpToR2, getActor, importBackupData, loadBackupTables, writeAuditLog } from "@/lib/backup/core";
+import { dumpToR2, getActor, importBackupData, loadBackupTables, writeAuditLog, RestoreOptions } from "@/lib/backup/core";
 import { loadBackupFromR2 } from "./adminBackupQuery";
 
 export type ActionError = { success: false; error: string; message: string };
@@ -135,7 +135,8 @@ const performRestore = async (
   payload: any,
   snapshotKey: string | undefined,
   actor: { performedBy?: string; performedByEmail?: string },
-  backupKey?: string
+  backupKey?: string,
+  options?: RestoreOptions
 ) => {
   const tables = await loadBackupTables(payload);
   const effectiveSnapshotKey = snapshotKey ?? (await dumpToR2(db, "snapshot")).key;
@@ -145,7 +146,7 @@ const performRestore = async (
   );
 
   try {
-    await importBackupData(db, tables);
+    await importBackupData(db, tables, options);
   } catch (e: unknown) {
     await writeAuditLog(db, {
       action: "restore",
@@ -163,7 +164,7 @@ const performRestore = async (
     status: "success",
     backupKey,
     snapshotKey: effectiveSnapshotKey,
-    detail: { rowCounts },
+    detail: { rowCounts, mode: options?.mode ?? "all" },
     ...actor,
   });
 
@@ -174,12 +175,12 @@ const performRestore = async (
 /**
  * R2 バケット上の指定されたバックアップファイルからデータを復元します。
  */
-export const restoreBackup = async (key: string, totpToken: string, snapshotKey?: string) => {
+export const restoreBackup = async (key: string, totpToken: string, snapshotKey?: string, options?: RestoreOptions) => {
   try {
     const { db, userId } = await getReauthenticatedAdminDb(totpToken);
     const actor = await getActor(db, userId);
 
-    return await performRestore(db, await loadBackupFromR2(key), snapshotKey, actor, key);
+    return await performRestore(db, await loadBackupFromR2(key), snapshotKey, actor, key, options);
   } catch (e: unknown) {
     return toActionError(e);
   }
@@ -237,12 +238,12 @@ export const applyMergeFromBackup = applyMerge;
 /**
  * 送信された JSON 文字列データからデータベースを復元します。
  */
-export const restoreBackupFromJson = async (jsonStr: string, totpToken: string, snapshotKey?: string) => {
+export const restoreBackupFromJson = async (jsonStr: string, totpToken: string, snapshotKey?: string, options?: RestoreOptions) => {
   try {
     const { db, userId } = await getReauthenticatedAdminDb(totpToken);
     const actor = await getActor(db, userId);
 
-    return await performRestore(db, JSON.parse(jsonStr), snapshotKey, actor);
+    return await performRestore(db, JSON.parse(jsonStr), snapshotKey, actor, undefined, options);
   } catch (e: unknown) {
     return toActionError(e);
   }

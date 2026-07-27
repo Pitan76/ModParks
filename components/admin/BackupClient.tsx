@@ -56,6 +56,10 @@ const BackupClient = ({ initialBackups, locale }: BackupClientProps) => {
     snapshotDownloaded,
     totpToken,
     confirmPhrase,
+    restoreMode,
+    setRestoreMode,
+    selectedTables,
+    setSelectedTables,
     mergeDialogOpen,
     mergeTarget,
     mergePlan,
@@ -207,6 +211,10 @@ const BackupClient = ({ initialBackups, locale }: BackupClientProps) => {
         confirmPhrase={confirmPhrase}
         totpToken={totpToken}
         isPending={isPending}
+        restoreMode={restoreMode}
+        selectedTables={selectedTables}
+        onChangeRestoreMode={setRestoreMode}
+        onChangeSelectedTables={setSelectedTables}
         onDownloadSnapshot={handleDownloadCurrentData}
         onChangeConfirmPhrase={setConfirmPhrase}
         onChangeTotpToken={setTotpToken}
@@ -222,6 +230,10 @@ const BackupClient = ({ initialBackups, locale }: BackupClientProps) => {
         confirmPhrase={confirmPhrase}
         totpToken={totpToken}
         isPending={isPending}
+        restoreMode={restoreMode}
+        selectedTables={selectedTables}
+        onChangeRestoreMode={setRestoreMode}
+        onChangeSelectedTables={setSelectedTables}
         onDownloadSnapshot={handleDownloadCurrentData}
         onChangeConfirmPhrase={setConfirmPhrase}
         onChangeTotpToken={setTotpToken}

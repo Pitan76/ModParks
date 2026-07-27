@@ -1,8 +1,13 @@
-import { getTableColumns } from "drizzle-orm";
+import { getTableColumns, eq } from "drizzle-orm";
 import { SCHEMA_TABLES, TABLE_RESTORE_ORDER } from "./schemaConfig";
 
 export const SUPPORTED_BACKUP_VERSIONS = ["1.0"];
 const D1_MAX_BOUND_PARAMS = 100;
+
+export type RestoreOptions = {
+  mode?: "all" | "downloads_only" | "selected_tables";
+  selectedTables?: string[];
+};
 
 /**
  * バックアップペイロードの形式を検証します。
@@ -21,7 +26,7 @@ export const validateBackupPayload = (payload: unknown): Record<string, any> => 
 
   const unknownTables = Object.keys(p.tables).filter((t) => !SCHEMA_TABLES[t]);
   if (unknownTables.length > 0) {
-    throw new Error(`Backup contains tables unknown to the current schema: ${unknownTables.join(", ")}`);
+    throw new Error("Backup contains tables unknown to the current schema: " + unknownTables.join(", "));
   }
 
   return p.tables;
@@ -89,25 +94,90 @@ const chunkRows = (rows: any[]): any[][] => {
 /**
  * 指定されたテーブルデータを用いてデータベースをリストアします。
  */
-export const importBackupData = async (db: any, tablesData: Record<string, any[]>) => {
+export const importBackupData = async (
+  db: any,
+  tablesData: Record<string, any[]>,
+  options?: RestoreOptions
+) => {
+  const mode = options?.mode ?? "all";
   const statements: any[] = [];
 
-  for (const tableName of [...TABLE_RESTORE_ORDER].reverse()) {
-    const tableObj = SCHEMA_TABLES[tableName];
-    if (tableObj) statements.push(db.delete(tableObj));
-  }
+  if (mode === "downloads_only") {
+    // downloads_only: We only update download counts of projects and versions based on ID
+    if (tablesData.projects && SCHEMA_TABLES.projects) {
+      for (const row of tablesData.projects) {
+        if (row.id !== undefined) {
+          statements.push(
+            db.update(SCHEMA_TABLES.projects)
+              .set({
+                downloads: row.downloads ?? 0,
+                totalDownloads: row.totalDownloads ?? 0,
+              })
+              .where(eq(SCHEMA_TABLES.projects.id, row.id))
+          );
+        }
+      }
+    }
 
-  for (const tableName of TABLE_RESTORE_ORDER) {
-    const tableObj = SCHEMA_TABLES[tableName];
-    const rows = tablesData[tableName];
-    if (tableObj && rows && rows.length > 0) {
-      for (const chunk of chunkRows(reviveRows(tableObj, rows))) {
-        statements.push(db.insert(tableObj).values(chunk));
+    if (tablesData.versions && SCHEMA_TABLES.versions) {
+      for (const row of tablesData.versions) {
+        if (row.id !== undefined) {
+          statements.push(
+            db.update(SCHEMA_TABLES.versions)
+              .set({
+                downloads: row.downloads ?? 0,
+              })
+              .where(eq(SCHEMA_TABLES.versions.id, row.id))
+          );
+        }
+      }
+    }
+  } else if (mode === "selected_tables") {
+    // selected_tables: Delete and insert only for selected tables
+    const selected = options?.selectedTables ?? [];
+
+    for (const tableName of [...TABLE_RESTORE_ORDER].reverse()) {
+      if (selected.includes(tableName)) {
+        const tableObj = SCHEMA_TABLES[tableName];
+        if (tableObj) statements.push(db.delete(tableObj));
+      }
+    }
+
+    for (const tableName of TABLE_RESTORE_ORDER) {
+      if (selected.includes(tableName)) {
+        const tableObj = SCHEMA_TABLES[tableName];
+        const rows = tablesData[tableName];
+        if (tableObj && rows && rows.length > 0) {
+          for (const chunk of chunkRows(reviveRows(tableObj, rows))) {
+            statements.push(db.insert(tableObj).values(chunk));
+          }
+        }
+      }
+    }
+  } else {
+    // mode === "all": Original full restore behavior
+    for (const tableName of [...TABLE_RESTORE_ORDER].reverse()) {
+      const tableObj = SCHEMA_TABLES[tableName];
+      if (tableObj) statements.push(db.delete(tableObj));
+    }
+
+    for (const tableName of TABLE_RESTORE_ORDER) {
+      const tableObj = SCHEMA_TABLES[tableName];
+      const rows = tablesData[tableName];
+      if (tableObj && rows && rows.length > 0) {
+        for (const chunk of chunkRows(reviveRows(tableObj, rows))) {
+          statements.push(db.insert(tableObj).values(chunk));
+        }
       }
     }
   }
 
   if (statements.length === 0) return;
 
-  await db.batch(statements as [any, ...any[]]);
+  // Batch execute statements in chunks of 100 to avoid D1 request limitations
+  const batchSize = 100;
+  for (let i = 0; i < statements.length; i += batchSize) {
+    const chunk = statements.slice(i, i + batchSize);
+    await db.batch(chunk as [any, ...any[]]);
+  }
 };

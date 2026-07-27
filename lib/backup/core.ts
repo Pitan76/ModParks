@@ -3,6 +3,7 @@ import * as schema from "@/db/schema";
 export { SCHEMA_TABLES, TABLE_RESTORE_ORDER, TABLE_PRIMARY_KEYS } from "./schemaConfig";
 export { BACKUP_FORMAT_VERSION, dumpToR2, pruneOldBackups, runAutoBackup } from "./backupExport";
 export { SUPPORTED_BACKUP_VERSIONS, validateBackupPayload, loadBackupTables, reviveRows, importBackupData } from "./backupImport";
+export type { RestoreOptions } from "./backupImport";
 
 export type AuditAction =
   | "create"

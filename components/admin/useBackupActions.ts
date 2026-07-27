@@ -98,7 +98,10 @@ export const useBackupActions = (initialBackups: Backup[]) => {
     if (!s.restoreTarget) return;
     startTransition(async () => {
       try {
-        const res = await restoreBackup(s.restoreTarget!, s.totpToken, s.snapshot?.key);
+        const res = await restoreBackup(s.restoreTarget!, s.totpToken, s.snapshot?.key, {
+          mode: s.restoreMode,
+          selectedTables: s.selectedTables
+        });
         if (res.success) {
           showSnackbar(tAdmin("backup.successRestore"), "success");
           s.setRestoreDialogOpen(false);
@@ -145,7 +148,10 @@ export const useBackupActions = (initialBackups: Backup[]) => {
     if (!s.localRestoreContent) return;
     startTransition(async () => {
       try {
-        const res = await restoreBackupFromJson(s.localRestoreContent!, s.totpToken, s.snapshot?.key);
+        const res = await restoreBackupFromJson(s.localRestoreContent!, s.totpToken, s.snapshot?.key, {
+          mode: s.restoreMode,
+          selectedTables: s.selectedTables
+        });
         if (res.success) {
           showSnackbar(tAdmin("backup.successRestore"), "success");
           s.setLocalRestoreDialogOpen(false);
@@ -210,6 +216,10 @@ export const useBackupActions = (initialBackups: Backup[]) => {
     snapshotDownloaded: s.snapshotDownloaded,
     totpToken: s.totpToken,
     confirmPhrase: s.confirmPhrase,
+    restoreMode: s.restoreMode,
+    setRestoreMode: s.setRestoreMode,
+    selectedTables: s.selectedTables,
+    setSelectedTables: s.setSelectedTables,
     mergeDialogOpen: s.mergeDialogOpen,
     mergeTarget: s.mergeTarget,
     mergePlan: s.mergePlan,
