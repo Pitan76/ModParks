@@ -79,8 +79,8 @@ async function toggleDdosProtection(env, enable, topSlug) {
     : `(http.request.uri.path contains "/api/download")`; // 不正なslugまたは無効時はフォールバック
 
   const body = enable
-    ? { enabled: true, expression }
-    : { enabled: false, expression: `(http.request.uri.path eq "/dev/null")` }; // 無効化時はダミー式へ
+    ? { enabled: true, expression, action: "managed_challenge" }
+    : { enabled: false, expression: `(http.request.uri.path eq "/dev/null")`, action: "managed_challenge" }; // 無効化時はダミー式へ
 
   const init = {
     method: "PATCH",
