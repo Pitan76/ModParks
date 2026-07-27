@@ -95,6 +95,22 @@ export default function UserDetailsDialog({ open, onClose, user }: UserDetailsDi
             </TableRow>
             <TableRow>
               <TableCell variant="head" sx={{ fontWeight: "bold" }}>
+                {tAdmin("detailsDeactivatedStatus")}
+              </TableCell>
+              <TableCell>
+                {user.deactivatedAt ? new Date(user.deactivatedAt).toLocaleString() : tAdmin("detailsStatusActive")}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head" sx={{ fontWeight: "bold" }}>
+                {tAdmin("detailsSuspendedStatus")}
+              </TableCell>
+              <TableCell>
+                {user.suspendedAt ? new Date(user.suspendedAt).toLocaleString() : tAdmin("detailsStatusActive")}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head" sx={{ fontWeight: "bold" }}>
                 {tAdmin("detailsDeletedStatus")}
               </TableCell>
               <TableCell>

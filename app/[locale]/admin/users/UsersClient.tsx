@@ -20,7 +20,11 @@ import InfoIcon from "@mui/icons-material/Info";
 import IconButton from "@mui/material/IconButton";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Chip from "@mui/material/Chip";
+import BlockIcon from "@mui/icons-material/Block";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useTranslations } from "next-intl";
+import { useSession } from "next-auth/react";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { useUsersState } from "./hooks/useUsersState";
 import UserDetailsDialog from "./components/UserDetailsDialog";
@@ -36,6 +40,8 @@ export interface User {
   role: string;
   createdAt: Date | number;
   deletedAt: Date | null;
+  deactivatedAt: Date | null;
+  suspendedAt: Date | null;
   twoFactorEnabled?: boolean;
   hasGithub?: boolean;
 }
@@ -71,7 +77,10 @@ export default function UsersClient({ users }: { users: User[] }) {
     handlePurgeDeletedUsers,
     handleOpenEditDialog,
     handleSaveUsername,
+    handleToggleSuspension,
+    isSuspending,
   } = useUsersState(users);
+  const { data: session } = useSession();
 
   return (
     <Box>
@@ -112,9 +121,17 @@ export default function UsersClient({ users }: { users: User[] }) {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Avatar src={user.avatarUrl || undefined} sx={{ width: 32, height: 32 }} />
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: "bold", textDecoration: user.deletedAt ? "line-through" : "none" }}>
-                          {user.displayName || user.username}
-                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}>
+                          <Typography variant="body2" sx={{ fontWeight: "bold", textDecoration: user.deletedAt ? "line-through" : "none" }}>
+                            {user.displayName || user.username}
+                          </Typography>
+                          {user.suspendedAt && (
+                            <Chip label={tAdmin("statusSuspended")} size="small" color="error" variant="outlined" sx={{ height: 20, fontSize: "0.7rem" }} />
+                          )}
+                          {user.deactivatedAt && (
+                            <Chip label={tAdmin("statusDeactivated")} size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: "0.7rem" }} />
+                          )}
+                        </Box>
                         <Typography variant="caption" color="text.secondary">
                           {user.username ? `@${user.username}` : tAdmin("noUsername")}
                         </Typography>
@@ -129,7 +146,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                       size="small"
                       onChange={(e) => handleRoleChange(user.id, e.target.value as "user" | "admin")}
                       sx={{ minWidth: 120 }}
-                      disabled={!!user.deletedAt}
+                      disabled={!!user.deletedAt || !!user.suspendedAt || !!user.deactivatedAt}
                     >
                       <MenuItem value="user">{tAdmin("roleUser")}</MenuItem>
                       <MenuItem value="admin">{tAdmin("roleAdmin")}</MenuItem>
@@ -141,10 +158,18 @@ export default function UsersClient({ users }: { users: User[] }) {
                         <IconButton color="info" onClick={() => { setDetailsUser(user); setDetailsDialogOpen(true); }} title={tAdmin("btnViewInfo")}>
                           <InfoIcon />
                         </IconButton>
-                        <IconButton color="primary" onClick={() => handleOpenEditDialog(user)} title={tAdmin("btnEditId")}>
+                        <IconButton color="primary" onClick={() => handleOpenEditDialog(user)} title={tAdmin("btnEditId")} disabled={!!user.suspendedAt || !!user.deactivatedAt}>
                           <EditIcon />
                         </IconButton>
-                        <IconButton color="error" onClick={() => setDeleteUserTarget(user)} title={tAdmin("btnDelete")}>
+                        <IconButton 
+                          color={user.suspendedAt ? "success" : "warning"} 
+                          onClick={() => handleToggleSuspension(user.id)} 
+                          title={user.suspendedAt ? tAdmin("btnUnsuspend") : tAdmin("btnSuspend")}
+                          disabled={user.id === session?.user?.id || isSuspending}
+                        >
+                          {user.suspendedAt ? <CheckCircleIcon /> : <BlockIcon />}
+                        </IconButton>
+                        <IconButton color="error" onClick={() => setDeleteUserTarget(user)} title={tAdmin("btnDelete")} disabled={!!user.suspendedAt || !!user.deactivatedAt}>
                           <DeleteIcon />
                         </IconButton>
                       </>
