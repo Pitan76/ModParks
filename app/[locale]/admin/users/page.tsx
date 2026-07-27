@@ -20,6 +20,8 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
       role: users.role,
       createdAt: users.createdAt,
       deletedAt: users.deletedAt,
+      deactivatedAt: users.deactivatedAt,
+      suspendedAt: users.suspendedAt,
       twoFactorEnabled: users.twoFactorEnabled
   }).from(users).leftJoin(userProfiles, eq(users.id, userProfiles.userId)).orderBy(desc(users.createdAt)).all() as any[];
 

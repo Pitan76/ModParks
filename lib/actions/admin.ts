@@ -21,6 +21,25 @@ export async function updateUserRole(targetUserId: string, newRole: "user" | "ad
   return { success: true };
 }
 
+export async function toggleUserSuspension(targetUserId: string) {
+  const { db, session } = await getAdminDb();
+
+  if (targetUserId === session.user.id) {
+    throw new Error("Cannot suspend yourself");
+  }
+
+  const user = await db.select().from(users).where(eq(users.id, targetUserId)).get();
+  if (!user) throw new Error("User not found");
+
+  const newSuspendedAt = user.suspendedAt ? null : new Date();
+
+  await db.update(users).set({ suspendedAt: newSuspendedAt }).where(eq(users.id, targetUserId));
+  await recordModerationAudit(db, newSuspendedAt ? "suspend_user" : "unsuspend_user", targetUserId, session.user.id);
+  
+  revalidatePath("/admin/users");
+  return { success: true, suspended: !!newSuspendedAt };
+}
+
 export async function updateUsernameByAdmin(targetUserId: string, newUsername: string) {
   const { db } = await getAdminDb();
   const { userProfiles, userSettings, users } = await import("@/db/schema");

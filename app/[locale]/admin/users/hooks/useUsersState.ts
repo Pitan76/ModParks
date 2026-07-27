@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { User } from "../UsersClient";
-import { updateUserRole, deleteUser, updateUsernameByAdmin, purgeDeletedUsers, hardDeleteUser } from "@/lib/actions/admin";
+import { updateUserRole, deleteUser, updateUsernameByAdmin, purgeDeletedUsers, hardDeleteUser, toggleUserSuspension } from "@/lib/actions/admin";
 import { useTranslations } from "next-intl";
 
 /**
@@ -23,6 +23,7 @@ export function useUsersState(users: User[]) {
 
   const [deleteUserTarget, setDeleteUserTarget] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSuspending, setIsSuspending] = useState(false);
 
   const activeUsers = users.filter((u) => !u.deletedAt);
   const deletedUsers = users.filter((u) => u.deletedAt);
@@ -53,6 +54,18 @@ export function useUsersState(users: User[]) {
       showMessage("error", err.message);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleToggleSuspension = async (userId: string) => {
+    setIsSuspending(true);
+    try {
+      const res = await toggleUserSuspension(userId);
+      showMessage("success", res.suspended ? tAdmin("successSuspend") : tAdmin("successUnsuspend"));
+    } catch (err: any) {
+      showMessage("error", err.message);
+    } finally {
+      setIsSuspending(false);
     }
   };
 
@@ -127,5 +140,7 @@ export function useUsersState(users: User[]) {
     handlePurgeDeletedUsers,
     handleOpenEditDialog,
     handleSaveUsername,
+    handleToggleSuspension,
+    isSuspending,
   };
 }
