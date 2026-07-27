@@ -1,6 +1,5 @@
 "use client";
 
-import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import { useColorMode } from "@/components/ThemeRegistry";
 import ProjectCard from "@/components/project/ProjectCard";

@@ -11,21 +11,24 @@ import AdSlot from "@/components/ads/AdSlot";
 
 import { getProjects } from "@/lib/actions/projectQuery";
 
-type HomePageProps = {
+type TopPageProps = {
   params: Promise<{ locale: string }>;
 };
 
-const HomePage = async ({ params }: HomePageProps) => {
+const TopPage = async ({ params }: TopPageProps) => {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations("Home");
   const tc = await getTranslations("Common");
 
-  const [{ data: newProjects }, { data: updatedProjects }] = await Promise.all([
+  const [newResult, updatedResult] = await Promise.all([
     getProjects({ sort: "newest", limit: 6 }),
     getProjects({ sort: "updated", limit: 6 }),
   ]);
+
+  const newProjects = newResult.data;
+  const updatedProjects = updatedResult.data;
 
   return (
     <Box>
@@ -59,6 +62,7 @@ const HomePage = async ({ params }: HomePageProps) => {
         <HomeProjectList projects={newProjects as any} />
       </Container>
 
+      {/* 広告差し込み予約 */}
       <Container maxWidth="lg" sx={{ pb: 4 }}>
         <AdSlot slot="home-mid" />
       </Container>
@@ -85,4 +89,4 @@ const HomePage = async ({ params }: HomePageProps) => {
   );
 };
 
-export default HomePage;
+export default TopPage;
