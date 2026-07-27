@@ -65,7 +65,7 @@ async function toggleDdosProtection(env, enable, topSlug) {
     return { success: true };
   }
 
-  if (!env.CF_API_TOKEN || !env.CF_ZONE_ID || !env.CF_RULESET_ID || !env.CF_WAF_RULE_ID) {
+  if (!env.CF_WAF_API_TOKEN || !env.CF_ZONE_ID || !env.CF_RULESET_ID || !env.CF_WAF_RULE_ID) {
     console.error("[DDOS-GUARD] Missing Cloudflare API configuration environment variables");
     return { success: false, error: "Missing config" };
   }
@@ -85,7 +85,7 @@ async function toggleDdosProtection(env, enable, topSlug) {
   const init = {
     method: "PATCH",
     headers: {
-      "Authorization": `Bearer ${env.CF_API_TOKEN}`,
+      "Authorization": `Bearer ${env.CF_WAF_API_TOKEN}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify(body)
@@ -106,14 +106,14 @@ async function toggleDdosProtection(env, enable, topSlug) {
 
 // Cloudflare API から現在のWAF設定（enabled）を取得する
 async function fetchCurrentWafRuleStatus(env) {
-  if (!env.CF_API_TOKEN || !env.CF_ZONE_ID || !env.CF_RULESET_ID || !env.CF_WAF_RULE_ID) {
+  if (!env.CF_WAF_API_TOKEN || !env.CF_ZONE_ID || !env.CF_RULESET_ID || !env.CF_WAF_RULE_ID) {
     return null;
   }
   const url = `https://api.cloudflare.com/client/v4/zones/${env.CF_ZONE_ID}/rulesets/${env.CF_RULESET_ID}/rules/${env.CF_WAF_RULE_ID}`;
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: { "Authorization": `Bearer ${env.CF_API_TOKEN}` }
+      headers: { "Authorization": `Bearer ${env.CF_WAF_API_TOKEN}` }
     });
     const data = await res.json();
     if (res.ok && data.success && data.result) {
