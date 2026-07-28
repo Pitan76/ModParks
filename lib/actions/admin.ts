@@ -1,11 +1,12 @@
 "use server";
 
 import { getAdminDb } from "@/lib/auth-helpers";
-import { users, settingsAudit, backupAudit, ddosState } from "@/db/schema";
+import { users, settingsAudit, backupAudit, ddosState, ddosAudit } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
+import { recordDdosAudit } from "@/lib/actions/ddosAudit";
 
 export async function updateUserRole(targetUserId: string, newRole: "user" | "admin") {
   const { db, session } = await getAdminDb();
@@ -282,8 +283,13 @@ export async function getDdosStateAction() {
 }
 
 export async function toggleManualUnderAttack(enable: boolean, durationMinutes = 10) {
-  const { db } = await getAdminDb();
+  const { db, userId } = await getAdminDb();
   const now = Date.now();
+
+  const before = await db.select({ currentState: ddosState.currentState })
+    .from(ddosState)
+    .where(eq(ddosState.stateKey, "global"))
+    .get();
 
   const apiRes = await toggleWaf(enable, "");
   if (!apiRes.success) {
@@ -317,6 +323,36 @@ export async function toggleManualUnderAttack(enable: boolean, durationMinutes =
       .run();
   }
 
+  await recordDdosAudit(
+    db,
+    enable ? "manual_activate" : "manual_deactivate",
+    enable ? "UNDER_ATTACK" : "NORMAL",
+    {
+      previousState: before?.currentState ?? null,
+      ...(enable ? { protectionDuration: durationMinutes * 60 * 1000 } : {}),
+    },
+    userId
+  );
+
   revalidatePath("/admin/config");
   return { success: true };
+}
+
+export async function getDdosAudits(limit = 50, offset = 0) {
+  const { db } = await getAdminDb();
+
+  const logs = await db
+    .select()
+    .from(ddosAudit)
+    .orderBy(desc(ddosAudit.createdAt))
+    .limit(limit)
+    .offset(offset)
+    .all();
+
+  const countRes = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(ddosAudit)
+    .get();
+
+  return { logs, total: countRes?.count ?? 0 };
 }
