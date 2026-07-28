@@ -71,6 +71,12 @@ const nextConfig: NextConfig = {
       // 本文中の画像はここに無いホストでもプロキシ経由で表示できる。
       [
         "img-src 'self' data: blob:",
+
+        "https://*.pitan76.net",
+        "https://*.wikichree.com",
+        
+        "https://*.civa.jp",
+
         // 自前ストレージ
         "https://*.r2.dev",
         "https://files.modparks.pitan76.net",
