@@ -1013,6 +1013,8 @@
       "description": "システム設定の変更やバックアップ操作の履歴ログを監視します。",
       "settingsTab": "設定変更履歴",
       "backupTab": "バックアップ履歴",
+      "ddosTab": "DDoS防護履歴",
+      "state": "遷移後の状態",
       "scope": "スコープ",
       "key": "キー",
       "oldValue": "変更前",
