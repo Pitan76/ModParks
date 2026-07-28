@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { listIdeaPosts } from "@/lib/queries/postList";
+import { listIdeaPosts, toIdeaCardData } from "@/lib/queries/postList";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -18,7 +18,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
   const db = await getDatabase();
   const session = await auth();
 
-  const allIdeas = await listIdeaPosts(db, { viewerId: session?.user?.id ?? null });
+  const allIdeas = (await listIdeaPosts(db, { viewerId: session?.user?.id ?? null })).map(toIdeaCardData);
 
   return (
     <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
@@ -41,7 +41,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
         </LinkButton>
       </Box>
 
-      <IdeaCardList ideas={allIdeas as any} />
+      <IdeaCardList ideas={allIdeas} />
     </Container>
   );
 }

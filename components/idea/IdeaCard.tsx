@@ -16,6 +16,8 @@ import { useColorMode } from "@/components/ThemeRegistry";
 
 export interface IdeaCardData {
   id: string;
+  /** URL 識別子。作成時は id と同じ値だが、作者が変更できる */
+  slug: string;
   title: string;
   content: string;
   status: string;
@@ -37,7 +39,7 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
 
   const c = useCommonItems();
   const pinItem = usePinMenuItem("idea", idea.id);
-  const href = `/ideas/${idea.id}`;
+  const href = `/ideas/${idea.slug}`;
   const onContextMenu = useContextMenu(
     [
       c.open(href),
