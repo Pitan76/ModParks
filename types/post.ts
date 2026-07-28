@@ -18,8 +18,13 @@ export type IdeaPost = Post & { kind: "idea" } & Omit<IdeaFields, "id">;
  */
 export type AnyPost = ProjectPost | IdeaPost;
 
-export const isProjectPost = (p: AnyPost): p is ProjectPost => p.kind === "project";
-export const isIdeaPost = (p: AnyPost): p is IdeaPost => p.kind === "idea";
+export function isProjectPost(p: AnyPost): p is ProjectPost {
+  return p.kind === "project";
+}
+
+export function isIdeaPost(p: AnyPost): p is IdeaPost {
+  return p.kind === "idea";
+}
 
 /** 表示に必要な投稿者情報。posts の行には無いので JOIN で補う */
 export interface PostAuthor {

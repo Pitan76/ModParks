@@ -19,7 +19,7 @@ export function renderNotification(t: Translate, n: Notification): RenderedNotif
 
 function hrefFor(type: string, p: Record<string, string>): string {
   if (type === "follow") return `/profile/${p.actorUsername ?? ""}`;
-  // comment_reply など、アイデア/プロジェクト両方に紐づく種別は payload から判定する
-  if (p.ideaId) return `/ideas/${p.ideaId}`;
-  return `/projects/${p.projectSlug ?? ""}`;
+  // Post 統合により、対象が Project か Idea かは payload.kind で判別する
+  if (p.kind === "idea") return `/ideas/${p.slug ?? ""}`;
+  return `/projects/${p.slug ?? ""}`;
 }

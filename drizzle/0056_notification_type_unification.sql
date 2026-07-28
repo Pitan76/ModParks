@@ -38,3 +38,20 @@ SET payload = json_patch(
       )
     )
 WHERE json_extract(payload, '$.ideaId') IS NOT NULL;
+--> statement-breakpoint
+
+-- 4. アイコンのキー名も統一する（projectIconUrl → iconUrl）。
+--    Idea には元々アイコンが無いため、対象は Project 由来の通知のみ。
+UPDATE notifications
+SET payload = json_remove(
+      json_patch(payload, json_object('iconUrl', json_extract(payload, '$.projectIconUrl'))),
+      '$.projectIconUrl'
+    )
+WHERE json_extract(payload, '$.projectIconUrl') IS NOT NULL;
+--> statement-breakpoint
+
+-- 5. 統合前のキーを落とす。旧キーが残ると、表示側でどちらを見るべきか曖昧になる。
+UPDATE notifications
+SET payload = json_remove(payload, '$.projectSlug', '$.projectName', '$.ideaId', '$.ideaTitle')
+WHERE json_extract(payload, '$.projectSlug') IS NOT NULL
+   OR json_extract(payload, '$.ideaId') IS NOT NULL;
