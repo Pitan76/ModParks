@@ -148,6 +148,7 @@ export const getProjectBySlug = async (slug: string) => {
     id: versions.id,
     versionNumber: versions.versionNumber,
     releaseChannel: versions.releaseChannel,
+    changelog: versions.changelog,
     mcVersions: versions.mcVersions,
     loaders: versions.loaders,
     fileName: versions.fileName,

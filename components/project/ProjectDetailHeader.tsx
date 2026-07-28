@@ -33,11 +33,12 @@ export type ProjectDetailHeaderProps = {
     sourceIdeaTitle?: string | null;
     createdAt: Date;
     updatedAt: Date;
+    /** left join のため、作者が削除済みなどで null になりうる */
     author: {
-      username: string;
-      displayName: string;
+      username: string | null;
+      displayName: string | null;
       avatarUrl?: string | null;
-    };
+    } | null;
   };
   /** ユーザーがこのプロジェクトの編集権限を持っているか */
   canEdit: boolean;
