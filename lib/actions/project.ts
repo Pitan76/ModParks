@@ -41,7 +41,7 @@ async function maybeNotifyPublish(db: any, project: PublishProject, newSlug: str
 /**
  * 新しいプロジェクト（Mod/Plugin）を作成する Server Action。
  */
-export const createProject = async (formData: FormData) => {
+export async function createProject(formData: FormData) {
   const { db, session } = await getAuthenticatedDb();
 
   const raw = {
@@ -103,7 +103,7 @@ export const createProject = async (formData: FormData) => {
 
   revalidatePath("/projects");
   redirect(`/projects/${slug}`);
-};
+}
 
 // ---- プロジェクト更新 ----
 

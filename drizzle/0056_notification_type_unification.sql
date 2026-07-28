@@ -55,3 +55,46 @@ UPDATE notifications
 SET payload = json_remove(payload, '$.projectSlug', '$.projectName', '$.ideaId', '$.ideaTitle')
 WHERE json_extract(payload, '$.projectSlug') IS NOT NULL
    OR json_extract(payload, '$.ideaId') IS NOT NULL;
+--> statement-breakpoint
+
+-- 6. ユーザーの通知ON/OFF設定（user_settings.notification_prefs）のキーも統合する。
+--
+--    このキーは NOTIFICATION_TYPES と対応しており、移行しないと
+--    「ユーザーが明示的にOFFにした設定」が消えて通知が復活する。
+--
+--    2つの設定を1つに統合するため、値が食い違う場合の扱いを決める必要がある。
+--    ここでは「どちらか一方でもOFFなら、統合後もOFF」とする。
+--    ユーザーが通知を減らす操作をした意図を優先し、望まない通知が復活する事態を避ける。
+--    必要な通知が届かなくなった場合は設定画面から戻せる（逆は気づきにくい）。
+UPDATE user_settings
+SET notification_prefs = json_patch(
+      notification_prefs,
+      json_object('comment', json(
+        CASE WHEN json_extract(notification_prefs, '$.project_comment') = 0
+               OR json_extract(notification_prefs, '$.idea_comment') = 0
+             THEN 'false' ELSE 'true' END))
+    )
+WHERE notification_prefs IS NOT NULL
+  AND (json_extract(notification_prefs, '$.project_comment') IS NOT NULL
+    OR json_extract(notification_prefs, '$.idea_comment') IS NOT NULL);
+--> statement-breakpoint
+
+UPDATE user_settings
+SET notification_prefs = json_patch(
+      notification_prefs,
+      json_object('favorite', json(
+        CASE WHEN json_extract(notification_prefs, '$.project_favorite') = 0
+               OR json_extract(notification_prefs, '$.idea_like') = 0
+             THEN 'false' ELSE 'true' END))
+    )
+WHERE notification_prefs IS NOT NULL
+  AND (json_extract(notification_prefs, '$.project_favorite') IS NOT NULL
+    OR json_extract(notification_prefs, '$.idea_like') IS NOT NULL);
+--> statement-breakpoint
+
+UPDATE user_settings
+SET notification_prefs = json_remove(
+      notification_prefs,
+      '$.project_comment', '$.idea_comment', '$.project_favorite', '$.idea_like'
+    )
+WHERE notification_prefs IS NOT NULL;

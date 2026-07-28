@@ -1,7 +1,8 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { ideas, ideaLikes, ideaComments } from "@/db/schema";
+import { posts, ideas, comments } from "@/db/schema";
+import { togglePostFavorite } from "./favorite";
 import { createIdeaSchema, createIdeaCommentSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
@@ -38,15 +39,21 @@ export async function createIdea(formData: FormData) {
   const id = createId();
 
   try {
-    await db.insert(ideas).values({
-      id,
-      title,
-      content,
-      contentFormat,
-      authorId: userId,
-      status: "open",
-      visibility: visibility || "public",
-    });
+    // Idea の slug は作成時点では id と同じランダム値。作者が後から変更できる。
+    await db.batch([
+      db.insert(posts).values({
+        id,
+        authorId:   userId,
+        kind:       "idea",
+        slug:       id,
+        title,
+        body:       content,
+        bodyFormat: contentFormat,
+        visibility: visibility || "public",
+      }),
+      db.insert(ideas).values({ id, status: "open" }),
+    ]);
+
     
     revalidatePath("/ideas");
     return { success: true, id };
@@ -81,9 +88,16 @@ export async function updateIdea(ideaId: string, formData: FormData) {
 
   const { title, content, contentFormat, visibility } = parsed.data;
 
-  await db.update(ideas)
-    .set({ title, content, contentFormat, visibility: visibility || "public" })
-    .where(eq(ideas.id, ideaId))
+  // タイトル・本文・公開範囲はすべて posts 側にある
+  await db.update(posts)
+    .set({
+      title,
+      body: content,
+      bodyFormat: contentFormat,
+      visibility: visibility || "public",
+      updatedAt: new Date(),
+    })
+    .where(eq(posts.id, ideaId))
     .run();
 
   revalidateIdea(ideaId);
@@ -105,10 +119,10 @@ export async function updateIdeaStatus(ideaId: string, status: "open" | "in_prog
     return { error: { server: [(await getServerErrors())("idea.invalidStatus")] } };
   }
 
-  await db.update(ideas)
-    .set({ status })
-    .where(eq(ideas.id, ideaId))
-    .run();
+  await db.batch([
+    db.update(ideas).set({ status }).where(eq(ideas.id, ideaId)),
+    db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, ideaId)),
+  ]);
 
   revalidateIdea(ideaId);
   return { success: true };
@@ -125,47 +139,22 @@ export async function deleteIdea(ideaId: string) {
   const loaded = await loadManageableIdea(db, ideaId, userId, "idea.noDeletePermission");
   if (loaded.error) return { error: loaded.error };
 
-  await db.delete(ideas).where(eq(ideas.id, ideaId)).run();
-  await recordDeletion(db, "ideas", ideaId);
+  // posts を削除すると ideas / comments / favorites は cascade で消える
+  await db.delete(posts).where(eq(posts.id, ideaId)).run();
+  await recordDeletion(db, "posts", ideaId);
 
   revalidatePath("/ideas");
   return { success: true };
 }
 
-// ---- いいねのトグル ----
+// ---- お気に入りのトグル ----
 
-export async function toggleIdeaLike(ideaId: string) {
-  const { db, userId } = await getAuthenticatedDb();
-
-  try {
-    const existing = await db
-      .select()
-      .from(ideaLikes)
-      .where(and(eq(ideaLikes.ideaId, ideaId), eq(ideaLikes.userId, userId)))
-      .get();
-
-    if (existing) {
-      await db.delete(ideaLikes).where(and(eq(ideaLikes.ideaId, ideaId), eq(ideaLikes.userId, userId)));
-      await recordDeletion(db, "idea_likes", buildRecordKey(ideaId, userId));
-    } else {
-      await db.insert(ideaLikes).values({ ideaId, userId });
-      const idea = await getIdeaTarget(db, ideaId);
-      if (idea) {
-        await notifyToUser(db, idea.authorId, userId, "idea_like", {
-          ideaId,
-          ideaTitle: idea.title,
-          actorName: await resolveActorName(db, userId),
-        });
-      }
-    }
-
-    revalidatePath("/ideas");
-    revalidatePath(`/ideas/${ideaId}`);
-    return { success: true, liked: !existing };
-  } catch (error) {
-    console.error("Failed to toggle like:", error);
-    return { success: false, error: (await getServerErrors())("idea.likeFailed") };
-  }
+/**
+ * 旧 toggleIdeaLike。「いいね」と「お気に入り」は統合されたため、
+ * Project と共通の togglePostFavorite に委譲する。
+ */
+export async function toggleIdeaFavorite(ideaId: string) {
+  return togglePostFavorite(ideaId);
 }
 
 // ---- コメント作成 ----
@@ -190,9 +179,9 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
   try {
     const { parentId, parentAuthorId } = await resolveCommentParent(db, ideaId, rawParentId);
 
-    await db.insert(ideaComments).values({
+    await db.insert(comments).values({
       id,
-      ideaId,
+      postId: ideaId,
       content,
       contentFormat,
       authorId: userId,
@@ -203,9 +192,13 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
     if (idea) {
       const actorName = await resolveActorName(db, userId);
       if (parentAuthorId) {
-        await notifyToUser(db, parentAuthorId, userId, "comment_reply", { ideaId, ideaTitle: idea.title, actorName });
+        await notifyToUser(db, parentAuthorId, userId, "comment_reply", {
+          kind: "idea", slug: idea.slug, title: idea.title, actorName,
+        });
       } else {
-        await notifyToUser(db, idea.authorId, userId, "idea_comment", { ideaId, ideaTitle: idea.title, actorName });
+        await notifyToUser(db, idea.authorId, userId, "comment", {
+          kind: "idea", slug: idea.slug, title: idea.title, actorName,
+        });
       }
     }
 
@@ -233,16 +226,16 @@ export async function updateIdeaComment(commentId: string, formData: FormData) {
   }
 
   const t = await getServerErrors();
-  const comment = await db.select().from(ideaComments).where(eq(ideaComments.id, commentId)).get();
+  const comment = await db.select().from(comments).where(eq(comments.id, commentId)).get();
   if (!comment) return { error: { server: [t("idea.commentNotFound")] } };
   if (comment.authorId !== userId) return { error: { server: [t("idea.noEditPermission")] } };
 
-  await db.update(ideaComments)
+  await db.update(comments)
     .set({ content: parsed.data.content, contentFormat: parsed.data.contentFormat, updatedAt: new Date() })
-    .where(eq(ideaComments.id, commentId))
+    .where(eq(comments.id, commentId))
     .run();
 
-  revalidatePath(`/ideas/${comment.ideaId}`);
+  revalidatePath(`/ideas/${comment.postId}`);
   return { success: true };
 }
 
@@ -253,20 +246,20 @@ export async function deleteIdeaComment(commentId: string) {
   const { db, userId } = await getAuthenticatedDb();
 
   const t = await getServerErrors();
-  const comment = await db.select().from(ideaComments).where(eq(ideaComments.id, commentId)).get();
+  const comment = await db.select().from(comments).where(eq(comments.id, commentId)).get();
   if (!comment) return { error: t("idea.commentNotFound") };
 
   // 削除はコメント投稿者本人・管理者に加え、アイデア所有者によるモデレーションも許可
   let allowed = await canManageIdea(db, comment.authorId, userId);
   if (!allowed) {
-    const idea = await db.select({ authorId: ideas.authorId }).from(ideas).where(eq(ideas.id, comment.ideaId)).get();
+    const idea = await db.select({ authorId: posts.authorId }).from(posts).where(eq(posts.id, comment.postId)).get();
     allowed = idea?.authorId === userId;
   }
   if (!allowed) return { error: t("idea.noDeletePermission") };
 
-  await db.delete(ideaComments).where(eq(ideaComments.id, commentId)).run();
-  await recordDeletion(db, "idea_comments", commentId);
+  await db.delete(comments).where(eq(comments.id, commentId)).run();
+  await recordDeletion(db, "comments", commentId);
 
-  revalidatePath(`/ideas/${comment.ideaId}`);
+  revalidatePath(`/ideas/${comment.postId}`);
   return { success: true };
 }
