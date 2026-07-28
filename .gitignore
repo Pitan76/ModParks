@@ -52,3 +52,5 @@ next-env.d.ts
 remote_data.sql
 *.dump.sql
 backup_before_*.sql
+
+/.git-rewrite/
