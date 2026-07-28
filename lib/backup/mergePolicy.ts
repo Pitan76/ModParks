@@ -18,8 +18,15 @@ export type MergeStrategy =
   /** 自動適用しない。差分を提示して管理者が個別に承認する */
   | "manual"
   /**
-   * 親の posts の判定に追随する。posts が採用された投稿の子行だけを上書きする。
+   * 親の posts の判定に追随する。
    * projects / ideas は Post 統合で updatedAt を失ったため、単独では新旧を判定できない。
+   *
+   * 具体的な挙動（merge.ts で実装）:
+   *   - 現行DBに無い行 … 挿入する（親の posts も同時に挿入される）
+   *   - 親の posts がバックアップ側を採用 … 子行も上書きする
+   *   - 親の posts が現行DB優先 … 子行も触らない
+   * posts だけ新しくして projects を古いまま残すと、投稿の共通部分と固有部分が
+   * ちぐはぐになるため、必ず揃えて動かす。
    */
   | "follow_parent_post";
 

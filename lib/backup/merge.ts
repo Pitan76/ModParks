@@ -67,6 +67,16 @@ async function computeMerge(
   const reviewSamples: MergePlan["reviewSamples"] = [];
   const operations: MergeOperations = { inserts: [], updates: [] };
 
+  /**
+   * このマージでバックアップ側を採用した posts の id。
+   *
+   * projects / ideas は Post 統合で updatedAt を失い、単独では新旧を判定できない。
+   * そこで follow_parent_post 戦略では、親の posts が採用された投稿の子行だけを
+   * 併せて更新する。TABLE_RESTORE_ORDER は posts を子より先に並べているため、
+   * 子テーブルを処理する時点でこの集合は埋まっている。
+   */
+  const adoptedPostIds = new Set<string>();
+
   // 親テーブルを先に処理する。挿入順が外部キー制約を満たす必要があるため。
   for (const table of TABLE_RESTORE_ORDER) {
     const policy = MERGE_POLICIES[table];
@@ -122,6 +132,8 @@ async function computeMerge(
         }
         rowsToInsert.push(row);
         summary.inserts++;
+        // posts を新規挿入するなら、その子行（projects / ideas）も併せて入れる必要がある
+        if (table === "posts" && typeof row.id === "string") adoptedPostIds.add(row.id);
         continue;
       }
 
@@ -139,8 +151,18 @@ async function computeMerge(
         if (backupTime !== null && currentTime !== null && backupTime > currentTime) {
           rowsToUpdate.push(row);
           summary.updates++;
+          if (table === "posts" && typeof row.id === "string") adoptedPostIds.add(row.id);
           continue;
         }
+      }
+
+      // 親の posts を採用した投稿だけ、子行も揃えて上書きする。
+      // posts だけ新しくして projects を古いまま残すと、
+      // 投稿の共通部分と固有部分がちぐはぐな状態になるため。
+      if (policy.strategy === "follow_parent_post" && adoptedPostIds.has(key)) {
+        rowsToUpdate.push(row);
+        summary.updates++;
+        continue;
       }
 
       summary.unchanged++;

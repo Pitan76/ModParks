@@ -1500,3 +1500,63 @@ v1が持つのは外向きの互換であって、内部の逃げ道ではない
 ### 考慮すべきもの
 - ModParks CLI
 - ModParks Wiki (DokuWikiなのでドキュメント関連の変更)
+## 16. 本番移行の手順
+
+### 事前に知っておくべきこと
+
+**バックアップ機能ではロールバックできない。**
+
+`lib/backup/` の復元は「同じスキーマ内での復元」を前提としている。移行前に取ったバックアップには`project_comments` / `idea_comments` / `project_favorites` / `idea_likes` が含まれるが、移行後の `SCHEMA_TABLES` にこれらは無いため、[backupImport.ts](../lib/backup/backupImport.ts) の検証で弾かれる。
+
+```
+Backup contains tables unknown to the current schema:
+project_comments, idea_comments, project_favorites, idea_likes
+```
+
+仮に検証を通しても、バックアップ内の`projects`の行は`name` / `description` / `status`を持っており、新スキーマの`projects`にその列は無いので挿入に失敗する。
+
+**戻す手段は Cloudflare D1 の Time Travel である。** スキーマごとDBを指定時点へ戻すため、スキーマ変更をまたぐ移行にも使える（既定で30日間）。
+
+### 手順
+
+1. 移行直前のタイムスタンプを控える。これが唯一の巻き戻し先になる。
+
+```bash
+wrangler d1 time-travel info modparks-db
+```
+
+2. 手元にもダンプを取る（Time Travel とは別系統の保険）。
+
+```bash
+wrangler d1 export modparks-db --remote --output=backup_before_post_unification.sql
+```
+
+3. マイグレーションを適用する。
+
+```bash
+wrangler d1 migrations apply modparks-db --remote
+```
+
+4. **間を空けずに**デプロイする。新コードは旧スキーマで動かず、旧コードは新スキーマで動かないため、この間はサイトが機能しない。
+
+```bash
+npm run cf:deploy
+```
+
+5. 主要画面とAPIを確認する。問題があれば手順1のタイムスタンプへ戻す。
+
+```bash
+wrangler d1 time-travel restore modparks-db --timestamp=<手順1のISO時刻>
+```
+
+### 事前検証
+
+`npm run sync2local` が移行リハーサルを兼ねる。本番データをローカルへ取り込み、未適用のマイグレーションをその実データに対して適用するため、本番と同じ条件で結果を確認できる。本番適用の前に必ず一度実行する。
+
+### 移行時に踏んだ罠
+
+`projects`を作り直す際、`DROP TABLE`が`ON DELETE CASCADE`を発火させ、参照している10テーブルのデータが全て消えた。SQLiteの`PRAGMA foreign_keys=OFF`はトランザクション内では効かず、D1のマイグレーションはトランザクション内で走るため回避できない。
+
+対策として、消える行を退避テーブルへコピーしてから作り直し、あとで戻す方式を採っている。詳細は[0055_post_unification_phase3.sql](../drizzle/0055_post_unification_phase3.sql)の冒頭コメントを参照。
+
+この問題は、空のローカルDBで検証している限り絶対に再現しない。**スキーマを変更するマイグレーションは、必ず本番相当のデータを入れた状態で検証すること。**
