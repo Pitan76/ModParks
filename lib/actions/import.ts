@@ -1,8 +1,9 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { projects, userSettings } from "@/db/schema";
+import { posts, projects, userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { findProjectPostBySlug } from "@/lib/queries/post";
 import { createId } from "@paralleldrive/cuid2";
 import { revalidatePath } from "next/cache";
 import { fetchCfAuthorProjects } from "@/lib/curseforge";
@@ -88,9 +89,10 @@ async function loadModrinthProjects(): Promise<ImportedProject[]> {
   const existingProjects = await db
     .select({
       modrinthId: projects.modrinthId,
-      slug: projects.slug,
+      slug: posts.slug,
     })
     .from(projects)
+    .innerJoin(posts, eq(posts.id, projects.id))
     .all();
 
   const existingModrinthIds = new Set(
@@ -138,9 +140,10 @@ async function loadCurseForgeProjects(): Promise<ImportedProject[]> {
   const existingProjects = await db
     .select({
       curseforgeId: projects.curseforgeId,
-      slug: projects.slug,
+      slug: posts.slug,
     })
     .from(projects)
+    .innerJoin(posts, eq(posts.id, projects.id))
     .all();
 
   const existingCfIds = new Set(
@@ -186,10 +189,15 @@ export async function importProjects(selectedProjects: ImportedProject[], source
   }
 
   let importedCount = 0;
-  const newProjects = [];
+  // 型注釈を付けて、posts / projects どちらのカラムかを取り違えたときに
+  // コンパイルエラーで気づけるようにする（暗黙 any[] だと素通りしてしまう）
+  const newProjects: {
+    post: typeof posts.$inferInsert;
+    project: typeof projects.$inferInsert;
+  }[] = [];
 
   for (const p of selectedProjects) {
-    const existing = await db.select().from(projects).where(eq(projects.slug, p.slug)).get();
+    const existing = await findProjectPostBySlug(db, p.slug);
     if (existing) continue;
 
     // CurseForge: 所有確認済み作者のプロジェクト集合に無いものはスキップ（他人のプロジェクト奪取を防止）
@@ -206,26 +214,39 @@ export async function importProjects(selectedProjects: ImportedProject[], source
       }]);
     }
 
+    const id = createId();
     newProjects.push({
-      id: createId(),
-      slug: p.slug,
-      name: p.name,
-      description: p.description || "",
-      type: p.type,
-      license: p.license || "All Rights Reserved",
-      sourceUrl: p.sourceUrl || null,
-      issueTrackerUrl: p.issueTrackerUrl || null,
-      links: linksJson,
-      iconUrl: p.iconUrl || null,
-      modrinthId: source === "modrinth" ? p.id : null,
-      curseforgeId: source === "curseforge" ? p.id : null,
-      authorId: session.user.id,
-      status: "draft" as const,
+      post: {
+        id,
+        authorId: session.user.id,
+        kind: "project" as const,
+        slug: p.slug,
+        title: p.name,
+        body: p.description || "",
+        bodyFormat: "markdown" as const,
+        visibility: "draft" as const,
+      },
+      project: {
+        id,
+        type: p.type,
+        license: p.license || "All Rights Reserved",
+        sourceUrl: p.sourceUrl || null,
+        issueTrackerUrl: p.issueTrackerUrl || null,
+        links: linksJson,
+        iconUrl: p.iconUrl || null,
+        modrinthId: source === "modrinth" ? p.id : null,
+        curseforgeId: source === "curseforge" ? p.id : null,
+      },
     });
   }
 
   if (newProjects.length > 0) {
-    await db.insert(projects).values(newProjects).run();
+    // posts を先に全件入れてから projects を入れる。
+    // 逆順だと外部キー（projects.id -> posts.id）に違反する。
+    await db.batch([
+      db.insert(posts).values(newProjects.map((n) => n.post)),
+      db.insert(projects).values(newProjects.map((n) => n.project)),
+    ]);
     importedCount = newProjects.length;
   }
 

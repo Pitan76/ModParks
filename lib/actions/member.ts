@@ -16,7 +16,7 @@ export async function getProjectMembers(projectId: string) {
   const db = await getDatabase();
   
   // オーナー取得
-  const project = await db.select({ authorId: projects.authorId }).from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project) return [];
 
   const owner = await db.select({

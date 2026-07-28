@@ -22,7 +22,6 @@ type GetProjectsParams = {
   includeTags?: boolean;
   includeAuthor?: boolean;
   includeExtDl?: boolean;
-  calculateTotal?: boolean;
 };
 
 /**
@@ -33,30 +32,16 @@ export const getProjects = async (params: GetProjectsParams) => {
   const db = await getDatabase();
   const {
     limit = 20, offset = 0, sort = "updated",
-    includeExtDl = false, calculateTotal = false
+    includeExtDl = false
   } = params;
 
   const conditions = buildProjectSearchConditions(params);
   const orderByExpr = resolveProjectOrderBy(sort, includeExtDl);
 
-  let rows;
-  let totalCount = 0;
   try {
-    if (calculateTotal) {
-      const countResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(posts)
-        .innerJoin(projects, eq(projects.id, posts.id))
-        .leftJoin(users, eq(posts.authorId, users.id))
-        .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-        .where(conditions.length > 0 ? and(...conditions) : undefined)
-        .get();
-      totalCount = countResult?.count || 0;
-    }
-
     // 一覧では本文全体を運ばず先頭のみ返す。body は posts 側にある
     const { body, ...restPosts } = getTableColumns(posts);
-    rows = await db
+    const rows = await db
       .select({
         project: {
           ...restPosts,
@@ -80,6 +65,8 @@ export const getProjects = async (params: GetProjectsParams) => {
       .limit(limit)
       .offset(offset)
       .all();
+
+    return rows.map(mapProjectRow);
   } catch (err: unknown) {
     console.error("D1 getProjects Error:");
     if (err instanceof Error) {
@@ -88,8 +75,36 @@ export const getProjects = async (params: GetProjectsParams) => {
     }
     throw err;
   }
+};
 
-  const data = rows.map(mapProjectRow);
+/**
+ * getProjects と同じ検索条件で、該当件数のみを取得する Server Action。
+ */
+export const getProjectCount = async (params: GetProjectsParams) => {
+  const db = await getDatabase();
+  const conditions = buildProjectSearchConditions(params);
+
+  const countResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(posts)
+    .innerJoin(projects, eq(projects.id, posts.id))
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .get();
+
+  return countResult?.count || 0;
+};
+
+/**
+ * getProjects に加えて、ページネーション用の総件数も取得する Server Action。
+ * 総件数の COUNT クエリが追加で走るため、必要な場合のみ使用してください。
+ */
+export const getProjectsWithCount = async (params: GetProjectsParams) => {
+  const [data, totalCount] = await Promise.all([
+    getProjects(params),
+    getProjectCount(params),
+  ]);
 
   return { data, totalCount };
 };

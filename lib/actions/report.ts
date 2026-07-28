@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
-import { reports, projects, users, userProfiles } from "@/db/schema";
+import { reports, posts, projects, users, userProfiles } from "@/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, desc } from "drizzle-orm";
@@ -85,13 +85,14 @@ export async function updateReportStatus(
 export async function unpublishProject(projectId: string, _formData?: FormData) {
   const { db, userId } = await getAdminDb();
 
+  // 公開範囲は posts が持つ。Idea も同じ経路で非公開にできる
   await db
-    .update(projects)
-    .set({ status: "draft" })
-    .where(eq(projects.id, projectId))
+    .update(posts)
+    .set({ visibility: "draft", updatedAt: new Date() })
+    .where(eq(posts.id, projectId))
     .run();
 
-  await recordModerationAudit(db, "project_unpublish", projectId, userId);
+  await recordModerationAudit(db, "post_unpublish", projectId, userId);
 
   revalidatePath("/admin/reports");
   revalidatePath("/projects");
@@ -112,9 +113,9 @@ export async function getReports() {
     .select({
       report: reports,
       project: {
-        id: projects.id,
-        slug: projects.slug,
-        name: projects.name,
+        id: posts.id,
+        slug: posts.slug,
+        name: posts.title,
       },
       reporter: {
         username: userProfiles.username,
@@ -123,6 +124,7 @@ export async function getReports() {
     })
     .from(reports)
     .innerJoin(projects, eq(reports.projectId, projects.id))
+    .innerJoin(posts, eq(posts.id, projects.id))
     .innerJoin(users, eq(reports.reporterId, users.id))
     .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .orderBy(desc(reports.createdAt))

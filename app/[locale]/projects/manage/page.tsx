@@ -28,9 +28,9 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
 
   // Fetch all user projects (no pagination limit, or high limit) for management
   // For management, we usually want to fetch all or a very high limit.
-  const { data: projects } = await getProjects({ 
-    authorId: session.user.id, 
-    limit: 1000 
+  const projects = await getProjects({
+    authorId: session.user.id,
+    limit: 1000
   });
 
   return (

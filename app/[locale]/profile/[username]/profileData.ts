@@ -1,7 +1,7 @@
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles, userSettings, userFollows, developerSubscriptions, profilePins, posts, projects, ideas, favorites, comments } from "@/db/schema";
 import { eq, and, sql, inArray, desc, getTableColumns } from "drizzle-orm";
-import { getProjects, getUserProjectStats } from "@/lib/actions/projectQuery";
+import { getProjectsWithCount, getUserProjectStats } from "@/lib/actions/projectQuery";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
 import { getUserCollections } from "@/lib/actions/collection";
 import { mapProjectRow } from "@/lib/queries/projectRow";
@@ -226,7 +226,7 @@ export async function getProfileContent(user: ProfileUser, viewerId: string | un
   const showIdeas = ((user.custom as Record<string, any>)?.showIdeasOnProfile ?? true) !== false;
 
   const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, stats, pinnedItems, authorIdeas] = await Promise.all([
-    getProjects({ authorId: user.id, limit, offset, sort: sort as any, calculateTotal: true }),
+    getProjectsWithCount({ authorId: user.id, limit, offset, sort: sort as any }),
     getFavoriteProjects(user.id),
     getUserCollections(user.id, viewerId),
     getUserProjectStats(user.id),

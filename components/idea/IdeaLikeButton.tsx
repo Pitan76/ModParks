@@ -7,7 +7,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
-import { toggleIdeaLike } from "@/lib/actions/idea";
+import { toggleIdeaFavorite } from "@/lib/actions/idea";
 import { useTranslations } from "next-intl";
 
 export interface IdeaLikeButtonProps {
@@ -38,7 +38,7 @@ export default function IdeaLikeButton({
     setCount((prev) => (liked ? prev - 1 : prev + 1));
 
     startTransition(async () => {
-      const res = await toggleIdeaLike(ideaId);
+      const res = await toggleIdeaFavorite(ideaId);
       if (res && res.error) {
         // エラー時は元に戻す
         setLiked(initialLiked);

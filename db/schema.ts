@@ -1013,7 +1013,8 @@ export const moderationAudit = sqliteTable("moderation_audit", {
     enum: [
       "report_resolve",
       "report_dismiss",
-      "project_unpublish",
+      // Post 統合により Project / Idea のどちらも非公開にできるため改名
+      "post_unpublish",
       "role_change",
       "scan_appeal_approve",
       "scan_appeal_reject",
