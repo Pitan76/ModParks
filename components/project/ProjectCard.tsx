@@ -26,8 +26,8 @@ export type ProjectCardProps = {
   project: {
     id:          string;
     slug:        string;
-    name:        string;
-    description: string;
+    title:       string;
+    body:        string;
     iconUrl:     string | null;
     type:        "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
     license:     string;
@@ -72,7 +72,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
       },
       { type: "divider" },
       c.copyLink(href),
-      c.share(href, project.name),
+      c.share(href, project.title),
       ...(project.authorUsername
         ? ([
             { type: "divider" },
@@ -116,7 +116,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
             {/* アイコン */}
             <Avatar
               src={project.iconUrl ?? undefined}
-              alt={project.name}
+              alt={project.title}
               variant="rounded"
               slotProps={{ img: { loading: "lazy", decoding: "async" } }}
               sx={{
@@ -131,7 +131,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
             {/* メイン情報（タイトル・説明・作者） */}
             <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", minWidth: 0 }}>
-                <Tooltip title={project.name} arrow placement="top">
+                <Tooltip title={project.title} arrow placement="top">
                   <Typography
                     variant="subtitle1"
                     component="h3"
@@ -144,7 +144,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
                       minWidth: 0,
                     }}
                   >
-                    {project.name}
+                    {project.title}
                   </Typography>
                 </Tooltip>
                 <ProjectTypeBadge type={project.type} />
@@ -164,7 +164,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
                   overflowWrap: "break-word"
                 }}
               >
-                {toPlainDescription(project.description)}
+                {toPlainDescription(project.body)}
               </Typography>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5, minWidth: 0 }}>

@@ -100,6 +100,27 @@ export async function listIdeaPosts(
   }));
 }
 
+/**
+ * IdeaPostView を IdeaCard が期待する形へ詰め替える。
+ *
+ * IdeaCard は Core コンポーネントなので、その props の形は変えない方針。
+ * ドメイン型（body / author / favoriteCount）と表示用の形（content / authorName /
+ * likesCount）の差はこの境界だけで吸収する。
+ */
+export function toIdeaCardData(idea: IdeaPostView) {
+  return {
+    id: idea.id,
+    slug: idea.slug,
+    title: idea.title,
+    content: idea.body,
+    status: idea.status,
+    createdAt: idea.createdAt,
+    likesCount: idea.favoriteCount,
+    commentsCount: idea.commentCount,
+    authorName: idea.author.displayName ?? idea.author.username,
+  };
+}
+
 export interface ListProjectPostsParams {
   viewerId?: string | null;
   authorId?: string;

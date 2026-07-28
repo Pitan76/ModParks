@@ -179,7 +179,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             }
             descriptionContent={
               <Box sx={{ mt: 2 }}>
-                <DescriptionRenderer content={p.description || ""} format={p.descriptionFormat || "markdown"} />
+                <DescriptionRenderer content={p.body} format={p.bodyFormat} />
               </Box>
             }
             filesContent={
