@@ -58,7 +58,59 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
+      // 投稿本文の外部画像は /api/image-proxy 経由（= 'self'）で読み込むため、
+      // img-src を https: 全体に開けておく必要はない。
+      // 開けたままだと、プロキシを通さない経路が生まれたときに
+      // 画像ホストへ閲覧者の IP / UA が渡ってしまう。
+      //
+      // ここに挙げるのは「プロキシを通さず直接 <img src> に入る配信元」:
+      //   - 自前ストレージ (R2)
+      //   - プロフィールのアバター (GitHub / Gravatar など)
+      //   - プロジェクトアイコン (Modrinth / CurseForge からのインポート)
+      //   - 利用者が指定しがちな一般的な画像ホスト
+      // 本文中の画像はここに無いホストでもプロキシ経由で表示できる。
+      [
+        "img-src 'self' data: blob:",
+        // 自前ストレージ
+        "https://*.r2.dev",
+        "https://files.modparks.pitan76.net",
+        // アバター
+        "https://avatars.githubusercontent.com",
+        "https://*.githubusercontent.com",
+        "https://secure.gravatar.com",
+        "https://cdn.discordapp.com",
+        // Mod 配布プラットフォーム由来のアイコン
+        "https://cdn.modrinth.com",
+        "https://media.forgecdn.net",
+        "https://*.curseforge.com",
+        "https://*.modrinth.com",
+        "https://*.forgecdn.net",
+
+        // Minecraft
+        "https://*.minecraft.net",
+        "https://*.mojang.com",
+
+        // Forge
+        "https://*.minecraftforge.net",
+
+        // NeoForge
+        "https://*.neoforged.net",
+
+        // FabricMC
+        "https://*.fabricmc.net",
+        
+        // QuiltMC
+        "https://*.quiltmc.org",
+        
+        // 一般的な画像ホスティング / バッジ
+        "https://i.imgur.com",
+        "https://imgur.com",
+        "https://img.shields.io",
+        "https://raw.githubusercontent.com",
+        "https://user-images.githubusercontent.com",
+        "https://*.github.io",
+        "https://github.com",
+      ].join(" "),
       "font-src 'self' data:",
       "connect-src 'self' https:",
       "frame-src https://www.youtube.com https://www.youtube-nocookie.com",

@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
 import ZoomableImage from "./ZoomableImage";
+import { toProxiedImageUrl } from "@/lib/utils/imageProxy";
 import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
 
 // リンク内の画像はクリックでリンク遷移させたいので、拡大表示を無効化するためのフラグ
@@ -20,9 +21,11 @@ type MarkdownRendererInnerProps = {
 const MarkdownImage = ({ src, alt }: { src?: string; alt?: string }) => {
   const insideLink = useContext(InsideLinkContext);
   if (!src) return null;
+  // 外部画像は必ずプロキシ経由にする。閲覧者の IP / UA を画像ホストへ渡さないため
+  const proxied = toProxiedImageUrl(src);
   // eslint-disable-next-line @next/next/no-img-element
-  if (insideLink) return <img src={src} alt={alt || ""} />;
-  return <ZoomableImage src={src} alt={alt} />;
+  if (insideLink) return <img src={proxied} alt={alt || ""} referrerPolicy="no-referrer" />;
+  return <ZoomableImage src={proxied} alt={alt} />;
 };
 
 /**
@@ -66,13 +69,21 @@ const MarkdownRendererInner = ({ content }: MarkdownRendererInnerProps) => {
 
   const { ReactMarkdown, remarkGfm, rehypeRaw, rehypeSanitize, defaultSchema } = modules;
 
-  // iframe(YouTube 等の埋め込み)を許可するため sanitize schema を拡張
+  // iframe(YouTube 等の埋め込み)を許可するため sanitize schema を拡張。
+  //
+  // iframe の style は外しておく。position: fixed などで画面全体を覆えてしまい、
+  // 自サイトのドメイン上で偽の UI を重ねる余地を与えるため。
+  // src の行き先は CSP の frame-src(YouTube のみ)で更に制限している。
+  //
+  // なお img は、Markdown 記法でも rehype-raw 経由の生 <img> でも
+  // components.img（= MarkdownImage）を通ることを確認済みのため、
+  // プロキシ化を迂回される経路は無い。
   const SCHEMA = {
     ...defaultSchema,
     tagNames: [...(defaultSchema.tagNames || []), "iframe"],
     attributes: {
       ...defaultSchema.attributes,
-      iframe: ["src", "width", "height", "allow", "allowfullscreen", "frameborder", "title", "style"],
+      iframe: ["src", "width", "height", "allow", "allowfullscreen", "frameborder", "title"],
     },
   };
 
