@@ -97,8 +97,17 @@ async function getFollowState(userId: string, viewerId: string | undefined, isOw
   };
 }
 
+/**
+ * ピン留めされた項目。
+ *
+ * project 側は mapProjectRow の戻り値だが、ジェネリクスの推論が効かず
+ * ReturnType<typeof mapProjectRow> では著者情報だけの型に潰れてしまう。
+ * 実際に組み立てている getPinnedItems の結果から型を取る。
+ */
+export type PinnedProject = Awaited<ReturnType<typeof getProjectsWithCount>>["data"][number];
+
 export type PinnedItem =
-  | { kind: "project"; project: ReturnType<typeof mapProjectRow> }
+  | { kind: "project"; project: PinnedProject }
   | { kind: "idea"; idea: AuthorIdea };
 
 /** プロフィールにピン留めされたプロジェクト/アイデアを、ピンの並び順で解決する。 */

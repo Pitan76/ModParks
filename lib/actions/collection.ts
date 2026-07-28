@@ -7,6 +7,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { toProjectPost } from "@/lib/queries/postRow";
 
 export async function createCollection(name: string, description: string | null, visibility: "public" | "unlisted" | "private") {
   const { db, userId } = await getAuthenticatedDb();
@@ -158,7 +159,8 @@ export async function getCollectionById(id: string, viewerId?: string) {
 
   // Fetch the basic project info for items in this collection
   const items = await db.select({
-    project: projects,
+    posts: posts,
+    projects: projects,
     author: {
       username: userProfiles.username,
       displayName: userProfiles.displayName,
@@ -177,7 +179,7 @@ export async function getCollectionById(id: string, viewerId?: string) {
 
   // ---- Gather tags for each project -------------------------------------
   // Collect all project IDs from the items we just fetched.
-  const projectIds = items.map(i => i.project.id);
+  const projectIds = items.map(i => i.posts.id);
   // Pull tags (projectId, tag) for those projects.
   const tagRows = await db
     .select({ projectId: projectTags.projectId, tag: projectTags.tag })
@@ -195,9 +197,10 @@ export async function getCollectionById(id: string, viewerId?: string) {
     ...collectionRow.collection,
     author: collectionRow.author,
     // Map each item, attaching the gathered tags (or an empty array)
+    // posts と projects を平坦化してから返す。ネストした形は外へ出さない
     items: items.map(item => ({
-      ...item.project,
-      tags: tagsMap[item.project.id] ?? [],
+      ...toProjectPost(item),
+      tags: tagsMap[item.posts.id] ?? [],
       authorUsername: item.author?.username,
       authorDisplayName: item.author?.displayName ?? item.author?.username,
       authorAvatarUrl: item.author?.avatarUrl,
