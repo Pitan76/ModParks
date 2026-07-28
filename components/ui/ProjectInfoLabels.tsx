@@ -12,11 +12,12 @@ import { useLocale, useTranslations, useFormatter } from "next-intl";
 import LinkButton from "@/components/ui/LinkButton";
 
 export interface AuthorLabelProps {
+  /** left join で取得すると作者が削除済みの場合に null になりうる */
   author: {
     username?: string | null;
     displayName?: string | null;
     avatarUrl?: string | null;
-  };
+  } | null;
   avatarSize?: number;
   textVariant?: TypographyProps["variant"];
   textColor?: string;
@@ -30,8 +31,8 @@ export function AuthorLabel({
   textColor = "text.secondary",
   sx,
 }: AuthorLabelProps) {
-  const username = author.username || "Unknown";
-  const displayName = author.displayName || username;
+  const username = author?.username || "Unknown";
+  const displayName = author?.displayName || username;
 
   return (
     <LinkButton
@@ -49,7 +50,7 @@ export function AuthorLabel({
         ...sx,
       }}
     >
-      <Avatar src={author.avatarUrl ?? undefined} sx={{ width: avatarSize, height: avatarSize }} />
+      <Avatar src={author?.avatarUrl ?? undefined} sx={{ width: avatarSize, height: avatarSize }} />
       <Typography variant={textVariant} sx={{ fontWeight: 500 }}>
         {displayName}
       </Typography>

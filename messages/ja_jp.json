@@ -545,8 +545,8 @@
   },
   "Idea": {
     "postedBy": "投稿者: {name}",
-    "like": "いいね",
-    "liked": "いいね済み",
+    "like": "お気に入り",
+    "liked": "お気に入り済み",
     "title": "アイデア",
     "description": "マイクラのMOD、プラグインをみんなで一緒につくったり、探したりしてみませんか？",
     "postIdea": "アイデアを投稿",
@@ -582,11 +582,11 @@
     "editModal": {
       "title": "アイデアを編集",
       "deleteTitle": "アイデアを削除しますか？",
-      "deleteConfirmDesc": "この操作は取り消せません。関連するコメントやいいねもすべて削除されます。"
+      "deleteConfirmDesc": "この操作は取り消せません。関連するコメントやお気に入りもすべて削除されます。"
     },
     "error": {
       "submitFailed": "アイデアの投稿に失敗しました",
-      "likeFailed": "いいねの操作に失敗しました",
+      "likeFailed": "お気に入りの操作に失敗しました",
       "commentFailed": "コメントの投稿に失敗しました"
     },
     "createProject": "プロジェクトを作成"
@@ -1429,7 +1429,7 @@
       "noStatusPermission": "ステータスを変更する権限がありません",
       "invalidStatus": "無効なステータスです",
       "noDeletePermission": "削除する権限がありません",
-      "likeFailed": "いいねの操作に失敗しました",
+      "likeFailed": "お気に入りの操作に失敗しました",
       "commentCreateFailed": "コメントの投稿に失敗しました",
       "commentNotFound": "コメントが見つかりません"
     },

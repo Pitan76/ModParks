@@ -4,7 +4,7 @@ import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
-import FavoriteIcon from "@mui/icons-material/Favorite";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CommentIcon from "@mui/icons-material/Comment";
 import { useTranslations } from "next-intl";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
@@ -104,7 +104,7 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
 
             <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 3 }, flexWrap: "wrap" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
-                <FavoriteIcon fontSize="small" />
+                <BookmarkIcon fontSize="small" />
                 <Typography variant="body2">{idea.likesCount}</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>

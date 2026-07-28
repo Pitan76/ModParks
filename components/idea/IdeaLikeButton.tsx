@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import { toggleIdeaFavorite } from "@/lib/actions/idea";
@@ -63,7 +63,7 @@ export default function IdeaLikeButton({
               transform: liked ? "scale(1.1)" : "scale(1)",
             }}
           >
-            {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+            {liked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
             {count > 0 && (
               <Typography variant="caption" sx={{ ml: 0.5, fontWeight: "bold" }}>
                 {count}
@@ -79,7 +79,7 @@ export default function IdeaLikeButton({
     <Button
       variant={liked ? "contained" : "outlined"}
       color="primary"
-      startIcon={liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+      startIcon={liked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
       onClick={handleToggle}
       disabled={!isLoggedIn || isPending}
       fullWidth

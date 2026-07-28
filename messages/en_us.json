@@ -542,8 +542,8 @@
   },
   "Idea": {
     "postedBy": "Posted by {name}",
-    "like": "Like",
-    "liked": "Liked",
+    "like": "Favorite",
+    "liked": "Favorited",
     "title": "Ideas",
     "description": "Post the mod you wish existed, and find someone who can build it.",
     "postIdea": "Post Idea",
@@ -1421,7 +1421,7 @@
       "noStatusPermission": "You do not have permission to change the status",
       "invalidStatus": "Invalid status",
       "noDeletePermission": "You do not have permission to delete this",
-      "likeFailed": "Failed to update the like",
+      "likeFailed": "Failed to update favorite",
       "commentCreateFailed": "Failed to post the comment",
       "commentNotFound": "Comment not found"
     },
