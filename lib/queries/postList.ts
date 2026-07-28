@@ -1,6 +1,6 @@
 import { eq, and, or, sql, desc, inArray, type SQL } from "drizzle-orm";
-import { posts, ideas, users, userProfiles, favorites, comments } from "@/db/schema";
-import type { IdeaPostView } from "@/types/post";
+import { posts, projects, ideas, users, userProfiles, favorites, comments, projectTags } from "@/db/schema";
+import type { IdeaPostView, ProjectPostView } from "@/types/post";
 
 /**
  * 投稿一覧の取得。表示に必要な形（PostView）まで組み立てて返す。
@@ -98,4 +98,83 @@ export async function listIdeaPosts(
     commentCount: Number(row.commentCount ?? 0),
     isFavorited: Boolean(row.isFavorited),
   }));
+}
+
+export interface ListProjectPostsParams {
+  viewerId?: string | null;
+  authorId?: string;
+  postIds?: string[];
+  /** 非公開・下書きも含める。本人・管理者向け */
+  includeHidden?: boolean;
+  limit?: number;
+}
+
+/**
+ * プロジェクト一覧を ProjectPostView[] で返す。listIdeaPosts と対になる関数。
+ * 公開範囲の絞り込みは行レベル（クエリの WHERE）で行う。
+ */
+/** tags は project_tags という別テーブルの集計であり ProjectPostView の列ではないため、拡張して返す */
+export type ProjectPostViewWithTags = ProjectPostView & { tags: string[] };
+
+export async function listProjectPosts(
+  db: Db,
+  params: ListProjectPostsParams = {},
+): Promise<ProjectPostViewWithTags[]> {
+  const { viewerId = null, authorId, postIds, includeHidden = false, limit = 50 } = params;
+
+  const conditions: SQL[] = [eq(posts.kind, "project")];
+
+  if (!includeHidden) {
+    conditions.push(
+      viewerId
+        ? or(eq(posts.visibility, "public"), eq(posts.authorId, viewerId))!
+        : eq(posts.visibility, "public"),
+    );
+  }
+  if (authorId) conditions.push(eq(posts.authorId, authorId));
+  if (postIds) {
+    if (postIds.length === 0) return [];
+    conditions.push(inArray(posts.id, postIds));
+  }
+
+  const rows = await db
+    .select({
+      post: posts,
+      project: projects,
+      ...postViewSelection(viewerId),
+      tagsJson: sql<string>`(SELECT json_group_array(tag) FROM ${projectTags} WHERE ${projectTags.projectId} = ${posts.id})`,
+    })
+    .from(posts)
+    .innerJoin(projects, eq(projects.id, posts.id))
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .where(and(...conditions))
+    .orderBy(desc(posts.createdAt))
+    .limit(limit)
+    .all();
+
+  return rows.map((row: any) => {
+    const { id: _childId, ...projectFields } = row.project;
+    let tags: string[] = [];
+    try {
+      const parsed = JSON.parse(row.tagsJson ?? "[]");
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0] !== null) tags = parsed;
+    } catch {}
+
+    return {
+      ...row.post,
+      kind: "project" as const,
+      ...projectFields,
+      tags,
+      author: {
+        id: row.author.id,
+        username: row.author.username ?? "",
+        displayName: row.author.displayName ?? row.author.username,
+        avatarUrl: row.author.avatarUrl,
+      },
+      favoriteCount: Number(row.favoriteCount ?? 0),
+      commentCount: Number(row.commentCount ?? 0),
+      isFavorited: Boolean(row.isFavorited),
+    };
+  });
 }

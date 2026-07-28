@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
+import { posts, versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { scanVersionFile } from "@/lib/actions/versionScan";
@@ -67,7 +67,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
     projectId:     project.id,
   });
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   after(async () => {
     await scanVersionFile(db, id, fileUrl, fileName);
@@ -168,7 +168,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
     await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId, mcVersion: mc }))).run();
   }
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
@@ -212,7 +212,7 @@ export const deleteVersion = async (versionId: string, projectSlug: string) => {
   await db.delete(versions).where(eq(versions.id, versionId)).run();
   await recordDeletion(db, "versions", versionId);
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
@@ -249,7 +249,7 @@ export const setVersionArchived = async (versionId: string, projectSlug: string,
     .where(eq(versions.id, versionId))
     .run();
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };

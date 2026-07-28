@@ -4,7 +4,7 @@ import { projects, users, userProfiles, projectTags } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { eq, desc, and, inArray, like } from "drizzle-orm";
-import { ApiProject, PaginatedResponse } from "@/types/api";
+import { ApiProject, PaginatedResponse } from "@/types/api-v1";
 import { createId } from "@paralleldrive/cuid2";
 import { withPublicCache } from "@/lib/http/cache";
 

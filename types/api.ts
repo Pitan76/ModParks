@@ -1,3 +1,11 @@
+/**
+ * 公開API v2 の型。
+ *
+ * 命名はドメイン層（types/post.ts の ProjectPost / IdeaPost）とそのまま揃える。
+ * DB の posts / projects 分割はここに持ち込まない — レスポンスは平坦な1オブジェクト。
+ * 詳細は docs-md/DESIGN.md の「公開APIも同じ名前に揃える」を参照。
+ */
+
 export interface ApiUser {
   username: string;
   displayName: string | null;
@@ -6,19 +14,51 @@ export interface ApiUser {
   githubUsername?: string | null;
 }
 
-export interface ApiProject {
+/** Project / Idea に共通するフィールド */
+export interface ApiPost {
   id: string;
+  kind: "project" | "idea";
   slug: string;
-  name: string;
-  description: string;
-  iconUrl: string | null;
-  type: "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
-  license: string;
-  downloads: Record<string, number>;
+  title: string;
+  body: string;
+  bodyFormat: "markdown" | "plaintext" | "pukiwiki";
   createdAt: number;
   updatedAt: number;
   author: ApiUser;
+}
+
+export interface ApiProject extends ApiPost {
+  kind: "project";
+  type: "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
+  license: string;
+  iconUrl: string | null;
+  downloads: Record<string, number>;
   tags: string[];
+}
+
+export interface ApiIdea extends ApiPost {
+  kind: "idea";
+  status: "open" | "in_progress" | "fulfilled";
+}
+
+/**
+ * 作者・共同編集者・管理者にのみ返す限定フィールド。
+ * ApiProject を継承して足す。積み上げ方式（削らずに足す）で組み立てること。
+ */
+export interface ApiProjectPrivate extends ApiProject {
+  visibility: "draft" | "public" | "unlisted" | "private";
+  githubRepo: string | null;
+  discordWebhookUrl: string | null;
+  modrinthId: string | null;
+  curseforgeId: string | null;
+  sourceIdeaId: string | null;
+  recipeNamespaces: string[];
+  commentsEnabled: boolean;
+  recipesEnabled: boolean;
+}
+
+export interface ApiIdeaPrivate extends ApiIdea {
+  visibility: "draft" | "public" | "unlisted" | "private";
 }
 
 export interface ApiVersion {
@@ -36,11 +76,11 @@ export interface ApiVersion {
   createdAt: number;
 }
 
-export interface ApiIdea {
+export interface ApiComment {
   id: string;
-  title: string;
   content: string;
-  status: "open" | "in_progress" | "fulfilled";
+  contentFormat: "markdown" | "plaintext" | "pukiwiki";
+  parentId: string | null;
   author: ApiUser;
   createdAt: number;
   updatedAt: number;
@@ -61,12 +101,17 @@ export interface ApiDependency {
   project: {
     id: string;
     slug: string;
-    name: string;
+    title: string;
     iconUrl: string | null;
   };
 }
 
 export interface ApiProjectDetail extends ApiProject {
+  dependencies: ApiDependency[];
+  dependents: ApiDependency[];
+}
+
+export interface ApiProjectPrivateDetail extends ApiProjectPrivate {
   dependencies: ApiDependency[];
   dependents: ApiDependency[];
 }

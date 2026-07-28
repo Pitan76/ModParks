@@ -2,7 +2,7 @@
 import { getDb, getD1 } from "@/lib/db";
 import { ideas, users, userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { ApiIdea } from "@/types/api";
+import { ApiIdea } from "@/types/api-v1";
 
 export async function GET(
   _request: Request,

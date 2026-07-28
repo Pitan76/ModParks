@@ -3,7 +3,7 @@ import { getDb, getD1, type Env } from "@/lib/db";
 import { projects, versions, projectMembers, versionLoaders, versionMcVersions } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, desc, and, isNull } from "drizzle-orm";
-import { ApiVersion } from "@/types/api";
+import { ApiVersion } from "@/types/api-v1";
 import { createVersionSchema, isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { buildR2Key, getR2PublicUrl, uploadToR2 } from "@/lib/r2";

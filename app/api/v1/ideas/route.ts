@@ -3,7 +3,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { ideas, users, userProfiles } from "@/db/schema";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { eq, desc } from "drizzle-orm";
-import { ApiIdea, PaginatedResponse } from "@/types/api";
+import { ApiIdea, PaginatedResponse } from "@/types/api-v1";
 import { withPublicCache } from "@/lib/http/cache";
 
 export async function GET(request: Request) {

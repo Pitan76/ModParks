@@ -3,7 +3,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { projects, users, userProfiles, projectTags, projectMembers } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, and } from "drizzle-orm";
-import { ApiProjectDetail } from "@/types/api";
+import { ApiProjectDetail } from "@/types/api-v1";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
 import { withPublicCache } from "@/lib/http/cache";
 

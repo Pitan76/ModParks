@@ -1,6 +1,7 @@
 import { getDatabase } from "@/lib/db";
-import { apiKeys } from "@/db/schema";
+import { apiKeys, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import type { Viewer } from "@/lib/auth/postAccess";
 
 export async function validateApiKey(request: Request) {
   const db = await getDatabase();
@@ -39,4 +40,17 @@ export async function validateApiKey(request: Request) {
   }
 
   return { valid: true, userId: apiKeyRecord.userId, error: null };
+}
+
+/**
+ * リクエストから canManagePost に渡せる Viewer を組み立てる。
+ * APIキーが無い・無効なら匿名として扱う（エラーにはしない — 公開APIは未認証でも読める）。
+ */
+export async function resolveViewer(request: Request): Promise<Viewer> {
+  const auth = await validateApiKey(request);
+  if (!auth.valid || !auth.userId) return { userId: null, isAdmin: false };
+
+  const db = await getDatabase();
+  const user = await db.select({ role: users.role }).from(users).where(eq(users.id, auth.userId)).get();
+  return { userId: auth.userId, isAdmin: user?.role === "admin" };
 }
