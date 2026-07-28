@@ -73,39 +73,50 @@ const nextConfig: NextConfig = {
         "img-src 'self' data: blob:",
 
         "https://*.pitan76.net",
+        "https://pitan76.net",
         "https://*.wikichree.com",
-        
+        "https://wikichree.com",
+
         "https://*.civa.jp",
+        "https://civa.jp",
 
         // 自前ストレージ
         "https://*.r2.dev",
         "https://files.modparks.pitan76.net",
         // アバター
         "https://avatars.githubusercontent.com",
+        "https://githubusercontent.com",
         "https://*.githubusercontent.com",
         "https://secure.gravatar.com",
         "https://cdn.discordapp.com",
         // Mod 配布プラットフォーム由来のアイコン
+        "https://modrinth.com",
         "https://cdn.modrinth.com",
         "https://media.forgecdn.net",
+        "https://curseforge.com",
         "https://*.curseforge.com",
         "https://*.modrinth.com",
         "https://*.forgecdn.net",
 
         // Minecraft
+        "https://minecraft.net",
         "https://*.minecraft.net",
         "https://*.mojang.com",
 
         // Forge
+        "https://minecraftforge.net",
         "https://*.minecraftforge.net",
 
         // NeoForge
+        "https://neoforged.net",
         "https://*.neoforged.net",
 
         // FabricMC
+        "https://fabricmc.net",
         "https://*.fabricmc.net",
         
         // QuiltMC
+        "https://quiltmc.org",
         "https://*.quiltmc.org",
         
         // 一般的な画像ホスティング / バッジ
@@ -114,6 +125,7 @@ const nextConfig: NextConfig = {
         "https://img.shields.io",
         "https://raw.githubusercontent.com",
         "https://user-images.githubusercontent.com",
+        "https://github.io",
         "https://*.github.io",
         "https://github.com",
       ].join(" "),

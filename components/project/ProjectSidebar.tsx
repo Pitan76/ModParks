@@ -16,6 +16,7 @@ import { useTranslations } from "next-intl";
 import ReportDialog from "@/components/project/ReportDialog";
 import { Link } from "@/i18n/routing";
 import { parseLinks } from "@/lib/utils/links";
+import { toProxiedImageUrl } from "@/lib/utils/imageProxy";
 
 export type ProjectSidebarProps = {
   /** 対象プロジェクトの情報 */
@@ -37,8 +38,8 @@ const getLinkIcon = (url: string) => {
     if (hostname.includes("x.com") || hostname.includes("twitter.com")) return <XIcon />;
     if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return <YouTubeIcon color="error" />;
     if (hostname.includes("github.com")) return <GitHubIcon />;
-    if (hostname.includes("modrinth.com")) return <img src="https://modrinth.com/favicon.ico" alt="Modrinth" style={{ width: 16, height: 16 }} />;
-    if (hostname.includes("curseforge.com")) return <img src="https://www.curseforge.com/favicon.ico" alt="CurseForge" style={{ width: 16, height: 16 }} />;
+    if (hostname.includes("modrinth.com")) return <img src={toProxiedImageUrl("https://modrinth.com/favicon.ico")} alt="Modrinth" style={{ width: 16, height: 16 }} />;
+    if (hostname.includes("curseforge.com")) return <img src={toProxiedImageUrl("https://www.curseforge.com/favicon.ico")} alt="CurseForge" style={{ width: 16, height: 16 }} />;
   } catch {
     // 無効なURLなどの場合はフォールバックアイコンへ移行
   }
