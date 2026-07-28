@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { projectFavorites, projectSubscriptions } from "@/db/schema";
+import { favorites, projectSubscriptions } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
@@ -41,8 +41,8 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
     return { title: "Not Found" };
   }
 
-  const title = `${project.name}`;
-  const plainDesc = toPlainDescription(project.description);
+  const title = `${project.title}`;
+  const plainDesc = toPlainDescription(project.body);
   const description = plainDesc.length > 150 ? plainDesc.substring(0, 150) + "..." : plainDesc || "Minecraft Java Edition向けのMOD/プラグイン";
   const imageUrl = project.iconUrl || SITE_URL + "/icon.png";
 
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
           url: imageUrl,
           width: 512,
           height: 512,
-          alt: `${project.name} Icon`,
+          alt: `${project.title} Icon`,
         },
       ],
     },
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
           url: imageUrl,
           width: 512,
           height: 512,
-          alt: `${project.name} Icon`,
+          alt: `${project.title} Icon`,
         },
       ],
     },
@@ -105,14 +105,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const isOwner = session?.user?.id === project.authorId;
 
   // private や draft の場合は作者以外には 404 を返す
-  if (!isOwner && (project.status === "private" || project.status === "draft")) {
+  if (!isOwner && (project.visibility === "private" || project.visibility === "draft")) {
     notFound();
   }
 
   const db = await getDatabase();
   const [favoritesData, userFavoriteData, dependencies, dependents, userSubscription, media] = await Promise.all([
-    db.select({ count: sql<number>`count(*)` }).from(projectFavorites).where(eq(projectFavorites.projectId, project.id)).get(),
-    session?.user?.id ? db.select().from(projectFavorites).where(and(eq(projectFavorites.projectId, project.id), eq(projectFavorites.userId, session.user.id))).get() : null,
+    db.select({ count: sql<number>`count(*)` }).from(favorites).where(eq(favorites.postId, project.id)).get(),
+    session?.user?.id ? db.select().from(favorites).where(and(eq(favorites.postId, project.id), eq(favorites.userId, session.user.id))).get() : null,
     getProjectDependencies(project.id),
     getProjectDependents(project.id),
     session?.user?.id ? db.select().from(projectSubscriptions).where(and(eq(projectSubscriptions.projectId, project.id), eq(projectSubscriptions.userId, session.user.id))).get() : null,

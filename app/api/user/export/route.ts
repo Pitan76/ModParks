@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { eq } from "drizzle-orm";
-import { users, userProfiles, userSettings, projects, ideas, collections, ideaComments, projectComments } from "@/db/schema";
+import { users, userProfiles, userSettings, collections, comments } from "@/db/schema";
+import { listProjectPosts, listIdeaPosts } from "@/lib/queries/postList";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,11 +18,11 @@ export async function GET(req: NextRequest) {
     const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
     
     // Fetch related content
-    const userProjects = await db.select().from(projects).where(eq(projects.authorId, userId)).all();
-    const userIdeas = await db.select().from(ideas).where(eq(ideas.authorId, userId)).all();
+    // 本人のデータなので非公開・下書きも含めて全件取得する
+    const userProjects = await listProjectPosts(db, { authorId: userId, includeHidden: true, limit: 10000 });
+    const userIdeas = await listIdeaPosts(db, { authorId: userId, includeHidden: true, limit: 10000 });
     const userCollections = await db.select().from(collections).where(eq(collections.userId, userId)).all();
-    const userIdeaComments = await db.select().from(ideaComments).where(eq(ideaComments.authorId, userId)).all();
-    const userProjectComments = await db.select().from(projectComments).where(eq(projectComments.authorId, userId)).all();
+    const userComments = await db.select({ id: comments.id }).from(comments).where(eq(comments.authorId, userId)).all();
 
     const data = {
       user: {
@@ -37,15 +38,15 @@ export async function GET(req: NextRequest) {
         projectsCount: userProjects.length,
         ideasCount: userIdeas.length,
         collectionsCount: userCollections.length,
-        commentsCount: userIdeaComments.length + userProjectComments.length,
+        commentsCount: userComments.length,
       },
       projects: userProjects.map(p => ({
         id: p.id,
         slug: p.slug,
-        name: p.name,
-        description: p.description,
+        name: p.title,
+        description: p.body,
         type: p.type,
-        status: p.status,
+        status: p.visibility,
         downloads: p.downloads,
         totalDownloads: p.totalDownloads,
         externalDownloads: p.externalDownloads,

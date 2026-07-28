@@ -41,8 +41,8 @@ export async function generateMetadata({ params }: VersionDetailPageProps) {
     return { title: "Not Found" };
   }
 
-  const title = `${project.name} v${version.versionNumber}`;
-  const description = version.changelog || `Download ${project.name} version ${version.versionNumber}`;
+  const title = `${project.title} v${version.versionNumber}`;
+  const description = version.changelog || `Download ${project.title} version ${version.versionNumber}`;
 
   return {
     title,
@@ -87,7 +87,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
 
   // 未公開（draft/private）は作者・メンバー・管理者のみ閲覧可。
   // public / unlisted は誰でも閲覧できる（unlisted は public と同等扱い）。
-  if ((project.status === "draft" || project.status === "private") && !canEdit) {
+  if ((project.visibility === "draft" || project.visibility === "private") && !canEdit) {
     notFound();
   }
 
@@ -103,7 +103,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
       <Breadcrumb
         items={[
           { label: tCommon("projects"), href: "/projects" },
-          { label: project.name, href: `/projects/${project.slug}` },
+          { label: project.title, href: `/projects/${project.slug}` },
           { label: t("versions"), href: `/projects/${project.slug}?tab=files` },
           { label: `v${version.versionNumber}` },
         ]}

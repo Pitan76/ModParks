@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { projects, projectTags } from "@/db/schema";
+import { posts, projects, projectTags } from "@/db/schema";
 import { createProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
     const { name, slug, description, type, license, sourceUrl, links, tags } = parsed.data;
     const id = createId();
 
-    const existingProject = await db.select().from(projects).where(eq(projects.slug, slug)).get();
+    const existingProject = await db.select({ id: posts.id }).from(posts).where(and(eq(posts.kind, "project"), eq(posts.slug, slug))).get();
     if (existingProject) {
       return NextResponse.json({ error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } }, { status: 400 });
     }
 
     const { userSettings, ideas } = await import("@/db/schema");
     const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
-    const status = (settingsRecord?.defaultProjectStatus as any) || "draft";
+    const visibility = (settingsRecord?.defaultProjectStatus as any) || "draft";
     const commentsEnabled = settingsRecord?.defaultCommentsEnabled ?? false;
 
     const modrinthId = formData.get("modrinthId") as string | null;
@@ -47,28 +47,39 @@ export async function POST(req: NextRequest) {
     const issueTrackerUrl = formData.get("issueTrackerUrl") as string | null;
     const ideaId = formData.get("ideaId") as string | null;
 
-    await db.insert(projects).values({
-      id,
-      slug,
-      name,
-      description,
-      type,
-      license,
-      sourceUrl:  sourceUrl || null,
-      links:      links || null,
-      iconUrl:    formData.get("iconUrl") as string | null,
-      authorId:   session.user.id,
-      status:     status,
-      modrinthId,
-      curseforgeId,
-      issueTrackerUrl,
-      externalDownloads: {}, // Expects an object, not a number
-      commentsEnabled,
-      sourceIdeaId: ideaId,
-    }).run();
+    // posts と projects は必ず同時に作る（DESIGN.md 12章）。D1 は transaction() 非対応のため batch を使う。
+    await db.batch([
+      db.insert(posts).values({
+        id,
+        authorId: session.user.id,
+        kind: "project",
+        slug,
+        title: name,
+        body: description,
+        bodyFormat: "markdown",
+        visibility,
+      }),
+      db.insert(projects).values({
+        id,
+        type,
+        license,
+        sourceUrl:  sourceUrl || null,
+        links:      links || null,
+        iconUrl:    formData.get("iconUrl") as string | null,
+        modrinthId,
+        curseforgeId,
+        issueTrackerUrl,
+        externalDownloads: {},
+        commentsEnabled,
+        sourceIdeaId: ideaId,
+      }),
+    ]);
 
     if (ideaId) {
-      await db.update(ideas).set({ status: "fulfilled", updatedAt: new Date() }).where(eq(ideas.id, ideaId)).run();
+      await db.batch([
+        db.update(ideas).set({ status: "fulfilled" }).where(eq(ideas.id, ideaId)),
+        db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, ideaId)),
+      ]);
     }
 
     if (tags.length > 0) {

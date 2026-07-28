@@ -35,11 +35,12 @@ export async function POST(req: NextRequest) {
       // プロジェクト新規作成時はDBチェックをスキップする
     } else {
       const { getDatabase } = await import("@/lib/db");
-      const { projects, projectMembers } = await import("@/db/schema");
+      const { projectMembers } = await import("@/db/schema");
       const { eq, and } = await import("drizzle-orm");
+      const { findProjectPostBySlug } = await import("@/lib/queries/post");
       const db = await getDatabase();
-      const project = await db.select().from(projects).where(eq(projects.slug, projectSlug!)).get();
-      
+      const project = await findProjectPostBySlug(db, projectSlug!);
+
       if (!project) {
         return NextResponse.json({ error: "Project not found" }, { status: 404 });
       }

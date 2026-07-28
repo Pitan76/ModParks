@@ -17,7 +17,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 type DependencyProject = {
   id: string;
   slug: string;
-  name: string;
+  title: string;
   iconUrl?: string | null;
 };
 
@@ -80,7 +80,7 @@ const ProjectDependencies = ({ dependencies, dependents }: ProjectDependenciesPr
                 <ListItemText 
                   primary={
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      {isExternal ? dep.externalName : dep.project.name}
+                      {isExternal ? dep.externalName : dep.project.title}
                       {isExternal && <OpenInNewIcon fontSize="small" color="action" />}
                     </Box>
                   }
@@ -114,7 +114,7 @@ const ProjectDependencies = ({ dependencies, dependents }: ProjectDependenciesPr
                 </Avatar>
               </ListItemAvatar>
               <ListItemText 
-                primary={dep.project.name}
+                primary={dep.project.title}
               />
               <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={DEP_COLOR[dep.dependencyType] || "default"} />
             </ListItem>
