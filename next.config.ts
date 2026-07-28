@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import path from "path";
+import { CSP_IMG_SRC } from "./lib/config/imageHosts";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
@@ -58,77 +59,11 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
       "style-src 'self' 'unsafe-inline'",
-      // 投稿本文の外部画像は /api/image-proxy 経由（= 'self'）で読み込むため、
-      // img-src を https: 全体に開けておく必要はない。
-      // 開けたままだと、プロキシを通さない経路が生まれたときに
-      // 画像ホストへ閲覧者の IP / UA が渡ってしまう。
-      //
-      // ここに挙げるのは「プロキシを通さず直接 <img src> に入る配信元」:
-      //   - 自前ストレージ (R2)
-      //   - プロフィールのアバター (GitHub / Gravatar など)
-      //   - プロジェクトアイコン (Modrinth / CurseForge からのインポート)
-      //   - 利用者が指定しがちな一般的な画像ホスト
-      // 本文中の画像はここに無いホストでもプロキシ経由で表示できる。
-      [
-        "img-src 'self' data: blob:",
-
-        "https://*.pitan76.net",
-        "https://pitan76.net",
-        "https://*.wikichree.com",
-        "https://wikichree.com",
-
-        "https://*.civa.jp",
-        "https://civa.jp",
-
-        // 自前ストレージ
-        "https://*.r2.dev",
-        "https://files.modparks.pitan76.net",
-        // アバター
-        "https://avatars.githubusercontent.com",
-        "https://githubusercontent.com",
-        "https://*.githubusercontent.com",
-        "https://secure.gravatar.com",
-        "https://cdn.discordapp.com",
-        // Mod 配布プラットフォーム由来のアイコン
-        "https://modrinth.com",
-        "https://cdn.modrinth.com",
-        "https://media.forgecdn.net",
-        "https://curseforge.com",
-        "https://*.curseforge.com",
-        "https://*.modrinth.com",
-        "https://*.forgecdn.net",
-
-        // Minecraft
-        "https://minecraft.net",
-        "https://*.minecraft.net",
-        "https://*.mojang.com",
-
-        // Forge
-        "https://minecraftforge.net",
-        "https://*.minecraftforge.net",
-
-        // NeoForge
-        "https://neoforged.net",
-        "https://*.neoforged.net",
-
-        // FabricMC
-        "https://fabricmc.net",
-        "https://*.fabricmc.net",
-        
-        // QuiltMC
-        "https://quiltmc.org",
-        "https://*.quiltmc.org",
-        
-        // 一般的な画像ホスティング / バッジ
-        "https://i.imgur.com",
-        "https://imgur.com",
-        "https://img.shields.io",
-        "https://raw.githubusercontent.com",
-        "https://user-images.githubusercontent.com",
-        "https://github.io",
-        "https://*.github.io",
-        "https://github.com",
-      ].join(" "),
+      // 画像の配信元一覧は lib/config/imageHosts.ts に集約している。
+      // プロキシ要否の判定（lib/utils/imageProxy.ts）と同じ定義を使うことで、
+      // 「直接読み込むと判定したのに CSP に弾かれる」食い違いを防ぐ。
+      // ここに無いホストの画像は /api/image-proxy 経由（= 'self'）で表示される。
+      CSP_IMG_SRC,
       "font-src 'self' data:",
       "connect-src 'self' https:",
       "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
