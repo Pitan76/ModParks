@@ -178,7 +178,6 @@
       "shader": "Shader",
       "modpack": "Modpack"
     },
-    "status": {},
     "fields": {
       "name": "Project Name",
       "edit": "Edit",

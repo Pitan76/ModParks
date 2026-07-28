@@ -96,7 +96,7 @@ const ProjectDetailHeader = ({
               <ProjectTypeBadge type={p.type} size="small" />
               {p.visibility !== "public" && (
                 <Chip
-                  label={tProject(`status.${p.visibility}`)}
+                  label={tCommon(`visibility.${p.visibility}`)}
                   color="warning"
                   size="small"
                   variant="outlined"

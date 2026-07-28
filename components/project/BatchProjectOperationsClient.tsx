@@ -30,9 +30,9 @@ import { useTableSort } from "@/lib/hooks/useTableSort";
 type ProjectForManagement = {
   id: string;
   slug: string;
-  name: string;
+  title: string;
   type: string;
-  status: string;
+  visibility: string;
   downloads: number | null;
   totalDownloads: number | null;
 };
@@ -56,10 +56,10 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const { sorted, order, orderBy, handleSort } = useTableSort(projects, {
-    name: (p) => p.name,
+    name: (p) => p.title,
     slug: (p) => p.slug,
     type: (p) => p.type,
-    status: (p) => p.status,
+    status: (p) => p.visibility,
     downloads: (p) => p.totalDownloads || 0,
   });
 
@@ -206,10 +206,10 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
                         onChange={() => handleToggle(p.id)}
                       />
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>{p.name}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{p.title}</TableCell>
                     <TableCell>{p.slug}</TableCell>
                     <TableCell>{p.type}</TableCell>
-                    <TableCell>{getStatusLabel(p.status)}</TableCell>
+                    <TableCell>{getStatusLabel(p.visibility)}</TableCell>
                     <TableCell align="right">{formatCompactNumber(totalDl, "ja")}</TableCell>
                     <TableCell align="center">
                       <Button component={Link} href={`/projects/${p.slug}/edit`} size="small">

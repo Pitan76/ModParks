@@ -178,7 +178,6 @@
       "shader": "シェーダー",
       "modpack": "MODパック"
     },
-    "status": {},
     "fields": {
       "name": "プロジェクト名",
       "slug": "スラッグ",

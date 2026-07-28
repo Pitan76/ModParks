@@ -71,7 +71,7 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
         </Box>
       </Box>
 
-      <BatchProjectOperationsClient projects={projects as any[]} />
+      <BatchProjectOperationsClient projects={projects} />
     </Container>
   );
 }

@@ -22,7 +22,7 @@ export default async function ProfilePinnedSection({ items }: { items: PinnedIte
       <Grid container spacing={2}>
         {items.map((item) =>
           item.kind === "project" ? (
-            <Grid key={`project-${(item.project as any).id}`} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid key={`project-${item.project.id}`} size={{ xs: 12, sm: 6, md: 4 }}>
               <ProjectCard project={item.project} layout="grid" />
             </Grid>
           ) : (
