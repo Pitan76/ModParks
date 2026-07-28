@@ -41,6 +41,7 @@ export function toApiProject(
   post: ProjectPostView,
   viewer: Viewer,
   tags: string[] = [],
+  memberIds?: string[],
 ): ApiProject | ApiProjectPrivate {
   const base: ApiProject = {
     id: post.id,
@@ -63,7 +64,7 @@ export function toApiProject(
     tags,
   };
 
-  if (!canManagePost(post, viewer)) return base;
+  if (!canManagePost({ ...post, memberIds }, viewer)) return base;
 
   const priv: ApiProjectPrivate = {
     ...base,
