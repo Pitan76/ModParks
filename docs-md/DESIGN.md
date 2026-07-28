@@ -712,6 +712,52 @@ export type AnyPost = ProjectPost | IdeaPost;
 
 `Omit<..., "id">`で子側の`id`を落としているのは、`Post`の`id`と同じ値であり、2つ書く意味が無いため。
 
+交差型にしているのは、これがTypeScriptにおける`extends`にあたるため。`ProjectPost`は`title`も`license`も自分のプロパティとして持ち、`project.title`で直接引ける。
+
+```typescript
+// これが成り立つ形にする
+project.title
+project.license
+
+// こうはしない
+project.post.title
+```
+
+### 平坦化はクエリ層で完了させる
+
+この形は、DBから読んだ時点で崩れやすい。Drizzleでjoinすると、返る形はネストする。
+
+```typescript
+db.select().from(posts).innerJoin(projects, eq(projects.id, posts.id));
+// → { posts: { title, body, ... }, projects: { license, downloads, ... } }
+```
+
+この形をそのまま上の層へ返してはいけない。`row.posts.title`と書くコードが広がると、`project.getPost().getTitle()`と同じことをプログラム全体でやることになり、DBの保存都合がドメイン層に漏れる。
+
+クエリ関数の中で平坦化し、外には必ず`ProjectPost`（または`PostView`）の形で返す。
+
+```typescript
+// lib/queries/post.ts
+export async function getProjectPost(slug: string): Promise<ProjectPost | null> {
+  const [row] = await db
+    .select()
+    .from(posts)
+    .innerJoin(projects, eq(projects.id, posts.id))
+    .where(and(eq(posts.kind, "project"), eq(posts.slug, slug)))
+    .limit(1);
+
+  if (!row) return null;
+
+  // ここで平坦にする。ネストした形はこの関数の外へ出さない
+  const { id: _childId, ...projectFields } = row.projects;
+  return { ...row.posts, kind: "project", ...projectFields };
+}
+```
+
+`select()`に個別のカラムを並べる書き方でも平坦な結果を得られるが、カラムを追加するたびに書き足す必要があるため、上記のように丸ごと受けて展開するほうを基本とする。
+
+境界はクエリ層とする。`lib/queries`と`lib/actions`の外へネストした行を出さない。この一線さえ守れば、ページやコンポーネントは`posts`と`projects`が分かれていることを知らずに済む。
+
 `kind`をリテラル型で固定しているのが要点で、これにより`AnyPost`が判別可能ユニオンになる。TypeScriptが`kind`を見て自動的に型を絞り込む。
 
 ```typescript
@@ -848,7 +894,186 @@ export interface ApiIdea extends ApiPost {
 
 旧名（`ApiProject.name` / `ApiProject.description` / `ApiIdea.content`）は残さない。内部だけ`title` / `body`にして境界で戻すと、同じものに2つの名前が存在し続け、どちらが正しいかを毎回確認することになる。この再設計は名前の重複を消すために行うので、境界で元の名前に戻すのは目的に反する。
 
-これはAPIの破壊的変更になる。利用者への影響と対応は[15. 外部ツールへの影響](#15-外部ツールへの影響)にまとめる。
+### レスポンスは平坦にする
+
+DBが`posts`と`projects`に分かれていることを、APIの形に持ち込まない。
+
+```jsonc
+// こうはしない
+{
+  "post":    { "id": "abc", "title": "ModParks", "body": "..." },
+  "project": { "license": "MIT", "downloads": 1200 }
+}
+```
+
+```jsonc
+// こうする
+{
+  "id": "abc",
+  "kind": "project",
+  "slug": "modparks",
+  "title": "ModParks",
+  "body": "...",
+  "license": "MIT",
+  "downloads": 1200
+}
+```
+
+Javaで`Project extends Post`と書いたとき、`project.getTitle()`は`Post`由来だからといって`project.getPost().getTitle()`にはならない。継承したフィールドは自分のフィールドとして見える。APIも同じで、利用者から見た`Project`は最初から全部入りの1つのオブジェクトである。
+
+`posts`と`projects`に分かれているのは保存方法の都合であり、利用者に見せる概念ではない。
+
+### 層の分け方
+
+この設計には境界が2つある。
+
+```text
+DB           posts / projects に分かれた保存形式
+  │
+  │ ← 境界1: クエリ層で平坦化する
+  ▼
+ドメイン層    ProjectPost（全部入りの1オブジェクト）
+  │
+  │ ← 境界2: 公開してよいフィールドだけを選ぶ
+  ▼
+API          ApiProject
+```
+
+境界1では形が変わる（ネスト → 平坦）。境界2では形を変えない。
+
+つまりAPIの理想は、ドメインオブジェクトをそのまま返すことである。ドメイン層の設計が正しければ、境界2でやることはほとんど無くなる。
+
+### 境界2でやってよいのは「間引き」だけ
+
+ただし文字通りそのまま返すことはできない。`ProjectPost`には外部に出してはいけないフィールドが含まれる。
+
+```typescript
+Response.json(post);  // discordWebhookUrl が漏れる
+```
+
+`discord_webhook_url`は、知られると誰でもそのDiscordチャンネルに投稿できてしまう。`github_repo` / `modrinth_id` / `curseforge_id` / `source_idea_id` / `recipe_namespaces`なども公開対象ではない。
+
+そのため境界2では、公開してよいフィールドを明示的に選ぶ（ホワイトリスト方式）。現在のv1もこの方式を採っており、これは維持する。
+
+ここでの規則は次の1つ。
+
+> 減らしてよい。名前を変えてはいけない。
+
+```typescript
+// よい: 出すものを選んでいるだけ。名前は同じ
+{ id: post.id, slug: post.slug, title: post.title, license: post.license }
+
+// だめ: 境界で名前が変わっている
+{ id: post.id, name: post.title, description: post.body }
+```
+
+名前を変えないことで、APIのフィールド名を見ればドメイン層のどのフィールドか一意に分かる。逆に境界で改名すると、同じものに2つの名前が生まれ、この再設計で消したはずの問題が層をまたいで復活する。
+
+なお`createdAt`を`Date`からUnix秒に直すような変換は、名前を変えていないので問題ない。これは表現形式の話であり、概念の言い換えではない。
+
+`...post`のスプレッドで一括展開する書き方は、新しいカラムを足したときに自動で外部へ漏れるため使わない。カラム追加時に明示的な追記を強制するほうが安全である。
+
+### 公開範囲は2段階に分ける
+
+「公開する / しない」の2択ではなく、閲覧者によって返す範囲を変える。
+
+`discord_webhook_url`や`github_repo`は、誰にでも見せてはいけないが、作者本人には見せる必要がある。設定した内容を確認・編集できなければ機能として成立しないため。
+
+| 段階 | 対象 | フィールド |
+| --- | --- | --- |
+| 公開 | 誰でも | `id` `kind` `slug` `title` `body` `bodyFormat` `type` `license` `iconUrl` `downloads` `createdAt` `updatedAt` `author` `tags` |
+| 限定 | 作者・共同編集者・管理者 | `visibility` `githubRepo` `discordWebhookUrl` `modrinthId` `curseforgeId` `sourceIdeaId` `recipeNamespaces` `commentsEnabled` `recipesEnabled` |
+
+型でも段階を分ける。
+
+```typescript
+export interface ApiProject extends ApiPost {
+  kind: "project";
+  type: ProjectType;
+  license: string;
+  iconUrl: string | null;
+  downloads: Record<string, number>;
+  tags: string[];
+}
+
+/** 作者・共同編集者・管理者にだけ返す。ApiProject を継承して足す */
+export interface ApiProjectPrivate extends ApiProject {
+  visibility: "draft" | "public" | "unlisted" | "private";
+  githubRepo: string | null;
+  discordWebhookUrl: string | null;
+  modrinthId: string | null;
+  curseforgeId: string | null;
+  sourceIdeaId: string | null;
+  recipeNamespaces: string[];
+  commentsEnabled: boolean;
+  recipesEnabled: boolean;
+}
+```
+
+限定側が公開側を継承しているので、フィールドを1つ増やすときに「どちらの段階か」を必ず選ぶことになる。
+
+### 積み上げ方式にする
+
+変換関数は、公開分を作ってから限定分を足す向きで書く。
+
+```typescript
+export function toApiProject(
+  post: ProjectPostView,
+  viewer: { userId: string | null; isAdmin: boolean },
+): ApiProject | ApiProjectPrivate {
+  const base: ApiProject = {
+    id: post.id,
+    kind: "project",
+    slug: post.slug,
+    title: post.title,
+    body: post.body,
+    // ... 公開フィールドを明示列挙
+  };
+
+  if (!canManagePost(post, viewer)) return base;
+
+  return {
+    ...base,
+    visibility: post.visibility,
+    githubRepo: post.githubRepo,
+    discordWebhookUrl: post.discordWebhookUrl,
+    // ...
+  };
+}
+```
+
+逆向き、つまり全部入りを作ってから秘密のフィールドを`delete`する書き方は採らない。新しいカラムを足したとき、削除リストに書き忘れれば公開されてしまう。積み上げ方式なら、書き忘れたフィールドは単に出ないだけで済む。
+
+安全側に倒れる向きを選ぶ、という原則である。
+
+### 行レベルの制御とは別物
+
+フィールド単位の制御と、投稿そのものを見せるかどうかは別の話である。
+
+`visibility`が`draft`や`private`の投稿は、フィールドを伏せるのではなく、そもそも取得結果に含めない。これはクエリ層（境界1）の責務であり、変換関数（境界2）では扱わない。
+
+```text
+境界1: draft の投稿を一覧に出さない          ← 行レベル
+境界2: 作者以外に discordWebhookUrl を返さない ← フィールドレベル
+```
+
+この2つを混同すると、「クエリでは取れているのに変換で消している」状態が生まれ、権限判定がどこにあるか追えなくなる。
+
+### 判定は1箇所にまとめる
+
+`canManagePost`は共通の関数として1つだけ定義し、全ルートがこれを使う。
+
+```typescript
+// lib/auth/postAccess.ts
+export function canManagePost(
+  post: { authorId: string; memberIds?: string[] },
+  viewer: { userId: string | null; isAdmin: boolean },
+): boolean;
+```
+
+ルートごとに判定を書くと、一覧APIと詳細APIで条件がずれ、片方だけが余計なフィールドを返す事故が起きる。実際この種の漏洩は、条件の分岐が増えた箇所ではなく、コピーし忘れた箇所で発生する。
+
+これはAPIの破壊的変更になる。バージョニングと外部ツールへの影響は[15. 外部ツールへの影響](#15-外部ツールへの影響)にまとめる。
 
 ### 9.6. UIコンポーネントの構成
 
@@ -1172,11 +1397,9 @@ favorites: updated_at が無い  → insert_missing
 
 ## 15. 外部ツールへの影響
 
-この再設計は公開APIの破壊的変更を含む。旧名でのアクセスは受け付けず、フォールバックも用意しない。
+この再設計は公開APIのフィールド名を変える。
 
 ### 変わるもの
-
-レスポンスとリクエストのフィールド名。
 
 | 旧 | 新 |
 | --- | --- |
@@ -1185,16 +1408,64 @@ favorites: updated_at が無い  → insert_missing
 | `ApiIdea.content` | `body` |
 | （なし） | `kind` を追加 |
 
-コメントとお気に入りのエンドポイントは、Postに対する共通アクションなので1本にまとめる。ProjectとIdeaで別々の実装を持たない。
+### URLは`posts`に寄せない
+
+コメントやお気に入りは内部的にはPostに対する操作だが、URLを`/api/v1/posts/{id}/comments`に統一することはしない。
 
 ```text
-旧: /api/v1/projects/{slug}/comments
-新: /api/v1/posts/{id}/comments
+採用しない: /api/v1/posts/{id}/comments
+採用する:   /api/v1/projects/{slug}/comments
+            /api/v1/ideas/{slug}/comments
 ```
 
-現在Ideaのコメントには公開APIが無いが、統合により自動的に使えるようになる。
+`/posts/{id}`に寄せると、Projectのslugしか知らない利用者は「先にPost IDを引く」という一手間を強いられる。これはオブジェクト指向でいえば、継承したメソッドを呼ぶのに基底クラスへキャストさせるようなもので、`Project extends Post`という関係の利点を捨てている。
 
-Project / Idea そのものの取得は`/api/v1/projects/{slug}`と`/api/v1/ideas/{slug}`のまま残す。人間が扱う単位はProjectとIdeaであり、ここまでPostに寄せると使いにくくなるため。
+```java
+project.getComments();              // これでよい
+((Post) project).getComments();     // これを強いるのが /posts/{id} 方式
+```
+
+利用者から見た操作対象はProjectであり、Postは実装上の基底に過ぎない。URLは利用者の概念に合わせる。
+
+ただし実装は1つにする。ルートハンドラは薄い入口だけを持ち、中身は共通のPost向け処理を呼ぶ。
+
+```text
+/api/v1/projects/{slug}/comments ─┐
+                                  ├─→ 共通のコメント処理（post_id で動く）
+/api/v1/ideas/{slug}/comments   ─┘
+```
+
+現在Ideaのコメントには公開APIが無いが、この共通化により追加コストなしで提供できるようになる。
+
+### バージョニング
+
+フィールド名の変更は破壊的なので、`v2`を新設し、`v1`は当面残す。
+
+`v2`を本体の実装とし、`v1`は`v2`のハンドラを呼んでフィールド名だけ旧名に詰め替える薄いシムにする。v1の実装を二重に持たない。
+
+```typescript
+// app/api/v1/projects/[slug]/route.ts
+export async function GET(req: Request, ctx: Ctx) {
+  const post = await getProjectPost(ctx.params.slug);
+  return Response.json({
+    ...toApiProject(post),
+    name: post.title,        // v1 の旧名
+    description: post.body,  // v1 の旧名
+  });
+}
+```
+
+この方式なら、内部に`name` / `description`という名前が生き残るのはv1のルートファイル1箇所だけで済む。ドメイン層とv2には旧名を一切持ち込まない。
+
+#### Workerサイズへの影響
+
+本プロジェクトはCloudflare Workersの3 MiB制限に対して、既にjar処理と認証をサイドカーのService（`JAR` / `AUTH`）へ分離している。バンドルサイズは実際に効いている制約なので、v1を残す判断はサイズを見て行う。
+
+現状のv1ルートは全体で約1,460行。上記のシム方式ならv1側に残るのは詰め替え処理だけで、追加は200行程度に収まる見込みであり、3 MiBに対しては誤差の範囲となる。
+
+一方、v1とv2で実装を丸ごと二重に持つ方式は採らない。サイズが倍近くになるうえ、修正のたびに両方直す必要があり、片方の直し忘れが必ず起きる。
+
+v1の廃止時期は、利用者の移行状況を見て別途決める。
 
 ### 改修が必要なツール
 
@@ -1202,31 +1473,29 @@ Project / Idea そのものの取得は`/api/v1/projects/{slug}`と`/api/v1/idea
 
 ```text
 src/api_models.rs
-  ApiProject        name / description → title / body
+  ApiProject        name / description → title / body、kind を追加
   ApiProjectDetail  同上
-  ApiIdea           content → body
+  ApiIdea           content → body、kind を追加
   CreateProjectReq  name / description → title / body
   UpdateProjectReq  name / description → title / body
 
-src/commands/comment.rs
-  コメント投稿先のエンドポイントを /api/v1/posts/{id}/comments へ
+src/api.rs（エンドポイント定義）
+  ベースパスを /api/v1 から /api/v2 へ
 ```
 
-CLIは別リポジトリなので、本体とCLIの両方を同時にリリースする。順序は次の通り。
+v1を残すため、CLIの改修が間に合わなくても既存バージョンは動き続ける。リリース順の制約は無い。
 
-1. 本体のAPIを新しい形に切り替えてデプロイする
-2. CLIを新しいフィールド名に対応させてリリースする
+1. 本体に`v2`を追加してデプロイする（`v1`はシム経由で動き続ける）
+2. CLIを`v2`に対応させてリリースする
 3. submodule の参照を新しいコミットに更新する
 
-この間、旧バージョンのCLIは動かなくなる。APIのバージョンを`v1`のまま変えるか`v2`を切るかは、利用者数を見て判断する。
+### 方針: 内部にフォールバックを置かない
 
-### 方針: フォールバックを置かない
+互換のための旧名を許すのは、v1ルートファイルの中だけとする。ドメイン層・DB・v2には旧名を一切残さない。
 
-旧フィールド名を併記する、旧エンドポイントを残す、といった互換措置は取らない。
+内部にフォールバックを置くと、`name`と`title`の両方が存在し続け、新しく書くコードがどちらを使うべきか分からなくなる。この再設計は「同じものに2つの名前がある」状態を解消するために行うので、内部に同じ状態を作るのは本末転倒である。
 
-互換を残すと、`name`と`title`の両方が存在する期間が生まれる。その期間に書かれたコードはどちらを使うか分からず、結局どちらも消せなくなる。この再設計は「同じものに2つの名前がある」状態を解消するために行うので、移行期間に同じ状態を作るのは本末転倒である。
-
-一度で切り替え、旧名は完全に削除する。
+v1が持つのは外向きの互換であって、内部の逃げ道ではない。この線引きを守れば、v1の廃止は該当ルートファイルを削除するだけで完了する。
 
 ### 考慮すべきもの
 - ModParks CLI

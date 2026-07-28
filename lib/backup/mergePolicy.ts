@@ -16,7 +16,12 @@ export type MergeStrategy =
   /** マージ対象外。バックアップ側の値は完全に無視する */
   | "skip"
   /** 自動適用しない。差分を提示して管理者が個別に承認する */
-  | "manual";
+  | "manual"
+  /**
+   * 親の posts の判定に追随する。posts が採用された投稿の子行だけを上書きする。
+   * projects / ideas は Post 統合で updatedAt を失ったため、単独では新旧を判定できない。
+   */
+  | "follow_parent_post";
 
 export interface TablePolicy {
   strategy: MergeStrategy;
@@ -83,25 +88,27 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
   },
 
   // ---- 本体コンテンツ（updatedAt あり → LWW 可能） ----
-  projects: {
+  posts: {
     strategy: "last_write_wins",
-    reason: "updatedAt を持つ。編集内容の新しい方を採用するのが直感に合う",
-    review: "バックアップ後に削除されたプロジェクトが復活する。削除済みを識別する手段が無い",
+    reason: "updatedAt を持つ。投稿の共通部分（title / body / visibility）はここに集約されている",
+    review: "バックアップ後に削除された投稿が復活する。削除済みを識別する手段が無い",
+  },
+  projects: {
+    strategy: "follow_parent_post",
+    reason:
+      "Post 統合により updatedAt が posts へ移り、単独では新旧を判定できなくなった。" +
+      "親の posts が採用された場合のみ子も上書きする",
+    review: "posts と projects が別々に採用されると、投稿の共通部分と固有部分がちぐはぐな状態になりうる",
   },
   collections: {
     strategy: "last_write_wins",
     reason: "updatedAt を持つ",
   },
   ideas: {
-    strategy: "last_write_wins",
-    reason: "updatedAt を持つ",
+    strategy: "follow_parent_post",
+    reason: "projects と同じ理由。updatedAt は posts が持つ",
   },
-  idea_comments: {
-    strategy: "last_write_wins",
-    reason: "updatedAt を持つ（編集済みコメントに対応）",
-    review: "削除されたコメントが復活する",
-  },
-  project_comments: {
+  comments: {
     strategy: "last_write_wins",
     reason: "updatedAt を持つ（編集済みコメントに対応）",
     review: "削除されたコメントが復活する。モデレーションで消したものが戻る点は特に要検討",
@@ -133,8 +140,7 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
   },
 
   // ---- ユーザー行動ログ（追記のみ） ----
-  project_favorites: { strategy: "insert_missing", reason: "お気に入り登録。追記のみで自然に復元できる" },
-  idea_likes: { strategy: "insert_missing", reason: "いいね。追記のみで自然に復元できる" },
+  favorites: { strategy: "insert_missing", reason: "お気に入り登録。追記のみで自然に復元できる" },
   user_follows: { strategy: "insert_missing", reason: "フォロー関係。追記のみで自然に復元できる" },
   collection_follows: { strategy: "insert_missing", reason: "フォロー関係。追記のみで自然に復元できる" },
   project_subscriptions: { strategy: "insert_missing", reason: "購読設定。追記のみで自然に復元できる" },
