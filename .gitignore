@@ -46,3 +46,9 @@ next-env.d.ts
 /memo/
 /mp-recipe/
 /modparks-recipe/
+
+# 本番DBのダンプ。OAuth アクセストークン等の実データを含むため絶対にコミットしない
+# （sync2local.mjs が一時的に生成し、正常終了時は自動削除される）
+remote_data.sql
+*.dump.sql
+backup_before_*.sql
