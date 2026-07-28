@@ -814,41 +814,41 @@ IdeaComment      2 ファイル
 
 なお上記の件数には、ローカル変数名やコメント中の`Project`も含まれる。実際に型として参照しているのは`@/db/schema`から型をimportしている19ファイルが中心となる。
 
-### 9.5. 公開APIの型は変えない
+### 9.5. 公開APIも同じ名前に揃える
 
-[types/api.ts](../types/api.ts)の`ApiProject` / `ApiIdea`は外部に公開しているREST APIの契約であり、内部のリファクタリングで壊してはいけない。
+[types/api.ts](../types/api.ts)の`ApiProject` / `ApiIdea`も`title` / `body`へ揃える。互換のための変換レイヤーは置かない。
 
 ```typescript
-export interface ApiProject {
-  name: string;         // ← 内部は post.title
-  description: string;  // ← 内部は post.body
-  ...
+export interface ApiPost {
+  id: string;
+  kind: "project" | "idea";
+  slug: string;
+  title: string;
+  body: string;
+  bodyFormat: "markdown" | "plaintext" | "pukiwiki";
+  createdAt: number;
+  updatedAt: number;
+  author: ApiUser;
 }
 
-export interface ApiIdea {
-  title: string;        // ← 内部は post.title
-  content: string;      // ← 内部は post.body
-  ...
+export interface ApiProject extends ApiPost {
+  kind: "project";
+  type: "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
+  license: string;
+  iconUrl: string | null;
+  downloads: Record<string, number>;
+  tags: string[];
+}
+
+export interface ApiIdea extends ApiPost {
+  kind: "idea";
+  status: "open" | "in_progress" | "fulfilled";
 }
 ```
 
-内部で`title` / `body`に統一しても、APIレスポンスは今の名前のまま返す。変換はAPIハンドラの境界で行う。
+旧名（`ApiProject.name` / `ApiProject.description` / `ApiIdea.content`）は残さない。内部だけ`title` / `body`にして境界で戻すと、同じものに2つの名前が存在し続け、どちらが正しいかを毎回確認することになる。この再設計は名前の重複を消すために行うので、境界で元の名前に戻すのは目的に反する。
 
-```typescript
-function toApiProject(post: PostView<ProjectPost>): ApiProject {
-  return {
-    id: post.id,
-    slug: post.slug,
-    name: post.title,
-    description: post.body,
-    type: post.type,
-    license: post.license,
-    ...
-  };
-}
-```
-
-この変換関数を置くことで、内部のカラム名を今後変えてもAPIの互換性を保てる。逆に変換を挟まず`post`をそのまま返すと、内部の都合が外部契約に漏れる。
+これはAPIの破壊的変更になる。利用者への影響と対応は[15. 外部ツールへの影響](#15-外部ツールへの影響)にまとめる。
 
 ### 9.6. UIコンポーネントの構成
 
@@ -984,6 +984,7 @@ Ideaのルートを`/ideas/[id]`から`/ideas/[slug]`へ変更する。初期値
 - Postには共通情報だけを置く
 - Project / Ideaには、それぞれの種類に固有の情報だけを置く
 - Postに対して行われる共通アクションは、Postを参照する関連テーブルで管理する
+- 同じものに2つの名前を与えない。旧名を互換のために残さない
 
 そのため、Project専用コメントやIdea専用コメントのようなテーブルは作らない。
 
@@ -1168,3 +1169,65 @@ favorites: updated_at が無い  → insert_missing
 | `project_members` | Ideaに共同編集者の概念を持たせるか。現状は不要と判断 |
 
 いずれもこの移行の必須項目ではない。まずは`posts` / `comments` / `favorites`の統合を完了させ、これらは個別に検討する。
+
+## 15. 外部ツールへの影響
+
+この再設計は公開APIの破壊的変更を含む。旧名でのアクセスは受け付けず、フォールバックも用意しない。
+
+### 変わるもの
+
+レスポンスとリクエストのフィールド名。
+
+| 旧 | 新 |
+| --- | --- |
+| `ApiProject.name` | `title` |
+| `ApiProject.description` | `body` |
+| `ApiIdea.content` | `body` |
+| （なし） | `kind` を追加 |
+
+コメントとお気に入りのエンドポイントは、Postに対する共通アクションなので1本にまとめる。ProjectとIdeaで別々の実装を持たない。
+
+```text
+旧: /api/v1/projects/{slug}/comments
+新: /api/v1/posts/{id}/comments
+```
+
+現在Ideaのコメントには公開APIが無いが、統合により自動的に使えるようになる。
+
+Project / Idea そのものの取得は`/api/v1/projects/{slug}`と`/api/v1/ideas/{slug}`のまま残す。人間が扱う単位はProjectとIdeaであり、ここまでPostに寄せると使いにくくなるため。
+
+### 改修が必要なツール
+
+[ModParks-CLI](https://github.com/Pitan76/ModParks-CLI)（Rust、submodule `cli/`）が該当する。以下の構造体が影響を受ける。
+
+```text
+src/api_models.rs
+  ApiProject        name / description → title / body
+  ApiProjectDetail  同上
+  ApiIdea           content → body
+  CreateProjectReq  name / description → title / body
+  UpdateProjectReq  name / description → title / body
+
+src/commands/comment.rs
+  コメント投稿先のエンドポイントを /api/v1/posts/{id}/comments へ
+```
+
+CLIは別リポジトリなので、本体とCLIの両方を同時にリリースする。順序は次の通り。
+
+1. 本体のAPIを新しい形に切り替えてデプロイする
+2. CLIを新しいフィールド名に対応させてリリースする
+3. submodule の参照を新しいコミットに更新する
+
+この間、旧バージョンのCLIは動かなくなる。APIのバージョンを`v1`のまま変えるか`v2`を切るかは、利用者数を見て判断する。
+
+### 方針: フォールバックを置かない
+
+旧フィールド名を併記する、旧エンドポイントを残す、といった互換措置は取らない。
+
+互換を残すと、`name`と`title`の両方が存在する期間が生まれる。その期間に書かれたコードはどちらを使うか分からず、結局どちらも消せなくなる。この再設計は「同じものに2つの名前がある」状態を解消するために行うので、移行期間に同じ状態を作るのは本末転倒である。
+
+一度で切り替え、旧名は完全に削除する。
+
+### 考慮すべきもの
+- ModParks CLI
+- ModParks Wiki (DokuWikiなのでドキュメント関連の変更)
