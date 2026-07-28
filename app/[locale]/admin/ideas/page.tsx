@@ -1,6 +1,5 @@
 import { getAdminDb } from "@/lib/auth-helpers";
-import { ideas, users, userProfiles } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { listIdeaPosts } from "@/lib/queries/postList";
 import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import IdeasClient from "./IdeasClientLazy";
@@ -11,20 +10,19 @@ export default async function AdminIdeasPage({ params }: { params: Promise<{ loc
   const tAdmin = await getTranslations("Admin.ideas");
 
   const { db } = await getAdminDb();
-  const allIdeas = await db
-    .select({
-      id: ideas.id,
-      title: ideas.title,
-      status: ideas.status,
-      createdAt: ideas.createdAt,
-      authorUsername: userProfiles.username,
-      authorDisplayName: userProfiles.displayName,
-    })
-    .from(ideas)
-    .leftJoin(users, eq(ideas.authorId, users.id))
-    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .orderBy(desc(ideas.createdAt))
-    .all();
+  // 管理画面なので下書き・非公開も含めて全件見る
+  const ideaPosts = await listIdeaPosts(db, { includeHidden: true, limit: 1000 });
+
+  // IdeasClient は平坦な authorUsername / authorDisplayName を期待する。
+  // 変換はこの境界（ページ）だけで行い、IdeaPostView 自体には手を加えない。
+  const allIdeas = ideaPosts.map((idea) => ({
+    id: idea.id,
+    title: idea.title,
+    status: idea.status,
+    createdAt: idea.createdAt,
+    authorUsername: idea.author.username,
+    authorDisplayName: idea.author.displayName,
+  }));
 
   return (
     <>

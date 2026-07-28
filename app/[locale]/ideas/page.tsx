@@ -1,9 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
 import { getDatabase } from "@/lib/db";
-import { posts, ideas, users, userProfiles, favorites, comments } from "@/db/schema";
-import { eq, sql, desc, or } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { listIdeaPosts } from "@/lib/queries/postList";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -19,28 +18,7 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
   const db = await getDatabase();
   const session = await auth();
 
-  // Fetch ideas with author, like count, and comment count
-  const allIdeas = await db
-    .select({
-      id: posts.id,
-      slug: posts.slug,
-      title: posts.title,
-      content: posts.body,
-      status: ideas.status,
-      createdAt: posts.createdAt,
-      authorId: users.id,
-      authorName: userProfiles.displayName,
-      authorAvatar: userProfiles.avatarUrl,
-      likesCount: sql<number>`(SELECT count(*) FROM ${favorites} WHERE ${favorites.postId} = ${posts.id})`,
-      commentsCount: sql<number>`(SELECT count(*) FROM ${comments} WHERE ${comments.postId} = ${posts.id})`,
-    })
-    .from(posts)
-    .innerJoin(ideas, eq(ideas.id, posts.id))
-    .innerJoin(users, eq(posts.authorId, users.id))
-    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(and(eq(posts.kind, "idea"), or(eq(posts.visibility, "public"), eq(posts.authorId, session?.user?.id || ""))))
-    .orderBy(desc(posts.createdAt))
-    .all();
+  const allIdeas = await listIdeaPosts(db, { viewerId: session?.user?.id ?? null });
 
   return (
     <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
