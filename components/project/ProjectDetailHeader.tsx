@@ -18,11 +18,11 @@ export type ProjectDetailHeaderProps = {
   /** 対象プロジェクトの情報 */
   project: {
     id: string;
-    name: string;
+    title: string;
     slug: string;
     type: string;
     visibility: string;
-    description: string;
+    body: string;
     iconUrl?: string | null;
     downloads: number;
     totalDownloads: number;
@@ -73,7 +73,7 @@ const ProjectDetailHeader = ({
       <Breadcrumb
         items={[
           { label: tCommon("projects"), href: "/projects" },
-          { label: p.name },
+          { label: p.title },
         ]}
       />
 
@@ -82,7 +82,7 @@ const ProjectDetailHeader = ({
           <EditableProjectIcon 
             projectId={p.id}
             projectSlug={p.slug}
-            projectName={p.name}
+            projectName={p.title}
             initialIconUrl={p.iconUrl}
             canEdit={canEdit}
           />
@@ -90,7 +90,7 @@ const ProjectDetailHeader = ({
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
               <Typography variant="h4" component="h1" sx={{ fontWeight: 800, wordBreak: "break-word", overflowWrap: "anywhere", fontSize: { xs: "1.5rem", sm: "2.125rem" } }}>
-                {p.name}
+                {p.title}
               </Typography>
               <ProjectTypeBadge type={p.type} size="small" />
               {p.visibility !== "public" && (
@@ -137,7 +137,7 @@ const ProjectDetailHeader = ({
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: { sm: 2 } }}>
                 <ShareMenuButton 
                   url={`${SITE_URL}/projects/${p.slug}`}
-                  title={p.name}
+                  title={p.title}
                 />
                 <ProjectFavoriteButton
                   projectId={p.id}

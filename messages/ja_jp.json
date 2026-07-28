@@ -1368,24 +1368,20 @@
     "type": {
       "new_project": "フォロー中の開発者が新しいプロジェクトを公開",
       "new_version": "購読中プロジェクトの新しいリリース",
-      "project_comment": "自分のプロジェクトへのコメント",
-      "idea_comment": "自分のアイデアへのコメント",
-      "idea_like": "自分のアイデアへのいいね",
-      "project_favorite": "自分のプロジェクトのお気に入り登録",
+      "comment": "自分の投稿へのコメント",
+      "favorite": "自分の投稿のお気に入り登録",
       "follow": "フォローされたとき",
       "list_add": "自分のプロジェクトがリストに追加されたとき",
       "comment_reply": "自分のコメントへの返信"
     },
     "message": {
-      "new_project": "{authorName} が新しいプロジェクト「{projectName}」を公開しました",
-      "new_version": "「{projectName}」の新しいバージョン {versionNumber} が公開されました",
-      "project_comment": "{actorName} が「{projectName}」にコメントしました",
-      "idea_comment": "{actorName} がアイデア「{ideaTitle}」にコメントしました",
-      "idea_like": "{actorName} がアイデア「{ideaTitle}」にいいねしました",
-      "project_favorite": "{actorName} が「{projectName}」をお気に入りに登録しました",
+      "new_project": "{authorName} が新しいプロジェクト「{title}」を公開しました",
+      "new_version": "「{title}」の新しいバージョン {versionNumber} が公開されました",
       "follow": "{actorName} があなたをフォローしました",
-      "list_add": "{actorName} が「{projectName}」をリスト「{collectionName}」に追加しました",
-      "comment_reply": "{actorName} があなたのコメントに返信しました"
+      "list_add": "{actorName} が「{title}」をリスト「{collectionName}」に追加しました",
+      "comment_reply": "{actorName} があなたのコメントに返信しました",
+      "comment": "{actorName} が「{title}」にコメントしました",
+      "favorite": "{actorName} が「{title}」をお気に入りに登録しました"
     }
   },
   "ContextMenu": {

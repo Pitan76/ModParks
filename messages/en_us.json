@@ -1360,24 +1360,20 @@
     "type": {
       "new_project": "A developer you follow publishes a new project",
       "new_version": "New release from a project you subscribe to",
-      "project_comment": "A comment on your project",
-      "idea_comment": "A comment on your idea",
-      "idea_like": "A like on your idea",
-      "project_favorite": "Someone favorites your project",
+      "comment": "A comment on your post",
+      "favorite": "Someone favorites your post",
       "follow": "Someone follows you",
       "list_add": "Your project is added to a list",
       "comment_reply": "A reply to your comment"
     },
     "message": {
-      "new_project": "{authorName} published a new project \"{projectName}\"",
-      "new_version": "New version {versionNumber} of \"{projectName}\" is available",
-      "project_comment": "{actorName} commented on \"{projectName}\"",
-      "idea_comment": "{actorName} commented on idea \"{ideaTitle}\"",
-      "idea_like": "{actorName} liked your idea \"{ideaTitle}\"",
-      "project_favorite": "{actorName} favorited \"{projectName}\"",
+      "new_project": "{authorName} published a new project \"{title}\"",
+      "new_version": "New version {versionNumber} of \"{title}\" is available",
       "follow": "{actorName} started following you",
-      "list_add": "{actorName} added \"{projectName}\" to list \"{collectionName}\"",
-      "comment_reply": "{actorName} replied to your comment"
+      "list_add": "{actorName} added \"{title}\" to list \"{collectionName}\"",
+      "comment_reply": "{actorName} replied to your comment",
+      "comment": "{actorName} commented on \"{title}\"",
+      "favorite": "{actorName} favorited \"{title}\""
     }
   },
   "ContextMenu": {

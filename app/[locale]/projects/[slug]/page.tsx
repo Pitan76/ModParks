@@ -136,8 +136,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   if (!project) notFound();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const p = project as any;
+  // getProjectBySlug は ProjectPost を平坦化した形を返す（title / body / visibility）。
+  // as any を外して、フィールド名の取りこぼしが型で見つかるようにする。
+  const p = project;
   const t = await getTranslations("Project");
 
   const canEdit = isOwner;
