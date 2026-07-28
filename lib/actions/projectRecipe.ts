@@ -6,6 +6,7 @@ import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
 import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
+import { findProjectPostBySlug } from "@/lib/queries/post";
 
 /** 1文に載せるレシピIDの数。D1 のバインド変数上限に当たらないよう分割する。 */
 const CHUNK_SIZE = 90;
@@ -25,7 +26,7 @@ const CHUNK_SIZE = 90;
 async function authorizeProject(slug: string) {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db.select().from(projects).where(eq(projects.slug, slug)).get();
+  const project = await findProjectPostBySlug(db, slug);
   if (!project) throw new Error("Project not found");
 
   await assertProjectAccess(db, project, session);

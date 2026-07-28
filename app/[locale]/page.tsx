@@ -27,8 +27,8 @@ const TopPage = async ({ params }: TopPageProps) => {
     getProjects({ sort: "updated", limit: 6 }),
   ]);
 
-  const newProjects = newResult.data;
-  const updatedProjects = updatedResult.data;
+  const newProjects = newResult;
+  const updatedProjects = updatedResult;
 
   return (
     <Box>

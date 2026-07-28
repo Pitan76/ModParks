@@ -7,6 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
+import { findProjectPostById } from "@/lib/queries/post";
 
 /**
  * プロジェクトのメンバー一覧を取得する
@@ -15,7 +16,7 @@ export async function getProjectMembers(projectId: string) {
   const db = await getDatabase();
   
   // オーナー取得
-  const project = await db.select({ authorId: projects.authorId }).from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project) return [];
 
   const owner = await db.select({
@@ -61,7 +62,7 @@ export async function addProjectMember(projectId: string, username: string) {
   const { db, session } = await getAuthenticatedDb();
 
   // 権限チェック（オーナーのみ追加可能）
-  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project || project.authorId !== session.user.id) {
     throw new Error("Forbidden: Only the owner can add members");
   }
@@ -101,7 +102,7 @@ export async function removeProjectMember(projectId: string, userId: string) {
   const { db, session } = await getAuthenticatedDb();
 
   // 権限チェック（オーナー、もしくは自分自身なら削除可能）
-  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project) {
     throw new Error("Project not found");
   }

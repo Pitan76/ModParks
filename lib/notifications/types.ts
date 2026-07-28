@@ -1,11 +1,16 @@
-/** 通知種別。DB(notifications.type)と設定(notificationPrefs)のキーを兼ねる */
+/**
+ * 通知種別。DB(notifications.type)と設定(notificationPrefs)のキーを兼ねる。
+ *
+ * Post 統合により、Project / Idea で分かれていた種別を統合した。
+ *   project_comment + idea_comment → comment
+ *   project_favorite + idea_like   → favorite
+ * 対象が Project か Idea かは payload.kind で判別する。
+ */
 export const NOTIFICATION_TYPES = [
   "new_project",
   "new_version",
-  "project_comment",
-  "idea_comment",
-  "idea_like",
-  "project_favorite",
+  "comment",
+  "favorite",
   "follow",
   "list_add",
   "comment_reply",

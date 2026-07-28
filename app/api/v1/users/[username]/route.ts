@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { ApiUser } from "@/types/api";
+import { ApiUser } from "@/types/api-v1";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ username: string }> }) {
   const d1 = await getD1();

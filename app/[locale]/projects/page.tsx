@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import ProjectCardList from "@/components/project/ProjectCardList";
 import LinkButton from "@/components/ui/LinkButton";
 import ProjectSearchBar from "@/components/project/ProjectSearchBar";
-import { getProjects } from "@/lib/actions/projectQuery";
+import { getProjectsWithCount } from "@/lib/actions/projectQuery";
 import { auth } from "@/lib/auth";
 import PaginationControls from "@/components/ui/PaginationControls";
 import AdSlot from "@/components/ads/AdSlot";
@@ -52,7 +52,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const offset = (page - 1) * limit;
 
   // フィルタリング
-  const { data: filtered, totalCount } = await getProjects({
+  const { data: filtered, totalCount } = await getProjectsWithCount({
     q,
     types: typesArr,
     authorId,
@@ -68,7 +68,6 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     includeExtDl: isIncludeExtDl,
     limit,
     offset,
-    calculateTotal: true,
   });
 
   const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");

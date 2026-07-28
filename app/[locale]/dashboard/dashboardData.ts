@@ -1,8 +1,9 @@
 import { getDatabase } from "@/lib/db";
 import { getUserProjectStats } from "@/lib/actions/projectQuery";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
-import { projects, projectComments, users, userProfiles, ideas } from "@/db/schema";
-import { eq, desc, count } from "drizzle-orm";
+import { posts, projects, comments, users, userProfiles, ideas } from "@/db/schema";
+import { toProjectPost, toIdeaPost } from "@/lib/queries/postRow";
+import { eq, and, desc, count } from "drizzle-orm";
 
 /** ダッシュボード表示に必要なユーザー固有データを一括取得する。 */
 export async function getDashboardData(userId: string) {
@@ -13,41 +14,59 @@ export async function getDashboardData(userId: string) {
 
   const [commentsCountResult] = await db
     .select({ value: count() })
-    .from(projectComments)
-    .innerJoin(projects, eq(projectComments.projectId, projects.id))
-    .where(eq(projects.authorId, userId));
+    .from(comments)
+    .innerJoin(posts, eq(comments.postId, posts.id))
+    .where(and(eq(posts.kind, "project"), eq(posts.authorId, userId)));
 
-  const latestComments = await db
+  const latestCommentRows = await db
     .select({
-      id: projectComments.id,
-      content: projectComments.content,
-      createdAt: projectComments.createdAt,
-      projectName: projects.name,
-      projectSlug: projects.slug,
+      id: comments.id,
+      content: comments.content,
+      createdAt: comments.createdAt,
+      projectTitle: posts.title,
+      projectSlug: posts.slug,
       authorName: userProfiles.displayName,
       authorUsername: userProfiles.username,
     })
-    .from(projectComments)
-    .innerJoin(projects, eq(projectComments.projectId, projects.id))
-    .innerJoin(users, eq(projectComments.authorId, users.id))
+    .from(comments)
+    .innerJoin(posts, eq(comments.postId, posts.id))
+    .innerJoin(users, eq(comments.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(projects.authorId, userId))
-    .orderBy(desc(projectComments.createdAt))
+    .where(and(eq(posts.kind, "project"), eq(posts.authorId, userId)))
+    .orderBy(desc(comments.createdAt))
     .limit(5);
 
-  const recentProjects = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.authorId, userId))
-    .orderBy(desc(projects.updatedAt))
-    .limit(5);
+  const latestComments = latestCommentRows.map((row) => ({
+    id: row.id,
+    content: row.content,
+    createdAt: row.createdAt,
+    projectName: row.projectTitle,
+    projectSlug: row.projectSlug,
+    authorName: row.authorName,
+    authorUsername: row.authorUsername,
+  }));
 
-  const myIdeas = await db
-    .select()
-    .from(ideas)
-    .where(eq(ideas.authorId, userId))
-    .orderBy(desc(ideas.createdAt))
-    .limit(5);
+  const recentProjectRows = await db
+    .select({ posts: posts, projects: projects })
+    .from(posts)
+    .innerJoin(projects, eq(projects.id, posts.id))
+    .where(and(eq(posts.kind, "project"), eq(posts.authorId, userId)))
+    .orderBy(desc(posts.updatedAt))
+    .limit(5)
+    .all();
+
+  const recentProjects = recentProjectRows.map(toProjectPost);
+
+  const myIdeaRows = await db
+    .select({ posts: posts, ideas: ideas })
+    .from(posts)
+    .innerJoin(ideas, eq(ideas.id, posts.id))
+    .where(and(eq(posts.kind, "idea"), eq(posts.authorId, userId)))
+    .orderBy(desc(posts.createdAt))
+    .limit(5)
+    .all();
+
+  const myIdeas = myIdeaRows.map(toIdeaPost);
 
   return {
     stats,

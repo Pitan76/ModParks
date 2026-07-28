@@ -1005,6 +1005,8 @@
       "description": "Monitor and review logs of system configuration changes and backup actions.",
       "settingsTab": "Settings Changes",
       "backupTab": "Backup Actions",
+      "ddosTab": "DDoS Protection",
+      "state": "Resulting State",
       "scope": "Scope",
       "key": "Key",
       "oldValue": "Old Value",

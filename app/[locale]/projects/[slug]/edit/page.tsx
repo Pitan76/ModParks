@@ -16,7 +16,7 @@ import ProjectDependenciesManager from "@/components/project/ProjectDependencies
 import { getProjectMembers } from "@/lib/actions/member";
 import { getProjectDependencies } from "@/lib/actions/dependency";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { versions, ideas } from "@/db/schema";
+import { versions, posts, ideas } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
 
 interface EditProjectPageProps {
@@ -72,8 +72,9 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   }));
 
   const openIdeas = await db
-    .select({ id: ideas.id, title: ideas.title })
+    .select({ id: posts.id, title: posts.title })
     .from(ideas)
+    .innerJoin(posts, eq(posts.id, ideas.id))
     .where(inArray(ideas.status, ["open", "in_progress"]))
     .all();
 
@@ -91,13 +92,13 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       <Breadcrumb
         items={[
           { label: tCommon("projects"), href: "/projects" },
-          { label: project.name, href: `/projects/${project.slug}` },
+          { label: project.title, href: `/projects/${project.slug}` },
           { label: t("manage") },
         ]}
       />
 
       <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 4 }}>
-        {t("managePage.title", { name: project.name })}
+        {t("managePage.title", { name: project.title })}
       </Typography>
 
       <ProjectEditClient

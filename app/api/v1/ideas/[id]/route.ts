@@ -1,53 +1,48 @@
-﻿import { NextResponse } from "next/server";
-import { getDb, getD1 } from "@/lib/db";
-import { ideas, users, userProfiles } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { ApiIdea } from "@/types/api";
+import { NextResponse } from "next/server";
+import { getDatabase } from "@/lib/db";
+import { resolveViewer } from "@/lib/api-auth";
+import { findIdeaPostBySlug } from "@/lib/queries/post";
+import { listIdeaPosts } from "@/lib/queries/postList";
+import { canViewPost } from "@/lib/auth/postAccess";
+import type { ApiIdea } from "@/types/api-v1";
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const d1 = await getD1();
-  const db = getDb(d1);
-
+/**
+ * v1 互換シム。
+ *
+ * v1 は id をそのまま URL に使っていた。Idea の slug は作成時 id と同じ値で
+ * 初期化されるため（DESIGN.md「slugをIdeaにも持たせる」）、既存の /api/v1/ideas/{id}
+ * は変更なしに動く。
+ */
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const db = await getDatabase();
   const { id } = await params;
 
-  const [result] = await db
-    .select({
-      id: ideas.id,
-      title: ideas.title,
-      content: ideas.content,
-      status: ideas.status,
-      createdAt: ideas.createdAt,
-      updatedAt: ideas.updatedAt,
-      author: {
-        username: userProfiles.username,
-        displayName: userProfiles.displayName,
-        avatarUrl: userProfiles.avatarUrl,
-      },
-    })
-    .from(ideas)
-    .leftJoin(users, eq(ideas.authorId, users.id))
-    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(ideas.id, id))
-    .limit(1);
+  const ideaStub = await findIdeaPostBySlug(db, id);
+  if (!ideaStub) {
+    return NextResponse.json({ error: "Idea not found" }, { status: 404 });
+  }
 
-  if (!result) {
+  const viewer = await resolveViewer(request);
+  if (!canViewPost(ideaStub, viewer)) {
+    return NextResponse.json({ error: "Idea not found" }, { status: 404 });
+  }
+
+  const [idea] = await listIdeaPosts(db, { viewerId: viewer.userId, postIds: [ideaStub.id], includeHidden: true });
+  if (!idea) {
     return NextResponse.json({ error: "Idea not found" }, { status: 404 });
   }
 
   const data: ApiIdea = {
-    id: result.id,
-    title: result.title,
-    content: result.content,
-    status: result.status as "open" | "in_progress" | "fulfilled",
-    createdAt: result.createdAt ? new Date(result.createdAt).getTime() : 0,
-    updatedAt: result.updatedAt ? new Date(result.updatedAt).getTime() : 0,
+    id: idea.id,
+    title: idea.title,
+    content: idea.body,
+    status: idea.status,
+    createdAt: idea.createdAt ? new Date(idea.createdAt).getTime() : 0,
+    updatedAt: idea.updatedAt ? new Date(idea.updatedAt).getTime() : 0,
     author: {
-      username: result.author?.username || "unknown",
-      displayName: result.author?.displayName || null,
-      avatarUrl: result.author?.avatarUrl || null,
+      username: idea.author.username || "unknown",
+      displayName: idea.author.displayName || null,
+      avatarUrl: idea.author.avatarUrl || null,
     },
   };
 

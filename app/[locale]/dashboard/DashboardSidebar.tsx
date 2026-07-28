@@ -88,7 +88,7 @@ export default async function DashboardSidebar({ locale, latestComments, topFavo
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Link href={`/projects/${fav.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
                         <Typography variant="subtitle2" noWrap sx={{ fontWeight: "bold" }}>
-                          {fav.name}
+                          {fav.title}
                         </Typography>
                       </Link>
                       <Typography variant="caption" color="text.secondary">

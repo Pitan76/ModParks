@@ -85,11 +85,11 @@ export default async function DashboardMain({ locale, recentProjects, myIdeas }:
                       <TableRow key={p.id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                         <TableCell>
                           <Link href={`/projects/${p.slug}`} style={{ fontWeight: "bold", textDecoration: "none", color: "inherit" }}>
-                            {p.name}
+                            {p.title}
                           </Link>
                         </TableCell>
                         <TableCell>
-                          <Chip label={tCommon(`visibility.${p.status}`)} size="small" color={getProjectStatusColor(p.status)} />
+                          <Chip label={tCommon(`visibility.${p.visibility}`)} size="small" color={getProjectStatusColor(p.visibility)} />
                         </TableCell>
                         <TableCell align="right">{p.totalDownloads.toLocaleString()}</TableCell>
                         <TableCell align="right" sx={{ color: "text.secondary" }}>

@@ -1,68 +1,44 @@
 import { NextResponse } from "next/server";
-import { getDb, getD1 } from "@/lib/db";
-import { ideas, users, userProfiles } from "@/db/schema";
+import { getDatabase } from "@/lib/db";
+import { resolveViewer } from "@/lib/api-auth";
 import { getAppSettings } from "@/lib/config/readSettings";
-import { eq, desc } from "drizzle-orm";
-import { ApiIdea, PaginatedResponse } from "@/types/api";
+import { listIdeaPosts } from "@/lib/queries/postList";
+import type { ApiIdea, PaginatedResponse } from "@/types/api-v1";
 import { withPublicCache } from "@/lib/http/cache";
 
+/**
+ * v1 互換シム。
+ * v1 の ApiIdea は content フィールドを持つ（v2 では body）。この境界だけで詰め替える。
+ * 詳細は docs-md/DESIGN.md の「15. 外部ツールへの影響」を参照。
+ */
 export async function GET(request: Request) {
-  const d1 = await getD1();
-  const db = getDb(d1);
-
-
+  const db = await getDatabase();
+  const viewer = await resolveViewer(request);
 
   const { searchParams } = new URL(request.url);
-  
   const limitParam = parseInt(searchParams.get("limit") || "");
   const appSettings = await getAppSettings();
   const limit = isNaN(limitParam) ? appSettings.apiDefaultLimit : Math.min(limitParam, appSettings.apiMaxLimit);
   const offsetParam = parseInt(searchParams.get("offset") || "0");
   const offset = isNaN(offsetParam) ? 0 : Math.max(0, offsetParam);
 
-  const results = await db
-    .select({
-      id: ideas.id,
-      title: ideas.title,
-      content: ideas.content,
-      status: ideas.status,
-      createdAt: ideas.createdAt,
-      updatedAt: ideas.updatedAt,
-      author: {
-        username: userProfiles.username,
-        displayName: userProfiles.displayName,
-        avatarUrl: userProfiles.avatarUrl,
-      }
-    })
-    .from(ideas)
-    .leftJoin(users, eq(ideas.authorId, users.id))
-    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .orderBy(desc(ideas.createdAt))
-    .limit(limit)
-    .offset(offset);
+  const rows = await listIdeaPosts(db, { viewerId: viewer.userId, limit: offset + limit });
+  const page = rows.slice(offset, offset + limit);
 
-  const data: ApiIdea[] = results.map(i => ({
+  const data: ApiIdea[] = page.map(i => ({
     id: i.id,
     title: i.title,
-    content: i.content,
-    status: i.status as "open" | "in_progress" | "fulfilled",
+    content: i.body,
+    status: i.status,
     createdAt: i.createdAt ? new Date(i.createdAt).getTime() : 0,
     updatedAt: i.updatedAt ? new Date(i.updatedAt).getTime() : 0,
     author: {
-      username: i.author?.username || "unknown",
-      displayName: i.author?.displayName || null,
-      avatarUrl: i.author?.avatarUrl || null,
-    }
+      username: i.author.username || "unknown",
+      displayName: i.author.displayName || null,
+      avatarUrl: i.author.avatarUrl || null,
+    },
   }));
 
-  const response: PaginatedResponse<ApiIdea> = {
-    data,
-    meta: {
-      limit,
-      offset,
-      count: data.length
-    }
-  };
-
+  const response: PaginatedResponse<ApiIdea> = { data, meta: { limit, offset, count: data.length } };
   return withPublicCache(NextResponse.json(response));
 }

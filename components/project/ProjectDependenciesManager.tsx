@@ -23,7 +23,7 @@ import Link from "@mui/material/Link";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ActionRow from "@/components/ui/ActionRow";
 import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/actions/dependency";
-import type { DependencyType } from "@/lib/actions/dependency";
+import type { DependencyType, DependencyProjectSummary } from "@/lib/actions/dependency";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
@@ -32,7 +32,7 @@ export type ProjectDependenciesManagerProps = {
   dependencies: {
     id: string;
     dependencyType: DependencyType;
-    project: { slug: string; name: string };
+    project: DependencyProjectSummary;
     externalUrl?: string | null;
     externalName?: string | null;
   }[];
@@ -165,7 +165,7 @@ const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependen
                 <Link href={dep.externalUrl!} target="_blank" rel="noopener noreferrer" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
                   {dep.externalName} <OpenInNewIcon fontSize="small" />
                 </Link>
-              ) : dep.project.name} 
+              ) : dep.project.title} 
               secondary={`${t("type")}: ${t(dep.dependencyType)} | ${dep.externalUrl ? "External" : `Slug: ${dep.project.slug}`}`} 
             />
             <ListItemSecondaryAction>

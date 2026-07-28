@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
+import { posts, versions, projects, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { scanVersionFile } from "@/lib/actions/versionScan";
@@ -14,6 +14,7 @@ import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
+import { findProjectPostBySlug } from "@/lib/queries/post";
 
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
@@ -22,11 +23,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.slug, projectSlug))
-    .get();
+  const project = await findProjectPostBySlug(db, projectSlug);
 
   if (!project) throw new Error("Project not found");
   await assertProjectAccess(db, project, session);
@@ -70,7 +67,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
     projectId:     project.id,
   });
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   after(async () => {
     await scanVersionFile(db, id, fileUrl, fileName);
@@ -97,7 +94,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
+  const project = await findProjectPostBySlug(db, projectSlug);
   if (!project) throw new Error("Project not found");
 
   await assertProjectAccess(db, project, session);
@@ -171,7 +168,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
     await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId, mcVersion: mc }))).run();
   }
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
@@ -183,11 +180,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
 export const deleteVersion = async (versionId: string, projectSlug: string) => {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.slug, projectSlug))
-    .get();
+  const project = await findProjectPostBySlug(db, projectSlug);
 
   if (!project) return { error: "Project not found" };
 
@@ -219,7 +212,7 @@ export const deleteVersion = async (versionId: string, projectSlug: string) => {
   await db.delete(versions).where(eq(versions.id, versionId)).run();
   await recordDeletion(db, "versions", versionId);
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
@@ -231,11 +224,7 @@ export const deleteVersion = async (versionId: string, projectSlug: string) => {
 export const setVersionArchived = async (versionId: string, projectSlug: string, archived: boolean) => {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.slug, projectSlug))
-    .get();
+  const project = await findProjectPostBySlug(db, projectSlug);
 
   if (!project) return { error: "Project not found" };
 
@@ -260,7 +249,7 @@ export const setVersionArchived = async (versionId: string, projectSlug: string,
     .where(eq(versions.id, versionId))
     .run();
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };

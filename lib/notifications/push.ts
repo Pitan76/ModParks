@@ -82,7 +82,10 @@ function getTemplates(locale: string): Record<string, string> {
 
 /** 通知種別ごとの遷移先 URL を決める */
 function targetUrl(locale: string, payload: NotificationPayload): string {
-  if (payload.projectSlug) return `/${locale}/projects/${payload.projectSlug}`;
+  if (payload.slug) {
+    const segment = payload.kind === "idea" ? "ideas" : "projects";
+    return `/${locale}/${segment}/${payload.slug}`;
+  }
   return `/${locale}/notifications`;
 }
 
@@ -139,7 +142,7 @@ export async function sendPushToRecipients(
         title: "ModParks",
         body,
         url: targetUrl(locale, payload),
-        icon: payload.projectIconUrl || "/icon.png",
+        icon: payload.iconUrl || "/icon.png",
         tag: type,
       });
 

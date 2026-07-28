@@ -142,31 +142,121 @@ export const apiKeys = sqliteTable("api_keys", {
   userIdx: index("api_keys_user_idx").on(table.userId),
 }));
 
+// ─── Posts (Project / Idea の共通基底) ────────────────────────────────────────
+
+/**
+ * ユーザーが作成する投稿の共通部分。Project と Idea はこのテーブルを継承する
+ * （Class Table Inheritance）。`projects.id` / `ideas.id` が `posts.id` を参照し、
+ * 1 つの投稿は「posts の 1 行 + 子テーブルの 1 行」で構成される。
+ *
+ * 詳細な設計意図は docs-md/DESIGN.md を参照。
+ */
+export const posts = sqliteTable("posts", {
+  id: text("id").primaryKey(),
+  authorId: text("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  /**
+   * 投稿の種別。子テーブルのどちらに対応行があるかで導出できる冗長な値だが、
+   * 一覧クエリを索引で引くために持つ。作成時に子テーブルと同時に書き、以後更新しない。
+   */
+  kind: text("kind", { enum: ["project", "idea"] }).notNull(),
+  /** URL 識別子。Idea は作成時 id と同じランダム値を入れ、作者が後から変更できる */
+  slug: text("slug").notNull(),
+  /** 変更前の slug。旧 URL からのリダイレクトに使う */
+  previousSlug: text("previous_slug"),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  bodyFormat: text("body_format", { enum: ["markdown", "plaintext", "pukiwiki"] })
+    .notNull()
+    .default("markdown"),
+  /** 公開範囲。旧 projects.status / ideas.visibility を統合したもの */
+  visibility: text("visibility", { enum: ["draft", "public", "unlisted", "private"] })
+    .notNull()
+    .default("draft"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (t) => ({
+  // slug は種別ごとに一意。Idea 発の Project が同じ slug を名乗れるようにする
+  slugUnique: uniqueIndex("posts_kind_slug_unique").on(t.kind, t.slug),
+  previousSlugUnique: uniqueIndex("posts_kind_previous_slug_unique").on(t.kind, t.previousSlug),
+  authorIdx: index("posts_author_idx").on(t.authorId),
+  // 一覧は「種別 + 公開範囲」で絞って新しい順に並べる
+  kindVisibilityCreatedIdx: index("posts_kind_visibility_created_idx")
+    .on(t.kind, t.visibility, t.createdAt),
+  updatedAtIdx: index("posts_updated_at_idx").on(t.updatedAt),
+}));
+
+// ─── Post Comments (Project / Idea 共通) ──────────────────────────────────────
+
+/** 旧 project_comments / idea_comments を統合したもの */
+export const comments = sqliteTable("comments", {
+  id: text("id").primaryKey(),
+  postId: text("post_id")
+    .notNull()
+    .references(() => posts.id, { onDelete: "cascade" }),
+  authorId: text("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  /** 返信先の親コメントID（1階層のみ）。トップレベルなら null */
+  parentId: text("parent_id"),
+  content: text("content").notNull(),
+  contentFormat: text("content_format", { enum: ["markdown", "plaintext", "pukiwiki"] })
+    .notNull()
+    .default("markdown"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (t) => ({
+  postIdx: index("comments_post_idx").on(t.postId),
+  authorIdx: index("comments_author_idx").on(t.authorId),
+}));
+
+// ─── Post Favorites (Project / Idea 共通) ─────────────────────────────────────
+
+/**
+ * 旧 project_favorites / idea_likes を統合したもの。
+ * 「いいね」と「ブックマーク」は区別せず、すべて「お気に入り」として扱う。
+ */
+export const favorites = sqliteTable("favorites", {
+  postId: text("post_id")
+    .notNull()
+    .references(() => posts.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.postId, t.userId] }),
+  postIdx: index("favorites_post_idx").on(t.postId),
+  userIdx: index("favorites_user_idx").on(t.userId),
+}));
+
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
+/**
+ * Project 固有の情報。共通部分（title / body / slug / visibility / author / 日時）は
+ * posts が持つ。単体では投稿として成立しないため、必ず posts と JOIN して使う。
+ */
 export const projects = sqliteTable("projects", {
-  id:          text("id").primaryKey(),
-  slug:        text("slug").unique().notNull(),
-  previousSlug: text("previous_slug").unique(),
-  name:        text("name").notNull(),
-  description: text("description").notNull(),
+  id:          text("id")
+    .primaryKey()
+    .references(() => posts.id, { onDelete: "cascade" }),
   iconUrl:     text("icon_url"),
   type:        text("type", { enum: ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"] }).notNull(),
   license:     text("license").notNull(),
   sourceUrl:   text("source_url"),
   links:       text("links"),
-  status:      text("status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
-  descriptionFormat: text("description_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull().default("markdown"),
-  authorId:    text("author_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
   downloads:   integer("downloads").notNull().default(0),
-  createdAt:   integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt:   integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
   modrinthId:  text("modrinth_id"),
   curseforgeId: text("curseforge_id"),
   issueTrackerUrl: text("issue_tracker_url"),
@@ -182,12 +272,9 @@ export const projects = sqliteTable("projects", {
   /** 新バージョン公開時に告知を送る Discord Webhook URL */
   discordWebhookUrl: text("discord_webhook_url"),
 }, (table) => ({
-  authorIdx: index("projects_author_idx").on(table.authorId),
-  statusIdx: index("projects_status_idx").on(table.status),
+  // author / status / created_at / updated_at による絞り込みと並び替えは posts 側の索引が担う
   typeIdx: index("projects_type_idx").on(table.type),
   downloadsIdx: index("projects_downloads_idx").on(table.downloads),
-  updatedAtIdx: index("projects_updated_at_idx").on(table.updatedAt),
-  createdAtIdx: index("projects_created_at_idx").on(table.createdAt),
 }));
 
 // ─── Project Categories ───────────────────────────────────────────────────────
@@ -396,26 +483,6 @@ export const projectHiddenRecipes = sqliteTable(
 
 export type ProjectHiddenRecipe = typeof projectHiddenRecipes.$inferSelect;
 
-export const projectFavorites = sqliteTable(
-  "project_favorites",
-  {
-    projectId: text("project_id")
-      .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    createdAt: integer("created_at", { mode: "timestamp" })
-      .notNull()
-      .default(sql`(unixepoch())`),
-  },
-  (t) => ({
-    pk: primaryKey({ columns: [t.projectId, t.userId] }),
-    projectIdx: index("project_favorites_project_idx").on(t.projectId),
-    userIdx: index("project_favorites_user_idx").on(t.userId),
-  })
-);
-
 // ─── Collections (Lists) ─────────────────────────────────────────────────────────
 
 export const collections = sqliteTable(
@@ -520,65 +587,17 @@ export const scanAppeals = sqliteTable("scan_appeals", {
 
 // ─── Ideas ────────────────────────────────────────────────────────────────────
 
+/**
+ * Idea 固有の情報。共通部分は posts が持つ。
+ * 現状 status のみだが、Idea 固有の項目を足す場所として独立させておく。
+ */
 export const ideas = sqliteTable("ideas", {
-  id:          text("id").primaryKey(),
-  title:       text("title").notNull(),
-  content:     text("content").notNull(),
-  contentFormat: text("content_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull().default("markdown"),
-  authorId:    text("author_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  id:          text("id")
+    .primaryKey()
+    .references(() => posts.id, { onDelete: "cascade" }),
   status:      text("status", { enum: ["open", "in_progress", "fulfilled"] }).notNull().default("open"),
-  visibility:  text("visibility", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
-  createdAt:   integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt:   integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
 }, (table) => ({
-  authorIdx: index("ideas_author_idx").on(table.authorId),
   statusIdx: index("ideas_status_idx").on(table.status),
-}));
-
-export const ideaLikes = sqliteTable(
-  "idea_likes",
-  {
-    ideaId: text("idea_id")
-      .notNull()
-      .references(() => ideas.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-  },
-  (t) => ({ 
-    pk: primaryKey({ columns: [t.ideaId, t.userId] }),
-    ideaIdx: index("idea_likes_idea_idx").on(t.ideaId),
-    userIdx: index("idea_likes_user_idx").on(t.userId),
-  })
-);
-
-export const ideaComments = sqliteTable("idea_comments", {
-  id:          text("id").primaryKey(),
-  ideaId:      text("idea_id")
-    .notNull()
-    .references(() => ideas.id, { onDelete: "cascade" }),
-  authorId:    text("author_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  /** 返信先の親コメントID（1階層のみ）。トップレベルなら null */
-  parentId:    text("parent_id"),
-  content:     text("content").notNull(),
-  contentFormat: text("content_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull().default("markdown"),
-  createdAt:   integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt:   integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-}, (table) => ({
-  ideaIdx: index("idea_comments_idea_idx").on(table.ideaId),
-  authorIdx: index("idea_comments_author_idx").on(table.authorId),
 }));
 
 export const versionIdeas = sqliteTable(
@@ -662,11 +681,22 @@ export const platforms = sqliteTable("platforms", {
 export type User        = typeof users.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type UserSettings = typeof userSettings.$inferSelect;
-export type Project     = typeof projects.$inferSelect;
+/**
+ * posts の行。単体の Post は投稿として完結しており、共通処理はこの型で書ける。
+ * Project / Idea として扱うときは types/post.ts の ProjectPost / IdeaPost を使う。
+ */
+export type Post        = typeof posts.$inferSelect;
+/**
+ * projects の行。title も author も持たないため、これ単体で Project を表さない。
+ * アプリが扱う Project は ProjectPost（Post & ProjectFields）。
+ */
+export type ProjectFields = typeof projects.$inferSelect;
+/** ideas の行。ProjectFields と同じ理由で、単体で Idea を表さない */
+export type IdeaFields  = typeof ideas.$inferSelect;
+export type Comment     = typeof comments.$inferSelect;
+export type Favorite    = typeof favorites.$inferSelect;
 export type Version     = typeof versions.$inferSelect;
 export type Report      = typeof reports.$inferSelect;
-export type Idea        = typeof ideas.$inferSelect;
-export type IdeaComment = typeof ideaComments.$inferSelect;
 export type ApiKey      = typeof apiKeys.$inferSelect;
 export type ProjectMember = typeof projectMembers.$inferSelect;
 export type ProjectDependency = typeof projectDependencies.$inferSelect;
@@ -675,7 +705,6 @@ export type Platform    = typeof platforms.$inferSelect;
 
 export type UserFollow  = typeof userFollows.$inferSelect;
 export type CollectionFollow = typeof collectionFollows.$inferSelect;
-export type ProjectComment = typeof projectComments.$inferSelect;
 
 // ─── Authenticators (WebAuthn / Passkeys) ───────────────────────────────────
 
@@ -753,31 +782,6 @@ export const collectionFollows = sqliteTable(
     collectionIdx: index("collection_follows_collection_idx").on(t.collectionId),
   })
 );
-
-// ─── Project Comments ─────────────────────────────────────────────────────────
-
-export const projectComments = sqliteTable("project_comments", {
-  id:          text("id").primaryKey(),
-  projectId:   text("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  authorId:    text("author_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  /** 返信先の親コメントID（1階層のみ）。トップレベルなら null */
-  parentId:    text("parent_id"),
-  content:     text("content").notNull(),
-  contentFormat: text("content_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull().default("markdown"),
-  createdAt:   integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt:   integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-}, (table) => ({
-  projectIdx: index("project_comments_project_idx").on(table.projectId),
-  authorIdx: index("project_comments_author_idx").on(table.authorId),
-}));
 
 // ─── Password Reset Tokens ────────────────────────────────────────────────────
 
@@ -857,10 +861,16 @@ export const notifications = sqliteTable("notifications", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  /**
+   * 通知の種別。Post 統合に伴い、Project / Idea で分かれていた種別を統合した。
+   *   project_comment + idea_comment → comment
+   *   idea_like + project_favorite   → favorite
+   * 対象が Project か Idea かは payload.kind で判別する。
+   */
   type: text("type", {
     enum: [
-      "new_version", "new_project", "project_comment", "idea_comment",
-      "idea_like", "project_favorite", "follow", "list_add", "comment_reply",
+      "new_version", "new_project", "comment", "favorite",
+      "follow", "list_add", "comment_reply",
     ],
   }).notNull(),
   /** 表示に必要な情報 (projectSlug, projectName, versionNumber 等)。type ごとに構造が異なる */
@@ -1003,7 +1013,8 @@ export const moderationAudit = sqliteTable("moderation_audit", {
     enum: [
       "report_resolve",
       "report_dismiss",
-      "project_unpublish",
+      // Post 統合により Project / Idea のどちらも非公開にできるため改名
+      "post_unpublish",
       "role_change",
       "scan_appeal_approve",
       "scan_appeal_reject",
@@ -1089,4 +1100,51 @@ export const ddosState = sqliteTable("ddos_state", {
 });
 
 export type DdosStateModel = typeof ddosState.$inferSelect;
+
+/**
+ * DDoS 防護の状態遷移の監査ログ。
+ *
+ * ddos_state は「今どうなっているか」しか持たず、Discord 通知も流れて消えるため、
+ * 「いつ・何をきっかけに防護が入り、いつ外れたか」を後から追える記録をここに残す。
+ *
+ * 他の監査ログと同様、users への外部キーは張らず操作時点のメールを非正規化して保持する。
+ * 自動検知や Cron による遷移では performed_by は null（システム実行）になる。
+ */
+export const ddosAudit = sqliteTable("ddos_audit", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  action: text("action", {
+    enum: [
+      /** 自動検知による WAF 有効化（UNDER_ATTACK 突入） */
+      "auto_activate",
+      /** 攻撃検知したが Cloudflare API に失敗し COOLDOWN へ退避 */
+      "auto_activate_failed",
+      /** 防護期限切れによる Cron の自動解除 */
+      "auto_deactivate",
+      /** 自動解除の Cloudflare API 失敗（UNDER_ATTACK へ差し戻し） */
+      "auto_deactivate_failed",
+      /** 管理者による手動の防護有効化 */
+      "manual_activate",
+      /** 管理者による手動の防護解除 */
+      "manual_deactivate",
+      /** ACTIVATING / DEACTIVATING でスタックした状態の Cron による復旧 */
+      "recover",
+    ],
+  }).notNull(),
+  /** 遷移後の ddos_state.current_state */
+  state: text("state").notNull(),
+  /** 検知メトリクス・対象 slug・防護時間・エラー内容などを JSON で保持する */
+  detail: text("detail", { mode: "json" }).$type<Record<string, unknown>>(),
+  /** 操作者の users.id。自動検知・Cron による遷移では null */
+  performedBy: text("performed_by"),
+  performedByEmail: text("performed_by_email"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  actionIdx: index("ddos_audit_action_idx").on(table.action, table.createdAt),
+}));
+
+export type DdosAudit = typeof ddosAudit.$inferSelect;
 

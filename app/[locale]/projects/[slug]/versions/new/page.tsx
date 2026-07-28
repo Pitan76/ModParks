@@ -1,8 +1,8 @@
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import { getDb, getD1 } from "@/lib/db";
-import { ideas } from "@/db/schema";
-import { inArray } from "drizzle-orm";
+import { posts, ideas } from "@/db/schema";
+import { inArray, eq } from "drizzle-orm";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import { getTranslations } from "next-intl/server";
 import { getAvailablePlatforms } from "@/lib/queries/masterData";
@@ -18,8 +18,9 @@ export default async function NewVersionPage({ params }: NewVersionPageProps) {
   const d1 = await getD1();
   const db = getDb(d1);
   const openIdeas = await db
-    .select({ id: ideas.id, title: ideas.title })
+    .select({ id: posts.id, title: posts.title })
     .from(ideas)
+    .innerJoin(posts, eq(posts.id, ideas.id))
     .where(inArray(ideas.status, ["open", "in_progress"]))
     .all();
 

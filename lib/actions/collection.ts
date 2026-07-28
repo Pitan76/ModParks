@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { collections, collectionItems, projects, users, userProfiles, projectTags } from "@/db/schema";
+import { collections, collectionItems, posts, projects, users, userProfiles, projectTags } from "@/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -82,15 +82,16 @@ export async function toggleProjectInCollection(collectionId: string, projectId:
     added = true;
 
     const project = await db
-      .select({ slug: projects.slug, name: projects.name, authorId: projects.authorId })
-      .from(projects)
-      .where(eq(projects.id, projectId))
+      .select({ slug: posts.slug, title: posts.title, authorId: posts.authorId })
+      .from(posts)
+      .where(eq(posts.id, projectId))
       .get();
     if (project) {
       const { notifyToUser, resolveActorName } = await import("@/lib/notifications/notify");
       await notifyToUser(db, project.authorId, userId, "list_add", {
-        projectSlug: project.slug,
-        projectName: project.name,
+        kind: "project",
+        slug: project.slug,
+        title: project.title,
         collectionName: collection.name,
         actorName: await resolveActorName(db, userId),
       });
@@ -167,7 +168,8 @@ export async function getCollectionById(id: string, viewerId?: string) {
   })
     .from(collectionItems)
     .innerJoin(projects, eq(collectionItems.projectId, projects.id))
-    .leftJoin(users, eq(projects.authorId, users.id))
+    .innerJoin(posts, eq(posts.id, projects.id))
+    .leftJoin(users, eq(posts.authorId, users.id))
     .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(collectionItems.collectionId, id))
     .orderBy(desc(collectionItems.addedAt))

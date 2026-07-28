@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { projects } from "@/db/schema";
+import { posts, projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { importGithubReleaseSystem } from "@/lib/actions/github";
+import { toProjectPost } from "@/lib/queries/postRow";
 
 export async function POST(request: Request) {
   try {
@@ -31,10 +32,12 @@ export async function POST(request: Request) {
     const db = getDb(d1);
 
     // 連携されているプロジェクトを検索
-    const projectList = await db.select()
+    const projectRows = await db.select({ post: posts, project: projects })
       .from(projects)
+      .innerJoin(posts, eq(posts.id, projects.id))
       .where(eq(projects.githubRepo, repositoryFullName))
       .all();
+    const projectList = projectRows.map(({ post, project }) => toProjectPost({ posts: post, projects: project }));
 
     if (projectList.length === 0) {
       return NextResponse.json({ success: true, ignored: true, reason: "No matching project found" });

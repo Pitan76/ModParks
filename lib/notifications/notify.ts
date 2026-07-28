@@ -1,6 +1,6 @@
 import { notifications, projectSubscriptions, developerSubscriptions, userSettings, users, userProfiles } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
-import type { Project } from "@/db/schema";
+import type { ProjectPost } from "@/types/post";
 import { sendDiscordVersionNotification } from "@/lib/notifications/discord";
 import { isTypeEnabled, type NotificationType, type NotificationPayload } from "@/lib/notifications/types";
 import { sendPushToRecipients } from "@/lib/notifications/push";
@@ -58,7 +58,7 @@ async function filterByPreference(db: any, ids: string[], type: NotificationType
  */
 export async function notifyNewVersion(
   db: any,
-  project: Pick<Project, "id" | "slug" | "name" | "iconUrl" | "authorId" | "discordWebhookUrl">,
+  project: Pick<ProjectPost, "id" | "slug" | "title" | "iconUrl" | "authorId" | "discordWebhookUrl">,
   versionNumber: string,
 ): Promise<void> {
   const subscribers = await db
@@ -72,15 +72,16 @@ export async function notifyNewVersion(
     .filter((id: string) => id !== project.authorId);
 
   await dispatchNotifications(db, recipients, "new_version", {
-    projectSlug: project.slug,
-    projectName: project.name,
+    kind: "project",
+    slug: project.slug,
+    title: project.title,
     versionNumber,
-    ...(project.iconUrl ? { projectIconUrl: project.iconUrl } : {}),
+    ...(project.iconUrl ? { iconUrl: project.iconUrl } : {}),
   });
 
   if (project.discordWebhookUrl) {
     await sendDiscordVersionNotification(project.discordWebhookUrl, {
-      projectName: project.name,
+      projectName: project.title,
       projectSlug: project.slug,
       projectIconUrl: project.iconUrl,
       versionNumber,
@@ -94,7 +95,7 @@ export async function notifyNewVersion(
  */
 export async function notifyNewProject(
   db: any,
-  project: Pick<Project, "slug" | "name" | "iconUrl" | "authorId">,
+  project: Pick<ProjectPost, "slug" | "title" | "iconUrl" | "authorId">,
   authorName: string,
 ): Promise<void> {
   const subscribers = await db
@@ -108,10 +109,11 @@ export async function notifyNewProject(
     .filter((id: string) => id !== project.authorId);
 
   await dispatchNotifications(db, recipients, "new_project", {
-    projectSlug: project.slug,
-    projectName: project.name,
+    kind: "project",
+    slug: project.slug,
+    title: project.title,
     authorName,
-    ...(project.iconUrl ? { projectIconUrl: project.iconUrl } : {}),
+    ...(project.iconUrl ? { iconUrl: project.iconUrl } : {}),
   });
 }
 

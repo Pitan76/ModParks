@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { projects, userSettings } from "@/db/schema";
+import { posts, projects, userSettings } from "@/db/schema";
 import { eq, isNotNull, or } from "drizzle-orm";
+import { toProjectPost } from "@/lib/queries/postRow";
 import { syncExternalProjectDataSystem } from "@/lib/actions/projectSync";
 import { purgeExpiredRateLimits } from "@/lib/rate-limit";
 
@@ -27,17 +28,19 @@ export async function GET(request: Request) {
     // もしくは raw SQL を使う必要があります。今回はシンプルに取得してフィルタします。
     // ※ プロジェクト数が増えるとパフォーマンス影響があるため、将来的にカラム分離を検討。
     const allLinkedProjects = await db
-      .select()
-      .from(projects)
+      .select({ post: posts, project: projects })
+      .from(posts)
+      .innerJoin(projects, eq(projects.id, posts.id))
       .where(or(isNotNull(projects.modrinthId), isNotNull(projects.curseforgeId)))
       .all();
 
     const projectsToSync = allLinkedProjects
-      .filter(p => {
-        const extObj = p.externalDownloads as Record<string, number> | undefined;
+      .filter(({ project }) => {
+        const extObj = project.externalDownloads as Record<string, number> | undefined;
         const lastSyncedAt = extObj?.lastSyncedAt || 0;
         return lastSyncedAt < threeDaysAgoMs;
       })
+      .map(({ post, project }) => toProjectPost({ posts: post, projects: project }))
       .slice(0, 10); // 1回のCRON実行で最大10件まで（タイムアウト防止）
 
     if (projectsToSync.length === 0) {

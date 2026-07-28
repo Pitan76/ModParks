@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { versions, projects, projectMembers, users } from "@/db/schema";
 import { eq, and, sql, desc, isNull } from "drizzle-orm";
+import { findProjectPostBySlug, findProjectPostById } from "@/lib/queries/post";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getR2PublicUrl } from "@/lib/r2";
 import { auth } from "@/lib/auth";
@@ -72,7 +73,7 @@ async function getLatestVersion(
   slug: string,
   pref: DownloadPreference
 ) {
-  const project = await db.select({ id: projects.id }).from(projects).where(eq(projects.slug, slug)).get();
+  const project = await findProjectPostBySlug(db, slug);
   if (!project) return undefined;
 
   const candidates = await db
@@ -115,11 +116,7 @@ export async function GET(req: NextRequest) {
     const versionId = version.id;
 
     // プロジェクトが公開されているか確認
-    const project = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.id, version.projectId))
-      .get();
+    const project = await findProjectPostById(db, version.projectId);
 
     if (!project) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -130,7 +127,7 @@ export async function GET(req: NextRequest) {
 
     // 未公開（draft/private）は作者・メンバー・管理者のみアクセス可。
     // public / unlisted は直リンクで誰でもダウンロードできる。
-    if (RESTRICTED_STATUSES.has(project.status) && !isInsider) {
+    if (RESTRICTED_STATUSES.has(project.visibility) && !isInsider) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 

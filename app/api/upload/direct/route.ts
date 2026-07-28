@@ -41,12 +41,13 @@ export async function PUT(req: NextRequest) {
     
     if (slugOrId !== "new-project") {
       const { getDb, getD1 } = await import("@/lib/db");
-      const { projects, projectMembers } = await import("@/db/schema");
+      const { projectMembers } = await import("@/db/schema");
       const { eq, and } = await import("drizzle-orm");
+      const { findProjectPostBySlug } = await import("@/lib/queries/post");
       const d1 = await getD1();
       const db = getDb(d1);
-      const project = await db.select().from(projects).where(eq(projects.slug, slugOrId)).get();
-      
+      const project = await findProjectPostBySlug(db, slugOrId);
+
       if (!project) {
         return NextResponse.json({ error: "Project not found" }, { status: 404 });
       }

@@ -1,7 +1,8 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { projects, projectTags, projectMembers, users, userProfiles } from "@/db/schema";
+import { posts, projects, projectTags, projectMembers, users, userProfiles } from "@/db/schema";
+import { findProjectPostById } from "@/lib/queries/post";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, inArray } from "drizzle-orm";
@@ -13,21 +14,16 @@ import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 type PublishProject = {
   slug: string;
-  name: string;
+  title: string;
   iconUrl: string | null;
   authorId: string;
-  status: string;
+  visibility: string;
 };
 
 /** 下書き→公開の初回公開時のみ、作者フォロワーへ新プロジェクト通知を送る */
-const maybeNotifyPublish = async (
-  db: any,
-  project: PublishProject,
-  newSlug: string,
-  newStatus: string | undefined,
-): Promise<void> => {
-  if (project.status !== "draft") return;
-  if (newStatus !== "public" && newStatus !== "unlisted") return;
+async function maybeNotifyPublish(db: any, project: PublishProject, newSlug: string, newVisibility: string | undefined): Promise<void> {
+  if (project.visibility !== "draft") return;
+  if (newVisibility !== "public" && newVisibility !== "unlisted") return;
 
   const author = await db
     .select({ displayName: userProfiles.displayName, username: users.name })
@@ -37,15 +33,15 @@ const maybeNotifyPublish = async (
     .get();
 
   const authorName = author?.displayName || author?.username || "";
-  await notifyNewProject(db, { ...project, slug: newSlug, name: project.name }, authorName);
-};
+  await notifyNewProject(db, { ...project, slug: newSlug, title: project.title }, authorName);
+}
 
 // ---- プロジェクト作成 ----
 
 /**
  * 新しいプロジェクト（Mod/Plugin）を作成する Server Action。
  */
-export const createProject = async (formData: FormData) => {
+export async function createProject(formData: FormData) {
   const { db, session } = await getAuthenticatedDb();
 
   const raw = {
@@ -66,26 +62,38 @@ export const createProject = async (formData: FormData) => {
   const { name, slug, description, descriptionFormat, type, license, sourceUrl, links, tags } = parsed.data;
   const id = createId();
 
-  const existingProject = await db.select().from(projects).where(eq(projects.slug, slug)).get();
+  const existingProject = await db
+    .select({ id: posts.id })
+    .from(posts)
+    .where(and(eq(posts.kind, "project"), eq(posts.slug, slug)))
+    .get();
   if (existingProject) {
     const t = await getServerErrors();
     return { error: { slug: [t("project.slugTaken")] } };
   }
 
-  await db.insert(projects).values({
-    id,
-    slug,
-    name,
-    description,
-    descriptionFormat: descriptionFormat || "markdown",
-    type,
-    license,
-    sourceUrl:  sourceUrl || null,
-    links:      links || null,
-    iconUrl:    formData.get("iconUrl") as string | null,
-    authorId:   session.user.id,
-    status:     "draft",
-  }).run();
+  // posts と projects は必ず同時に作る。D1 は transaction() が使えないため batch を使う。
+  // 片方だけが残ると「kind=project なのに projects に行が無い」状態になり、FK では防げない。
+  await db.batch([
+    db.insert(posts).values({
+      id,
+      authorId:   session.user.id,
+      kind:       "project",
+      slug,
+      title:      name,
+      body:       description,
+      bodyFormat: descriptionFormat || "markdown",
+      visibility: "draft",
+    }),
+    db.insert(projects).values({
+      id,
+      type,
+      license,
+      sourceUrl:  sourceUrl || null,
+      links:      links || null,
+      iconUrl:    formData.get("iconUrl") as string | null,
+    }),
+  ]);
 
   if (tags.length > 0) {
     await db.insert(projectTags).values(
@@ -95,7 +103,7 @@ export const createProject = async (formData: FormData) => {
 
   revalidatePath("/projects");
   redirect(`/projects/${slug}`);
-};
+}
 
 // ---- プロジェクト更新 ----
 
@@ -105,11 +113,7 @@ export const createProject = async (formData: FormData) => {
 export const updateProject = async (projectId: string, formData: FormData) => {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, projectId))
-    .get();
+  const project = await findProjectPostById(db, projectId);
 
   if (!project) throw new Error("Project not found");
 
@@ -159,28 +163,47 @@ export const updateProject = async (projectId: string, formData: FormData) => {
 
   let previousSlugToSet: string | undefined = undefined;
   if (fields.slug && fields.slug !== project.slug) {
-    const existingSlug = await db.select().from(projects).where(eq(projects.slug, fields.slug)).get();
+    const existingSlug = await db
+      .select({ id: posts.id })
+      .from(posts)
+      .where(and(eq(posts.kind, "project"), eq(posts.slug, fields.slug)))
+      .get();
     if (existingSlug) return { error: { slug: [t("project.slugTaken")] } };
     previousSlugToSet = project.slug;
   }
 
-  await db
-    .update(projects)
-    .set({
-      ...fields,
-      issueTrackerUrl: fields.issueTrackerUrl !== undefined ? fields.issueTrackerUrl : project.issueTrackerUrl,
-      sourceUrl: fields.sourceUrl || null,
-      links: fields.links || null,
-      githubRepo: normalizedGithubRepo,
-      discordWebhookUrl: normalizedWebhook,
-      commentsEnabled: formData.get("commentsEnabled") === "on",
-      recipesEnabled: formData.get("recipesEnabled") === "on",
-      iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
-      updatedAt: new Date(),
-      ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {})
-    })
-    .where(eq(projects.id, project.id))
-    .run();
+  // 共通カラムは posts、Project 固有のカラムは projects へ。
+  // 2 つの UPDATE がちぐはぐな状態で残らないよう batch でまとめる。
+  const { name, description, descriptionFormat, status, ...projectFields } = fields;
+
+  await db.batch([
+    db
+      .update(posts)
+      .set({
+        ...(name !== undefined ? { title: name } : {}),
+        ...(description !== undefined ? { body: description } : {}),
+        ...(descriptionFormat !== undefined ? { bodyFormat: descriptionFormat } : {}),
+        ...(status !== undefined ? { visibility: status } : {}),
+        ...(fields.slug !== undefined ? { slug: fields.slug } : {}),
+        ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(posts.id, project.id)),
+    db
+      .update(projects)
+      .set({
+        ...projectFields,
+        issueTrackerUrl: fields.issueTrackerUrl !== undefined ? fields.issueTrackerUrl : project.issueTrackerUrl,
+        sourceUrl: fields.sourceUrl || null,
+        links: fields.links || null,
+        githubRepo: normalizedGithubRepo,
+        discordWebhookUrl: normalizedWebhook,
+        commentsEnabled: formData.get("commentsEnabled") === "on",
+        recipesEnabled: formData.get("recipesEnabled") === "on",
+        iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
+      })
+      .where(eq(projects.id, project.id)),
+  ]);
 
   if (tags !== undefined) {
     const previousTags = await db
@@ -220,12 +243,16 @@ export const updateProject = async (projectId: string, formData: FormData) => {
 export const updateProjectIcon = async (projectId: string, iconUrl: string) => {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project) throw new Error("Not found");
 
   await assertProjectAccess(db, project, session);
 
-  await db.update(projects).set({ iconUrl, updatedAt: new Date() }).where(eq(projects.id, projectId));
+  // iconUrl は projects、updatedAt は posts と、更新先が分かれる
+  await db.batch([
+    db.update(projects).set({ iconUrl }).where(eq(projects.id, projectId)),
+    db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, projectId)),
+  ]);
   revalidatePath(`/[locale]/projects/[slug]`, "page");
   return { success: true };
 };
@@ -238,7 +265,7 @@ export const updateProjectIcon = async (projectId: string, iconUrl: string) => {
 export const transferOwnership = async (projectId: string, newOwnerId: string) => {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project) throw new Error("Not found");
 
   if (project.authorId !== session.user.id && session.user.role !== "admin") {
@@ -248,7 +275,7 @@ export const transferOwnership = async (projectId: string, newOwnerId: string) =
   const targetUser = await db.select().from(users).where(eq(users.id, newOwnerId)).get();
   if (!targetUser) throw new Error("User not found");
 
-  await db.update(projects).set({ authorId: newOwnerId, updatedAt: new Date() }).where(eq(projects.id, projectId));
+  await db.update(posts).set({ authorId: newOwnerId, updatedAt: new Date() }).where(eq(posts.id, projectId));
 
   await db.delete(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, newOwnerId)));
   await recordDeletion(db, "project_members", buildRecordKey(projectId, newOwnerId));
@@ -266,10 +293,11 @@ export const batchUpdateProjectStatus = async (projectIds: string[], status: "pu
   const { db, session } = await getAuthenticatedDb();
   if (!projectIds.length) return { success: true };
 
-  const isOwnerCondition = eq(projects.authorId, session.user.id);
-  const conditions = session.user.role === "admin" ? inArray(projects.id, projectIds) : and(inArray(projects.id, projectIds), isOwnerCondition);
+  // 公開範囲も作者も posts が持つため、projects を触る必要がない
+  const isOwnerCondition = eq(posts.authorId, session.user.id);
+  const conditions = session.user.role === "admin" ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
 
-  await db.update(projects).set({ status, updatedAt: new Date() }).where(conditions).run();
+  await db.update(posts).set({ visibility: status, updatedAt: new Date() }).where(conditions).run();
   
   revalidatePath("/projects");
   revalidatePath("/projects/manage");
@@ -283,14 +311,15 @@ export const batchDeleteProjects = async (projectIds: string[]) => {
   const { db, session } = await getAuthenticatedDb();
   if (!projectIds.length) return { success: true };
 
-  const isOwnerCondition = eq(projects.authorId, session.user.id);
-  const conditions = session.user.role === "admin" ? inArray(projects.id, projectIds) : and(inArray(projects.id, projectIds), isOwnerCondition);
+  const isOwnerCondition = eq(posts.authorId, session.user.id);
+  const conditions = session.user.role === "admin" ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
 
-  const deletable = await db.select({ id: projects.id }).from(projects).where(conditions).all();
+  const deletable = await db.select({ id: posts.id }).from(posts).where(conditions).all();
 
-  await db.delete(projects).where(conditions).run();
+  // posts を削除すると projects は cascade で消える。逆向きに消すと posts が孤児になる
+  await db.delete(posts).where(conditions).run();
 
-  await recordDeletion(db, "projects", deletable.map((p: { id: string }) => p.id));
+  await recordDeletion(db, "posts", deletable.map((p: { id: string }) => p.id));
 
   revalidatePath("/projects");
   revalidatePath("/projects/manage");

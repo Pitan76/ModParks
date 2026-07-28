@@ -56,6 +56,19 @@ async function sendDdosDiscordNotification(webhookUrl, embeds) {
   }
 }
 
+// 状態遷移の監査ログ (ddos_audit) への記録
+// Discord 通知と違って流れて消えないので、後から「いつ何をきっかけに防護が入ったか」を追える。
+// 記録の失敗で防護そのものを巻き戻さないよう、例外は握りつぶす。
+async function recordDdosAudit(db, action, state, detail) {
+  try {
+    await db.prepare(
+      "INSERT INTO ddos_audit (id, action, state, detail) VALUES (?, ?, ?, ?)"
+    ).bind(crypto.randomUUID(), action, state, detail ? JSON.stringify(detail) : null).run();
+  } catch (err) {
+    console.error("[DDOS-GUARD] Failed to record audit log:", err);
+  }
+}
+
 // Cloudflare API 呼び出し (WAF Rulesets API)
 async function toggleDdosProtection(env, enable, topSlug) {
   const isDryRun = env.DRY_RUN === "true";
@@ -260,6 +273,20 @@ async function evaluateAndTriggerDdos(env, sliceTime) {
           cachedState = null; // キャッシュクリア
           console.log("[DDOS-GUARD] Successfully enabled WAF custom rule.");
 
+          await recordDdosAudit(env.DB, "auto_activate", "UNDER_ATTACK", {
+            topSlug: topSlug || null,
+            totalRequests,
+            totalDownloads,
+            downloadRatio: Number(downloadRatio.toFixed(3)),
+            topSlugRatio: Number(topSlugRatio.toFixed(3)),
+            ipRepeatRate: Number(ipRepeatRate.toFixed(2)),
+            dispersionScore,
+            approxCountries,
+            protectionDuration,
+            scheduledDisableAt,
+            dryRun: env.DRY_RUN === "true",
+          });
+
           // Discord 通知
           const dryLabel = env.DRY_RUN === "true" ? " [DRY-RUN]" : "";
           await sendDdosDiscordNotification(env.DISCORD_WEBHOOK_URL, [
@@ -289,6 +316,13 @@ async function evaluateAndTriggerDdos(env, sliceTime) {
           ).bind(cooldownUntil, now).run();
           
           cachedState = null;
+
+          await recordDdosAudit(env.DB, "auto_activate_failed", "COOLDOWN", {
+            topSlug: topSlug || null,
+            totalRequests,
+            error: apiRes.error,
+            cooldownUntil,
+          });
 
           await sendDdosDiscordNotification(env.DISCORD_WEBHOOK_URL, [
             {
@@ -392,6 +426,13 @@ async function handleDdosCron(controller, env, ctx) {
           cachedState = null;
           console.log("[DDOS-GUARD] Successfully disabled WAF rule. System is in COOLDOWN");
 
+          await recordDdosAudit(db, "auto_deactivate", "COOLDOWN", {
+            underAttackEnabledAt: state.underAttackEnabledAt,
+            protectionDuration: state.protectionDuration,
+            cooldownUntil,
+            dryRun: env.DRY_RUN === "true",
+          });
+
           const dryLabel = env.DRY_RUN === "true" ? " [DRY-RUN]" : "";
           await sendDdosDiscordNotification(env.DISCORD_WEBHOOK_URL, [
             {
@@ -408,6 +449,10 @@ async function handleDdosCron(controller, env, ctx) {
             "UPDATE ddos_state SET current_state = 'UNDER_ATTACK', updated_at = ? WHERE state_key = 'global'"
           ).bind(now).run();
           cachedState = null;
+
+          await recordDdosAudit(db, "auto_deactivate_failed", "UNDER_ATTACK", {
+            error: apiRes.error,
+          });
         }
       }
     }
@@ -432,6 +477,11 @@ async function handleDdosCron(controller, env, ctx) {
           "UPDATE ddos_state SET current_state = 'UNDER_ATTACK', under_attack_enabled_at = ?, scheduled_disable_at = ?, updated_at = ? WHERE state_key = 'global'"
         ).bind(now, scheduledDisableAt, now).run();
         console.log("[DDOS-GUARD] ACTIVATING recovery: CF is active. State moved to UNDER_ATTACK");
+        await recordDdosAudit(db, "recover", "UNDER_ATTACK", {
+          from: "ACTIVATING",
+          wafEnabled: true,
+          scheduledDisableAt,
+        });
       } else {
         // CF側は無効だった -> API失敗とみなし、2分間 COOLDOWN に移行
         const cooldownUntil = now + 120000;
@@ -439,6 +489,11 @@ async function handleDdosCron(controller, env, ctx) {
           "UPDATE ddos_state SET current_state = 'COOLDOWN', cooldown_until = ?, updated_at = ? WHERE state_key = 'global'"
         ).bind(cooldownUntil, now).run();
         console.log("[DDOS-GUARD] ACTIVATING recovery: CF is inactive. State moved to COOLDOWN");
+        await recordDdosAudit(db, "recover", "COOLDOWN", {
+          from: "ACTIVATING",
+          wafEnabled: currentRuleEnabled,
+          cooldownUntil,
+        });
       }
       cachedState = null;
     }
@@ -454,12 +509,21 @@ async function handleDdosCron(controller, env, ctx) {
           "UPDATE ddos_state SET current_state = 'COOLDOWN', cooldown_until = ?, last_normal_at = ?, updated_at = ? WHERE state_key = 'global'"
         ).bind(cooldownUntil, now, now).run();
         console.log("[DDOS-GUARD] DEACTIVATING recovery: CF is inactive. State moved to COOLDOWN");
+        await recordDdosAudit(db, "recover", "COOLDOWN", {
+          from: "DEACTIVATING",
+          wafEnabled: false,
+          cooldownUntil,
+        });
       } else {
         // CF側はまだ有効だった -> UNDER_ATTACK に戻して再試行へ
         await db.prepare(
           "UPDATE ddos_state SET current_state = 'UNDER_ATTACK', updated_at = ? WHERE state_key = 'global'"
         ).bind(now).run();
         console.log("[DDOS-GUARD] DEACTIVATING recovery: CF is active. Reverted state to UNDER_ATTACK");
+        await recordDdosAudit(db, "recover", "UNDER_ATTACK", {
+          from: "DEACTIVATING",
+          wafEnabled: currentRuleEnabled,
+        });
       }
       cachedState = null;
     }

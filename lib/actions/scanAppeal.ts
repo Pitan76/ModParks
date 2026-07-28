@@ -1,7 +1,8 @@
 "use server";
 
 import { getAuthenticatedDb, getAdminDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { scanAppeals, versions, projects, userProfiles, users } from "@/db/schema";
+import { scanAppeals, versions, posts, projects, userProfiles, users } from "@/db/schema";
+import { findProjectPostById } from "@/lib/queries/post";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, desc, and } from "drizzle-orm";
@@ -24,7 +25,7 @@ export async function createScanAppeal(versionId: string, formData: FormData) {
   const version = await db.select().from(versions).where(eq(versions.id, versionId)).get();
   if (!version) return { error: "notFound" };
 
-  const project = await db.select().from(projects).where(eq(projects.id, version.projectId)).get();
+  const project = await findProjectPostById(db, version.projectId);
   if (!project) return { error: "notFound" };
   await assertProjectAccess(db, project, session);
 
@@ -107,8 +108,8 @@ export async function getScanAppeals(status: "pending" | "approved" | "rejected"
         scanFindings: versions.scanFindings,
       },
       project: {
-        slug: projects.slug,
-        name: projects.name,
+        slug: posts.slug,
+        name: posts.title,
       },
       appellant: {
         username: userProfiles.username,
@@ -118,6 +119,7 @@ export async function getScanAppeals(status: "pending" | "approved" | "rejected"
     .from(scanAppeals)
     .innerJoin(versions, eq(scanAppeals.versionId, versions.id))
     .innerJoin(projects, eq(versions.projectId, projects.id))
+    .innerJoin(posts, eq(posts.id, projects.id))
     .innerJoin(users, eq(scanAppeals.appellantId, users.id))
     .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(eq(scanAppeals.status, status))

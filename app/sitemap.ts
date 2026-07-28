@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/config';
 import { getDatabase } from '@/lib/db';
-import { projects, ideas, userProfiles, users } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { posts, userProfiles, users } from '@/db/schema';
+import { eq, and, sql } from 'drizzle-orm';
 
 // ビルド時は D1 バインディングが無くテーブルを引けないため、リクエスト時に生成する。
 export const dynamic = 'force-dynamic';
@@ -62,14 +62,14 @@ const dynamicEntries = async (): Promise<MetadataRoute.Sitemap> => {
 
   const [dbProjects, dbIdeas, dbUsers] = await Promise.all([
     db
-      .select({ slug: projects.slug, updatedAt: projects.updatedAt })
-      .from(projects)
-      .where(eq(projects.status, 'public'))
+      .select({ slug: posts.slug, updatedAt: posts.updatedAt })
+      .from(posts)
+      .where(and(eq(posts.kind, 'project'), eq(posts.visibility, 'public')))
       .all(),
     db
-      .select({ id: ideas.id, updatedAt: ideas.updatedAt })
-      .from(ideas)
-      .where(eq(ideas.visibility, 'public'))
+      .select({ slug: posts.slug, updatedAt: posts.updatedAt })
+      .from(posts)
+      .where(and(eq(posts.kind, 'idea'), eq(posts.visibility, 'public')))
       .all(),
     db
       .select({ username: userProfiles.username })
@@ -89,7 +89,7 @@ const dynamicEntries = async (): Promise<MetadataRoute.Sitemap> => {
     }),
     ...toEntries({
       items: dbIdeas,
-      pathOf: (i) => `/ideas/${i.id}`,
+      pathOf: (i) => `/ideas/${i.slug}`,
       lastModifiedOf: (i) => i.updatedAt,
       changeFrequency: 'daily',
       priority: 0.6,

@@ -8,7 +8,7 @@ import Tooltip from "@mui/material/Tooltip";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import Typography from "@mui/material/Typography";
-import { toggleProjectFavorite, toggleCookieFavorite } from "@/lib/actions/favorite";
+import { togglePostFavorite, toggleCookieFavorite } from "@/lib/actions/favorite";
 import { useTranslations } from "next-intl";
 
 export type ProjectFavoriteButtonProps = {
@@ -48,7 +48,7 @@ const ProjectFavoriteButton = ({
 
     startTransition(async () => {
       try {
-        const result = isLoggedIn ? await toggleProjectFavorite(projectId) : await toggleCookieFavorite(projectId);
+        const result = isLoggedIn ? await togglePostFavorite(projectId) : await toggleCookieFavorite(projectId);
         if ("error" in result && result.error) {
           // 失敗したら元に戻す
           setFavorited(initialFavorited);

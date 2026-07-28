@@ -1,44 +1,25 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { projects, users, userProfiles } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { listProjectPosts } from "@/lib/queries/postList";
 import { SITE_URL } from "@/lib/config";
 
 export async function GET() {
   const db = await getDatabase();
 
-  const latestProjects = await db
-    .select({
-      id: projects.id,
-      slug: projects.slug,
-      name: projects.name,
-      description: projects.description,
-      createdAt: projects.createdAt,
-      updatedAt: projects.updatedAt,
-      author: {
-        username: userProfiles.username,
-        displayName: userProfiles.displayName,
-      }
-    })
-    .from(projects)
-    .leftJoin(users, eq(projects.authorId, users.id))
-    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(projects.status, "public"))
-    .orderBy(desc(projects.updatedAt))
-    .limit(20);
+  const latestProjects = await listProjectPosts(db, { limit: 20 });
 
   const itemsXml = latestProjects.map(project => {
-    const authorName = project.author?.displayName || project.author?.username || "Unknown";
+    const authorName = project.author.displayName || project.author.username || "Unknown";
     const projectUrl = `${SITE_URL}/projects/${project.slug}`;
-    const pubDate = new Date(project.updatedAt).toUTCString();
+    const pubDate = new Date(project.updatedAt ?? project.createdAt).toUTCString();
 
     return `
     <item>
-      <title><![CDATA[${project.name}]]></title>
+      <title><![CDATA[${project.title}]]></title>
       <link>${projectUrl}</link>
       <guid isPermaLink="true">${projectUrl}</guid>
       <pubDate>${pubDate}</pubDate>
-      <description><![CDATA[${project.description}]]></description>
+      <description><![CDATA[${project.body}]]></description>
       <author>${authorName}</author>
     </item>`;
   }).join("");
