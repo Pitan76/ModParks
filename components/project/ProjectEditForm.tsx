@@ -22,13 +22,13 @@ import Switch from "@mui/material/Switch";
 interface ProjectEditFormProps {
   project: {
     id: string;
-    name: string;
+    title: string;
     slug: string;
     type: string;
-    description: string;
+    body: string;
     license: string;
     sourceUrl?: string | null;
-    status: string;
+    visibility: string;
     commentsEnabled?: boolean;
     recipesEnabled?: boolean;
   };
@@ -116,7 +116,10 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
   return (
     <>
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}>
-          <ProjectFormFields error={error} project={project as any} availableTags={availableTags}>
+          {/* ProjectFormFields のフォームフィールド名（name/description）は
+              Server Action (updateProject) の契約に合わせて変えていない。
+              project.title / project.body から詰め替えて渡す */}
+          <ProjectFormFields error={error} project={{ ...project, name: project.title, description: project.body } as any} availableTags={availableTags}>
             <FormControl fullWidth required>
               <InputLabel id="project-status-label">{t("fields.status")}</InputLabel>
               <Select
@@ -124,7 +127,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
                 id="project-status"
                 name="status"
                 label={t("fields.status")}
-                defaultValue={project.status}
+                defaultValue={project.visibility}
               >
                 <MenuItem value="public">{tCommon("visibility.public")}</MenuItem>
                 <MenuItem value="unlisted">{tCommon("visibility.unlisted")}</MenuItem>

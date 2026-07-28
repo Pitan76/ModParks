@@ -1,5 +1,5 @@
 import { getAdminDb } from "@/lib/auth-helpers";
-import { projects, users, userProfiles } from "@/db/schema";
+import { posts, projects, users, userProfiles } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -14,16 +14,17 @@ export default async function AdminProjectsPage({ params }: { params: Promise<{ 
   const allProjects = await db
     .select({
       id: projects.id,
-      name: projects.name,
-      slug: projects.slug,
-      createdAt: projects.createdAt,
+      name: posts.title,
+      slug: posts.slug,
+      createdAt: posts.createdAt,
       authorUsername: userProfiles.username,
       authorDisplayName: userProfiles.displayName,
     })
     .from(projects)
-    .leftJoin(users, eq(projects.authorId, users.id))
-    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .orderBy(desc(projects.createdAt))
+    .innerJoin(posts, eq(projects.id, posts.id)) // project と post をidでくっつける
+    .leftJoin(users, eq(posts.authorId, users.id)) // user がいない（削除済みなど）可能性もあるのでleftJoin
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId)) // userProfiles がいない可能性もあるのでleftJoin
+    .orderBy(desc(posts.createdAt))
     .all();
 
   return (
