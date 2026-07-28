@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projectFavorites, projects, users, userProfiles } from "@/db/schema";
+import { favorites, posts, projects, users, userProfiles } from "@/db/schema";
 import { eq, and, desc, sql, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -12,38 +12,43 @@ import { mapProjectRow } from "@/lib/queries/projectRow";
 
 // ---- お気に入りのトグル ----
 
-export async function toggleProjectFavorite(projectId: string) {
+/**
+ * 投稿のお気に入りを切り替える。Project / Idea のどちらでも同じ経路を通る。
+ * かつての toggleProjectFavorite（いいね/ブックマーク）を統合したもの。
+ */
+export async function togglePostFavorite(postId: string) {
   const { db, userId } = await getAuthenticatedDb();
 
   try {
     const existing = await db
       .select()
-      .from(projectFavorites)
-      .where(and(eq(projectFavorites.projectId, projectId), eq(projectFavorites.userId, userId)))
+      .from(favorites)
+      .where(and(eq(favorites.postId, postId), eq(favorites.userId, userId)))
       .get();
 
     if (existing) {
       await db
-        .delete(projectFavorites)
-        .where(and(eq(projectFavorites.projectId, projectId), eq(projectFavorites.userId, userId)));
+        .delete(favorites)
+        .where(and(eq(favorites.postId, postId), eq(favorites.userId, userId)));
     } else {
-      await db.insert(projectFavorites).values({ projectId, userId });
+      await db.insert(favorites).values({ postId, userId });
     }
 
     revalidatePath("/[locale]/projects", "page");
     revalidatePath("/[locale]/profile/[username]", "page");
 
-    const project = await db
-      .select({ slug: projects.slug, name: projects.name, authorId: projects.authorId })
-      .from(projects)
-      .where(eq(projects.id, projectId))
+    const post = await db
+      .select({ kind: posts.kind, slug: posts.slug, title: posts.title, authorId: posts.authorId })
+      .from(posts)
+      .where(eq(posts.id, postId))
       .get();
-    if (project) {
-      revalidatePath("/[locale]/projects/[slug]", "page");
+    if (post) {
+      revalidatePath(post.kind === "project" ? "/[locale]/projects/[slug]" : "/[locale]/ideas/[slug]", "page");
       if (!existing) {
-        await notifyToUser(db, project.authorId, userId, "project_favorite", {
-          projectSlug: project.slug,
-          projectName: project.name,
+        await notifyToUser(db, post.authorId, userId, "favorite", {
+          kind: post.kind,
+          slug: post.slug,
+          title: post.title,
           actorName: await resolveActorName(db, userId),
         });
       }
@@ -51,7 +56,7 @@ export async function toggleProjectFavorite(projectId: string) {
 
     return { success: true, favorited: !existing };
   } catch (error) {
-    console.error("Failed to toggle project favorite:", error);
+    console.error("Failed to toggle favorite:", error);
     return { success: false, error: (await getServerErrors())("favorite.toggleFailed") };
   }
 }
@@ -60,29 +65,31 @@ export async function toggleProjectFavorite(projectId: string) {
 
 export async function getFavoriteProjects(userId: string) {
   const db = await getDatabase();
-  const { description, ...restProjects } = getTableColumns(projects);
-  
-  // project_favorites と projects, users を結合して取得
+  const { body, ...restPosts } = getTableColumns(posts);
+
+  // favorites には Idea も含まれるため、projects との inner join で Project だけに絞る
   const rows = await db
     .select({
       project: {
-        ...restProjects,
-        description: sql<string>`SUBSTR(${projects.description}, 1, 1200) || CASE WHEN LENGTH(${projects.description}) > 1200 THEN '...' ELSE '' END`,
-        tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = projects.id)`
+        ...restPosts,
+        ...getTableColumns(projects),
+        body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
+        tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`
       },
       author: {
         username: userProfiles.username,
         displayName: userProfiles.displayName,
         avatarUrl: userProfiles.avatarUrl,
       },
-      favoritedAt: projectFavorites.createdAt
+      favoritedAt: favorites.createdAt
     })
-    .from(projectFavorites)
-    .innerJoin(projects, eq(projectFavorites.projectId, projects.id))
-    .leftJoin(users, eq(projects.authorId, users.id))
+    .from(favorites)
+    .innerJoin(posts, eq(favorites.postId, posts.id))
+    .innerJoin(projects, eq(projects.id, posts.id))
+    .leftJoin(users, eq(posts.authorId, users.id))
     .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(projectFavorites.userId, userId))
-    .orderBy(desc(projectFavorites.createdAt))
+    .where(eq(favorites.userId, userId))
+    .orderBy(desc(favorites.createdAt))
     .all();
 
   return rows.map((row) => ({ ...mapProjectRow(row), favoritedAt: row.favoritedAt }));

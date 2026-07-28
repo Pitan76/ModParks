@@ -861,10 +861,16 @@ export const notifications = sqliteTable("notifications", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  /**
+   * 通知の種別。Post 統合に伴い、Project / Idea で分かれていた種別を統合した。
+   *   project_comment + idea_comment → comment
+   *   idea_like + project_favorite   → favorite
+   * 対象が Project か Idea かは payload.kind で判別する。
+   */
   type: text("type", {
     enum: [
-      "new_version", "new_project", "project_comment", "idea_comment",
-      "idea_like", "project_favorite", "follow", "list_add", "comment_reply",
+      "new_version", "new_project", "comment", "favorite",
+      "follow", "list_add", "comment_reply",
     ],
   }).notNull(),
   /** 表示に必要な情報 (projectSlug, projectName, versionNumber 等)。type ごとに構造が異なる */

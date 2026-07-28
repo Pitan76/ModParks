@@ -1,4 +1,4 @@
-import { projects, userProfiles } from "@/db/schema";
+import { posts, projects, userProfiles } from "@/db/schema";
 import { eq, desc, and, or, like, sql, inArray, type SQL } from "drizzle-orm";
 
 type ContentType = "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
@@ -31,13 +31,13 @@ export function buildProjectSearchConditions(params: ProjectSearchParams): SQL[]
   const conditions: SQL[] = [];
 
   if (authorId) {
-    conditions.push(eq(projects.authorId, authorId));
+    conditions.push(eq(posts.authorId, authorId));
   } else if (authorUsername) {
     conditions.push(eq(userProfiles.username, authorUsername));
-    conditions.push(eq(projects.status, "public"));
+    conditions.push(eq(posts.visibility, "public"));
   } else {
     // 検索・一覧表示には「public」のみ表示（unlisted, private, draft は表示しない）
-    conditions.push(eq(projects.status, "public"));
+    conditions.push(eq(posts.visibility, "public"));
   }
 
   if (types && types.length > 0) {
@@ -48,9 +48,9 @@ export function buildProjectSearchConditions(params: ProjectSearchParams): SQL[]
     const keywords = q.trim().split(/\s+/).filter(Boolean);
     if (keywords.length > 0) {
       const keywordConditions = keywords.map((kw) => {
-        const kwConds: SQL[] = [like(projects.name, `%${kw}%`)];
+        const kwConds: SQL[] = [like(posts.title, `%${kw}%`)];
         if (includeDesc) {
-          kwConds.push(like(projects.description, `%${kw}%`));
+          kwConds.push(like(posts.body, `%${kw}%`));
         }
         if (includeAuthor) {
           kwConds.push(like(userProfiles.username, `%${kw}%`));
@@ -92,6 +92,6 @@ export function resolveProjectOrderBy(sort: "downloads" | "newest" | "updated", 
   if (sort === "downloads") {
     return includeExtDl ? desc(projects.totalDownloads) : desc(projects.downloads);
   }
-  if (sort === "newest") return desc(projects.createdAt);
-  return desc(projects.updatedAt);
+  if (sort === "newest") return desc(posts.createdAt);
+  return desc(posts.updatedAt);
 }

@@ -1,8 +1,10 @@
 import { getDatabase } from "@/lib/db";
-import { projects, projectTags, users, userProfiles, versions, ideas } from "@/db/schema";
+import { posts, projects, projectTags, users, userProfiles, versions } from "@/db/schema";
 import { eq, desc, and, or, sql, isNull, getTableColumns } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
 import { mapProjectRow } from "@/lib/queries/projectRow";
+import { toProjectPost } from "@/lib/queries/postRow";
 
 type GetProjectsParams = {
   q?: string;
@@ -43,21 +45,25 @@ export const getProjects = async (params: GetProjectsParams) => {
     if (calculateTotal) {
       const countResult = await db
         .select({ count: sql<number>`count(*)` })
-        .from(projects)
-        .leftJoin(users, eq(projects.authorId, users.id))
+        .from(posts)
+        .innerJoin(projects, eq(projects.id, posts.id))
+        .leftJoin(users, eq(posts.authorId, users.id))
         .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
         .where(conditions.length > 0 ? and(...conditions) : undefined)
         .get();
       totalCount = countResult?.count || 0;
     }
 
-    const { description, ...restProjects } = getTableColumns(projects);
+    // 一覧では本文全体を運ばず先頭のみ返す。body は posts 側にある
+    const { body, ...restPosts } = getTableColumns(posts);
     rows = await db
       .select({
         project: {
-          ...restProjects,
-          description: sql<string>`SUBSTR(${projects.description}, 1, 1200) || CASE WHEN LENGTH(${projects.description}) > 1200 THEN '...' ELSE '' END`,
-          tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = projects.id)`
+          ...restPosts,
+          // projects.id は posts.id と同じ値なので、後勝ちで上書きされても問題ない
+          ...getTableColumns(projects),
+          body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
+          tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`
         },
         author: {
           username: userProfiles.username,
@@ -65,8 +71,9 @@ export const getProjects = async (params: GetProjectsParams) => {
           avatarUrl: userProfiles.avatarUrl,
         }
       })
-      .from(projects)
-      .leftJoin(users, eq(projects.authorId, users.id))
+      .from(posts)
+      .innerJoin(projects, eq(projects.id, posts.id))
+      .leftJoin(users, eq(posts.authorId, users.id))
       .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(orderByExpr)
@@ -93,26 +100,35 @@ export const getProjects = async (params: GetProjectsParams) => {
 export const getProjectBySlug = async (slug: string) => {
   const db = await getDatabase();
 
+  // 元になった Idea のタイトルも posts にあるため、posts をもう一度別名で join する
+  const sourceIdeaPost = alias(posts, "source_idea_post");
+
   const row = await db
     .select({
-      project: projects,
+      posts: posts,
+      projects: projects,
       author: {
         username: userProfiles.username,
         displayName: userProfiles.displayName,
         avatarUrl: userProfiles.avatarUrl,
       },
-      sourceIdeaTitle: ideas.title,
+      sourceIdeaTitle: sourceIdeaPost.title,
     })
-    .from(projects)
-    .leftJoin(users, eq(projects.authorId, users.id))
+    .from(posts)
+    .innerJoin(projects, eq(projects.id, posts.id))
+    .leftJoin(users, eq(posts.authorId, users.id))
     .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .leftJoin(ideas, eq(projects.sourceIdeaId, ideas.id))
-    .where(or(eq(projects.slug, slug), eq(projects.previousSlug, slug)))
+    .leftJoin(sourceIdeaPost, eq(projects.sourceIdeaId, sourceIdeaPost.id))
+    .where(and(
+      eq(posts.kind, "project"),
+      or(eq(posts.slug, slug), eq(posts.previousSlug, slug)),
+    ))
     .get();
 
   if (!row) return null;
 
-  const tagsRows = await db.select().from(projectTags).where(eq(projectTags.projectId, row.project.id)).all();
+  const project = toProjectPost(row);
+  const tagsRows = await db.select().from(projectTags).where(eq(projectTags.projectId, project.id)).all();
   const versionsRows = await db.select({
     id: versions.id,
     versionNumber: versions.versionNumber,
@@ -126,15 +142,15 @@ export const getProjectBySlug = async (slug: string) => {
     projectId: versions.projectId,
     fileUrl: versions.fileUrl,
     fileSha256: versions.fileSha256,
-  }).from(versions).where(and(eq(versions.projectId, row.project.id), isNull(versions.archivedAt))).orderBy(desc(versions.createdAt)).limit(20).all();
+  }).from(versions).where(and(eq(versions.projectId, project.id), isNull(versions.archivedAt))).orderBy(desc(versions.createdAt)).limit(20).all();
 
   return {
-    ...row.project,
+    ...project,
     author: row.author,
     sourceIdeaTitle: row.sourceIdeaTitle,
     tags: tagsRows.map((t) => t.tag),
     versions: versionsRows,
-    redirectSlug: row.project.slug !== slug ? row.project.slug : undefined,
+    redirectSlug: project.slug !== slug ? project.slug : undefined,
   };
 };
 
@@ -152,8 +168,9 @@ export const getUserProjectStats = async (authorId: string) => {
       modrinthDownloads: sql<number>`sum(COALESCE(json_extract(${projects.externalDownloads}, '$.modrinth'), 0))`,
       curseforgeDownloads: sql<number>`sum(COALESCE(json_extract(${projects.externalDownloads}, '$.curseforge'), 0))`,
     })
-    .from(projects)
-    .where(and(eq(projects.authorId, authorId), eq(projects.status, "public")))
+    .from(posts)
+    .innerJoin(projects, eq(projects.id, posts.id))
+    .where(and(eq(posts.authorId, authorId), eq(posts.visibility, "public")))
     .get();
 
   return {
