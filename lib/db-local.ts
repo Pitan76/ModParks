@@ -40,8 +40,22 @@ export const createLocalSqliteDb = async () => {
         return { rows: [] };
       }
 
-      // sqlite-proxy は値の配列を期待するため、行オブジェクトを列順の配列へ変換する
-      const rows = stmt.all(...params).map((row: Record<string, unknown>) => Object.values(row));
+      // sqlite-proxy は値の配列を期待するため、行オブジェクトを列順の配列へ変換する。
+      //
+      // ⚠ Object.values(row) を使ってはいけない。
+      // node:sqlite は行をオブジェクトで返すため、SELECT に同名の列が複数あると
+      // （例: posts.id と users.id を同時に取る join）キーが衝突して 1 つに潰れ、
+      // 配列の要素数が SQL の列数より少なくなる。sqlite-proxy は位置で値を
+      // 読むので、以降の列が 1 つずつずれて別のカラムの値が入る。
+      // 本番の D1 ドライバは値の配列を直接返すためこの問題は起きず、
+      // ローカル開発時だけ再現する。
+      //
+      // 対策として、列名ではなく列の位置で値を取り出す。
+      stmt.setReturnArrays?.(true);
+      const raw = stmt.all(...params) as unknown[];
+      const rows = raw.map((row) =>
+        Array.isArray(row) ? row : Object.values(row as Record<string, unknown>)
+      );
       if (method === "get") return { rows: rows[0] ?? [] };
       return { rows };
     },

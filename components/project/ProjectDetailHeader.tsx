@@ -21,7 +21,7 @@ export type ProjectDetailHeaderProps = {
     name: string;
     slug: string;
     type: string;
-    status: string;
+    visibility: string;
     description: string;
     iconUrl?: string | null;
     downloads: number;
@@ -93,9 +93,9 @@ const ProjectDetailHeader = ({
                 {p.name}
               </Typography>
               <ProjectTypeBadge type={p.type} size="small" />
-              {p.status !== "public" && (
+              {p.visibility !== "public" && (
                 <Chip
-                  label={tProject(`status.${p.status}`)}
+                  label={tProject(`status.${p.visibility}`)}
                   color="warning"
                   size="small"
                   variant="outlined"
