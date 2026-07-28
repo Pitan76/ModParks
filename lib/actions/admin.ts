@@ -237,8 +237,8 @@ async function toggleWaf(enable: boolean, topSlug = "") {
     : `(http.request.uri.path contains "/api/download")`;
 
   const body = enable
-    ? { enabled: true, expression }
-    : { enabled: false, expression: `(http.request.uri.path eq "/dev/null")` };
+    ? { enabled: true, expression, action: "managed_challenge" }
+    : { enabled: false, expression: `(http.request.uri.path eq "/dev/null")`, action: "managed_challenge" };
 
   try {
     const res = await fetch(url, {
