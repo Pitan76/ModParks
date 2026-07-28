@@ -4,6 +4,7 @@ import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { findProjectPostById } from "@/lib/queries/post";
 
 /**
  * 外部プラットフォーム（Modrinth, CurseForge）からプロジェクトのダウンロード数を同期するシステム関数
@@ -139,7 +140,7 @@ export const syncExternalProjectDataSystem = async (db: any, project: any, setti
 export const syncExternalProjectData = async (projectId: string) => {
   const { db, session } = await getAuthenticatedDb();
   
-  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project) throw new Error("Project not found");
 
   const { assertProjectAccess } = await import("@/lib/auth-helpers");

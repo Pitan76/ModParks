@@ -1,5 +1,5 @@
 import { getDb, getD1 } from "@/lib/db";
-import { users, userProfiles, userSettings, userFollows, developerSubscriptions, profilePins, projects, ideas, ideaLikes, ideaComments } from "@/db/schema";
+import { users, userProfiles, userSettings, userFollows, developerSubscriptions, profilePins, posts, projects, ideas, favorites, comments } from "@/db/schema";
 import { eq, and, sql, inArray, desc, getTableColumns } from "drizzle-orm";
 import { getProjects, getUserProjectStats } from "@/lib/actions/projectQuery";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
@@ -118,16 +118,17 @@ async function getPinnedItems(userId: string, isOwner: boolean): Promise<PinnedI
   const projectIds = pins.filter((p) => p.itemType === "project").map((p) => p.itemId);
   const ideaIds = pins.filter((p) => p.itemType === "idea").map((p) => p.itemId);
 
-  const { description, ...restProjects } = getTableColumns(projects);
+  const { body, ...restPosts } = getTableColumns(posts);
 
   const [projectRows, ideaRows] = await Promise.all([
     projectIds.length
       ? db
           .select({
             project: {
-              ...restProjects,
-              description: sql<string>`SUBSTR(${projects.description}, 1, 1200) || CASE WHEN LENGTH(${projects.description}) > 1200 THEN '...' ELSE '' END`,
-              tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = projects.id)`,
+              ...restPosts,
+              ...getTableColumns(projects),
+              body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
+              tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`,
             },
             author: {
               username: userProfiles.username,
@@ -135,26 +136,28 @@ async function getPinnedItems(userId: string, isOwner: boolean): Promise<PinnedI
               avatarUrl: userProfiles.avatarUrl,
             },
           })
-          .from(projects)
-          .leftJoin(users, eq(projects.authorId, users.id))
+          .from(posts)
+          .innerJoin(projects, eq(projects.id, posts.id))
+          .leftJoin(users, eq(posts.authorId, users.id))
           .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
           .where(
             isOwner
-              ? inArray(projects.id, projectIds)
-              : and(inArray(projects.id, projectIds), eq(projects.status, "public"))
+              ? inArray(posts.id, projectIds)
+              : and(inArray(posts.id, projectIds), eq(posts.visibility, "public"))
           )
           .all()
       : Promise.resolve([]),
     ideaIds.length
       ? db
           .select(ideaSelection())
-          .from(ideas)
-          .innerJoin(users, eq(ideas.authorId, users.id))
+          .from(posts)
+          .innerJoin(ideas, eq(ideas.id, posts.id))
+          .innerJoin(users, eq(posts.authorId, users.id))
           .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
           .where(
             isOwner
-              ? inArray(ideas.id, ideaIds)
-              : and(inArray(ideas.id, ideaIds), eq(ideas.visibility, "public"))
+              ? inArray(posts.id, ideaIds)
+              : and(inArray(posts.id, ideaIds), eq(posts.visibility, "public"))
           )
           .all()
       : Promise.resolve([]),
@@ -178,14 +181,15 @@ async function getPinnedItems(userId: string, isOwner: boolean): Promise<PinnedI
 
 function ideaSelection() {
   return {
-    id: ideas.id,
-    title: ideas.title,
-    content: ideas.content,
+    id: posts.id,
+    slug: posts.slug,
+    title: posts.title,
+    content: posts.body,
     status: ideas.status,
-    createdAt: ideas.createdAt,
+    createdAt: posts.createdAt,
     authorName: userProfiles.displayName,
-    likesCount: sql<number>`(SELECT count(*) FROM ${ideaLikes} WHERE ${ideaLikes.ideaId} = ${ideas.id})`,
-    commentsCount: sql<number>`(SELECT count(*) FROM ${ideaComments} WHERE ${ideaComments.ideaId} = ${ideas.id})`,
+    likesCount: sql<number>`(SELECT count(*) FROM ${favorites} WHERE ${favorites.postId} = ${posts.id})`,
+    commentsCount: sql<number>`(SELECT count(*) FROM ${comments} WHERE ${comments.postId} = ${posts.id})`,
   };
 }
 
@@ -198,15 +202,16 @@ async function getAuthorIdeas(userId: string, isOwner: boolean) {
 
   return db
     .select(ideaSelection())
-    .from(ideas)
-    .innerJoin(users, eq(ideas.authorId, users.id))
+    .from(posts)
+    .innerJoin(ideas, eq(ideas.id, posts.id))
+    .innerJoin(users, eq(posts.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(
       isOwner
-        ? eq(ideas.authorId, userId)
-        : and(eq(ideas.authorId, userId), eq(ideas.visibility, "public"))
+        ? eq(posts.authorId, userId)
+        : and(eq(posts.authorId, userId), eq(posts.visibility, "public"))
     )
-    .orderBy(desc(ideas.createdAt))
+    .orderBy(desc(posts.createdAt))
     .limit(30)
     .all();
 }
@@ -230,7 +235,7 @@ export async function getProfileContent(user: ProfileUser, viewerId: string | un
     showIdeas || isOwner ? getAuthorIdeas(user.id, isOwner) : Promise.resolve([] as AuthorIdea[]),
   ]);
 
-  const visibleProjects = allProjects.filter((p) => (isOwner ? true : p.status === "public"));
+  const visibleProjects = allProjects.filter((p) => (isOwner ? true : p.visibility === "public"));
 
   return {
     ...followState,

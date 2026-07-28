@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
 import { getDatabase } from "@/lib/db";
-import { ideas, users, userProfiles, ideaLikes, ideaComments } from "@/db/schema";
+import { posts, ideas, users, userProfiles, favorites, comments } from "@/db/schema";
 import { eq, sql, desc, or } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";
@@ -22,22 +22,24 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
   // Fetch ideas with author, like count, and comment count
   const allIdeas = await db
     .select({
-      id: ideas.id,
-      title: ideas.title,
-      content: ideas.content,
+      id: posts.id,
+      slug: posts.slug,
+      title: posts.title,
+      content: posts.body,
       status: ideas.status,
-      createdAt: ideas.createdAt,
+      createdAt: posts.createdAt,
       authorId: users.id,
       authorName: userProfiles.displayName,
       authorAvatar: userProfiles.avatarUrl,
-      likesCount: sql<number>`(SELECT count(*) FROM ${ideaLikes} WHERE ${ideaLikes.ideaId} = ${ideas.id})`,
-      commentsCount: sql<number>`(SELECT count(*) FROM ${ideaComments} WHERE ${ideaComments.ideaId} = ${ideas.id})`,
+      likesCount: sql<number>`(SELECT count(*) FROM ${favorites} WHERE ${favorites.postId} = ${posts.id})`,
+      commentsCount: sql<number>`(SELECT count(*) FROM ${comments} WHERE ${comments.postId} = ${posts.id})`,
     })
-    .from(ideas)
-    .innerJoin(users, eq(ideas.authorId, users.id))
+    .from(posts)
+    .innerJoin(ideas, eq(ideas.id, posts.id))
+    .innerJoin(users, eq(posts.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(or(eq(ideas.visibility, "public"), eq(ideas.authorId, session?.user?.id || "")))
-    .orderBy(desc(ideas.createdAt))
+    .where(and(eq(posts.kind, "idea"), or(eq(posts.visibility, "public"), eq(posts.authorId, session?.user?.id || ""))))
+    .orderBy(desc(posts.createdAt))
     .all();
 
   return (

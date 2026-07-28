@@ -6,6 +6,7 @@ import { projectDependencies, projects, projectMembers } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
+import { findProjectPostById, findProjectPostBySlug } from "@/lib/queries/post";
 
 export type DependencyType = "required" | "optional" | "incompatible" | "embedded";
 
@@ -67,10 +68,10 @@ export async function getProjectDependents(projectId: string) {
 export async function addProjectDependencyBySlug(projectId: string, targetSlug: string, dependencyType: DependencyType) {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project) throw new Error("Project not found");
 
-  const targetProject = await db.select().from(projects).where(eq(projects.slug, targetSlug)).get();
+  const targetProject = await findProjectPostBySlug(db, targetSlug);
   if (!targetProject) throw new Error("Target project not found");
 
   if (projectId === targetProject.id) {
@@ -106,7 +107,7 @@ export async function addProjectDependencyBySlug(projectId: string, targetSlug: 
 export async function addExternalProjectDependency(projectId: string, externalName: string, externalUrl: string, dependencyType: DependencyType) {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+  const project = await findProjectPostById(db, projectId);
   if (!project) throw new Error("Project not found");
 
   const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();

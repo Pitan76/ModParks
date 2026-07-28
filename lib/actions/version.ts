@@ -14,6 +14,7 @@ import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
+import { findProjectPostBySlug } from "@/lib/queries/post";
 
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
@@ -22,11 +23,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.slug, projectSlug))
-    .get();
+  const project = await findProjectPostBySlug(db, projectSlug);
 
   if (!project) throw new Error("Project not found");
   await assertProjectAccess(db, project, session);
@@ -97,7 +94,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
+  const project = await findProjectPostBySlug(db, projectSlug);
   if (!project) throw new Error("Project not found");
 
   await assertProjectAccess(db, project, session);
@@ -183,11 +180,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
 export const deleteVersion = async (versionId: string, projectSlug: string) => {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.slug, projectSlug))
-    .get();
+  const project = await findProjectPostBySlug(db, projectSlug);
 
   if (!project) return { error: "Project not found" };
 
@@ -231,11 +224,7 @@ export const deleteVersion = async (versionId: string, projectSlug: string) => {
 export const setVersionArchived = async (versionId: string, projectSlug: string, archived: boolean) => {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.slug, projectSlug))
-    .get();
+  const project = await findProjectPostBySlug(db, projectSlug);
 
   if (!project) return { error: "Project not found" };
 

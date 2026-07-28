@@ -7,6 +7,7 @@ import { isAllowedExternalUrl } from "@/lib/validations";
 import { extractRecipes, type JarSource } from "@/lib/services/jar";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { findProjectPostBySlug } from "@/lib/queries/post";
 
 /**
  * JARファイル内のクラフティングレシピを抽出し、CDN/R2にアップロードして
@@ -15,11 +16,7 @@ import { revalidatePath } from "next/cache";
 export const extractRecipesFromVersion = async (versionId: string, projectSlug: string) => {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.slug, projectSlug))
-    .get();
+  const project = await findProjectPostBySlug(db, projectSlug);
 
   if (!project) return { error: "Project not found" };
 

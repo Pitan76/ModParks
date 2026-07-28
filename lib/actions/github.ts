@@ -20,6 +20,7 @@ import {
   normalizeGithubRepo,
   type GithubRelease,
 } from "@/lib/utils/github";
+import { findProjectPostBySlug } from "@/lib/queries/post";
 
 /** Worker のメモリ制約を踏まえたダウンロード/解析の上限 */
 const MAX_ASSET_SIZE = 50 * 1024 * 1024; // 50MB
@@ -41,7 +42,7 @@ export async function listGithubReleases(projectSlug: string): Promise<
 > {
   try {
     const { db, session } = await getAuthenticatedDb();
-    const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
+    const project = await findProjectPostBySlug(db, projectSlug);
     if (!project) return { error: "Project not found" };
     await assertProjectAccess(db, project, session);
     if (!project.githubRepo) return { error: "No GitHub repository linked to this project." };
@@ -179,7 +180,7 @@ export async function importGithubRelease(
 ): Promise<{ success: true; versionId: string; versionNumber: string } | { error: string }> {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
+  const project = await findProjectPostBySlug(db, projectSlug);
   if (!project) return { error: "Project not found" };
   await assertProjectAccess(db, project, session);
 

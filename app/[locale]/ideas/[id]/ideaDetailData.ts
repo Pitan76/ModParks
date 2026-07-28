@@ -1,19 +1,19 @@
 import { getDb, getD1 } from "@/lib/db";
-import { ideas, ideaLikes, ideaComments, users, userProfiles, versions, versionIdeas, projects } from "@/db/schema";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { posts, ideas, favorites, comments as commentsTable, users, userProfiles, versions, versionIdeas, projects } from "@/db/schema";
+import { eq, and, or, sql, desc } from "drizzle-orm";
 
 export async function getIdeaMeta(id: string) {
   const d1 = await getD1();
   const db = getDb(d1);
   return db
     .select({
-      title: ideas.title,
-      content: ideas.content,
-      contentFormat: ideas.contentFormat,
-      visibility: ideas.visibility,
+      title: posts.title,
+      content: posts.body,
+      contentFormat: posts.bodyFormat,
+      visibility: posts.visibility,
     })
-    .from(ideas)
-    .where(eq(ideas.id, id))
+    .from(posts)
+    .where(and(eq(posts.kind, "idea"), or(eq(posts.slug, id), eq(posts.previousSlug, id))))
     .get();
 }
 
@@ -55,14 +55,15 @@ function fetchLinked(db: ReturnType<typeof getDb>, id: string) {
     .select({
       versionId: versions.id,
       versionNumber: versions.versionNumber,
-      projectId: projects.id,
-      projectName: projects.name,
-      projectSlug: projects.slug,
-      projectDescription: projects.description,
+      projectId: posts.id,
+      projectName: posts.title,
+      projectSlug: posts.slug,
+      projectDescription: posts.body,
     })
     .from(versionIdeas)
     .innerJoin(versions, eq(versionIdeas.versionId, versions.id))
     .innerJoin(projects, eq(versions.projectId, projects.id))
+    .innerJoin(posts, eq(posts.id, projects.id))
     .where(eq(versionIdeas.ideaId, id))
     .all();
 }
@@ -70,12 +71,13 @@ function fetchLinked(db: ReturnType<typeof getDb>, id: string) {
 function fetchSource(db: ReturnType<typeof getDb>, id: string) {
   return db
     .select({
-      projectId: projects.id,
-      projectName: projects.name,
-      projectSlug: projects.slug,
-      projectDescription: projects.description,
+      projectId: posts.id,
+      projectName: posts.title,
+      projectSlug: posts.slug,
+      projectDescription: posts.body,
     })
     .from(projects)
+    .innerJoin(posts, eq(posts.id, projects.id))
     .where(eq(projects.sourceIdeaId, id))
     .all();
 }
@@ -86,54 +88,62 @@ export async function getIdeaDetail(id: string, userId?: string) {
 
   const ideaData = await db
     .select({
-      id: ideas.id,
-      title: ideas.title,
-      content: ideas.content,
-      contentFormat: ideas.contentFormat,
+      id: posts.id,
+      slug: posts.slug,
+      title: posts.title,
+      content: posts.body,
+      contentFormat: posts.bodyFormat,
       status: ideas.status,
-      visibility: ideas.visibility,
-      createdAt: ideas.createdAt,
+      visibility: posts.visibility,
+      createdAt: posts.createdAt,
       authorId: users.id,
       authorName: userProfiles.displayName,
       authorAvatar: userProfiles.avatarUrl,
       authorUsername: userProfiles.username,
     })
-    .from(ideas)
-    .innerJoin(users, eq(ideas.authorId, users.id))
+    .from(posts)
+    .innerJoin(ideas, eq(ideas.id, posts.id))
+    .innerJoin(users, eq(posts.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(ideas.id, id))
+    .where(and(eq(posts.kind, "idea"), or(eq(posts.slug, id), eq(posts.previousSlug, id))))
     .get();
 
   if (!ideaData) return null;
 
+  // 以降は slug ではなく実体の id で引く
+  const postId = ideaData.id;
+
   const [likesData, userLike] = await Promise.all([
-    db.select({ count: sql<number>`count(*)` }).from(ideaLikes).where(eq(ideaLikes.ideaId, id)).get(),
+    db.select({ count: sql<number>`count(*)` }).from(favorites).where(eq(favorites.postId, postId)).get(),
     userId
-      ? db.select().from(ideaLikes).where(and(eq(ideaLikes.ideaId, id), eq(ideaLikes.userId, userId))).get()
+      ? db.select().from(favorites).where(and(eq(favorites.postId, postId), eq(favorites.userId, userId))).get()
       : null,
   ]);
 
   const comments = await db
     .select({
-      id: ideaComments.id,
-      content: ideaComments.content,
-      contentFormat: ideaComments.contentFormat,
-      createdAt: ideaComments.createdAt,
-      updatedAt: ideaComments.updatedAt,
-      parentId: ideaComments.parentId,
-      authorId: ideaComments.authorId,
+      id: commentsTable.id,
+      content: commentsTable.content,
+      contentFormat: commentsTable.contentFormat,
+      createdAt: commentsTable.createdAt,
+      updatedAt: commentsTable.updatedAt,
+      parentId: commentsTable.parentId,
+      authorId: commentsTable.authorId,
       authorName: userProfiles.displayName,
       authorAvatar: userProfiles.avatarUrl,
       authorUsername: userProfiles.username,
     })
-    .from(ideaComments)
-    .innerJoin(users, eq(ideaComments.authorId, users.id))
+    .from(commentsTable)
+    .innerJoin(users, eq(commentsTable.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(ideaComments.ideaId, id))
-    .orderBy(desc(ideaComments.createdAt))
+    .where(eq(commentsTable.postId, postId))
+    .orderBy(desc(commentsTable.createdAt))
     .all();
 
-  const [linkedVersions, sourceIdeaProjects] = await Promise.all([fetchLinked(db, id), fetchSource(db, id)]);
+  const [linkedVersions, sourceIdeaProjects] = await Promise.all([
+    fetchLinked(db, postId),
+    fetchSource(db, postId),
+  ]);
 
   return {
     ideaData,
