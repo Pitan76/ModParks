@@ -59,7 +59,7 @@ const TopPage = async ({ params }: TopPageProps) => {
           </LinkButton>
         </Box>
 
-        <HomeProjectList projects={newProjects as any} />
+        <HomeProjectList projects={newProjects} />
       </Container>
 
       {/* 広告差し込み予約 */}
@@ -83,7 +83,7 @@ const TopPage = async ({ params }: TopPageProps) => {
           </LinkButton>
         </Box>
 
-        <HomeProjectList projects={updatedProjects as any} />
+        <HomeProjectList projects={updatedProjects} />
       </Container>
     </Box>
   );

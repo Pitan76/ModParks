@@ -133,7 +133,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
 
       {/* プロジェクト一覧 */}
       <ProjectCardList
-        projects={filtered as any}
+        projects={filtered}
         storageKey="projectsListLayout"
         headerLeft={
           <Typography variant="body2" color="text.secondary">

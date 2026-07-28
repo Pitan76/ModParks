@@ -113,7 +113,7 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
         <Grid container spacing={3}>
           {collection.items.map(p => (
             <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={p as any} layout="grid" />
+              <ProjectCard project={p} layout="grid" />
             </Grid>
           ))}
         </Grid>

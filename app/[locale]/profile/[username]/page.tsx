@@ -119,7 +119,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
       )}
 
       <ProjectCardList
-        projects={visibleProjects as any}
+        projects={visibleProjects}
         storageKey="profileProjectsLayout"
         defaultLayout="grid"
         headerLeft={
@@ -163,7 +163,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
       )}
 
       <ProjectCardList
-        projects={favoritedProjects as any}
+        projects={favoritedProjects}
         storageKey="profileFavoritesLayout"
         defaultLayout="grid"
         headerLeft={
@@ -183,7 +183,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
             {isOwner && <IdeasVisibilityToggle initial={showIdeas} />}
           </Box>
           {authorIdeas.length > 0 ? (
-            <IdeaCardList ideas={authorIdeas as any} />
+            <IdeaCardList ideas={authorIdeas} />
           ) : (
             <Alert severity="info">{t("noIdeasPosted")}</Alert>
           )}
