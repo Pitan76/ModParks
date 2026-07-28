@@ -1101,3 +1101,50 @@ export const ddosState = sqliteTable("ddos_state", {
 
 export type DdosStateModel = typeof ddosState.$inferSelect;
 
+/**
+ * DDoS 防護の状態遷移の監査ログ。
+ *
+ * ddos_state は「今どうなっているか」しか持たず、Discord 通知も流れて消えるため、
+ * 「いつ・何をきっかけに防護が入り、いつ外れたか」を後から追える記録をここに残す。
+ *
+ * 他の監査ログと同様、users への外部キーは張らず操作時点のメールを非正規化して保持する。
+ * 自動検知や Cron による遷移では performed_by は null（システム実行）になる。
+ */
+export const ddosAudit = sqliteTable("ddos_audit", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  action: text("action", {
+    enum: [
+      /** 自動検知による WAF 有効化（UNDER_ATTACK 突入） */
+      "auto_activate",
+      /** 攻撃検知したが Cloudflare API に失敗し COOLDOWN へ退避 */
+      "auto_activate_failed",
+      /** 防護期限切れによる Cron の自動解除 */
+      "auto_deactivate",
+      /** 自動解除の Cloudflare API 失敗（UNDER_ATTACK へ差し戻し） */
+      "auto_deactivate_failed",
+      /** 管理者による手動の防護有効化 */
+      "manual_activate",
+      /** 管理者による手動の防護解除 */
+      "manual_deactivate",
+      /** ACTIVATING / DEACTIVATING でスタックした状態の Cron による復旧 */
+      "recover",
+    ],
+  }).notNull(),
+  /** 遷移後の ddos_state.current_state */
+  state: text("state").notNull(),
+  /** 検知メトリクス・対象 slug・防護時間・エラー内容などを JSON で保持する */
+  detail: text("detail", { mode: "json" }).$type<Record<string, unknown>>(),
+  /** 操作者の users.id。自動検知・Cron による遷移では null */
+  performedBy: text("performed_by"),
+  performedByEmail: text("performed_by_email"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  actionIdx: index("ddos_audit_action_idx").on(table.action, table.createdAt),
+}));
+
+export type DdosAudit = typeof ddosAudit.$inferSelect;
+
