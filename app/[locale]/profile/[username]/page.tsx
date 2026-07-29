@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PublicProfileProps) {
   const title = `${user.displayName || user.username} (@${user.username})`;
   const description = user.bio || `${user.displayName || user.username} のプロフィールページです。`;
   const imageUrl = user.avatarUrl || SITE_URL + "/icon.png";
-  const image = { url: imageUrl, width: 256, height: 256, alt: `${user.username} Avatar` };
+  const image = { url: imageUrl, width: 256, height: 256 };
 
   return {
     title,

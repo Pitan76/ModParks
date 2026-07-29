@@ -37,9 +37,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
   const { locale, slug } = await params;
   const project = await getProjectBySlug(slug);
 
-  if (!project) {
-    return { title: "Not Found" };
-  }
+  if (!project) return { title: "Not Found" };
 
   const title = `${project.title}`;
   const plainDesc = toPlainDescription(project.body);
@@ -59,7 +57,6 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
           url: imageUrl,
           width: 512,
           height: 512,
-          alt: `${project.title} Icon`,
         },
       ],
     },
@@ -72,7 +69,6 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
           url: imageUrl,
           width: 512,
           height: 512,
-          alt: `${project.title} Icon`,
         },
       ],
     },
