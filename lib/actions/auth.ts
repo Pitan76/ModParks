@@ -221,9 +221,11 @@ export async function requestPasswordReset(formData: FormData) {
     })
   });
 
+  // 送信失敗もサーバーログに留め、呼び出し側には常に success を返す。
+  // ここでエラーを返すと「エラーが出た＝そのメールは登録済み」と判別でき、
+  // 未登録アドレスが常に success になる分だけメール列挙が成立してしまうため。
   if (!res.ok) {
     console.error("Failed to send reset email", await res.text());
-    return { error: "failedToSendEmail" };
   }
 
   return { success: true };

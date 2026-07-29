@@ -33,7 +33,6 @@ export default function ForgotPasswordPage() {
       
       if (res?.error) {
         if (res.error === "TOO_MANY_REQUESTS") setError(tAuth("login.errors.tooManyRequests"));
-        else if (res.error === "failedToSendEmail") setError(tAuth("login.errors.failedToSend"));
         else setError(tAuth("login.errors.unexpected"));
       } else {
         setSuccess(true);
