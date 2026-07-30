@@ -402,7 +402,6 @@
     "goToManage": "Go to Project Management",
     "sourceIdeaTooltip": "Project created from this idea",
     "manageTitle": "Manage Projects",
-    "manageDescription": "Manage all your projects — change status, bulk delete, and more.",
     "batchImport": "Bulk Import",
     "batch": {
       "changeStatus": "Change Status",
@@ -440,7 +439,6 @@
   },
   "Version": {
     "manager": {
-      "description": "Manage and list uploaded versions (files).",
       "addVersion": "Add Version",
       "columns": {
         "version": "Version",
@@ -936,7 +934,6 @@
       "ddosStateTransition": "Transitioning...",
       "minutes": "min",
       "ddosSettingsTitle": "Automated Defense Thresholds",
-      "ddosSettingsDesc": "Tune DDoS detection sensitivity at the edge.",
       "ddosThresholdRequests": "Requests Threshold (10s / all isolates)",
       "ddosThresholdRequestsHelp": "Attack evaluation is triggered when request count exceeds this threshold",
       "ddosThresholdDownloadRatio": "Download Ratio Threshold",

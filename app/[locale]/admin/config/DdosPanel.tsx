@@ -219,10 +219,7 @@ export default function DdosPanel({
       {/* --- Section 2: DDoS Threshold Settings --- */}
       <Card>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 1 }}>{t("ddosSettingsTitle")}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-            {t("ddosSettingsDesc")}
-          </Typography>
+          <Typography variant="h6" sx={{ mb: 4 }}>{t("ddosSettingsTitle")}</Typography>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3, maxWidth: 640 }}>
             <TextField

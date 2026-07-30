@@ -44,11 +44,8 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
 
       <Box sx={{ mb: 4, display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between", gap: 2 }}>
         <Box sx={{ minWidth: 0 }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }} gutterBottom>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }}>
             {tProject("manageTitle")}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {tProject("manageDescription")}
           </Typography>
         </Box>
 

@@ -8,6 +8,9 @@ import { eq } from "drizzle-orm";
 import SettingsClient from "@/components/settings/SettingsClientLazy";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import Link from "next/link";
 
 export const generateMetadata = async ({ params }: { params: Promise<{ locale: string }> }) => {
   const { locale } = await params;
@@ -72,6 +75,17 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
         notificationPrefs={settingsRecord?.notificationPrefs ?? null}
         error={resolvedSearchParams.error as string | undefined}
       />
+
+      <Card sx={{ mt: 4 }}>
+        <CardActionArea component={Link} href={`/${locale}/settings/rewards`} sx={{ p: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            {tReward("title")}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {tReward("description")}
+          </Typography>
+        </CardActionArea>
+      </Card>
     </Container>
   );
 };

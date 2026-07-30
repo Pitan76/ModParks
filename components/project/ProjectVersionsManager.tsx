@@ -1,7 +1,6 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
@@ -48,15 +47,12 @@ const ProjectVersionsManager = ({
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           alignItems: { xs: "stretch", md: "center" },
           gap: 2,
           mb: 3,
         }}
       >
-        <Typography variant="body2" color="text.secondary">
-          {t("manager.description")}
-        </Typography>
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={1}
