@@ -2,12 +2,11 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import { redirect } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
+import SettingsSection from "@/components/settings/SettingsSection";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { getPointBalance, listPointTransactions } from "@/lib/services/points";
 import { getCreatorRewardOptIn } from "@/lib/actions/creatorReward";
@@ -20,32 +19,21 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: t("title") };
 }
 
-export default async function RewardSettingsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
+export default async function RewardSettingsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect(`/${locale}/login`);
-
   const t = await getTranslations("CreatorReward");
+  const userId = session!.user!.id!;
 
   const [settings, balance, transactions, optIn] = await Promise.all([
     getAppSettings(),
-    getPointBalance(session.user.id),
-    listPointTransactions(session.user.id),
-    getCreatorRewardOptIn(session.user.id),
+    getPointBalance(userId),
+    listPointTransactions(userId),
+    getCreatorRewardOptIn(userId),
   ]);
 
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
-      <Typography variant="h4" sx={{ mb: 1, fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }}>
-        {t("title")}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+    <SettingsSection title={t("title")}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 4, mt: -2 }}>
         {t("description")}
       </Typography>
 
@@ -92,6 +80,6 @@ export default async function RewardSettingsPage({
           <PointHistoryTable transactions={transactions} />
         </CardContent>
       </Card>
-    </Container>
+    </SettingsSection>
   );
 }

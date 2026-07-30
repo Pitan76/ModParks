@@ -1369,6 +1369,9 @@
       "pushDisabled": "Push notifications disabled.",
       "pushDenied": "Notification permission is blocked. Please allow it in your browser settings.",
       "pushError": "Failed to configure push notifications."
+    },
+    "rewards": {
+      "title": "Creator Reward"
     }
   },
   "Legal": {

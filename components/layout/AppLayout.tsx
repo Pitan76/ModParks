@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";
 import AdminSidebar from "./AdminSidebar";
+import SettingsSidebar from "./SettingsSidebar";
 import AppHeader from "./AppHeader";
 import OnboardingTour from "./OnboardingTour";
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
@@ -31,6 +32,7 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname() || "";
   const isAdminPage = pathname.includes("/admin");
+  const isSettingsPage = pathname.includes("/settings");
   const tNav = useTranslations("Nav");
 
   useEffect(() => {
@@ -49,7 +51,9 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
     });
   };
 
-  const SidebarComponent = isAdminPage ? AdminSidebar : AppSidebar;
+  let SidebarComponent = AppSidebar;
+  if (isAdminPage) SidebarComponent = AdminSidebar;
+  else if (isSettingsPage) SidebarComponent = SettingsSidebar;
 
   return (
     <ContextMenuProvider>

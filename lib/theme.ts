@@ -269,9 +269,7 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
     MuiDivider: {
       styleOverrides: {
         root: { 
-          borderColor: isNewTheme 
-            ? (mode === "light" ? "#e0e0e0" : "#3c4043") 
-            : (mode === "light" ? "#e2e8f0" : "#334155") 
+          borderColor: mode === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.15)" 
         },
       },
     },
