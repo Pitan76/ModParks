@@ -1,0 +1,1 @@
+ALTER TABLE `user_settings` ADD `creator_reward_opt_in` integer DEFAULT false NOT NULL;
