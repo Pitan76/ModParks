@@ -39,7 +39,9 @@ export default async function PointHistoryTable({
         <TableBody>
           {transactions.map((tx) => (
             <TableRow key={tx.id}>
-              <TableCell>{format.dateTime(tx.createdAt, "short")}</TableCell>
+              <TableCell>
+                {format.dateTime(tx.createdAt, { dateStyle: "medium", timeStyle: "short" })}
+              </TableCell>
               <TableCell>{t(`txTypes.${tx.type}`)}</TableCell>
               <TableCell align="right" sx={{ color: tx.amount < 0 ? "error.main" : "success.main" }}>
                 {tx.amount > 0 ? `+${tx.amount}` : tx.amount}
