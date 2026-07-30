@@ -62,6 +62,14 @@ export default async function AdminConfigPage({ params }: { params: Promise<{ lo
           lastNormalAt: 0,
           updatedAt: 0,
         }} initialSettings={appSettings} />}
+        reward={
+          <AppSettingsGroupPanel
+            initialSettings={appSettings}
+            group="reward"
+            titleKey="rewardSettingsTitle"
+            descKey="rewardSettingsDesc"
+          />
+        }
       />
     </Box>
   );
