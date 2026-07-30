@@ -7,6 +7,7 @@ export async function getIdeaMeta(id: string) {
   const db = getDb(d1);
   return db
     .select({
+      authorId: posts.authorId,
       title: posts.title,
       content: posts.body,
       contentFormat: posts.bodyFormat,

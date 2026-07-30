@@ -34,10 +34,20 @@ interface VersionDetailPageProps {
 
 export async function generateMetadata({ params }: VersionDetailPageProps) {
   const { slug, versionId } = await params;
-  const project = await getProjectBySlug(slug);
-  const version = await getVersionById(versionId);
+  const [project, version, session] = await Promise.all([
+    getProjectBySlug(slug),
+    getVersionById(versionId),
+    auth(),
+  ]);
 
   if (!project || !version) {
+    return { title: "Not Found" };
+  }
+
+  const isOwner = session?.user?.id === project.authorId;
+  const isViewable = project.visibility === "public" || project.visibility === "unlisted" || isOwner;
+
+  if (!isViewable) {
     return { title: "Not Found" };
   }
 

@@ -35,9 +35,17 @@ interface ProjectDetailPageProps {
 
 export async function generateMetadata({ params }: ProjectDetailPageProps) {
   const { locale, slug } = await params;
-  const project = await getProjectBySlug(slug);
+  const [project, session] = await Promise.all([
+    getProjectBySlug(slug),
+    auth(),
+  ]);
 
   if (!project) return { title: "Not Found" };
+
+  const isOwner = session?.user?.id === project.authorId;
+  const isViewable = project.visibility === "public" || project.visibility === "unlisted" || isOwner;
+
+  if (!isViewable) return { title: "Not Found" };
 
   const title = `${project.title}`;
   const plainDesc = toPlainDescription(project.body);

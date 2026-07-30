@@ -22,8 +22,17 @@ import IdeaComments from "./IdeaComments";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { id, locale } = await params;
-  const idea = await getIdeaMeta(id);
-  if (!idea || idea.visibility !== "public") return { title: "Not Found" };
+  const [idea, session] = await Promise.all([
+    getIdeaMeta(id),
+    auth(),
+  ]);
+
+  if (!idea) return { title: "Not Found" };
+
+  const isOwner = session?.user?.id === idea.authorId;
+  const isViewable = idea.visibility === "public" || idea.visibility === "unlisted" || isOwner;
+
+  if (!isViewable) return { title: "Not Found" };
 
   const title = idea.title;
   const description = idea.content.length > 150 ? idea.content.substring(0, 150) + "..." : idea.content;
