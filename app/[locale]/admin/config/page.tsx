@@ -10,6 +10,7 @@ import { getDdosStateAction } from "@/lib/actions/admin";
 import ConfigClient from "./ConfigClientLazy";
 import ConfigTabs from "./ConfigTabs";
 import AppSettingsPanel from "./AppSettingsPanel";
+import AppSettingsGroupPanel from "./AppSettingsGroupPanel";
 import WorkerVarsPanel from "./WorkerVarsPanel";
 import SecretsPanel from "./SecretsPanel";
 import DdosPanel from "./DdosPanel";

@@ -14,6 +14,7 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
   spacing: isNewTheme ? 10 : 8,
   palette: {
     mode,
+    divider: mode === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.15)",
     ...(isNewTheme
       ? (mode === "light"
         ? {

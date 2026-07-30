@@ -164,9 +164,8 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
         slotProps={{ paper: { sx: { minWidth: 200 } } }}
       >
         {state?.items.map((item, index) => {
-          const dividerColor = theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.15)";
           if (item.type === "divider") {
-            return <Divider key={`divider-${index}`} sx={{ borderColor: dividerColor }} />;
+            return <Divider key={`divider-${index}`} />;
           }
           return (
             <MenuItem
@@ -199,7 +198,7 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
         })}
 
         {state?.includeBrowserItem && [
-          <Divider key="browser-divider" sx={{ borderColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.15)" }} />,
+          <Divider key="browser-divider" />,
           // JS からネイティブメニューは開けないため、Shift+右クリックを案内する項目
           <MenuItem key="browser-hint" onClick={() => {
             close();
