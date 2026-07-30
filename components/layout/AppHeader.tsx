@@ -251,6 +251,13 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
                 {t("dashboard")}
               </LinkMenuItem>
               <LinkMenuItem
+                href="/settings/rewards"
+                onClick={handleMenuClose}
+                id="user-menu-rewards"
+              >
+                {t("rewards")}
+              </LinkMenuItem>
+              <LinkMenuItem
                 href="/settings"
                 onClick={handleMenuClose}
                 id="user-menu-settings"

@@ -8,8 +8,6 @@ import { eq } from "drizzle-orm";
 import SettingsClient from "@/components/settings/SettingsClientLazy";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 
 export const generateMetadata = async ({ params }: { params: Promise<{ locale: string }> }) => {
   const { locale } = await params;
@@ -28,7 +26,6 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
   }
 
   const t = await getTranslations("Settings");
-  const tReward = await getTranslations("CreatorReward");
 
   const db = await getDatabase();
 
@@ -49,6 +46,7 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
       <Typography variant="h4" sx={{ mb: 4, fontWeight: 800, fontSize: { xs: "1.6rem", sm: "2.125rem" } }}>
         {t("title")}
       </Typography>
+
       <SettingsClient
         user={{
           username: profileRecord?.username || "",
@@ -75,17 +73,6 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
         notificationPrefs={settingsRecord?.notificationPrefs ?? null}
         error={resolvedSearchParams.error as string | undefined}
       />
-
-      <Card sx={{ mt: 4 }}>
-        <LinkCardActionArea href="/settings/rewards" sx={{ p: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            {tReward("title")}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {tReward("description")}
-          </Typography>
-        </LinkCardActionArea>
-      </Card>
     </Container>
   );
 };
