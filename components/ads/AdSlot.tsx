@@ -8,6 +8,8 @@ interface AdSlotProps {
   slot: string;
   /** 目安の高さ（px）。プレビュー枠の高さにも使う */
   minHeight?: number;
+  /** スマホ幅（xs）で非表示にするか。既定は非表示 */
+  hideOnMobile?: boolean;
 }
 
 /**
@@ -15,7 +17,11 @@ interface AdSlotProps {
  * モードに応じて、非表示 / 位置プレビュー / 実配信 を切り替える。
  * 現状 "on" の実配信はプレースホルダーのみで、配信機構は未接続。
  */
-export default async function AdSlot({ slot, minHeight = 90 }: AdSlotProps) {
+export default async function AdSlot({
+  slot,
+  minHeight = 90,
+  hideOnMobile = true,
+}: AdSlotProps) {
   const mode = getAdsMode();
   if (mode === "off") return null;
 
@@ -25,7 +31,7 @@ export default async function AdSlot({ slot, minHeight = 90 }: AdSlotProps) {
     <Box
       data-ad-slot={slot}
       sx={{
-        display: "flex",
+        display: hideOnMobile ? { xs: "none", sm: "flex" } : "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",

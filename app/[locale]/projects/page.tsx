@@ -104,7 +104,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         )}
       </Box>
 
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, display: { xs: "none", sm: "block" } }}>
         <AdSlot slot="projects-top" />
       </Box>
 

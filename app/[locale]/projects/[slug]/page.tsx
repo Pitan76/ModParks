@@ -229,7 +229,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         {/* ---- 右カラム: サイドバー ---- */}
         <Grid size={{ xs: 12, md: 4 }}>
           <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 3, display: { xs: "none", sm: "block" } }}>
             <AdSlot slot="project-sidebar" minHeight={250} />
           </Box>
         </Grid>

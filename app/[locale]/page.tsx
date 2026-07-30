@@ -63,7 +63,7 @@ const TopPage = async ({ params }: TopPageProps) => {
       </Container>
 
       {/* 広告差し込み予約 */}
-      <Container maxWidth="lg" sx={{ pb: 4 }}>
+      <Container maxWidth="lg" sx={{ pb: 4, display: { xs: "none", sm: "block" } }}>
         <AdSlot slot="home-mid" />
       </Container>
 
