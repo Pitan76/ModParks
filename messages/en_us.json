@@ -74,6 +74,32 @@
     "label": "Advertisement",
     "previewLabel": "Ad space (preview)"
   },
+  "CreatorReward": {
+    "title": "Creator Reward",
+    "description": "We share site revenue with creators as points. Each month's rewards are calculated from the previous month's settled revenue.",
+    "featureDisabled": "Creator Reward is currently paused. No points are calculated or granted until it resumes.",
+    "balance": "Current balance",
+    "points": "{count} pt",
+    "lifetimeEarned": "Total earned",
+    "lifetimeSpent": "Total spent",
+    "participation": "Participation",
+    "optInLabel": "Receive creator rewards",
+    "optInHelp": "Turning this off removes you from distribution. Points you receive can later be exchanged for gift cards and similar.",
+    "optInFailed": "Could not save your setting. Please try again later.",
+    "history": "Point history",
+    "noTransactions": "No transactions yet.",
+    "txDate": "Date",
+    "txType": "Type",
+    "txAmount": "Change",
+    "txReason": "Details",
+    "txTypes": {
+      "reward": "Reward",
+      "adjustment": "Adjustment",
+      "spend": "Spend",
+      "payout": "Payout",
+      "expire": "Expired"
+    }
+  },
   "Media": {
     "description": "Upload screenshots or add YouTube video URLs. Screenshots marked as 'Show in carousel' will be shown in the carousel at the top of the project page.",
     "upload": "Add image",
