@@ -165,8 +165,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
       <Divider sx={{ my: 4 }} />
 
       <Box>
-        <Typography variant="h6" sx={{ mb: 1 }}>{t("account.exportData")}</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.exportDataDesc")}</Typography>
+        <Typography variant="h6" sx={{ mb: 2 }}>{t("account.exportData")}</Typography>
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 4 }}>
           <Button variant="outlined" onClick={() => handleExportData("json")}>{t("account.exportJson")}</Button>
           <Button variant="outlined" onClick={() => handleExportData("csv")}>{t("account.exportCsv")}</Button>

@@ -1231,9 +1231,7 @@
     "posting": {
       "title": "投稿設定",
       "defaultProjectStatus": "デフォルトの公開状態",
-      "defaultProjectStatusDesc": "新しく作成するプロジェクトの初期公開状態を設定します。",
       "defaultLicense": "デフォルトのライセンス",
-      "defaultLicenseDesc": "新しく作成するプロジェクトの初期ライセンスを設定します。",
       "successUpdate": "投稿設定を更新しました"
     },
     "theme": {
@@ -1339,7 +1337,6 @@
       "setBtn": "設定する",
       "successSetPassword": "パスワードを設定しました",
       "exportData": "データのエクスポート",
-      "exportDataDesc": "アカウントに関するデータをダウンロードできます。",
       "exportJson": "JSON形式",
       "exportCsv": "CSV形式",
       "exportMd": "Markdown形式",
@@ -1347,7 +1344,6 @@
     },
     "notifications": {
       "title": "通知設定",
-      "description": "受け取る通知の種類を選択できます。",
       "successUpdate": "通知設定を更新しました。",
       "pushTitle": "プッシュ通知",
       "pushDescription": "この端末のブラウザ/ホーム画面アプリにプッシュ通知を届けます。iPhone はホーム画面に追加したアプリでのみ利用できます。",

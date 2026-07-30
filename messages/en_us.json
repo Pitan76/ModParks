@@ -1223,9 +1223,7 @@
     "posting": {
       "title": "Posting Settings",
       "defaultProjectStatus": "Default Visibility",
-      "defaultProjectStatusDesc": "Set the initial visibility status for newly created projects.",
       "defaultLicense": "Default License",
-      "defaultLicenseDesc": "Set the initial license for newly created projects.",
       "successUpdate": "Posting settings updated successfully"
     },
     "theme": {
@@ -1331,7 +1329,6 @@
       "setBtn": "Set Password",
       "successSetPassword": "Password has been set",
       "exportData": "Export Data",
-      "exportDataDesc": "You can download your account data in various formats.",
       "exportJson": "JSON Format",
       "exportCsv": "CSV Format",
       "exportMd": "Markdown Format",
@@ -1339,7 +1336,6 @@
     },
     "notifications": {
       "title": "Notifications",
-      "description": "Choose which types of notifications you want to receive.",
       "successUpdate": "Notification settings updated.",
       "pushTitle": "Push notifications",
       "pushDescription": "Deliver push notifications to this device's browser or home-screen app. On iPhone, this only works from an app added to the Home Screen.",

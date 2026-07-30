@@ -35,8 +35,7 @@ export default function PostingTab({ defaultProjectStatus, defaultLicense }: Pro
     <Box component="form" onSubmit={handleSubmit} sx={{ p: "2px" }}>
       {message && <Alert severity={message.type} sx={{ mb: 3 }}>{message.text}</Alert>}
 
-      <Typography variant="h6" sx={{ mb: 1 }}>{t("posting.defaultProjectStatus")}</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("posting.defaultProjectStatusDesc")}</Typography>
+      <Typography variant="h6" sx={{ mb: 2 }}>{t("posting.defaultProjectStatus")}</Typography>
       <Box sx={{ mb: 4, maxWidth: 300 }}>
         <FormSelect
           size="small"
@@ -51,8 +50,7 @@ export default function PostingTab({ defaultProjectStatus, defaultLicense }: Pro
         />
       </Box>
 
-      <Typography variant="h6" sx={{ mb: 1 }}>{t("posting.defaultLicense")}</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("posting.defaultLicenseDesc")}</Typography>
+      <Typography variant="h6" sx={{ mb: 2 }}>{t("posting.defaultLicense")}</Typography>
       <FormAutocomplete
         freeSolo
         options={LICENSE_OPTIONS as unknown as string[]}

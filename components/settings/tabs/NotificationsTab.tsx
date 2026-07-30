@@ -88,8 +88,7 @@ export default function NotificationsTab({ initialPrefs }: Props) {
       <Divider sx={{ my: 3 }} />
 
       {/* 通知種別ごとの受信可否 */}
-      <Typography variant="h6" sx={{ mb: 1 }}>{t("notifications.title")}</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("notifications.description")}</Typography>
+      <Typography variant="h6" sx={{ mb: 2 }}>{t("notifications.title")}</Typography>
 
       <FormGroup sx={{ mb: 4 }}>
         {NOTIFICATION_TYPES.map((type) => (
