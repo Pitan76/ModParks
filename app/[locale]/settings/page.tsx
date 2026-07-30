@@ -9,8 +9,7 @@ import SettingsClient from "@/components/settings/SettingsClientLazy";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
-import CardActionArea from "@mui/material/CardActionArea";
-import Link from "next/link";
+import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 
 export const generateMetadata = async ({ params }: { params: Promise<{ locale: string }> }) => {
   const { locale } = await params;
@@ -29,6 +28,7 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
   }
 
   const t = await getTranslations("Settings");
+  const tReward = await getTranslations("CreatorReward");
 
   const db = await getDatabase();
 
@@ -77,14 +77,14 @@ const SettingsPage = async ({ params, searchParams }: { params: Promise<{ locale
       />
 
       <Card sx={{ mt: 4 }}>
-        <CardActionArea component={Link} href={`/${locale}/settings/rewards`} sx={{ p: 2 }}>
+        <LinkCardActionArea href="/settings/rewards" sx={{ p: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             {tReward("title")}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {tReward("description")}
           </Typography>
-        </CardActionArea>
+        </LinkCardActionArea>
       </Card>
     </Container>
   );
