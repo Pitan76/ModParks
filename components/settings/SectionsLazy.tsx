@@ -19,13 +19,13 @@ function Loading() {
   );
 }
 
-const lazyOptions = { ssr: false as const, loading: Loading };
-
-export const ProfileTabLazy = dynamic(() => import("./tabs/ProfileTab"), lazyOptions);
-export const AccountSectionLazy = dynamic(() => import("./AccountSection"), lazyOptions);
-export const ThemeTabLazy = dynamic(() => import("./tabs/ThemeTab"), lazyOptions);
-export const SecuritySectionLazy = dynamic(() => import("./SecuritySection"), lazyOptions);
-export const ApiKeysTabLazy = dynamic(() => import("./tabs/ApiKeysTab"), lazyOptions);
-export const PostingTabLazy = dynamic(() => import("./tabs/PostingTab"), lazyOptions);
-export const NotificationsTabLazy = dynamic(() => import("./tabs/NotificationsTab"), lazyOptions);
-export const IntegrationTabLazy = dynamic(() => import("./tabs/IntegrationTab"), lazyOptions);
+// next/dynamic の第2引数はオブジェクトリテラルでなければビルドが通らないため、
+// 共通の設定を変数に括り出さずに各行へ展開している。
+export const ProfileTabLazy = dynamic(() => import("./tabs/ProfileTab"), { ssr: false, loading: Loading });
+export const AccountSectionLazy = dynamic(() => import("./AccountSection"), { ssr: false, loading: Loading });
+export const ThemeTabLazy = dynamic(() => import("./tabs/ThemeTab"), { ssr: false, loading: Loading });
+export const SecuritySectionLazy = dynamic(() => import("./SecuritySection"), { ssr: false, loading: Loading });
+export const ApiKeysTabLazy = dynamic(() => import("./tabs/ApiKeysTab"), { ssr: false, loading: Loading });
+export const PostingTabLazy = dynamic(() => import("./tabs/PostingTab"), { ssr: false, loading: Loading });
+export const NotificationsTabLazy = dynamic(() => import("./tabs/NotificationsTab"), { ssr: false, loading: Loading });
+export const IntegrationTabLazy = dynamic(() => import("./tabs/IntegrationTab"), { ssr: false, loading: Loading });
