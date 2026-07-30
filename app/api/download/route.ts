@@ -9,6 +9,7 @@ import { auth } from "@/lib/auth";
 import { validateApiKey } from "@/lib/api-auth";
 import { toStringArray } from "@/lib/utils/format";
 import { parseCsvParam, type DownloadPreference } from "@/lib/utils/downloadUrl";
+import { recordProjectDownload } from "@/lib/services/rewardMetrics";
 
 /** 未公開扱いのステータス（直リンクでも認可が必要） */
 const RESTRICTED_STATUSES = new Set(["draft", "private"]);
@@ -164,6 +165,8 @@ export async function GET(req: NextRequest) {
           .where(eq(projects.id, project.id))
           .run(),
       ]);
+      // 還元の配分計算は累積カウンタから期間差分を取れないため、日次でも積む
+      await recordProjectDownload(project.id);
     }
 
     // 外部URLの場合はそのままリダイレクト、R2の場合はプレフィックスを付加

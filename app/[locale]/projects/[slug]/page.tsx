@@ -8,7 +8,8 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { favorites, projectSubscriptions } from "@/db/schema";
+import { after } from "next/server";
+import { favorites, projectSubscriptions, projectMembers } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
@@ -23,6 +24,7 @@ import ProjectDependencies from "@/components/project/ProjectDependencies";
 import ProjectComments from "@/components/project/ProjectComments";
 import ProjectRecipes from "@/components/project/ProjectRecipes";
 import LinkButton from "@/components/ui/LinkButton";
+import { recordProjectView } from "@/lib/services/rewardMetrics";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import { toPlainDescription } from "@/lib/utils/plainText";
 import AdSlot from "@/components/ads/AdSlot";
@@ -114,13 +116,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   const db = await getDatabase();
-  const [favoritesData, userFavoriteData, dependencies, dependents, userSubscription, media] = await Promise.all([
+  const [favoritesData, userFavoriteData, dependencies, dependents, userSubscription, media, membership] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(favorites).where(eq(favorites.postId, project.id)).get(),
     session?.user?.id ? db.select().from(favorites).where(and(eq(favorites.postId, project.id), eq(favorites.userId, session.user.id))).get() : null,
     getProjectDependencies(project.id),
     getProjectDependents(project.id),
     session?.user?.id ? db.select().from(projectSubscriptions).where(and(eq(projectSubscriptions.projectId, project.id), eq(projectSubscriptions.userId, session.user.id))).get() : null,
     getPublicProjectMedia(project.id),
+    session?.user?.id ? db.select({ userId: projectMembers.userId }).from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get() : null,
   ]);
 
   const featuredMedia = media.filter((m) => m.featured);
@@ -137,6 +140,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   const isFavorited = session?.user?.id ? !!userFavoriteData : cookieFavorites.includes(project.id);
+
+  // 還元の配分スコアに使う閲覧数。公開プロジェクトのみ、関係者を除いて数える
+  if (project.visibility === "public") {
+    after(() => recordProjectView(project.id, isOwner || !!membership));
+  }
 
   if (!project) notFound();
 
