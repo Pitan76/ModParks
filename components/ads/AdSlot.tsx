@@ -3,6 +3,7 @@ import Typography from "@mui/material/Typography";
 import { getTranslations } from "next-intl/server";
 import { getAdsMode, getAdsenseClient, getAdSlotId, type AdSlotName } from "@/lib/config/ads";
 import AdSenseUnit from "./AdSenseUnit";
+import { isAdFreeViewer } from "@/lib/ads/adsServer";
 
 interface AdSlotProps {
   /** 広告枠の識別子。`AD_SLOT_IDS` に登録済みのものだけ指定できる */
@@ -24,6 +25,9 @@ export default async function AdSlot({
 }: AdSlotProps) {
   const mode = getAdsMode();
   if (mode === "off") return null;
+
+  // プレミアムは広告非表示。プレビュー枠も出さない（実際の見え方に合わせる）
+  if (await isAdFreeViewer()) return null;
 
   const client = getAdsenseClient();
   const slotId = getAdSlotId(slot);

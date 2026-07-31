@@ -30,9 +30,9 @@ export function getAdsenseClient(): string {
  * 枠を増やすときはここにも追記する（`AdSlot` の型で強制される）。
  */
 const AD_SLOT_IDS = {
-  "home-mid": "9291538212",
+  "home-mid": "",
   "projects-top": "",
-  "project-sidebar": "",
+  "project-sidebar": "9291538212",
 } as const;
 
 /** 設置可能な広告枠の識別子 */

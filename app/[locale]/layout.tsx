@@ -125,7 +125,10 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   const themeMode = (cookieStore.get("theme_mode")?.value as "light" | "dark") || "dark";
 
   // 実配信モードのときだけ AdSense を読み込む（枠ごとではなくページで一度だけ）
-  const adsenseClient = getAdsMode() === "on" ? getAdsenseClient() : "";
+  // プレミアムは広告非表示のため、スクリプト自体も読み込まない
+  const adsenseClient = getAdsMode() === "on" && !session?.user?.isPremium
+    ? getAdsenseClient()
+    : "";
 
   return (
     <html lang={locale} suppressHydrationWarning>
