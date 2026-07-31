@@ -12,6 +12,17 @@ interface AdSlotProps {
   minHeight?: number;
   /** スマホ幅（xs）で非表示にするか。既定は非表示 */
   hideOnMobile?: boolean;
+  /**
+   * 広告の形状。既定の "auto" は枠幅に応じて最も収益期待値の高い形を選ぶため、
+   * 幅が広いと縦に大きいレクタングルになりやすい。
+   * 横長バナーに収めたい枠では "horizontal" を指定する。
+   */
+  format?: "auto" | "horizontal" | "rectangle" | "vertical";
+  /**
+   * 高さの上限（px）。指定すると広告がこの高さを超えて伸びない。
+   * 形状指定だけでは足りない枠の保険として使う。
+   */
+  maxHeight?: number;
 }
 
 /**
@@ -22,6 +33,8 @@ export default async function AdSlot({
   slot,
   minHeight = 90,
   hideOnMobile = true,
+  format = "auto",
+  maxHeight,
 }: AdSlotProps) {
   const mode = getAdsMode();
   if (mode === "off") return null;
@@ -41,6 +54,8 @@ export default async function AdSlot({
         slotId={slotId}
         minHeight={minHeight}
         hideOnMobile={hideOnMobile}
+        format={format}
+        maxHeight={maxHeight}
       />
     );
   }

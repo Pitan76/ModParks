@@ -105,7 +105,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       </Box>
 
       <Box sx={{ mb: 3, display: { xs: "none", sm: "block" } }}>
-        <AdSlot slot="projects-top" />
+        <AdSlot slot="projects-top" format="horizontal" maxHeight={100} />
       </Box>
 
       {/* 検索バー */}

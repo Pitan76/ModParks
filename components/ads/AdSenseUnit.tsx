@@ -18,13 +18,24 @@ interface AdSenseUnitProps {
   minHeight: number;
   /** スマホ幅（xs）で非表示にするか */
   hideOnMobile: boolean;
+  /** 広告の形状 */
+  format: "auto" | "horizontal" | "rectangle" | "vertical";
+  /** 高さの上限（px）。未指定なら制限しない */
+  maxHeight?: number;
 }
 
 /**
  * AdSense の広告ユニットを1枠描画する。
  * スクリプト自体はレイアウトで一度だけ読み込む前提で、ここでは push のみ行う。
  */
-export default function AdSenseUnit({ client, slotId, minHeight, hideOnMobile }: AdSenseUnitProps) {
+export default function AdSenseUnit({
+  client,
+  slotId,
+  minHeight,
+  hideOnMobile,
+  format,
+  maxHeight,
+}: AdSenseUnitProps) {
   const pushedRef = useRef(false);
 
   useEffect(() => {
@@ -46,14 +57,16 @@ export default function AdSenseUnit({ client, slotId, minHeight, hideOnMobile }:
         display: hideOnMobile ? { xs: "none", sm: "block" } : "block",
         width: "100%",
         minHeight,
+        // 上限を超える広告が来ても枠からはみ出させない
+        ...(maxHeight ? { maxHeight, overflow: "hidden" } : {}),
       }}
     >
       <ins
         className="adsbygoogle"
-        style={{ display: "block" }}
+        style={{ display: "block", ...(maxHeight ? { maxHeight } : {}) }}
         data-ad-client={client}
         data-ad-slot={slotId}
-        data-ad-format="auto"
+        data-ad-format={format}
         data-full-width-responsive="true"
       />
     </Box>
