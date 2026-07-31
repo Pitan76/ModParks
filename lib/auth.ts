@@ -100,6 +100,8 @@ export const authConfig = {
             const { eq: drizzleEq } = await import("drizzle-orm");
             const dbUser = await db.select({
               role: users.role,
+              premiumTier: users.premiumTier,
+              premiumUntil: users.premiumUntil,
               deletedAt: users.deletedAt,
               deactivatedAt: users.deactivatedAt,
               suspendedAt: users.suspendedAt,
@@ -115,6 +117,8 @@ export const authConfig = {
             
             if (dbUser) {
               token.role = dbUser.role as string;
+              const { isPremiumActive } = await import("@/lib/premium");
+              token.isPremium = isPremiumActive(dbUser);
               token.isDeleted = !!dbUser.deletedAt;
               token.isDeactivated = !!dbUser.deactivatedAt;
               token.isSuspended = !!dbUser.suspendedAt;
@@ -149,6 +153,7 @@ export const authConfig = {
         session.user.displayName = (token.displayName ?? null) as string | null;
         session.user.avatarUrl = (token.avatarUrl ?? null) as string | null;
         session.user.role = (token.role ?? "user") as string;
+        session.user.isPremium = !!token?.isPremium;
         session.user.locale = (token.locale ?? null) as string | null;
         session.user.onboardingCompleted = !!token?.onboardingCompleted;
       }

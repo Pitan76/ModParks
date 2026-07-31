@@ -30,6 +30,13 @@ export const users = sqliteTable("users", {
   githubId:      text("github_id").unique(),
   role:          text("role", { enum: ["user", "admin"] }).notNull().default("user"),
   twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).notNull().default(false),
+  /**
+   * プレミアム区分。現状は販売しておらず、管理画面からの手動付与のみ。
+   * 課金導入時はここに決済由来の更新を流し込む。
+   */
+  premiumTier:   text("premium_tier", { enum: ["free", "premium"] }).notNull().default("free"),
+  /** プレミアムの有効期限。null は無期限（買い切り／手動付与の既定） */
+  premiumUntil:  integer("premium_until", { mode: "timestamp" }),
   twoFactorSecret: text("two_factor_secret"),
   deletedAt:     integer("deleted_at", { mode: "timestamp" }),
   deactivatedAt: integer("deactivated_at", { mode: "timestamp" }),
@@ -1025,6 +1032,8 @@ export const moderationAudit = sqliteTable("moderation_audit", {
       "scan_appeal_reject",
       "suspend_user",
       "unsuspend_user",
+      "premium_grant",
+      "premium_revoke",
     ],
   }).notNull(),
   /** 操作対象の識別子（projectId / userId / versionId など） */

@@ -428,6 +428,13 @@
       "when": 1785418681027,
       "tag": "0060_creator_reward_opt_in",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "6",
+      "when": 1785500586951,
+      "tag": "0061_premium_tier",
+      "breakpoints": true
     }
   ]
 }

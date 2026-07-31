@@ -41,6 +41,49 @@ export async function toggleUserSuspension(targetUserId: string) {
   return { success: true, suspended: !!newSuspendedAt };
 }
 
+/**
+ * プレミアムを手動で付与する。販売は未実施のため、付与経路は当面この管理操作のみ。
+ * @param days 有効日数。未指定（null）なら無期限
+ */
+export async function grantPremium(targetUserId: string, days: number | null = null) {
+  const { db, session } = await getAdminDb();
+
+  if (days !== null && (!Number.isFinite(days) || days <= 0 || days > 3650)) {
+    throw new Error("Invalid premium duration");
+  }
+
+  const user = await db.select({ id: users.id }).from(users).where(eq(users.id, targetUserId)).get();
+  if (!user) throw new Error("User not found");
+
+  const premiumUntil = days === null ? null : new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+  await db.update(users)
+    .set({ premiumTier: "premium", premiumUntil })
+    .where(eq(users.id, targetUserId));
+
+  await recordModerationAudit(db, "premium_grant", targetUserId, session.user.id, {
+    days,
+    until: premiumUntil?.toISOString() ?? null,
+  });
+
+  revalidatePath("/admin/users");
+  return { success: true, premiumUntil: premiumUntil ? premiumUntil.getTime() : null };
+}
+
+/** プレミアムを取り消す */
+export async function revokePremium(targetUserId: string) {
+  const { db, session } = await getAdminDb();
+
+  await db.update(users)
+    .set({ premiumTier: "free", premiumUntil: null })
+    .where(eq(users.id, targetUserId));
+
+  await recordModerationAudit(db, "premium_revoke", targetUserId, session.user.id);
+
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
 export async function updateUsernameByAdmin(targetUserId: string, newUsername: string) {
   const { db } = await getAdminDb();
   const { userProfiles, userSettings, users } = await import("@/db/schema");

@@ -18,6 +18,8 @@ declare module "next-auth" {
       displayName: string | null;
       avatarUrl:   string | null;
       role:        string;
+      /** プレミアムが現在有効か（期限切れは false）。付与は管理画面から */
+      isPremium:   boolean;
       onboardingCompleted: boolean;
       name?:       string | null;
       email?:      string | null;
@@ -32,6 +34,7 @@ declare module "next-auth/jwt" {
     displayName?: string | null;
     avatarUrl?:   string | null;
     role?:        string;
+    isPremium?:   boolean;
     onboardingCompleted?: boolean;
   }
 }

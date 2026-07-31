@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { User } from "../UsersClient";
-import { updateUserRole, deleteUser, updateUsernameByAdmin, purgeDeletedUsers, hardDeleteUser, toggleUserSuspension } from "@/lib/actions/admin";
+import { updateUserRole, deleteUser, updateUsernameByAdmin, purgeDeletedUsers, hardDeleteUser, toggleUserSuspension, grantPremium, revokePremium } from "@/lib/actions/admin";
 import { useTranslations } from "next-intl";
 
 /**
@@ -24,6 +24,11 @@ export function useUsersState(users: User[]) {
   const [deleteUserTarget, setDeleteUserTarget] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSuspending, setIsSuspending] = useState(false);
+
+  const [premiumTarget, setPremiumTarget] = useState<User | null>(null);
+  // 空文字は無期限
+  const [premiumDuration, setPremiumDuration] = useState("");
+  const [isPremiumSaving, setIsPremiumSaving] = useState(false);
 
   const activeUsers = users.filter((u) => !u.deletedAt);
   const deletedUsers = users.filter((u) => u.deletedAt);
@@ -94,6 +99,39 @@ export function useUsersState(users: User[]) {
     }
   };
 
+  const handleOpenPremiumDialog = (user: User) => {
+    setPremiumTarget(user);
+    setPremiumDuration("");
+  };
+
+  const handleGrantPremium = async () => {
+    if (!premiumTarget) return;
+    setIsPremiumSaving(true);
+    try {
+      await grantPremium(premiumTarget.id, premiumDuration ? Number(premiumDuration) : null);
+      showMessage("success", tAdmin("successPremiumGrant"));
+      setPremiumTarget(null);
+    } catch (err: any) {
+      showMessage("error", err.message);
+    } finally {
+      setIsPremiumSaving(false);
+    }
+  };
+
+  const handleRevokePremium = async () => {
+    if (!premiumTarget) return;
+    setIsPremiumSaving(true);
+    try {
+      await revokePremium(premiumTarget.id);
+      showMessage("success", tAdmin("successPremiumRevoke"));
+      setPremiumTarget(null);
+    } catch (err: any) {
+      showMessage("error", err.message);
+    } finally {
+      setIsPremiumSaving(false);
+    }
+  };
+
   const handleOpenEditDialog = (user: User) => {
     setEditUserId(user.id);
     setEditUsername(user.username || "");
@@ -142,5 +180,13 @@ export function useUsersState(users: User[]) {
     handleSaveUsername,
     handleToggleSuspension,
     isSuspending,
+    premiumTarget,
+    setPremiumTarget,
+    premiumDuration,
+    setPremiumDuration,
+    isPremiumSaving,
+    handleOpenPremiumDialog,
+    handleGrantPremium,
+    handleRevokePremium,
   };
 }

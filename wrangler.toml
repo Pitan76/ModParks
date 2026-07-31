@@ -66,8 +66,12 @@ CLOUDFLARE_ACCOUNT_ID = "70a9b16c9396a3ab84c4ce7719800373"
 # /api/r2 プロキシ（Worker 経由）を通らなくなる＝Worker の継続負荷が消える。
 # modparks-storage バケットに接続したカスタムドメイン（Cloudflare CDN キャッシュ対象）。
 R2_PUBLIC_URL = "https://files.modparks.pitan76.net"
-
+# 広告枠の表示モード: off / preview(位置のみ) / on(実配信)
 NEXT_PUBLIC_ADS_MODE = "on"
+# AdSense のパブリッシャーID。HTML に出る公開値なので秘匿不要。
+# 未設定だと ADS_MODE=on でも全枠が非表示になる。
+# 広告ユニットID は lib/config/ads.ts の AD_SLOT_IDS で管理。
+NEXT_PUBLIC_ADSENSE_CLIENT = "ca-pub-3977024448605477"
 
 [observability]
 enabled = false

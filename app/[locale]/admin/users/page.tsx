@@ -22,7 +22,9 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
       deletedAt: users.deletedAt,
       deactivatedAt: users.deactivatedAt,
       suspendedAt: users.suspendedAt,
-      twoFactorEnabled: users.twoFactorEnabled
+      twoFactorEnabled: users.twoFactorEnabled,
+      premiumTier: users.premiumTier,
+      premiumUntil: users.premiumUntil
   }).from(users).leftJoin(userProfiles, eq(users.id, userProfiles.userId)).orderBy(desc(users.createdAt)).all() as any[];
 
   const { accounts } = await import("@/db/schema");

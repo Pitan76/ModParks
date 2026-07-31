@@ -29,6 +29,9 @@ import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { useUsersState } from "./hooks/useUsersState";
 import UserDetailsDialog from "./components/UserDetailsDialog";
 import UserEditDialog from "./components/UserEditDialog";
+import PremiumDialog from "./components/PremiumDialog";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import { getPremiumState } from "@/lib/premium";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
 
 export interface User {
@@ -44,6 +47,8 @@ export interface User {
   suspendedAt: Date | null;
   twoFactorEnabled?: boolean;
   hasGithub?: boolean;
+  premiumTier?: string | null;
+  premiumUntil?: Date | number | null;
 }
 
 /**
@@ -79,6 +84,14 @@ export default function UsersClient({ users }: { users: User[] }) {
     handleSaveUsername,
     handleToggleSuspension,
     isSuspending,
+    premiumTarget,
+    setPremiumTarget,
+    premiumDuration,
+    setPremiumDuration,
+    isPremiumSaving,
+    handleOpenPremiumDialog,
+    handleGrantPremium,
+    handleRevokePremium,
   } = useUsersState(users);
   const { data: session } = useSession();
 
@@ -128,6 +141,9 @@ export default function UsersClient({ users }: { users: User[] }) {
                           {user.suspendedAt && (
                             <Chip label={tAdmin("statusSuspended")} size="small" color="error" variant="outlined" sx={{ height: 20, fontSize: "0.7rem" }} />
                           )}
+                          {getPremiumState(user) === "active" && (
+                            <Chip label={tAdmin("premiumLabel")} size="small" color="warning" sx={{ height: 20, fontSize: "0.7rem" }} />
+                          )}
                           {user.deactivatedAt && (
                             <Chip label={tAdmin("statusDeactivated")} size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: "0.7rem" }} />
                           )}
@@ -161,8 +177,16 @@ export default function UsersClient({ users }: { users: User[] }) {
                         <IconButton color="primary" onClick={() => handleOpenEditDialog(user)} title={tAdmin("btnEditId")} disabled={!!user.suspendedAt || !!user.deactivatedAt}>
                           <EditIcon />
                         </IconButton>
-                        <IconButton 
-                          color={user.suspendedAt ? "success" : "warning"} 
+                        <IconButton
+                          color={getPremiumState(user) === "active" ? "warning" : "default"}
+                          onClick={() => handleOpenPremiumDialog(user)}
+                          title={tAdmin("btnPremium")}
+                          disabled={!!user.suspendedAt || !!user.deactivatedAt}
+                        >
+                          <WorkspacePremiumIcon />
+                        </IconButton>
+                        <IconButton
+                          color={user.suspendedAt ? "success" : "warning"}
                           onClick={() => handleToggleSuspension(user.id)} 
                           title={user.suspendedAt ? tAdmin("btnUnsuspend") : tAdmin("btnSuspend")}
                           disabled={user.id === session?.user?.id || isSuspending}
@@ -214,6 +238,17 @@ export default function UsersClient({ users }: { users: User[] }) {
         expectedValue={deleteUserTarget?.username || deleteUserTarget?.id || ""}
         expectedValueLabel={tAdmin("deleteUserExpectedLabel")}
         pending={isDeleting}
+      />
+
+      <PremiumDialog
+        open={!!premiumTarget}
+        onClose={() => !isPremiumSaving && setPremiumTarget(null)}
+        user={premiumTarget}
+        duration={premiumDuration}
+        onChangeDuration={setPremiumDuration}
+        onGrant={handleGrantPremium}
+        onRevoke={handleRevokePremium}
+        pending={isPremiumSaving}
       />
 
       <UserDetailsDialog
