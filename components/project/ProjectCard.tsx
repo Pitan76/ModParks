@@ -265,7 +265,8 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
                 display: "flex",
                 alignItems: "center",
                 justifyContent: isGrid ? "space-between" : { xs: "space-between", sm: "flex-end" },
-                width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
+                width: isGrid ? "auto" : { xs: "100%", sm: "auto" },
+                flex: isGrid ? "1 1 auto" : "0 1 auto",
                 gap: isGrid ? 2 : { xs: 2, sm: 1 },
                 minWidth: 0,
               }}
@@ -294,7 +295,7 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
             </Box>
             
             {safeTags.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end", flexShrink: 0 }}>
                 {safeTags.slice(0, isGrid ? 2 : 3).map((tag) => (
                   <ProjectTagBadge
                     key={tag}
