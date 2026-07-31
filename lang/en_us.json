@@ -1548,6 +1548,9 @@
     "downloadAll": "Download",
     "downloadWarning": "*Depending on your browser settings, you may need to allow automatic download of multiple files.",
     "added": "Added to cart",
-    "removed": "Removed from cart"
+    "removed": "Removed from cart",
+    "addList": "Add all to cart",
+    "addedItems": "Added {count} items to cart",
+    "allInCart": "All items are already in your cart"
   }
 }

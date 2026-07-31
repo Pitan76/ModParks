@@ -11,6 +11,7 @@ import Avatar from "@mui/material/Avatar";
 import ProjectCard from "@/components/project/ProjectCard";
 import ListActions from "@/components/list/ListActions";
 import FollowListButton from "@/components/list/FollowListButton";
+import AddListToCartButton from "@/components/list/AddListToCartButton";
 import { setRequestLocale } from "next-intl/server";
 import { getDatabase } from "@/lib/db";
 import { collectionFollows } from "@/db/schema";
@@ -110,6 +111,18 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
       </Box>
 
       {collection.items.length > 0 ? (
+        <>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          <AddListToCartButton
+            items={collection.items.map((p) => ({
+              id: p.id,
+              slug: p.slug,
+              title: p.title,
+              iconUrl: p.iconUrl,
+              type: p.type,
+            }))}
+          />
+        </Box>
         <Grid container spacing={3}>
           {collection.items.map(p => (
             <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
@@ -117,6 +130,7 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
             </Grid>
           ))}
         </Grid>
+        </>
       ) : (
         <Alert severity="info">
           このリストにはまだプロジェクトが追加されていません。

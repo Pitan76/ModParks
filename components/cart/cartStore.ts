@@ -27,6 +27,25 @@ export const cartStore = {
     cartItems = [...cartItems, item];
     cartStore._notify();
   },
+  /**
+   * 複数アイテムをまとめて追加する。
+   * 既にカートにあるものと、引数内の重複は除外する。
+   * @returns 実際に追加された件数
+   */
+  addMany: (items: CartItem[]) => {
+    const seen = new Set(cartItems.map((i) => i.id));
+    const fresh: CartItem[] = [];
+    for (const item of items) {
+      if (seen.has(item.id)) continue;
+      seen.add(item.id);
+      fresh.push(item);
+    }
+    if (fresh.length === 0) return 0;
+    cartItems = [...cartItems, ...fresh];
+    // 1件ずつ add するとその都度 localStorage 書き込みと再描画が走るため、まとめて通知する
+    cartStore._notify();
+    return fresh.length;
+  },
   remove: (id: string) => {
     cartItems = cartItems.filter((i) => i.id !== id);
     cartStore._notify();
@@ -64,6 +83,7 @@ export function useCart() {
   return {
     items,
     add: cartStore.add,
+    addMany: cartStore.addMany,
     remove: cartStore.remove,
     clear: cartStore.clear,
     has: (id: string) => items.some((i) => i.id === id),

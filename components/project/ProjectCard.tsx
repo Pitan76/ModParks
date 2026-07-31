@@ -124,8 +124,32 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
   // Ensure tags is always an array to avoid undefined errors
   const safeTags: string[] = project.tags ?? [];
 
+  // グリッドではカード右上に浮かせ、リストではメタ情報の行に並べるため要素を共有する
+  const cartButton = showCart && (
+    <Tooltip title={inCart ? tCart("remove") : tCart("add")} arrow>
+      <IconButton
+        size="small"
+        onClick={handleCartClick}
+        color={inCart ? "primary" : "default"}
+        sx={{
+          p: 0.5,
+          flexShrink: 0,
+          border: "1px solid",
+          borderColor: inCart ? "primary.main" : "divider",
+          borderRadius: 1.5,
+          bgcolor: inCart ? "action.selected" : "background.paper",
+          "&:hover": {
+            bgcolor: "action.hover",
+          }
+        }}
+      >
+        {inCart ? <ShoppingCartIcon fontSize="small" /> : <AddShoppingCartIcon fontSize="small" />}
+      </IconButton>
+    </Tooltip>
+  );
+
   return (
-    <Card id={`project-card-${project.slug}`} onContextMenu={onContextMenu} style={{ boxShadow: "none" }} sx={{ height: "100%" }}>
+    <Card id={`project-card-${project.slug}`} onContextMenu={onContextMenu} style={{ boxShadow: "none" }} sx={{ height: "100%", position: "relative" }}>
       <LinkCardActionArea href={`/projects/${project.slug}`} sx={{ height: "100%" }}>
         <CardContent 
           sx={{ 
@@ -137,8 +161,14 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
             height: "100%"
           }}
         >
+          {isGrid && cartButton && (
+            <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}>
+              {cartButton}
+            </Box>
+          )}
           {/* Top Section: Icon + Main Info (Always row, wrap if extremely narrow) */}
-          <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2, alignItems: "flex-start", flex: isGrid ? "none" : { xs: "none", sm: 1 }, minWidth: 0 }}>
+          {/* グリッドでは右上のカートボタンとタイトルが重ならないよう余白を空ける */}
+          <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2, alignItems: "flex-start", flex: isGrid ? "none" : { xs: "none", sm: 1 }, minWidth: 0, pr: isGrid && showCart ? 4.5 : 0 }}>
             {/* アイコン */}
             <Avatar
               src={project.iconUrl ?? undefined}
@@ -255,29 +285,8 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
                 </Box>
               </Box>
 
-              {/* カートに追加/削除ボタン */}
-              {showCart && (
-              <Tooltip title={inCart ? tCart("remove") : tCart("add")} arrow>
-                <IconButton
-                  size="small"
-                  onClick={handleCartClick}
-                  color={inCart ? "primary" : "default"}
-                  sx={{
-                    p: 0.5,
-                    flexShrink: 0,
-                    border: "1px solid",
-                    borderColor: inCart ? "primary.main" : "divider",
-                    borderRadius: 1.5,
-                    bgcolor: inCart ? "action.selected" : "transparent",
-                    "&:hover": {
-                      bgcolor: inCart ? "action.hover" : "action.hover",
-                    }
-                  }}
-                >
-                  {inCart ? <ShoppingCartIcon fontSize="small" /> : <AddShoppingCartIcon fontSize="small" />}
-                </IconButton>
-              </Tooltip>
-              )}
+              {/* カートに追加/削除ボタン（グリッドではカード右上に表示する） */}
+              {!isGrid && cartButton}
             </Box>
             
             {safeTags.length > 0 && (
