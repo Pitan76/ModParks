@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import GoogleIcon from "@mui/icons-material/Google";
 import { Link } from "@/lib/i18n/routing";
 import { sendRegistrationEmail } from "@/lib/actions/auth";
 import { signIn } from "next-auth/react";
@@ -24,6 +25,10 @@ const RegisterPage = () => {
 
   const handleGithubLogin = () => {
     signIn("github", { callbackUrl: `/${locale}/projects` });
+  };
+
+  const handleGoogleLogin = () => {
+    signIn("google", { callbackUrl: `/${locale}/projects` });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -121,6 +126,17 @@ const RegisterPage = () => {
           sx={{ py: 1.2, mb: 2 }}
         >
           {tAuth("register.registerWithGithub")}
+        </Button>
+
+        <Button
+          variant="outlined"
+          fullWidth
+          size="large"
+          startIcon={<GoogleIcon />}
+          onClick={handleGoogleLogin}
+          sx={{ py: 1.2, mb: 2 }}
+        >
+          {tAuth("register.registerWithGoogle")}
         </Button>
 
         <Box sx={{ mt: 4, textAlign: "center" }}>

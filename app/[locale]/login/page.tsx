@@ -14,6 +14,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import GoogleIcon from "@mui/icons-material/Google";
 import PasskeyLoginButton from "@/components/auth/PasskeyLoginButton";
 import { Link } from "@/lib/i18n/routing";
 import { signIn } from "next-auth/react";
@@ -92,6 +93,10 @@ export default function LoginPage() {
     signIn("github", { callbackUrl: `/${locale}/projects` });
   };
 
+  const handleGoogleLogin = () => {
+    signIn("google", { callbackUrl: `/${locale}/projects` });
+  };
+
   return (
     <Container maxWidth="xs" sx={{ py: 8 }}>
       <Box
@@ -166,6 +171,17 @@ export default function LoginPage() {
           sx={{ py: 1.2, mb: 2 }}
         >
           {tAuth("login.loginWithGithub")}
+        </Button>
+
+        <Button
+          variant="outlined"
+          fullWidth
+          size="large"
+          startIcon={<GoogleIcon />}
+          onClick={handleGoogleLogin}
+          sx={{ py: 1.2, mb: 2 }}
+        >
+          {tAuth("login.loginWithGoogle")}
         </Button>
 
         <PasskeyLoginButton onError={setError} />

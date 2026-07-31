@@ -1,4 +1,5 @@
 import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import Resend from "next-auth/providers/resend";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/types";
@@ -6,7 +7,7 @@ import { DEFAULT_APP_SETTINGS } from "@/lib/config/appSettings";
 import { eq } from "drizzle-orm";
 
 /**
- * NextAuthで使用する認証プロバイダー（Resend, GitHub, Credentials）の設定配列。
+ * NextAuthで使用する認証プロバイダー（Resend, GitHub, Google, Credentials）の設定配列。
  * 2FA (TOTP) やレートリミットなどのカスタム認可ロジックが含まれています。
  */
 export const authProviders = [
@@ -51,6 +52,22 @@ export const authProviders = [
         displayName: profile.name ?? profile.login,
         avatarUrl: profile.avatar_url,
         githubId: profile.id.toString(),
+        role: "user",
+      };
+    },
+  }),
+  Google({
+    clientId:     process.env.AUTH_GOOGLE_ID!,
+    clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+    allowDangerousEmailAccountLinking: true,
+    profile(profile) {
+      return {
+        id: profile.sub,
+        name: profile.name ?? profile.email,
+        email: profile.email,
+        image: profile.picture,
+        displayName: profile.name ?? profile.email,
+        avatarUrl: profile.picture,
         role: "user",
       };
     },

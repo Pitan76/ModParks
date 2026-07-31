@@ -19,6 +19,7 @@ import Alert from "@mui/material/Alert";
 import { useTranslations } from "next-intl";
 import { useCart } from "./cartStore";
 import ProjectTypeBadge from "../project/ProjectTypeBadge";
+import { useColorMode } from "@/components/ThemeRegistry";
 
 interface CartDrawerProps {
   open: boolean;
@@ -28,6 +29,11 @@ interface CartDrawerProps {
 export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   const t = useTranslations("Cart");
   const { items, remove, clear } = useCart();
+  const { mode, isNewTheme } = useColorMode();
+
+  const borderColor = isNewTheme
+    ? (mode === "light" ? "#e0e0e0" : "#3c4043")
+    : (mode === "light" ? "#e2e8f0" : "#334155");
 
   const handleDownloadAll = async () => {
     for (const item of items) {
@@ -53,6 +59,9 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
       anchor="right"
       open={open}
       onClose={onClose}
+      sx={{
+        zIndex: (theme) => theme.zIndex.appBar + 100
+      }}
       slotProps={{
         paper: {
           sx: { width: { xs: "100%", sm: 400 }, display: "flex", flexDirection: "column" }
@@ -60,7 +69,18 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
       }}
     >
       {/* Header */}
-      <Box sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: 1, borderColor: "divider" }}>
+      <Box
+        sx={{
+          minHeight: { xs: 56, sm: 64 },
+          px: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: "1px solid",
+          borderColor: borderColor,
+          boxSizing: "border-box"
+        }}
+      >
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
           {t("title")} ({items.length})
         </Typography>
