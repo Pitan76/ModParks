@@ -66,12 +66,17 @@ const nextConfig: NextConfig = {
       "https://ep2.adtrafficquality.google",
       "https://www.googletagmanager.com",
       "https://www.google-analytics.com",
+      // プライバシーメッセージ(同意管理/Funding Choices)。GDPR/CCPA 同意バナーの配信元で、
+      // AdSense 本体から動的に読み込まれる
+      "https://fundingchoicesmessages.google.com",
     ].join(" ");
     const adFrameHosts = [
       "https://googleads.g.doubleclick.net",
       "https://tpc.googlesyndication.com",
       "https://www.google.com",
       "https://ep2.adtrafficquality.google",
+      // 同意バナー本体は iframe で描画される
+      "https://fundingchoicesmessages.google.com",
     ].join(" ");
     const adImgHosts = [
       "https://pagead2.googlesyndication.com",
