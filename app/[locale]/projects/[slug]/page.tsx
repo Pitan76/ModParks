@@ -242,9 +242,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             sx={{
               position: { md: "sticky" },
               top: { md: 80 },
-              // 内容が画面より高いときに広告が見切れないようにする
-              maxHeight: { md: "calc(100vh - 96px)" },
-              overflowY: { md: "auto" },
             }}
           >
             <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
