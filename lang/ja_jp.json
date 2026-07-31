@@ -1324,7 +1324,7 @@
       "legacyTheme": "レガシーテーマ",
       "contextMenuLabel": "コンテキストメニュー",
       "useCustomContextMenu": "ModParksの右クリックメニューを使用する",
-      "cartLabel": "ダウンロードカート",
+      "cartLabel": "カート",
       "useCart": "カート機能を使用する",
       "save": "保存する",
       "success": "テーマ設定を更新しました"
@@ -1568,7 +1568,7 @@
     }
   },
   "Cart": {
-    "title": "ダウンロードカート",
+    "title": "カート",
     "empty": "カートは空です",
     "add": "カートに入れる",
     "remove": "カートから削除",

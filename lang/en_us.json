@@ -1316,7 +1316,7 @@
       "legacyTheme": "Legacy Theme",
       "contextMenuLabel": "Context Menu",
       "useCustomContextMenu": "Use custom context menu",
-      "cartLabel": "Download Cart",
+      "cartLabel": "Cart",
       "useCart": "Enable cart feature",
       "save": "Save Changes",
       "success": "Theme settings updated"
@@ -1560,7 +1560,7 @@
     }
   },
   "Cart": {
-    "title": "Download Cart",
+    "title": "Cart",
     "empty": "Your cart is empty",
     "add": "Add to Cart",
     "remove": "Remove from Cart",
