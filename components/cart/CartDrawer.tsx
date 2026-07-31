@@ -107,7 +107,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
       </Box>
 
       {/* Cart List */}
-      <Box sx={{ flex: 1, overflowY: "auto", p: 2 }}>
+      <Box sx={{ flex: 1, overflowY: "auto", px: 1.5, py: 1 }}>
         {items.length === 0 ? (
           <Box sx={{ py: 8, textAlign: "center" }}>
             <Typography variant="body1" color="text.secondary">
