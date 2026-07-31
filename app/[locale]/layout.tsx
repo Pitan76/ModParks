@@ -16,6 +16,7 @@ import PinProvider from "@/components/pin/PinProvider";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
 import { SITE_URL } from "@/lib/config";
+import { getAdsMode, getAdsenseClient } from "@/lib/config/ads";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -123,6 +124,9 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   const cookieStore = await cookies();
   const themeMode = (cookieStore.get("theme_mode")?.value as "light" | "dark") || "dark";
 
+  // 実配信モードのときだけ AdSense を読み込む（枠ごとではなくページで一度だけ）
+  const adsenseClient = getAdsMode() === "on" ? getAdsenseClient() : "";
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -140,6 +144,15 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
             gtag('config', '${GA_ID}');
           `}
         </Script>
+
+        {/* Google AdSense */}
+        {adsenseClient && (
+          <Script
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
       </head>
       <body>
         <PwaRegister />

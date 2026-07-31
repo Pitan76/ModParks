@@ -14,3 +14,31 @@ export function getAdsMode(): AdsMode {
   if (mode === "preview" || mode === "on") return mode;
   return "off";
 }
+
+/**
+ * AdSense のパブリッシャーID（`ca-pub-...`）。
+ * HTML に出力される公開値なので秘匿不要。未設定なら実配信はしない。
+ */
+export function getAdsenseClient(): string {
+  return process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "";
+}
+
+/**
+ * 広告枠の識別子 → AdSense の広告ユニットID の対応。
+ * 空文字はユニット未発行を意味し、その枠は実配信しない。
+ *
+ * 枠を増やすときはここにも追記する（`AdSlot` の型で強制される）。
+ */
+const AD_SLOT_IDS = {
+  "home-mid": "9291538212",
+  "projects-top": "",
+  "project-sidebar": "",
+} as const;
+
+/** 設置可能な広告枠の識別子 */
+export type AdSlotName = keyof typeof AD_SLOT_IDS;
+
+/** 広告枠に対応する広告ユニットIDを返す。未発行なら空文字 */
+export function getAdSlotId(slot: AdSlotName): string {
+  return AD_SLOT_IDS[slot];
+}
