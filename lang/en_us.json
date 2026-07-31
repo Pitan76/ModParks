@@ -1545,7 +1545,7 @@
     "add": "Add to Cart",
     "remove": "Remove from Cart",
     "clear": "Clear Cart",
-    "downloadAll": "Download All",
+    "downloadAll": "Download",
     "downloadWarning": "*Depending on your browser settings, you may need to allow automatic download of multiple files.",
     "added": "Added to cart",
     "removed": "Removed from cart"

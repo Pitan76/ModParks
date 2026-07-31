@@ -60,7 +60,8 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
       open={open}
       onClose={onClose}
       sx={{
-        zIndex: (theme) => theme.zIndex.appBar + 100
+        // AppHeader が zIndex.drawer + 1 なので、それより手前に出す
+        zIndex: (theme) => theme.zIndex.modal
       }}
       slotProps={{
         paper: {
@@ -71,7 +72,8 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
       {/* Header */}
       <Box
         sx={{
-          minHeight: { xs: 56, sm: 64 },
+          // ヘッダーの区切り線とちょうど揃うよう、境界線分の1pxを足す
+          minHeight: { xs: 57, sm: 65 },
           px: 2,
           display: "flex",
           alignItems: "center",
