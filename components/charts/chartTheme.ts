@@ -54,9 +54,12 @@ export function baseChartOptions(theme: Theme) {
     legend: { position: "bottom" as const, alignment: "start" as const, textStyle: text },
     tooltip: { textStyle: { fontSize: 12 } },
     hAxis: { textStyle: text, gridlines: { color: "transparent" }, baselineColor: theme.palette.divider },
+    // 値軸は必ず 0 起点にする。途中から始めると差が実際より大きく見えるため
     vAxis: {
       textStyle: text,
       minValue: 0,
+      viewWindow: { min: 0 },
+      baseline: 0,
       gridlines: { color: theme.palette.divider, count: 5 },
       minorGridlines: { count: 0 },
       baselineColor: theme.palette.divider,
