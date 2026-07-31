@@ -16,7 +16,12 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import DownloadIcon from "@mui/icons-material/Download";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import Alert from "@mui/material/Alert";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { LOADERS_DATA } from "@/lib/data/loaderIds";
+import { MC_VERSIONS } from "@/lib/data/minecraftVersions";
 import { useCart } from "./cartStore";
 import { buildProjectDownloadUrl } from "@/lib/utils/downloadUrl";
 import ProjectTypeBadge from "../project/ProjectTypeBadge";
@@ -36,11 +41,20 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
     ? (mode === "light" ? "#e0e0e0" : "#3c4043")
     : (mode === "light" ? "#e2e8f0" : "#334155");
 
+  // 空文字は「指定なし」。条件に合うバージョンが無い場合はサーバ側が最新版へフォールバックする
+  const [loader, setLoader] = useState("");
+  const [mcVersion, setMcVersion] = useState("");
+
   const handleDownloadAll = async () => {
+    const pref = {
+      loaders:    loader ? [loader] : undefined,
+      mcVersions: mcVersion ? [mcVersion] : undefined,
+    };
+
     // iframe は CSP の frame-src に阻まれるため、<a download> のクリックで開始する
     for (const item of items) {
       const a = document.createElement("a");
-      a.href = buildProjectDownloadUrl(item.slug);
+      a.href = buildProjectDownloadUrl(item.slug, pref);
       a.download = "";
       a.rel = "noopener";
       a.style.display = "none";
@@ -146,6 +160,37 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
       {/* Footer Actions */}
       {items.length > 0 && (
         <Box sx={{ p: 2, borderTop: 1, borderColor: "divider", bgcolor: "background.paper" }}>
+          {/* ダウンロードするバージョンの絞り込み（合致が無ければ最新版になる） */}
+          <Box sx={{ display: "flex", gap: 1.5, mb: 2 }}>
+            <TextField
+              select
+              size="small"
+              fullWidth
+              label={t("loader")}
+              value={loader}
+              onChange={(e) => setLoader(e.target.value)}
+            >
+              <MenuItem value="">{t("anyFilter")}</MenuItem>
+              {LOADERS_DATA.map((l) => (
+                <MenuItem key={l.id} value={l.id}>{l.name}</MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              size="small"
+              fullWidth
+              label={t("mcVersion")}
+              value={mcVersion}
+              onChange={(e) => setMcVersion(e.target.value)}
+              slotProps={{ select: { MenuProps: { slotProps: { paper: { sx: { maxHeight: 320 } } } } } }}
+            >
+              <MenuItem value="">{t("anyFilter")}</MenuItem>
+              {MC_VERSIONS.map((v) => (
+                <MenuItem key={v} value={v}>{v}</MenuItem>
+              ))}
+            </TextField>
+          </Box>
+
           <Alert severity="info" sx={{ mb: 2, "& .MuiAlert-message": { fontSize: "0.75rem" } }}>
             {t("downloadWarning")}
           </Alert>
