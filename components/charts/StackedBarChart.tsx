@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 import GoogleChart from "./GoogleChart";
-import { baseChartOptions, categoricalColors } from "./chartTheme";
+import { axisMax, baseChartOptions, categoricalColors } from "./chartTheme";
 
 const HEIGHT = 260;
 
@@ -29,13 +29,18 @@ export default function StackedBarChart({ labels, seriesNames, values, emptyText
   const options = useMemo(
     () => ({
       ...baseChartOptions(theme),
+      // 積み上げなので上端は各バケットの合計で決まる
+      vAxis: {
+        ...baseChartOptions(theme).vAxis,
+        viewWindow: { min: 0, max: axisMax(values.map((v) => v.reduce((a, b) => a + b, 0))) },
+      },
       height: HEIGHT,
       colors: categoricalColors(seriesNames.length, theme.palette.mode === "dark"),
       isStacked: true,
       bar: { groupWidth: "70%" },
       focusTarget: "category" as const,
     }),
-    [theme, seriesNames.length]
+    [theme, seriesNames.length, values]
   );
 
   if (labels.length === 0 || seriesNames.length === 0) {

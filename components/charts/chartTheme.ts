@@ -44,6 +44,20 @@ export function categoricalColors(count: number, isDark: boolean): string[] {
  * 全グラフ共通の見た目。
  * 背景を透過にしてカードの面をそのまま使い、文字色は MUI のテーマから取る。
  */
+const AXIS_TICKS = 4;
+
+/**
+ * 0 起点で目盛りが整数になる上端を返す。
+ * 自動スケールに任せると件数が小さいときに 0.5 刻みの目盛りが出るため。
+ */
+export function axisMax(values: number[]): number {
+  const max = Math.max(1, ...values);
+  const perTick = max / AXIS_TICKS;
+  const magnitude = 10 ** Math.floor(Math.log10(perTick));
+  const step = [1, 2, 2.5, 5, 10].find((s) => perTick <= s * magnitude) ?? 10;
+  return Math.max(AXIS_TICKS, step * magnitude * AXIS_TICKS);
+}
+
 export function baseChartOptions(theme: Theme) {
   const text = { color: theme.palette.text.secondary, fontSize: 12 };
 
@@ -54,12 +68,16 @@ export function baseChartOptions(theme: Theme) {
     legend: { position: "bottom" as const, alignment: "start" as const, textStyle: text },
     tooltip: { textStyle: { fontSize: 12 } },
     hAxis: { textStyle: text, gridlines: { color: "transparent" }, baselineColor: theme.palette.divider },
-    // 値軸は必ず 0 起点にする。途中から始めると差が実際より大きく見えるため
+    // 値軸は必ず 0 起点にする。途中から始めると差が実際より大きく見えるため。
+    // viewWindowMode を explicit にしないと viewWindow は無視され、
+    // 全て 0 の期間で目盛りがマイナスまで伸びる
     vAxis: {
       textStyle: text,
       minValue: 0,
+      viewWindowMode: "explicit" as const,
       viewWindow: { min: 0 },
       baseline: 0,
+      format: "#,##0",
       gridlines: { color: theme.palette.divider, count: 5 },
       minorGridlines: { count: 0 },
       baselineColor: theme.palette.divider,

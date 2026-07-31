@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 import GoogleChart from "./GoogleChart";
-import { baseChartOptions, seriesColor, type ChartSeriesKey } from "./chartTheme";
+import { axisMax, baseChartOptions, seriesColor, type ChartSeriesKey } from "./chartTheme";
 
 const HEIGHT = 260;
 
@@ -38,6 +38,10 @@ export default function TrendChart({ labels, series, emptyText, errorText }: Pro
   const options = useMemo(
     () => ({
       ...baseChartOptions(theme),
+      vAxis: {
+        ...baseChartOptions(theme).vAxis,
+        viewWindow: { min: 0, max: axisMax(series.flatMap((s) => s.values)) },
+      },
       height: HEIGHT,
       colors: series.map((s) => seriesColor(s.key, isDark)),
       lineWidth: 2,

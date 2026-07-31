@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 import GoogleChart from "./GoogleChart";
-import { baseChartOptions, seriesColor, type ChartSeriesKey } from "./chartTheme";
+import { axisMax, baseChartOptions, seriesColor, type ChartSeriesKey } from "./chartTheme";
 
 const ROW_HEIGHT = 44;
 const CHART_PADDING = 48;
@@ -41,11 +41,11 @@ export default function RankedBarChart({ items, seriesKey, valueLabel, emptyText
       colors: [seriesColor(seriesKey, theme.palette.mode === "dark")],
       legend: { position: "none" as const },
       bar: { groupWidth: "62%" },
-      hAxis: { ...base.vAxis },
+      hAxis: { ...base.vAxis, viewWindow: { min: 0, max: axisMax(items.map((i) => i.value)) } },
       vAxis: { ...base.hAxis },
       annotations: { alwaysOutside: true, textStyle: { fontSize: 12, color: theme.palette.text.secondary } },
     };
-  }, [theme, seriesKey, height]);
+  }, [theme, seriesKey, height, items]);
 
   if (items.length === 0) {
     return <Typography variant="body2" color="text.secondary">{emptyText}</Typography>;
