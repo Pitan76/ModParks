@@ -88,7 +88,9 @@ const nextConfig: NextConfig = {
       `${CSP_IMG_SRC} ${adHosts}`,
       "font-src 'self' data:",
       "connect-src 'self' https:",
-      `frame-src https://www.youtube.com https://www.youtube-nocookie.com ${adHosts}`,
+      // 'self' はダウンロード処理が非表示 iframe で /api/download を開くために必要。
+      // frame-src を明示すると default-src 'self' は継承されないので省略できない
+      `frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com ${adHosts}`,
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

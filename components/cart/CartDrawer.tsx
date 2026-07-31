@@ -18,6 +18,7 @@ import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import Alert from "@mui/material/Alert";
 import { useTranslations } from "next-intl";
 import { useCart } from "./cartStore";
+import { buildProjectDownloadUrl } from "@/lib/utils/downloadUrl";
 import ProjectTypeBadge from "../project/ProjectTypeBadge";
 import { useColorMode } from "@/components/ThemeRegistry";
 
@@ -36,21 +37,19 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
     : (mode === "light" ? "#e2e8f0" : "#334155");
 
   const handleDownloadAll = async () => {
+    // iframe は CSP の frame-src に阻まれるため、<a download> のクリックで開始する
     for (const item of items) {
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = `/api/download?slug=${encodeURIComponent(item.slug)}`;
-      document.body.appendChild(iframe);
-      
+      const a = document.createElement("a");
+      a.href = buildProjectDownloadUrl(item.slug);
+      a.download = "";
+      a.rel = "noopener";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
       // Delay slightly between requests to ease browser load (300ms)
       await new Promise((resolve) => setTimeout(resolve, 300));
-      
-      // Cleanup iframe after download starts
-      setTimeout(() => {
-        if (iframe.parentNode) {
-          document.body.removeChild(iframe);
-        }
-      }, 1000);
     }
   };
 
