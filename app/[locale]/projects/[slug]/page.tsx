@@ -245,9 +245,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             }}
           >
             <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
-            <Box sx={{ mt: 3, display: { xs: "none", sm: "block" } }}>
-              <AdSlot slot="project-sidebar" minHeight={250} />
-            </Box>
+            {/* 作者本人には自分のページの広告を出さない（自己クリックによる
+                無効トラフィック扱いを避けるため） */}
+            {!isOwner && (
+              <Box sx={{ mt: 3, display: { xs: "none", sm: "block" } }}>
+                <AdSlot slot="project-sidebar" minHeight={250} />
+              </Box>
+            )}
           </Box>
         </Grid>
       </Grid>

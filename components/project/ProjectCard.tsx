@@ -25,7 +25,6 @@ import { useColorMode } from "@/components/ThemeRegistry";
 import ProjectTypeBadge from "./ProjectTypeBadge";
 import ProjectTagBadge from "./ProjectTagBadge";
 import { useCart } from "@/components/cart/cartStore";
-import { useSession } from "next-auth/react";
 
 export type ProjectCardProps = {
   project: {
@@ -63,12 +62,6 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
   const router = useRouter();
   const { isNewTheme } = useColorMode();
   const isGrid = layout === "grid";
-
-  // 自分のプロジェクトはカートに入れる意味がないのでボタンを出さない
-  const { data: session } = useSession();
-  const isOwnProject =
-    !!session?.user?.username && session.user.username === project.authorUsername;
-  const showCartButton = showCart && !isOwnProject;
 
   const { has: isInCart, add: addToCart, remove: removeFromCart } = useCart();
   const inCart = isInCart(project.id);
@@ -132,7 +125,7 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
   const safeTags: string[] = project.tags ?? [];
 
   // グリッドではカード右上に浮かせ、リストではメタ情報の行に並べるため要素を共有する
-  const cartButton = showCartButton && (
+  const cartButton = showCart && (
     <Tooltip title={inCart ? tCart("remove") : tCart("add")} arrow>
       <IconButton
         size="small"
@@ -175,7 +168,7 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
           )}
           {/* Top Section: Icon + Main Info (Always row, wrap if extremely narrow) */}
           {/* グリッドでは右上のカートボタンとタイトルが重ならないよう余白を空ける */}
-          <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2, alignItems: "flex-start", flex: isGrid ? "none" : { xs: "none", sm: 1 }, minWidth: 0, pr: isGrid && showCartButton ? 4.5 : 0 }}>
+          <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2, alignItems: "flex-start", flex: isGrid ? "none" : { xs: "none", sm: 1 }, minWidth: 0, pr: isGrid && showCart ? 4.5 : 0 }}>
             {/* アイコン */}
             <Avatar
               src={project.iconUrl ?? undefined}
