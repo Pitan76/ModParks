@@ -86,7 +86,7 @@ export const deleteApiKey = async (id: string) => {
  * 指定したOAuthプロバイダーとの連携を解除する。
  * 解除するとログイン手段が一つも残らない場合は、締め出しを防ぐため拒否する。
  */
-async function disconnectOAuthProvider(provider: string) {
+async function disconnectOAuthProvider(provider: string): Promise<{ success: boolean; error?: "NOT_CONNECTED" | "LAST_LOGIN_METHOD" }> {
   const { db, userId } = await getAuthenticatedDb();
 
   const [user, userAccounts, passkeys] = await Promise.all([
@@ -96,7 +96,7 @@ async function disconnectOAuthProvider(provider: string) {
   ]);
 
   if (!userAccounts.some((acc) => acc.provider === provider)) {
-    return { error: "NOT_CONNECTED" as const };
+    return { success: false, error: "NOT_CONNECTED" };
   }
 
   const remainingMethods =
@@ -104,13 +104,13 @@ async function disconnectOAuthProvider(provider: string) {
     userAccounts.filter((acc) => acc.provider !== provider).length +
     passkeys.length;
   if (remainingMethods === 0) {
-    return { error: "LAST_LOGIN_METHOD" as const };
+    return { success: false, error: "LAST_LOGIN_METHOD" };
   }
 
   await db.delete(accounts).where(and(eq(accounts.userId, userId), eq(accounts.provider, provider)));
 
   revalidatePath("/settings");
-  return { success: true as const };
+  return { success: true };
 }
 
 /**

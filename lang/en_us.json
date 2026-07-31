@@ -1286,6 +1286,20 @@
       "successShow": "GitHub link is now visible",
       "successHide": "GitHub link is now hidden"
     },
+    "google": {
+      "title": "Google Connection",
+      "desc": "Connect your Google account to sign in with Google.",
+      "connected": "Connected",
+      "disconnected": "Not Connected",
+      "connect": "Connect Google",
+      "disconnect": "Disconnect",
+      "status": "Status",
+      "successDisconnect": "Google disconnected successfully"
+    },
+    "oauth": {
+      "errorLastLoginMethod": "This is your only sign-in method. Set a password or add another sign-in method before disconnecting.",
+      "errorDisconnect": "Failed to disconnect."
+    },
     "posting": {
       "title": "Posting Settings",
       "defaultProjectStatus": "Default Visibility",

@@ -1294,6 +1294,20 @@
       "successShow": "GitHubリンクを表示しました",
       "successHide": "GitHubリンクを非表示にしました"
     },
+    "google": {
+      "title": "Google連携",
+      "desc": "Googleアカウントを連携すると、Googleでログインできるようになります。",
+      "connected": "連携済み",
+      "disconnected": "未連携",
+      "connect": "連携する",
+      "disconnect": "連携を解除する",
+      "status": "ステータス",
+      "successDisconnect": "Google連携を解除しました"
+    },
+    "oauth": {
+      "errorLastLoginMethod": "唯一のログイン手段のため解除できません。パスワードを設定するか、他のログイン手段を追加してから解除してください。",
+      "errorDisconnect": "連携の解除に失敗しました。"
+    },
     "posting": {
       "title": "投稿設定",
       "defaultProjectStatus": "デフォルトの公開状態",
