@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { startAuthentication } from "@simplewebauthn/browser";
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/types";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
 import KeyIcon from "@mui/icons-material/Key";
 
 interface Props {
@@ -47,8 +49,20 @@ export default function PasskeyLoginButton({ onError }: Props) {
   };
 
   return (
-    <Button variant="outlined" fullWidth size="large" startIcon={<KeyIcon />} onClick={handleLogin} disabled={loading} sx={{ py: 1.2, mb: 2 }}>
-      {tAuth("login.loginWithPasskey")}
-    </Button>
+    <Tooltip title={tAuth("login.loginWithPasskey")}>
+      <Button
+        variant="outlined"
+        aria-label={tAuth("login.loginWithPasskey")}
+        onClick={handleLogin}
+        disabled={loading}
+        sx={{ flex: { xs: "1 1 100%", sm: "1 1 0" }, minWidth: 0, py: 1.2 }}
+      >
+        <KeyIcon />
+        {/* パスキーはロゴだけでは伝わりにくいため、hover でツールチップを出せないモバイルのみラベルを添える */}
+        <Box component="span" sx={{ display: { xs: "inline", sm: "none" }, ml: 1 }}>
+          {tAuth("login.providerPasskey")}
+        </Box>
+      </Button>
+    </Tooltip>
   );
 }

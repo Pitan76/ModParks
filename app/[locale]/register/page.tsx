@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
+import Tooltip from "@mui/material/Tooltip";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
 import { Link } from "@/lib/i18n/routing";
@@ -117,27 +118,29 @@ const RegisterPage = () => {
           <Typography variant="body2" color="text.disabled">{tAuth("or")}</Typography>
         </Divider>
 
-        <Button
-          variant="outlined"
-          fullWidth
-          size="large"
-          startIcon={<GitHubIcon />}
-          onClick={handleGithubLogin}
-          sx={{ py: 1.2, mb: 2 }}
-        >
-          {tAuth("register.registerWithGithub")}
-        </Button>
+        <Box sx={{ display: "flex", gap: 1.5, mb: 2 }}>
+          <Tooltip title={tAuth("register.registerWithGithub")}>
+            <Button
+              variant="outlined"
+              aria-label={tAuth("register.registerWithGithub")}
+              onClick={handleGithubLogin}
+              sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
+            >
+              <GitHubIcon />
+            </Button>
+          </Tooltip>
 
-        <Button
-          variant="outlined"
-          fullWidth
-          size="large"
-          startIcon={<GoogleIcon />}
-          onClick={handleGoogleLogin}
-          sx={{ py: 1.2, mb: 2 }}
-        >
-          {tAuth("register.registerWithGoogle")}
-        </Button>
+          <Tooltip title={tAuth("register.registerWithGoogle")}>
+            <Button
+              variant="outlined"
+              aria-label={tAuth("register.registerWithGoogle")}
+              onClick={handleGoogleLogin}
+              sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
+            >
+              <GoogleIcon />
+            </Button>
+          </Tooltip>
+        </Box>
 
         <Box sx={{ mt: 4, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">

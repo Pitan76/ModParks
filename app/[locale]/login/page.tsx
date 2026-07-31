@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
+import Tooltip from "@mui/material/Tooltip";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -152,7 +153,7 @@ export default function LoginPage() {
             fullWidth
             size="large"
             disabled={loading}
-            sx={{ mt: 3, py: 1.5, fontSize: "1rem" }}
+            sx={{ mt: 3, py: 1.2, fontSize: "1rem" }}
           >
             {loading ? tAuth("login.loggingIn") : tAuth("login.title")}
           </Button>
@@ -162,59 +163,39 @@ export default function LoginPage() {
           <Typography variant="body2" color="text.disabled">{tAuth("or")}</Typography>
         </Divider>
 
-        <Button
-          variant="outlined"
-          fullWidth
-          size="large"
-          startIcon={<GitHubIcon />}
-          onClick={handleGithubLogin}
-          sx={{ py: 1.2, mb: 2 }}
-        >
-          {tAuth("login.loginWithGithub")}
-        </Button>
-
-        <Button
-          variant="outlined"
-          fullWidth
-          size="large"
-          startIcon={<GoogleIcon />}
-          onClick={handleGoogleLogin}
-          sx={{ py: 1.2, mb: 2 }}
-        >
-          {tAuth("login.loginWithGoogle")}
-        </Button>
-
-        <PasskeyLoginButton onError={setError} />
-
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          setLoading(true);
-          signIn("resend", { email, callbackUrl: `/${locale}/projects` });
-        }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1, mt: 1 }}>
-            {tAuth("login.loginWithEmail") || "Log in with Magic Link"}
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <TextField
-              name="magicEmail"
-              label={tAuth("fields.email")}
-              type="email"
-              size="small"
-              fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+          <Tooltip title={tAuth("login.loginWithGithub")}>
             <Button
-              type="submit"
               variant="outlined"
-              disabled={loading || !email}
-              sx={{ whiteSpace: "nowrap" }}
+              aria-label={tAuth("login.loginWithGithub")}
+              onClick={handleGithubLogin}
+              sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
             >
-              {tCommon("submit") || "Send Link"}
+              <GitHubIcon />
             </Button>
-          </Box>
-        </form>
+          </Tooltip>
+
+          <Tooltip title={tAuth("login.loginWithGoogle")}>
+            <Button
+              variant="outlined"
+              aria-label={tAuth("login.loginWithGoogle")}
+              onClick={handleGoogleLogin}
+              sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
+            >
+              <GoogleIcon />
+            </Button>
+          </Tooltip>
+
+          <PasskeyLoginButton onError={setError} />
+        </Box>
+
+        <Box sx={{ mt: 2, textAlign: "center" }}>
+          <Link href={`/${locale}/magic-link`} style={{ textDecoration: "none" }}>
+            <Typography variant="body2" color="primary">
+              {tAuth("login.loginWithEmail")}
+            </Typography>
+          </Link>
+        </Box>
 
         <Box sx={{ mt: 4, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
