@@ -2,7 +2,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
+import LegalContent from "@/components/ui/LegalContent";
 import { SITE_URL } from "@/lib/config";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -33,7 +33,7 @@ export default async function PrivacyPolicyPage({ params }: { params: Promise<{ 
         {t("privacy.title")}
       </Typography>
       <Box sx={{ mt: 4 }}>
-        <MarkdownRenderer content={t("privacy.content")} />
+        <LegalContent content={t("privacy.content")} />
       </Box>
     </Container>
   );
