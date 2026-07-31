@@ -63,7 +63,12 @@ export default function AdSenseUnit({
     >
       <ins
         className="adsbygoogle"
-        style={{ display: "block", ...(maxHeight ? { maxHeight } : {}) }}
+        style={{
+          display: "block",
+          // 未配信時などに白く塗られないよう、枠自体は透明にしておく
+          background: "transparent",
+          ...(maxHeight ? { maxHeight } : {}),
+        }}
         data-ad-client={client}
         data-ad-slot={slotId}
         data-ad-format={format}

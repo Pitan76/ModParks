@@ -76,7 +76,7 @@ export default async function AdSlot({
         border: "1px dashed",
         borderColor: "divider",
         color: "text.disabled",
-        bgcolor: "action.hover",
+        bgcolor: "transparent",
       }}
     >
       <Typography variant="caption">{t("previewLabel")}</Typography>
