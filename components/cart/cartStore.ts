@@ -73,6 +73,49 @@ export const cartStore = {
   }
 };
 
+/** カート機能そのもののオン/オフ（設定 > テーマから切り替え） */
+const CART_DISABLED_KEY = "disable_cart";
+
+let cartEnabled = true;
+if (typeof window !== "undefined") {
+  try {
+    cartEnabled = window.localStorage.getItem(CART_DISABLED_KEY) !== "true";
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+const enabledListeners = new Set<() => void>();
+
+export const cartEnabledStore = {
+  getSnapshot: () => cartEnabled,
+  getServerSnapshot: () => true,
+  set: (enabled: boolean) => {
+    cartEnabled = enabled;
+    try {
+      window.localStorage.setItem(CART_DISABLED_KEY, enabled ? "false" : "true");
+    } catch (e) {
+      console.error(e);
+    }
+    enabledListeners.forEach((l) => l());
+  },
+  subscribe: (listener: () => void) => {
+    enabledListeners.add(listener);
+    return () => {
+      enabledListeners.delete(listener);
+    };
+  },
+};
+
+/** カート機能が有効か。無効ならカートUIは一切出さない */
+export function useCartEnabled() {
+  return useSyncExternalStore(
+    cartEnabledStore.subscribe,
+    cartEnabledStore.getSnapshot,
+    cartEnabledStore.getServerSnapshot
+  );
+}
+
 export function useCart() {
   const items = useSyncExternalStore(
     cartStore.subscribe,

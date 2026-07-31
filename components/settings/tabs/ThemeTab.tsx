@@ -13,6 +13,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Alert from "@mui/material/Alert";
 import { useColorMode } from "@/components/ThemeRegistry";
 import { useContextMenuContext } from "@/components/ui/ContextMenu";
+import { cartEnabledStore, useCartEnabled } from "@/components/cart/cartStore";
 
 /**
  * テーマ設定タブコンポーネント。
@@ -26,7 +27,13 @@ export default function ThemeTab() {
     isNewTheme ? "new" : "legacy"
   );
   const [useCustomContextMenu, setUseCustomContextMenu] = useState<boolean>(true);
+  const cartEnabled = useCartEnabled();
+  const [useCart, setUseCart] = useState<boolean>(cartEnabled);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    setUseCart(cartEnabled);
+  }, [cartEnabled]);
 
   useEffect(() => {
     try {
@@ -45,6 +52,7 @@ export default function ThemeTab() {
     } catch (e) {
       // ignore
     }
+    cartEnabledStore.set(useCart);
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);
   };
@@ -87,6 +95,21 @@ export default function ThemeTab() {
             />
           }
           label={t("useCustomContextMenu")}
+        />
+      </FormControl>
+
+      <FormControl>
+        <FormLabel id="cart-label" sx={{ mb: 1, fontWeight: 600 }}>
+          {t("cartLabel")}
+        </FormLabel>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={useCart}
+              onChange={(e) => setUseCart(e.target.checked)}
+            />
+          }
+          label={t("useCart")}
         />
       </FormControl>
 

@@ -24,7 +24,7 @@ import { useContextMenuHandler, useCommonItems, useContextMenuContext } from "@/
 import { useState } from "react";
 import Badge from "@mui/material/Badge";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { useCart } from "@/components/cart/cartStore";
+import { useCart, useCartEnabled } from "@/components/cart/cartStore";
 import CartDrawer from "@/components/cart/CartDrawer";
 
 export const SIDEBAR_WIDTH = 260;
@@ -81,6 +81,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
   // モバイルはヘッダーにカートを置かないので、サイドバーから開けるようにする
   const [cartOpen, setCartOpen] = useState(false);
   const { items: cartItems } = useCart();
+  const cartEnabled = useCartEnabled();
 
   const handleCartClick = () => {
     onMobileClose();
@@ -153,6 +154,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
         })}
 
         {/* カート（モバイルのみ。デスクトップはヘッダーに常設） */}
+        {cartEnabled && (
         <ListItem disablePadding sx={{ mb: 0.5, display: { xs: "block", md: "none" } }}>
           <ListItemButton onClick={handleCartClick} sx={{ borderRadius: 1 }}>
             <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }}>
@@ -165,6 +167,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
             />
           </ListItemButton>
         </ListItem>
+        )}
       </List>
 
       {/* ---- Collapse Button - Desktop Only ---- */}
@@ -267,7 +270,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
       >
         {drawerContent}
       </Drawer>
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      {cartEnabled && <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />}
     </Box>
   );
 };

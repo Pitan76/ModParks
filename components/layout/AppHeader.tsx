@@ -29,7 +29,7 @@ import { useColorMode } from "@/components/ThemeRegistry";
 import NotificationBell from "@/components/notification/NotificationBell";
 import { SIDEBAR_WIDTH } from "./BaseSidebar";
 import type { Session } from "next-auth";
-import { useCart } from "@/components/cart/cartStore";
+import { useCart, useCartEnabled } from "@/components/cart/cartStore";
 import CartDrawer from "@/components/cart/CartDrawer";
 
 export type AppHeaderProps = {
@@ -53,6 +53,7 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
 
   const [cartOpen, setCartOpen] = useState(false);
   const { items } = useCart();
+  const cartEnabled = useCartEnabled();
 
   // Drawer/Divider と同一の枠線色（theme.ts と一致させる）
   const borderColor = isNewTheme
@@ -175,6 +176,7 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
         {session?.user && <NotificationBell />}
 
         {/* カートボタン（モバイルはサイドバーに置くのでヘッダーには出さない） */}
+        {cartEnabled && (
         <Tooltip title={tCart("title")}>
           <IconButton
             id="nav-cart-button"
@@ -188,6 +190,7 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
             </Badge>
           </IconButton>
         </Tooltip>
+        )}
 
         {/* テーマ切替 */}
         <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"}>
@@ -334,7 +337,7 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
           </Box>
         )}
       </Toolbar>
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      {cartEnabled && <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />}
     </AppBar>
   );
 };

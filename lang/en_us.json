@@ -1316,6 +1316,8 @@
       "legacyTheme": "Legacy Theme",
       "contextMenuLabel": "Context Menu",
       "useCustomContextMenu": "Use custom context menu",
+      "cartLabel": "Download Cart",
+      "useCart": "Enable cart feature",
       "save": "Save Changes",
       "success": "Theme settings updated"
     },
