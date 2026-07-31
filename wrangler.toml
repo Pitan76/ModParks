@@ -67,6 +67,8 @@ CLOUDFLARE_ACCOUNT_ID = "70a9b16c9396a3ab84c4ce7719800373"
 # modparks-storage バケットに接続したカスタムドメイン（Cloudflare CDN キャッシュ対象）。
 R2_PUBLIC_URL = "https://files.modparks.pitan76.net"
 
+NEXT_PUBLIC_ADS_MODE = "on"
+
 [observability]
 enabled = false
 head_sampling_rate = 1
