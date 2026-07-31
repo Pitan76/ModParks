@@ -10,6 +10,9 @@ import Tooltip from "@mui/material/Tooltip";
 import { useRouter } from "@/lib/i18n/routing";
 import PersonIcon from "@mui/icons-material/Person";
 import DownloadIcon from "@mui/icons-material/Download";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import IconButton from "@mui/material/IconButton";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { usePinMenuItem } from "@/components/pin/usePinMenuItem";
@@ -21,6 +24,7 @@ import { useDownloadPreference } from "@/lib/hooks/useDownloadPreference";
 import { useColorMode } from "@/components/ThemeRegistry";
 import ProjectTypeBadge from "./ProjectTypeBadge";
 import ProjectTagBadge from "./ProjectTagBadge";
+import { useCart } from "@/components/cart/cartStore";
 
 export type ProjectCardProps = {
   project: {
@@ -52,9 +56,29 @@ export type ProjectCardProps = {
 const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
   const tTags = useTranslations("Tags");
   const tMenu = useTranslations("ContextMenu");
+  const tCart = useTranslations("Cart");
   const router = useRouter();
   const { isNewTheme } = useColorMode();
   const isGrid = layout === "grid";
+
+  const { has: isInCart, add: addToCart, remove: removeFromCart } = useCart();
+  const inCart = isInCart(project.id);
+
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (inCart) {
+      removeFromCart(project.id);
+    } else {
+      addToCart({
+        id: project.id,
+        slug: project.slug,
+        title: project.title,
+        iconUrl: project.iconUrl,
+        type: project.type,
+      });
+    }
+  };
 
   const c = useCommonItems();
   const pinItem = usePinMenuItem("project", project.id);
@@ -193,29 +217,52 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
               alignItems: isGrid ? "center" : { xs: "center", sm: "flex-end" }, 
               justifyContent: isGrid ? "space-between" : "flex-start",
               width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
-              gap: isGrid ? 2 : { xs: 2, sm: 0.5 }, 
+              gap: isGrid ? 2 : { xs: 2, sm: 1 }, 
               flexShrink: 0,
               mt: isGrid ? "auto" : { xs: "auto", sm: 0 },
               alignSelf: isGrid ? "auto" : { xs: "stretch", sm: "flex-end" }
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
-              <DownloadLabel
-                downloads={project.downloads}
-                totalDownloads={project.totalDownloads}
-                externalDownloads={project.externalDownloads}
-                modrinthId={project.modrinthId}
-                curseforgeId={project.curseforgeId}
-                iconSize="1rem"
-                textVariant="body2"
-                textColor="text.secondary"
-                iconColor="text.secondary"
-              />
-              {/* 狭い画面・グリッド表示ではDL数の横に日付を置く */}
-              <Box sx={{ display: isGrid ? "flex" : { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.5, minWidth: 0 }}>
-                <Typography variant="caption" color="text.disabled">•</Typography>
-                <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
+                <DownloadLabel
+                  downloads={project.downloads}
+                  totalDownloads={project.totalDownloads}
+                  externalDownloads={project.externalDownloads}
+                  modrinthId={project.modrinthId}
+                  curseforgeId={project.curseforgeId}
+                  iconSize="1rem"
+                  textVariant="body2"
+                  textColor="text.secondary"
+                  iconColor="text.secondary"
+                />
+                {/* 狭い画面・グリッド表示ではDL数の横に日付を置く */}
+                <Box sx={{ display: isGrid ? "flex" : { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.5, minWidth: 0 }}>
+                  <Typography variant="caption" color="text.disabled">•</Typography>
+                  <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
+                </Box>
               </Box>
+
+              {/* カートに追加/削除ボタン */}
+              <Tooltip title={inCart ? tCart("remove") : tCart("add")} arrow>
+                <IconButton
+                  size="small"
+                  onClick={handleCartClick}
+                  color={inCart ? "primary" : "default"}
+                  sx={{
+                    p: 0.5,
+                    border: "1px solid",
+                    borderColor: inCart ? "primary.main" : "divider",
+                    borderRadius: 1.5,
+                    bgcolor: inCart ? "action.selected" : "transparent",
+                    "&:hover": {
+                      bgcolor: inCart ? "action.hover" : "action.hover",
+                    }
+                  }}
+                >
+                  {inCart ? <ShoppingCartIcon fontSize="small" /> : <AddShoppingCartIcon fontSize="small" />}
+                </IconButton>
+              </Tooltip>
             </Box>
             
             {safeTags.length > 0 && (

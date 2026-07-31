@@ -1536,5 +1536,16 @@
       "curseforgeNotVerifiedDetail": "CurseForge ownership is not verified yet. Verify ownership in settings.",
       "curseforgeNotVerified": "CurseForge ownership is not verified yet."
     }
+  },
+  "Cart": {
+    "title": "Download Cart",
+    "empty": "Your cart is empty",
+    "add": "Add to Cart",
+    "remove": "Remove from Cart",
+    "clear": "Clear Cart",
+    "downloadAll": "Download All",
+    "downloadWarning": "*Depending on your browser settings, you may need to allow automatic download of multiple files.",
+    "added": "Added to cart",
+    "removed": "Removed from cart"
   }
 }

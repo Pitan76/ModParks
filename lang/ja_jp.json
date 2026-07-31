@@ -1544,5 +1544,16 @@
       "curseforgeNotVerifiedDetail": "CurseForge の所有確認が未完了です。設定画面で所有確認を行ってください。",
       "curseforgeNotVerified": "CurseForge の所有確認が未完了です。"
     }
+  },
+  "Cart": {
+    "title": "ダウンロードカート",
+    "empty": "カートは空です",
+    "add": "カートに入れる",
+    "remove": "カートから削除",
+    "clear": "カートを空にする",
+    "downloadAll": "まとめてダウンロード",
+    "downloadWarning": "※ブラウザの設定によっては、複数ファイルの自動ダウンロード許可が必要です。",
+    "added": "カートに追加しました",
+    "removed": "カートから削除しました"
   }
 }

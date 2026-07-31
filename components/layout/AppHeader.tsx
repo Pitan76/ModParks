@@ -13,11 +13,13 @@ import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 import Select from "@mui/material/Select";
 import Tooltip from "@mui/material/Tooltip";
+import Badge from "@mui/material/Badge";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
 import LanguageIcon from "@mui/icons-material/Language";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter, Link } from "@/lib/i18n/routing";
@@ -27,6 +29,8 @@ import { useColorMode } from "@/components/ThemeRegistry";
 import NotificationBell from "@/components/notification/NotificationBell";
 import { SIDEBAR_WIDTH } from "./BaseSidebar";
 import type { Session } from "next-auth";
+import { useCart } from "@/components/cart/cartStore";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 export type AppHeaderProps = {
   session: Session | null;
@@ -41,10 +45,14 @@ export type AppHeaderProps = {
  */
 const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) => {
   const t        = useTranslations("Nav");
+  const tCart    = useTranslations("Cart");
   const locale   = useLocale();
   const pathname = usePathname();
   const router   = useRouter();
   const { mode, toggleColorMode, isNewTheme } = useColorMode();
+
+  const [cartOpen, setCartOpen] = useState(false);
+  const { items } = useCart();
 
   // Drawer/Divider と同一の枠線色（theme.ts と一致させる）
   const borderColor = isNewTheme
@@ -165,6 +173,21 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
 
         {/* 通知ベル (ログイン時のみ) */}
         {session?.user && <NotificationBell />}
+
+        {/* カートボタン */}
+        <Tooltip title={tCart("title")}>
+          <IconButton
+            id="nav-cart-button"
+            color="inherit"
+            size="small"
+            onClick={() => setCartOpen(true)}
+            sx={{ mr: 0.5 }}
+          >
+            <Badge badgeContent={items.length} color="primary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
+        </Tooltip>
 
         {/* テーマ切替 */}
         <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"}>
@@ -311,6 +334,7 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
           </Box>
         )}
       </Toolbar>
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </AppBar>
   );
 };
