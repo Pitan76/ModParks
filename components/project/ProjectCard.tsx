@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import Tooltip from "@mui/material/Tooltip";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/lib/i18n/routing";
 import PersonIcon from "@mui/icons-material/Person";
 import DownloadIcon from "@mui/icons-material/Download";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";

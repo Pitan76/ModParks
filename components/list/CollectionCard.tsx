@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
-import { Link as RoutingLink } from "@/i18n/routing";
+import { Link as RoutingLink } from "@/lib/i18n/routing";
 import { useContextMenu, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
 import { toPlainDescription } from "@/lib/utils/plainText";

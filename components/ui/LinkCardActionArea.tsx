@@ -2,7 +2,7 @@
 
 import CardActionArea from "@mui/material/CardActionArea";
 import type { CardActionAreaProps } from "@mui/material/CardActionArea";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import type { ComponentProps } from "react";
 
 /**

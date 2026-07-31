@@ -13,7 +13,7 @@ import IdeaStatusControl from "@/components/idea/IdeaStatusControl";
 import ShareMenuButton from "@/components/ui/ShareMenuButton";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import { formatDate } from "@/lib/utils/format";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SITE_URL } from "@/lib/config";
 import { getIdeaMeta, getIdeaDetail } from "./ideaDetailData";

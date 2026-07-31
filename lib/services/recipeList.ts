@@ -1,4 +1,4 @@
-import { localeToFileMap, type AppLocale } from "@/i18n/routing";
+import { localeToFileMap, type AppLocale } from "@/lib/i18n/routing";
 
 /**
  * レシピCDN（mp-recipe）からネームスペース単位のレシピ索引を取得するモジュール。

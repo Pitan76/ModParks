@@ -16,7 +16,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
-import { usePathname, useRouter, Link } from "@/i18n/routing";
+import { usePathname, useRouter, Link } from "@/lib/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";

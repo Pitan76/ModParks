@@ -15,7 +15,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import type { MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";

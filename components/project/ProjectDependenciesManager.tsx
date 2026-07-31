@@ -24,7 +24,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ActionRow from "@/components/ui/ActionRow";
 import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/actions/dependency";
 import type { DependencyType, DependencyProjectSummary } from "@/lib/actions/dependency";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 
 export type ProjectDependenciesManagerProps = {

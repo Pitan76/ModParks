@@ -6,7 +6,7 @@ const GA_ID = "G-5N4ZEX76T6";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { routing, AppLocale } from "@/i18n/routing";
+import { routing, AppLocale } from "@/lib/i18n/routing";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";

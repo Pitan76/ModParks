@@ -8,7 +8,7 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import RssFeedIcon from "@mui/icons-material/RssFeed";
-import { Link as NextLink } from "@/i18n/routing";
+import { Link as NextLink } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 
 /**

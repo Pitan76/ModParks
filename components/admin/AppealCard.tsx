@@ -8,7 +8,7 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import { reviewScanAppeal } from "@/lib/actions/scanAppeal";
 import type { ScanFinding } from "@/workers/jar/src/types";

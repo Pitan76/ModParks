@@ -8,7 +8,7 @@ import Stack from "@mui/material/Stack";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import { unpublishProject, updateReportStatus, getReports } from "@/lib/actions/report";
 
 interface AdminReportsPageProps {

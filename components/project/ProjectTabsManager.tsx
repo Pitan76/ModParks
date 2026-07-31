@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/lib/i18n/routing";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 

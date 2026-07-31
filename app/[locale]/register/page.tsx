@@ -9,7 +9,7 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import { sendRegistrationEmail } from "@/lib/actions/auth";
 import { signIn } from "next-auth/react";
 import { useTranslations, useLocale } from "next-intl";

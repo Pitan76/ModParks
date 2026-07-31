@@ -11,7 +11,7 @@ import CollectionCard from "@/components/list/CollectionCard";
 import PaginationControls from "@/components/ui/PaginationControls";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
-import { Link as RoutingLink } from "@/i18n/routing";
+import { Link as RoutingLink } from "@/lib/i18n/routing";
 import { SITE_URL } from "@/lib/config";
 import IdeaCardList from "@/components/idea/IdeaCardList";
 import { getProfileMeta, resolveProfileUser, getProfileContent } from "./profileData";

@@ -2,7 +2,7 @@
 
 import MenuItem from "@mui/material/MenuItem";
 import type { MenuItemProps } from "@mui/material/MenuItem";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import type { ComponentProps } from "react";
 
 /**

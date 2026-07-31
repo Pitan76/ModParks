@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
-import { Link as RoutingLink } from "@/i18n/routing";
+import { Link as RoutingLink } from "@/lib/i18n/routing";
 import FollowUserButton from "@/components/user/FollowUserButton";
 import { DownloadLabel } from "@/components/ui/ProjectInfoLabels";
 import ProfileLinks from "./ProfileLinks";

@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/lib/i18n/routing";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import type { Notification } from "@/db/schema";
 import { renderNotification } from "./renderNotification";

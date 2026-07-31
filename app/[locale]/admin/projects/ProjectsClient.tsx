@@ -15,7 +15,7 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import { adminDeleteProject } from "@/lib/actions/admin";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";

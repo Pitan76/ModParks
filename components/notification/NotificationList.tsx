@@ -6,7 +6,7 @@ import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import type { Notification } from "@/db/schema";
 import { renderNotification } from "./renderNotification";
 

@@ -12,7 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { useTranslations } from "next-intl";
 import { updateIdeaComment, deleteIdeaComment, createIdeaComment } from "@/lib/actions/idea";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import CommentForm from "@/components/ui/CommentForm";
 

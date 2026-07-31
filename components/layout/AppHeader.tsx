@@ -20,7 +20,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
-import { usePathname, useRouter, Link } from "@/i18n/routing";
+import { usePathname, useRouter, Link } from "@/lib/i18n/routing";
 import LinkButton from "@/components/ui/LinkButton";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import { useColorMode } from "@/components/ThemeRegistry";

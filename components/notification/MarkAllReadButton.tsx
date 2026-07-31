@@ -4,7 +4,7 @@ import * as React from "react";
 import Button from "@mui/material/Button";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/lib/i18n/routing";
 import { markAllNotificationsRead } from "@/lib/actions/notification";
 
 export default function MarkAllReadButton() {

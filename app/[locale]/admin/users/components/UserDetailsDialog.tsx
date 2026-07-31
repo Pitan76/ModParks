@@ -7,7 +7,7 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import type { User } from "../UsersClient";
 

@@ -1,5 +1,5 @@
 import createMiddleware from "next-intl/middleware";
-import { routing } from "./i18n/routing";
+import { routing } from "./lib/i18n/routing";
 
 // Cloudflare Workers (OpenNext) では NextAuth の auth() ラッパーが
 // 非同期初期化のため proxy エクスポートとして機能しないため、

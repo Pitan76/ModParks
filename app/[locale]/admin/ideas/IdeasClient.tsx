@@ -14,7 +14,7 @@ import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import { adminDeleteIdea } from "@/lib/actions/admin";
 import { useTranslations } from "next-intl";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";

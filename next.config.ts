@@ -3,7 +3,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 import path from "path";
 import { CSP_IMG_SRC } from "./lib/config/imageHosts";
 
-const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   // Cloudflare Workers (Edge Runtime) 向け設定

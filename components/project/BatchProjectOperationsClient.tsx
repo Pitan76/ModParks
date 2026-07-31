@@ -20,7 +20,7 @@ import MenuItem from "@mui/material/MenuItem";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { formatCompactNumber } from "@/lib/utils/format";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/project";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";

@@ -10,7 +10,7 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import DownloadIcon from "@mui/icons-material/Download";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import type { MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";

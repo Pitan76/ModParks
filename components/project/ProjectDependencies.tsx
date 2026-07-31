@@ -9,7 +9,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 import MuiLink from "@mui/material/Link";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";

@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
 import { useLocale } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/lib/i18n/routing";
 import { useTheme } from "@mui/material/styles";
 import { isLongPressEvent, useLongPressContextMenu } from "./useLongPressContextMenu";
 

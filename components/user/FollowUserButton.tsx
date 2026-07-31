@@ -23,7 +23,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Avatar from "@mui/material/Avatar";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Link as RoutingLink } from "@/i18n/routing";
+import { Link as RoutingLink } from "@/lib/i18n/routing";
 import { getFollowList } from "@/lib/actions/profile";
 
 interface Props {
