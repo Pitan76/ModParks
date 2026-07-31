@@ -4,63 +4,31 @@ import { posts, projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { importGithubReleaseSystem } from "@/lib/actions/github";
 import { toProjectPost } from "@/lib/queries/postRow";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
- * GitHub からの Webhook であることを HMAC-SHA256 で検証する。
+ * このエンドポイントは署名検証を行わない。
  *
- * 検証が無いと、誰でも任意のリポジトリ名を騙って同期処理を起こせる。
- * 同期される内容自体は GitHub API から取り直すため改竄はできないが、
- * DB 書き込みと GitHub API 呼び出しを無制限に誘発できてしまう。
+ * Webhook を登録するのは利用者それぞれの連携先リポジトリ側であり、
+ * ModParks 運営が持つ単一のシークレットでは検証できない
+ * （検証するには全オーナーに同じ値を配る必要があり、配った時点で
+ *   シークレットとして成立しなくなる）。
+ * リポジトリ単位のシークレットを持たせるまでは、
+ * ペイロードは「同期のきっかけ」としてのみ扱う。
  *
- * シークレット未設定時は受け付けない（fail-closed）。設定漏れを黙って
- * 素通しにすると、検証を入れた意味が無くなるため。
+ * 偽造ペイロードが送られても、取り込む内容は下で GitHub API から
+ * 取り直すため改竄はできない。残るリスクは同期処理の誘発
+ * （＝リソース消費）なので、リポジトリ単位のレート制限で抑える。
  */
-async function verifyGithubSignature(rawBody: string, signature: string | null): Promise<boolean> {
-  const secret = process.env.GITHUB_WEBHOOK_SECRET;
-  if (!secret) return false;
-  if (!signature || !signature.startsWith("sha256=")) return false;
-
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawBody));
-  const expected = Array.from(new Uint8Array(mac))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  const actual = signature.slice("sha256=".length);
-
-  // タイミング攻撃を避けるため、長さを見てから定数時間で比較する
-  if (actual.length !== expected.length) return false;
-  let diff = 0;
-  for (let i = 0; i < expected.length; i++) {
-    diff |= expected.charCodeAt(i) ^ actual.charCodeAt(i);
-  }
-  return diff === 0;
-}
-
 export async function POST(request: Request) {
   try {
     const event = request.headers.get("x-github-event");
-
-    // 署名検証はイベント種別の判定より先に行う。
-    // 未署名のリクエストに「無視した」と返すと、エンドポイントの挙動を
-    // 外部から観測できてしまうため。
-    const rawBody = await request.text();
-    const valid = await verifyGithubSignature(rawBody, request.headers.get("x-hub-signature-256"));
-    if (!valid) {
-      return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 401 });
-    }
-
     if (event !== "release") {
       // 興味がないイベントは無視するが、GitHub側には正常完了を返す
       return NextResponse.json({ success: true, ignored: true, reason: "Not a release event" });
     }
 
-    const body = JSON.parse(rawBody) as any;
+    const body = await request.json() as any;
 
     // Releaseが新しく作られた(published)、あるいは公開された場合のみ対象
     // "created", "published", "released" などがあるが、"published" が一般的な公開イベント
@@ -73,6 +41,14 @@ export async function POST(request: Request) {
 
     if (!repositoryFullName || !releaseId) {
       return NextResponse.json({ success: false, error: "Missing repository or release info" }, { status: 400 });
+    }
+
+    // 認証が無い以上、同じリポジトリ名で何度も叩けば同期処理を無制限に起こせる。
+    // 正常な運用ではリリース公開時に数回届く程度なので、
+    // リポジトリ単位で 1 時間 10 回に制限する。
+    const limit = await checkRateLimit("gh-webhook", 10, 60 * 60 * 1000, repositoryFullName);
+    if (!limit.success) {
+      return NextResponse.json({ success: false, error: "Too many requests" }, { status: 429 });
     }
 
     const d1 = await getD1();
