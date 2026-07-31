@@ -47,13 +47,15 @@ export type ProjectCardProps = {
     updatedAt:   Date | number;
   };
   layout?: "list" | "grid";
+  /** カート追加/削除ボタンを表示するか（既定: true） */
+  showCart?: boolean;
 };
 
 /**
  * プロジェクト一覧などで個々のプロジェクト概要を表示するカードコンポーネント。
  * リスト表示とグリッド表示の2レイアウトに対応し、コンテキストメニュー機能も備えます。
  */
-const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
+const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardProps) => {
   const tTags = useTranslations("Tags");
   const tMenu = useTranslations("ContextMenu");
   const tCart = useTranslations("Cart");
@@ -254,6 +256,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
               </Box>
 
               {/* カートに追加/削除ボタン */}
+              {showCart && (
               <Tooltip title={inCart ? tCart("remove") : tCart("add")} arrow>
                 <IconButton
                   size="small"
@@ -274,6 +277,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
                   {inCart ? <ShoppingCartIcon fontSize="small" /> : <AddShoppingCartIcon fontSize="small" />}
                 </IconButton>
               </Tooltip>
+              )}
             </Box>
             
             {safeTags.length > 0 && (

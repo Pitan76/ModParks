@@ -20,7 +20,7 @@ const HomeProjectList = ({ projects }: HomeProjectListProps) => {
     <Grid container spacing={isNewTheme ? 0 : 2}>
       {projects.map((project) => (
         <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
-          <ProjectCard project={project} layout="grid" />
+          <ProjectCard project={project} layout="grid" showCart={false} />
         </Grid>
       ))}
     </Grid>
