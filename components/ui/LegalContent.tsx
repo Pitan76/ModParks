@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 
 type Block =
@@ -51,6 +52,19 @@ function parseLegalContent(content: string): Block[] {
   return blocks;
 }
 
+/**
+ * 本文中に素で書かれた URL をリンクに変換する。
+ * マークダウンのリンク記法には対応しない（法的文書では素の URL の方が印刷時に読めるため）。
+ */
+function linkify(text: string) {
+  const parts = text.split(/(https?:\/\/[^\s、。)）]+)/g);
+  return parts.map((part, i) =>
+    /^https?:\/\//.test(part)
+      ? <Link key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</Link>
+      : part
+  );
+}
+
 type LegalContentProps = {
   content: string;
 };
@@ -79,7 +93,7 @@ function LegalContent({ content }: LegalContentProps) {
             <Box key={i} component="ul" sx={{ pl: 3, my: 2 }}>
               {block.items.map((item, j) => (
                 <Typography key={j} component="li" variant="body1" sx={{ lineHeight: 1.9 }}>
-                  {item}
+                  {linkify(item)}
                 </Typography>
               ))}
             </Box>
@@ -88,7 +102,7 @@ function LegalContent({ content }: LegalContentProps) {
 
         return (
           <Typography key={i} variant="body1" sx={{ lineHeight: 1.9, mb: 2 }}>
-            {block.text}
+            {linkify(block.text)}
           </Typography>
         );
       })}
