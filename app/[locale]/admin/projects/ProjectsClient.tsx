@@ -15,7 +15,9 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import DownloadIcon from "@mui/icons-material/Download";
 import { Link } from "@/lib/i18n/routing";
+import { buildSilentDownloadUrl } from "@/lib/utils/downloadUrl";
 import { adminDeleteProject } from "@/lib/actions/admin";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
@@ -92,6 +94,16 @@ export default function ProjectsClient({ projects }: { projects: AdminProject[] 
                     </IconButton>
                     <IconButton component={Link} href={`/projects/${project.slug}`} color="primary" title="View Project">
                       <OpenInNewIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      component="a"
+                      href={buildSilentDownloadUrl(project.slug)}
+                      target="_blank"
+                      rel="noopener"
+                      color="inherit"
+                      title="Silent Download (latest version, not counted)"
+                    >
+                      <DownloadIcon fontSize="small" />
                     </IconButton>
                     <IconButton color="error" onClick={() => setDeleteTarget(project)} title="Delete Project">
                       <DeleteIcon fontSize="small" />

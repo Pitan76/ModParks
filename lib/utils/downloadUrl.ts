@@ -25,6 +25,15 @@ export const buildProjectDownloadUrl = (slug: string, pref?: DownloadPreference)
   return `/api/download?${params.toString()}`;
 };
 
+/**
+ * 管理者用のサイレントダウンロードURL（最新版）。
+ * ダウンロード数を増やさずに取得する。サーバ側で管理者以外は silent を無視するため、
+ * このURLが漏れてもカウント回避には使えない。
+ */
+export function buildSilentDownloadUrl(slug: string): string {
+  return `/api/download?slug=${encodeURIComponent(slug)}&silent=1`;
+}
+
 /** カンマ区切りクエリ値を配列へ。空なら undefined */
 export const parseCsvParam = (value: string | null | undefined): string[] | undefined => {
   const items = (value ?? "").split(",").map((v) => v.trim()).filter(Boolean);

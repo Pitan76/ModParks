@@ -29,19 +29,34 @@ async function resolveRequesterId(req: NextRequest): Promise<string | null> {
 }
 
 /**
- * プロジェクトのインサイダー（作者・メンバー・管理者）かどうか。
- * 未公開ファイルへのアクセス可否と、ダウンロード数カウント除外の両方に使う。
+ * ダウンロード要求元とプロジェクトの関係。
+ *
+ * アクセス可否とカウント除外は範囲が異なる。管理者は運営上あらゆるファイルを
+ * 取得できる必要があるが、そのダウンロードは「関係者の自己ダウンロード」ではないので
+ * 集計からは外さない。
  */
-async function isProjectInsider(
+type Relation = {
+  /** 未公開・アーカイブ済み・malicious なファイルを取得できるか（作者・メンバー・管理者） */
+  canAccessRestricted: boolean;
+  /** ダウンロード数の集計から除外するか（作者・メンバーのみ） */
+  excludedFromCount: boolean;
+  /** サイト管理者か。silent パラメータの許可判定に使う */
+  isAdmin: boolean;
+};
+
+async function resolveRelation(
   db: Awaited<ReturnType<typeof getDatabase>>,
   project: { id: string; authorId: string },
   userId: string | null
-): Promise<boolean> {
-  if (!userId) return false;
-  if (project.authorId === userId) return true;
+): Promise<Relation> {
+  if (!userId) return { canAccessRestricted: false, excludedFromCount: false, isAdmin: false };
 
   const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
-  if (dbUser?.role === "admin") return true;
+  const isAdmin = dbUser?.role === "admin";
+
+  if (project.authorId === userId) {
+    return { canAccessRestricted: true, excludedFromCount: true, isAdmin };
+  }
 
   const member = await db
     .select({ userId: projectMembers.userId })
@@ -49,7 +64,9 @@ async function isProjectInsider(
     .where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId)))
     .get();
 
-  return !!member;
+  if (member) return { canAccessRestricted: true, excludedFromCount: true, isAdmin };
+
+  return { canAccessRestricted: isAdmin, excludedFromCount: false, isAdmin };
 }
 
 /** バージョンが絞り込み条件（ローダー / MCバージョン）に合致するか */
@@ -89,7 +106,7 @@ async function getLatestVersion(
 
 /** GET /api/download?versionId=... | ?slug=...
  * - versionId 指定で該当バージョン、slug 指定でそのプロジェクトの最新バージョン
- * - ダウンロードカウントをインクリメント
+ * - ダウンロードカウントをインクリメント（silent=1 かつ管理者なら加算しない）
  * - R2 のファイル URL または外部URLにリダイレクト
  */
 export async function GET(req: NextRequest) {
@@ -124,28 +141,32 @@ export async function GET(req: NextRequest) {
     }
 
     const requesterId = await resolveRequesterId(req);
-    const isInsider = await isProjectInsider(db, project, requesterId);
+    const relation = await resolveRelation(db, project, requesterId);
 
     // 未公開（draft/private）は作者・メンバー・管理者のみアクセス可。
     // public / unlisted は直リンクで誰でもダウンロードできる。
-    if (RESTRICTED_STATUSES.has(project.visibility) && !isInsider) {
+    if (RESTRICTED_STATUSES.has(project.visibility) && !relation.canAccessRestricted) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     // アーカイブ済みバージョンは公開ダウンロード不可。作者・メンバー・管理者のみ取得できる。
-    if (version.archivedAt && !isInsider) {
+    if (version.archivedAt && !relation.canAccessRestricted) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     // スキャンで malicious 判定のファイルは配布しない。
     // 誤検知の可能性があるため、作者・メンバー・管理者は検証目的で取得できる。
-    if (version.scanStatus === "malicious" && !isInsider) {
+    if (version.scanStatus === "malicious" && !relation.canAccessRestricted) {
       return NextResponse.json({ error: "Download blocked by security scan" }, { status: 403 });
     }
 
+    // 管理画面からの「サイレントダウンロード」。審査・検証目的で統計を汚さずに取得する。
+    // 一般利用者が silent=1 を付けてカウントを回避できないよう、管理者のみ有効。
+    const silent = req.nextUrl.searchParams.get("silent") === "1" && relation.isAdmin;
+
     // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）。
-    // 作者・メンバー・管理者による自己ダウンロード（テスト等）は集計から除外する。
-    const rlRes = isInsider
+    // 作者・メンバーによる自己ダウンロード（テスト等）は集計から除外する。
+    const rlRes = relation.excludedFromCount || silent
       ? { success: false }
       : await checkRateLimit(`download:${versionId}`, 1, 10 * 60 * 1000);
 
