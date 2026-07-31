@@ -1175,6 +1175,30 @@
     "noIdeas": "No ideas yet.",
     "noFavorites": "No favorites yet",
     "commentOn": "On",
+    "charts": {
+      "downloadTrend": "Downloads ({period})",
+      "byProject": "Downloads by project ({period})",
+      "topProjects": "Total by project ({period})",
+      "rewardTrend": "Rewards (last {months} months)",
+      "downloads": "Downloads",
+      "views": "Views",
+      "earned": "Earned",
+      "spent": "Spent",
+      "otherProjects": "Other",
+      "granularityLabel": "Interval",
+      "granularity": {
+        "day": "Daily",
+        "week": "Weekly",
+        "month": "Monthly"
+      },
+      "period": {
+        "day": "last 30 days",
+        "week": "last 12 weeks",
+        "month": "last 12 months"
+      },
+      "noData": "No data yet",
+      "loadError": "Could not load the chart"
+    },
     "table": {
       "projectName": "Project Name",
       "status": "Status",

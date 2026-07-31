@@ -11,6 +11,7 @@ import { getDashboardData } from "./dashboardData";
 import StatsGrid from "./StatsGrid";
 import DashboardMain from "./DashboardMain";
 import DashboardSidebar from "./DashboardSidebar";
+import DashboardCharts from "./DashboardCharts";
 
 export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -66,6 +67,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         favorites={data.favorites.length}
         comments={data.totalComments}
       />
+
+      <DashboardCharts userId={session.user.id} locale={locale} />
 
       <Grid container spacing={{ xs: 3, md: 4 }}>
         <DashboardMain locale={locale} recentProjects={data.recentProjects} myIdeas={data.myIdeas} />

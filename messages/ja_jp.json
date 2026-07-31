@@ -1183,6 +1183,30 @@
     "noIdeas": "アイデアはまだありません。",
     "noFavorites": "お気に入りはまだありません",
     "commentOn": "投稿先",
+    "charts": {
+      "downloadTrend": "ダウンロード推移（{period}）",
+      "byProject": "プロジェクト別ダウンロード（{period}）",
+      "topProjects": "プロジェクト別合計（{period}）",
+      "rewardTrend": "リワード推移（過去{months}か月）",
+      "downloads": "ダウンロード",
+      "views": "閲覧",
+      "earned": "獲得ポイント",
+      "spent": "利用ポイント",
+      "otherProjects": "その他",
+      "granularityLabel": "表示単位",
+      "granularity": {
+        "day": "日",
+        "week": "週",
+        "month": "月"
+      },
+      "period": {
+        "day": "過去30日",
+        "week": "過去12週",
+        "month": "過去12か月"
+      },
+      "noData": "まだデータがありません",
+      "loadError": "グラフを読み込めませんでした"
+    },
     "table": {
       "projectName": "プロジェクト名",
       "status": "ステータス",

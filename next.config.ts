@@ -57,8 +57,10 @@ const nextConfig: NextConfig = {
     // script/styleは 'unsafe-inline' を許容した最低限のCSPに留める
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
-      "style-src 'self' 'unsafe-inline'",
+      // gstatic はダッシュボードのグラフ (Google Charts) のローダーと、
+      // ローダーが後から読む描画スクリプト・スタイルの配信元
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://www.gstatic.com",
+      "style-src 'self' 'unsafe-inline' https://www.gstatic.com",
       // 画像の配信元一覧は lib/config/imageHosts.ts に集約している。
       // プロキシ要否の判定（lib/utils/imageProxy.ts）と同じ定義を使うことで、
       // 「直接読み込むと判定したのに CSP に弾かれる」食い違いを防ぐ。

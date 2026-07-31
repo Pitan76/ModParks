@@ -17,6 +17,16 @@ export default function Loading() {
         ))}
       </Grid>
 
+      {/* グラフ */}
+      <Grid container spacing={4} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <Skeleton variant="rounded" width="100%" height={300} />
+        </Grid>
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Skeleton variant="rounded" width="100%" height={300} />
+        </Grid>
+      </Grid>
+
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 8 }}>
           <Skeleton variant="text" width={180} sx={{ fontSize: "1.5rem", mb: 3 }} />
