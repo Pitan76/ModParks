@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { users, userProfiles, userSettings, apiKeys, accounts } from "@/db/schema";
+import { users, userProfiles, userSettings, apiKeys, accounts, authenticators } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
@@ -83,15 +83,48 @@ export const deleteApiKey = async (id: string) => {
 };
 
 /**
+ * 指定したOAuthプロバイダーとの連携を解除する。
+ * 解除するとログイン手段が一つも残らない場合は、締め出しを防ぐため拒否する。
+ */
+async function disconnectOAuthProvider(provider: string) {
+  const { db, userId } = await getAuthenticatedDb();
+
+  const [user, userAccounts, passkeys] = await Promise.all([
+    db.select({ passwordHash: users.passwordHash }).from(users).where(eq(users.id, userId)).get(),
+    db.select({ provider: accounts.provider }).from(accounts).where(eq(accounts.userId, userId)),
+    db.select({ credentialID: authenticators.credentialID }).from(authenticators).where(eq(authenticators.userId, userId)),
+  ]);
+
+  if (!userAccounts.some((acc) => acc.provider === provider)) {
+    return { error: "NOT_CONNECTED" as const };
+  }
+
+  const remainingMethods =
+    (user?.passwordHash ? 1 : 0) +
+    userAccounts.filter((acc) => acc.provider !== provider).length +
+    passkeys.length;
+  if (remainingMethods === 0) {
+    return { error: "LAST_LOGIN_METHOD" as const };
+  }
+
+  await db.delete(accounts).where(and(eq(accounts.userId, userId), eq(accounts.provider, provider)));
+
+  revalidatePath("/settings");
+  return { success: true as const };
+}
+
+/**
  * GitHubとのOAuth連携を解除する Server Action。
  */
 export const disconnectGitHub = async () => {
-  const { db, userId } = await getAuthenticatedDb();
+  return disconnectOAuthProvider("github");
+};
 
-  await db.delete(accounts).where(and(eq(accounts.userId, userId), eq(accounts.provider, "github")));
-
-  revalidatePath("/settings");
-  return { success: true };
+/**
+ * GoogleとのOAuth連携を解除する Server Action。
+ */
+export const disconnectGoogle = async () => {
+  return disconnectOAuthProvider("google");
 };
 
 /**

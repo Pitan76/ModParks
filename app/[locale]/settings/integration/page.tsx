@@ -27,6 +27,7 @@ export default async function IntegrationSettingsPage() {
         curseforgeVerified={prefs.curseforgeVerified}
         curseforgeVerifyCode={prefs.curseforgeVerifyCode}
         isGitHubConnected={prefs.isGitHubConnected}
+        isGoogleConnected={prefs.isGoogleConnected}
         showGithubLinkInitial={user.showGithubLink}
       />
     </SettingsSection>

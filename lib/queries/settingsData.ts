@@ -94,5 +94,6 @@ export async function getSettingsPreferences(userId: string) {
     curseforgeVerifyCode: settings?.curseforgeVerifyCode || "",
     notificationPrefs: settings?.notificationPrefs ?? null,
     isGitHubConnected: userAccounts.some((acc) => acc.provider === "github"),
+    isGoogleConnected: userAccounts.some((acc) => acc.provider === "google"),
   };
 }

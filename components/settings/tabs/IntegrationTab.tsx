@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
-import { updateIntegrations, disconnectGitHub, toggleGithubVisibility } from "@/lib/actions/settings";
+import { updateIntegrations, disconnectGitHub, disconnectGoogle, toggleGithubVisibility } from "@/lib/actions/settings";
 import CurseForgeVerify from "./CurseForgeVerify";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -21,10 +21,11 @@ interface IntegrationTabProps {
   curseforgeVerified: boolean;
   curseforgeVerifyCode: string;
   isGitHubConnected: boolean;
+  isGoogleConnected: boolean;
   showGithubLinkInitial: boolean;
 }
 
-export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, isGitHubConnected, showGithubLinkInitial }: IntegrationTabProps) {
+export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, isGitHubConnected, isGoogleConnected, showGithubLinkInitial }: IntegrationTabProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const { message, flash } = useFlashMessage();
