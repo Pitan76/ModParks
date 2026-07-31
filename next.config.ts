@@ -58,49 +58,37 @@ const nextConfig: NextConfig = {
     // 広告(AdSense)と計測(GA)の配信元。AdSense は本体スクリプトの他に
     // 入札・不正クリック検知(adtrafficquality)・広告表示用 iframe を別ホストから読むため、
     // script/frame/img をまとめてここで定義する。
-    const adScriptHosts = [
-      "https://pagead2.googlesyndication.com",
-      "https://tpc.googlesyndication.com",
-      "https://partner.googleadservices.com",
-      "https://adservice.google.com",
-      "https://ep2.adtrafficquality.google",
-      "https://www.googletagmanager.com",
-      "https://www.google-analytics.com",
-      // プライバシーメッセージ(同意管理/Funding Choices)。GDPR/CCPA 同意バナーの配信元で、
-      // AdSense 本体から動的に読み込まれる
-      "https://fundingchoicesmessages.google.com",
-    ].join(" ");
-    const adFrameHosts = [
-      "https://googleads.g.doubleclick.net",
-      "https://tpc.googlesyndication.com",
-      "https://www.google.com",
-      "https://ep2.adtrafficquality.google",
-      // 同意バナー本体は iframe で描画される
-      "https://fundingchoicesmessages.google.com",
-    ].join(" ");
-    const adImgHosts = [
-      "https://pagead2.googlesyndication.com",
-      "https://tpc.googlesyndication.com",
-      "https://googleads.g.doubleclick.net",
-      "https://www.google.com",
-      "https://www.google-analytics.com",
-      "https://ep1.adtrafficquality.google",
+    // ホストを個別列挙すると Google が配信元を増やしたときに広告が黙って止まるため、
+    // サブドメインはワイルドカードで許可する。
+    // script-src は既に 'unsafe-inline' / 'unsafe-eval' を許容しており XSS 防御としては
+    // 機能していないので、ここを絞っても得られる安全性はほぼ無い。
+    // 一方で取りこぼすと配信停止に直結するため、広く許可する側に倒している。
+    // ワイルドカードは apex ドメインに一致しないので、両方を列挙すること。
+    const adHosts = [
+      "https://googlesyndication.com https://*.googlesyndication.com",
+      "https://googleadservices.com https://*.googleadservices.com",
+      "https://doubleclick.net https://*.doubleclick.net",
+      "https://adtrafficquality.google https://*.adtrafficquality.google",
+      "https://google-analytics.com https://*.google-analytics.com",
+      "https://googletagmanager.com https://*.googletagmanager.com",
+      // 広告配信・同意管理(Funding Choices)・広告用 iframe が google.com 直下にある
+      "https://google.com https://*.google.com",
     ].join(" ");
 
     const csp = [
       "default-src 'self'",
       // gstatic はダッシュボードのグラフ (Google Charts) のローダーと、
       // ローダーが後から読む描画スクリプト・スタイルの配信元
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://www.gstatic.com ${adScriptHosts}`,
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://www.gstatic.com ${adHosts}`,
       "style-src 'self' 'unsafe-inline' https://www.gstatic.com",
       // 画像の配信元一覧は lib/config/imageHosts.ts に集約している。
       // プロキシ要否の判定（lib/utils/imageProxy.ts）と同じ定義を使うことで、
       // 「直接読み込むと判定したのに CSP に弾かれる」食い違いを防ぐ。
       // ここに無いホストの画像は /api/image-proxy 経由（= 'self'）で表示される。
-      `${CSP_IMG_SRC} ${adImgHosts}`,
+      `${CSP_IMG_SRC} ${adHosts}`,
       "font-src 'self' data:",
       "connect-src 'self' https:",
-      `frame-src https://www.youtube.com https://www.youtube-nocookie.com ${adFrameHosts}`,
+      `frame-src https://www.youtube.com https://www.youtube-nocookie.com ${adHosts}`,
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
