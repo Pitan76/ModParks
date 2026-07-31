@@ -55,20 +55,47 @@ const nextConfig: NextConfig = {
   async headers() {
     // MUI(emotion)のinline styleとNext.jsのinline scriptを壊さないため、
     // script/styleは 'unsafe-inline' を許容した最低限のCSPに留める
+    // 広告(AdSense)と計測(GA)の配信元。AdSense は本体スクリプトの他に
+    // 入札・不正クリック検知(adtrafficquality)・広告表示用 iframe を別ホストから読むため、
+    // script/frame/img をまとめてここで定義する。
+    const adScriptHosts = [
+      "https://pagead2.googlesyndication.com",
+      "https://tpc.googlesyndication.com",
+      "https://partner.googleadservices.com",
+      "https://adservice.google.com",
+      "https://ep2.adtrafficquality.google",
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com",
+    ].join(" ");
+    const adFrameHosts = [
+      "https://googleads.g.doubleclick.net",
+      "https://tpc.googlesyndication.com",
+      "https://www.google.com",
+      "https://ep2.adtrafficquality.google",
+    ].join(" ");
+    const adImgHosts = [
+      "https://pagead2.googlesyndication.com",
+      "https://tpc.googlesyndication.com",
+      "https://googleads.g.doubleclick.net",
+      "https://www.google.com",
+      "https://www.google-analytics.com",
+      "https://ep1.adtrafficquality.google",
+    ].join(" ");
+
     const csp = [
       "default-src 'self'",
       // gstatic はダッシュボードのグラフ (Google Charts) のローダーと、
       // ローダーが後から読む描画スクリプト・スタイルの配信元
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://www.gstatic.com",
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://www.gstatic.com ${adScriptHosts}`,
       "style-src 'self' 'unsafe-inline' https://www.gstatic.com",
       // 画像の配信元一覧は lib/config/imageHosts.ts に集約している。
       // プロキシ要否の判定（lib/utils/imageProxy.ts）と同じ定義を使うことで、
       // 「直接読み込むと判定したのに CSP に弾かれる」食い違いを防ぐ。
       // ここに無いホストの画像は /api/image-proxy 経由（= 'self'）で表示される。
-      CSP_IMG_SRC,
+      `${CSP_IMG_SRC} ${adImgHosts}`,
       "font-src 'self' data:",
       "connect-src 'self' https:",
-      "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
+      `frame-src https://www.youtube.com https://www.youtube-nocookie.com ${adFrameHosts}`,
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
