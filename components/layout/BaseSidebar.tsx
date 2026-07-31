@@ -21,6 +21,11 @@ import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";
 import { useContextMenuHandler, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
+import { useState } from "react";
+import Badge from "@mui/material/Badge";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { useCart } from "@/components/cart/cartStore";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 export const SIDEBAR_WIDTH = 260;
 
@@ -59,6 +64,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
   const locale = useLocale();
   const tMenu = useTranslations("ContextMenu");
   const tNav = useTranslations("Nav");
+  const tCart = useTranslations("Cart");
   const openMenu = useContextMenuHandler();
   const { isDisabled } = useContextMenuContext();
   const c = useCommonItems();
@@ -70,6 +76,15 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
   const handleNavigation = (path: string) => {
     router.push(path);
     onMobileClose();
+  };
+
+  // モバイルはヘッダーにカートを置かないので、サイドバーから開けるようにする
+  const [cartOpen, setCartOpen] = useState(false);
+  const { items: cartItems } = useCart();
+
+  const handleCartClick = () => {
+    onMobileClose();
+    setCartOpen(true);
   };
 
   const drawerContent = (
@@ -136,6 +151,20 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
             </ListItem>
           );
         })}
+
+        {/* カート（モバイルのみ。デスクトップはヘッダーに常設） */}
+        <ListItem disablePadding sx={{ mb: 0.5, display: { xs: "block", md: "none" } }}>
+          <ListItemButton onClick={handleCartClick} sx={{ borderRadius: 1 }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }}>
+              <Badge badgeContent={cartItems.length} color="primary">
+                <ShoppingCartIcon />
+              </Badge>
+            </ListItemIcon>
+            <ListItemText
+              primary={<Typography sx={{ fontWeight: 500 }}>{tCart("title")}</Typography>}
+            />
+          </ListItemButton>
+        </ListItem>
       </List>
 
       {/* ---- Collapse Button - Desktop Only ---- */}
@@ -238,6 +267,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
       >
         {drawerContent}
       </Drawer>
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </Box>
   );
 };

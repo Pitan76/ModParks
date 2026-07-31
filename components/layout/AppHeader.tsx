@@ -174,14 +174,14 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
         {/* 通知ベル (ログイン時のみ) */}
         {session?.user && <NotificationBell />}
 
-        {/* カートボタン */}
+        {/* カートボタン（モバイルはサイドバーに置くのでヘッダーには出さない） */}
         <Tooltip title={tCart("title")}>
           <IconButton
             id="nav-cart-button"
             color="inherit"
             size="small"
             onClick={() => setCartOpen(true)}
-            sx={{ mr: 0.5 }}
+            sx={{ mr: 0.5, display: { xs: "none", md: "inline-flex" } }}
           >
             <Badge badgeContent={items.length} color="primary">
               <ShoppingCartIcon />
