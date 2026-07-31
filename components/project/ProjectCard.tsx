@@ -217,13 +217,23 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
               alignItems: isGrid ? "center" : { xs: "center", sm: "flex-end" }, 
               justifyContent: isGrid ? "space-between" : "flex-start",
               width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
-              gap: isGrid ? 2 : { xs: 2, sm: 1 }, 
+              gap: isGrid ? 2 : { xs: 2, sm: 0.5 },
               flexShrink: 0,
               mt: isGrid ? "auto" : { xs: "auto", sm: 0 },
               alignSelf: isGrid ? "auto" : { xs: "stretch", sm: "flex-end" }
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", gap: 2 }}>
+            {/* グリッド/狭い画面は左右に振り分け、リスト表示(sm以上)は右寄せで列幅を広げない */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: isGrid ? "space-between" : { xs: "space-between", sm: "flex-end" },
+                width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
+                gap: isGrid ? 2 : { xs: 2, sm: 1 },
+                minWidth: 0,
+              }}
+            >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
                 <DownloadLabel
                   downloads={project.downloads}
@@ -251,6 +261,7 @@ const ProjectCard = ({ project, layout = "list" }: ProjectCardProps) => {
                   color={inCart ? "primary" : "default"}
                   sx={{
                     p: 0.5,
+                    flexShrink: 0,
                     border: "1px solid",
                     borderColor: inCart ? "primary.main" : "divider",
                     borderRadius: 1.5,
