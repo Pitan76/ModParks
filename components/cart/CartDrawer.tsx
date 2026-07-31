@@ -5,6 +5,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import { Link } from "@/lib/i18n/routing";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Avatar from "@mui/material/Avatar";
@@ -122,35 +124,40 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                     <DeleteIcon />
                   </IconButton>
                 }
+                disablePadding
                 sx={{
                   borderBottom: 1,
                   borderColor: "divider",
-                  py: 1.5,
-                  px: 0.5
                 }}
               >
-                <ListItemAvatar sx={{ minWidth: 48 }}>
-                  <Avatar
-                    src={item.iconUrl ?? undefined}
-                    alt={item.title}
-                    variant="rounded"
-                    sx={{ width: 36, height: 36 }}
-                  >
-                    <ExtensionIcon fontSize="small" />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", pr: 2 }}>
-                      {item.title}
-                    </Typography>
-                  }
-                  secondary={
-                    <Box sx={{ mt: 0.5 }}>
-                      <ProjectTypeBadge type={item.type as any} />
-                    </Box>
-                  }
-                />
+                <ListItemButton
+                  component={Link}
+                  href={`/projects/${item.slug}`}
+                  onClick={onClose}
+                  sx={{ py: 0.75, pl: 0.5, pr: 5, borderRadius: 1 }}
+                >
+                  <ListItemAvatar sx={{ minWidth: 44 }}>
+                    <Avatar
+                      src={item.iconUrl ?? undefined}
+                      alt={item.title}
+                      variant="rounded"
+                      sx={{ width: 32, height: 32 }}
+                    >
+                      <ExtensionIcon fontSize="small" />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    disableTypography
+                    primary={
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0, pr: 1 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                          {item.title}
+                        </Typography>
+                        <ProjectTypeBadge type={item.type as any} />
+                      </Box>
+                    }
+                  />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>
@@ -169,6 +176,8 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
               label={t("loader")}
               value={loader}
               onChange={(e) => setLoader(e.target.value)}
+              // テーマ既定の disablePortal だとドロワー内に埋め込まれて表示位置が崩れる
+              slotProps={{ select: { MenuProps: { disablePortal: false, slotProps: { paper: { sx: { maxHeight: 320 } } } } } }}
             >
               <MenuItem value="">{t("anyFilter")}</MenuItem>
               {LOADERS_DATA.map((l) => (
@@ -182,7 +191,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
               label={t("mcVersion")}
               value={mcVersion}
               onChange={(e) => setMcVersion(e.target.value)}
-              slotProps={{ select: { MenuProps: { slotProps: { paper: { sx: { maxHeight: 320 } } } } } }}
+              slotProps={{ select: { MenuProps: { disablePortal: false, slotProps: { paper: { sx: { maxHeight: 320 } } } } } }}
             >
               <MenuItem value="">{t("anyFilter")}</MenuItem>
               {MC_VERSIONS.map((v) => (
