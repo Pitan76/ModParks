@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { Env } from "@/lib/db";
+import { safeContentTypeForKey } from "@/lib/upload/fileTypes";
 
 export async function GET(
   _req: NextRequest,
@@ -37,11 +38,21 @@ export async function GET(
     }
 
     const headers = new Headers();
-    if (object.httpMetadata?.contentType) {
-      headers.set("Content-Type", object.httpMetadata.contentType);
+    // 保存済みの Content-Type はアップロード時にクライアントが指定した値なので信用しない。
+    // そのまま返すと `text/html` を保存するだけで自オリジン上の HTML として描画され、
+    // CSP が script-src 'unsafe-inline' を許している以上スクリプトが実行される。
+    // 画像として安全に返せる拡張子のみ本来の型を付け、それ以外は必ずダウンロード扱いにする。
+    const contentType = safeContentTypeForKey(key);
+    if (contentType) {
+      headers.set("Content-Type", contentType);
+    } else {
+      headers.set("Content-Type", "application/octet-stream");
+      headers.set("Content-Disposition", "attachment");
     }
+    headers.set("X-Content-Type-Options", "nosniff");
     headers.set("etag", object.httpEtag);
-    
+
+
     // R2オブジェクトの body は ReadableStream なのでそのまま返せる
     return new NextResponse(object.body as any, {
       headers,

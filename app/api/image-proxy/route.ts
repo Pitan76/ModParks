@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * 外部画像のプロキシ。
@@ -80,6 +81,13 @@ export async function GET(request: Request) {
   }
   if (isPrivateAddress(target.hostname)) {
     return NextResponse.json({ error: "Forbidden host" }, { status: 400 });
+  }
+
+  // 認証不要の汎用フェッチャーなので、そのままだと帯域の踏み台にできる。
+  // 正常な閲覧（1ページに数十枚の画像）を妨げない範囲で IP 単位の上限を設ける。
+  const limit = await checkRateLimit("image-proxy", 300, 60 * 1000);
+  if (!limit.success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
   let upstream: Response;

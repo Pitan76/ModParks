@@ -8,6 +8,9 @@ import { checkRateLimit } from "@/lib/rate-limit";
 const LOGIN_RATE_LIMIT = 10;
 const LOGIN_RATE_WINDOW_MS = 15 * 60 * 1000;
 
+/** ログインで発行する CLI 用 API キーの有効期限（90日） */
+const API_KEY_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json() as any;
@@ -81,13 +84,18 @@ export async function POST(request: Request) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashedKey = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
+    // ログインの度に無期限キーが増え続けると、1本漏れただけで永久に使われる。
+    // CLI の利用実態に合わせて有効期限を切り、失効したものは再ログインで取り直させる。
+    const expiresAt = new Date(Date.now() + API_KEY_TTL_MS);
+
     await db.insert(apiKeys).values({
       key: hashedKey,
       name: keyName,
       userId: user.id,
+      expiresAt,
     });
 
-    return NextResponse.json({ apiKey: newApiKey });
+    return NextResponse.json({ apiKey: newApiKey, expiresAt: expiresAt.toISOString() });
   } catch (error) {
     console.error("Login Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

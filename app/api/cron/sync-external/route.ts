@@ -5,16 +5,15 @@ import { eq, isNotNull, or } from "drizzle-orm";
 import { toProjectPost } from "@/lib/queries/postRow";
 import { syncExternalProjectDataSystem } from "@/lib/actions/projectSync";
 import { purgeExpiredRateLimits } from "@/lib/rate-limit";
+import { checkCronAuth } from "@/lib/cron/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
-    // 認証ヘッダーのチェック（任意：外部からの不正アクセスを防ぐためのシークレット）
-    const authHeader = request.headers.get("authorization");
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    // 認証ヘッダーのチェック（シークレット未設定なら実行しない）
+    const unauthorized = checkCronAuth(request);
+    if (unauthorized) return unauthorized;
 
     const d1 = await getD1();
     const db = getDb(d1);

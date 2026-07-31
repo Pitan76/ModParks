@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { runAutoBackup } from "@/lib/backup/core";
+import { checkCronAuth } from "@/lib/cron/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,8 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: Request) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const unauthorized = checkCronAuth(request);
+    if (unauthorized) return unauthorized;
 
     const d1 = await getD1();
     const db = getDb(d1);

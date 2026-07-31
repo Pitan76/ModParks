@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { uploadToR2, getR2Bucket } from "@/lib/r2";
+import { isAllowedUpload, uploadTypeFromKey } from "@/lib/upload/fileTypes";
 
 /** PUT /api/upload/direct
  * 開発環境向けの R2 への直接アップロードエンドポイント
@@ -38,8 +39,17 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden: Invalid key format" }, { status: 403 });
     }
     const slugOrId = parts[1];
-    
-    if (slugOrId !== "new-project") {
+
+    if (slugOrId === "new-project") {
+      // presign が発行する未保存プロジェクト用キーは
+      // `icon/new-project/<userId>/...` の形。
+      // ここを素通しにすると、認証さえ通れば誰でも公開プレフィックス配下へ
+      // 書き込めてしまう（自オリジンでの保存型 XSS になる）ため、
+      // 用途と所有者を必ず突き合わせる。
+      if (!key.startsWith("icon/") || parts[2] !== session.user.id) {
+        return NextResponse.json({ error: "Forbidden: Invalid key" }, { status: 403 });
+      }
+    } else {
       const { getDb, getD1 } = await import("@/lib/db");
       const { projectMembers } = await import("@/db/schema");
       const { eq, and } = await import("drizzle-orm");
@@ -75,6 +85,14 @@ export async function PUT(req: NextRequest) {
     }
 
     const contentType = req.headers.get("content-type") || "application/octet-stream";
+
+    // 保存した Content-Type は配信時にそのまま返る可能性があるので、
+    // presign と同じホワイトリストをここでも必ず通す。
+    const uploadType = uploadTypeFromKey(key);
+    const fileName = key.split("/").pop() ?? "";
+    if (!uploadType || !isAllowedUpload(uploadType, contentType, fileName)) {
+      return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
+    }
 
     if (!req.body) {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });

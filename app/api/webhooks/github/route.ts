@@ -5,15 +5,62 @@ import { eq } from "drizzle-orm";
 import { importGithubReleaseSystem } from "@/lib/actions/github";
 import { toProjectPost } from "@/lib/queries/postRow";
 
+/**
+ * GitHub からの Webhook であることを HMAC-SHA256 で検証する。
+ *
+ * 検証が無いと、誰でも任意のリポジトリ名を騙って同期処理を起こせる。
+ * 同期される内容自体は GitHub API から取り直すため改竄はできないが、
+ * DB 書き込みと GitHub API 呼び出しを無制限に誘発できてしまう。
+ *
+ * シークレット未設定時は受け付けない（fail-closed）。設定漏れを黙って
+ * 素通しにすると、検証を入れた意味が無くなるため。
+ */
+async function verifyGithubSignature(rawBody: string, signature: string | null): Promise<boolean> {
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  if (!secret) return false;
+  if (!signature || !signature.startsWith("sha256=")) return false;
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawBody));
+  const expected = Array.from(new Uint8Array(mac))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  const actual = signature.slice("sha256=".length);
+
+  // タイミング攻撃を避けるため、長さを見てから定数時間で比較する
+  if (actual.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) {
+    diff |= expected.charCodeAt(i) ^ actual.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 export async function POST(request: Request) {
   try {
     const event = request.headers.get("x-github-event");
+
+    // 署名検証はイベント種別の判定より先に行う。
+    // 未署名のリクエストに「無視した」と返すと、エンドポイントの挙動を
+    // 外部から観測できてしまうため。
+    const rawBody = await request.text();
+    const valid = await verifyGithubSignature(rawBody, request.headers.get("x-hub-signature-256"));
+    if (!valid) {
+      return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 401 });
+    }
+
     if (event !== "release") {
       // 興味がないイベントは無視するが、GitHub側には正常完了を返す
       return NextResponse.json({ success: true, ignored: true, reason: "Not a release event" });
     }
 
-    const body = await request.json() as any;
+    const body = JSON.parse(rawBody) as any;
 
     // Releaseが新しく作られた(published)、あるいは公開された場合のみ対象
     // "created", "published", "released" などがあるが、"published" が一般的な公開イベント
