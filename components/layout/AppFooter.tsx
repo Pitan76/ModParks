@@ -97,17 +97,6 @@ const AppFooter = () => {
               </Link>
             </Stack>
 
-            {/* アカウントとデータ取得目的の明示。Google OAuth の審査要件で
-                ホームページ上に記載が必要なため、全ページ共通のフッターに置く。 */}
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              align="center"
-              sx={{ display: "block", maxWidth: 720, mx: "auto", lineHeight: 1.8 }}
-            >
-              {t("dataNotice")}
-            </Typography>
-
             {/* 下段: 法的情報 */}
             <Stack direction="row" spacing={3} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
               <Link
@@ -131,6 +120,17 @@ const AppFooter = () => {
         </Stack>
 
         <Divider sx={{ my: 3 }} />
+
+        {/* アカウントとデータ取得目的の明示。Google OAuth の審査要件で
+            ホームページ上に記載が必要なため、全ページ共通のフッターに置く。 */}
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          align="center"
+          sx={{ display: "block", maxWidth: 720, mx: "auto", mb: 1.5, lineHeight: 1.8 }}
+        >
+          {t("dataNotice")}
+        </Typography>
 
         <Typography variant="caption" color="text.disabled" align="center" sx={{ display: "block" }}>
           © {year} ModParks. MIT License.

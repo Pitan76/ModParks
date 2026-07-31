@@ -1450,7 +1450,8 @@
     "support": "Support",
     "contact": "Contact",
     "terms": "Terms of Service",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "dataNotice": "Browsing and searching mods and plugins requires no account. Posting requires an account, and if you sign in with Google or GitHub we receive only your email address, display name, and avatar, which are used solely for signing you in and displaying your profile."
   },
   "List": {
     "editList": "Edit List",
