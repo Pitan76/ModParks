@@ -67,8 +67,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
         borderColor:  "divider",
         borderRadius: 2,
         p:            2.5,
-        position:     { md: "sticky" },
-        top:          { md: 80 },
+        // 追従は広告枠を含む親側で行う（ここで sticky にすると広告と重なる）
       }}
     >
       {/* ライセンス */}

@@ -236,9 +236,21 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
         {/* ---- 右カラム: サイドバー ---- */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
-          <Box sx={{ mt: 3, display: { xs: "none", sm: "block" } }}>
-            <AdSlot slot="project-sidebar" minHeight={250} />
+          {/* 情報カードと広告をまとめて追従させる。個別に sticky にすると
+              固定されない側が上を通過して重なるため、必ずこのラッパーで行う */}
+          <Box
+            sx={{
+              position: { md: "sticky" },
+              top: { md: 80 },
+              // 内容が画面より高いときに広告が見切れないようにする
+              maxHeight: { md: "calc(100vh - 96px)" },
+              overflowY: { md: "auto" },
+            }}
+          >
+            <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
+            <Box sx={{ mt: 3, display: { xs: "none", sm: "block" } }}>
+              <AdSlot slot="project-sidebar" minHeight={250} />
+            </Box>
           </Box>
         </Grid>
       </Grid>
