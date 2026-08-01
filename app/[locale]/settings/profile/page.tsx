@@ -19,7 +19,6 @@ export default async function ProfileSettingsPage() {
     <SettingsSection title={t("profile.title")}>
       <ProfileTabLazy
         user={user}
-        locale={user.locale}
         showGithubLink={user.showGithubLink && !!user.githubUsername}
         githubUsername={user.githubUsername}
       />

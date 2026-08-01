@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { updateProfile } from "@/lib/actions/settings";
 import { useAvatarUpload } from "@/lib/hooks/useAvatarUpload";
-import { useLinksEditor } from "@/lib/hooks/useLinksEditor";
+import { useLinksEditor, parseLinks, type LinkItem } from "@/lib/hooks/useLinksEditor";
+import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
+import StickySaveBar from "@/components/ui/StickySaveBar";
 import AvatarUploadBadge from "@/components/common/AvatarUploadBadge";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -23,31 +25,52 @@ import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface ProfileTabProps {
   user: { username: string; displayName: string; bio: string; avatarUrl: string; links: string };
-  locale: "ja" | "en";
   showGithubLink: boolean;
   githubUsername: string;
 }
 
-export default function ProfileTab({ user, locale, showGithubLink, githubUsername }: ProfileTabProps) {
+export default function ProfileTab({ user, showGithubLink, githubUsername }: ProfileTabProps) {
   const t = useTranslations("Settings");
   const { message, flash } = useFlashMessage();
 
-  const [displayName, setDisplayName] = useState(user.displayName);
-  const [bio, setBio] = useState(user.bio);
-  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
+  const form = useDirtyForm(
+    {
+      displayName: user.displayName,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+      links: parseLinks(user.links),
+    },
+    async (values) => {
+      await updateProfile({
+        displayName: values.displayName,
+        bio: values.bio,
+        avatarUrl: values.avatarUrl,
+        links: JSON.stringify(values.links),
+      });
+      flash("success", t("profile.success"));
+    }
+  );
+  const { displayName, bio, avatarUrl } = form.values;
+  const setField = form.setField;
 
-  const { links, addLink, removeLink, changeLink, moveLink } = useLinksEditor(user.links);
+  const setLinks = useCallback(
+    (updater: React.SetStateAction<LinkItem[]>) => setField("links", updater as LinkItem[]),
+    [setField]
+  );
+  const { links, addLink, removeLink, changeLink, moveLink } = useLinksEditor(null, {
+    links: form.values.links,
+    setLinks,
+  });
 
   const { uploading, fileInputRef, handleFileChange } = useAvatarUpload({
-    onUploaded: setAvatarUrl,
+    onUploaded: (url: string) => setField("avatarUrl", url),
     onError: (msg) => flash("error", msg),
     errorMessages: { presign: t("profile.uploadError"), upload: t("profile.uploadFailed") },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile({ displayName, bio, avatarUrl, links: JSON.stringify(links), locale });
-    flash("success", t("profile.success"));
+    form.submit();
   };
 
   return (
@@ -67,8 +90,8 @@ export default function ProfileTab({ user, locale, showGithubLink, githubUsernam
         </Box>
       </Box>
 
-      <TextField label={t("profile.displayName")} fullWidth value={displayName} onChange={(e) => setDisplayName(e.target.value)} sx={{ mb: 3 }} />
-      <TextField label={t("profile.bio")} fullWidth multiline rows={5} value={bio} onChange={(e) => setBio(e.target.value)} sx={{ mb: 3 }} />
+      <TextField label={t("profile.displayName")} fullWidth value={displayName} onChange={(e) => setField("displayName", e.target.value)} sx={{ mb: 3 }} />
+      <TextField label={t("profile.bio")} fullWidth multiline rows={5} value={bio} onChange={(e) => setField("bio", e.target.value)} sx={{ mb: 3 }} />
 
       <Divider sx={{ my: 4 }} />
       <Typography variant="h6" sx={{ mb: 2 }}>{t("profile.customLinks")}</Typography>
@@ -104,7 +127,7 @@ export default function ProfileTab({ user, locale, showGithubLink, githubUsernam
         {t("profile.addLink")}
       </Button>
 
-      <Button type="submit" variant="contained" sx={{ height: 40, display: "block" }}>{t("profile.save")}</Button>
+      <StickySaveBar open={form.dirty} saving={form.saving} onSave={form.submit} onDiscard={form.reset} />
     </Box>
   );
 }

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
 import FormGroup from "@mui/material/FormGroup";
@@ -13,6 +12,8 @@ import Switch from "@mui/material/Switch";
 import { updateNotificationPrefs } from "@/lib/actions/notification";
 import { NOTIFICATION_TYPES, normalizePrefs } from "@/lib/notifications/types";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
+import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
+import StickySaveBar from "@/components/ui/StickySaveBar";
 import { isPushSupported, getPushSubscription, enablePush, disablePush } from "@/lib/push-client";
 
 interface Props {
@@ -23,7 +24,11 @@ export default function NotificationsTab({ initialPrefs }: Props) {
   const t = useTranslations("Settings");
   const tn = useTranslations("Notifications");
   const { message, flash } = useFlashMessage();
-  const [prefs, setPrefs] = useState<Record<string, boolean>>(() => normalizePrefs(initialPrefs));
+  const form = useDirtyForm({ prefs: normalizePrefs(initialPrefs) }, async (values) => {
+    await updateNotificationPrefs(values.prefs);
+    flash("success", t("notifications.successUpdate"));
+  });
+  const prefs = form.values.prefs;
 
   // ─── Web Push（PWA プッシュ通知）の端末単位トグル ───
   const [pushSupported, setPushSupported] = useState(false);
@@ -59,16 +64,11 @@ export default function NotificationsTab({ initialPrefs }: Props) {
     }
   };
 
-  const toggle = (type: string) => setPrefs((prev) => ({ ...prev, [type]: !prev[type] }));
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updateNotificationPrefs(prefs);
-    flash("success", t("notifications.successUpdate"));
-  };
+  const toggle = (type: string) =>
+    form.setField("prefs", (prev) => ({ ...prev, [type]: !prev[type] }));
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ p: "2px" }}>
+    <Box sx={{ p: "2px" }}>
       {message && <Alert severity={message.type} sx={{ mb: 3 }}>{message.text}</Alert>}
 
       {/* プッシュ通知（端末単位） */}
@@ -100,7 +100,7 @@ export default function NotificationsTab({ initialPrefs }: Props) {
         ))}
       </FormGroup>
 
-      <Button type="submit" variant="contained" sx={{ display: "block" }}>{t("profile.save")}</Button>
+      <StickySaveBar open={form.dirty} saving={form.saving} onSave={form.submit} onDiscard={form.reset} />
     </Box>
   );
 }

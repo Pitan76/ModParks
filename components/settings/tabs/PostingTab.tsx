@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { updatePostingSettings } from "@/lib/actions/settings";
+import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
+import StickySaveBar from "@/components/ui/StickySaveBar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
-import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
@@ -33,26 +33,30 @@ export default function PostingTab({
   const t = useTranslations("Settings");
   const { message, flash } = useFlashMessage();
 
-  const [postingStatus, setPostingStatus] = useState(defaultProjectStatus || "draft");
-  const [ideaStatus, setIdeaStatus] = useState(defaultIdeaStatus || "public");
-  const [postingLicense, setPostingLicense] = useState(defaultLicense || "All Rights Reserved");
-  const [commentsEnabled, setCommentsEnabled] = useState(defaultCommentsEnabled);
-  const [recipesEnabled, setRecipesEnabled] = useState(defaultRecipesEnabled);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updatePostingSettings(
-      postingStatus as any,
-      ideaStatus as any,
-      postingLicense,
-      commentsEnabled,
-      recipesEnabled
-    );
-    flash("success", t("posting.successUpdate"));
-  };
+  const form = useDirtyForm(
+    {
+      postingStatus: defaultProjectStatus || "draft",
+      ideaStatus: defaultIdeaStatus || "public",
+      postingLicense: defaultLicense || "All Rights Reserved",
+      commentsEnabled: defaultCommentsEnabled,
+      recipesEnabled: defaultRecipesEnabled,
+    },
+    async (values) => {
+      await updatePostingSettings(
+        values.postingStatus as any,
+        values.ideaStatus as any,
+        values.postingLicense,
+        values.commentsEnabled,
+        values.recipesEnabled
+      );
+      flash("success", t("posting.successUpdate"));
+    }
+  );
+  const { postingStatus, ideaStatus, postingLicense, commentsEnabled, recipesEnabled } = form.values;
+  const setField = form.setField;
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ p: "2px" }}>
+    <Box sx={{ p: "2px" }}>
       {message && <Alert severity={message.type} sx={{ mb: 3 }}>{message.text}</Alert>}
 
       <Typography variant="h6" sx={{ mb: 2 }}>{t("posting.defaultProjectStatus")}</Typography>
@@ -60,7 +64,7 @@ export default function PostingTab({
         <FormSelect
           size="small"
           value={postingStatus}
-          onChange={(e) => setPostingStatus(e.target.value as string)}
+          onChange={(e) => setField("postingStatus", e.target.value as string)}
           options={[
             { value: "draft", label: tCommon("visibility.draft") },
             { value: "public", label: tCommon("visibility.public") },
@@ -75,7 +79,7 @@ export default function PostingTab({
         <FormSelect
           size="small"
           value={ideaStatus}
-          onChange={(e) => setIdeaStatus(e.target.value as string)}
+          onChange={(e) => setField("ideaStatus", e.target.value as string)}
           options={[
             { value: "draft", label: tCommon("visibility.draft") },
             { value: "public", label: tCommon("visibility.public") },
@@ -90,8 +94,8 @@ export default function PostingTab({
         freeSolo
         options={LICENSE_OPTIONS as unknown as string[]}
         value={postingLicense}
-        onChange={(_, newValue) => setPostingLicense((newValue as string) || "MIT")}
-        onInputChange={(_, newInputValue) => setPostingLicense(newInputValue)}
+        onChange={(_, newValue) => setField("postingLicense", (newValue as string) || "MIT")}
+        onInputChange={(_, newInputValue) => setField("postingLicense", newInputValue)}
         sx={{ mb: 4, maxWidth: 300 }}
         renderInputProps={{ size: "small", fullWidth: true }}
       />
@@ -102,7 +106,7 @@ export default function PostingTab({
           control={
             <Switch
               checked={commentsEnabled}
-              onChange={(e) => setCommentsEnabled(e.target.checked)}
+              onChange={(e) => setField("commentsEnabled", e.target.checked)}
             />
           }
           label={t("posting.defaultCommentsEnabled")}
@@ -111,14 +115,14 @@ export default function PostingTab({
           control={
             <Switch
               checked={recipesEnabled}
-              onChange={(e) => setRecipesEnabled(e.target.checked)}
+              onChange={(e) => setField("recipesEnabled", e.target.checked)}
             />
           }
           label={t("posting.defaultRecipesEnabled")}
         />
       </Box>
 
-      <Button type="submit" variant="contained" sx={{ display: "block" }}>{t("profile.save")}</Button>
+      <StickySaveBar open={form.dirty} saving={form.saving} onSave={form.submit} onDiscard={form.reset} />
     </Box>
   );
 }

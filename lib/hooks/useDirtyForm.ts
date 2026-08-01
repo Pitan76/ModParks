@@ -38,6 +38,17 @@ export function useDirtyForm<T extends Record<string, unknown>>(
 
   const reset = useCallback(() => setValues(baseline), [baseline]);
 
+  /**
+   * 外部（localStorage やストア）から取り込んだ値を「保存済み」として採用する。
+   * 初期値をクライアント側でしか読めないフォーム向け。
+   */
+  const commit = useCallback((next: Updater<T>) => {
+    const resolved = typeof next === "function" ? (next as (prev: T) => T)(valuesRef.current) : next;
+    valuesRef.current = resolved;
+    setValues(resolved);
+    setBaseline(resolved);
+  }, []);
+
   /** 現在値を保存する。onSave が false を返した場合は失敗扱いで dirty を維持する */
   const submit = useCallback(async () => {
     if (saving) return;
@@ -51,5 +62,5 @@ export function useDirtyForm<T extends Record<string, unknown>>(
     }
   }, [saving]);
 
-  return { values, setField, setValues, dirty, saving, reset, submit, baseline };
+  return { values, setField, setValues, dirty, saving, reset, commit, submit, baseline };
 }

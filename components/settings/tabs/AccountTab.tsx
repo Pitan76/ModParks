@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
 import { changeUsername, changeEmail, changePassword, deleteAccount, deactivateAccount } from "@/lib/actions/settingsSecurity";
+import { updateLocale } from "@/lib/actions/settings";
+import { useRouter, usePathname } from "@/lib/i18n/routing";
+import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
+import StickySaveBar from "@/components/ui/StickySaveBar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import FormTextField from "@/components/ui/form/FormTextField";
@@ -20,17 +24,16 @@ interface AccountTabProps {
   hasPassword: boolean;
   is2FAEnabled: boolean;
   locale: "ja" | "en";
-  setLocale: (locale: "ja" | "en") => void;
 }
 
-export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, setLocale }: AccountTabProps) {
+export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: AccountTabProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const tAuth = useTranslations("Auth");
   const { message, flash } = useFlashMessage(4000);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const [username, setUsername] = useState(user.username);
-  const [email, setEmail] = useState(user.email);
   const [emailPassword, setEmailPassword] = useState("");
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -46,21 +49,47 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
 
   const showAccMsg = (type: "success" | "error", key: string) => flash(type, t(`account.${key}`));
 
-  const handleUsernameChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username === user.username) return;
-    const res = await changeUsername(username);
-    if (res.error) showAccMsg("error", res.error);
-    else showAccMsg("success", "successId");
-  };
+  /**
+   * 表示言語・ユーザーID・メールアドレスは「値を編集する」設定なので、
+   * 個別の更新ボタンを持たず、変更された項目だけをまとめて保存バーから反映する。
+   */
+  const form = useDirtyForm(
+    { locale, username: user.username, email: user.email },
+    async (values) => {
+      const changed: string[] = [];
 
-  const handleEmailChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email === user.email) return;
-    const res = await changeEmail(email, emailPassword);
-    if (res.error) showAccMsg("error", res.error);
-    else showAccMsg("success", "successEmail");
-  };
+      if (values.username !== form.baseline.username) {
+        const res = await changeUsername(values.username);
+        if (res.error) {
+          showAccMsg("error", res.error);
+          return false;
+        }
+        changed.push("successId");
+      }
+
+      if (values.email !== form.baseline.email) {
+        const res = await changeEmail(values.email, emailPassword);
+        if (res.error) {
+          showAccMsg("error", res.error);
+          return false;
+        }
+        setEmailPassword("");
+        changed.push("successEmail");
+      }
+
+      if (values.locale !== form.baseline.locale) {
+        await updateLocale(values.locale);
+        // localePrefix が "never" のため、言語の切り替えは next-intl のルーターに任せる
+        router.replace(pathname, { locale: values.locale });
+        router.refresh();
+        return;
+      }
+
+      if (changed.length) showAccMsg("success", changed[changed.length - 1]);
+    }
+  );
+  const { locale: localeValue, username, email } = form.values;
+  const emailChanged = email !== form.baseline.email;
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,8 +147,8 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
         <FormSelect
           size="small"
           label={t("account.languageLabel")}
-          value={locale}
-          onChange={(e) => setLocale(e.target.value as "ja" | "en")}
+          value={localeValue}
+          onChange={(e) => form.setField("locale", e.target.value as "ja" | "en")}
           options={[
             { value: "ja", label: "🇯🇵 日本語" },
             { value: "en", label: "🇺🇸 English" },
@@ -130,23 +159,19 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
       </Box>
       <Divider sx={{ my: 4 }} />
 
-      <Box component="form" onSubmit={handleUsernameChange} sx={{ mb: 4, p: "2px" }}>
+      <Box sx={{ mb: 4, p: "2px" }}>
         <Typography variant="h6" sx={{ mb: 1 }}>{t("account.changeId")}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("account.changeIdDesc")}</Typography>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <FormTextField label={t("account.newId")} size="small" value={username} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)} required />
-          <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("account.updateBtn")}</Button>
-        </Box>
+        <FormTextField label={t("account.newId")} size="small" value={username} onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setField("username", e.target.value)} required />
       </Box>
 
       <Divider sx={{ my: 4 }} />
 
-      <Box component="form" onSubmit={handleEmailChange} sx={{ mb: 4, p: "2px" }}>
+      <Box sx={{ mb: 4, p: "2px" }}>
         <Typography variant="h6" sx={{ mb: 2 }}>{t("account.changeEmail")}</Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <FormTextField label={t("account.newEmail")} size="small" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} required />
-          {hasPassword && <FormTextField label={t("account.currentPassword")} type="password" size="small" value={emailPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmailPassword(e.target.value)} required />}
-          <Button type="submit" variant="contained" sx={{ height: 40 }}>{t("account.updateBtn")}</Button>
+          <FormTextField label={t("account.newEmail")} size="small" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setField("email", e.target.value)} required />
+          {hasPassword && emailChanged && <FormTextField label={t("account.currentPassword")} type="password" size="small" value={emailPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmailPassword(e.target.value)} required />}
         </Box>
       </Box>
 
@@ -264,6 +289,14 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
           autoComplete="off"
         />
       </AbstractDialog>
+
+      <StickySaveBar
+        open={form.dirty}
+        saving={form.saving}
+        onSave={form.submit}
+        onDiscard={form.reset}
+        disabled={emailChanged && hasPassword && !emailPassword}
+      />
     </Box>
   );
 }

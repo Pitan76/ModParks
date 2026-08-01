@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -14,6 +13,8 @@ import Alert from "@mui/material/Alert";
 import { useColorMode } from "@/components/ThemeRegistry";
 import { useContextMenuContext } from "@/components/ui/ContextMenu";
 import { cartEnabledStore, useCartEnabled } from "@/components/cart/cartStore";
+import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
+import StickySaveBar from "@/components/ui/StickySaveBar";
 
 /**
  * テーマ設定タブコンポーネント。
@@ -23,39 +24,40 @@ export default function ThemeTab() {
   const t = useTranslations("Settings.theme");
   const { isNewTheme, setThemeType } = useColorMode();
   const { setIsDisabled } = useContextMenuContext();
-  const [selectedTheme, setSelectedTheme] = useState<"new" | "legacy">(
-    isNewTheme ? "new" : "legacy"
-  );
-  const [useCustomContextMenu, setUseCustomContextMenu] = useState<boolean>(true);
   const cartEnabled = useCartEnabled();
-  const [useCart, setUseCart] = useState<boolean>(cartEnabled);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    setUseCart(cartEnabled);
-  }, [cartEnabled]);
+  const form = useDirtyForm(
+    {
+      selectedTheme: (isNewTheme ? "new" : "legacy") as "new" | "legacy",
+      useCustomContextMenu: true,
+      useCart: cartEnabled,
+    },
+    (values) => {
+      setThemeType(values.selectedTheme);
+      try {
+        window.localStorage.setItem("disable_custom_context_menu", values.useCustomContextMenu ? "false" : "true");
+        setIsDisabled(!values.useCustomContextMenu);
+      } catch (e) {
+        // ignore
+      }
+      cartEnabledStore.set(values.useCart);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    }
+  );
+  const { selectedTheme, useCustomContextMenu, useCart } = form.values;
 
+  // ローカルストレージ / カートストアの現在値を保存済みの初期値として取り込む
   useEffect(() => {
+    let disabled = false;
     try {
-      const disabled = window.localStorage.getItem("disable_custom_context_menu") === "true";
-      setUseCustomContextMenu(!disabled);
+      disabled = window.localStorage.getItem("disable_custom_context_menu") === "true";
     } catch (e) {
       // ignore
     }
-  }, []);
-
-  const handleSave = () => {
-    setThemeType(selectedTheme);
-    try {
-      window.localStorage.setItem("disable_custom_context_menu", useCustomContextMenu ? "false" : "true");
-      setIsDisabled(!useCustomContextMenu);
-    } catch (e) {
-      // ignore
-    }
-    cartEnabledStore.set(useCart);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
-  };
+    form.commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled }));
+  }, [cartEnabled, form.commit]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, maxWidth: 500 }}>
@@ -68,7 +70,7 @@ export default function ThemeTab() {
         <RadioGroup
           aria-labelledby="theme-select-label"
           value={selectedTheme}
-          onChange={(e) => setSelectedTheme(e.target.value as "new" | "legacy")}
+          onChange={(e) => form.setField("selectedTheme", e.target.value as "new" | "legacy")}
         >
           <FormControlLabel
             value="new"
@@ -91,7 +93,7 @@ export default function ThemeTab() {
           control={
             <Checkbox
               checked={useCustomContextMenu}
-              onChange={(e) => setUseCustomContextMenu(e.target.checked)}
+              onChange={(e) => form.setField("useCustomContextMenu", e.target.checked)}
             />
           }
           label={t("useCustomContextMenu")}
@@ -106,18 +108,14 @@ export default function ThemeTab() {
           control={
             <Checkbox
               checked={useCart}
-              onChange={(e) => setUseCart(e.target.checked)}
+              onChange={(e) => form.setField("useCart", e.target.checked)}
             />
           }
           label={t("useCart")}
         />
       </FormControl>
 
-      <Box sx={{ mt: 1 }}>
-        <Button variant="contained" onClick={handleSave}>
-          {t("save")}
-        </Button>
-      </Box>
+      <StickySaveBar open={form.dirty} saving={form.saving} onSave={form.submit} onDiscard={form.reset} />
     </Box>
   );
 }

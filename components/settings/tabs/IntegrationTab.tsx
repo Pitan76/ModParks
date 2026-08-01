@@ -14,6 +14,8 @@ import Divider from "@mui/material/Divider";
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
+import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
+import StickySaveBar from "@/components/ui/StickySaveBar";
 
 interface IntegrationTabProps {
   modrinthApiKey: string;
@@ -30,7 +32,11 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
   const tCommon = useTranslations("Common");
   const { message, flash } = useFlashMessage();
 
-  const [modrinthKey, setModrinthKey] = useState(modrinthApiKey || "");
+  const form = useDirtyForm({ modrinthKey: modrinthApiKey || "" }, async (values) => {
+    await updateIntegrations(values.modrinthKey);
+    flash("success", tCommon("saved"));
+  });
+  const modrinthKey = form.values.modrinthKey;
 
   const [githubMsg, setGithubMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [googleMsg, setGoogleMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -41,12 +47,6 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
     if (code === "LAST_LOGIN_METHOD") return t("oauth.errorLastLoginMethod");
     return t("oauth.errorDisconnect");
   }
-
-  const handleIntegrationSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updateIntegrations(modrinthKey);
-    flash("success", tCommon("saved") || "保存しました");
-  };
 
   const handleDisconnect = async () => {
     const res = await disconnectGitHub();
@@ -74,7 +74,7 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
 
   return (
     <Box>
-      <Box component="form" onSubmit={handleIntegrationSubmit} sx={{ p: "2px" }}>
+      <Box sx={{ p: "2px" }}>
         {message && <Alert severity={message.type} sx={{ mb: 3 }}>{message.text}</Alert>}
 
         <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.modrinth")}</Typography>
@@ -82,9 +82,7 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           APIキー（PAT）は <a href="https://modrinth.com/settings/pats" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>Modrinth Settings</a> から作成できます。「Read projects」と「Read user data」の権限が必要です。
         </Typography>
-        <TextField fullWidth label="Modrinth API Key" size="small" type="password" value={modrinthKey} onChange={(e) => setModrinthKey(e.target.value)} sx={{ mb: 3, maxWidth: 400 }} />
-
-        <Button type="submit" variant="contained" sx={{ display: "block", mb: 4 }}>{t("profile.save")}</Button>
+        <TextField fullWidth label="Modrinth API Key" size="small" type="password" value={modrinthKey} onChange={(e) => form.setField("modrinthKey", e.target.value)} sx={{ mb: 3, maxWidth: 400 }} />
       </Box>
 
       <Divider sx={{ my: 4 }} />
@@ -122,6 +120,8 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
       ) : (
         <Button variant="contained" onClick={() => signIn("google")}>{t("google.connect")}</Button>
       )}
+
+      <StickySaveBar open={form.dirty} saving={form.saving} onSave={form.submit} onDiscard={form.reset} />
     </Box>
   );
 }
