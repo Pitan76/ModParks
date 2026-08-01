@@ -20,6 +20,8 @@ if (typeof window !== "undefined") {
 
 const listeners = new Set<() => void>();
 
+const EMPTY_ARRAY: CartItem[] = [];
+
 export const cartStore = {
   getSnapshot: () => cartItems,
   add: (item: CartItem) => {
@@ -60,7 +62,7 @@ export const cartStore = {
       listeners.delete(listener);
     };
   },
-  getServerSnapshot: () => [] as CartItem[],
+  getServerSnapshot: () => EMPTY_ARRAY,
   _notify: () => {
     if (typeof window !== "undefined") {
       try {
