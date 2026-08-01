@@ -8,6 +8,7 @@ import { useLinksEditor, parseLinks, type LinkItem } from "@/lib/hooks/useLinksE
 import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import AvatarUploadBadge from "@/components/common/AvatarUploadBadge";
+import SettingsLink from "@/components/ui/SettingsLink";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -96,15 +97,11 @@ export default function ProfileTab({ user, showGithubLink, githubUsername }: Pro
       <Divider sx={{ my: 4 }} />
       <Typography variant="h6" sx={{ mb: 2 }}>{t("profile.customLinks")}</Typography>
       {showGithubLink && (
-        <Box sx={{ mb: 2 }}>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { xs: "stretch", sm: "center" } }}>
-            <TextField label={t("profile.linkTitle")} size="small" value="GitHub" disabled sx={{ width: { xs: "100%", sm: 150 } }} />
-            <TextField label="URL" size="small" value={`https://github.com/${githubUsername}`} disabled slotProps={{ input: { startAdornment: <GitHubIcon fontSize="small" sx={{ mr: 1, opacity: 0.6 }} /> } }} sx={{ flex: 1 }} />
-          </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-            {t("profile.githubLinkManaged")}
-          </Typography>
-        </Box>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2, alignItems: { xs: "stretch", sm: "center" } }}>
+          <TextField label={t("profile.linkTitle")} size="small" value="GitHub" disabled sx={{ width: { xs: "100%", sm: 150 } }} />
+          <TextField label="URL" size="small" value={`https://github.com/${githubUsername}`} disabled slotProps={{ input: { startAdornment: <GitHubIcon fontSize="small" sx={{ mr: 1, opacity: 0.6 }} /> } }} sx={{ flex: 1 }} />
+          <SettingsLink href="/settings/integration" label={t("integration.title")} sx={{ color: "text.secondary", flexShrink: 0 }} />
+        </Stack>
       )}
       {links.map((link, idx) => (
         <Stack key={idx} direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2, alignItems: { xs: "stretch", sm: "center" } }}>

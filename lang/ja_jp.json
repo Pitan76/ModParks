@@ -1272,8 +1272,7 @@
       "addLink": "リンクを追加",
       "moveUp": "上へ移動",
       "moveDown": "下へ移動",
-      "removeLink": "リンクを削除",
-      "githubLinkManaged": "GitHubリンクは「外部連携」タブから表示しています。表示・非表示の変更はそちらで行えます。"
+      "removeLink": "リンクを削除"
     },
     "apiKeys": {
       "title": "APIキー",
