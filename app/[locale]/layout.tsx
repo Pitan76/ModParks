@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, AppLocale } from "@/lib/i18n/routing";
+import { pickRootMessages } from "@/lib/i18n/clientMessages";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -112,8 +113,7 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   // 未対応言語であれば404を返す
   if (!routing.locales.includes(locale as AppLocale)) notFound();
 
-  const messages = await getMessages();
-  const session  = await auth();
+  const [messages, session] = await Promise.all([getMessages(), auth()]);
 
   let userLocale = null;
   if (session?.user?.id) {
@@ -161,7 +161,7 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
         <PwaRegister />
         <ThemeRegistry initialMode={themeMode}>
           <SessionProvider session={session} refetchOnWindowFocus={false}>
-            <NextIntlClientProvider messages={messages}>
+            <NextIntlClientProvider messages={pickRootMessages(messages)}>
               {userLocale && <LocaleSyncer userLocale={userLocale} />}
               <PinProvider>
                 <AppLayout session={session}>

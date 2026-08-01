@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getMessages } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { pickAdminMessages } from "@/lib/i18n/clientMessages";
 import Box from "@mui/material/Box";
 
 export default async function AdminLayout({
@@ -32,9 +34,15 @@ export default async function AdminLayout({
     redirect(`/${locale}/settings?error=admin_password_required`);
   }
 
+  // ルートレイアウトは Admin をサイドバー分しか配っていないため、ここで全量に差し替える。
+  // 入れ子の Provider は messages を置換するので、共通分を含めた完成形を渡す
+  const messages = await getMessages();
+
   return (
-    <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, md: 4 }, overflow: "auto", height: "100%" }}>
-      {children}
-    </Box>
+    <NextIntlClientProvider messages={pickAdminMessages(messages)}>
+      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, md: 4 }, overflow: "auto", height: "100%" }}>
+        {children}
+      </Box>
+    </NextIntlClientProvider>
   );
 }

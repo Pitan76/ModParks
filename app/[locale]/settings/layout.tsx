@@ -1,6 +1,8 @@
 import Container from "@mui/material/Container";
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getMessages } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { pickSettingsMessages } from "@/lib/i18n/clientMessages";
 import { auth } from "@/lib/auth";
 
 /**
@@ -20,9 +22,14 @@ export default async function SettingsLayout({
   const session = await auth();
   if (!session?.user?.id) redirect(`/${locale}/login`);
 
+  // ルートレイアウトは Settings をサイドバーの見出し分しか配っていないため、ここで全量に差し替える
+  const messages = await getMessages();
+
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
-      {children}
-    </Container>
+    <NextIntlClientProvider messages={pickSettingsMessages(messages)}>
+      <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
+        {children}
+      </Container>
+    </NextIntlClientProvider>
   );
 }
