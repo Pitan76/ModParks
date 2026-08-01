@@ -8,9 +8,10 @@ import { recordDeletion } from "@/lib/backup/tombstone";
 
 
 /**
- * プロフィール情報（表示名、Bio、アバターURL、リンク、使用言語）を更新する Server Action。
+ * プロフィール情報（表示名、Bio、アバターURL、リンク）を更新する Server Action。
+ * 表示言語は設定画面がセクション分割されたため updateLocale が担当する。
  */
-export const updateProfile = async (data: { displayName: string, bio: string, avatarUrl: string, links: string, locale: "ja" | "en" }) => {
+export const updateProfile = async (data: { displayName: string, bio: string, avatarUrl: string, links: string }) => {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userProfiles).set({
@@ -20,12 +21,20 @@ export const updateProfile = async (data: { displayName: string, bio: string, av
     links: data.links,
   }).where(eq(userProfiles.userId, userId));
 
-  await db.update(userSettings).set({
-    locale: data.locale,
-  }).where(eq(userSettings.userId, userId));
-
   revalidatePath("/settings");
   revalidatePath("/profile");
+  return { success: true };
+};
+
+/**
+ * 表示言語のみを更新する Server Action。アカウント設定から呼ばれる。
+ */
+export const updateLocale = async (locale: "ja" | "en") => {
+  const { db, userId } = await getAuthenticatedDb();
+
+  await db.update(userSettings).set({ locale }).where(eq(userSettings.userId, userId));
+
+  revalidatePath("/", "layout");
   return { success: true };
 };
 

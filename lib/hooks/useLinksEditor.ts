@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { parseLinks, type LinkItem } from "@/lib/utils/links";
 
 export { parseLinks, type LinkItem };
@@ -6,9 +6,17 @@ export { parseLinks, type LinkItem };
 /**
  * プロフィール / プロジェクトのカスタムリンク編集を扱う共通フック。
  * 追加・削除・変更のロジックが複数フォームで重複していたのを集約する。
+ *
+ * external を渡すと状態を外部（useDirtyForm など）に委ねる。
+ * 未保存判定にリンクの編集を含めたいフォームで使う。
  */
-export function useLinksEditor(rawInitial?: string | null) {
-  const [links, setLinks] = useState<LinkItem[]>(() => parseLinks(rawInitial));
+export function useLinksEditor(
+  rawInitial?: string | null,
+  external?: { links: LinkItem[]; setLinks: Dispatch<SetStateAction<LinkItem[]>> }
+) {
+  const [internalLinks, setInternalLinks] = useState<LinkItem[]>(() => parseLinks(rawInitial));
+  const links = external ? external.links : internalLinks;
+  const setLinks = external ? external.setLinks : setInternalLinks;
 
   const addLink = () => setLinks((prev) => [...prev, { title: "", url: "" }]);
   const removeLink = (idx: number) => setLinks((prev) => prev.filter((_, i) => i !== idx));
