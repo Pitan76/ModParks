@@ -1,139 +1,32 @@
-"use client";
+import { getDatabase } from "@/lib/db";
+import { userSettings } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { eq } from "drizzle-orm";
+import NewIdeaForm from "@/components/idea/NewIdeaForm";
+import { getTranslations } from "next-intl/server";
 
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import { useState } from "react";
-import type { SyntheticEvent } from "react";
-import { useRouter } from "next/navigation";
-import { createIdea } from "@/lib/actions/idea";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import LinkButton from "@/components/ui/LinkButton";
-import { useTranslations } from "next-intl";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Idea" });
+  return { title: t("postIdeaTitle") };
+}
 
-export default function NewIdeaPage() {
-  const tCommon = useTranslations("Common");
-  const router = useRouter();
-  const tIdea = useTranslations("Idea");
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
+export default async function NewIdeaPage() {
+  const session = await auth();
+  const db = await getDatabase();
+  let defaultVisibility = "public";
 
-  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setPending(true);
-    setError(null);
-
-    const formData = new FormData(e.currentTarget);
+  if (session?.user?.id) {
+    const settingsRecord = await db
+      .select({ defaultIdeaStatus: userSettings.defaultIdeaStatus })
+      .from(userSettings)
+      .where(eq(userSettings.userId, session.user.id))
+      .get();
     
-    // Server Action呼び出し
-    const result = await createIdea(formData);
-    
-    if (result && result.error) {
-      setError(result.error as { [key: string]: string[] });
-      setPending(false);
-    } else if (result && result.success && result.id) {
-      router.push(`/ideas/${result.id}`);
+    if (settingsRecord?.defaultIdeaStatus) {
+      defaultVisibility = settingsRecord.defaultIdeaStatus;
     }
-  };
+  }
 
-  return (
-    <Container maxWidth="md" sx={{ py: 5 }}>
-      <Box sx={{ mb: 4 }}>
-        <LinkButton startIcon={<ArrowBackIcon />} href="/ideas" sx={{ mb: 2 }}>
-          {tIdea("backToList")}
-        </LinkButton>
-        <Typography variant="h4" sx={{ fontWeight: 800 }}>
-          {tIdea("postIdeaTitle")}
-        </Typography>
-      </Box>
-
-      <Card variant="outlined" sx={{ borderRadius: 3 }}>
-        <CardContent sx={{ p: 4 }}>
-          <form onSubmit={handleSubmit}>
-            <Stack spacing={4}>
-              {error?.server && (
-                <Typography color="error" variant="body2">
-                  {error.server[0]}
-                </Typography>
-              )}
-
-              <TextField
-                id="title"
-                name="title"
-                label={tIdea("fields.title")}
-                fullWidth
-                required
-                error={!!error?.title}
-                helperText={error?.title?.[0] || tIdea("fields.titlePlaceholder")}
-                disabled={pending}
-                size="small"
-              />
-
-              <FormControl fullWidth size="small">
-                <InputLabel>{tCommon("format")}</InputLabel>
-                <Select
-                  name="contentFormat"
-                  label={tCommon("format")}
-                  defaultValue="markdown"
-                  disabled={pending}
-                >
-                  <MenuItem value="markdown">{tCommon("formatOptions.markdown")}</MenuItem>
-                  <MenuItem value="plaintext">{tCommon("formatOptions.plaintext")}</MenuItem>
-                  <MenuItem value="pukiwiki">{tCommon("formatOptions.pukiwiki")}</MenuItem>
-                </Select>
-              </FormControl>
-
-              <TextField
-                id="content"
-                name="content"
-                label={tIdea("fields.content")}
-                fullWidth
-                required
-                multiline
-                rows={6}
-                error={!!error?.content}
-                helperText={error?.content?.[0] || tIdea("fields.contentPlaceholder")}
-                disabled={pending}
-              />
-
-              <FormControl fullWidth size="small">
-                <InputLabel>{tIdea("fields.visibility")}</InputLabel>
-                <Select
-                  name="visibility"
-                  label={tIdea("fields.visibility")}
-                  defaultValue="public"
-                  disabled={pending}
-                >
-                  <MenuItem value="public">{tCommon("visibility.public")}</MenuItem>
-                  <MenuItem value="unlisted">{tCommon("visibility.unlisted")}</MenuItem>
-                  <MenuItem value="private">{tCommon("visibility.private")}</MenuItem>
-                  <MenuItem value="draft">{tCommon("visibility.draft")}</MenuItem>
-                </Select>
-              </FormControl>
-
-              <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 2 }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={pending}
-                  sx={{ px: 5 }}
-                >
-                  {pending ? tIdea("submitting") : tIdea("submitIdea")}
-                </Button>
-              </Box>
-            </Stack>
-          </form>
-        </CardContent>
-      </Card>
-    </Container>
-  );
+  return <NewIdeaForm defaultVisibility={defaultVisibility} />;
 }

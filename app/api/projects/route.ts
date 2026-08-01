@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
     const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
     const visibility = (settingsRecord?.defaultProjectStatus as any) || "draft";
     const commentsEnabled = settingsRecord?.defaultCommentsEnabled ?? false;
+    const recipesEnabled = settingsRecord?.defaultRecipesEnabled ?? false;
 
     const modrinthId = formData.get("modrinthId") as string | null;
     const curseforgeId = formData.get("curseforgeId") as string | null;
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
         issueTrackerUrl,
         externalDownloads: {},
         commentsEnabled,
+        recipesEnabled,
         sourceIdeaId: ideaId,
       }),
     ]);
