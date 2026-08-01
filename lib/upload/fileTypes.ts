@@ -10,14 +10,6 @@
 
 export type UploadType = "icon" | "mod" | "avatar" | "media";
 
-const ALLOWED_MOD_TYPES = [
-  "application/java-archive",
-  "application/x-java-archive",
-  "application/zip",
-  "application/x-zip-compressed",
-  "application/octet-stream",
-];
-
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 /** キーのプレフィックス（`mod/` など）から用途を逆算する */
@@ -32,17 +24,19 @@ export function uploadTypeFromKey(key: string): UploadType | null {
 /**
  * 用途に対して Content-Type / ファイル名が妥当かを判定する。
  *
- * mod は Content-Type が当てにならない（ブラウザが octet-stream を送る）ため
- * 拡張子でも判定するが、画像系は Content-Type をそのまま R2 に保存して
- * 配信時に返すことになるので、必ずホワイトリストに一致させる。
+ * mod は Content-Type が環境依存で当てにならない。ブラウザは OS の登録情報を
+ * そのまま返すため、例えば Amazon Corretto が入った Windows では .jar が
+ * `application/jar` になるなど、ホワイトリストで列挙しきれない。
+ * 保存した Content-Type は配信時に使わず（safeContentTypeForKey 参照）
+ * 必ず octet-stream + attachment で返すので、拡張子だけで判定する。
+ * 画像系は Content-Type をそのまま配信で返すため、引き続き厳密に照合する。
  */
 export function isAllowedUpload(type: UploadType, contentType: string, fileName: string): boolean {
   const normalized = contentType.split(";")[0].trim().toLowerCase();
   const name = fileName.toLowerCase();
 
   if (type === "mod") {
-    const extOk = name.endsWith(".jar") || name.endsWith(".zip");
-    return extOk && ALLOWED_MOD_TYPES.includes(normalized);
+    return name.endsWith(".jar") || name.endsWith(".zip");
   }
 
   return ALLOWED_IMAGE_TYPES.includes(normalized);
