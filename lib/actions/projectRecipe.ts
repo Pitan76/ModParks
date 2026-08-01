@@ -8,8 +8,15 @@ import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
 import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 
-/** 1文に載せるレシピIDの数。D1 のバインド変数上限に当たらないよう分割する。 */
-const CHUNK_SIZE = 90;
+/**
+ * 1文に載せるレシピIDの数。D1 は 1クエリあたりのバインド変数が 100 個までなので、
+ * 「行数」ではなく「バインド変数の数」で分割する必要がある。
+ * INSERT は 1行につき project_id / recipe_id / hidden_by の 3 個、
+ * DELETE は project_id の 1 個に加えて IN (...) の中身が 1 件 1 個。
+ */
+const D1_MAX_BOUND_PARAMS = 100;
+const INSERT_CHUNK_SIZE = Math.floor(D1_MAX_BOUND_PARAMS / 3); // 33行 = 99個
+const DELETE_CHUNK_SIZE = D1_MAX_BOUND_PARAMS - 1; // 99件 + project_id = 100個
 
 /**
  * プロジェクトのレシピ表示設定を扱う Server Action。
@@ -83,8 +90,9 @@ export async function setRecipesHiddenAction(slug: string, recipeIds: string[], 
   try {
     const { db, session, project } = await authorizeProject(slug);
 
-    for (let i = 0; i < recipeIds.length; i += CHUNK_SIZE) {
-      const chunk = recipeIds.slice(i, i + CHUNK_SIZE);
+    const chunkSize = hidden ? INSERT_CHUNK_SIZE : DELETE_CHUNK_SIZE;
+    for (let i = 0; i < recipeIds.length; i += chunkSize) {
+      const chunk = recipeIds.slice(i, i + chunkSize);
       if (hidden) {
         await db
           .insert(projectHiddenRecipes)
