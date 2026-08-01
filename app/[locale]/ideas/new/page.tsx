@@ -15,10 +15,14 @@ export default async function NewIdeaPage() {
   const session = await auth();
   const db = await getDatabase();
   let defaultVisibility = "public";
+  let defaultBodyFormat = "markdown";
 
   if (session?.user?.id) {
     const settingsRecord = await db
-      .select({ defaultIdeaStatus: userSettings.defaultIdeaStatus })
+      .select({
+        defaultIdeaStatus: userSettings.defaultIdeaStatus,
+        defaultIdeaBodyFormat: userSettings.defaultIdeaBodyFormat,
+      })
       .from(userSettings)
       .where(eq(userSettings.userId, session.user.id))
       .get();
@@ -26,7 +30,10 @@ export default async function NewIdeaPage() {
     if (settingsRecord?.defaultIdeaStatus) {
       defaultVisibility = settingsRecord.defaultIdeaStatus;
     }
+    if (settingsRecord?.defaultIdeaBodyFormat) {
+      defaultBodyFormat = settingsRecord.defaultIdeaBodyFormat;
+    }
   }
 
-  return <NewIdeaForm defaultVisibility={defaultVisibility} />;
+  return <NewIdeaForm defaultVisibility={defaultVisibility} defaultBodyFormat={defaultBodyFormat} />;
 }

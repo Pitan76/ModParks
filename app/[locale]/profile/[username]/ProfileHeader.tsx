@@ -102,7 +102,7 @@ export default async function ProfileHeader({
           </Box>
 
           {isOwner && (
-            <RoutingLink href="/settings?tab=profile" prefetch={false} style={{ textDecoration: "none", flexShrink: 0 }}>
+            <RoutingLink href="/settings/profile" prefetch={false} style={{ textDecoration: "none", flexShrink: 0 }}>
               <Button variant="outlined" startIcon={<EditIcon />} size="small" sx={{ whiteSpace: "nowrap" }}>
                 {tCommon("edit")}
               </Button>

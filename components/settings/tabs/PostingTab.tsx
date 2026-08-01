@@ -17,6 +17,9 @@ import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 interface Props {
   defaultProjectStatus: string;
   defaultIdeaStatus: string;
+  defaultProjectBodyFormat: string;
+  defaultIdeaBodyFormat: string;
+  defaultCommentBodyFormat: string;
   defaultLicense: string;
   defaultCommentsEnabled: boolean;
   defaultRecipesEnabled: boolean;
@@ -25,6 +28,9 @@ interface Props {
 export default function PostingTab({
   defaultProjectStatus,
   defaultIdeaStatus,
+  defaultProjectBodyFormat,
+  defaultIdeaBodyFormat,
+  defaultCommentBodyFormat,
   defaultLicense,
   defaultCommentsEnabled,
   defaultRecipesEnabled,
@@ -37,6 +43,9 @@ export default function PostingTab({
     {
       postingStatus: defaultProjectStatus || "draft",
       ideaStatus: defaultIdeaStatus || "public",
+      projectBodyFormat: defaultProjectBodyFormat || "markdown",
+      ideaBodyFormat: defaultIdeaBodyFormat || "markdown",
+      commentBodyFormat: defaultCommentBodyFormat || "markdown",
       postingLicense: defaultLicense || "All Rights Reserved",
       commentsEnabled: defaultCommentsEnabled,
       recipesEnabled: defaultRecipesEnabled,
@@ -45,6 +54,9 @@ export default function PostingTab({
       await updatePostingSettings(
         values.postingStatus as any,
         values.ideaStatus as any,
+        values.projectBodyFormat as any,
+        values.ideaBodyFormat as any,
+        values.commentBodyFormat as any,
         values.postingLicense,
         values.commentsEnabled,
         values.recipesEnabled
@@ -52,7 +64,16 @@ export default function PostingTab({
       flash("success", t("posting.successUpdate"));
     }
   );
-  const { postingStatus, ideaStatus, postingLicense, commentsEnabled, recipesEnabled } = form.values;
+  const {
+    postingStatus,
+    ideaStatus,
+    projectBodyFormat,
+    ideaBodyFormat,
+    commentBodyFormat,
+    postingLicense,
+    commentsEnabled,
+    recipesEnabled,
+  } = form.values;
   const setField = form.setField;
 
   return (
@@ -99,6 +120,48 @@ export default function PostingTab({
         sx={{ mb: 4, maxWidth: 300 }}
         renderInputProps={{ size: "small", fullWidth: true }}
       />
+
+      <Typography variant="h6" sx={{ mb: 2 }}>{t("posting.defaultProjectBodyFormat")}</Typography>
+      <Box sx={{ mb: 4, maxWidth: 300 }}>
+        <FormSelect
+          size="small"
+          value={projectBodyFormat}
+          onChange={(e) => setField("projectBodyFormat", e.target.value as string)}
+          options={[
+            { value: "markdown", label: "Markdown" },
+            { value: "plaintext", label: "Plain Text" },
+            { value: "pukiwiki", label: "PukiWiki" },
+          ]}
+        />
+      </Box>
+
+      <Typography variant="h6" sx={{ mb: 2 }}>{t("posting.defaultIdeaBodyFormat")}</Typography>
+      <Box sx={{ mb: 4, maxWidth: 300 }}>
+        <FormSelect
+          size="small"
+          value={ideaBodyFormat}
+          onChange={(e) => setField("ideaBodyFormat", e.target.value as string)}
+          options={[
+            { value: "markdown", label: "Markdown" },
+            { value: "plaintext", label: "Plain Text" },
+            { value: "pukiwiki", label: "PukiWiki" },
+          ]}
+        />
+      </Box>
+
+      <Typography variant="h6" sx={{ mb: 2 }}>{t("posting.defaultCommentBodyFormat")}</Typography>
+      <Box sx={{ mb: 4, maxWidth: 300 }}>
+        <FormSelect
+          size="small"
+          value={commentBodyFormat}
+          onChange={(e) => setField("commentBodyFormat", e.target.value as string)}
+          options={[
+            { value: "markdown", label: "Markdown" },
+            { value: "plaintext", label: "Plain Text" },
+            { value: "pukiwiki", label: "PukiWiki" },
+          ]}
+        />
+      </Box>
 
       <Typography variant="h6" sx={{ mb: 2 }}>{t("posting.defaultFeatures")}</Typography>
       <Box sx={{ mb: 4, display: "flex", flexDirection: "column", gap: 1 }}>

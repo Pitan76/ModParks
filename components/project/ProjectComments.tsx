@@ -12,13 +12,14 @@ type ProjectCommentsProps = {
   projectSlug: string;
   isLoggedIn: boolean;
   currentUserId?: string;
+  defaultCommentBodyFormat?: string;
 };
 
 /**
  * プロジェクトに対するコメントスレッド全体を表示・管理するクライアントコンポーネント。
  * 新規コメント・返信の投稿、コメントの削除、及び一覧の非同期取得を行います。
  */
-const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId }: ProjectCommentsProps) => {
+const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId, defaultCommentBodyFormat }: ProjectCommentsProps) => {
   const t = useTranslations("Comment");
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,6 +80,7 @@ const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId }: ProjectComm
           title={t("titleWithCount", { count: comments.length })}
           placeholder={t("projectPlaceholder")}
           submitLabel={t("submit")}
+          initialFormat={defaultCommentBodyFormat}
           onSubmit={async (content, format) => {
             await postComment(content, undefined, format);
           }}

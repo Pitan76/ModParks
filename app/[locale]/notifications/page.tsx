@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LinkButton from "@/components/ui/LinkButton";
 import { getNotifications } from "@/lib/queries/notifications";
 import NotificationList from "@/components/notification/NotificationListLazy";
 import MarkAllReadButton from "@/components/notification/MarkAllReadButton";
@@ -22,7 +24,12 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>{t("title")}</Typography>
-        {items.length > 0 && <MarkAllReadButton />}
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          {items.length > 0 && <MarkAllReadButton />}
+          <LinkButton href="/settings/notifications" size="small" startIcon={<SettingsIcon />}>
+            {t("settingsLink")}
+          </LinkButton>
+        </Box>
       </Box>
 
       {items.length === 0 ? (

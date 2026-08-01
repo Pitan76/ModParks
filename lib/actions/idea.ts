@@ -39,6 +39,11 @@ export async function createIdea(formData: FormData) {
   const id = createId();
 
   try {
+    const { userSettings } = await import("@/db/schema");
+    const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
+    const defaultVisibility = settingsRecord?.defaultIdeaStatus || "public";
+    const defaultFormat = (settingsRecord?.defaultIdeaBodyFormat as any) || "markdown";
+
     // Idea の slug は作成時点では id と同じランダム値。作者が後から変更できる。
     await db.batch([
       db.insert(posts).values({
@@ -48,13 +53,12 @@ export async function createIdea(formData: FormData) {
         slug:       id,
         title,
         body:       content,
-        bodyFormat: contentFormat,
-        visibility: visibility || "public",
+        bodyFormat: contentFormat || defaultFormat,
+        visibility: visibility || defaultVisibility,
       }),
       db.insert(ideas).values({ id, status: "open" }),
     ]);
 
-    
     revalidatePath("/ideas");
     return { success: true, id };
   } catch (error: any) {

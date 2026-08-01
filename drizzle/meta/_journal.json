@@ -442,6 +442,13 @@
       "when": 1785553511517,
       "tag": "0062_amusing_omega_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "6",
+      "when": 1785554243785,
+      "tag": "0063_exotic_skin",
+      "breakpoints": true
     }
   ]
 }

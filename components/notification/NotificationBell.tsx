@@ -10,6 +10,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/routing";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
@@ -76,8 +77,13 @@ export default function NotificationBell() {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         slotProps={{ paper: { sx: { width: 360, maxWidth: "90vw" } } }}
       >
-        <Box sx={{ px: 2, py: 1 }}>
+        <Box sx={{ px: 2, py: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t("title")}</Typography>
+          <Tooltip title={t("settingsLink")}>
+            <IconButton size="small" onClick={() => goTo("/settings/notifications")}>
+              <SettingsIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
         <Divider />
 

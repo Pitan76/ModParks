@@ -76,9 +76,13 @@ export async function createPostComment(
     }
   }
 
+  const { userSettings } = await import("@/db/schema");
+  const settingsRecord = await db.select({ defaultCommentBodyFormat: userSettings.defaultCommentBodyFormat }).from(userSettings).where(eq(userSettings.userId, authorId)).get();
+  const defaultFormat = settingsRecord?.defaultCommentBodyFormat || "markdown";
+
   const format = (["markdown", "plaintext", "pukiwiki"].includes(input.contentFormat || "")
     ? input.contentFormat
-    : "markdown") as "markdown" | "plaintext" | "pukiwiki";
+    : defaultFormat) as "markdown" | "plaintext" | "pukiwiki";
 
   const id = createId();
   await db.insert(comments).values({

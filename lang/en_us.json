@@ -1309,6 +1309,9 @@
       "title": "Posting Settings",
       "defaultProjectStatus": "Default Project Visibility",
       "defaultIdeaStatus": "Default Idea Visibility",
+      "defaultProjectBodyFormat": "Default Project Body Format",
+      "defaultIdeaBodyFormat": "Default Idea Body Format",
+      "defaultCommentBodyFormat": "Default Comment Body Format",
       "defaultLicense": "Default License",
       "defaultFeatures": "Default Features",
       "defaultCommentsEnabled": "Enable comments by default",
@@ -1483,6 +1486,7 @@
     "title": "Notifications",
     "empty": "No notifications.",
     "viewAll": "View all",
+    "settingsLink": "Notification settings",
     "markAllRead": "Mark all as read",
     "subscribe": {
       "subscribe": "Notify on new releases",

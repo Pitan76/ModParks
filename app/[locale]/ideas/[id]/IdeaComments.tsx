@@ -4,6 +4,9 @@ import Typography from "@mui/material/Typography";
 import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
 import IdeaCommentItem from "@/components/idea/IdeaCommentItem";
 import type { IdeaDetail } from "./ideaDetailData";
+import { getDatabase } from "@/lib/db";
+import { userSettings } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 type Props = {
   ideaId: string;
@@ -15,12 +18,25 @@ type Props = {
 
 export default async function IdeaComments({ ideaId, comments, currentUserId, isLoggedIn, canManage }: Props) {
   const tComment = await getTranslations("Comment");
+  let defaultCommentBodyFormat = "markdown";
+
+  if (isLoggedIn && currentUserId) {
+    const db = await getDatabase();
+    const settingsRecord = await db
+      .select({ defaultCommentBodyFormat: userSettings.defaultCommentBodyFormat })
+      .from(userSettings)
+      .where(eq(userSettings.userId, currentUserId))
+      .get();
+    if (settingsRecord?.defaultCommentBodyFormat) {
+      defaultCommentBodyFormat = settingsRecord.defaultCommentBodyFormat;
+    }
+  }
 
   return (
     <Box>
       {isLoggedIn ? (
         <Box sx={{ mb: 4 }}>
-          <IdeaCommentForm ideaId={ideaId} commentsCount={comments.length} />
+          <IdeaCommentForm ideaId={ideaId} commentsCount={comments.length} defaultCommentBodyFormat={defaultCommentBodyFormat} />
         </Box>
       ) : (
         <>

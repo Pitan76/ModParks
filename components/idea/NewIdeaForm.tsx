@@ -22,9 +22,10 @@ import { useTranslations } from "next-intl";
 
 interface NewIdeaFormProps {
   defaultVisibility?: string;
+  defaultBodyFormat?: string;
 }
 
-export default function NewIdeaForm({ defaultVisibility = "public" }: NewIdeaFormProps) {
+export default function NewIdeaForm({ defaultVisibility = "public", defaultBodyFormat = "markdown" }: NewIdeaFormProps) {
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const tIdea = useTranslations("Idea");
@@ -87,7 +88,7 @@ export default function NewIdeaForm({ defaultVisibility = "public" }: NewIdeaFor
                 <Select
                   name="contentFormat"
                   label={tCommon("format")}
-                  defaultValue="markdown"
+                  defaultValue={defaultBodyFormat}
                   disabled={pending}
                 >
                   <MenuItem value="markdown">{tCommon("formatOptions.markdown")}</MenuItem>

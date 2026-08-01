@@ -44,13 +44,14 @@ export type ProjectFormFieldsProps = {
   };
   availableTags?: OptionItem[];
   defaultLicense?: string;
+  defaultBodyFormat?: string;
   children?: ReactNode;
 };
 
 /**
  * 新規作成や編集ページにおいて、プロジェクトの基本情報（名称、説明、タグ、ライセンス、リンク等）を編集するフォームフィールド群コンポーネント。
  */
-const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense, children }: ProjectFormFieldsProps) => {
+const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense, defaultBodyFormat, children }: ProjectFormFieldsProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
@@ -111,7 +112,7 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
             name="descriptionFormat"
             size="small"
             label={t("fields.descriptionFormat")}
-            defaultValue={project?.descriptionFormat || "markdown"}
+            defaultValue={project?.descriptionFormat || defaultBodyFormat || "markdown"}
             options={[
               { value: "markdown", label: "Markdown" },
               { value: "plaintext", label: "Plain Text" },

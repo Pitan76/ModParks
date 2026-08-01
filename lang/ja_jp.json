@@ -1317,6 +1317,9 @@
       "title": "投稿設定",
       "defaultProjectStatus": "プロジェクトのデフォルト公開状態",
       "defaultIdeaStatus": "アイデアのデフォルト公開状態",
+      "defaultProjectBodyFormat": "プロジェクト本文のデフォルト形式",
+      "defaultIdeaBodyFormat": "アイデア本文のデフォルト形式",
+      "defaultCommentBodyFormat": "コメント本文のデフォルト形式",
       "defaultLicense": "デフォルトのライセンス",
       "defaultFeatures": "デフォルト機能",
       "defaultCommentsEnabled": "コメント欄をデフォルトで有効化する",
@@ -1491,6 +1494,7 @@
     "title": "通知",
     "empty": "通知はありません。",
     "viewAll": "すべて表示",
+    "settingsLink": "通知設定",
     "markAllRead": "すべて既読にする",
     "subscribe": {
       "subscribe": "新リリースを通知",

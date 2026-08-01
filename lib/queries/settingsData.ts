@@ -88,6 +88,9 @@ export async function getSettingsPreferences(userId: string) {
   return {
     defaultProjectStatus: settings?.defaultProjectStatus || "draft",
     defaultIdeaStatus: settings?.defaultIdeaStatus || "public",
+    defaultProjectBodyFormat: settings?.defaultProjectBodyFormat || "markdown",
+    defaultIdeaBodyFormat: settings?.defaultIdeaBodyFormat || "markdown",
+    defaultCommentBodyFormat: settings?.defaultCommentBodyFormat || "markdown",
     defaultLicense: settings?.defaultLicense || "All Rights Reserved",
     defaultCommentsEnabled: settings?.defaultCommentsEnabled ?? false,
     defaultRecipesEnabled: settings?.defaultRecipesEnabled ?? false,

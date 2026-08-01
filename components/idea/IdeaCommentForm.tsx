@@ -4,7 +4,7 @@ import { createIdeaComment } from "@/lib/actions/idea";
 import { useTranslations } from "next-intl";
 import CommentForm from "@/components/ui/CommentForm";
 
-export default function IdeaCommentForm({ ideaId, commentsCount }: { ideaId: string; commentsCount: number }) {
+export default function IdeaCommentForm({ ideaId, commentsCount, defaultCommentBodyFormat }: { ideaId: string; commentsCount: number; defaultCommentBodyFormat?: string }) {
   const tComment = useTranslations("Comment");
   const tCommon = useTranslations("Common");
 
@@ -26,6 +26,7 @@ export default function IdeaCommentForm({ ideaId, commentsCount }: { ideaId: str
       title={tComment("titleWithCount", { count: commentsCount })}
       placeholder={tComment("ideaPlaceholder")}
       submitLabel={tComment("submit")}
+      initialFormat={defaultCommentBodyFormat}
       onSubmit={handleSubmit}
     />
   );

@@ -20,6 +20,9 @@ export default async function PostingSettingsPage() {
       <PostingTabLazy
         defaultProjectStatus={prefs.defaultProjectStatus}
         defaultIdeaStatus={prefs.defaultIdeaStatus}
+        defaultProjectBodyFormat={prefs.defaultProjectBodyFormat}
+        defaultIdeaBodyFormat={prefs.defaultIdeaBodyFormat}
+        defaultCommentBodyFormat={prefs.defaultCommentBodyFormat}
         defaultLicense={prefs.defaultLicense}
         defaultCommentsEnabled={prefs.defaultCommentsEnabled}
         defaultRecipesEnabled={prefs.defaultRecipesEnabled}

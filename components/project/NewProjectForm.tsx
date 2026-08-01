@@ -27,6 +27,7 @@ import type { ParsedModData } from "@/lib/utils/jarParser";
 export type NewProjectFormProps = {
   availableTags: { slug: string; name: string }[];
   defaultLicense?: string;
+  defaultBodyFormat?: string;
   ideaId?: string;
   hasModrinthKey?: boolean;
   hasCurseForgeKey?: boolean;
@@ -39,6 +40,7 @@ export type NewProjectFormProps = {
 const NewProjectForm = ({
   availableTags,
   defaultLicense,
+  defaultBodyFormat,
   ideaId,
   hasModrinthKey,
   hasCurseForgeKey
@@ -237,7 +239,7 @@ const NewProjectForm = ({
         {importData?.externalDownloads !== undefined && <input type="hidden" name="externalDownloads" value={importData.externalDownloads} />}
         {importData?.issueTrackerUrl && <input type="hidden" name="issueTrackerUrl" value={importData.issueTrackerUrl} />}
 
-        <ProjectFormFields key={formKey} error={error} project={importData || undefined} availableTags={availableTags} defaultLicense={defaultLicense} />
+        <ProjectFormFields key={formKey} error={error} project={importData || undefined} availableTags={availableTags} defaultLicense={defaultLicense} defaultBodyFormat={defaultBodyFormat} />
 
         <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <Button variant="outlined" onClick={() => router.back()} disabled={pending}>

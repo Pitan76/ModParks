@@ -10,6 +10,7 @@ export default async function NewProjectPage({ searchParams }: { searchParams: P
   
   const session = await auth();
   let defaultLicense = "All Rights Reserved";
+  let defaultProjectBodyFormat = "markdown";
   let defaultCommentsEnabled = false;
   let defaultRecipesEnabled = false;
   let hasModrinthKey = false;
@@ -20,6 +21,9 @@ export default async function NewProjectPage({ searchParams }: { searchParams: P
     if (settingsRecord) {
       if (settingsRecord.defaultLicense) {
         defaultLicense = settingsRecord.defaultLicense;
+      }
+      if (settingsRecord.defaultProjectBodyFormat) {
+        defaultProjectBodyFormat = settingsRecord.defaultProjectBodyFormat;
       }
       defaultCommentsEnabled = settingsRecord.defaultCommentsEnabled;
       defaultRecipesEnabled = settingsRecord.defaultRecipesEnabled;
@@ -36,6 +40,7 @@ export default async function NewProjectPage({ searchParams }: { searchParams: P
     <NewProjectForm 
       availableTags={availableTags} 
       defaultLicense={defaultLicense} 
+      defaultBodyFormat={defaultProjectBodyFormat}
       ideaId={ideaId}
       hasModrinthKey={hasModrinthKey}
       hasCurseForgeKey={hasCurseForgeKey}

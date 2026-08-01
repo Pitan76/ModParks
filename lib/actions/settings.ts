@@ -161,6 +161,9 @@ export const toggleGithubVisibility = async (show: boolean) => {
 export const updatePostingSettings = async (
   projectStatus: "draft" | "public" | "unlisted" | "private",
   ideaStatus: "draft" | "public" | "unlisted" | "private",
+  projectBodyFormat: "markdown" | "plaintext" | "pukiwiki",
+  ideaBodyFormat: "markdown" | "plaintext" | "pukiwiki",
+  commentBodyFormat: "markdown" | "plaintext" | "pukiwiki",
   license: string,
   commentsEnabled: boolean,
   recipesEnabled: boolean
@@ -170,6 +173,9 @@ export const updatePostingSettings = async (
   await db.update(userSettings).set({
     defaultProjectStatus: projectStatus,
     defaultIdeaStatus: ideaStatus,
+    defaultProjectBodyFormat: projectBodyFormat,
+    defaultIdeaBodyFormat: ideaBodyFormat,
+    defaultCommentBodyFormat: commentBodyFormat,
     defaultLicense: license,
     defaultCommentsEnabled: commentsEnabled,
     defaultRecipesEnabled: recipesEnabled,
