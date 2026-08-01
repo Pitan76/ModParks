@@ -22,6 +22,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";
 import { useContextMenuHandler, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import Badge from "@mui/material/Badge";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useCart, useCartEnabled } from "@/components/cart/cartStore";
@@ -57,6 +58,7 @@ const getIsSelected = (itemId: string, itemPath: string, pathname: string, isMyP
  */
 const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, onToggleCollapse }: BaseSidebarProps) => {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isMyProjects = searchParams?.get("author") === "me";
@@ -185,6 +187,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
       )}
 
       {/* ---- Bottom Section (Theme, Locale) - Mobile Only ---- */}
+      {!session?.user && (
       <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", mt: "auto" }}>
         <Divider />
         <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -221,6 +224,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
           </Box>
         </Box>
       </Box>
+      )}
     </Box>
   );
 
