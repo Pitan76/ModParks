@@ -65,7 +65,10 @@ export default function NotificationsTab({ initialPrefs }: Props) {
   };
 
   const toggle = (type: string) =>
-    form.setField("prefs", (prev) => ({ ...prev, [type]: !prev[type] }));
+    form.setField("prefs", (prev) => ({
+      ...prev,
+      [type]: !(prev as any)[type],
+    }));
 
   return (
     <Box sx={{ p: "2px" }}>

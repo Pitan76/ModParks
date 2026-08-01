@@ -36,8 +36,6 @@ export default async function NewProjectPage({ searchParams }: { searchParams: P
     <NewProjectForm 
       availableTags={availableTags} 
       defaultLicense={defaultLicense} 
-      defaultCommentsEnabled={defaultCommentsEnabled}
-      defaultRecipesEnabled={defaultRecipesEnabled}
       ideaId={ideaId}
       hasModrinthKey={hasModrinthKey}
       hasCurseForgeKey={hasCurseForgeKey}
