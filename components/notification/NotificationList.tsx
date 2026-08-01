@@ -4,11 +4,13 @@ import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import { Link } from "@/lib/i18n/routing";
 import type { Notification } from "@/db/schema";
 import { renderNotification } from "./renderNotification";
+import NotificationAvatar from "./NotificationAvatar";
 
 interface Props {
   items: Notification[];
@@ -26,6 +28,9 @@ export default function NotificationList({ items }: Props) {
             {i > 0 && <Divider component="li" />}
             <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
               <ListItemButton sx={{ bgcolor: n.read ? "transparent" : "action.hover" }}>
+                <ListItemAvatar sx={{ minWidth: 56 }}>
+                  <NotificationAvatar notification={n} />
+                </ListItemAvatar>
                 <ListItemText primary={message} secondary={new Date(n.createdAt).toLocaleString()} />
               </ListItemButton>
             </Link>
