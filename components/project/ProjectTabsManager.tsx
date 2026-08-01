@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import LazyTabPanel from "@/components/ui/LazyTabPanel";
 import { useRouter } from "@/lib/i18n/routing";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -136,12 +135,12 @@ const ProjectTabsManager = ({
         </Tabs>
       </Box>
 
-      {/* 各パネルが自分の訪問履歴を持ち、開くまでマウントせず、開いた後は残す */}
-      <LazyTabPanel active={tab === TAB_DESCRIPTION}>{descriptionContent}</LazyTabPanel>
-      <LazyTabPanel active={tab === TAB_FILES}>{filesContent}</LazyTabPanel>
-      <LazyTabPanel active={tab === TAB_DEPENDENCIES}>{dependenciesContent}</LazyTabPanel>
-      {recipesEnabled && <LazyTabPanel active={tab === TAB_RECIPES}>{recipesContent}</LazyTabPanel>}
-      {hasMedia && <LazyTabPanel active={tab === TAB_MEDIA}>{mediaContent}</LazyTabPanel>}
+      {/* 全タブを常時マウントし表示だけ切替 */}
+      <Box sx={{ display: tab === TAB_DESCRIPTION ? "block" : "none" }}>{descriptionContent}</Box>
+      <Box sx={{ display: tab === TAB_FILES ? "block" : "none" }}>{filesContent}</Box>
+      <Box sx={{ display: tab === TAB_DEPENDENCIES ? "block" : "none" }}>{dependenciesContent}</Box>
+      {recipesEnabled && <Box sx={{ display: tab === TAB_RECIPES ? "block" : "none" }}>{recipesContent}</Box>}
+      {hasMedia && <Box sx={{ display: tab === TAB_MEDIA ? "block" : "none" }}>{mediaContent}</Box>}
     </Box>
   );
 };
