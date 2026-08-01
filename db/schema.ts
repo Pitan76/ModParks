@@ -69,6 +69,7 @@ export const userSettings = sqliteTable("user_settings", {
     .references(() => users.id, { onDelete: "cascade" }),
   locale:        text("locale", { enum: ["ja", "en"] }).notNull().default("ja"),
   defaultProjectStatus: text("default_project_status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("draft"),
+  defaultIdeaStatus: text("default_idea_status", { enum: ["draft", "public", "unlisted", "private"] }).notNull().default("public"),
   defaultLicense: text("default_license").notNull().default("All Rights Reserved"),
   custom:        text("custom", { mode: "json" }),
   modrinthApiKey: text("modrinth_api_key"),
@@ -84,6 +85,7 @@ export const userSettings = sqliteTable("user_settings", {
   /** 所有確認が完了した日時。未確認なら null */
   curseforgeVerifiedAt: integer("curseforge_verified_at", { mode: "timestamp" }),
   defaultCommentsEnabled: integer("default_comments_enabled", { mode: "boolean" }).notNull().default(false),
+  defaultRecipesEnabled: integer("default_recipes_enabled", { mode: "boolean" }).notNull().default(false),
   /** 通知種別ごとの受信ON/OFF。未設定の種別はデフォルトON扱い */
   notificationPrefs: text("notification_prefs", { mode: "json" }).$type<Record<string, boolean>>(),
   /** クリエイタ還元に参加するか。false のユーザーは配分対象から除外する */
