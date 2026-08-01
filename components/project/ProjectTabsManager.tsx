@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import LazyTabPanel from "@/components/ui/LazyTabPanel";
 import { useRouter } from "@/lib/i18n/routing";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -61,15 +62,8 @@ const ProjectTabsManager = ({
   const tabParam = searchParams?.get("tab") || null;
   const [tab, setTab] = useState(getTabFromParam(tabParam, recipesEnabled, hasMedia));
 
-  // 一度開いたタブは残すが、まだ開いていないタブはマウントしない。
-  // 全タブを常時マウントすると初回ハイドレーションに全タブ分のコストが乗り、
-  // ページを開いた直後の数秒間クリックが効かなくなるため。
-  const [visited, setVisited] = useState<ReadonlySet<number>>(() => new Set([getTabFromParam(tabParam, recipesEnabled, hasMedia)]));
-
   useEffect(() => {
-    const next = getTabFromParam(tabParam, recipesEnabled, hasMedia);
-    setTab(next);
-    setVisited((prev) => (prev.has(next) ? prev : new Set(prev).add(next)));
+    setTab(getTabFromParam(tabParam, recipesEnabled, hasMedia));
   }, [tabParam, recipesEnabled, hasMedia]);
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
@@ -86,7 +80,6 @@ const ProjectTabsManager = ({
     }
     
     setTab(newValue);
-    setVisited((prev) => (prev.has(newValue) ? prev : new Set(prev).add(newValue)));
 
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (newValue === TAB_FILES) params.set("tab", "files");
@@ -143,12 +136,12 @@ const ProjectTabsManager = ({
         </Tabs>
       </Box>
 
-      {/* 一度開いたタブだけをマウントし、以降はアンマウントせず表示だけ切替 */}
-      {visited.has(TAB_DESCRIPTION) && <Box sx={{ display: tab === TAB_DESCRIPTION ? "block" : "none" }}>{descriptionContent}</Box>}
-      {visited.has(TAB_FILES) && <Box sx={{ display: tab === TAB_FILES ? "block" : "none" }}>{filesContent}</Box>}
-      {visited.has(TAB_DEPENDENCIES) && <Box sx={{ display: tab === TAB_DEPENDENCIES ? "block" : "none" }}>{dependenciesContent}</Box>}
-      {recipesEnabled && visited.has(TAB_RECIPES) && <Box sx={{ display: tab === TAB_RECIPES ? "block" : "none" }}>{recipesContent}</Box>}
-      {hasMedia && visited.has(TAB_MEDIA) && <Box sx={{ display: tab === TAB_MEDIA ? "block" : "none" }}>{mediaContent}</Box>}
+      {/* 各パネルが自分の訪問履歴を持ち、開くまでマウントせず、開いた後は残す */}
+      <LazyTabPanel active={tab === TAB_DESCRIPTION}>{descriptionContent}</LazyTabPanel>
+      <LazyTabPanel active={tab === TAB_FILES}>{filesContent}</LazyTabPanel>
+      <LazyTabPanel active={tab === TAB_DEPENDENCIES}>{dependenciesContent}</LazyTabPanel>
+      {recipesEnabled && <LazyTabPanel active={tab === TAB_RECIPES}>{recipesContent}</LazyTabPanel>}
+      {hasMedia && <LazyTabPanel active={tab === TAB_MEDIA}>{mediaContent}</LazyTabPanel>}
     </Box>
   );
 };
