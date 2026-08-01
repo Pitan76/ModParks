@@ -49,9 +49,7 @@ const ProjectEditClient = ({
   locale
 }: ProjectEditClientProps) => {
   const tProject = useTranslations("Project");
-  const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
 
   const tabQuery = searchParams?.get("tab");
