@@ -153,5 +153,6 @@ export async function notifyToUser(
   payload: NotificationPayload,
 ): Promise<void> {
   if (recipientId === actorId) return;
-  await dispatchNotifications(db, [recipientId], type, payload);
+  // actorId を必ず載せる。表示時はこれを辿って「今の」アバターを解決する
+  await dispatchNotifications(db, [recipientId], type, { ...payload, actorId });
 }
