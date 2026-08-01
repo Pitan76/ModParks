@@ -10,15 +10,21 @@ export default async function NewProjectPage({ searchParams }: { searchParams: P
   
   const session = await auth();
   let defaultLicense = "All Rights Reserved";
+  let defaultCommentsEnabled = false;
+  let defaultRecipesEnabled = false;
   let hasModrinthKey = false;
   let hasCurseForgeKey = false;
 
   if (session?.user?.id) {
     const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
-    if (settingsRecord?.defaultLicense) {
-      defaultLicense = settingsRecord.defaultLicense;
+    if (settingsRecord) {
+      if (settingsRecord.defaultLicense) {
+        defaultLicense = settingsRecord.defaultLicense;
+      }
+      defaultCommentsEnabled = settingsRecord.defaultCommentsEnabled;
+      defaultRecipesEnabled = settingsRecord.defaultRecipesEnabled;
+      hasModrinthKey = !!settingsRecord.modrinthApiKey;
     }
-    hasModrinthKey = !!settingsRecord?.modrinthApiKey;
     // CF の単体URLインポートは運営設定の共通コンソールキーを使うため、サーバー側の設定有無で判定
     hasCurseForgeKey = !!(process.env.CURSEFORGE_FOR_STUDIOS_API_KEY);
   }
@@ -30,6 +36,8 @@ export default async function NewProjectPage({ searchParams }: { searchParams: P
     <NewProjectForm 
       availableTags={availableTags} 
       defaultLicense={defaultLicense} 
+      defaultCommentsEnabled={defaultCommentsEnabled}
+      defaultRecipesEnabled={defaultRecipesEnabled}
       ideaId={ideaId}
       hasModrinthKey={hasModrinthKey}
       hasCurseForgeKey={hasCurseForgeKey}
