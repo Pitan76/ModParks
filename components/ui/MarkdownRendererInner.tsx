@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
 import ZoomableImage from "./ZoomableImage";
 import { toProxiedImageUrl } from "@/lib/utils/imageProxy";
-import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
 
 // リンク内の画像はクリックでリンク遷移させたいので、拡大表示を無効化するためのフラグ
 const InsideLinkContext = createContext(false);
@@ -30,45 +33,14 @@ const MarkdownImage = ({ src, alt }: { src?: string; alt?: string }) => {
 
 /**
  * 実際の Markdown 描画本体。
- * react-markdown / rehype / remark を動的 import に変更し、
- * サーバーサイドのバンドルから完全に除外します。
+ *
+ * このモジュール自体が MarkdownRenderer 側の dynamic(ssr:false) 経由でしか読まれないため、
+ * react-markdown / rehype / remark はここで静的 import してもサーバーバンドルには入らない。
+ * かつて中でさらに動的 import していたが、それだと「Inner のチャンク取得 → 完了後に
+ * ようやくパーサ4本の取得を開始」と往復が直列に積まれ、本文が出るまでスケルトンのまま
+ * 待たされていたため、この段は畳んである。
  */
 const MarkdownRendererInner = ({ content }: MarkdownRendererInnerProps) => {
-  const [modules, setModules] = useState<{
-    ReactMarkdown: any;
-    remarkGfm: any;
-    rehypeRaw: any;
-    rehypeSanitize: any;
-    defaultSchema: any;
-  } | null>(null);
-
-  useEffect(() => {
-    Promise.all([
-      import("react-markdown"),
-      import("remark-gfm"),
-      import("rehype-raw"),
-      import("rehype-sanitize"),
-    ])
-      .then(([reactMarkdown, remarkGfm, rehypeRaw, rehypeSanitize]) => {
-        setModules({
-          ReactMarkdown: reactMarkdown.default,
-          remarkGfm: remarkGfm.default,
-          rehypeRaw: rehypeRaw.default,
-          rehypeSanitize: rehypeSanitize.default,
-          defaultSchema: rehypeSanitize.defaultSchema,
-        });
-      })
-      .catch((err) => {
-        console.error("Failed to load markdown renderer modules dynamically:", err);
-      });
-  }, []);
-
-  if (!modules) {
-    return <DescriptionSkeleton />;
-  }
-
-  const { ReactMarkdown, remarkGfm, rehypeRaw, rehypeSanitize, defaultSchema } = modules;
-
   // iframe(YouTube 等の埋め込み)を許可するため sanitize schema を拡張。
   //
   // iframe の style は外しておく。position: fixed などで画面全体を覆えてしまい、
