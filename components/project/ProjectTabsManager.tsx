@@ -61,8 +61,15 @@ const ProjectTabsManager = ({
   const tabParam = searchParams?.get("tab") || null;
   const [tab, setTab] = useState(getTabFromParam(tabParam, recipesEnabled, hasMedia));
 
+  // 一度開いたタブは残すが、まだ開いていないタブはマウントしない。
+  // 全タブを常時マウントすると初回ハイドレーションに全タブ分のコストが乗り、
+  // ページを開いた直後の数秒間クリックが効かなくなるため。
+  const [visited, setVisited] = useState<ReadonlySet<number>>(() => new Set([getTabFromParam(tabParam, recipesEnabled, hasMedia)]));
+
   useEffect(() => {
-    setTab(getTabFromParam(tabParam, recipesEnabled, hasMedia));
+    const next = getTabFromParam(tabParam, recipesEnabled, hasMedia);
+    setTab(next);
+    setVisited((prev) => (prev.has(next) ? prev : new Set(prev).add(next)));
   }, [tabParam, recipesEnabled, hasMedia]);
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
@@ -79,6 +86,7 @@ const ProjectTabsManager = ({
     }
     
     setTab(newValue);
+    setVisited((prev) => (prev.has(newValue) ? prev : new Set(prev).add(newValue)));
 
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (newValue === TAB_FILES) params.set("tab", "files");
@@ -135,12 +143,12 @@ const ProjectTabsManager = ({
         </Tabs>
       </Box>
 
-      {/* 全タブを常時マウントし表示だけ切替 */}
-      <Box sx={{ display: tab === TAB_DESCRIPTION ? "block" : "none" }}>{descriptionContent}</Box>
-      <Box sx={{ display: tab === TAB_FILES ? "block" : "none" }}>{filesContent}</Box>
-      <Box sx={{ display: tab === TAB_DEPENDENCIES ? "block" : "none" }}>{dependenciesContent}</Box>
-      {recipesEnabled && <Box sx={{ display: tab === TAB_RECIPES ? "block" : "none" }}>{recipesContent}</Box>}
-      {hasMedia && <Box sx={{ display: tab === TAB_MEDIA ? "block" : "none" }}>{mediaContent}</Box>}
+      {/* 一度開いたタブだけをマウントし、以降はアンマウントせず表示だけ切替 */}
+      {visited.has(TAB_DESCRIPTION) && <Box sx={{ display: tab === TAB_DESCRIPTION ? "block" : "none" }}>{descriptionContent}</Box>}
+      {visited.has(TAB_FILES) && <Box sx={{ display: tab === TAB_FILES ? "block" : "none" }}>{filesContent}</Box>}
+      {visited.has(TAB_DEPENDENCIES) && <Box sx={{ display: tab === TAB_DEPENDENCIES ? "block" : "none" }}>{dependenciesContent}</Box>}
+      {recipesEnabled && visited.has(TAB_RECIPES) && <Box sx={{ display: tab === TAB_RECIPES ? "block" : "none" }}>{recipesContent}</Box>}
+      {hasMedia && visited.has(TAB_MEDIA) && <Box sx={{ display: tab === TAB_MEDIA ? "block" : "none" }}>{mediaContent}</Box>}
     </Box>
   );
 };
