@@ -6,6 +6,7 @@
   },
   "Common": {
     "appName": "ModParks",
+    "moreActions": "More actions",
     "home": "Home",
     "projects": "Projects",
     "loading": "Loading...",
@@ -1580,7 +1581,6 @@
     "loader": "Loader",
     "mcVersion": "MC Version",
     "anyFilter": "Any",
-    "downloadWarning": "*Depending on your browser settings, you may need to allow automatic download of multiple files.",
     "added": "Added to cart",
     "removed": "Removed from cart",
     "addList": "Add all to cart",
@@ -1588,6 +1588,7 @@
     "allInCart": "All items are already in your cart",
     "export": "Export",
     "exportFormat": "Format",
+    "exportDialogTitle": "Choose export format",
     "format": {
       "json": "JSON",
       "csv": "CSV",

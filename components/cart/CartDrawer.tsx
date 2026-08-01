@@ -22,6 +22,16 @@ import DownloadIcon from "@mui/icons-material/Download";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Menu from "@mui/material/Menu";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Radio from "@mui/material/Radio";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
@@ -46,6 +56,7 @@ interface CartDrawerProps {
 
 export default function CartDrawer({ open, onClose, userId }: CartDrawerProps) {
   const t = useTranslations("Cart");
+  const tCommon = useTranslations("Common");
   const { items, remove, clear } = useCart();
   const history = useDownloadHistory();
   const { mode, isNewTheme } = useColorMode();
@@ -61,6 +72,8 @@ export default function CartDrawer({ open, onClose, userId }: CartDrawerProps) {
   const [mcVersion, setMcVersion] = useState("");
 
   const [format, setFormat] = useState<ExportFormat>("json");
+  const [exportOpen, setExportOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [saveOpen, setSaveOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -90,6 +103,7 @@ export default function CartDrawer({ open, onClose, userId }: CartDrawerProps) {
 
   function handleExport() {
     exportCart(items, format);
+    setExportOpen(false);
   }
 
   function renderRow(item: CartItem, onRemove: () => void, secondary?: string) {
@@ -260,20 +274,7 @@ export default function CartDrawer({ open, onClose, userId }: CartDrawerProps) {
             </TextField>
           </Box>
 
-          <Alert severity="info" sx={{ mb: 2, "& .MuiAlert-message": { fontSize: "0.75rem" } }}>
-            {t("downloadWarning")}
-          </Alert>
-          <Box sx={{ display: "flex", gap: 1.5, mb: 1.5 }}>
-            <Button
-              variant="outlined"
-              color="inherit"
-              fullWidth
-              startIcon={<DeleteSweepIcon />}
-              onClick={clear}
-              sx={{ py: 1 }}
-            >
-              {t("clear")}
-            </Button>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "stretch" }}>
             <Button
               variant="contained"
               color="primary"
@@ -284,44 +285,37 @@ export default function CartDrawer({ open, onClose, userId }: CartDrawerProps) {
             >
               {t("downloadAll")}
             </Button>
+            <IconButton
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+              aria-label={tCommon("moreActions")}
+              sx={{ border: 1, borderColor: "divider", borderRadius: 1 }}
+            >
+              <MoreVertIcon />
+            </IconButton>
           </Box>
 
-          {/* エクスポート（mod名とURLの一覧） */}
-          <Box sx={{ display: "flex", gap: 1.5, mb: userId ? 1.5 : 0 }}>
-            <TextField
-              select
-              size="small"
-              label={t("exportFormat")}
-              value={format}
-              onChange={(e) => setFormat(e.target.value as ExportFormat)}
-              sx={{ minWidth: 130 }}
-              slotProps={{ select: { MenuProps: { disablePortal: false } } }}
-            >
-              {EXPORT_FORMATS.map((f) => (
-                <MenuItem key={f} value={f}>{t(`format.${f}`)}</MenuItem>
-              ))}
-            </TextField>
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<FileDownloadIcon />}
-              onClick={handleExport}
-            >
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={() => setMenuAnchor(null)}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            transformOrigin={{ vertical: "bottom", horizontal: "right" }}
+          >
+            <MenuItem onClick={() => { setMenuAnchor(null); setExportOpen(true); }}>
+              <ListItemIcon><FileDownloadIcon fontSize="small" /></ListItemIcon>
               {t("export")}
-            </Button>
-          </Box>
-
-          {userId && (
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<PlaylistAddIcon />}
-              onClick={() => setSaveOpen(true)}
-              sx={{ py: 1 }}
-            >
-              {t("saveToCollection")}
-            </Button>
-          )}
+            </MenuItem>
+            {userId && (
+              <MenuItem onClick={() => { setMenuAnchor(null); setSaveOpen(true); }}>
+                <ListItemIcon><PlaylistAddIcon fontSize="small" /></ListItemIcon>
+                {t("saveToCollection")}
+              </MenuItem>
+            )}
+            <MenuItem onClick={() => { setMenuAnchor(null); clear(); }}>
+              <ListItemIcon><DeleteSweepIcon fontSize="small" color="error" /></ListItemIcon>
+              {t("clear")}
+            </MenuItem>
+          </Menu>
         </Box>
       )}
 
@@ -339,6 +333,23 @@ export default function CartDrawer({ open, onClose, userId }: CartDrawerProps) {
           </Button>
         </Box>
       )}
+
+      <Dialog open={exportOpen} onClose={() => setExportOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>{t("exportDialogTitle")}</DialogTitle>
+        <DialogContent>
+          <RadioGroup value={format} onChange={(e) => setFormat(e.target.value as ExportFormat)}>
+            {EXPORT_FORMATS.map((f) => (
+              <FormControlLabel key={f} value={f} control={<Radio />} label={t(`format.${f}`)} />
+            ))}
+          </RadioGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setExportOpen(false)}>{tCommon("cancel")}</Button>
+          <Button variant="contained" startIcon={<FileDownloadIcon />} onClick={handleExport}>
+            {t("export")}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {userId && (
         <SaveCartToCollectionModal

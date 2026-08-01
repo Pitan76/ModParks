@@ -7,10 +7,8 @@ import Breadcrumb from "@/components/ui/Breadcrumb";
 import { useTranslations } from "next-intl";
 import Tooltip from "@mui/material/Tooltip";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
-import ProjectSubscribeButton from "./ProjectSubscribeButton";
 import AddToCollectionButton from "./AddToCollectionButton";
-import ProjectCartButton from "@/components/cart/ProjectCartButton";
-import ShareMenuButton from "@/components/ui/ShareMenuButton";
+import ProjectHeaderMenu from "./ProjectHeaderMenu";
 import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { SITE_URL } from "@/lib/config";
 import ProjectTypeBadge from "./ProjectTypeBadge";
@@ -137,10 +135,6 @@ const ProjectDetailHeader = ({
               <DateLabel date={p.updatedAt} type="updated" />
               
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: { sm: 2 } }}>
-                <ShareMenuButton 
-                  url={`${SITE_URL}/projects/${p.slug}`}
-                  title={p.title}
-                />
                 <ProjectFavoriteButton
                   projectId={p.id}
                   initialCount={favoritesCount}
@@ -148,14 +142,14 @@ const ProjectDetailHeader = ({
                   isLoggedIn={isLoggedIn}
                   variant="icon"
                 />
-                {isLoggedIn && (
-                  <ProjectSubscribeButton projectId={p.id} initialSubscribed={isSubscribed} />
-                )}
                 {isLoggedIn && currentUserId && (
                   <AddToCollectionButton projectId={p.id} userId={currentUserId} variant="icon" />
                 )}
-                <ProjectCartButton
+                <ProjectHeaderMenu
                   project={{ id: p.id, slug: p.slug, title: p.title, iconUrl: p.iconUrl, type: p.type }}
+                  shareUrl={`${SITE_URL}/projects/${p.slug}`}
+                  isLoggedIn={isLoggedIn}
+                  isSubscribed={isSubscribed}
                 />
               </Box>
             </Box>

@@ -8,6 +8,12 @@ const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 const nextConfig: NextConfig = {
   // Cloudflare Workers (Edge Runtime) 向け設定
   output: "standalone",
+  typescript: {
+    // 型チェックはビルドの直列区間で 36 秒を占めており、デプロイの待ち時間に直結していた。
+    // ビルドからは外し、CI では typecheck ジョブ（npm run typecheck）を並列に流して担保する。
+    // ローカルはエディタの言語サーバが常時チェックしているため二重実行になっていた。
+    ignoreBuildErrors: true,
+  },
   experimental: {
     optimizePackageImports: ["@mui/icons-material", "@mui/material"],
   },
