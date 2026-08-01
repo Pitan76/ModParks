@@ -1,9 +1,9 @@
 "use client";
 
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import TabbedPanel from "@/components/ui/TabbedPanel";
-import { type ReactNode, useTransition, useState, useEffect } from "react";
+import { type ReactNode, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 
 import dynamic from "next/dynamic";
@@ -96,18 +96,15 @@ const ProjectEditClient = ({
     if (selectedTab && selectedTab.id) {
       const params = new URLSearchParams(searchParams?.toString() || "");
       params.set("tab", selectedTab.id);
-      
-      startTransition(() => {
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-      });
+
+      // タブの中身は全てクライアント側に揃っているので、ここでやることは URL の書き換えだけ。
+      // router.replace だと Server Component へのナビゲーションになり、ページの全クエリが
+      // 再実行される往復の間じゅうタブが操作不能になっていたため、履歴 API を直接叩く。
+      window.history.replaceState(null, "", `${pathname}?${params.toString()}`);
     }
   };
 
-  return (
-    <Box sx={{ opacity: isPending ? 0.6 : 1, transition: "opacity 0.2s", pointerEvents: isPending ? "none" : "auto" }}>
-      <TabbedPanel items={visibleTabs} value={localActiveIndex} onChange={handleTabChange} />
-    </Box>
-  );
+  return <TabbedPanel items={visibleTabs} value={localActiveIndex} onChange={handleTabChange} />;
 };
 
 export default ProjectEditClient;

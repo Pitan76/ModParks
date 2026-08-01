@@ -21,9 +21,10 @@ type MarkdownRendererInnerProps = {
 /**
  * Markdown 内の画像。リンクの中にある場合のみ拡大せず通常の画像として描画します。
  */
-const MarkdownImage = ({ src, alt }: { src?: string; alt?: string }) => {
+// src は react-markdown の型上 Blob もありうるが、Markdown 経由で来るのは常に文字列
+const MarkdownImage = ({ src, alt }: { src?: string | Blob; alt?: string }) => {
   const insideLink = useContext(InsideLinkContext);
-  if (!src) return null;
+  if (!src || typeof src !== "string") return null;
   // 外部画像は必ずプロキシ経由にする。閲覧者の IP / UA を画像ホストへ渡さないため
   const proxied = toProxiedImageUrl(src);
   // eslint-disable-next-line @next/next/no-img-element
@@ -131,7 +132,7 @@ const MarkdownRendererInner = ({ content }: MarkdownRendererInnerProps) => {
               <InsideLinkContext.Provider value={true}>{children}</InsideLinkContext.Provider>
             </Link>
           ),
-          img: ({ src, alt }: { src?: string; alt?: string }) => <MarkdownImage src={typeof src === "string" ? src : undefined} alt={alt} />,
+          img: MarkdownImage,
           li: ({ children }: { children?: ReactNode }) => (
             <Typography component="li" variant="body1" sx={{ lineHeight: 1.8 }}>
               {children}
