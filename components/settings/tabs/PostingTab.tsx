@@ -9,12 +9,17 @@ import FormSelect from "@/components/ui/form/FormSelect";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface Props {
   defaultProjectStatus: string;
+  defaultIdeaStatus: string;
   defaultLicense: string;
+  defaultCommentsEnabled: boolean;
+  defaultRecipesEnabled: boolean;
 }
 
 export default function PostingTab({ defaultProjectStatus, defaultLicense }: Props) {

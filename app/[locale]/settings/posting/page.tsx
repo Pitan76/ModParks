@@ -19,7 +19,10 @@ export default async function PostingSettingsPage() {
     <SettingsSection title={t("posting.title")}>
       <PostingTabLazy
         defaultProjectStatus={prefs.defaultProjectStatus}
+        defaultIdeaStatus={prefs.defaultIdeaStatus}
         defaultLicense={prefs.defaultLicense}
+        defaultCommentsEnabled={prefs.defaultCommentsEnabled}
+        defaultRecipesEnabled={prefs.defaultRecipesEnabled}
       />
     </SettingsSection>
   );

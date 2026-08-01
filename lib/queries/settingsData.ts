@@ -87,7 +87,10 @@ export async function getSettingsPreferences(userId: string) {
 
   return {
     defaultProjectStatus: settings?.defaultProjectStatus || "draft",
+    defaultIdeaStatus: settings?.defaultIdeaStatus || "public",
     defaultLicense: settings?.defaultLicense || "All Rights Reserved",
+    defaultCommentsEnabled: settings?.defaultCommentsEnabled ?? false,
+    defaultRecipesEnabled: settings?.defaultRecipesEnabled ?? false,
     modrinthApiKey: settings?.modrinthApiKey || "",
     curseforgeProjectId: settings?.curseforgeProjectId || "",
     curseforgeVerified: !!settings?.curseforgeVerifiedAt,

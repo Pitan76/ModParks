@@ -158,12 +158,21 @@ export const toggleGithubVisibility = async (show: boolean) => {
 /**
  * デフォルトのMOD投稿設定（公開設定、既定ライセンス）を更新する Server Action。
  */
-export const updatePostingSettings = async (status: "draft" | "public" | "unlisted" | "private", license: string) => {
+export const updatePostingSettings = async (
+  projectStatus: "draft" | "public" | "unlisted" | "private",
+  ideaStatus: "draft" | "public" | "unlisted" | "private",
+  license: string,
+  commentsEnabled: boolean,
+  recipesEnabled: boolean
+) => {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userSettings).set({
-    defaultProjectStatus: status,
+    defaultProjectStatus: projectStatus,
+    defaultIdeaStatus: ideaStatus,
     defaultLicense: license,
+    defaultCommentsEnabled: commentsEnabled,
+    defaultRecipesEnabled: recipesEnabled,
   }).where(eq(userSettings.userId, userId));
 
   revalidatePath("/settings");
