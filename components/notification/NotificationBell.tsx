@@ -16,6 +16,7 @@ import { useRouter } from "@/lib/i18n/routing";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import type { Notification } from "@/db/schema";
 import { renderNotification } from "./renderNotification";
+import NotificationAvatar from "./NotificationAvatar";
 import { markAllNotificationsRead } from "@/lib/actions/notification";
 
 export default function NotificationBell() {
@@ -95,7 +96,8 @@ export default function NotificationBell() {
           items.map((n) => {
             const { message, href } = renderNotification(t, n);
             return (
-              <MenuItem key={n.id} onClick={() => goTo(href)} sx={{ whiteSpace: "normal", alignItems: "flex-start" }}>
+              <MenuItem key={n.id} onClick={() => goTo(href)} sx={{ whiteSpace: "normal", alignItems: "flex-start", gap: 1.5 }}>
+                <NotificationAvatar notification={n} size={32} />
                 <Box>
                   <Typography variant="body2">{message}</Typography>
                   <Typography variant="caption" color="text.secondary">

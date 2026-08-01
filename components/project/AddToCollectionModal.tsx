@@ -127,9 +127,9 @@ const AddToCollectionModal = ({ open, onClose, projectId, userId }: AddToCollect
         </>
       }
     >
-      <Box sx={{ p: 0, m: -3 }}>
+      <Box sx={{ p: 0, m: -3, minHeight: 260, maxHeight: "60vh", overflowY: "auto" }}>
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 260 }}>
             <CircularProgress />
           </Box>
         ) : (

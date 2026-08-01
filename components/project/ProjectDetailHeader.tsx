@@ -9,6 +9,7 @@ import Tooltip from "@mui/material/Tooltip";
 import ProjectFavoriteButton from "./ProjectFavoriteButton";
 import ProjectSubscribeButton from "./ProjectSubscribeButton";
 import AddToCollectionButton from "./AddToCollectionButton";
+import ProjectCartButton from "@/components/cart/ProjectCartButton";
 import ShareMenuButton from "@/components/ui/ShareMenuButton";
 import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { SITE_URL } from "@/lib/config";
@@ -153,6 +154,9 @@ const ProjectDetailHeader = ({
                 {isLoggedIn && currentUserId && (
                   <AddToCollectionButton projectId={p.id} userId={currentUserId} variant="icon" />
                 )}
+                <ProjectCartButton
+                  project={{ id: p.id, slug: p.slug, title: p.title, iconUrl: p.iconUrl, type: p.type }}
+                />
               </Box>
             </Box>
           </Box>

@@ -35,12 +35,12 @@ const SettingsSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onTogg
     ? [
         { id: "settings-profile", label: t("profile.title"), path: "/settings/profile", icon: <PersonIcon /> },
         { id: "settings-account", label: t("account.title"), path: "/settings/account", icon: <ManageAccountsIcon /> },
-        { id: "settings-theme", label: t("theme.title"), path: "/settings/theme", icon: <PaletteIcon /> },
         { id: "settings-security", label: t("security.title"), path: "/settings/security", icon: <SecurityIcon /> },
-        { id: "settings-api-keys", label: t("apiKeys.title"), path: "/settings/api-keys", icon: <VpnKeyIcon /> },
+        { id: "settings-theme", label: t("theme.title"), path: "/settings/theme", icon: <PaletteIcon /> },
         { id: "settings-posting", label: t("posting.title"), path: "/settings/posting", icon: <PostAddIcon /> },
         { id: "settings-notifications", label: t("notifications.title"), path: "/settings/notifications", icon: <NotificationsIcon /> },
         { id: "settings-integration", label: t("integration.title"), path: "/settings/integration", icon: <HubIcon /> },
+        { id: "settings-api-keys", label: t("apiKeys.title"), path: "/settings/api-keys", icon: <VpnKeyIcon /> },
         { id: "settings-rewards", label: t("rewards.title"), path: "/settings/rewards", icon: <RedeemIcon /> },
       ]
     : [];
