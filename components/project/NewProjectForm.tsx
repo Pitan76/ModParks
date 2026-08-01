@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 import ActionRow from "@/components/ui/ActionRow";
+import SettingsLink from "@/components/ui/SettingsLink";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import TextField from "@mui/material/TextField";
@@ -48,6 +49,7 @@ const NewProjectForm = ({
   const router = useRouter();
   const t = useTranslations("Project");
   const tCommon = useTranslations("Common");
+  const tSettings = useTranslations("Settings");
   const locale = useLocale();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
@@ -63,6 +65,10 @@ const NewProjectForm = ({
   const [jarImporting, setJarImporting] = useState(false);
   const [jarError, setJarError] = useState("");
   const [jarData, setJarData] = useState<ParsedModData | null>(null);
+
+  const integrationSettingsLink = (
+    <SettingsLink href="/settings/integration" label={tSettings("integration.title")} color="inherit" />
+  );
 
   const handleImport = async () => {
     if (!importId) return;
@@ -197,10 +203,14 @@ const NewProjectForm = ({
               </Button>
             </ActionRow>
             {importPlatform === "modrinth" && !hasModrinthKey && (
-              <Alert severity="warning" sx={{ mt: 2 }}>{t("create.import.modrinthKeyWarning")}</Alert>
+              <Alert severity="warning" sx={{ mt: 2 }} action={integrationSettingsLink}>
+                {t("create.import.modrinthKeyWarning")}
+              </Alert>
             )}
             {importPlatform === "curseforge" && !hasCurseForgeKey && (
-              <Alert severity="warning" sx={{ mt: 2 }}>{t("create.import.curseforgeKeyWarning")}</Alert>
+              <Alert severity="warning" sx={{ mt: 2 }} action={integrationSettingsLink}>
+                {t("create.import.curseforgeKeyWarning")}
+              </Alert>
             )}
             {importError && <Alert severity="error" sx={{ mt: 2 }}>{importError}</Alert>}
             {importData && !jarData && <Alert severity="success" sx={{ mt: 2 }}>{t("create.import.fetchSuccess")}</Alert>}
@@ -241,13 +251,16 @@ const NewProjectForm = ({
 
         <ProjectFormFields key={formKey} error={error} project={importData || undefined} availableTags={availableTags} defaultLicense={defaultLicense} defaultBodyFormat={defaultBodyFormat} />
 
-        <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-          <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
-            {tCommon("cancel")}
-          </Button>
-          <Button type="submit" variant="contained" disabled={pending}>
-            {pending ? t("create.creating") : t("create.submit")}
-          </Button>
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+          <SettingsLink href="/settings/posting" label={tSettings("posting.title")} color="inherit" sx={{ color: "text.secondary" }} />
+          <Box sx={{ display: "flex", gap: 2, ml: "auto" }}>
+            <Button variant="outlined" onClick={() => router.back()} disabled={pending}>
+              {tCommon("cancel")}
+            </Button>
+            <Button type="submit" variant="contained" disabled={pending}>
+              {pending ? t("create.creating") : t("create.submit")}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Container>

@@ -17,6 +17,7 @@ import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import ActionRow from "@/components/ui/ActionRow";
+import SettingsLink from "@/components/ui/SettingsLink";
 import { fetchModrinthProjects, fetchCurseForgeProjects, importProjects } from "@/lib/actions/import";
 import type { ImportedProject } from "@/lib/actions/import";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
@@ -39,6 +40,7 @@ const toDisplayError = (err: unknown, fallback: string): string => {
  */
 const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProject }: BatchImportClientProps) => {
   const t = useTranslations("Project");
+  const tSettings = useTranslations("Settings");
   const [projects, setProjects] = useState<ImportedProject[]>([]);
   const [source, setSource] = useState<"modrinth" | "curseforge">("modrinth");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -143,9 +145,12 @@ const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProj
               {loading && source === config.id ? <CircularProgress size={24} /> : config.label}
             </Button>
             {config.showWarning && (
-              <Typography variant="body2" color="text.secondary">
-                {config.warning}
-              </Typography>
+              <>
+                <Typography variant="body2" color="text.secondary">
+                  {config.warning}
+                </Typography>
+                <SettingsLink href="/settings/integration" label={tSettings("integration.title")} />
+              </>
             )}
           </ActionRow>
         ))}

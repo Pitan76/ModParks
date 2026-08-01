@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { createIdea } from "@/lib/actions/idea";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LinkButton from "@/components/ui/LinkButton";
+import SettingsLink from "@/components/ui/SettingsLink";
 import { useTranslations } from "next-intl";
 
 interface NewIdeaFormProps {
@@ -29,6 +30,7 @@ export default function NewIdeaForm({ defaultVisibility = "public", defaultBodyF
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const tIdea = useTranslations("Idea");
+  const tSettings = useTranslations("Settings");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
 
@@ -125,7 +127,8 @@ export default function NewIdeaForm({ defaultVisibility = "public", defaultBodyF
                 </Select>
               </FormControl>
 
-              <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 2 }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 2, gap: 2, flexWrap: "wrap" }}>
+                <SettingsLink href="/settings/posting" label={tSettings("posting.title")} color="inherit" sx={{ color: "text.secondary" }} />
                 <Button
                   type="submit"
                   variant="contained"

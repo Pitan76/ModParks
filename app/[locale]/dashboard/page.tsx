@@ -7,6 +7,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import LinkButton from "@/components/ui/LinkButton";
+import SettingsLink from "@/components/ui/SettingsLink";
 import { getDashboardData } from "./dashboardData";
 import StatsGrid from "./StatsGrid";
 import DashboardMain from "./DashboardMain";
@@ -39,7 +40,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: "1.75rem", sm: "2.125rem" } }}>
           {t("title")}
         </Typography>
-        <Box sx={{ display: "flex", gap: { xs: 1, sm: 2 }, flexWrap: "wrap" }}>
+        <Box sx={{ display: "flex", gap: { xs: 1, sm: 2 }, flexWrap: "wrap", alignItems: "center" }}>
+          <SettingsLink href="/settings/rewards" label={tNav("rewards")} sx={{ color: "text.secondary" }} />
           <LinkButton
             href="/ideas/new"
             variant="outlined"
