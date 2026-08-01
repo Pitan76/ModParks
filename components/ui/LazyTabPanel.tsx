@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import type { SxProps, Theme } from "@mui/material/styles";
@@ -22,12 +22,12 @@ export type LazyTabPanelProps = {
  * 訪問済みかどうかは各パネルが自分で持つため、呼び出し側はタブの状態管理をするだけでよい。
  */
 const LazyTabPanel = ({ active, children, sx }: LazyTabPanelProps) => {
-  // 選択された瞬間の描画でそのまま中身を出したいので、state ではなく ref で持つ。
-  // state にすると「マウントを許可する」ためだけの再描画が 1 回余計に挟まる。
-  const everActiveRef = useRef(active);
-  if (active) everActiveRef.current = true;
+  // 選択された瞬間の描画でそのまま中身を出したいので、effect ではなく描画中に更新する。
+  // effect でマウントを許可すると、中身が出るまでに再描画が 1 回余計に挟まる。
+  const [everActive, setEverActive] = useState(active);
+  if (active && !everActive) setEverActive(true);
 
-  if (!everActiveRef.current) return null;
+  if (!everActive) return null;
 
   return (
     <Box role="tabpanel" hidden={!active} sx={{ display: active ? "block" : "none", ...sx }}>
