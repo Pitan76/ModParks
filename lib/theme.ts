@@ -227,9 +227,6 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
     MuiSelect: {
       defaultProps: {
         size: "small",
-        MenuProps: {
-          disablePortal: true,
-        },
       },
     },
     MuiAutocomplete: {

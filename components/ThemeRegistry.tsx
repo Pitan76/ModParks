@@ -11,6 +11,7 @@ import { useSearchParams } from "next/navigation";
 export const ColorModeContext = React.createContext({
   mode: "dark" as "light" | "dark",
   toggleColorMode: () => {},
+  setColorMode: (mode: "light" | "dark") => {},
   isNewTheme: true,
   setThemeType: (theme: "new" | "legacy") => {},
 });
@@ -86,6 +87,10 @@ export default function ThemeRegistry({ children, initialMode = "dark" }: ThemeR
           Cookies.set("theme_mode", nextMode, { expires: 365, path: "/" });
           return nextMode;
         });
+      },
+      setColorMode: (newMode: "light" | "dark") => {
+        setMode(newMode);
+        Cookies.set("theme_mode", newMode, { expires: 365, path: "/" });
       },
       isNewTheme,
       setThemeType: (theme: "new" | "legacy") => {

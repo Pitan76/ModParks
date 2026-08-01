@@ -22,7 +22,7 @@ import StickySaveBar from "@/components/ui/StickySaveBar";
  */
 export default function ThemeTab() {
   const t = useTranslations("Settings.theme");
-  const { isNewTheme, setThemeType } = useColorMode();
+  const { isNewTheme, setThemeType, mode, setColorMode } = useColorMode();
   const { setIsDisabled } = useContextMenuContext();
   const cartEnabled = useCartEnabled();
   const [success, setSuccess] = useState(false);
@@ -30,11 +30,13 @@ export default function ThemeTab() {
   const form = useDirtyForm(
     {
       selectedTheme: (isNewTheme ? "new" : "legacy") as "new" | "legacy",
+      colorMode: mode as "light" | "dark",
       useCustomContextMenu: true,
       useCart: cartEnabled,
     },
     (values) => {
       setThemeType(values.selectedTheme);
+      setColorMode(values.colorMode);
       try {
         window.localStorage.setItem("disable_custom_context_menu", values.useCustomContextMenu ? "false" : "true");
         setIsDisabled(!values.useCustomContextMenu);
@@ -46,7 +48,7 @@ export default function ThemeTab() {
       setTimeout(() => setSuccess(false), 3000);
     }
   );
-  const { selectedTheme, useCustomContextMenu, useCart } = form.values;
+  const { selectedTheme, colorMode, useCustomContextMenu, useCart } = form.values;
   const commit = form.commit;
 
   // ローカルストレージ / カートストアの現在値を保存済みの初期値として取り込む
@@ -57,8 +59,8 @@ export default function ThemeTab() {
     } catch (e) {
       // ignore
     }
-    commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled }));
-  }, [cartEnabled, commit]);
+    commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled, colorMode: mode }));
+  }, [cartEnabled, commit, mode]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, maxWidth: 500 }}>
@@ -82,6 +84,28 @@ export default function ThemeTab() {
             value="legacy"
             control={<Radio />}
             label={t("legacyTheme")}
+          />
+        </RadioGroup>
+      </FormControl>
+
+      <FormControl>
+        <FormLabel id="color-mode-select-label" sx={{ mb: 1, fontWeight: 600 }}>
+          {t("colorModeLabel")}
+        </FormLabel>
+        <RadioGroup
+          aria-labelledby="color-mode-select-label"
+          value={colorMode}
+          onChange={(e) => form.setField("colorMode", e.target.value as "light" | "dark")}
+        >
+          <FormControlLabel
+            value="light"
+            control={<Radio />}
+            label={t("lightMode")}
+          />
+          <FormControlLabel
+            value="dark"
+            control={<Radio />}
+            label={t("darkMode")}
           />
         </RadioGroup>
       </FormControl>

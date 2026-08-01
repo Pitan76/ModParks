@@ -192,12 +192,14 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
         </Tooltip>
         )}
 
-        {/* テーマ切替 */}
+        {/* テーマ切替 (非ログイン時のみ) */}
+        {!session?.user && (
         <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"}>
           <IconButton onClick={toggleColorMode} color="inherit" size="small" sx={{ mr: 0.5, display: { xs: "none", md: "flex" } }}>
             {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
         </Tooltip>
+        )}
 
         {/* 言語切替 (非ログイン時のみ。ログイン時は設定から変更) */}
         {!session?.user && (
