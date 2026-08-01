@@ -7,7 +7,7 @@ import { createIdeaSchema, createIdeaCommentSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
+import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import {
@@ -194,14 +194,14 @@ export async function createIdeaComment(ideaId: string, formData: FormData) {
 
     const idea = await getIdeaTarget(db, ideaId);
     if (idea) {
-      const actorName = await resolveActorName(db, userId);
+      const actor = await resolveActor(db, userId);
       if (parentAuthorId) {
         await notifyToUser(db, parentAuthorId, userId, "comment_reply", {
-          kind: "idea", slug: idea.slug, title: idea.title, actorName,
+          kind: "idea", slug: idea.slug, title: idea.title, ...actor,
         });
       } else {
         await notifyToUser(db, idea.authorId, userId, "comment", {
-          kind: "idea", slug: idea.slug, title: idea.title, actorName,
+          kind: "idea", slug: idea.slug, title: idea.title, ...actor,
         });
       }
     }

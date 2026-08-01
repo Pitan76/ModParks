@@ -3,7 +3,7 @@ import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { listPostComments, createPostComment } from "@/lib/api/postComments";
-import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
+import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
 
 /**
  * v1 互換シム。
@@ -59,8 +59,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
 
     const { id: newCommentId, parentAuthorId } = await createPostComment(db, project.id, session.user.id, { ...body, content });
 
-    const actorName = await resolveActorName(db, session.user.id);
-    const payload = { kind: "project" as const, slug: project.slug, title: project.title, actorName };
+    const actor = await resolveActor(db, session.user.id);
+    const payload = { kind: "project" as const, slug: project.slug, title: project.title, ...actor };
     if (parentAuthorId) {
       await notifyToUser(db, parentAuthorId, session.user.id, "comment_reply", payload);
     } else {

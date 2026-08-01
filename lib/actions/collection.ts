@@ -88,13 +88,13 @@ export async function toggleProjectInCollection(collectionId: string, projectId:
       .where(eq(posts.id, projectId))
       .get();
     if (project) {
-      const { notifyToUser, resolveActorName } = await import("@/lib/notifications/notify");
+      const { notifyToUser, resolveActor } = await import("@/lib/notifications/notify");
       await notifyToUser(db, project.authorId, userId, "list_add", {
         kind: "project",
         slug: project.slug,
         title: project.title,
         collectionName: collection.name,
-        actorName: await resolveActorName(db, userId),
+        ...(await resolveActor(db, userId)),
       });
     }
   }
@@ -138,15 +138,15 @@ export async function addProjectsToCollection(collectionId: string, projectIds: 
     .where(inArray(posts.id, fresh))
     .all();
   if (addedProjects.length > 0) {
-    const { notifyToUser, resolveActorName } = await import("@/lib/notifications/notify");
-    const actorName = await resolveActorName(db, userId);
+    const { notifyToUser, resolveActor } = await import("@/lib/notifications/notify");
+    const actor = await resolveActor(db, userId);
     for (const project of addedProjects) {
       await notifyToUser(db, project.authorId, userId, "list_add", {
         kind: "project",
         slug: project.slug,
         title: project.title,
         collectionName: collection.name,
-        actorName,
+        ...actor,
       });
     }
   }

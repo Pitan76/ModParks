@@ -142,7 +142,10 @@ export async function sendPushToRecipients(
         title: "ModParks",
         body,
         url: targetUrl(locale, payload),
-        icon: payload.iconUrl || "/icon.png",
+        // 人が起点の通知（コメント・フォロー等）はその人のアバター、
+        // システム起点（新バージョン・新規公開）はプロジェクトアイコン、
+        // どちらも無ければ ModParks のアイコンにフォールバックする
+        icon: payload.actorImage || payload.iconUrl || "/icon.png",
         tag: type,
       });
 

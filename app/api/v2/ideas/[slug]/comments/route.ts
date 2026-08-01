@@ -3,7 +3,7 @@ import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { findIdeaPostBySlug } from "@/lib/queries/post";
 import { listPostComments, createPostComment } from "@/lib/api/postComments";
-import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
+import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import type { PaginatedResponse, ApiComment } from "@/types/api";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -35,8 +35,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
 
   const { id, parentAuthorId } = await createPostComment(db, idea.id, session.user.id, { ...body, content });
 
-  const actorName = await resolveActorName(db, session.user.id);
-  const payload = { kind: "idea" as const, slug: idea.slug, title: idea.title, actorName };
+  const actor = await resolveActor(db, session.user.id);
+  const payload = { kind: "idea" as const, slug: idea.slug, title: idea.title, ...actor };
   if (parentAuthorId) {
     await notifyToUser(db, parentAuthorId, session.user.id, "comment_reply", payload);
   } else {

@@ -6,7 +6,7 @@ import { favorites, posts, projects, users, userProfiles } from "@/db/schema";
 import { eq, and, desc, sql, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { notifyToUser, resolveActorName } from "@/lib/notifications/notify";
+import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { mapProjectRow } from "@/lib/queries/projectRow";
 
@@ -49,7 +49,7 @@ export async function togglePostFavorite(postId: string) {
           kind: post.kind,
           slug: post.slug,
           title: post.title,
-          actorName: await resolveActorName(db, userId),
+          ...(await resolveActor(db, userId)),
         });
       }
     }

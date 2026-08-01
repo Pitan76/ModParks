@@ -28,15 +28,9 @@ export async function POST(_request: Request, { params }: { params: Promise<{ us
       followingId: targetProfile.userId,
     }).run();
 
-    const actorProfile = await db
-      .select({ username: userProfiles.username, displayName: userProfiles.displayName })
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, session.user.id))
-      .get();
-    const { notifyToUser } = await import("@/lib/notifications/notify");
+    const { notifyToUser, resolveActor } = await import("@/lib/notifications/notify");
     await notifyToUser(db, targetProfile.userId, session.user.id, "follow", {
-      actorUsername: actorProfile?.username ?? "",
-      actorName: actorProfile?.displayName || actorProfile?.username || "",
+      ...(await resolveActor(db, session.user.id)),
     });
 
     return NextResponse.json({ success: true });

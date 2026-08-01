@@ -117,15 +117,31 @@ export async function notifyNewProject(
   });
 }
 
-/** 通知の payload に載せる操作者の表示名を取得する */
-export async function resolveActorName(db: any, actorId: string): Promise<string> {
+/**
+ * 通知の payload に載せる操作者の情報（表示名・アイコン・ユーザー名）を取得する。
+ * 戻り値はそのまま payload へ spread する前提。actorImage は通知一覧のアバターと
+ * Web Push の通知アイコンの両方に使う。
+ */
+export async function resolveActor(db: any, actorId: string): Promise<NotificationPayload> {
   const row = await db
-    .select({ displayName: userProfiles.displayName, name: users.name })
+    .select({
+      displayName: userProfiles.displayName,
+      username: userProfiles.username,
+      avatarUrl: userProfiles.avatarUrl,
+      name: users.name,
+      image: users.image,
+    })
     .from(users)
     .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
     .where(eq(users.id, actorId))
     .get();
-  return row?.displayName || row?.name || "";
+
+  const actorImage = row?.avatarUrl || row?.image || "";
+  return {
+    actorName: row?.displayName || row?.name || row?.username || "",
+    ...(row?.username ? { actorUsername: row.username } : {}),
+    ...(actorImage ? { actorImage } : {}),
+  };
 }
 
 /** 単一受信者向けイベント（コメント・いいね・お気に入り・フォロー・リスト追加） */
