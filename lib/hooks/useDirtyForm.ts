@@ -24,9 +24,6 @@ export function useDirtyForm<T extends Record<string, unknown>>(
     onSaveRef.current = onSave;
   }, [onSave]);
 
-  const valuesRef = useRef(values);
-  valuesRef.current = values;
-
   const dirty = useMemo(() => JSON.stringify(values) !== JSON.stringify(baseline), [values, baseline]);
 
   const setField = useCallback(<K extends keyof T>(key: K, value: Updater<T[K]>) => {
@@ -43,10 +40,11 @@ export function useDirtyForm<T extends Record<string, unknown>>(
    * 初期値をクライアント側でしか読めないフォーム向け。
    */
   const commit = useCallback((next: Updater<T>) => {
-    const resolved = typeof next === "function" ? (next as (prev: T) => T)(valuesRef.current) : next;
-    valuesRef.current = resolved;
-    setValues(resolved);
-    setBaseline(resolved);
+    setValues((prev) => {
+      const resolved = typeof next === "function" ? (next as (p: T) => T)(prev) : next;
+      setBaseline(resolved);
+      return resolved;
+    });
   }, []);
 
   /** 現在値を保存する。onSave が false を返した場合は失敗扱いで dirty を維持する */
@@ -54,13 +52,12 @@ export function useDirtyForm<T extends Record<string, unknown>>(
     if (saving) return;
     setSaving(true);
     try {
-      const snapshot = valuesRef.current;
-      const result = await onSaveRef.current(snapshot);
-      if (result !== false) setBaseline(snapshot);
+      const result = await onSaveRef.current(values);
+      if (result !== false) setBaseline(values);
     } finally {
       setSaving(false);
     }
-  }, [saving]);
+  }, [saving, values]);
 
   return { values, setField, setValues, dirty, saving, reset, commit, submit, baseline };
 }

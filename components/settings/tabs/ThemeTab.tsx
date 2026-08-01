@@ -47,6 +47,7 @@ export default function ThemeTab() {
     }
   );
   const { selectedTheme, useCustomContextMenu, useCart } = form.values;
+  const commit = form.commit;
 
   // ローカルストレージ / カートストアの現在値を保存済みの初期値として取り込む
   useEffect(() => {
@@ -56,8 +57,8 @@ export default function ThemeTab() {
     } catch (e) {
       // ignore
     }
-    form.commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled }));
-  }, [cartEnabled, form.commit]);
+    commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled }));
+  }, [cartEnabled, commit]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, maxWidth: 500 }}>
