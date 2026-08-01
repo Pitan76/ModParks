@@ -337,7 +337,7 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
           </Box>
         )}
       </Toolbar>
-      {cartEnabled && <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />}
+      {cartEnabled && <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} userId={session?.user?.id ?? null} />}
     </AppBar>
   );
 };

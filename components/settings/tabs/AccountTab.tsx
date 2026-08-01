@@ -42,6 +42,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
   const [deactivateOpen, setDeactivateOpen] = useState(false);
   const [isDeactivatingAccount, setIsDeactivatingAccount] = useState(false);
   const [deactivatePasswordOrToken, setDeactivatePasswordOrToken] = useState("");
+  const [exportFormat, setExportFormat] = useState("json");
 
   const showAccMsg = (type: "success" | "error", key: string) => flash(type, t(`account.${key}`));
 
@@ -104,8 +105,8 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
     setIsDeactivatingAccount(false);
   };
 
-  const handleExportData = (format: string) => {
-    window.open(`/api/user/export?format=${format}`, "_blank");
+  const handleExportData = () => {
+    window.open(`/api/user/export?format=${exportFormat}`, "_blank");
   };
 
   return (
@@ -166,11 +167,21 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale, se
 
       <Box>
         <Typography variant="h6" sx={{ mb: 2 }}>{t("account.exportData")}</Typography>
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 4 }}>
-          <Button variant="outlined" onClick={() => handleExportData("json")}>{t("account.exportJson")}</Button>
-          <Button variant="outlined" onClick={() => handleExportData("csv")}>{t("account.exportCsv")}</Button>
-          <Button variant="outlined" onClick={() => handleExportData("md")}>{t("account.exportMd")}</Button>
-          <Button variant="outlined" onClick={() => handleExportData("txt")}>{t("account.exportTxt")}</Button>
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 4 }}>
+          <FormSelect
+            size="small"
+            label={t("account.exportFormat")}
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value as string)}
+            options={[
+              { value: "json", label: t("account.exportJson") },
+              { value: "csv", label: t("account.exportCsv") },
+              { value: "md", label: t("account.exportMd") },
+              { value: "txt", label: t("account.exportTxt") },
+            ]}
+            formControlProps={{ sx: { minWidth: 200 } }}
+          />
+          <Button variant="outlined" onClick={handleExportData} sx={{ height: 40 }}>{t("account.exportBtn")}</Button>
         </Box>
       </Box>
 

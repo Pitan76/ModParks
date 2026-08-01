@@ -103,6 +103,58 @@ export async function toggleProjectInCollection(collectionId: string, projectId:
   return { success: true, added };
 }
 
+/**
+ * 複数プロジェクトをまとめてコレクションへ追加する（カートからの一括保存用）。
+ * トグルと違い、既に入っているものは「そのまま残す」だけで削除しない。
+ * @returns 実際に追加された件数
+ */
+export async function addProjectsToCollection(collectionId: string, projectIds: string[]) {
+  const { db, userId } = await getAuthenticatedDb();
+
+  const collection = await db.select().from(collections).where(and(eq(collections.id, collectionId), eq(collections.userId, userId))).get();
+  if (!collection) {
+    throw new Error("Forbidden or Not Found");
+  }
+
+  const uniqueIds = [...new Set(projectIds)];
+  if (uniqueIds.length === 0) return { success: true, added: 0 };
+
+  // 既に入っているものを一度に引いて、差分だけを挿入する
+  const existing = await db.select({ projectId: collectionItems.projectId })
+    .from(collectionItems)
+    .where(and(eq(collectionItems.collectionId, collectionId), inArray(collectionItems.projectId, uniqueIds)))
+    .all();
+  const existingSet = new Set(existing.map(e => e.projectId));
+
+  const fresh = uniqueIds.filter(id => !existingSet.has(id));
+  if (fresh.length === 0) return { success: true, added: 0 };
+
+  await db.insert(collectionItems).values(fresh.map(projectId => ({ collectionId, projectId })));
+
+  // 追加されたプロジェクトの作者へ通知する（トグル時と同じ扱い）
+  const addedProjects = await db
+    .select({ slug: posts.slug, title: posts.title, authorId: posts.authorId })
+    .from(posts)
+    .where(inArray(posts.id, fresh))
+    .all();
+  if (addedProjects.length > 0) {
+    const { notifyToUser, resolveActorName } = await import("@/lib/notifications/notify");
+    const actorName = await resolveActorName(db, userId);
+    for (const project of addedProjects) {
+      await notifyToUser(db, project.authorId, userId, "list_add", {
+        kind: "project",
+        slug: project.slug,
+        title: project.title,
+        collectionName: collection.name,
+        actorName,
+      });
+    }
+  }
+
+  revalidatePath("/[locale]/lists/[id]", "page");
+  return { success: true, added: fresh.length };
+}
+
 export async function getUserCollections(targetUserId: string, viewerId?: string) {
   const db = await getDatabase();
   const isOwner = targetUserId === viewerId;

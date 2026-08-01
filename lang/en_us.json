@@ -75,15 +75,15 @@
     "previewLabel": "Ad space (preview)"
   },
   "CreatorReward": {
-    "title": "Creator Reward",
+    "title": "Reward",
     "description": "We share site revenue with creators as points. Each month's rewards are calculated from the previous month's settled revenue.",
-    "featureDisabled": "Creator Reward is currently paused. No points are calculated or granted until it resumes.",
+    "featureDisabled": "Reward is currently paused. No points are calculated or granted until it resumes.",
     "balance": "Current balance",
     "points": "{count} pt",
     "lifetimeEarned": "Total earned",
     "lifetimeSpent": "Total spent",
     "participation": "Participation",
-    "optInLabel": "Receive creator rewards",
+    "optInLabel": "Receive rewards",
     "optInHelp": "Turning this off removes you from distribution. Points you receive can later be exchanged for gift cards and similar.",
     "optInFailed": "Could not save your setting. Please try again later.",
     "history": "Point history",
@@ -1375,7 +1375,7 @@
       "passkeyNamePlaceholder": "e.g. My laptop"
     },
     "account": {
-      "title": "Account Management",
+      "title": "Account",
       "changeId": "Change User ID",
       "changeIdDesc": "If you change your ID, access from the previous ID will redirect to the new one, but older IDs will become available for others to claim.",
       "currentId": "Current ID",
@@ -1417,7 +1417,9 @@
       "exportJson": "JSON Format",
       "exportCsv": "CSV Format",
       "exportMd": "Markdown Format",
-      "exportTxt": "Text Format"
+      "exportTxt": "Text Format",
+      "exportFormat": "Format",
+      "exportBtn": "Export"
     },
     "notifications": {
       "title": "Notifications",
@@ -1574,6 +1576,20 @@
     "removed": "Removed from cart",
     "addList": "Add all to cart",
     "addedItems": "Added {count} items to cart",
-    "allInCart": "All items are already in your cart"
+    "allInCart": "All items are already in your cart",
+    "export": "Export",
+    "exportFormat": "Format",
+    "format": {
+      "json": "JSON",
+      "csv": "CSV",
+      "md": "Markdown",
+      "txt": "Text"
+    },
+    "saveToCollection": "Save to list",
+    "savedItems": "Saved {count} items to the list",
+    "allInCollection": "All items are already in that list",
+    "history": "Download history",
+    "historyEmpty": "No download history",
+    "clearHistory": "Clear history"
   }
 }

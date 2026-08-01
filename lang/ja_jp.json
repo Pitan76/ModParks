@@ -75,15 +75,15 @@
     "previewLabel": "広告スペース（プレビュー）"
   },
   "CreatorReward": {
-    "title": "クリエイタ還元",
+    "title": "リワード",
     "description": "サイトの収益からクリエイタへポイントを還元しています。前月の実収益をもとに、翌月に計算・付与されます。",
-    "featureDisabled": "クリエイタ還元は現在停止中です。再開までポイントの計算と付与は行われません。",
+    "featureDisabled": "リワードは現在停止中です。再開までポイントの計算と付与は行われません。",
     "balance": "現在の残高",
     "points": "{count} pt",
     "lifetimeEarned": "累計獲得",
     "lifetimeSpent": "累計使用",
     "participation": "参加設定",
-    "optInLabel": "クリエイタ還元を受け取る",
+    "optInLabel": "リワードを受け取る",
     "optInHelp": "オフにすると配分の対象から外れます。受け取ったポイントは後日ギフトカードなどに交換できます。",
     "optInFailed": "設定を保存できませんでした。時間をおいて再度お試しください。",
     "history": "ポイント履歴",
@@ -1383,7 +1383,7 @@
       "passkeyNamePlaceholder": "例: 自分のノートPC"
     },
     "account": {
-      "title": "アカウント管理",
+      "title": "アカウント",
       "changeId": "ユーザーIDの変更",
       "changeIdDesc": "IDを変更すると、旧IDからのアクセスは自動で新IDへリダイレクトされますが、それより古いIDは他のユーザーが取得できるようになります。",
       "currentId": "現在のID",
@@ -1425,7 +1425,9 @@
       "exportJson": "JSON形式",
       "exportCsv": "CSV形式",
       "exportMd": "Markdown形式",
-      "exportTxt": "テキスト形式"
+      "exportTxt": "テキスト形式",
+      "exportFormat": "形式",
+      "exportBtn": "エクスポート"
     },
     "notifications": {
       "title": "通知設定",
@@ -1582,6 +1584,20 @@
     "removed": "カートから削除しました",
     "addList": "リストをまとめてカートに追加",
     "addedItems": "{count}件をカートに追加しました",
-    "allInCart": "すべてカートに追加済みです"
+    "allInCart": "すべてカートに追加済みです",
+    "export": "エクスポート",
+    "exportFormat": "形式",
+    "format": {
+      "json": "JSON",
+      "csv": "CSV",
+      "md": "Markdown",
+      "txt": "テキスト"
+    },
+    "saveToCollection": "コレクションへ保存",
+    "savedItems": "{count}件をリストに保存しました",
+    "allInCollection": "すべてリストに保存済みです",
+    "history": "ダウンロード履歴",
+    "historyEmpty": "ダウンロード履歴はありません",
+    "clearHistory": "履歴を消去"
   }
 }
