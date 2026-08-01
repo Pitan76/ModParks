@@ -2,10 +2,11 @@
 ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラグイン配布プラットフォームです。<br />
 日本発のプラットフォームとして、開発者とプレイヤーがより円滑に作品を共有し、コミュニケーションできる場を提供することを目的としています。
 
+
+
 <img width="1307" height="773" alt="image" src="https://github.com/user-attachments/assets/a902929c-cc75-4bf3-b90d-b83903dfa7ce" />
 
 <img width="1301" height="776" alt="image" src="https://github.com/user-attachments/assets/bf7ff7d3-f5fc-47be-b9a9-c506ef1fbb24" />
-
 
 ## 特徴
 - プロジェクトの公開と探索: MODやプラグインを検索、発見、ダウンロード。
@@ -28,6 +29,15 @@ ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラ
 - **認証**: [Auth.js (NextAuth v5)](https://authjs.dev/)
 - **多言語化**: [next-intl](https://next-intl-docs.vercel.app/)
 - **実行環境**: Cloudflare Workers
+
+## ロゴ
+
+<img width="256" height="256" alt="image" src="https://github.com/user-attachments/assets/000b8a58-55f1-4053-8120-d63322a74fbf" />
+
+- M - Minecraft/MOD
+- P - Publish/Plugin
+- S - Search
+
 
 ## ローカル開発環境のセットアップ
 
