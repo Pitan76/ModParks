@@ -1315,8 +1315,12 @@
     },
     "posting": {
       "title": "投稿設定",
-      "defaultProjectStatus": "デフォルトの公開状態",
+      "defaultProjectStatus": "プロジェクトのデフォルト公開状態",
+      "defaultIdeaStatus": "アイデアのデフォルト公開状態",
       "defaultLicense": "デフォルトのライセンス",
+      "defaultFeatures": "デフォルト機能",
+      "defaultCommentsEnabled": "コメント欄をデフォルトで有効化する",
+      "defaultRecipesEnabled": "レシピタブをデフォルトで有効化する",
       "successUpdate": "投稿設定を更新しました"
     },
     "theme": {

@@ -1307,8 +1307,12 @@
     },
     "posting": {
       "title": "Posting Settings",
-      "defaultProjectStatus": "Default Visibility",
+      "defaultProjectStatus": "Default Project Visibility",
+      "defaultIdeaStatus": "Default Idea Visibility",
       "defaultLicense": "Default License",
+      "defaultFeatures": "Default Features",
+      "defaultCommentsEnabled": "Enable comments by default",
+      "defaultRecipesEnabled": "Enable recipe tab by default",
       "successUpdate": "Posting settings updated successfully"
     },
     "theme": {
