@@ -28,10 +28,11 @@ interface ProjectsPageProps {
  */
 export async function generateMetadata({ params }: ProjectsPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const tNav = await getTranslations({ locale, namespace: "Nav" });
+  const t = await getTranslations({ locale, namespace: "Project" });
 
   return {
-    title: tNav("projects"),
+    title: t("explore.title"),
+    description: t("explore.description"),
     alternates: { canonical: canonicalUrl("/projects") },
   };
 }
