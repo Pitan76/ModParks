@@ -18,6 +18,13 @@ const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 /**
+ * 未保存プロジェクトのアップロードキーに使う目印（`icon/new-project/<userId>/...`）。
+ * 実プロジェクトが同じ slug を取ると誤認するため、slug としては予約済み。
+ * @see lib/validations.ts の RESERVED_PROJECT_SLUGS
+ */
+export const NEW_PROJECT_SLUG = "new-project";
+
+/**
  * 外から来た値が UploadType かを実行時に判定する。
  *
  * presign はリクエストボディの `type` をそのまま R2 キーの先頭に埋め込むため、

@@ -3,116 +3,127 @@ import { auth } from "@/lib/auth";
 import { buildR2Key, getR2PublicUrl } from "@/lib/r2";
 import { getR2S3Config, createPresignedPutUrl } from "@/lib/r2Presign";
 import { createId } from "@paralleldrive/cuid2";
-import { isAllowedUpload, isUploadType, MAX_UPLOAD_BYTES } from "@/lib/upload/fileTypes";
+import { checkProjectUploadAccess, type UploadActor } from "@/lib/upload/access";
+import {
+  isAllowedUpload,
+  isUploadType,
+  MAX_UPLOAD_BYTES,
+  NEW_PROJECT_SLUG,
+  type UploadType,
+} from "@/lib/upload/fileTypes";
+
+interface PresignRequest {
+  fileName: string;
+  contentType: string;
+  type: UploadType;
+  fileSize: number;
+  projectSlug?: string;
+}
+
+/** 入力検証の結果。失敗時はそのまま HTTP 応答に使う。 */
+type Parsed = { ok: true; value: PresignRequest } | { ok: false; status: number; error: string };
+
+function invalid(error: string, status = 400): Parsed {
+  return { ok: false, status, error };
+}
+
+/**
+ * リクエストボディを検証する。
+ *
+ * type は R2 キーの先頭にそのまま埋め込まれるので、型アサーションでは足りない。
+ * `../evil` のような値が通ると、バケットの任意プレフィックスへの署名を発行できてしまう。
+ * fileSize も必須。presigned URL の PUT は Worker を通らないため、
+ * ここで確定させたバイト数を署名に焼き込む以外に上限を効かせる手段が無い。
+ */
+function parseRequest(body: unknown): Parsed {
+  const { fileName, contentType, type, projectSlug, fileSize } = (body ?? {}) as Record<
+    string,
+    unknown
+  >;
+
+  if (typeof fileName !== "string" || !fileName) return invalid("Missing fields");
+  if (typeof contentType !== "string" || !contentType) return invalid("Missing fields");
+  if (!isUploadType(type)) return invalid("Invalid type");
+  if (typeof fileSize !== "number" || !Number.isInteger(fileSize) || fileSize <= 0) {
+    return invalid("Missing or invalid fileSize");
+  }
+  if (fileSize > MAX_UPLOAD_BYTES) {
+    return invalid(`File size exceeds ${MAX_UPLOAD_BYTES / 1024 / 1024}MB limit`, 413);
+  }
+  if (projectSlug !== undefined && typeof projectSlug !== "string") return invalid("Missing fields");
+  if (type !== "avatar" && !projectSlug) return invalid("Missing projectSlug");
+  if (!isAllowedUpload(type, contentType, fileName)) {
+    return invalid(`Invalid file type for ${type}`);
+  }
+
+  return { ok: true, value: { fileName, contentType, type, fileSize, projectSlug } };
+}
+
+/**
+ * アップロード先に対する権限を確認する。
+ *
+ * 未保存プロジェクトはまだ DB にレコードが無く所有権を確認できない。
+ * 誰でも通せてしまう経路なので、アイコン（画像）に限定したうえで
+ * キーを呼び出し元のユーザーIDで区切り、影響範囲を閉じる（キー生成は buildKey 側）。
+ */
+async function authorize(req: PresignRequest, actor: UploadActor) {
+  if (req.type === "avatar") return { ok: true } as const;
+  if (req.projectSlug !== NEW_PROJECT_SLUG) {
+    return await checkProjectUploadAccess(req.projectSlug!, actor);
+  }
+  if (req.type !== "icon") {
+    return { ok: false, status: 400, error: "Invalid type for new project" } as const;
+  }
+  return { ok: true } as const;
+}
+
+function buildKey(req: PresignRequest, actor: UploadActor): string {
+  const uniqueId = createId();
+  const safeFileName = req.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+  if (req.type !== "avatar" && req.projectSlug === NEW_PROJECT_SLUG) {
+    return `${req.type}/${NEW_PROJECT_SLUG}/${actor.id}/${Date.now()}/${uniqueId}/${safeFileName}`;
+  }
+
+  const slugOrId = req.type === "avatar" ? actor.id : req.projectSlug!;
+  return buildR2Key(req.type, slugOrId, `${uniqueId}/${safeFileName}`);
+}
+
+/**
+ * アップロード先 URL を決める。
+ *
+ * 本番は R2 の S3 互換 API で presigned URL を発行し、ブラウザ → R2 へ直接 PUT させる。
+ * これによりアップロードのバイト転送が OpenNext Worker を一切通らない。
+ * S3 クレデンシャル未設定（開発時など）は Worker 経由の /api/upload/direct に落とす。
+ */
+async function resolveUploadUrl(key: string, fileSize: number): Promise<string> {
+  const s3Config = getR2S3Config();
+  if (!s3Config) return `/api/upload/direct?key=${encodeURIComponent(key)}`;
+  return await createPresignedPutUrl(key, s3Config, fileSize);
+}
 
 /** POST /api/upload/presign
  * アップロード前に R2 の署名付き URL を発行する
- * ボディ: { fileName: string; contentType: string; type: "icon" | "mod"; projectSlug: string }
+ * ボディ: { fileName, contentType, fileSize, type, projectSlug? }
  */
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const parsed = parseRequest(await req.json());
+  if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: parsed.status });
+
+  const access = await authorize(parsed.value, session.user);
+  if (!access.ok) return NextResponse.json({ error: access.error }, { status: access.status });
+
+  const key = buildKey(parsed.value, session.user);
+
+  try {
+    const uploadUrl = await resolveUploadUrl(key, parsed.value.fileSize);
+    return NextResponse.json({ key, uploadUrl, publicUrl: getR2PublicUrl(key) });
+  } catch (err) {
+    // 署名失敗時はフォールバックせず可視化する（設定ミスを黙って握りつぶさない）
+    console.error("Failed to create presigned URL:", err);
+    return NextResponse.json({ error: "Failed to create upload URL" }, { status: 500 });
   }
-
-  const body = await req.json();
-  const { fileName, contentType, type, projectSlug, fileSize } = body as {
-    fileName:    string;
-    contentType: string;
-    type:        unknown;
-    projectSlug?: string;
-    fileSize?:   number;
-  };
-
-  if (!fileName || !contentType || !type) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-  }
-
-  // type は下で R2 キーの先頭にそのまま埋め込まれる。型アサーションだけでは
-  // `../evil` のような値が通り、バケットの任意プレフィックスへの署名を発行できてしまう。
-  if (!isUploadType(type)) {
-    return NextResponse.json({ error: "Invalid type" }, { status: 400 });
-  }
-
-  // サイズ上限。presigned URL の PUT は Worker を通らないので、ここで確定させた
-  // バイト数を署名に焼き込む以外に上限を効かせる手段が無い。
-  if (typeof fileSize !== "number" || !Number.isInteger(fileSize) || fileSize <= 0) {
-    return NextResponse.json({ error: "Missing or invalid fileSize" }, { status: 400 });
-  }
-  if (fileSize > MAX_UPLOAD_BYTES) {
-    return NextResponse.json(
-      { error: `File size exceeds ${MAX_UPLOAD_BYTES / 1024 / 1024}MB limit` },
-      { status: 413 }
-    );
-  }
-
-  if (type !== "avatar" && !projectSlug) {
-    return NextResponse.json({ error: "Missing projectSlug" }, { status: 400 });
-  }
-
-  // 未保存プロジェクト用の逃げ道。まだ DB にレコードが無いので所有権を確認できない。
-  // 誰でも通せてしまう経路なので、
-  //  1. アイコン（画像）に限定し、
-  //  2. キーを呼び出し元のユーザーIDで区切って他人の領域に書けないようにする
-  // という 2 点で影響範囲を閉じる。
-  const isNewProject = type !== "avatar" && projectSlug === "new-project";
-  if (isNewProject && type !== "icon") {
-    return NextResponse.json({ error: "Invalid type for new project" }, { status: 400 });
-  }
-
-  if (type !== "avatar") {
-    if (isNewProject) {
-      // 上のガード済み。DBチェックはスキップする
-    } else {
-      const { getDatabase } = await import("@/lib/db");
-      const { projectMembers } = await import("@/db/schema");
-      const { eq, and } = await import("drizzle-orm");
-      const { findProjectPostBySlug } = await import("@/lib/queries/post");
-      const db = await getDatabase();
-      const project = await findProjectPostBySlug(db, projectSlug!);
-
-      if (!project) {
-        return NextResponse.json({ error: "Project not found" }, { status: 404 });
-      }
-
-      const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-      if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
-        return NextResponse.json({ error: "Forbidden: You don't have permission to upload to this project" }, { status: 403 });
-      }
-    }
-  }
-
-  // ファイルタイプ検証（direct アップロードと同じ定義を共有する）
-  if (!isAllowedUpload(type, contentType, fileName)) {
-    return NextResponse.json({ error: `Invalid file type for ${type}` }, { status: 400 });
-  }
-
-  const uniqueId = createId();
-  const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const slugOrId = type === "avatar" ? session.user.id : projectSlug!;
-  const key = isNewProject
-    ? `${type}/new-project/${session.user.id}/${Date.now()}/${uniqueId}/${safeFileName}`
-    : buildR2Key(type, slugOrId, `${uniqueId}/${safeFileName}`);
-
-  // 本番: R2 の S3 互換 API で presigned URL を発行し、ブラウザ → R2 へ直接 PUT させる。
-  // これによりアップロードのバイト転送が OpenNext Worker を一切通らず、Worker 負荷が発生しない。
-  // クライアント側（uploadFileToR2）は PUT 先が変わるだけで無改造で動く。
-  const s3Config = getR2S3Config();
-  if (s3Config) {
-    try {
-      const uploadUrl = await createPresignedPutUrl(key, s3Config, fileSize);
-      return NextResponse.json({ key, uploadUrl, publicUrl: getR2PublicUrl(key) });
-    } catch (err) {
-      // 署名失敗時はフォールバックせず可視化する（設定ミスを黙って握りつぶさない）
-      console.error("Failed to create presigned URL:", err);
-      return NextResponse.json({ error: "Failed to create upload URL" }, { status: 500 });
-    }
-  }
-
-  // フォールバック（開発 / S3 クレデンシャル未設定時）: Worker 経由の直接アップロード。
-  return NextResponse.json({
-    key,
-    uploadUrl: `/api/upload/direct?key=${encodeURIComponent(key)}`,
-    publicUrl: getR2PublicUrl(key),
-  });
 }

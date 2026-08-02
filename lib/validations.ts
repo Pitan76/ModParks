@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { MC_VERSIONS, type McVersion } from "@/lib/data/minecraftVersions";
+import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
 
 const LICENSES = [
   "MIT",
@@ -42,13 +43,11 @@ export type { McVersion };
 /**
  * プロジェクト slug として使えない値。
  *
- * "new-project" は未保存プロジェクトのアップロードキー
- * （`icon/new-project/<userId>/...`）の目印として使われている。
+ * NEW_PROJECT_SLUG は未保存プロジェクトのアップロードキーの目印。
  * 実プロジェクトが同じ slug を取ると、アップロード経路がそのキーを
  * 「未保存プロジェクト」と誤認して所有者でも 403 になる。
- * @see app/api/upload/presign/route.ts, app/api/upload/direct/route.ts
  */
-export const RESERVED_PROJECT_SLUGS = ["new-project"] as const;
+export const RESERVED_PROJECT_SLUGS = [NEW_PROJECT_SLUG] as const;
 
 const projectSlugSchema = z
   .string()

@@ -1,5 +1,6 @@
 import { resizeImageFile } from "./image";
 import { uploadFileToR2 } from "./upload";
+import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
 
 export type ParsedModData = {
   name: string;
@@ -122,7 +123,7 @@ export const parseJarFile = async (
         const resizedFile = await resizeImageFile(iconFile, 400, 400);
         const { publicUrl } = await uploadFileToR2(resizedFile, {
           type: "icon",
-          projectSlug: "new-project",
+          projectSlug: NEW_PROJECT_SLUG,
         }, { presignError: "Upload error", uploadError: "Upload error" });
         
         foundData.iconUrl = publicUrl;

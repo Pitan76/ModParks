@@ -10,6 +10,7 @@ import { useState, useRef } from "react";
 import type { ChangeEvent } from "react";
 import { resizeImageFile } from "@/lib/utils/image";
 import { uploadFileToR2 } from "@/lib/utils/upload";
+import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
 import { useTranslations } from "next-intl";
 
 export type ProjectIconUploadProps = {
@@ -38,7 +39,7 @@ const ProjectIconUpload = ({ initialIconUrl, projectSlug }: ProjectIconUploadPro
       const resizedFile = await resizeImageFile(file, 400, 400);
       const { publicUrl } = await uploadFileToR2(resizedFile, {
         type: "icon",
-        projectSlug: projectSlug || "new-project",
+        projectSlug: projectSlug || NEW_PROJECT_SLUG,
       }, { presignError: t("iconUpload.error"), uploadError: t("iconUpload.error") });
 
       setIconUrl(publicUrl);

@@ -8,7 +8,7 @@ import { MAX_UPLOAD_BYTES } from "@/lib/upload/fileTypes";
 
 export interface UploadTarget {
   type: "icon" | "mod" | "avatar" | "media";
-  /** icon / mod では必須。新規プロジェクト作成時は "new-project" を渡す */
+  /** icon / mod では必須。新規プロジェクト作成時は NEW_PROJECT_SLUG を渡す */
   projectSlug?: string;
 }
 
