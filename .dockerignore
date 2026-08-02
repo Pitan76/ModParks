@@ -3,10 +3,9 @@ node_modules
 .open-next
 .wrangler
 .git
-cli/target
-cli/dist
-mp-recipe/node_modules
-mp-recipe/dist
+cli
+mp-recipe
+docs-md
 apt-repo
 tsconfig.tsbuildinfo
 .dev.vars
