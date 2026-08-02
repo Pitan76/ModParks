@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Container from "@mui/material/Container";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { pickSettingsMessages } from "@/lib/i18n/clientMessages";
 import { auth } from "@/lib/auth";
+
+/** ログイン必須の画面なので検索結果に出さない */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * 設定画面の共通レイアウト。

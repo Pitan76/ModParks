@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
+import { canonicalUrl } from "@/lib/seo/canonical";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { listIdeaPosts, toIdeaCardData } from "@/lib/queries/postList";
@@ -9,6 +11,16 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import LinkButton from "@/components/ui/LinkButton";
 import IdeaCardList from "@/components/idea/IdeaCardList";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const tNav = await getTranslations({ locale, namespace: "Nav" });
+
+  return {
+    title: tNav("ideas"),
+    alternates: { canonical: canonicalUrl("/ideas") },
+  };
+}
 
 export default async function IdeasPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

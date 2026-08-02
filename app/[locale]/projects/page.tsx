@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
+import { canonicalUrl } from "@/lib/seo/canonical";
 import Typography from "@mui/material/Typography";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
@@ -18,6 +20,20 @@ interface ProjectsPageProps {
     searchMode?: string; includeDesc?: string; includeTags?: string; includeAuthor?: string; includeExtDl?: string;
     page?: string; limit?: string;
   }>;
+}
+
+/**
+ * 検索条件やページ番号の組み合わせで URL が無限に増えるため、
+ * canonical は常に絞り込み無しの一覧へ向ける。
+ */
+export async function generateMetadata({ params }: ProjectsPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const tNav = await getTranslations({ locale, namespace: "Nav" });
+
+  return {
+    title: tNav("projects"),
+    alternates: { canonical: canonicalUrl("/projects") },
+  };
 }
 
 export default async function ProjectsPage({ params, searchParams }: ProjectsPageProps) {

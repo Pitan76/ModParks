@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { pickAdminMessages } from "@/lib/i18n/clientMessages";
 import Box from "@mui/material/Box";
+
+/** 管理者専用画面なので検索結果に出さない */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminLayout({
   children,
