@@ -11,7 +11,8 @@ import {
   index,
 } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
-import { users, projects } from "./schema";
+import { users } from "./auth";
+import { projects } from "./projects";
 
 /** 収益源。プレミアム購読を追加してもここに足すだけで済むようにしている */
 export const REWARD_SOURCES = ["ads", "subscription", "donation", "other"] as const;
