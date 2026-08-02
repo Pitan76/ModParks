@@ -1,0 +1,21 @@
+services:
+  web:
+    build: .
+    ports: ["3000:3000"]
+    volumes:
+      - .:/modparks
+      - node_modules:/modparks/node_modules
+      - next_cache:/modparks/.next
+      - wrangler_state:/modparks/.wrangler
+
+  cf:
+    build: .
+    command: bun run cf:dev -- --ip 0.0.0.0
+    profiles: [workers]
+    ports: ["8787:8787"]
+    volumes:
+      - .:/modparks
+      - node_modules:/modparks/node_modules
+      - wrangler_state:/modparks/.wrangler
+
+volumes: { node_modules: , next_cache: , wrangler_state: }

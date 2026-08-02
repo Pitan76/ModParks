@@ -1,0 +1,15 @@
+node_modules
+.next
+.open-next
+.wrangler
+.git
+cli/target
+cli/dist
+mp-recipe/node_modules
+mp-recipe/dist
+apt-repo
+tsconfig.tsbuildinfo
+.dev.vars
+.env*
+secret
+*.jar
