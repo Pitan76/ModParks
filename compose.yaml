@@ -3,6 +3,10 @@ services:
   web:
     build: .
     ports: ["3000:3000"]
+    environment:
+      # Windows ホストの bind mount では inotify が届かないためポーリングで監視する
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
     volumes:
       - .:/modparks
       - node_modules:/modparks/node_modules
