@@ -1,36 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import type { MouseEvent } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
-import Avatar from "@mui/material/Avatar";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Divider from "@mui/material/Divider";
-import Select from "@mui/material/Select";
 import Tooltip from "@mui/material/Tooltip";
-import Badge from "@mui/material/Badge";
 import MenuIcon from "@mui/icons-material/Menu";
-import AddIcon from "@mui/icons-material/Add";
-import LanguageIcon from "@mui/icons-material/Language";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { useTranslations } from "next-intl";
-import { useLocale } from "next-intl";
-import { usePathname, useRouter, Link } from "@/lib/i18n/routing";
-import LinkButton from "@/components/ui/LinkButton";
-import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import { useColorMode } from "@/components/ThemeRegistry";
+import { useBorderColor } from "@/lib/hooks/useBorderColor";
 import NotificationBell from "@/components/notification/NotificationBell";
+import { useCartEnabled } from "@/components/cart/cartStore";
 import { SIDEBAR_WIDTH } from "./BaseSidebar";
+import HeaderBrand from "./header/HeaderBrand";
+import NewProjectButton from "./header/NewProjectButton";
+import HeaderCartButton from "./header/HeaderCartButton";
+import LocaleSelect from "./header/LocaleSelect";
+import UserMenu from "./header/UserMenu";
+import AuthButtons from "./header/AuthButtons";
 import type { Session } from "next-auth";
-import { useCart, useCartEnabled } from "@/components/cart/cartStore";
-import CartDrawer from "@/components/cart/CartDrawer";
 
 export type AppHeaderProps = {
   session: Session | null;
@@ -40,34 +29,15 @@ export type AppHeaderProps = {
 
 /**
  * アプリケーションの共通ヘッダーコンポーネント。
- * ロゴ、検索、新規プロジェクト作成ボタン、通知ベル、テーマ切り替え、言語切り替え、
- * およびユーザーのアバター（ログインメニュー）を提供します。
+ * ロゴ、新規プロジェクト作成ボタン、通知ベル、カート、テーマ切り替え、言語切り替え、
+ * およびユーザーのアバター（ログインメニュー）を配置する。
  */
 const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) => {
-  const t        = useTranslations("Nav");
-  const tCart    = useTranslations("Cart");
-  const locale   = useLocale();
-  const pathname = usePathname();
-  const router   = useRouter();
-  const { mode, toggleColorMode, isNewTheme } = useColorMode();
-
-  const [cartOpen, setCartOpen] = useState(false);
-  const { items } = useCart();
+  const { mode, toggleColorMode } = useColorMode();
+  const borderColor = useBorderColor();
   const cartEnabled = useCartEnabled();
 
-  // Drawer/Divider と同一の枠線色（theme.ts と一致させる）
-  const borderColor = isNewTheme
-    ? (mode === "light" ? "#e0e0e0" : "#3c4043")
-    : (mode === "light" ? "#e2e8f0" : "#334155");
-
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleAvatarClick = (e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
-
-  const handleLocaleChange = (newLocale: string) => {
-    router.replace(pathname, { locale: newLocale });
-  };
+  const user = session?.user ?? null;
 
   return (
     <AppBar
@@ -94,7 +64,6 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
         }}
       />
       <Toolbar sx={{ gap: 1 }}>
-        {/* ハンバーガーメニュー（モバイル） */}
         <IconButton
           id="menu-button"
           edge="start"
@@ -106,240 +75,32 @@ const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) 
           <MenuIcon />
         </IconButton>
 
-        {/* ロゴ (ヘッダーに常設) */}
-        <Link href="/" prefetch={false} style={{ textDecoration: "none", color: "inherit" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Box
-              component="img"
-              src="/icon.svg"
-              alt="ModParks Logo"
-              sx={{
-                width: 32,
-                height: 32,
-                borderRadius: "8px",
-                objectFit: "cover"
-              }}
-            />
-            <Typography
-              variant="h6"
-              component="span"
-              sx={{ fontWeight: 800, letterSpacing: "-0.5px", color: "text.primary" }}
-            >
-              ModParks
-            </Typography>
-          </Box>
-        </Link>
+        <HeaderBrand />
 
-        {/* スペーサー */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* デスクトップナビ（アクションのみ） */}
-        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, alignItems: "center" }} />
+        {user && <NewProjectButton />}
+        {user && <NotificationBell />}
 
-        {/* 新規プロジェクトボタン (ログイン時のみ表示) */}
-        {session?.user && (
-          <>
-            <LinkButton
-              href="/projects/new"
-              id="nav-new-project-desktop"
-              variant="contained"
+        {cartEnabled && <HeaderCartButton userId={user?.id ?? null} />}
+
+        {/* テーマと言語の切替は、ログイン時は設定画面に集約するのでここでは出さない */}
+        {!user && (
+          <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"}>
+            <IconButton
+              onClick={toggleColorMode}
+              color="inherit"
               size="small"
-              startIcon={<AddIcon />}
-              sx={{ ml: 1, display: { xs: "none", sm: "flex" } }}
+              sx={{ mr: 0.5, display: { xs: "none", md: "flex" } }}
             >
-              <Box component="span" sx={{ mt: "1px" }}>
-                {t("newProject")}
-              </Box>
-            </LinkButton>
-
-            {/* スマホ向け: 正方形のアイコンボタン */}
-            <Box sx={{ display: { xs: "flex", sm: "none" }, ml: 0 }}>
-              <Link href="/projects/new" prefetch={false} style={{ display: "flex", textDecoration: "none" }} id="nav-new-project-mobile">
-                <IconButton
-                  size="small"
-                  sx={{
-                    bgcolor: "primary.main",
-                    color: "primary.contrastText",
-                    "&:hover": { bgcolor: "primary.dark" },
-                    borderRadius: 1,
-                    p: "6px"
-                  }}
-                >
-                  <AddIcon fontSize="small" />
-                </IconButton>
-              </Link>
-            </Box>
-          </>
+              {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+            </IconButton>
+          </Tooltip>
         )}
+        {!user && <LocaleSelect />}
 
-        {/* 通知ベル (ログイン時のみ) */}
-        {session?.user && <NotificationBell />}
-
-        {/* カートボタン（モバイルはサイドバーに置くのでヘッダーには出さない） */}
-        {cartEnabled && (
-        <Tooltip title={tCart("title")}>
-          <IconButton
-            id="nav-cart-button"
-            color="inherit"
-            size="small"
-            onClick={() => setCartOpen(true)}
-            sx={{ mr: 0.5, display: { xs: "none", md: "inline-flex" } }}
-          >
-            <Badge badgeContent={items.length} color="primary">
-              <ShoppingCartIcon />
-            </Badge>
-          </IconButton>
-        </Tooltip>
-        )}
-
-        {/* テーマ切替 (非ログイン時のみ) */}
-        {!session?.user && (
-        <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"}>
-          <IconButton onClick={toggleColorMode} color="inherit" size="small" sx={{ mr: 0.5, display: { xs: "none", md: "flex" } }}>
-            {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
-          </IconButton>
-        </Tooltip>
-        )}
-
-        {/* 言語切替 (非ログイン時のみ。ログイン時は設定から変更) */}
-        {!session?.user && (
-        <Tooltip title="Language">
-          <Select
-            id="locale-select"
-            value={locale}
-            onChange={(e) => handleLocaleChange(e.target.value as string)}
-            size="small"
-            variant="outlined"
-            renderValue={(v) => (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <LanguageIcon fontSize="small" />
-                <Typography variant="body2" sx={{ mt: "1px" }}>
-                  {v.toUpperCase()}
-                </Typography>
-              </Box>
-            )}
-            sx={{
-              display: { xs: "none", md: "flex" },
-              color:        "text.secondary",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-              ".MuiSelect-icon": { color: "text.secondary" },
-            }}
-          >
-            <MenuItem value="ja">🇯🇵 日本語</MenuItem>
-            <MenuItem value="en">🇺🇸 English</MenuItem>
-          </Select>
-        </Tooltip>
-        )}
-
-        {/* ログイン / アバター */}
-        {session?.user ? (
-          <>
-            <Tooltip title={session.user.displayName ?? session.user.name ?? ""}>
-              <IconButton
-                id="user-avatar-button"
-                onClick={handleAvatarClick}
-                size="small"
-              >
-                <Avatar
-                  src={session.user.avatarUrl ?? session.user.image ?? undefined}
-                  alt={session.user.displayName ?? ""}
-                  sx={{ width: 32, height: 32 }}
-                />
-              </IconButton>
-            </Tooltip>
-
-            <Menu
-              id="user-menu"
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-              transformOrigin={{ horizontal: "right", vertical: "top" }}
-              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-            >
-              <LinkMenuItem
-                href={`/profile/${session.user.username}`}
-                onClick={handleMenuClose}
-                id="user-menu-profile"
-              >
-                {t("profile")}
-              </LinkMenuItem>
-              <LinkMenuItem
-                href="/projects?author=me"
-                onClick={handleMenuClose}
-                id="user-menu-my-projects"
-              >
-                {t("myProjects")}
-              </LinkMenuItem>
-              <LinkMenuItem
-                href="/dashboard"
-                onClick={handleMenuClose}
-                id="user-menu-dashboard"
-              >
-                {t("dashboard")}
-              </LinkMenuItem>
-              <LinkMenuItem
-                href="/settings"
-                onClick={handleMenuClose}
-                id="user-menu-settings"
-              >
-                {t("settings")}
-              </LinkMenuItem>
-              {session.user.role === "admin" && (
-                <LinkMenuItem
-                  href="/admin"
-                  onClick={handleMenuClose}
-                  id="user-menu-admin"
-                >
-                  {t("admin")}
-                </LinkMenuItem>
-              )}
-              <Divider />
-              <MenuItem
-                onClick={() => {
-                  handleMenuClose();
-                  import("next-auth/react").then(({ signOut }) => signOut({ callbackUrl: "/" }));
-                }}
-                id="user-menu-signout"
-              >
-                {t("logout")}
-              </MenuItem>
-            </Menu>
-          </>
-        ) : (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <LinkButton
-              id="login-button"
-              href="/login"
-              variant="outlined"
-              size="small"
-              sx={{
-                borderColor: "primary.main",
-                color:        "primary.main",
-                "&:hover": {
-                  background:   "rgba(56,189,248,0.08)",
-                  borderColor:  "primary.light",
-                },
-              }}
-            >
-              <Box component="span" sx={{ mt: "1px" }}>
-                {t("login")}
-              </Box>
-            </LinkButton>
-            <LinkButton
-              id="register-button"
-              href="/register"
-              variant="contained"
-              size="small"
-            >
-              <Box component="span" sx={{ mt: "1px" }}>
-                {t("register")}
-              </Box>
-            </LinkButton>
-          </Box>
-        )}
+        {user ? <UserMenu user={user} /> : <AuthButtons />}
       </Toolbar>
-      {cartEnabled && <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} userId={session?.user?.id ?? null} />}
     </AppBar>
   );
 };
