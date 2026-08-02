@@ -6,7 +6,22 @@ const robots = (): MetadataRoute.Robots => {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/', '/admin/', '/*/api/', '/*/admin/'],
+      // ログインしないと意味が無い / 検索結果に出す価値の無い画面はクロールさせない
+      disallow: [
+        '/api/',
+        '/admin/',
+        '/dashboard/',
+        '/settings/',
+        '/notifications/',
+        '/login',
+        '/register',
+        '/projects/new',
+        '/projects/import',
+        '/projects/manage',
+        '/ideas/new',
+        '/*/api/',
+        '/*/admin/',
+      ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
