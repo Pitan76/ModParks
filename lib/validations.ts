@@ -39,13 +39,30 @@ export type { McVersion };
 
 // ---- Project Schema ----
 
+/**
+ * プロジェクト slug として使えない値。
+ *
+ * "new-project" は未保存プロジェクトのアップロードキー
+ * （`icon/new-project/<userId>/...`）の目印として使われている。
+ * 実プロジェクトが同じ slug を取ると、アップロード経路がそのキーを
+ * 「未保存プロジェクト」と誤認して所有者でも 403 になる。
+ * @see app/api/upload/presign/route.ts, app/api/upload/direct/route.ts
+ */
+export const RESERVED_PROJECT_SLUGS = ["new-project"] as const;
+
+const projectSlugSchema = z
+  .string()
+  .min(3)
+  .max(64)
+  .regex(/^[a-z0-9-]+$/, "小文字英数字とハイフンのみ")
+  .refine(
+    (slug) => !(RESERVED_PROJECT_SLUGS as readonly string[]).includes(slug),
+    "この slug は予約語のため使用できません"
+  );
+
 export const createProjectSchema = z.object({
   name:        z.string().min(3, "3文字以上").max(64, "64文字以内"),
-  slug:        z
-    .string()
-    .min(3)
-    .max(64)
-    .regex(/^[a-z0-9-]+$/, "小文字英数字とハイフンのみ"),
+  slug:        projectSlugSchema,
   description: z.string().min(10, "10文字以上").max(2000, "2000文字以内"),
   descriptionFormat: z.enum(["markdown", "plaintext", "pukiwiki"]).default("markdown").optional(),
   type:        z.enum(CONTENT_TYPES),
@@ -60,12 +77,7 @@ export const createProjectSchema = z.object({
 });
 
 export const updateProjectSchema = createProjectSchema.partial().extend({
-  slug: z
-    .string()
-    .min(3)
-    .max(64)
-    .regex(/^[a-z0-9-]+$/, "小文字英数字とハイフンのみ")
-    .optional(),
+  slug: projectSlugSchema.optional(),
   issueTrackerUrl: z.string().url("有効なURLを入力してください").optional().or(z.literal("")).nullable(),
   status: z.enum(["draft", "public", "unlisted", "private"]).optional(),
 });

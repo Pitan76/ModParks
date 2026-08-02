@@ -8,17 +8,30 @@
  * 定義をここに集約して両方から使う。
  */
 
-export type UploadType = "icon" | "mod" | "avatar" | "media";
+export const UPLOAD_TYPES = ["icon", "mod", "avatar", "media"] as const;
+
+export type UploadType = (typeof UPLOAD_TYPES)[number];
 
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+
+/** アップロード 1 件あたりの上限バイト数（presign / direct の両経路で共有する） */
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
+/**
+ * 外から来た値が UploadType かを実行時に判定する。
+ *
+ * presign はリクエストボディの `type` をそのまま R2 キーの先頭に埋め込むため、
+ * 型アサーションだけだと `type: "../evil"` のような値で
+ * バケットの任意プレフィックスへ書き込める。必ずこの関数を通す。
+ */
+export function isUploadType(value: unknown): value is UploadType {
+  return typeof value === "string" && (UPLOAD_TYPES as readonly string[]).includes(value);
+}
 
 /** キーのプレフィックス（`mod/` など）から用途を逆算する */
 export function uploadTypeFromKey(key: string): UploadType | null {
   const prefix = key.split("/")[0];
-  if (prefix === "icon" || prefix === "mod" || prefix === "avatar" || prefix === "media") {
-    return prefix;
-  }
-  return null;
+  return isUploadType(prefix) ? prefix : null;
 }
 
 /**
@@ -30,16 +43,26 @@ export function uploadTypeFromKey(key: string): UploadType | null {
  * 保存した Content-Type は配信時に使わず（safeContentTypeForKey 参照）
  * 必ず octet-stream + attachment で返すので、拡張子だけで判定する。
  * 画像系は Content-Type をそのまま配信で返すため、引き続き厳密に照合する。
+ *
+ * 種別ごとに switch で網羅する。「mod 以外は画像」のフォールスルーにすると、
+ * UploadType に種別を足した瞬間に黙って画像ルールが適用されてしまう。
  */
 export function isAllowedUpload(type: UploadType, contentType: string, fileName: string): boolean {
   const normalized = contentType.split(";")[0].trim().toLowerCase();
   const name = fileName.toLowerCase();
 
-  if (type === "mod") {
-    return name.endsWith(".jar") || name.endsWith(".zip");
+  switch (type) {
+    case "mod":
+      return name.endsWith(".jar") || name.endsWith(".zip");
+    case "icon":
+    case "avatar":
+    case "media":
+      return ALLOWED_IMAGE_TYPES.includes(normalized);
+    default: {
+      const exhaustive: never = type;
+      return exhaustive;
+    }
   }
-
-  return ALLOWED_IMAGE_TYPES.includes(normalized);
 }
 
 /**

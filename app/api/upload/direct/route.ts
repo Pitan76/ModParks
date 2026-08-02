@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { uploadToR2, getR2Bucket } from "@/lib/r2";
-import { isAllowedUpload, uploadTypeFromKey } from "@/lib/upload/fileTypes";
+import { isAllowedUpload, uploadTypeFromKey, MAX_UPLOAD_BYTES } from "@/lib/upload/fileTypes";
 
 /** PUT /api/upload/direct
  * 開発環境向けの R2 への直接アップロードエンドポイント
@@ -80,8 +80,11 @@ export async function PUT(req: NextRequest) {
     const contentLengthStr = req.headers.get("content-length");
     const contentLength = contentLengthStr ? parseInt(contentLengthStr, 10) : 0;
     
-    if (contentLength > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 413 });
+    if (contentLength > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { error: `File size exceeds ${MAX_UPLOAD_BYTES / 1024 / 1024}MB limit` },
+        { status: 413 }
+      );
     }
 
     const contentType = req.headers.get("content-type") || "application/octet-stream";

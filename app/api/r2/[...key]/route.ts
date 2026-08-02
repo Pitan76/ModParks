@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { Env } from "@/lib/db";
-import { safeContentTypeForKey } from "@/lib/upload/fileTypes";
+import { safeContentTypeForKey, UPLOAD_TYPES } from "@/lib/upload/fileTypes";
 
 export async function GET(
   _req: NextRequest,
@@ -11,7 +11,10 @@ export async function GET(
   const key = keyArray.join("/");
 
   // M-1: Only allow specific prefixes for public access
-  const allowedPrefixes = ["avatar/", "icon/", "mod/"];
+  // アップロード側（presign / direct）が受け付けるプレフィックスと必ず揃えること。
+  // ここから media/ が漏れていたため、R2_PUBLIC_URL 未設定の環境（getR2PublicUrl が
+  // /api/r2/<key> を返す）ではプロジェクトメディアが一律 403 になっていた。
+  const allowedPrefixes = UPLOAD_TYPES.map((type) => `${type}/`);
   const isAllowed = allowedPrefixes.some(prefix => key.startsWith(prefix));
   if (!isAllowed) {
     return new NextResponse("Forbidden", { status: 403 });

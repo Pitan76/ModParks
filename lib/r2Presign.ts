@@ -31,13 +31,22 @@ export function getR2S3Config(): R2S3Config | null {
 
 /**
  * 指定キーへの PUT 用 presigned URL を生成する。
+ *
+ * contentLength を署名対象ヘッダに入れるのが要点。presigned URL による PUT は
+ * Worker を通らないので、/api/upload/direct のサイズ上限が一切効かない。
+ * Content-Length を SignedHeaders に含めておけば、宣言と違うサイズを送った
+ * 時点で R2 側の署名検証が落ちるため、サーバーが認めたバイト数しか書けない。
+ * （ブラウザは File を body にすると必ず実バイト数を Content-Length に入れる）
+ *
  * @param key     R2 オブジェクトキー
  * @param config  R2 S3 設定
+ * @param contentLength 許可するバイト数。PUT はこの長さちょうどでなければ失敗する
  * @param expiresSeconds 有効期限（秒）。既定 600（10分）
  */
 export async function createPresignedPutUrl(
   key: string,
   config: R2S3Config,
+  contentLength: number,
   expiresSeconds = 600
 ): Promise<string> {
   const client = new AwsClient({
@@ -55,6 +64,7 @@ export async function createPresignedPutUrl(
     `${endpoint}?X-Amz-Expires=${expiresSeconds}`,
     {
       method: "PUT",
+      headers: { "content-length": String(contentLength) },
       aws: { signQuery: true },
     }
   );

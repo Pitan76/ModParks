@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { buildR2Key, getR2PublicUrl } from "@/lib/r2";
 import { getR2S3Config, createPresignedPutUrl } from "@/lib/r2Presign";
 import { createId } from "@paralleldrive/cuid2";
-import { isAllowedUpload } from "@/lib/upload/fileTypes";
+import { isAllowedUpload, isUploadType, MAX_UPLOAD_BYTES } from "@/lib/upload/fileTypes";
 
 /** POST /api/upload/presign
  * アップロード前に R2 の署名付き URL を発行する
@@ -16,15 +16,34 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { fileName, contentType, type, projectSlug } = body as {
+  const { fileName, contentType, type, projectSlug, fileSize } = body as {
     fileName:    string;
     contentType: string;
-    type:        "icon" | "mod" | "avatar" | "media";
+    type:        unknown;
     projectSlug?: string;
+    fileSize?:   number;
   };
 
   if (!fileName || !contentType || !type) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  // type は下で R2 キーの先頭にそのまま埋め込まれる。型アサーションだけでは
+  // `../evil` のような値が通り、バケットの任意プレフィックスへの署名を発行できてしまう。
+  if (!isUploadType(type)) {
+    return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+  }
+
+  // サイズ上限。presigned URL の PUT は Worker を通らないので、ここで確定させた
+  // バイト数を署名に焼き込む以外に上限を効かせる手段が無い。
+  if (typeof fileSize !== "number" || !Number.isInteger(fileSize) || fileSize <= 0) {
+    return NextResponse.json({ error: "Missing or invalid fileSize" }, { status: 400 });
+  }
+  if (fileSize > MAX_UPLOAD_BYTES) {
+    return NextResponse.json(
+      { error: `File size exceeds ${MAX_UPLOAD_BYTES / 1024 / 1024}MB limit` },
+      { status: 413 }
+    );
   }
 
   if (type !== "avatar" && !projectSlug) {
@@ -81,7 +100,7 @@ export async function POST(req: NextRequest) {
   const s3Config = getR2S3Config();
   if (s3Config) {
     try {
-      const uploadUrl = await createPresignedPutUrl(key, s3Config);
+      const uploadUrl = await createPresignedPutUrl(key, s3Config, fileSize);
       return NextResponse.json({ key, uploadUrl, publicUrl: getR2PublicUrl(key) });
     } catch (err) {
       // 署名失敗時はフォールバックせず可視化する（設定ミスを黙って握りつぶさない）
