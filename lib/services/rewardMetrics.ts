@@ -67,17 +67,20 @@ async function incrementMetric(
  *
  * 作者・メンバー・管理者の閲覧は自演を配分に反映させないため数えない。
  * 同一IPからは 1日 1回のみ計上する。
+ *
+ * レスポンス後の after() から呼ばれるため、headers() を読めない。
+ * IP はレンダリング中に解決したものを受け取る。
  */
-export async function recordProjectView(projectId: string, isInsider: boolean): Promise<void> {
+export async function recordProjectView(projectId: string, isInsider: boolean, clientIp: string): Promise<void> {
   if (isInsider) return;
 
   try {
-    const dedupe = await checkRateLimit(`rwview:${projectId}`, 1, VIEW_DEDUPE_WINDOW_MS);
+    const dedupe = await checkRateLimit(`rwview:${projectId}`, 1, VIEW_DEDUPE_WINDOW_MS, undefined, clientIp);
     if (!dedupe.success) return;
 
     await incrementMetric(projectId, "pageViews", resolveViewerTier());
   } catch (err) {
-    console.error("[REWARD] Failed to record project view:", err);
+    console.error("[REWARD] Failed to record project view:", (err as Error)?.message, err);
   }
 }
 

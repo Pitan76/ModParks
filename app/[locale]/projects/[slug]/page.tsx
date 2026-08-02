@@ -25,6 +25,7 @@ import ProjectComments from "@/components/project/ProjectComments";
 import ProjectRecipes from "@/components/project/ProjectRecipes";
 import LinkButton from "@/components/ui/LinkButton";
 import { recordProjectView } from "@/lib/services/rewardMetrics";
+import { resolveClientIp } from "@/lib/rate-limit";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import { toPlainDescription } from "@/lib/utils/plainText";
 import AdSlot from "@/components/ads/AdSlot";
@@ -144,7 +145,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   // 還元の配分スコアに使う閲覧数。公開プロジェクトのみ、関係者を除いて数える
   if (project.visibility === "public") {
-    after(() => recordProjectView(project.id, isOwner || !!membership));
+    // IP はレンダリング中に解決する。after() の中では headers() を読めない
+    const clientIp = await resolveClientIp();
+    after(() => recordProjectView(project.id, isOwner || !!membership, clientIp));
   }
 
   if (!project) notFound();

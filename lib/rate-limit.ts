@@ -12,14 +12,28 @@ const SUBJECT_MAX_LENGTH = 64;
  * @param subject IPに加えて絞り込むキー（例: ログイン識別子）。
  *   共有IP環境で無関係な利用者を巻き込まないために指定する。
  */
-export async function checkRateLimit(action: string, limit: number, windowMs: number, subject?: string) {
+/**
+ * リクエスト元のIPを解決する。
+ *
+ * headers() はリクエストスコープでしか読めないため、after() など
+ * レスポンス後に走る処理では、レンダリング中にこれを呼んで値を渡すこと。
+ */
+export async function resolveClientIp(): Promise<string> {
   const reqHeaders = await headers();
   // cf-connecting-ip はCloudflareが付与する信頼できる値。
   // x-forwarded-for はクライアント改変可能なため、優先せず先頭要素のみ採用する
-  const ip =
+  return (
     reqHeaders.get("cf-connecting-ip") ||
     reqHeaders.get("x-forwarded-for")?.split(",")[0].trim() ||
-    "127.0.0.1";
+    "127.0.0.1"
+  );
+}
+
+/**
+ * @param clientIp 解決済みのIP。リクエストスコープ外から呼ぶ場合に渡す
+ */
+export async function checkRateLimit(action: string, limit: number, windowMs: number, subject?: string, clientIp?: string) {
+  const ip = clientIp ?? (await resolveClientIp());
   const scope = subject ? `${subject.slice(0, SUBJECT_MAX_LENGTH)}:${ip}` : ip;
   const id = `rate:${action}:${scope}`;
 
