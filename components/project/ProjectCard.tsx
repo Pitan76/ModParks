@@ -5,26 +5,16 @@ import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
-import ExtensionIcon from "@mui/icons-material/Extension";
 import Tooltip from "@mui/material/Tooltip";
-import { useRouter } from "@/lib/i18n/routing";
-import PersonIcon from "@mui/icons-material/Person";
-import DownloadIcon from "@mui/icons-material/Download";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import IconButton from "@mui/material/IconButton";
+import ExtensionIcon from "@mui/icons-material/Extension";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
-import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
-import { usePinMenuItem } from "@/components/pin/usePinMenuItem";
-import { useTranslations } from "next-intl";
-import { DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
+import { DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { toPlainDescription } from "@/lib/utils/plainText";
-import { buildProjectDownloadUrl } from "@/lib/utils/downloadUrl";
-import { useDownloadPreference } from "@/lib/hooks/useDownloadPreference";
-import { useColorMode } from "@/components/ThemeRegistry";
+import { useCartEnabled } from "@/components/cart/cartStore";
 import ProjectTypeBadge from "./ProjectTypeBadge";
-import ProjectTagBadge from "./ProjectTagBadge";
-import { useCart, useCartEnabled } from "@/components/cart/cartStore";
+import CartToggleButton from "./card/CartToggleButton";
+import ProjectCardMeta from "./card/ProjectCardMeta";
+import { useProjectContextMenu } from "./card/useProjectContextMenu";
 
 export type ProjectCardProps = {
   project: {
@@ -56,139 +46,71 @@ export type ProjectCardProps = {
  * リスト表示とグリッド表示の2レイアウトに対応し、コンテキストメニュー機能も備えます。
  */
 const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardProps) => {
-  const tTags = useTranslations("Tags");
-  const tMenu = useTranslations("ContextMenu");
-  const tCart = useTranslations("Cart");
-  const router = useRouter();
-  const { isNewTheme } = useColorMode();
   const isGrid = layout === "grid";
+  const onContextMenu = useProjectContextMenu(project);
+  const cartEnabled = useCartEnabled();
 
   // 設定でカート機能自体をオフにしている場合はボタンを出さない
-  const cartEnabled = useCartEnabled();
   const showCartButton = showCart && cartEnabled;
 
-  const { has: isInCart, add: addToCart, remove: removeFromCart } = useCart();
-  const inCart = isInCart(project.id);
-
-  const handleCartClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (inCart) {
-      removeFromCart(project.id);
-    } else {
-      addToCart({
+  // グリッドではカード右上に浮かせ、リストではメタ情報の行に並べるため要素を共有する
+  const cartButton = showCartButton ? (
+    <CartToggleButton
+      item={{
         id: project.id,
         slug: project.slug,
         title: project.title,
         iconUrl: project.iconUrl,
         type: project.type,
-      });
-    }
-  };
-
-  const c = useCommonItems();
-  const pinItem = usePinMenuItem("project", project.id);
-  const href = `/projects/${project.slug}`;
-  const downloadUrl = buildProjectDownloadUrl(project.slug, useDownloadPreference());
-  const onContextMenu = useContextMenu(
-    [
-      c.open(href, tMenu("viewProject")),
-      c.openNewTab(href),
-      {
-        id: "cm-download",
-        label: tMenu("download"),
-        icon: <DownloadIcon fontSize="small" />,
-        href: downloadUrl,
-      },
-      { type: "divider" },
-      c.copyLink(href),
-      c.share(href, project.title),
-      ...(project.authorUsername
-        ? ([
-            { type: "divider" },
-            {
-              id: "cm-author",
-              label: tMenu("author"),
-              icon: <PersonIcon fontSize="small" />,
-              href: `/profile/${project.authorUsername}`,
-            },
-          ] as const)
-        : []),
-      ...(pinItem ? ([{ type: "divider" }, pinItem] as const) : []),
-    ],
-    // カード全体が LinkCardActionArea（<a>）なのでリンク素通しは無効化
-    { passthrough: { links: false } },
-  );
-
-  const getTagLabel = (tag: string) => {
-    const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-    return tTags.has(key as any) ? tTags(key as any) : tag;
-  };
-
-  // Ensure tags is always an array to avoid undefined errors
-  const safeTags: string[] = project.tags ?? [];
-
-  // グリッドではカード右上に浮かせ、リストではメタ情報の行に並べるため要素を共有する
-  const cartButton = showCartButton && (
-    <Tooltip title={inCart ? tCart("remove") : tCart("add")} arrow>
-      <IconButton
-        size="small"
-        onClick={handleCartClick}
-        color={inCart ? "primary" : "default"}
-        sx={{
-          p: 0.5,
-          flexShrink: 0,
-          border: "1px solid",
-          borderColor: inCart ? "primary.main" : "divider",
-          borderRadius: 1.5,
-          bgcolor: inCart ? "action.selected" : "background.paper",
-          "&:hover": {
-            bgcolor: "action.hover",
-          }
-        }}
-      >
-        {inCart ? <ShoppingCartIcon fontSize="small" /> : <AddShoppingCartIcon fontSize="small" />}
-      </IconButton>
-    </Tooltip>
-  );
+      }}
+    />
+  ) : null;
 
   return (
-    <Card id={`project-card-${project.slug}`} onContextMenu={onContextMenu} style={{ boxShadow: "none" }} sx={{ height: "100%", position: "relative" }}>
+    <Card
+      id={`project-card-${project.slug}`}
+      onContextMenu={onContextMenu}
+      style={{ boxShadow: "none" }}
+      sx={{ height: "100%", position: "relative" }}
+    >
       <LinkCardActionArea href={`/projects/${project.slug}`} sx={{ height: "100%" }}>
-        <CardContent 
-          sx={{ 
-            p: 2, 
-            display: "flex", 
-            flexDirection: isGrid ? "column" : { xs: "column", sm: "row" }, 
-            alignItems: isGrid ? "stretch" : { xs: "stretch", sm: "center" }, 
+        <CardContent
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: isGrid ? "column" : { xs: "column", sm: "row" },
+            alignItems: isGrid ? "stretch" : { xs: "stretch", sm: "center" },
             gap: 2,
             height: "100%"
           }}
         >
           {isGrid && cartButton && (
-            <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}>
-              {cartButton}
-            </Box>
+            <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}>{cartButton}</Box>
           )}
-          {/* Top Section: Icon + Main Info (Always row, wrap if extremely narrow) */}
+
           {/* グリッドでは右上のカートボタンとタイトルが重ならないよう余白を空ける */}
-          <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2, alignItems: "flex-start", flex: isGrid ? "none" : { xs: "none", sm: 1 }, minWidth: 0, pr: isGrid && showCartButton ? 4.5 : 0 }}>
-            {/* アイコン */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "wrap",
+              gap: 2,
+              alignItems: "flex-start",
+              flex: isGrid ? "none" : { xs: "none", sm: 1 },
+              minWidth: 0,
+              pr: isGrid && showCartButton ? 4.5 : 0,
+            }}
+          >
             <Avatar
               src={project.iconUrl ?? undefined}
               alt={project.title}
               variant="rounded"
               slotProps={{ img: { loading: "lazy", decoding: "async" } }}
-              sx={{
-                width: 48,
-                height: 48,
-                flexShrink: 0,
-              }}
+              sx={{ width: 48, height: 48, flexShrink: 0 }}
             >
               <ExtensionIcon />
             </Avatar>
 
-            {/* メイン情報（タイトル・説明・作者） */}
             <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%", minWidth: 0 }}>
                 <Tooltip title={project.title} arrow placement="top">
@@ -209,7 +131,7 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
                 </Tooltip>
                 <ProjectTypeBadge type={project.type} />
               </Box>
-              
+
               <Typography
                 variant="body2"
                 color="text.secondary"
@@ -228,16 +150,18 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
               </Typography>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5, minWidth: 0 }}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  noWrap
-                  sx={{ minWidth: 0 }}
-                >
+                <Typography variant="caption" color="text.secondary" noWrap sx={{ minWidth: 0 }}>
                   by {project.authorDisplayName || project.authorUsername || "Unknown"}
                 </Typography>
                 {/* 広い画面（リスト表示のsm以上）では作者名の横に日付を置く。狭い場合はDL数の横へ回す */}
-                <Box sx={{ display: isGrid ? "none" : { xs: "none", sm: "flex" }, alignItems: "center", gap: 0.5, flexShrink: 0 }}>
+                <Box
+                  sx={{
+                    display: isGrid ? "none" : { xs: "none", sm: "flex" },
+                    alignItems: "center",
+                    gap: 0.5,
+                    flexShrink: 0,
+                  }}
+                >
                   <Typography variant="caption" color="text.disabled">•</Typography>
                   <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
                 </Box>
@@ -245,82 +169,17 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
             </Box>
           </Box>
 
-          {/* メタ情報（ダウンロード数など） */}
-          <Box 
-            sx={{ 
-              display: "flex", 
-              flexDirection: isGrid ? "row" : { xs: "row", sm: "column" }, 
-              alignItems: isGrid ? "center" : { xs: "center", sm: "flex-end" }, 
-              justifyContent: isGrid ? "space-between" : "flex-start",
-              width: isGrid ? "100%" : { xs: "100%", sm: "auto" },
-              gap: isGrid ? 2 : { xs: 2, sm: 0.5 },
-              flexShrink: 0,
-              mt: isGrid ? "auto" : { xs: "auto", sm: 0 },
-              alignSelf: isGrid ? "auto" : { xs: "stretch", sm: "flex-end" }
-            }}
-          >
-            {/* グリッド/狭い画面は左右に振り分け、リスト表示(sm以上)は右寄せで列幅を広げない */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: isGrid ? "space-between" : { xs: "space-between", sm: "flex-end" },
-                width: isGrid ? "auto" : { xs: "100%", sm: "auto" },
-                flex: isGrid ? "1 1 auto" : "0 1 auto",
-                gap: isGrid ? 2 : { xs: 2, sm: 1 },
-                minWidth: 0,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
-                <DownloadLabel
-                  downloads={project.downloads}
-                  totalDownloads={project.totalDownloads}
-                  externalDownloads={project.externalDownloads}
-                  modrinthId={project.modrinthId}
-                  curseforgeId={project.curseforgeId}
-                  iconSize="1rem"
-                  textVariant="body2"
-                  textColor="text.secondary"
-                  iconColor="text.secondary"
-                />
-                {/* 狭い画面・グリッド表示ではDL数の横に日付を置く */}
-                <Box sx={{ display: isGrid ? "flex" : { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.5, minWidth: 0 }}>
-                  <Typography variant="caption" color="text.disabled">•</Typography>
-                  <DateLabel date={project.updatedAt} type="updated" textVariant="caption" textColor="text.disabled" hideIcon />
-                </Box>
-              </Box>
-
-              {/* カートに追加/削除ボタン（グリッドではカード右上に表示する） */}
-              {!isGrid && cartButton}
-            </Box>
-            
-            {safeTags.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: isGrid ? 0 : { xs: 0, sm: 1 }, flexWrap: "wrap", justifyContent: "flex-end", flexShrink: 0 }}>
-                {safeTags.slice(0, isGrid ? 2 : 3).map((tag) => (
-                  <ProjectTagBadge
-                    key={tag}
-                    tag={tag}
-                    clickable
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      router.push(`/projects?tags=${encodeURIComponent(tag)}`);
-                    }}
-                  />
-                ))}
-                {safeTags.length > (isGrid ? 2 : 3) && (
-                  <Tooltip title={safeTags.slice(isGrid ? 2 : 3).map(getTagLabel).join(", ")} arrow placement="top">
-                    <Box
-                      component="span"
-                      sx={{ display: "inline-flex", alignItems: "center", height: 18, cursor: "help", color: "text.disabled", fontSize: "0.65rem", lineHeight: 1 }}
-                    >
-                      +{safeTags.length - (isGrid ? 2 : 3)}
-                    </Box>
-                  </Tooltip>
-                )}
-              </Box>
-            )}
-          </Box>
+          <ProjectCardMeta
+            downloads={project.downloads}
+            totalDownloads={project.totalDownloads}
+            externalDownloads={project.externalDownloads}
+            modrinthId={project.modrinthId}
+            curseforgeId={project.curseforgeId}
+            updatedAt={project.updatedAt}
+            tags={project.tags ?? []}
+            isGrid={isGrid}
+            cartButton={isGrid ? undefined : cartButton}
+          />
         </CardContent>
       </LinkCardActionArea>
     </Card>

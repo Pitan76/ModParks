@@ -17,6 +17,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import { usePathname, useRouter, Link } from "@/lib/i18n/routing";
+import { LOCALE_OPTIONS } from "@/lib/i18n/localeLabels";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";
@@ -214,8 +215,9 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
                 ".MuiSelect-icon": { color: "text.secondary" },
               }}
             >
-              <MenuItem value="ja">🇯🇵 日本語</MenuItem>
-              <MenuItem value="en">🇺🇸 English</MenuItem>
+              {LOCALE_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+              ))}
             </Select>
 
             <IconButton onClick={toggleColorMode} color="inherit" size="small" sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, p: "6px" }}>

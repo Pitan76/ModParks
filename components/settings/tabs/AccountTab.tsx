@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import { changeUsername, changeEmail, changePassword, deleteAccount, deactivateAccount } from "@/lib/actions/settingsSecurity";
 import { updateLocale } from "@/lib/actions/settings";
 import { useRouter, usePathname } from "@/lib/i18n/routing";
+import { LOCALE_OPTIONS } from "@/lib/i18n/localeLabels";
 import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import Box from "@mui/material/Box";
@@ -149,10 +150,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
           label={t("account.languageLabel")}
           value={localeValue}
           onChange={(e) => form.setField("locale", e.target.value as "ja" | "en")}
-          options={[
-            { value: "ja", label: "🇯🇵 日本語" },
-            { value: "en", label: "🇺🇸 English" },
-          ]}
+          options={LOCALE_OPTIONS}
           formControlProps={{ sx: { minWidth: 200 } }}
         />
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t("account.languageWarning")}</Typography>
