@@ -17,6 +17,7 @@ import PinProvider from "@/components/pin/PinProvider";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
 import { SITE_URL } from "@/lib/config";
+import { SITE_NAME, canonicalUrl } from "@/lib/seo/canonical";
 import { getAdsMode, getAdsenseClient } from "@/lib/config/ads";
 
 export const viewport: Viewport = {
@@ -49,11 +50,11 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
     openGraph: {
       type: "website",
       locale: locale === "ja" ? "ja_JP" : "en_US",
-      url: SITE_URL,
-      siteName: "ModParks",
+      url: canonicalUrl("/"),
+      siteName: SITE_NAME,
       images: [
         {
-          url: SITE_URL + "/icon.png",
+          url: SITE_URL + "/icon-512.png",
           width: 512,
           height: 512,
         },
@@ -65,18 +66,26 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
       description: t("description"),
       images: [
         {
-          url: SITE_URL + "/icon.png",
+          url: SITE_URL + "/icon-512.png",
           width: 512,
           height: 512,
         },
       ],
     },
+    // Google のファビコンは URL 単位でキャッシュされるため、
+    // app/favicon.ico の自動出力（?ハッシュ付き）ではなく public の固定URLを使う。
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    },
     alternates: {
-      canonical: `${SITE_URL}/${locale}`,
-      languages: {
-        ja: `${SITE_URL}/ja`,
-        en: `${SITE_URL}/en`,
-      },
+      // localePrefix が "never" のため URL にロケール接頭辞は存在しない。
+      // `/ja` `/en` は 307 で `/` に戻るので canonical/hreflang には使えない。
+      canonical: canonicalUrl("/"),
       types: {
         "application/rss+xml": SITE_URL + "/feed.xml",
       },

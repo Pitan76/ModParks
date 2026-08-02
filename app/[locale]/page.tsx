@@ -9,6 +9,9 @@ import HomeProjectList from "@/components/project/HomeProjectList";
 import HomeHero from "@/components/layout/HomeHero";
 import AdSlot from "@/components/ads/AdSlot";
 
+import JsonLd from "@/components/seo/JsonLd";
+import { organizationSchema, websiteSchema } from "@/lib/seo/schema";
+
 import { getProjects } from "@/lib/actions/projectQuery";
 
 type TopPageProps = {
@@ -21,6 +24,7 @@ const TopPage = async ({ params }: TopPageProps) => {
 
   const t = await getTranslations("Home");
   const tc = await getTranslations("Common");
+  const tm = await getTranslations("Metadata");
 
   const [newResult, updatedResult] = await Promise.all([
     getProjects({ sort: "newest", limit: 6 }),
@@ -32,6 +36,9 @@ const TopPage = async ({ params }: TopPageProps) => {
 
   return (
     <Box>
+      {/* 検索結果にドメイン名ではなくサイト名を出すためのシグナル。トップページのみ */}
+      <JsonLd data={[websiteSchema(tm("description")), organizationSchema()]} />
+
       {/* Hero */}
       <HomeHero
         labels={{

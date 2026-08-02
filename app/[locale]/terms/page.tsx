@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import LegalContent from "@/components/ui/LegalContent";
-import { SITE_URL } from "@/lib/config";
+import { canonicalUrl } from "@/lib/seo/canonical";
 
 export const generateMetadata = async ({ params }: { params: Promise<{ locale: string }> }) => {
   const { locale } = await params;
@@ -13,11 +13,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ locale: s
     title,
     description: `${title} - ModParks`,
     alternates: {
-      canonical: `${SITE_URL}/${locale}/terms`,
-      languages: {
-        ja: `${SITE_URL}/ja/terms`,
-        en: `${SITE_URL}/en/terms`,
-      },
+      canonical: canonicalUrl("/terms"),
     },
   };
 };

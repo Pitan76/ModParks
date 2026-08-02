@@ -31,38 +31,49 @@ import { toPlainDescription } from "@/lib/utils/plainText";
 import AdSlot from "@/components/ads/AdSlot";
 import AddIcon from "@mui/icons-material/Add";
 import { SITE_URL } from "@/lib/config";
+import { canonicalUrl } from "@/lib/seo/canonical";
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema, projectSchema } from "@/lib/seo/schema";
 
 interface ProjectDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
 export async function generateMetadata({ params }: ProjectDetailPageProps) {
-  const { locale, slug } = await params;
+  const { slug } = await params;
   const [project, session] = await Promise.all([
     getProjectBySlug(slug),
     auth(),
   ]);
 
-  if (!project) return { title: "Not Found" };
+  if (!project) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const isOwner = session?.user?.id === project.authorId;
   const isViewable = project.visibility === "public" || project.visibility === "unlisted" || isOwner;
 
-  if (!isViewable) return { title: "Not Found" };
+  if (!isViewable) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const title = `${project.title}`;
   const plainDesc = toPlainDescription(project.body);
   const description = plainDesc.length > 150 ? plainDesc.substring(0, 150) + "..." : plainDesc || "Minecraft Java Edition向けのMOD/プラグイン";
   const imageUrl = project.iconUrl || SITE_URL + "/icon.png";
 
+  // 統合先がある場合は canonical を統合先に向け、重複ページとして扱わせない
+  const canonicalSlug = project.redirectSlug || project.slug;
+  const url = canonicalUrl(`/projects/${canonicalSlug}`);
+
+  // unlisted / draft / private は URL を知る人だけのものなので検索結果に出さない
+  const isIndexable = project.visibility === "public" && !project.redirectSlug;
+
   return {
     title,
     description,
+    robots: isIndexable ? undefined : { index: false, follow: true },
     openGraph: {
       title,
       description,
       type: "article",
-      url: SITE_URL + `/${locale}/projects/${project.slug}`,
+      url,
       images: [
         {
           url: imageUrl,
@@ -84,11 +95,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
       ],
     },
     alternates: {
-      canonical: `${SITE_URL}/${locale}/projects/${project.slug}`,
-      languages: {
-        ja: `${SITE_URL}/ja/projects/${project.slug}`,
-        en: `${SITE_URL}/en/projects/${project.slug}`,
-      },
+      canonical: url,
     },
   };
 }
