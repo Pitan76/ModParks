@@ -168,8 +168,28 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   // ダウンロード数の合算 (ローカル + 外部) はデータベースの totalDownloads を利用する
 
+  // 非公開系はメタデータ側で noindex にしているため構造化データも出さない
+  const structuredData = p.visibility === "public"
+    ? [
+        projectSchema({
+          slug: p.slug,
+          title: p.title,
+          description: toPlainDescription(p.body).slice(0, 300),
+          imageUrl: p.iconUrl || SITE_URL + "/icon-512.png",
+          authorName: p.author?.displayName || p.author?.username,
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt,
+        }),
+        breadcrumbSchema([
+          { name: t("title"), path: "/projects" },
+          { name: p.title, path: `/projects/${p.slug}` },
+        ]),
+      ]
+    : null;
+
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
+      {structuredData && <JsonLd data={structuredData} />}
       <Grid container spacing={{ xs: 3, md: 4 }}>
         {/* ---- 左カラム: プロジェクト情報 ---- */}
         <Grid size={{ xs: 12, md: 8 }} sx={{ minWidth: 0, maxWidth: "100%" }}>
