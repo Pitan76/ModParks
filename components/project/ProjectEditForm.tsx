@@ -92,8 +92,18 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
           return; // バリデーションエラー時はリトライ不要
         } else {
           setDirty(false);
-          router.push(`/projects/${formData.get("slug")}`);
           success = true;
+          setPending(false);
+          setToast({ message: tCommon("saved"), severity: "success" });
+
+          // 保存後も管理画面に留まる。slug を変更した場合だけ、
+          // 現在の URL (/projects/[slug]/edit) が古くなるので置き換える
+          const nextSlug = String(formData.get("slug") ?? project.slug);
+          if (nextSlug !== project.slug) {
+            router.replace(`/projects/${nextSlug}/edit`);
+          } else {
+            router.refresh();
+          }
         }
       } catch (err: any) {
         retries++;
