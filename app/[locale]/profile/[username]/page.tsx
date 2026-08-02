@@ -13,6 +13,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { Link as RoutingLink } from "@/lib/i18n/routing";
 import { SITE_URL } from "@/lib/config";
+import { canonicalUrl } from "@/lib/seo/canonical";
 import IdeaCardList from "@/components/idea/IdeaCardList";
 import { getProfileMeta, resolveProfileUser, getProfileContent } from "./profileData";
 import ProfileHeader from "./ProfileHeader";
@@ -27,7 +28,9 @@ interface PublicProfileProps {
 export async function generateMetadata({ params }: PublicProfileProps) {
   const { locale, username } = await params;
   const user = await getProfileMeta(username);
-  if (!user || user.deletedAt || user.suspendedAt || user.deactivatedAt) return { title: "Not Found" };
+  if (!user || user.deletedAt || user.suspendedAt || user.deactivatedAt) {
+    return { title: "Not Found", robots: { index: false, follow: false } };
+  }
 
   const title = `${user.displayName || user.username} (@${user.username})`;
   const description = user.bio || `${user.displayName || user.username} のプロフィールページです。`;
@@ -37,11 +40,10 @@ export async function generateMetadata({ params }: PublicProfileProps) {
   return {
     title,
     description,
-    openGraph: { title, description, type: "profile", url: SITE_URL + `/${locale}/profile/${user.username}`, images: [image] },
+    openGraph: { title, description, type: "profile", url: canonicalUrl(`/profile/${user.username}`), images: [image] },
     twitter: { card: "summary", title, description, images: [image] },
     alternates: {
-      canonical: `${SITE_URL}/${locale}/profile/${user.username}`,
-      languages: { ja: `${SITE_URL}/ja/profile/${user.username}`, en: `${SITE_URL}/en/profile/${user.username}` },
+      canonical: canonicalUrl(`/profile/${user.username}`),
     },
   };
 }

@@ -25,7 +25,7 @@ import FileHashChip from "@/components/project/FileHashChip";
 import ScanStatusBanner from "@/components/project/ScanStatusBanner";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
-import { SITE_URL } from "@/lib/config";
+import { canonicalUrl } from "@/lib/seo/canonical";
 import { formatBytes, toStringArray } from "@/lib/utils/format";
 
 interface VersionDetailPageProps {
@@ -41,27 +41,32 @@ export async function generateMetadata({ params }: VersionDetailPageProps) {
   ]);
 
   if (!project || !version) {
-    return { title: "Not Found" };
+    return { title: "Not Found", robots: { index: false, follow: false } };
   }
 
   const isOwner = session?.user?.id === project.authorId;
   const isViewable = project.visibility === "public" || project.visibility === "unlisted" || isOwner;
 
   if (!isViewable) {
-    return { title: "Not Found" };
+    return { title: "Not Found", robots: { index: false, follow: false } };
   }
 
   const title = `${project.title} v${version.versionNumber}`;
   const description = version.changelog || `Download ${project.title} version ${version.versionNumber}`;
+  const url = canonicalUrl(`/projects/${project.slug}/versions/${version.id}`);
 
   return {
     title,
     description,
+    robots: project.visibility === "public" ? undefined : { index: false, follow: true },
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       title,
       description,
       type: "article",
-      url: SITE_URL + `/projects/${project.slug}/versions/${version.id}`,
+      url,
     },
     twitter: {
       card: "summary",

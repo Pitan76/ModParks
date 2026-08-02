@@ -16,6 +16,7 @@ import { formatDate } from "@/lib/utils/format";
 import { Link } from "@/lib/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SITE_URL } from "@/lib/config";
+import { canonicalUrl } from "@/lib/seo/canonical";
 import { getIdeaMeta, getIdeaDetail } from "./ideaDetailData";
 import ResolvedProjects from "./ResolvedProjects";
 import IdeaComments from "./IdeaComments";
@@ -27,24 +28,25 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     auth(),
   ]);
 
-  if (!idea) return { title: "Not Found" };
+  if (!idea) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const isOwner = session?.user?.id === idea.authorId;
   const isViewable = idea.visibility === "public" || idea.visibility === "unlisted" || isOwner;
 
-  if (!isViewable) return { title: "Not Found" };
+  if (!isViewable) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const title = idea.title;
   const description = idea.content.length > 150 ? idea.content.substring(0, 150) + "..." : idea.content;
+  const url = canonicalUrl(`/ideas/${id}`);
 
   return {
     title,
     description,
-    openGraph: { title, description, type: "article", url: SITE_URL + `/${locale}/ideas/${id}` },
+    robots: idea.visibility === "public" ? undefined : { index: false, follow: true },
+    openGraph: { title, description, type: "article", url },
     twitter: { card: "summary", title, description },
     alternates: {
-      canonical: `${SITE_URL}/${locale}/ideas/${id}`,
-      languages: { ja: `${SITE_URL}/ja/ideas/${id}`, en: `${SITE_URL}/en/ideas/${id}` },
+      canonical: url,
     },
   };
 }

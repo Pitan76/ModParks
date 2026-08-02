@@ -7,13 +7,14 @@ import { eq, and, sql } from 'drizzle-orm';
 // ビルド時は D1 バインディングが無くテーブルを引けないため、リクエスト時に生成する。
 export const dynamic = 'force-dynamic';
 
-const LOCALES = ['ja', 'en'];
-
+// routing の localePrefix は "never" のため、URL にロケール接頭辞は付かない。
+// `/ja/...` を載せると全件 307 リダイレクトを指す sitemap になる。
 const STATIC_ROUTES = [
   { path: '', changeFrequency: 'daily', priority: 1 },
   { path: '/projects', changeFrequency: 'daily', priority: 0.8 },
-  { path: '/terms', changeFrequency: 'weekly', priority: 0.8 },
-  { path: '/privacy', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/ideas', changeFrequency: 'daily', priority: 0.6 },
+  { path: '/terms', changeFrequency: 'weekly', priority: 0.3 },
+  { path: '/privacy', changeFrequency: 'weekly', priority: 0.3 },
 ] as const satisfies ReadonlyArray<{
   path: string;
   changeFrequency: NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>;
@@ -22,14 +23,14 @@ const STATIC_ROUTES = [
 
 type EntryOptions<T> = {
   items: readonly T[];
-  /** ロケールを除いたパス (例: `/projects/my-mod`) */
+  /** サイトルートからのパス (例: `/projects/my-mod`) */
   pathOf: (item: T) => string;
   lastModifiedOf: (item: T) => Date;
   changeFrequency: NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>;
   priority: number;
 };
 
-/** 各アイテムを全ロケール分の sitemap エントリへ展開する */
+/** 各アイテムを sitemap エントリへ変換する */
 const toEntries = <T>({
   items,
   pathOf,
@@ -37,24 +38,20 @@ const toEntries = <T>({
   changeFrequency,
   priority,
 }: EntryOptions<T>): MetadataRoute.Sitemap =>
-  LOCALES.flatMap((locale) =>
-    items.map((item) => ({
-      url: `${SITE_URL}/${locale}${pathOf(item)}`,
-      lastModified: lastModifiedOf(item),
-      changeFrequency,
-      priority,
-    }))
-  );
+  items.map((item) => ({
+    url: `${SITE_URL}${pathOf(item)}`,
+    lastModified: lastModifiedOf(item),
+    changeFrequency,
+    priority,
+  }));
 
 const staticEntries = (): MetadataRoute.Sitemap =>
-  LOCALES.flatMap((locale) =>
-    STATIC_ROUTES.map((route) => ({
-      url: `${SITE_URL}/${locale}${route.path}`,
-      lastModified: new Date(),
-      changeFrequency: route.changeFrequency,
-      priority: route.priority,
-    }))
-  );
+  STATIC_ROUTES.map((route) => ({
+    url: route.path ? `${SITE_URL}${route.path}` : SITE_URL,
+    lastModified: new Date(),
+    changeFrequency: route.changeFrequency,
+    priority: route.priority,
+  }));
 
 /** D1 から公開コンテンツを引いて sitemap エントリへ変換する */
 const dynamicEntries = async (): Promise<MetadataRoute.Sitemap> => {
