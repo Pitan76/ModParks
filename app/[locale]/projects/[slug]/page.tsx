@@ -163,6 +163,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   // as any を外して、フィールド名の取りこぼしが型で見つかるようにする。
   const p = project;
   const t = await getTranslations("Project");
+  const tNav = await getTranslations("Nav");
 
   const canEdit = isOwner;
 
@@ -181,7 +182,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           updatedAt: p.updatedAt,
         }),
         breadcrumbSchema([
-          { name: t("title"), path: "/projects" },
+          { name: tNav("projects"), path: "/projects" },
           { name: p.title, path: `/projects/${p.slug}` },
         ]),
       ]
