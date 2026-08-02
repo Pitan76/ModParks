@@ -176,6 +176,9 @@ export const updateProject = async (projectId: string, formData: FormData) => {
   // 2 つの UPDATE がちぐはぐな状態で残らないよう batch でまとめる。
   const { name, description, descriptionFormat, status, ...projectFields } = fields;
 
+  // 下書きの間は「作成しただけ」の状態なので、他のステータスへ移した時点を作成日時とみなす
+  const isLeavingDraft = project.visibility === "draft" && status !== undefined && status !== "draft";
+
   await db.batch([
     db
       .update(posts)
@@ -186,6 +189,7 @@ export const updateProject = async (projectId: string, formData: FormData) => {
         ...(status !== undefined ? { visibility: status } : {}),
         ...(fields.slug !== undefined ? { slug: fields.slug } : {}),
         ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {}),
+        ...(isLeavingDraft ? { createdAt: new Date() } : {}),
         updatedAt: new Date(),
       })
       .where(eq(posts.id, project.id)),
@@ -297,8 +301,17 @@ export const batchUpdateProjectStatus = async (projectIds: string[], status: "pu
   const isOwnerCondition = eq(posts.authorId, session.user.id);
   const conditions = session.user.role === "admin" ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
 
+  // 下書きから出るものは、その時点を作成日時に付け直す（updateProject と同じ扱い）
+  if (status !== "draft") {
+    await db
+      .update(posts)
+      .set({ createdAt: new Date() })
+      .where(and(conditions, eq(posts.visibility, "draft")))
+      .run();
+  }
+
   await db.update(posts).set({ visibility: status, updatedAt: new Date() }).where(conditions).run();
-  
+
   revalidatePath("/projects");
   revalidatePath("/projects/manage");
   return { success: true };

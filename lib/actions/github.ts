@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { projects, versions } from "@/db/schema";
+import { posts, projects, versions } from "@/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -156,7 +156,8 @@ export async function importGithubReleaseSystem(
     projectId: project.id,
   });
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, project.id)).run();
+  // updatedAt は posts が持つ（projects 側には無い）
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   const fullProject = await db.select().from(projects).where(eq(projects.id, project.id)).get();
   if (fullProject) {

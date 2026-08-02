@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1, type Env } from "@/lib/db";
-import { versions, projectMembers, versionLoaders, versionMcVersions } from "@/db/schema";
+import { posts, versions, projectMembers, versionLoaders, versionMcVersions } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, desc, and, isNull } from "drizzle-orm";
 import type { ApiVersion } from "@/types/api";
@@ -201,6 +201,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     projectId: project.id,
     createdAt: new Date(),
   }).run();
+
+  // バージョン追加はプロジェクトの更新とみなす
+  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   if (parsed.data.loaders && parsed.data.loaders.length > 0) {
     await db.insert(versionLoaders).values(parsed.data.loaders.map(loader => ({ versionId: id, loader }))).run();
