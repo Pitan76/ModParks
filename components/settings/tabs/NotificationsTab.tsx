@@ -30,7 +30,7 @@ export default function NotificationsTab({ initialPrefs }: Props) {
   });
   const prefs = form.values.prefs;
 
-  // ─── Web Push（PWA プッシュ通知）の端末単位トグル ───
+  // ---- Web Push（PWA プッシュ通知）の端末単位トグル ----
   const [pushSupported, setPushSupported] = useState(false);
   const [pushOn, setPushOn] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);

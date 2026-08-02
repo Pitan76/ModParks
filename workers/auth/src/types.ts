@@ -20,7 +20,7 @@ export interface AuthenticatorRecord {
   transports?: AuthenticatorTransportFuture[];
 }
 
-// ── /registration-options ──────────────────────────────────────────────
+// ---- /registration-options ----
 export interface RegistrationOptionsRequest {
   rpName: string;
   rpID: string;
@@ -32,14 +32,14 @@ export interface RegistrationOptionsRequest {
 }
 export type RegistrationOptionsResult = PublicKeyCredentialCreationOptionsJSON;
 
-// ── /authentication-options ────────────────────────────────────────────
+// ---- /authentication-options ----
 export interface AuthenticationOptionsRequest {
   rpID: string;
   userVerification: "required" | "preferred" | "discouraged";
 }
 export type AuthenticationOptionsResult = PublicKeyCredentialRequestOptionsJSON;
 
-// ── /verify-registration ───────────────────────────────────────────────
+// ---- /verify-registration ----
 export interface VerifyRegistrationRequest {
   response: RegistrationResponseJSON;
   expectedChallenge: string;
@@ -58,7 +58,7 @@ export interface VerifyRegistrationResult {
   };
 }
 
-// ── /verify-authentication ─────────────────────────────────────────────
+// ---- /verify-authentication ----
 export interface VerifyAuthenticationRequest {
   response: AuthenticationResponseJSON;
   expectedChallenge: string;
@@ -72,7 +72,7 @@ export interface VerifyAuthenticationResult {
   newCounter: number;
 }
 
-// ── /bcrypt-hash ───────────────────────────────────────────────────────
+// ---- /bcrypt-hash ----
 export interface BcryptHashRequest {
   password: string;
   /** salt rounds（Cloudflare Workers の CPU 制限を考慮し呼び出し側で指定） */
@@ -82,7 +82,7 @@ export interface BcryptHashResult {
   hash: string;
 }
 
-// ── /bcrypt-compare ────────────────────────────────────────────────────
+// ---- /bcrypt-compare ----
 export interface BcryptCompareRequest {
   password: string;
   hash: string;
@@ -91,7 +91,7 @@ export interface BcryptCompareResult {
   match: boolean;
 }
 
-// ── /totp-validate ─────────────────────────────────────────────────────
+// ---- /totp-validate ----
 export interface TotpValidateRequest {
   /** base32 シークレット（DB の twoFactorSecret） */
   secret: string;
@@ -104,7 +104,7 @@ export interface TotpValidateResult {
   valid: boolean;
 }
 
-// ── /totp-provision ────────────────────────────────────────────────────
+// ---- /totp-provision ----
 export interface TotpProvisionRequest {
   /** otpauth URI に載せる label（メール/ユーザー名など） */
   label: string;

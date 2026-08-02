@@ -10,7 +10,7 @@ self.addEventListener("fetch", () => {
   // 基本的なキャッシュなし。PWAのインストール条件をクリアするための最低限のハンドラです。
 });
 
-// ─── Web Push (PWA プッシュ通知) ──────────────────────────────────────────────
+// ---- Web Push (PWA プッシュ通知) ----
 
 self.addEventListener("push", (event) => {
   let data = {};

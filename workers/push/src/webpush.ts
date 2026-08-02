@@ -10,7 +10,7 @@
 
 import type { PushSubscriptionJSON, VapidKeys } from "./types";
 
-// ─── base64url ────────────────────────────────────────────────────────────────
+// ---- base64url ----
 
 export function b64urlToBytes(s: string): Uint8Array {
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4);
@@ -36,7 +36,7 @@ function concat(...arrs: Uint8Array[]): Uint8Array {
 
 const utf8 = (s: string) => new TextEncoder().encode(s);
 
-// ─── HKDF (RFC 5869) ────────────────────────────────────────────────────────
+// ---- HKDF (RFC 5869) ----
 
 async function hmacSha256(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
   const k = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -50,7 +50,7 @@ async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length:
   return t.slice(0, length);
 }
 
-// ─── VAPID (RFC 8292, ES256) ──────────────────────────────────────────────────
+// ---- VAPID (RFC 8292, ES256) ----
 
 async function importVapidSigningKey(vapid: VapidKeys): Promise<CryptoKey> {
   const pub = b64urlToBytes(vapid.publicKey); // 0x04 || X(32) || Y(32)
@@ -86,7 +86,7 @@ async function buildVapidAuth(endpoint: string, vapid: VapidKeys): Promise<strin
   return `vapid t=${jwt}, k=${vapid.publicKey}`;
 }
 
-// ─── 本文暗号化 (RFC 8291 + RFC 8188 aes128gcm) ───────────────────────────────
+// ---- 本文暗号化 (RFC 8291 + RFC 8188 aes128gcm) ----
 
 async function encryptPayload(sub: PushSubscriptionJSON, payload: Uint8Array): Promise<Uint8Array> {
   const uaPublic = b64urlToBytes(sub.keys.p256dh); // 65byte uncompressed point
@@ -129,7 +129,7 @@ async function encryptPayload(sub: PushSubscriptionJSON, payload: Uint8Array): P
   return concat(header, ciphertext);
 }
 
-// ─── 送信 ─────────────────────────────────────────────────────────────────────
+// ---- 送信 ----
 
 export interface DeliverResult {
   ok: boolean;
