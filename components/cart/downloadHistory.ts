@@ -25,9 +25,12 @@ if (typeof window !== "undefined") {
 
 const listeners = new Set<() => void>();
 
+/** getServerSnapshot は毎回同じ参照を返さないと無限ループになる */
+const EMPTY_ENTRIES: DownloadHistoryEntry[] = [];
+
 export const downloadHistoryStore = {
   getSnapshot: () => entries,
-  getServerSnapshot: () => [] as DownloadHistoryEntry[],
+  getServerSnapshot: () => EMPTY_ENTRIES,
   /**
    * ダウンロードを記録する。同じプロジェクトの古い記録は取り除いて先頭に積み直す。
    */
