@@ -104,3 +104,16 @@ export async function assertProjectAccess(db: any, project: { id: string; author
   }
   return true; // Member
 }
+
+/**
+ * ログイン・新規登録などゲスト専用画面のガード。
+ * 認証チェックは middleware ではなくページ/レイアウト側で行う方針のため、
+ * 各ゲスト専用ルートの layout から呼び出します。
+ */
+export async function redirectIfAuthenticated(locale: string) {
+  const session = await auth();
+  if (session?.user?.id) {
+    const { redirect } = await import("next/navigation");
+    redirect(`/${locale}/projects`);
+  }
+}
