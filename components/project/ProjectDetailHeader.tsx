@@ -131,8 +131,8 @@ const ProjectDetailHeader = ({
             </Box>
             
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 1, flexWrap: "wrap" }}>
-              <DateLabel date={p.createdAt} type="published" />
-              <DateLabel date={p.updatedAt} type="updated" />
+              <DateLabel date={p.createdAt} type="published" showTooltip />
+              <DateLabel date={p.updatedAt} type="updated" showTooltip />
               
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: { sm: 2 } }}>
                 <ProjectFavoriteButton

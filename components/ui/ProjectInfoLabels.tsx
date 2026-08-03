@@ -125,6 +125,8 @@ export interface DateLabelProps extends Omit<BoxProps, "children"> {
   textVariant?: TypographyProps["variant"];
   textColor?: string;
   hideIcon?: boolean;
+  /** ホバー時にフルの日時をツールチップ表示する（一覧カードでは邪魔なので既定は無効） */
+  showTooltip?: boolean;
 }
 
 export function DateLabel({
@@ -134,6 +136,7 @@ export function DateLabel({
   textVariant = "caption",
   textColor = "text.secondary",
   hideIcon = false,
+  showTooltip = false,
   sx,
   ...props
 }: DateLabelProps) {
@@ -141,22 +144,34 @@ export function DateLabel({
   const tProject = useTranslations("Project");
   const dateObj = new Date(date);
 
-  return (
-    <DateTimeTooltip date={dateObj}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: hideIcon ? 0 : 0.5, cursor: "help", color: textColor, ...sx }} {...props}>
-        {!hideIcon && (
-          type === "published" ? (
-            <AccessTimeIcon sx={{ fontSize: iconSize }} />
-          ) : (
-            <EditIcon sx={{ fontSize: iconSize }} />
-          )
-        )}
-        <Typography variant={textVariant} sx={{ whiteSpace: "nowrap", color: "inherit" }}>
-          {tProject(type === "published" ? "header.publishedAt" : "header.updatedAt", {
-            date: format.dateTime(dateObj, { dateStyle: "short" }),
-          })}
-        </Typography>
-      </Box>
-    </DateTimeTooltip>
+  const content = (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: hideIcon ? 0 : 0.5,
+        color: textColor,
+        ...(showTooltip && { cursor: "help" }),
+        ...sx,
+      }}
+      {...props}
+    >
+      {!hideIcon && (
+        type === "published" ? (
+          <AccessTimeIcon sx={{ fontSize: iconSize }} />
+        ) : (
+          <EditIcon sx={{ fontSize: iconSize }} />
+        )
+      )}
+      <Typography variant={textVariant} sx={{ whiteSpace: "nowrap", color: "inherit" }}>
+        {tProject(type === "published" ? "header.publishedAt" : "header.updatedAt", {
+          date: format.dateTime(dateObj, { dateStyle: "short" }),
+        })}
+      </Typography>
+    </Box>
   );
+
+  if (!showTooltip) return content;
+
+  return <DateTimeTooltip date={dateObj}>{content}</DateTimeTooltip>;
 }

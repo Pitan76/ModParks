@@ -23,7 +23,6 @@ import { getLoaderInfo } from "@/lib/loaders";
 import { formatBytes } from "@/lib/utils/format";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import SortableTableCell from "@/components/ui/SortableTableCell";
-import DateTimeTooltip from "@/components/ui/DateTimeTooltip";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 import { useContextMenuHandler } from "@/components/ui/ContextMenu";
 import type { ContextMenuItem } from "@/components/ui/ContextMenu";
@@ -129,14 +128,12 @@ export default function ProjectVersionsDesktopTable({ versions, projectSlug, ord
                   </Stack>
                 </TableCell>
                 <TableCell>
-                  <DateTimeTooltip date={version.date}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, cursor: "help" }}>
-                      <CalendarTodayIcon sx={{ fontSize: 14, color: "text.disabled" }} />
-                      <Typography variant="caption" color="text.disabled" suppressHydrationWarning>
-                        {version.date.toLocaleDateString(locale)}
-                      </Typography>
-                    </Box>
-                  </DateTimeTooltip>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <CalendarTodayIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                    <Typography variant="caption" color="text.disabled" suppressHydrationWarning>
+                      {version.date.toLocaleDateString(locale)}
+                    </Typography>
+                  </Box>
                 </TableCell>
                 <TableCell align="right">
                   <Tooltip title={t("download")}>

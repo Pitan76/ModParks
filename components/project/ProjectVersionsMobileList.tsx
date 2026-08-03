@@ -17,7 +17,6 @@ import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";
 import { getLoaderInfo } from "@/lib/loaders";
 import { formatBytes } from "@/lib/utils/format";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
-import DateTimeTooltip from "@/components/ui/DateTimeTooltip";
 import { useContextMenuHandler } from "@/components/ui/ContextMenu";
 import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 import type { ParsedProjectVersion } from "./useProjectVersions";
@@ -95,14 +94,12 @@ export default function ProjectVersionsMobileList({ versions, projectSlug, build
                 </Typography>
               )}
 
-              <DateTimeTooltip date={version.date}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1.5, cursor: "help" }}>
-                  <CalendarTodayIcon sx={{ fontSize: 14, color: "text.disabled" }} />
-                  <Typography variant="caption" color="text.disabled" suppressHydrationWarning>
-                    {version.date.toLocaleDateString(locale)}
-                  </Typography>
-                </Box>
-              </DateTimeTooltip>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1.5 }}>
+                <CalendarTodayIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                <Typography variant="caption" color="text.disabled" suppressHydrationWarning>
+                  {version.date.toLocaleDateString(locale)}
+                </Typography>
+              </Box>
             </CardContent>
             <CardActions sx={{ px: 2, pb: 2, pt: 0 }}>
               <Button

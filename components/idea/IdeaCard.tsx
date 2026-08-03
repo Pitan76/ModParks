@@ -11,7 +11,6 @@ import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useContextMenu, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 import { usePinMenuItem } from "@/components/pin/usePinMenuItem";
 import { formatDate } from "@/lib/utils/format";
-import DateTimeTooltip from "@/components/ui/DateTimeTooltip";
 import { toPlainDescription } from "@/lib/utils/plainText";
 import { useColorMode } from "@/components/ThemeRegistry";
 
@@ -98,11 +97,9 @@ export default function IdeaCard({ idea }: { idea: IdeaCardData }) {
                 by {idea.authorName || "Unknown"}
               </Typography>
               <Typography variant="caption" color="text.disabled">•</Typography>
-              <DateTimeTooltip date={idea.createdAt}>
-                <Typography variant="caption" color="text.disabled" sx={{ cursor: "help" }}>
-                  {formatDate(idea.createdAt)}
-                </Typography>
-              </DateTimeTooltip>
+              <Typography variant="caption" color="text.disabled">
+                {formatDate(idea.createdAt)}
+              </Typography>
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 3 }, flexWrap: "wrap" }}>
