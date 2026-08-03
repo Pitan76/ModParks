@@ -9,6 +9,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import LinkButton from "@/components/ui/LinkButton";
 import { useColorMode } from "@/components/ThemeRegistry";
 import { getLoaderInfo } from "@/lib/loaders";
+import Image from "next/image";
 
 interface HomeHeroProps {
   labels: {
@@ -42,6 +43,9 @@ export default function HomeHero({ labels }: HomeHeroProps) {
     >
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         <Box sx={{ textAlign: "center", maxWidth: 720, mx: "auto" }}>
+
+          <Image src="/hero.png" alt="Home Hero" width={1200} height={600} />
+
           <Typography
             variant="h2"
             component="h1"
