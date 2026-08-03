@@ -10,6 +10,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import { useColorMode } from "@/components/ThemeRegistry";
 import { getLoaderInfo } from "@/lib/loaders";
 import Image from "next/image";
+import { useTheme, alpha } from "@mui/material/styles";
 
 interface HomeHeroProps {
   labels: {
@@ -27,52 +28,99 @@ interface HomeHeroProps {
  */
 export default function HomeHero({ labels }: HomeHeroProps) {
   const { isNewTheme } = useColorMode();
+  const theme = useTheme();
 
   return (
     <Box
       sx={{
         position:   "relative",
-        py:         { xs: 6, md: 10 },
+        width:      "100%",
+        height:     { xs: 200, sm: 260, md: 320 },
         overflow:   "hidden",
-        "&::before": {
-          content:  '""',
-          position: "absolute",
-          inset:    0,
-        },
+        display:    "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-        <Box sx={{ textAlign: "center", maxWidth: 720, mx: "auto" }}>
+      {/* 背景画像 (直接フィルターで暗くすることで、テキストのmixBlendModeを正常に機能させます) */}
+      <Image
+        src="/hero.png"
+        alt="Home Hero"
+        fill
+        priority
+        sizes="100vw"
+        style={{
+          objectFit: "cover",
+          zIndex: 0,
+          filter: "brightness(0.45)",
+        }}
+      />
 
-          <Image src="/hero.png" alt="Home Hero" width={1200} height={600} />
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, color: "#fff" }}>
+        <Box sx={{ textAlign: "center", maxWidth: "100%", mx: "auto", px: 2 }}>
 
-          <Typography
-            variant="h2"
-            component="h1"
+          <Box
             sx={{
-              fontWeight:   800,
-              mb:           2,
-              lineHeight:   1.25,
-              fontSize:     { xs: "1.75rem", md: "2.5rem" },
+              width: "100%",
+              maxWidth: { xs: 160, sm: 200, md: 240 },
+              mx: "auto",
+              mb: 2,
+              filter: "drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.5))",
             }}
           >
-            {labels.title}
-            <Box
-              component="span"
+            <svg viewBox="0 0 320 80" style={{ width: "100%", height: "auto", display: "block" }}>
+              <defs>
+                <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#4ade80" />
+                  <stop offset="100%" stopColor="#818cf8" />
+                </linearGradient>
+              </defs>
+              <text
+                x="50%"
+                y="52%"
+                dominantBaseline="central"
+                textAnchor="middle"
+                fill="none"
+                stroke="url(#textGrad)"
+                strokeWidth="1.5"
+                style={{
+                  fontWeight: 900,
+                  fontFamily: "inherit",
+                  fontSize: "44px",
+                  letterSpacing: "1.5px",
+                }}
+              >
+                {labels.title.replace(/\s+/g, "")}
+              </text>
+            </svg>
+          </Box>
+
+          {labels.titleHighlight && (
+            <Typography
+              variant="h4"
               sx={{
-                background: "linear-gradient(135deg, #4ade80, #818cf8)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                fontWeight: 800,
+                mb: 2,
+                color: "transparent",
+                WebkitTextStroke: "1px #818cf8",
+                fontSize: { xs: "1.25rem", md: "1.75rem" }
               }}
             >
               {labels.titleHighlight}
-            </Box>
-          </Typography>
+            </Typography>
+          )}
 
           <Typography
             variant="h6"
-            color="text.secondary"
-            sx={{ mb: 5, fontWeight: 400, lineHeight: 1.6, px: { xs: 2, sm: 4 } }}
+            sx={{
+              mb: 5,
+              fontWeight: 400,
+              lineHeight: 1.6,
+              px: { xs: 2, sm: 4 },
+              color: "rgba(255, 255, 255, 0.9)",
+              fontSize: { xs: "0.85rem", sm: "1rem", md: "1.25rem" },
+              textShadow: "0px 1px 2px rgba(0, 0, 0, 0.6)",
+            }}
           >
             {labels.description}
           </Typography>
@@ -84,20 +132,38 @@ export default function HomeHero({ labels }: HomeHeroProps) {
               variant="contained"
               size="large"
               startIcon={<SearchIcon />}
-              sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
+              sx={{
+                px: 4, py: 1.5, fontSize: "1rem",
+                backgroundColor: alpha(theme.palette.primary.main, 0.15),
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                backdropFilter: "blur(12px)",
+                color: theme.palette.primary.main,
+                fontWeight: 700,
+                "&:hover": {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.25),
+                  borderColor: alpha(theme.palette.primary.main, 0.45),
+                }
+              }}
             >
               {labels.search}
             </LinkButton>
             <LinkButton
               href="/projects/new"
               id="hero-cta-btn"
-              variant="outlined"
+              variant="contained"
               size="large"
               endIcon={<ArrowForwardIcon />}
               sx={{
                 px: 4, py: 1.5, fontSize: "1rem",
-                borderColor: "primary.main",
-                color:        "primary.main",
+                backgroundColor: alpha(theme.palette.primary.main, 0.15),
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                backdropFilter: "blur(12px)",
+                color: theme.palette.primary.main,
+                fontWeight: 700,
+                "&:hover": {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.25),
+                  borderColor: alpha(theme.palette.primary.main, 0.45),
+                }
               }}
             >
               {labels.cta}
@@ -114,7 +180,12 @@ export default function HomeHero({ labels }: HomeHeroProps) {
                   variant="outlined"
                   size="small"
                   icon={info.icon}
-                  sx={{ borderColor: "divider", color: "text.secondary" }}
+                  sx={{
+                    borderColor: "rgba(255, 255, 255, 0.3)",
+                    color: "rgba(255, 255, 255, 0.8)",
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    "& .MuiChip-icon": { color: "inherit" }
+                  }}
                 />
               );
             })}

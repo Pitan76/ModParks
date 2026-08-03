@@ -165,8 +165,8 @@
   },
   "Home": {
     "hero": {
-      "title": "Minecraft mod & plugin ",
-      "titleHighlight": "hosting",
+      "title": "ModParks",
+      "titleHighlight": "",
       "description": "Publish, search, and download. Japanese-first.",
       "searchPlaceholder": "Search Mods & Plugins..."
     },

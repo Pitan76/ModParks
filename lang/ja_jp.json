@@ -165,15 +165,15 @@
   },
   "Home": {
     "hero": {
-      "title": "マイクラのMOD/プラグイン",
-      "titleHighlight": "配布プラットフォーム",
+      "title": "ModParks",
+      "titleHighlight": "",
       "description": "みんなで一緒につくったり、探したりしてみませんか？",
       "searchPlaceholder": "MOD/プラグインを検索..."
     },
     "newProjects": "新着",
     "updatedProjects": "最近の更新",
     "viewAll": "すべて見る",
-    "cta": "投稿する"
+    "cta": "投稿"
   },
   "Project": {
     "copyHash": "ハッシュをコピー",

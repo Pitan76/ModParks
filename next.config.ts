@@ -16,6 +16,16 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["@mui/icons-material", "@mui/material"],
+    // Turbopack の dev 永続キャッシュ（Next 16 でデフォルト有効）を無効化する。
+    // このリポジトリが置かれている E: は exFAT で、reparse point も NTFS の
+    // rename セマンティクスも持たないため、キャッシュストアの commit が
+    // 「アクセスが拒否されました (os error 5)」で失敗する。一度失敗すると
+    // ストアがロックされたままになり、以降 Persisting/Compaction failed を
+    // 延々と吐き続けてキャッシュも残らない。
+    // 無効化しても失うのは dev サーバー再起動をまたいだ再利用だけで、
+    // セッション中のメモリキャッシュは効いたままなので編集時の速度は変わらない。
+    // リポジトリを NTFS に移せばこの行は不要になる。
+    turbopackFileSystemCacheForDev: false,
   },
   images: {
     // GitHub アバター & R2 ファイルを許可
