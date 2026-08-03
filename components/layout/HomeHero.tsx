@@ -134,9 +134,9 @@ export default function HomeHero({ labels }: HomeHeroProps) {
               startIcon={<SearchIcon />}
               sx={{
                 px: 4, py: 1.5, fontSize: "1rem",
-                backgroundColor: alpha(theme.palette.primary.main, 0.15),
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                backdropFilter: "blur(12px)",
+                backdropFilter: "blur(3px)",
                 color: theme.palette.primary.main,
                 fontWeight: 700,
                 "&:hover": {
@@ -155,9 +155,9 @@ export default function HomeHero({ labels }: HomeHeroProps) {
               endIcon={<ArrowForwardIcon />}
               sx={{
                 px: 4, py: 1.5, fontSize: "1rem",
-                backgroundColor: alpha(theme.palette.primary.main, 0.15),
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                backdropFilter: "blur(12px)",
+                backdropFilter: "blur(3px)",
                 color: theme.palette.primary.main,
                 fontWeight: 700,
                 "&:hover": {
