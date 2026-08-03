@@ -114,7 +114,9 @@ const nextConfig: NextConfig = {
 
     return [
       {
-        source: "/(.*)",
+        // クローラーによるファビコン等へのアクセス干渉を防ぎ、キャッシュ効率を向上させるため、
+        // 静的ファイルやAPIエンドポイントなどのドキュメント以外のリソースを適用対象から除外する
+        source: "/((?!api/|_next/|favicon\\.ico|icon\\.svg|icon-192\\.png|icon-512\\.png|apple-touch-icon\\.png|sw\\.js|ads\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
