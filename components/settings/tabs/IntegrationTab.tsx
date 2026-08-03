@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import { updateIntegrations, disconnectGitHub, disconnectGoogle, toggleGithubVisibility } from "@/lib/actions/settings";
 import CurseForgeVerify from "./CurseForgeVerify";
+import GithubAppSection from "../GithubAppSection";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -25,9 +26,13 @@ interface IntegrationTabProps {
   isGitHubConnected: boolean;
   isGoogleConnected: boolean;
   showGithubLinkInitial: boolean;
+  /** GitHub App のインストール先アカウント名 */
+  githubAppAccounts: string[];
+  /** GitHub App 未設定のサーバーでは null */
+  githubAppInstallUrl: string | null;
 }
 
-export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, isGitHubConnected, isGoogleConnected, showGithubLinkInitial }: IntegrationTabProps) {
+export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, isGitHubConnected, isGoogleConnected, showGithubLinkInitial, githubAppAccounts, githubAppInstallUrl }: IntegrationTabProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const { message, flash } = useFlashMessage();
@@ -106,6 +111,10 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
       ) : (
         <Button variant="contained" onClick={() => signIn("github")}>{t("github.connect")}</Button>
       )}
+
+      <Divider sx={{ my: 4 }} />
+
+      <GithubAppSection installedAccounts={githubAppAccounts} installUrl={githubAppInstallUrl} />
 
       <Divider sx={{ my: 4 }} />
 

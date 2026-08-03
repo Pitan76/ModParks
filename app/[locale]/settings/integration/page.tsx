@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { getSettingsUser, getSettingsPreferences } from "@/lib/queries/settingsData";
 import SettingsSection from "@/components/settings/SettingsSection";
 import { IntegrationTabLazy } from "@/components/settings/SectionsLazy";
+import { getGithubAppInstallUrl } from "@/lib/utils/githubApp";
+import { listGithubAppAccounts } from "@/lib/queries/githubApp";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -14,9 +16,10 @@ export default async function IntegrationSettingsPage() {
   const session = await auth();
   const t = await getTranslations("Settings");
 
-  const [user, prefs] = await Promise.all([
+  const [user, prefs, githubAppAccounts] = await Promise.all([
     getSettingsUser(session!.user!.id!),
     getSettingsPreferences(session!.user!.id!),
+    listGithubAppAccounts(session!.user!.id!),
   ]);
 
   return (
@@ -29,6 +32,8 @@ export default async function IntegrationSettingsPage() {
         isGitHubConnected={prefs.isGitHubConnected}
         isGoogleConnected={prefs.isGoogleConnected}
         showGithubLinkInitial={user.showGithubLink}
+        githubAppAccounts={githubAppAccounts}
+        githubAppInstallUrl={getGithubAppInstallUrl()}
       />
     </SettingsSection>
   );

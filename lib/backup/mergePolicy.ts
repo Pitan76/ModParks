@@ -81,6 +81,12 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
     strategy: "skip",
     reason: "レート制限カウンタ。expiresAt ベースで自然に再生成される",
   },
+  github_installations: {
+    strategy: "skip",
+    reason:
+      "GitHub App のインストール実体は GitHub 側にあり、DB を戻しても復活しない。" +
+      "アンインストール済みの紐づけが蘇ると非公開リポジトリの権限判定を誤らせる",
+  },
 
   // ---- ユーザー付随データ ----
   user_profiles: {

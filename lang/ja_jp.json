@@ -1299,6 +1299,19 @@
       "successShow": "GitHubリンクを表示しました",
       "successHide": "GitHubリンクを非表示にしました"
     },
+    "githubApp": {
+      "title": "非公開リポジトリの取り込み",
+      "desc": "非公開リポジトリの Release を取り込むには、ModParks の GitHub App をインストールしてください。取り込みたいリポジトリだけを個別に選べます。権限はリポジトリ内容の読み取りのみで、書き込みは行いません。",
+      "unavailable": "この機能は現在利用できません（サーバー側で GitHub App が設定されていません）。",
+      "notInstalled": "未インストール",
+      "installedOn": "インストール済み: {accounts}",
+      "install": "GitHub App をインストール",
+      "manage": "インストール設定を変更",
+      "manageDesc": "対象リポジトリの追加・削除やアンインストールは GitHub 側で行います。",
+      "connected": "GitHub App を連携しました",
+      "removed": "GitHub App の連携を解除しました",
+      "error": "GitHub App の連携に失敗しました。もう一度お試しください。"
+    },
     "google": {
       "title": "Google連携",
       "desc": "Googleアカウントを連携すると、Googleでログインできるようになります。",

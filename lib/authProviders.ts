@@ -42,6 +42,9 @@ export const authProviders = [
   GitHub({
     clientId:     process.env.AUTH_GITHUB_ID!,
     clientSecret: process.env.AUTH_GITHUB_SECRET!,
+    // scope はログインに必要な最小限のまま（既定の read:user user:email）。
+    // 非公開リポジトリの読み取りは repo scope ではなく GitHub App の
+    // installation token で行う（lib/utils/githubApp.ts）。
     profile(profile) {
       return {
         id: profile.id.toString(),

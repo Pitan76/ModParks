@@ -72,6 +72,7 @@ NEXT_PUBLIC_ADS_MODE = "on"
 # 未設定だと ADS_MODE=on でも全枠が非表示になる。
 # 広告ユニットID は lib/config/ads.ts の AD_SLOT_IDS で管理。
 NEXT_PUBLIC_ADSENSE_CLIENT = "ca-pub-3977024448605477"
+GITHUB_APP_SLUG = "modparks"
 
 [observability]
 enabled = false

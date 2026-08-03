@@ -1291,6 +1291,19 @@
       "successShow": "GitHub link is now visible",
       "successHide": "GitHub link is now hidden"
     },
+    "githubApp": {
+      "title": "Private repository import",
+      "desc": "To import releases from a private repository, install the ModParks GitHub App. You choose exactly which repositories it can see. It only requests read access to repository contents and never writes.",
+      "unavailable": "This feature is currently unavailable (the GitHub App is not configured on the server).",
+      "notInstalled": "Not installed",
+      "installedOn": "Installed on: {accounts}",
+      "install": "Install the GitHub App",
+      "manage": "Manage installation",
+      "manageDesc": "Adding or removing repositories, and uninstalling, are done on GitHub.",
+      "connected": "GitHub App connected",
+      "removed": "GitHub App disconnected",
+      "error": "Failed to connect the GitHub App. Please try again."
+    },
     "google": {
       "title": "Google Connection",
       "desc": "Connect your Google account to sign in with Google.",

@@ -70,6 +70,7 @@ const SCHEMA_TABLES_LIST = [
   "platforms",
   "authenticator",
   "rate_limits",
+  "github_installations",
   "user_follows",
   "collection_follows",
   "project_comments",

@@ -173,6 +173,28 @@ export const authenticators = sqliteTable(
   })
 );
 
+/**
+ * GitHub App のインストール。
+ *
+ * 非公開リポジトリの Release 取り込みに使う installation token は、
+ * 「そのインストールを行った本人」に紐づいていることを確認してから発行する。
+ * この対応表が無いと、App が入っている任意のリポジトリを他人が
+ * 自分のプロジェクトに連携させて中身を読めてしまう。
+ */
+export const githubInstallations = sqliteTable("github_installations", {
+  /** GitHub 側の installation_id */
+  id: integer("id").primaryKey(),
+  /** インストール操作を行った ModParks ユーザー */
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  /** インストール先のアカウント名（owner）。表示と照合に使う */
+  accountLogin: text("account_login").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 export const rateLimits = sqliteTable("rate_limits", {
   id: text("id").primaryKey(), // e.g. "ip:192.168.1.1:login"
   count: integer("count").notNull().default(1),
