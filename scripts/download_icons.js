@@ -3,19 +3,19 @@ const fs = require('fs');
 const path = require('path');
 
 const loaders = {
-  fabric: 'https://github.com/FabricMC.png',
-  forge: 'https://github.com/MinecraftForge.png',
-  neoforge: 'https://github.com/neoforged.png',
-  quilt: 'https://github.com/QuiltMC.png',
-  paper: 'https://github.com/PaperMC.png',
-  purpur: 'https://github.com/PurpurMC.png',
-  cleanroommc: 'https://github.com/CleanroomMC.png',
-  babric: 'https://github.com/Babric.png',
-  liteloader: 'https://github.com/LiteLoader.png',
-  ornithe: 'https://github.com/OrnitheMC.png',
-  rift: 'https://github.com/DimensionalDevelopment.png',
-  risugami: 'https://github.com/Risugami.png',
-  nilloader: 'https://github.com/exaskye.png'
+  // fabric: 'https://github.com/FabricMC.png',
+  // forge: 'https://github.com/MinecraftForge.png',
+  // neoforge: 'https://github.com/neoforged.png',
+  // quilt: 'https://github.com/QuiltMC.png',
+  // paper: 'https://github.com/PaperMC.png',
+  // purpur: 'https://github.com/PurpurMC.png',
+  // cleanroommc: 'https://github.com/CleanroomMC.png',
+  // babric: 'https://github.com/Babric.png',
+  // liteloader: 'https://github.com/LiteLoader.png',
+  // ornithe: 'https://github.com/OrnitheMC.png',
+  // rift: 'https://github.com/DimensionalDevelopment.png',
+  // risugami: 'https://github.com/Risugami.png',
+  // nilloader: 'https://github.com/exaskye.png'
 };
 
 const dir = path.join(__dirname, '../public/icons/loaders');
