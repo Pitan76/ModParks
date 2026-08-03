@@ -10,7 +10,14 @@ const loaders = {
   paper: 'https://github.com/PaperMC.png',
   purpur: 'https://github.com/PurpurMC.png',
   velocity: 'https://github.com/PaperMC.png',
-  waterfall: 'https://github.com/PaperMC.png'
+  waterfall: 'https://github.com/PaperMC.png',
+  cleanroommc: 'https://github.com/CleanroomMC.png',
+  babric: 'https://github.com/Babric.png',
+  liteloader: 'https://github.com/LiteLoader.png',
+  ornithe: 'https://github.com/OrnitheMC.png',
+  rift: 'https://github.com/DimensionalDevelopment.png',
+  risugami: 'https://github.com/Risugami.png',
+  nilloader: 'https://github.com/exaskye.png'
 };
 
 const dir = path.join(__dirname, '../public/icons/loaders');

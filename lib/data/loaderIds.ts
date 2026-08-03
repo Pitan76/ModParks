@@ -18,6 +18,13 @@ export const LOADERS_DATA: { id: string; name: string; color: LoaderColor }[] = 
   { id: "purpur",    name: "Purpur",    color: "default"   },
   { id: "velocity",  name: "Velocity",  color: "info"      },
   { id: "waterfall", name: "Waterfall", color: "info"      },
+  { id: "cleanroommc", name: "CleanroomMC", color: "success" },
+  { id: "babric",    name: "Babric",    color: "primary"   },
+  { id: "liteloader", name: "LiteLoader", color: "warning"   },
+  { id: "ornithe",   name: "Ornithe",   color: "secondary" },
+  { id: "rift",      name: "Rift",      color: "info"      },
+  { id: "risugami",  name: "Risugami'S ModLoader", color: "warning" },
+  { id: "nilloader", name: "NilLoader", color: "default"   },
 ];
 
 export const AVAILABLE_LOADERS = LOADERS_DATA.map((l) => l.id);

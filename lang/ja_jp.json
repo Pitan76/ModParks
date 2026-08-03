@@ -156,7 +156,7 @@
     "settings": "設定",
     "admin": "システム管理",
     "login": "ログイン",
-    "register": "新規登録",
+    "register": "登録",
     "logout": "ログアウト",
     "dashboard": "ダッシュボード",
     "notifications": "通知",
@@ -522,7 +522,14 @@
       "paper": "Paper",
       "spigot": "Spigot",
       "bukkit": "Bukkit",
-      "velocity": "Velocity"
+      "velocity": "Velocity",
+      "cleanroommc": "CleanroomMC",
+      "babric": "Babric",
+      "liteloader": "LiteLoader",
+      "ornithe": "Ornithe",
+      "rift": "Rift",
+      "risugami": "Risugami's ModLoader",
+      "nilloader": "NilLoader"
     }
   },
   "Report": {
@@ -1159,6 +1166,13 @@
     "paper": "Paper",
     "spigot": "Spigot",
     "quilt": "Quilt",
+    "cleanroommc": "CleanroomMC",
+    "babric": "Babric",
+    "liteloader": "LiteLoader",
+    "ornithe": "Ornithe",
+    "rift": "Rift",
+    "risugami": "Risugami's ModLoader",
+    "nilloader": "NilLoader",
     "items": "アイテム",
     "blocks": "ブロック",
     "commands": "コマンド",

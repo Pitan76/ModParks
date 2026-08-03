@@ -10,6 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { formatCompactNumber } from "@/lib/utils/format";
 import { useLocale, useTranslations, useFormatter } from "next-intl";
 import LinkButton from "@/components/ui/LinkButton";
+import DateTimeTooltip from "@/components/ui/DateTimeTooltip";
 
 export interface AuthorLabelProps {
   /** left join で取得すると作者が削除済みの場合に null になりうる */
@@ -141,19 +142,21 @@ export function DateLabel({
   const dateObj = new Date(date);
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: hideIcon ? 0 : 0.5, color: textColor, ...sx }} {...props}>
-      {!hideIcon && (
-        type === "published" ? (
-          <AccessTimeIcon sx={{ fontSize: iconSize }} />
-        ) : (
-          <EditIcon sx={{ fontSize: iconSize }} />
-        )
-      )}
-      <Typography variant={textVariant} sx={{ whiteSpace: "nowrap", color: "inherit" }}>
-        {tProject(type === "published" ? "header.publishedAt" : "header.updatedAt", {
-          date: format.dateTime(dateObj, { dateStyle: "short" }),
-        })}
-      </Typography>
-    </Box>
+    <DateTimeTooltip date={dateObj}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: hideIcon ? 0 : 0.5, cursor: "help", color: textColor, ...sx }} {...props}>
+        {!hideIcon && (
+          type === "published" ? (
+            <AccessTimeIcon sx={{ fontSize: iconSize }} />
+          ) : (
+            <EditIcon sx={{ fontSize: iconSize }} />
+          )
+        )}
+        <Typography variant={textVariant} sx={{ whiteSpace: "nowrap", color: "inherit" }}>
+          {tProject(type === "published" ? "header.publishedAt" : "header.updatedAt", {
+            date: format.dateTime(dateObj, { dateStyle: "short" }),
+          })}
+        </Typography>
+      </Box>
+    </DateTimeTooltip>
   );
 }

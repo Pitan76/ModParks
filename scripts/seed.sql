@@ -39,4 +39,11 @@ INSERT OR IGNORE INTO platforms (id, name, slug) VALUES
 ('plat_bukkit', 'Bukkit', 'bukkit'),
 ('plat_purpur', 'Purpur', 'purpur'),
 ('plat_velocity', 'Velocity', 'velocity'),
-('plat_waterfall', 'Waterfall', 'waterfall');
+('plat_waterfall', 'Waterfall', 'waterfall'),
+('plat_cleanroommc', 'CleanroomMC', 'cleanroommc'),
+('plat_babric', 'Babric', 'babric'),
+('plat_liteloader', 'LiteLoader', 'liteloader'),
+('plat_ornithe', 'Ornithe', 'ornithe'),
+('plat_rift', 'Rift', 'rift'),
+('plat_risugami', 'Risugami''s ModLoader', 'risugami'),
+('plat_nilloader', 'NilLoader', 'nilloader');

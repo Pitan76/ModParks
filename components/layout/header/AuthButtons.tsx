@@ -9,7 +9,7 @@ const AuthButtons = () => {
   const t = useTranslations("Nav");
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
       <LinkButton
         id="login-button"
         href="/login"
@@ -18,6 +18,9 @@ const AuthButtons = () => {
         sx={{
           borderColor: "primary.main",
           color:        "primary.main",
+          whiteSpace:   "nowrap",
+          flexShrink:   0,
+          minWidth:     "auto",
           "&:hover": {
             background:  "rgba(56,189,248,0.08)",
             borderColor: "primary.light",
@@ -26,7 +29,13 @@ const AuthButtons = () => {
       >
         <Box component="span" sx={{ mt: "1px" }}>{t("login")}</Box>
       </LinkButton>
-      <LinkButton id="register-button" href="/register" variant="contained" size="small">
+      <LinkButton
+        id="register-button"
+        href="/register"
+        variant="contained"
+        size="small"
+        sx={{ whiteSpace: "nowrap", flexShrink: 0, minWidth: "auto" }}
+      >
         <Box component="span" sx={{ mt: "1px" }}>{t("register")}</Box>
       </LinkButton>
     </Box>
