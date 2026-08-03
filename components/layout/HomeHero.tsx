@@ -58,7 +58,7 @@ export default function HomeHero({ labels }: HomeHeroProps) {
       />
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, color: "#fff" }}>
-        <Box sx={{ textAlign: "center", maxWidth: "100%", mx: "auto", px: 2 }}>
+        <Box sx={{ textAlign: "center", maxWidth: "100%", mx: "auto" }}>
 
           <Box
             sx={{
