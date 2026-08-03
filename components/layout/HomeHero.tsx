@@ -35,7 +35,8 @@ export default function HomeHero({ labels }: HomeHeroProps) {
       sx={{
         position:   "relative",
         width:      "100%",
-        height:     { xs: 200, sm: 260, md: 320 },
+        minHeight:  { xs: 200, sm: 260, md: 320 },
+        py:         { xs: 5, sm: 6, md: 8 },
         overflow:   "hidden",
         display:    "flex",
         alignItems: "center",
@@ -62,7 +63,7 @@ export default function HomeHero({ labels }: HomeHeroProps) {
           <Box
             sx={{
               width: "100%",
-              maxWidth: { xs: 160, sm: 200, md: 240 },
+              maxWidth: { xs: 260, sm: 280, md: 320 },
               mx: "auto",
               mb: 2,
               filter: "drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.5))",
@@ -125,7 +126,7 @@ export default function HomeHero({ labels }: HomeHeroProps) {
             {labels.description}
           </Typography>
 
-          <Box sx={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap" }}>
+          <Box sx={{ display: "flex", gap: { xs: 1, sm: 2 }, justifyContent: "center", flexWrap: "wrap" }}>
             <LinkButton
               href="/projects"
               id="hero-search-btn"
@@ -133,7 +134,14 @@ export default function HomeHero({ labels }: HomeHeroProps) {
               size="large"
               startIcon={<SearchIcon />}
               sx={{
-                px: 4, py: 1.5, fontSize: "1rem",
+                px: { xs: 2.5, sm: 4 }, py: 1.5,
+                fontSize: "1rem",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+                "& .MuiButton-startIcon, & .MuiButton-endIcon": {
+                  display: "inline-flex",
+                  alignItems: "center",
+                },
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
                 backdropFilter: "blur(3px)",
@@ -154,7 +162,14 @@ export default function HomeHero({ labels }: HomeHeroProps) {
               size="large"
               endIcon={<ArrowForwardIcon />}
               sx={{
-                px: 4, py: 1.5, fontSize: "1rem",
+                px: { xs: 2.5, sm: 4 }, py: 1.5,
+                fontSize: "1rem",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+                "& .MuiButton-startIcon, & .MuiButton-endIcon": {
+                  display: "inline-flex",
+                  alignItems: "center",
+                },
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
                 backdropFilter: "blur(3px)",
