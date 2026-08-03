@@ -13,6 +13,7 @@ import IdeaStatusControl from "@/components/idea/IdeaStatusControl";
 import ShareMenuButton from "@/components/ui/ShareMenuButton";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import { formatDate } from "@/lib/utils/format";
+import DateTimeTooltip from "@/components/ui/DateTimeTooltip";
 import { Link } from "@/lib/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SITE_URL } from "@/lib/config";
@@ -82,9 +83,11 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
               <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2, "&:hover": { textDecoration: "underline" } }}>
                 {ideaData.authorName}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {formatDate(ideaData.createdAt!)}
-              </Typography>
+              <DateTimeTooltip date={ideaData.createdAt!} placement="bottom">
+                <Typography variant="caption" color="text.secondary" sx={{ cursor: "help" }}>
+                  {formatDate(ideaData.createdAt!)}
+                </Typography>
+              </DateTimeTooltip>
             </Box>
           </Link>
           <Box sx={{ flexGrow: 1 }} />

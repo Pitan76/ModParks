@@ -23,7 +23,7 @@ export const LOADERS_DATA: { id: string; name: string; color: LoaderColor }[] = 
   { id: "liteloader", name: "LiteLoader", color: "warning"   },
   { id: "ornithe",   name: "Ornithe",   color: "secondary" },
   { id: "rift",      name: "Rift",      color: "info"      },
-  { id: "risugami",  name: "Risugami'S ModLoader", color: "warning" },
+  { id: "risugami",  name: "Risugami's ModLoader", color: "warning" },
   { id: "nilloader", name: "NilLoader", color: "default"   },
 ];
 
