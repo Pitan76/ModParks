@@ -46,15 +46,13 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
           border: "1px solid",
           borderColor: "divider",
           borderRadius: 2,
-          transition: "all 0.2s",
+          transition: "border-color 0.2s",
           display: "flex",
           gap: 2,
           alignItems: "flex-start",
           height: "100%",
           "&:hover": {
             borderColor: "primary.main",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-            transform: "translateY(-2px)",
           },
         }}
       >
