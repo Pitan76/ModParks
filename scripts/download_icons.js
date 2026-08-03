@@ -9,8 +9,6 @@ const loaders = {
   quilt: 'https://github.com/QuiltMC.png',
   paper: 'https://github.com/PaperMC.png',
   purpur: 'https://github.com/PurpurMC.png',
-  velocity: 'https://github.com/PaperMC.png',
-  waterfall: 'https://github.com/PaperMC.png',
   cleanroommc: 'https://github.com/CleanroomMC.png',
   babric: 'https://github.com/Babric.png',
   liteloader: 'https://github.com/LiteLoader.png',
