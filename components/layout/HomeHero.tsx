@@ -186,7 +186,7 @@ export default function HomeHero({ labels }: HomeHeroProps) {
           </Box>
 
           <Box sx={{ display: "flex", gap: 1, justifyContent: "center", mt: 4, flexWrap: "wrap" }}>
-            {["Fabric", "Forge", "NeoForge", "Paper", "Spigot", "Quilt", "CleanroomMC", "Babric", "LiteLoader", "Ornithe", "Rift", "Risugami", "NilLoader"].map((l) => {
+            {["Fabric", "Forge", "NeoForge", "Paper", "Spigot", "Quilt"].map((l) => {
               const info = getLoaderInfo(l.toLowerCase());
               return (
                 <Chip
