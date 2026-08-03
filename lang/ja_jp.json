@@ -496,7 +496,8 @@
         "fileRequired": "ファイルを選択してください",
         "fileTooLarge": "ファイルサイズは5MB以下にしてください",
         "uploadFailed": "アップロードに失敗しました",
-        "uploadError": "アップロード中にエラーが発生しました"
+        "uploadError": "アップロード中にエラーが発生しました",
+        "extractFailed": "バージョンは登録されましたが、レシピの抽出に失敗しました: {message}"
       },
       "fileSelect": "ファイルを選択 (.jar, .zip)",
       "parsingJar": "JARファイルを解析中...",
@@ -510,7 +511,8 @@
       "modeUrl": "外部URLを指定",
       "externalUrl": "ダウンロードURL",
       "externalUrlHelper": "GitHub Releases, Modrinth, CurseForge のURLが使用できます",
-      "extractRecipes": "JARからレシピを抽出してアップロード"
+      "extractRecipes": "JARからレシピを抽出してアップロード",
+      "extracting": "レシピを抽出中..."
     },
     "loaders": {
       "fabric": "Fabric",

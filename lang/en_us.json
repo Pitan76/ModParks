@@ -490,7 +490,8 @@
         "fileRequired": "Please select a file",
         "fileTooLarge": "File size must be 5MB or less",
         "uploadFailed": "Failed to upload",
-        "uploadError": "An error occurred during upload"
+        "uploadError": "An error occurred during upload",
+        "extractFailed": "The version was created, but recipe extraction failed: {message}"
       },
       "fileSelect": "Select File (.jar, .zip)",
       "parsingJar": "Parsing JAR file...",
@@ -504,7 +505,8 @@
       "modeUrl": "Specify external URL",
       "externalUrl": "Download URL",
       "externalUrlHelper": "Supports GitHub Releases, Modrinth, and CurseForge URLs",
-      "extractRecipes": "Extract and upload recipes from JAR"
+      "extractRecipes": "Extract and upload recipes from JAR",
+      "extracting": "Extracting recipes..."
     },
     "loaders": {
       "fabric": "Fabric",

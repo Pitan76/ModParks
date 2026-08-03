@@ -18,6 +18,7 @@ import { useState, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
+import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
 import { MC_VERSIONS } from "@/lib/validations";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/utils/modParser";
@@ -59,6 +60,7 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
   const [releaseChannel, setReleaseChannel] = useState<string>(DEFAULT_RELEASE_CHANNEL);
   const [extractRecipes, setExtractRecipes] = useState(true);
   const [parsing, setParsing] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +93,7 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
    * 1. 署名付きURLの取得
    * 2. R2ストレージへのファイルアップロード
    * 3. DBへのバージョン登録 (Server Action)
+   * 4. トグルが有効なら、登録されたバージョンからレシピを抽出
    */
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -115,7 +118,6 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
       mcVersions.forEach(v => formData.append("mcVersions", v));
       loaders.forEach(l => formData.append("loaders", l));
       formData.set("releaseChannel", releaseChannel);
-      formData.set("extractRecipes", extractRecipes ? "true" : "false");
 
       if (uploadMode === "file" && file) {
         if (file.size > FILE_SIZE_LIMIT) {
@@ -141,9 +143,26 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
       if (result && result.error) {
         setError(result.error as { [key: string]: string[] });
         setPending(false);
-      } else {
-        router.push(`/projects/${slug}`);
+        return;
       }
+
+      // バージョン登録後に既存の抽出パスを再利用する。
+      // 失敗してもバージョン自体は作成済みなので、その旨を伝えてこのページに留まる。
+      const versionId = result && "versionId" in result ? result.versionId : null;
+      // トグルはファイルアップロード時のみ表示されるため、抽出もその場合に限る
+      if (extractRecipes && versionId && uploadMode === "file") {
+        setExtracting(true);
+        const extractRes = await extractRecipesFromVersion(versionId, slug);
+        setExtracting(false);
+
+        if ("error" in extractRes && extractRes.error) {
+          setError({ fileUrl: [tVersion("uploadForm.error.extractFailed", { message: extractRes.error })] });
+          setPending(false);
+          return;
+        }
+      }
+
+      router.push(`/projects/${slug}`);
     } catch (err: unknown) {
       console.error(err);
       setError({ fileUrl: [err instanceof Error ? err.message : tVersion("uploadForm.error.uploadError")] });
@@ -312,7 +331,14 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
               {tCommon("cancel")}
             </Button>
             <Button type="submit" variant="contained" disabled={pending || (uploadMode === "file" ? !file : !externalUrl)}>
-              {pending ? <CircularProgress size={24} color="inherit" /> : tVersion("uploadForm.publish")}
+              {pending ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={24} color="inherit" />
+                  {extracting && tVersion("uploadForm.extracting")}
+                </Box>
+              ) : (
+                tVersion("uploadForm.publish")
+              )}
             </Button>
         </Box>
       </Box>
