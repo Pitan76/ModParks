@@ -1,46 +1,39 @@
 # ModParks
-ModParksは、マインクラフト(Minecraft Java Edition)向けのMOD、プラグイン配布プラットフォームです。<br />
-日本発のプラットフォームとして、開発者とプレイヤーがより円滑に作品を共有し、コミュニケーションできる場を提供することを目的としています。
+ModParks(モッドパークス)は、マインクラフト(Minecraft Java Edition)向けのMOD/プラグイン配布プラットフォームです。<br />
+日本発のプラットフォームとして、開発者の不便を減らし、開発者だけでなくプレイヤーもアイデアを出してプロジェクトに参加できる場を目的としています。
 
 - https://modparks.pitan76.net/
-
-<!-- <img width="1301" height="776" alt="image" src="https://github.com/user-attachments/assets/bf7ff7d3-f5fc-47be-b9a9-c506ef1fbb24" /> -->
 
 <img width="2400" height="1600" alt="image" src="https://github.com/user-attachments/assets/db2ef835-b0ab-497c-a4a7-cbf9aefd6fde" />
 
 
 ## 特徴
-- プロジェクトの公開と探索: MODやプラグインを検索、発見、ダウンロード。
-- バージョン管理: バージョンごとのJar/Zipファイルのアップロード、または外部URL（GitHub Releases, Modrinth, CurseForge 等）へのリンク機能。
-- 多言語対応: 日本語と英語の表示切り替え。
-- 認証: 2FA対応の通常ログインとGitHubアカウントを用いたソーシャルログイン。
-- アイデアボード: ユーザーが「こんなMODが欲しい！」を投稿・議論し、実現されたプロジェクトと紐付けられる機能。
+- バージョン管理: バージョンごとのファイルのアップロード、または外部URLへのリンク機能
+- 認証: 2FA対応のパスワードログイン、GitHub/Googleアカウントを用いたソーシャルログイン
+- アイデアボード: ユーザーが欲しい/作りたいMODのアイデアを投稿、議論し、実現されたプロジェクトと紐付けられる機能
 - 記法: Markdown, PlainText, PukiWikiの文法が対応
-- インポートと同期機能: 他のプラットフォームとの連携が強み。インポートはもちろんDL数同期なども
-- レシピ抽出機能: レシピをjarから抽出して一覧として表示する (https://recipe.modparks.pitan76.net/)
-- 絞り込み連動ダウンロード: 検索中のローダー・MCバージョン条件に合う版を、一覧から直接ワンクリックで取得。
+- インポートと同期: 他プラットフォームからのインポート、DL数同期など
+- レシピ抽出: レシピをjarから抽出して一覧として表示する (https://recipe.modparks.pitan76.net/)
+- 絞り込み連動DL: 検索中のローダー、MCバージョンの指定に沿ってバージョンを一覧からカードを右クリックしてDL可能
 
 ## 技術スタック
-- **フレームワーク**: [Next.js](https://nextjs.org/) (App Router, v15)
-- **言語**: TypeScript
-- **スタイリング / UI**: [MUI v6](https://mui.com/)
-- **データベース**: [Cloudflare D1](https://developers.cloudflare.com/d1/)
-- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
-- **ストレージ**: [Cloudflare R2](https://developers.cloudflare.com/r2/)
-- **認証**: [Auth.js (NextAuth v5)](https://authjs.dev/)
-- **多言語化**: [next-intl](https://next-intl-docs.vercel.app/)
-- **実行環境**: Cloudflare Workers
+- 言語: TypeScript
+- フレームワーク: [Next.js](https://nextjs.org/) (App Router, v15)
+- UIライブラリ: [MUI v6](https://mui.com/)
+- 実行環境: Cloudflare Workers
+- データベース: [Cloudflare D1](https://developers.cloudflare.com/d1/)
+- ストレージ: [Cloudflare R2](https://developers.cloudflare.com/r2/)
+- 認証: [Auth.js (NextAuth v5)](https://authjs.dev/)
+- ORM: [Drizzle ORM](https://orm.drizzle.team/)
+- I18n: [next-intl](https://next-intl-docs.vercel.app/)
+- ソーシャルログイン: GitHub, Google
 
 ## ロゴ
-
 <img width="256" height="256" alt="image" src="https://github.com/user-attachments/assets/000b8a58-55f1-4053-8120-d63322a74fbf" />
 
-- M - Minecraft/MOD
-- P - Publish/Plugin
-- S - Search
+- M: Minecraft/MOD, P: Publish/Plugin, S: Search
 
-
-## ローカル開発環境のセットアップ
+## 開発環境
 
 ### 1. 前提条件
 - Node.js (v20以上)
@@ -54,7 +47,11 @@ cd modparks
 
 ### 3. パッケージのインストール
 ```bash
+# npm
 npm install
+
+# bun
+bun install
 ```
 
 ### 4. 環境変数の設定
@@ -67,8 +64,8 @@ AUTH_GITHUB_SECRET="your-github-client-secret"
 RECIPE_CDN_SECRET="your-recipe-cdn-secret" # https://recipe.modparks.pitan76.net/ のAPIにアクセスするためのシークレットキー
 ```
 
-### 5. データベースのセットアップ（ローカルD1）
-ローカル開発用の D1 データベースにマイグレーションを適用します。
+### 5. データベースのセットアップ
+ローカルのD1にマイグレーションを適用します。
 ```bash
 npm run db:generate
 npm run db:migrate:local
@@ -80,8 +77,6 @@ npm run dev
 ```
 
 ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスして確認してください。
-
-※ローカル開発環境では `wrangler.getPlatformProxy` のキャッシュ機構 (`lib/proxy.ts`) によって、Next.jsのホットリロード時にも重いプロキシインスタンスの再起動が防がれ、軽快に動作するよう設計されています。
 
 ## フォルダ構成
 - `app/`: Next.js App Router (ルーティング, Server Components)
@@ -97,12 +92,11 @@ npm run dev
 JAR/ZIP の解析処理は、メインアプリではなく **`modparks-jar` という別 Worker** で動いています。
 
 ### なぜ分けているか
-
-Cloudflare Workers の無料プランには **1 Worker あたり 3072 KiB (gzip)** というスクリプトサイズ上限があり、
+Cloudflare Workers の無料プランには 1 Worker あたり 3072 KiB (gzip) というスクリプトサイズ上限があり、
 本体はここに張り付いています。JAR を開くための `jszip` はサーバーバンドルに
 RSC 用 + SSR 用で複数コピー入るため、単体で 100 KiB 以上を占めていました。
 
-重要なのは、**この問題はアプリを機能ごとに分割しても解決しない**という点です。
+重要なのは、この問題はアプリを機能ごとに分割しても解決しないという点です。
 本体バンドルの約 8 割は Next.js のランタイムであり、admin などを別 Worker に切り出しても
 両方が同じランタイムを丸ごと抱えるだけでサイズは減りません。
 対して素の Worker であるサイドカーはランタイム負担がほぼゼロなので、
@@ -113,7 +107,7 @@ RSC 用 + SSR 用で複数コピー入るため、単体で 100 KiB 以上を占
 | パス | 役割 |
 |---|---|
 | `workers/jar/src/index.ts` | ルーティング (`/parse-mod`, `/extract-recipes`) |
-| `workers/jar/src/parseMod.ts` | JAR からバージョン・ローダー・対応MCバージョンを検出 |
+| `workers/jar/src/parseMod.ts` | jarからバージョン、ローダー、対応MCバージョンを検出 |
 | `workers/jar/src/recipeExtract.ts` | レシピ/タグ/テクスチャ/モデルの抽出 |
 | `workers/jar/src/recipeUpload.ts` | レシピCDNへの bulk 送出、または R2 への直接書き込み |
 | `workers/jar/src/types.ts` | 入出力の型定義。**実装や依存を一切含まない** |
@@ -144,12 +138,12 @@ npx wrangler deploy
 npx wrangler secret put RECIPE_CDN_SECRET
 ```
 
-## プッシュ通知 (PWA / Web Push)
+## プッシュ通知
 
 アプリ内通知（`dispatchNotifications`）に相乗りして、ブラウザ/ホーム画面アプリへ Web Push を配信します。種別ごとの受信可否は既存の通知設定（`notificationPrefs`）を尊重し、端末単位の ON/OFF は設定 →「通知」タブのトグルで行います。
 
 - 本文暗号化（RFC 8291 aes128gcm）と VAPID 署名（RFC 8292）は Node crypto 依存の `web-push` が Workers で動かないため、`workers/push`（`modparks-push`）サイドカーに Web Crypto 実装として隔離しています。
-- **iPhone/iPad はホーム画面に追加した PWA でのみ**プッシュを受信できます（iOS 16.4+、Safari のタブ状態では不可）。
+- iPhone/iPad はホーム画面に追加したPWAでのみプッシュを受信できます（iOS 16.4+、Safari のタブ状態では不可）。
 
 ### セットアップ
 
@@ -182,45 +176,5 @@ npx wrangler secret put RECIPE_CDN_SECRET
 VAPID が未設定の場合、Web Push はスキップされアプリ内通知だけが動きます。ローカル開発では `wrangler dev` のシークレット供給（`.dev.vars`）に同じ値を入れてください。
 
 ## 右クリックメニュー
-
-`components/ui/ContextMenu/` に、右クリックで独自コンテキストメニューを出す基盤があります（Chrome のネイティブメニューを妨害しない設計）。詳細・使い方はそちらの 
-
-配線済み: `ProjectCard` / `ProjectVersionsTable`（バージョン行・モバイルカード） / `CollectionCard` / `IdeaCard`。
-
-### 今後増やせる箇所（候補）
-- **プロフィール / ユーザー行** - フォロー・プロフィールコピー
-- **通知アイテム** - 既読・該当ページへ
-- **プロジェクトコメント / アイデアコメント** - 返信・リンクコピー・報告
-- **依存関係リスト・タグ Chip** - そのタグで絞り込み
-- **プロジェクト詳細ヘッダー** - お気に入り・購読・共有
-
-いずれも `useContextMenu` + `useCommonItems` で数行。owner限定操作は `items` の関数形式 `(target) => [...]` で出し分ける。
-
-## メモ
-なるべく無料で運用するためにCloudflare Workers圧縮後3MBのスクリプトサイズ制限を守ったメモ (以下AI執筆あり)
-（正直、jar, push, authをメインから分岐してサイドカーに持っていったりしたが, やっぱ限界が来たので）
-
-当初は依存ライブラリの削減を疑い、`jszip` の分離や `unenv` の削減、`@mui/icons-material` の最適化、Dynamic Import などを実施したが、大きな改善は得られなかった。
-
-次に、SSR を減らせば Worker サイズも減ると考え、設定画面などを **SSR → SSG + API** 構成へ変更する実験を行った。しかし、実際の削減量は約 **13KB** に留まり、OpenNext のバンドルは一部ページを静的化しただけではほとんど小さくならないことが分かった。
-
-さらに、Cloudflare Workers を維持するために「完全SPA化」や「Pages + API Worker 分離」などのアーキテクチャ変更も検討したが、ModParks は検索流入や SNS シェアを重視するサービスであるため、**SEO や動的 OGP を失うことは許容できない**と判断し、大規模なリファクタリングは見送った。
-
-最終的には、OpenNext のビルド設定を詳しく調査し、
-
-* サーバーサイド Source Map の無効化
-* `wrangler deploy --minify` の適用
-
-というデプロイ設定の最適化を実施した。
-
-その結果、`wrangler deploy --dry-run --minify` による測定では、
-
-* **変更前:** gzip 約 **3071 KiB**
-* **変更後:** gzip 約 **2693 KiB**
-
-となり、**約379 KiB の余裕**を確保した状態で Cloudflare Workers 無料プランへデプロイできるようになった。(普通にこんな変わるとは思わんかった)
-
-この対応により、**SSR・Server Actions・動的 OGP・SEO・多言語対応（next-intl）を一切犠牲にすることなく**、無料プランでの運用を継続できた。
-
-今回の経験を通じて、「思い込みで設計変更する」のではなく、**実際にビルドサイズを測定し、仮説と検証を繰り返しながら問題を切り分ける重要性**を学んだ。(いやminifyを追加するだけでこうなるとは思わんかった。どうせ追加しても...って思ってたから最初からやることさぼってたのがよくない)
-
+カードやサイドバーなどで右クリックすることで独自のコンテキストメニューを表示します。<br>
+オフにしたい場合はコンテキストメニューから、または設定から変更可能です。
