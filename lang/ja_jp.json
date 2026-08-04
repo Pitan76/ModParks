@@ -739,7 +739,8 @@
       "config": "システム設定",
       "backup": "バックアップ",
       "audit": "監査ログ",
-      "recipe": "レシピ管理"
+      "recipe": "レシピ管理",
+      "scans": "スキャンログ"
     },
     "recipe": {
       "title": "レシピ管理",
@@ -805,7 +806,21 @@
       "reviewed": {
         "approved": "{name} の異議を承認しました。",
         "rejected": "{name} の異議を却下しました。"
-      }
+      },
+      "filters": {
+        "pending": "保留中",
+        "approved": "承認済み",
+        "rejected": "却下",
+        "all": "すべて"
+      },
+      "status": {
+        "pending": "保留中",
+        "approved": "承認",
+        "rejected": "却下"
+      },
+      "reviewedBy": "裁定: {name}（{date}）",
+      "unknownReviewer": "退会済みの管理者",
+      "reviewNote": "コメント: {note}"
     },
     "users": {
       "title": "ユーザー管理",
@@ -1127,6 +1142,29 @@
       "status": "ステータス",
       "detail": "詳細",
       "noLogs": "ログ履歴はありません。"
+    },
+    "scans": {
+      "listTitle": "スキャンログ",
+      "description": "jar ヒューリスティック検査の結果一覧です。判定と検出内容、異議申請の有無を確認できます。",
+      "filters": {
+        "all": "すべて",
+        "pending": "未スキャン",
+        "clean": "問題なし",
+        "suspicious": "疑わしい",
+        "malicious": "悪質",
+        "skipped": "対象外"
+      },
+      "columns": {
+        "version": "バージョン",
+        "status": "判定",
+        "findings": "検出内容",
+        "scannedAt": "スキャン日時",
+        "appeal": "異議"
+      },
+      "topFindings": "よく当たっているルール（直近500件）",
+      "notScanned": "未実施",
+      "noFindings": "検出なし",
+      "empty": "該当するスキャン結果はありません。"
     }
   },
   "Search": {

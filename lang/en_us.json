@@ -731,7 +731,8 @@
       "config": "Config",
       "backup": "Backup",
       "audit": "Audit Logs",
-      "recipe": "Recipe Management"
+      "recipe": "Recipe Management",
+      "scans": "Scan logs"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -797,7 +798,21 @@
       "reviewed": {
         "approved": "Approved the appeal for {name}.",
         "rejected": "Rejected the appeal for {name}."
-      }
+      },
+      "filters": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "all": "All"
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "reviewedBy": "Reviewed by {name} ({date})",
+      "unknownReviewer": "a deleted admin",
+      "reviewNote": "Note: {note}"
     },
     "users": {
       "title": "User Management",
@@ -1119,6 +1134,29 @@
       "status": "Status",
       "detail": "Detail",
       "noLogs": "No audit logs found."
+    },
+    "scans": {
+      "listTitle": "Scan logs",
+      "description": "Results of the jar heuristic scan: verdicts, findings, and whether an appeal was filed.",
+      "filters": {
+        "all": "All",
+        "pending": "Not scanned",
+        "clean": "Clean",
+        "suspicious": "Suspicious",
+        "malicious": "Malicious",
+        "skipped": "Skipped"
+      },
+      "columns": {
+        "version": "Version",
+        "status": "Verdict",
+        "findings": "Findings",
+        "scannedAt": "Scanned at",
+        "appeal": "Appeal"
+      },
+      "topFindings": "Most frequent rules (last 500)",
+      "notScanned": "Not scanned",
+      "noFindings": "None",
+      "empty": "No scan results match this filter."
     }
   },
   "Search": {
