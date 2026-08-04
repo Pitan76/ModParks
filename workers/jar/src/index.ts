@@ -71,9 +71,41 @@ async function handleScanJar(req: Request, env: JarWorkerEnv): Promise<ScanJarRe
   return scanJar(arrayBuffer);
 }
 
+/**
+ * @param req リクエストオブジェクト
+ * @param env 環境変数
+ * @returns 抽出結果
+ */
+async function handleExtractRecipesBinary(
+  req: Request,
+  env: JarWorkerEnv
+): Promise<ExtractRecipesResult> {
+  const cdnUrl = req.headers.get("X-CDN-Url");
+  if (!cdnUrl) throw new Error("Missing X-CDN-Url header");
+
+  const useCdnApi = req.headers.get("X-Use-CDN-Api") === "true";
+  const token = req.headers.get("X-Token") || undefined;
+  const buildHeader = req.headers.get("X-Build");
+  const build = buildHeader ? JSON.parse(buildHeader) : undefined;
+
+  const arrayBuffer = await req.arrayBuffer();
+  const { byNs, namespaces, craftingRecipes } = await extractRecipes(arrayBuffer);
+
+  if (useCdnApi) {
+    const resolved = await resolveBuildInfo(arrayBuffer, build);
+    const count = await uploadViaCdn(byNs, cdnUrl, env.RECIPE_CDN_SECRET, resolved, token);
+    return { count, namespaces, mcVersions: resolved.mcVersions };
+  }
+
+  const count = await uploadDirectToR2(byNs, env.modparks_storage);
+  await updateRecipeIndex(env.modparks_storage, craftingRecipes);
+  return { count, namespaces };
+}
+
 const ROUTES: Record<string, (req: Request, env: JarWorkerEnv) => Promise<unknown>> = {
   "/parse-mod": handleParseMod,
   "/extract-recipes": handleExtractRecipes,
+  "/extract-recipes-binary": handleExtractRecipesBinary,
   "/scan-jar": handleScanJar,
 };
 
