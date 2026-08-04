@@ -74,9 +74,12 @@ export async function issueIdToken(claims: IdTokenClaims): Promise<string> {
   return `${signingInput}.${base64Url(new Uint8Array(signature))}`;
 }
 
-/** JWKS で配る公開鍵。秘密パラメータ d は必ず落とす */
+/**
+ * JWKS で配る公開鍵。
+ * 秘密鍵 JWK から差分で削るのではなく、公開に必要な項目だけを明示して組み直す。
+ * 削り忘れが即そのまま鍵の漏洩になるため、許可リスト側に倒している。
+ */
 export async function getPublicJwks() {
-  const jwk = await readPrivateJwk() as PrivateJwk & { d?: string };
-  delete jwk.d;
-  return { keys: [{ ...jwk, alg: ALG, use: "sig" }] };
+  const { kty, crv, x, y, kid } = await readPrivateJwk() as PrivateJwk & { crv?: string; x?: string; y?: string };
+  return { keys: [{ kty, crv, x, y, kid, alg: ALG, use: "sig" }] };
 }

@@ -85,11 +85,19 @@ Cloudflare のシークレットに `OAUTH_ID_TOKEN_KEY` として JSON 文字�
 （`kid` を含めておくと鍵の入れ替えが楽になります）。
 未設定でもアクセストークンの発行は動きますが、`id_token` は付きません。
 
-鍵の生成例:
+鍵の生成と登録:
 
-```js
-const { publicKey, privateKey } = await crypto.subtle.generateKey(
-  { name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]
-);
-JSON.stringify({ ...await crypto.subtle.exportKey("jwk", privateKey), kid: "2026-08" });
+```bash
+# 秘密鍵 JWK を1行で出力する（画面に出た値がそのままシークレットの中身）
+node scripts/generate-oauth-key.mjs
+
+# 本番へ登録（プロンプトに上の出力を貼る）
+npx wrangler secret put OAUTH_ID_TOKEN_KEY
+
+# ローカル開発は .dev.vars に
+# OAUTH_ID_TOKEN_KEY={"kty":"EC",...}
 ```
+
+公開鍵は秘密鍵から導出して `/api/oauth/jwks` が配るため、別途登録する必要はありません。
+鍵を入れ替えると、それまでに発行した `id_token` は検証できなくなります
+（アクセストークンには影響しません）。
