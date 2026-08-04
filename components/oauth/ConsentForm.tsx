@@ -12,7 +12,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import { approveAuthorization, denyAuthorization } from "@/lib/actions/oauthConsent";
 
@@ -78,7 +78,7 @@ export default function ConsentForm({ rawQuery, scopes, accountName, client }: C
       <List dense disablePadding>
         {scopes.map((scope) => (
           <ListItem key={scope} disableGutters>
-            <ListItemIcon sx={{ minWidth: 32 }}><CheckCircleOutlineIcon fontSize="small" color="success" /></ListItemIcon>
+            <ListItemIcon sx={{ minWidth: 32 }}><CheckCircleOutlinedIcon fontSize="small" color="success" /></ListItemIcon>
             <ListItemText primary={t(`scopes.${scope}` as never)} />
           </ListItem>
         ))}
