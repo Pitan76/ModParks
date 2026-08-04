@@ -55,7 +55,6 @@ export type ProjectFormFieldsProps = {
 const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense, defaultBodyFormat, children }: ProjectFormFieldsProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Project");
-  const tTags = useTranslations("Tags");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
   
   const { links, addLink, removeLink, changeLink, moveLink } = useLinksEditor(project?.links);

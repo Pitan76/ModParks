@@ -56,7 +56,6 @@ const AdvancedSearchDialog = ({
   availablePlatforms = []
 }: AdvancedSearchDialogProps) => {
   const t = useTranslations("Search");
-  const tTags = useTranslations("Tags");
 
   const [tempAuthor, setTempAuthor] = useState<string>(initialFilters.author || "");
   const [tempLoaders, setTempLoaders] = useState<string[]>(initialFilters.loaders);
