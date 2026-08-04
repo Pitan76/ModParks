@@ -22,16 +22,29 @@ export interface ParseModRequest {
   source: JarSource;
 }
 
+/** 取り込み結果を build として確定させるための素性。 */
+export interface ExtractBuildInfo {
+  /** 対象 MC バージョン。省略時は JAR の依存宣言から推定する */
+  mcVersions?: string[];
+  modVersion?: string | null;
+  loader?: string | null;
+}
+
 export interface ExtractRecipesRequest {
   source: JarSource;
   cdnUrl: string;
   /** true なら CDN の bulk API へ、false ならバインディング経由で R2 へ直接書く */
   useCdnApi: boolean;
+  /** ネームスペース単位の書き込みトークン。外部投稿の経路で使う。省略時は共有シークレット */
+  token?: string;
+  build?: ExtractBuildInfo;
 }
 
 export interface ExtractRecipesResult {
   count: number;
   namespaces: string[];
+  /** 確定した build の対象 MC バージョン（build を作らなかった場合は空） */
+  mcVersions?: string[];
 }
 
 /**

@@ -1,4 +1,5 @@
 import type { NsBucket, RecipeSummary } from "./recipeExtract";
+import type { ExtractBuildInfo } from "./types";
 
 /** エントリ数と（任意で）バイト数を上限にレコードを分割する */
 function chunkRecord(
@@ -34,10 +35,14 @@ function chunkRecord(
 export async function uploadViaCdn(
   byNs: Record<string, NsBucket>,
   cdnUrl: string,
-  cdnSecret: string | undefined
+  cdnSecret: string | undefined,
+  build?: ExtractBuildInfo,
+  token?: string
 ): Promise<number> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (cdnSecret) headers["Authorization"] = `Bearer ${cdnSecret}`;
+  // トークンが来ていれば所有権つきの経路。共有シークレットは ModParks 自身の取り込み用
+  const auth = token || cdnSecret;
+  if (auth) headers["Authorization"] = `Bearer ${auth}`;
 
   const entries = Object.entries(byNs);
 
@@ -46,7 +51,7 @@ export async function uploadViaCdn(
   // セッションを開けなかった ns はセッション無し（従来動作）にフォールバックする。
   const sessions = new Map<string, string>();
   for (const [ns] of entries) {
-    const session = await beginSession(cdnUrl, ns, headers);
+    const session = await beginSession(cdnUrl, ns, headers, build);
     if (session) sessions.set(ns, session);
   }
 
@@ -102,13 +107,22 @@ export async function uploadViaCdn(
 async function beginSession(
   cdnUrl: string,
   ns: string,
-  headers: Record<string, string>
+  headers: Record<string, string>,
+  build?: ExtractBuildInfo
 ): Promise<string | null> {
+  // 対象 MC バージョンを渡したセッションだけが build として確定する。
+  // 渡さなければ CDN 側は従来どおりフラットに上書きするだけで、挙動は変わらない。
+  const body = JSON.stringify({
+    mcVersions: build?.mcVersions ?? [],
+    modVersion: build?.modVersion ?? null,
+    loader: build?.loader ?? null,
+    source: "jar",
+  });
   try {
-    const res = await fetch(`${cdnUrl}/api/${ns}/ingest/begin`, { method: "POST", headers });
+    const res = await fetch(`${cdnUrl}/api/${ns}/ingest/begin`, { method: "POST", headers, body });
     if (!res.ok) return null;
-    const body = (await res.json()) as { session?: string };
-    return body.session ?? null;
+    const started = (await res.json()) as { session?: string };
+    return started.session ?? null;
   } catch {
     return null;
   }

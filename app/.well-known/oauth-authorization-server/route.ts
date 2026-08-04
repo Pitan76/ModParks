@@ -1,5 +1,11 @@
 /**
- * RFC 8414 の認可サーバーメタデータ。
- * 中身は OIDC ディスカバリと同一なので、そちらの実装をそのまま公開する。
+ * RFC 8414 の認可サーバーメタデータ。内容は OIDC ディスカバリと同一。
  */
-export { GET } from "../openid-configuration/route";
+import { NextResponse } from "next/server";
+import { buildAuthorizationServerMetadata } from "@/lib/oauth/metadata";
+
+export async function GET() {
+  return NextResponse.json(buildAuthorizationServerMetadata(), {
+    headers: { "Cache-Control": "public, max-age=3600" },
+  });
+}

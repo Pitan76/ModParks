@@ -11,6 +11,7 @@ import type {
   ParsedModInfo,
   ScanJarRequest,
   ScanJarResult,
+  ExtractBuildInfo,
 } from "./types";
 
 const json = (body: unknown, status = 200) =>
@@ -29,18 +30,39 @@ async function handleExtractRecipes(
   req: Request,
   env: JarWorkerEnv
 ): Promise<ExtractRecipesResult> {
-  const { source, cdnUrl, useCdnApi } = (await req.json()) as ExtractRecipesRequest;
+  const { source, cdnUrl, useCdnApi, token, build } = (await req.json()) as ExtractRecipesRequest;
   const arrayBuffer = await resolveJarSource(source, env);
   const { byNs, namespaces, craftingRecipes } = await extractRecipes(arrayBuffer);
 
   if (useCdnApi) {
-    const count = await uploadViaCdn(byNs, cdnUrl, env.RECIPE_CDN_SECRET);
-    return { count, namespaces };
+    const resolved = await resolveBuildInfo(arrayBuffer, build);
+    const count = await uploadViaCdn(byNs, cdnUrl, env.RECIPE_CDN_SECRET, resolved, token);
+    return { count, namespaces, mcVersions: resolved.mcVersions };
   }
 
   const count = await uploadDirectToR2(byNs, env.modparks_storage);
   await updateRecipeIndex(env.modparks_storage, craftingRecipes);
   return { count, namespaces };
+}
+
+/**
+ * build の素性を決める。呼び出し側の指定を優先し、無い項目だけ JAR の宣言から補う。
+ *
+ * ModParks 経由では version レコードが正で、外部投稿では JAR しか手がかりが無い。
+ * 両方を同じ経路に載せるため、ここで一度だけ突き合わせる。
+ */
+async function resolveBuildInfo(
+  arrayBuffer: ArrayBuffer,
+  requested: ExtractBuildInfo | undefined
+): Promise<ExtractBuildInfo> {
+  if (requested?.mcVersions?.length && requested.modVersion) return requested;
+
+  const parsed = await parseModJar(arrayBuffer).catch(() => null);
+  return {
+    mcVersions: requested?.mcVersions?.length ? requested.mcVersions : parsed?.detectedMcVersions ?? [],
+    modVersion: requested?.modVersion ?? parsed?.detectedVersion ?? null,
+    loader: requested?.loader ?? parsed?.detectedLoaders?.[0] ?? null,
+  };
 }
 
 async function handleScanJar(req: Request, env: JarWorkerEnv): Promise<ScanJarResult> {
