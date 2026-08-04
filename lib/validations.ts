@@ -91,12 +91,9 @@ export const createVersionSchema = z.object({
     .min(1)
     .max(32)
     .regex(/^[0-9a-zA-Z.\-+]+$/, "バージョン番号の形式が不正です"),
-  mcVersions: z
-    .array(z.enum(MC_VERSIONS))
-    .min(1, "Minecraftバージョンを1つ以上選択してください"),
-  loaders: z
-    .array(z.string())
-    .min(1, "ローダーを1つ以上選択してください"),
+  // リソースパック/データパック等はローダーやMCバージョンを持たないため任意
+  mcVersions: z.array(z.enum(MC_VERSIONS)).default([]),
+  loaders: z.array(z.string()).default([]),
   changelog: z.string().max(10000).optional().or(z.literal("")),
   releaseChannel: z.enum(RELEASE_CHANNELS).default(DEFAULT_RELEASE_CHANNEL),
 });
@@ -110,14 +107,8 @@ export const updateVersionSchema = createVersionSchema.partial().extend({
     .max(32)
     .regex(/^[0-9a-zA-Z.\-+]+$/, "バージョン番号の形式が不正です")
     .optional(),
-  mcVersions: z
-    .array(z.enum(MC_VERSIONS))
-    .min(1, "Minecraftバージョンを1つ以上選択してください")
-    .optional(),
-  loaders: z
-    .array(z.string())
-    .min(1, "ローダーを1つ以上選択してください")
-    .optional(),
+  mcVersions: z.array(z.enum(MC_VERSIONS)).optional(),
+  loaders: z.array(z.string()).optional(),
   fileUrl: z.string().url("有効なURLを入力してください").optional(),
 });
 

@@ -12,6 +12,7 @@ import { notifyNewVersion } from "@/lib/notifications/notify";
 import { channelFromGithubPrerelease } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/services/jar";
 import { scanVersionFile } from "@/lib/actions/versionScan";
+import { isAllowedExternalUrl } from "@/lib/validations";
 import {
   fetchGithubReleases,
   fetchLatestGithubRelease,
@@ -19,12 +20,19 @@ import {
   downloadGithubAsset,
   normalizeGithubRepo,
   type GithubRelease,
+  type GithubReleaseAsset,
+  type GithubImportMode,
 } from "@/lib/utils/github";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { getRepoAccessToken } from "@/lib/utils/githubRepoAccess";
 
 /** Worker のメモリ制約を踏まえたダウンロード/解析の上限 */
 const MAX_ASSET_SIZE = 50 * 1024 * 1024; // 50MB
+
+type ImportResult = { success: true; versionId: string; versionNumber: string } | { error: string };
+
+/** 取り込んだファイルの所在。R2 に置いた場合のみ key を持つ */
+type ImportedFile = { fileUrl: string; fileSize: number | null; fileSha256: string | null; r2Key?: string };
 
 function stripVPrefix(tag: string): string {
   return tag.replace(/^v/i, "").trim();
@@ -66,6 +74,64 @@ export async function listGithubReleases(projectSlug: string): Promise<
   }
 }
 
+/** 取り込み対象の Release を決定する。prefetch 済みならそれを優先する */
+async function resolveRelease(
+  repo: string,
+  releaseId?: number,
+  prefetchedRelease?: GithubRelease | null,
+  repoToken?: string
+): Promise<GithubRelease | null> {
+  if (prefetchedRelease !== undefined) return prefetchedRelease;
+  if (releaseId != null) {
+    const all = await fetchGithubReleases(repo, repoToken);
+    return all.find((r) => r.id === releaseId) ?? null;
+  }
+  return fetchLatestGithubRelease(repo, repoToken);
+}
+
+/** アセットをダウンロードして R2 へ格納する */
+async function storeAssetToR2(
+  projectSlug: string,
+  asset: GithubReleaseAsset,
+  repoToken?: string
+): Promise<ImportedFile | { error: string }> {
+  if (asset.size > MAX_ASSET_SIZE) {
+    return { error: `Asset is too large to import (max ${MAX_ASSET_SIZE / 1024 / 1024}MB).` };
+  }
+
+  let arrayBuffer: ArrayBuffer;
+  try {
+    arrayBuffer = await downloadGithubAsset(asset, repoToken);
+  } catch (e: any) {
+    return { error: e?.message || "Failed to download release asset." };
+  }
+
+  const safeFileName = asset.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const key = buildR2Key("mod", projectSlug, `${createId()}/${safeFileName}`);
+  const contentType = asset.name.toLowerCase().endsWith(".zip")
+    ? "application/zip"
+    : "application/java-archive";
+
+  try {
+    const fileSha256 = await sha256Hex(arrayBuffer);
+    const bucket = await getR2Bucket();
+    await uploadToR2(bucket, key, arrayBuffer, contentType);
+    return { fileUrl: getR2PublicUrl(key), fileSize: asset.size, fileSha256, r2Key: key };
+  } catch (e: any) {
+    return { error: e?.message || "Failed to store the release file." };
+  }
+}
+
+/**
+ * アセットを取り込まず、GitHub の配布 URL をそのまま外部リンクとして使う。
+ * 非公開リポジトリの URL は誰も辿れないため、この方式は公開リポジトリ限定。
+ */
+function linkToAsset(asset: GithubReleaseAsset): ImportedFile | { error: string } {
+  const url = asset.browser_download_url;
+  if (!url || !isAllowedExternalUrl(url)) return { error: "The release asset URL is not an allowed external URL." };
+  return { fileUrl: url, fileSize: asset.size, fileSha256: null };
+}
+
 /**
  * 内部システム用のインポート関数（セッション・権限チェックなし）。Webhook等から使用する。
  */
@@ -75,22 +141,15 @@ export async function importGithubReleaseSystem(
   releaseId?: number,
   prefetchedRelease?: GithubRelease | null,
   /** 非公開リポジトリを扱う場合に必要な GitHub App の installation token */
-  repoToken?: string
-): Promise<{ success: true; versionId: string; versionNumber: string } | { error: string }> {
+  repoToken?: string,
+  mode: GithubImportMode = "file"
+): Promise<ImportResult> {
   const repo = project.githubRepo ? normalizeGithubRepo(project.githubRepo) : null;
   if (!repo) return { error: "No valid GitHub repository linked to this project." };
 
-  // 対象 Release を決定
   let release: GithubRelease | null = null;
   try {
-    if (prefetchedRelease !== undefined) {
-      release = prefetchedRelease;
-    } else if (releaseId != null) {
-      const all = await fetchGithubReleases(repo, repoToken);
-      release = all.find((r) => r.id === releaseId) ?? null;
-    } else {
-      release = await fetchLatestGithubRelease(repo, repoToken);
-    }
+    release = await resolveRelease(repo, releaseId, prefetchedRelease, repoToken);
   } catch (e: any) {
     return { error: e?.message || "Failed to fetch GitHub release." };
   }
@@ -98,40 +157,17 @@ export async function importGithubReleaseSystem(
 
   const asset = pickPrimaryAsset(release);
   if (!asset) return { error: "No downloadable .jar/.zip asset found in the release." };
-  if (asset.size > MAX_ASSET_SIZE) {
-    return { error: `Asset is too large to import (max ${MAX_ASSET_SIZE / 1024 / 1024}MB).` };
-  }
 
-  // ダウンロード
-  let arrayBuffer: ArrayBuffer;
-  try {
-    arrayBuffer = await downloadGithubAsset(asset, repoToken);
-  } catch (e: any) {
-    return { error: e?.message || "Failed to download release asset." };
-  }
+  // R2 へのアップロードを解析より先に行うのは、非公開リポジトリのアセット URL を
+  // jar Worker 側から取得できない（トークンを持たない）ため。
+  // R2 キー経由なら公開/非公開を問わず解析できる。
+  const stored = mode === "link" ? linkToAsset(asset) : await storeAssetToR2(project.slug, asset, repoToken);
+  if ("error" in stored) return stored;
 
-  // R2 へアップロード。
-  // 解析より先に置くのは、非公開リポジトリのアセット URL を jar Worker 側から
-  // 取得できない（トークンを持たない）ため。R2 キー経由なら公開/非公開を問わず解析できる。
-  const safeFileName = asset.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const key = buildR2Key("mod", project.slug, `${createId()}/${safeFileName}`);
-  const contentType = asset.name.toLowerCase().endsWith(".zip")
-    ? "application/zip"
-    : "application/java-archive";
-
-  let fileSha256 = "";
-  try {
-    fileSha256 = await sha256Hex(arrayBuffer);
-    const bucket = await getR2Bucket();
-    await uploadToR2(bucket, key, arrayBuffer, contentType);
-  } catch (e: any) {
-    return { error: e?.message || "Failed to store the release file." };
-  }
-
-  // 解析。Service Binding 越しに巨大なバイト列を渡さず、R2 キーを渡して Worker 側に取得させる
+  // 解析。Service Binding 越しに巨大なバイト列を渡さず、所在だけを Worker に渡す
   let parsed = { detectedVersion: "", detectedLoaders: [] as string[], detectedMcVersions: [] as string[] };
   try {
-    parsed = await parseModJar({ kind: "r2", key });
+    parsed = await parseModJar(stored.r2Key ? { kind: "r2", key: stored.r2Key } : { kind: "url", url: stored.fileUrl });
   } catch {
     // 解析失敗時はタグ名などのフォールバックで続行
   }
@@ -147,10 +183,12 @@ export async function importGithubReleaseSystem(
     .where(and(eq(versions.projectId, project.id), eq(versions.versionNumber, versionNumber)))
     .get();
   if (existing) {
-    try {
-      await deleteFromR2(await getR2Bucket(), key);
-    } catch (e: unknown) {
-      console.error("Failed to clean up R2 object after duplicate version:", e);
+    if (stored.r2Key) {
+      try {
+        await deleteFromR2(await getR2Bucket(), stored.r2Key);
+      } catch (e: unknown) {
+        console.error("Failed to clean up R2 object after duplicate version:", e);
+      }
     }
     return { error: `Version '${versionNumber}' has already been imported.` };
   }
@@ -163,10 +201,10 @@ export async function importGithubReleaseSystem(
     loaders: parsed.detectedLoaders,
     changelog: release.body || "",
     releaseChannel: channelFromGithubPrerelease(release.prerelease),
-    fileUrl: getR2PublicUrl(key),
+    fileUrl: stored.fileUrl,
     fileName: asset.name,
-    fileSize: asset.size,
-    fileSha256,
+    fileSize: stored.fileSize,
+    fileSha256: stored.fileSha256,
     projectId: project.id,
   });
 
@@ -176,7 +214,7 @@ export async function importGithubReleaseSystem(
   const fullProject = await db.select().from(projects).where(eq(projects.id, project.id)).get();
   if (fullProject) {
     after(async () => {
-      await scanVersionFile(db, id, getR2PublicUrl(key), asset.name);
+      await scanVersionFile(db, id, stored.fileUrl, asset.name);
       await notifyNewVersion(db, fullProject, versionNumber);
     });
   }
@@ -188,11 +226,13 @@ export async function importGithubReleaseSystem(
 /**
  * 連携している GitHub リポジトリの Release から新しいバージョンを取り込む。
  * releaseId 未指定なら最新の安定版 Release を対象とする。
+ * mode が `link` の場合はファイルを保管せず、GitHub の配布 URL を外部リンクとして登録する。
  */
 export async function importGithubRelease(
   projectSlug: string,
-  releaseId?: number
-): Promise<{ success: true; versionId: string; versionNumber: string } | { error: string }> {
+  releaseId?: number,
+  mode: GithubImportMode = "file"
+): Promise<ImportResult> {
   const { db, session } = await getAuthenticatedDb();
 
   const project = await findProjectPostBySlug(db, projectSlug);
@@ -200,5 +240,5 @@ export async function importGithubRelease(
   await assertProjectAccess(db, project, session);
 
   const repoToken = await getRepoAccessToken(db, project.authorId, project.githubRepo ?? "");
-  return importGithubReleaseSystem(db, project, releaseId, undefined, repoToken);
+  return importGithubReleaseSystem(db, project, releaseId, undefined, repoToken, mode);
 }

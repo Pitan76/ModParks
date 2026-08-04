@@ -178,6 +178,7 @@ const EditVersionDialog = ({
           label={t("fields.mcVersions")}
           error={!!editError?.mcVersions}
           helperText={editError?.mcVersions?.[0]}
+          required={false}
         />
 
         <LoaderAutocomplete
@@ -187,6 +188,7 @@ const EditVersionDialog = ({
           label={t("fields.loaders")}
           error={!!editError?.loaders}
           helperText={editError?.loaders?.[0]}
+          required={false}
         />
 
         <FormTextField

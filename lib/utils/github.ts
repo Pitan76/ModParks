@@ -25,6 +25,13 @@ export interface GithubRelease {
   assets: GithubReleaseAsset[];
 }
 
+/**
+ * Release の取り込み方式。
+ * - `file`: アセットを ModParks（R2）へ取り込み、自前で配信する
+ * - `link`: アセットを取り込まず、GitHub の配布 URL を外部リンクとして登録する
+ */
+export type GithubImportMode = "file" | "link";
+
 const GITHUB_API = "https://api.github.com";
 
 /** "owner/repo" や GitHub の URL からリポジトリ識別子を正規化する */

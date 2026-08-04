@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { deleteVersion, setVersionArchived } from "@/lib/actions/version";
 import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
 import { importGithubRelease } from "@/lib/actions/github";
+import type { GithubImportMode } from "@/lib/utils/github";
 import { normalizeReleaseChannel } from "@/lib/releaseChannels";
 import type { PreviousVersionSettings } from "./PreviousVersionSettings";
 
@@ -81,11 +82,11 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [searchParams, localVersions, pathname, router]);
 
-  const handleImportGithub = async () => {
+  const handleImportGithub = async (mode: GithubImportMode = "file") => {
     setImporting(true);
     setImportMsg(null);
     try {
-      const res = await importGithubRelease(projectSlug);
+      const res = await importGithubRelease(projectSlug, undefined, mode);
       if ("error" in res) {
         setImportMsg({ text: res.error, severity: "error" });
       } else {

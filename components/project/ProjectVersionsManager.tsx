@@ -4,8 +4,17 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import AddIcon from "@mui/icons-material/Add";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import LinkIcon from "@mui/icons-material/Link";
+import { useState } from "react";
+import type { GithubImportMode } from "@/lib/utils/github";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import { useTranslations } from "next-intl";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
@@ -40,6 +49,12 @@ const ProjectVersionsManager = ({
   const tCommon = useTranslations("Common");
   const t = useTranslations("Version");
   const m = useVersionsManager(projectSlug, initialVersions);
+  const [importAnchor, setImportAnchor] = useState<HTMLElement | null>(null);
+
+  const handleImportSelect = (mode: GithubImportMode) => {
+    setImportAnchor(null);
+    m.handleImportGithub(mode);
+  };
 
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
@@ -59,15 +74,28 @@ const ProjectVersionsManager = ({
           sx={{ width: { xs: "100%", md: "auto" }, alignItems: { xs: "stretch", sm: "center" }, flexShrink: 0 }}
         >
           {githubRepo && (
-            <Button
-              variant="outlined"
-              startIcon={<GitHubIcon />}
-              onClick={m.handleImportGithub}
-              disabled={m.importing}
-              sx={{ whiteSpace: "nowrap" }}
-            >
-              {m.importing ? t("manager.importing") : t("manager.importGithub")}
-            </Button>
+            <>
+              <Button
+                variant="outlined"
+                startIcon={<GitHubIcon />}
+                endIcon={<ArrowDropDownIcon />}
+                onClick={(e) => setImportAnchor(e.currentTarget)}
+                disabled={m.importing}
+                sx={{ whiteSpace: "nowrap" }}
+              >
+                {m.importing ? t("manager.importing") : t("manager.importGithub")}
+              </Button>
+              <Menu anchorEl={importAnchor} open={!!importAnchor} onClose={() => setImportAnchor(null)}>
+                <MenuItem onClick={() => handleImportSelect("file")}>
+                  <ListItemIcon><CloudUploadIcon fontSize="small" /></ListItemIcon>
+                  <ListItemText primary={t("manager.importModeFile")} secondary={t("manager.importModeFileHint")} />
+                </MenuItem>
+                <MenuItem onClick={() => handleImportSelect("link")}>
+                  <ListItemIcon><LinkIcon fontSize="small" /></ListItemIcon>
+                  <ListItemText primary={t("manager.importModeLink")} secondary={t("manager.importModeLinkHint")} />
+                </MenuItem>
+              </Menu>
+            </>
           )}
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => m.setUploadOpen(true)} sx={{ whiteSpace: "nowrap" }}>
             {t("manager.addVersion")}

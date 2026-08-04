@@ -305,6 +305,7 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [], previousS
             label={tVersion("fields.mcVersions")}
             error={!!error?.mcVersions}
             helperText={error?.mcVersions?.[0]}
+            required={false}
           />
 
           <LoaderAutocomplete
@@ -314,6 +315,7 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [], previousS
             label={tVersion("fields.loaders")}
             error={!!error?.loaders}
             helperText={error?.loaders?.[0]}
+            required={false}
           />
 
           <TextField
