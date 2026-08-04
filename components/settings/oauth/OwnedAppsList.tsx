@@ -40,7 +40,7 @@ export default function OwnedAppsList({ apps, onEdit, onRegenerate, onDelete }: 
           </ListItemAvatar>
           <ListItemText
             primary={app.name}
-            secondaryTypographyProps={{ component: "div" }}
+            slotProps={{ secondary: { component: "div" } }}
             secondary={
               <Box>
                 <Typography variant="caption" sx={{ fontFamily: "monospace", display: "block" }}>{app.id}</Typography>

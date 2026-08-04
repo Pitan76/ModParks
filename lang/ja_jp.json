@@ -1490,6 +1490,48 @@
     },
     "rewards": {
       "title": "クリエイタ還元"
+    },
+    "oauthApps": {
+      "title": "OAuthアプリ",
+      "description": "他のサービスから ModParks アカウントへ安全にアクセスさせるための設定です。自分のサービスに「ModParksでログイン」を実装する場合はアプリを登録し、連携を許可したアプリはここから解除できます。",
+      "ownedTitle": "登録したアプリ",
+      "connectedTitle": "連携中のアプリ",
+      "newApp": "アプリを登録",
+      "editApp": "アプリを編集",
+      "name": "アプリ名",
+      "descriptionField": "説明",
+      "homepageUrl": "サイトURL",
+      "logoUrl": "アイコンURL",
+      "redirectUris": "リダイレクトURI",
+      "redirectUrisHelp": "1行に1つ。https のみ（localhost に限り http も可）。完全一致で照合します。",
+      "confidential": "サーバー側でシークレットを保持できる（機密クライアント）",
+      "publicClient": "公開クライアント",
+      "scopes": "要求できる権限",
+      "scopeLabels": {
+        "openid": "あなたのアカウントでログインする",
+        "email": "メールアドレスを取得する",
+        "profile:read": "プロフィール（表示名・ユーザー名・アイコン）を読み取る",
+        "projects:read": "プロジェクトを読み取る",
+        "projects:write": "プロジェクトを作成・編集する",
+        "versions:read": "バージョン情報を読み取る",
+        "versions:write": "バージョンを追加・編集する",
+        "ideas:read": "アイデアを読み取る",
+        "ideas:write": "アイデアを作成・編集する",
+        "comments:write": "あなたとしてコメントを投稿する",
+        "notifications:read": "通知を読み取る"
+      },
+      "regenerate": "シークレット再発行",
+      "secretOnce": "クライアントシークレットは今だけ表示されます。必ず控えてください。",
+      "revoke": "連携を解除",
+      "authorizedAt": "許可日: {date}",
+      "noApps": "登録したアプリはありません",
+      "noConnections": "連携中のアプリはありません",
+      "errors": {
+        "invalidRedirectUri": "リダイレクトURIが不正です。https のURLを1行に1つ入力してください。",
+        "nameRequired": "アプリ名を入力してください。",
+        "notFound": "アプリが見つかりませんでした。",
+        "publicClient": "公開クライアントにはシークレットがありません。"
+      }
     }
   },
   "Legal": {
@@ -1647,5 +1689,30 @@
     "history": "ダウンロード履歴",
     "historyEmpty": "ダウンロード履歴はありません",
     "clearHistory": "履歴を消去"
+  },
+  "OAuth": {
+    "consent": {
+      "title": "{app} があなたの ModParks アカウントへのアクセスを求めています",
+      "permissions": "許可する権限",
+      "account": "アカウント: {account}",
+      "approve": "許可する",
+      "deny": "拒否する",
+      "untrusted": "このアプリは ModParks の審査を受けていません。信頼できる提供元か確認してください。",
+      "invalidTitle": "認可リクエストが不正です",
+      "failed": "処理に失敗しました。もう一度お試しください。"
+    },
+    "scopes": {
+      "openid": "あなたのアカウントでログインする",
+      "email": "メールアドレスを取得する",
+      "profile:read": "プロフィール（表示名・ユーザー名・アイコン）を読み取る",
+      "projects:read": "プロジェクトを読み取る",
+      "projects:write": "プロジェクトを作成・編集する",
+      "versions:read": "バージョン情報を読み取る",
+      "versions:write": "バージョンを追加・編集する",
+      "ideas:read": "アイデアを読み取る",
+      "ideas:write": "アイデアを作成・編集する",
+      "comments:write": "あなたとしてコメントを投稿する",
+      "notifications:read": "通知を読み取る"
+    }
   }
 }

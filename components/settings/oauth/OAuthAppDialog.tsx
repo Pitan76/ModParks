@@ -64,7 +64,7 @@ export default function OAuthAppDialog({ open, app, onClose, onSubmit }: OAuthAp
       <DialogTitle>{app ? t("oauthApps.editApp") : t("oauthApps.newApp")}</DialogTitle>
       <DialogContent>
         <TextField label={t("oauthApps.name")} fullWidth margin="normal" required value={form.name} onChange={(e) => update({ name: e.target.value })} />
-        <TextField label={t("oauthApps.description")} fullWidth margin="normal" multiline minRows={2} value={form.description} onChange={(e) => update({ description: e.target.value })} />
+        <TextField label={t("oauthApps.descriptionField")} fullWidth margin="normal" multiline minRows={2} value={form.description} onChange={(e) => update({ description: e.target.value })} />
         <TextField label={t("oauthApps.homepageUrl")} fullWidth margin="normal" value={form.homepageUrl} onChange={(e) => update({ homepageUrl: e.target.value })} />
         <TextField label={t("oauthApps.logoUrl")} fullWidth margin="normal" value={form.logoUrl} onChange={(e) => update({ logoUrl: e.target.value })} />
         <TextField

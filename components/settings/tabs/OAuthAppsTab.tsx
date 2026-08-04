@@ -50,14 +50,22 @@ export default function OAuthAppsTab({ ownedApps, connectedApps }: OAuthAppsTabP
   }
 
   async function handleSubmit(input: OAuthAppInput) {
-    const res = editing ? await updateOAuthApp(editing.id, input) : await createOAuthApp(input);
-    if (!res.success) {
-      setError(t(`oauthApps.errors.${res.error}` as never));
+    if (editing) {
+      const res = await updateOAuthApp(editing.id, input);
+      if (!res.success) return setError(t(`oauthApps.errors.${res.error}` as never));
+      finishSubmit();
       return;
     }
+
+    const res = await createOAuthApp(input);
+    if (!res.success) return setError(t(`oauthApps.errors.${res.error}` as never));
+    if (res.clientSecret) setIssuedSecret(res.clientSecret);
+    finishSubmit();
+  }
+
+  function finishSubmit() {
     setError("");
     setDialogOpen(false);
-    if ("clientSecret" in res && res.clientSecret) setIssuedSecret(res.clientSecret);
     router.refresh();
   }
 

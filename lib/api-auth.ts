@@ -2,17 +2,27 @@ import { getDatabase } from "@/lib/db";
 import { apiKeys, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import type { Viewer } from "@/lib/auth/postAccess";
+import { isOAuthAccessToken } from "@/lib/oauth/bearer";
+import { verifyAccessToken } from "@/lib/oauth/tokens";
 
 export async function validateApiKey(request: Request) {
   const db = await getDatabase();
 
   const authHeader = request.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return { valid: false, userId: null, error: "Missing or invalid Authorization header" };
+    return { valid: false, userId: null, scopes: null, error: "Missing or invalid Authorization header" };
   }
 
   const key = authHeader.split(" ")[1];
-  
+
+  // OAuth のアクセストークンも同じ Authorization ヘッダで来るため、
+  // API キーとして照合する前にこちらへ振り分ける。
+  if (isOAuthAccessToken(key)) {
+    const token = await verifyAccessToken(key);
+    if (!token) return { valid: false, userId: null, scopes: null, error: "Invalid or expired access token" };
+    return { valid: true, userId: token.userId, scopes: token.scopes, error: null };
+  }
+
   const encoder = new TextEncoder();
   const data = encoder.encode(key);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
@@ -26,11 +36,11 @@ export async function validateApiKey(request: Request) {
     .limit(1);
 
   if (!apiKeyRecord) {
-    return { valid: false, userId: null, error: "Invalid API key" };
+    return { valid: false, userId: null, scopes: null, error: "Invalid API key" };
   }
   
   if (apiKeyRecord.expiresAt && apiKeyRecord.expiresAt < new Date()) {
-    return { valid: false, userId: null, error: "API key has expired" };
+    return { valid: false, userId: null, scopes: null, error: "API key has expired" };
   }
 
   try {
@@ -39,7 +49,8 @@ export async function validateApiKey(request: Request) {
     // Ignore update error
   }
 
-  return { valid: true, userId: apiKeyRecord.userId, error: null };
+  // API キーはスコープを持たない（全権）ため scopes は null で返す
+  return { valid: true, userId: apiKeyRecord.userId, scopes: null, error: null };
 }
 
 /**
@@ -53,4 +64,18 @@ export async function resolveViewer(request: Request): Promise<Viewer> {
   const db = await getDatabase();
   const user = await db.select({ role: users.role }).from(users).where(eq(users.id, auth.userId)).get();
   return { userId: auth.userId, isAdmin: user?.role === "admin" };
+}
+
+/**
+ * スコープを要求する API 認証。
+ * API キー（scopes が null）は従来どおり全権として通し、
+ * OAuth トークンは必要なスコープを持つ場合だけ通す。
+ */
+export async function requireScope(request: Request, scope: string) {
+  const auth = await validateApiKey(request);
+  if (!auth.valid || !auth.userId) return { ok: false as const, status: 401, error: auth.error ?? "Unauthorized" };
+  if (auth.scopes && !auth.scopes.includes(scope)) {
+    return { ok: false as const, status: 403, error: `Scope '${scope}' is required` };
+  }
+  return { ok: true as const, userId: auth.userId };
 }

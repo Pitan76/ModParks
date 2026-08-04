@@ -1482,6 +1482,48 @@
     },
     "rewards": {
       "title": "Creator Reward"
+    },
+    "oauthApps": {
+      "title": "OAuth apps",
+      "description": "Let other services access your ModParks account safely. Register an app to add \"Sign in with ModParks\" to your own service, and revoke apps you have authorized.",
+      "ownedTitle": "Your apps",
+      "connectedTitle": "Authorized apps",
+      "newApp": "Register app",
+      "editApp": "Edit app",
+      "name": "App name",
+      "descriptionField": "Description",
+      "homepageUrl": "Website URL",
+      "logoUrl": "Icon URL",
+      "redirectUris": "Redirect URIs",
+      "redirectUrisHelp": "One per line. HTTPS only (HTTP allowed for localhost). Matched exactly.",
+      "confidential": "Can keep a secret on the server (confidential client)",
+      "publicClient": "Public client",
+      "scopes": "Requestable scopes",
+      "scopeLabels": {
+        "openid": "Sign in with your account",
+        "email": "Read your email address",
+        "profile:read": "Read your profile (display name, username, avatar)",
+        "projects:read": "Read your projects",
+        "projects:write": "Create and edit projects",
+        "versions:read": "Read version information",
+        "versions:write": "Add and edit versions",
+        "ideas:read": "Read ideas",
+        "ideas:write": "Create and edit ideas",
+        "comments:write": "Post comments as you",
+        "notifications:read": "Read your notifications"
+      },
+      "regenerate": "Regenerate secret",
+      "secretOnce": "The client secret is shown only once. Copy it now.",
+      "revoke": "Revoke",
+      "authorizedAt": "Authorized: {date}",
+      "noApps": "No apps registered",
+      "noConnections": "No authorized apps",
+      "errors": {
+        "invalidRedirectUri": "Invalid redirect URI. Enter one HTTPS URL per line.",
+        "nameRequired": "App name is required.",
+        "notFound": "App not found.",
+        "publicClient": "Public clients have no secret."
+      }
     }
   },
   "Legal": {
@@ -1639,5 +1681,30 @@
     "history": "Download history",
     "historyEmpty": "No download history",
     "clearHistory": "Clear history"
+  },
+  "OAuth": {
+    "consent": {
+      "title": "{app} wants to access your ModParks account",
+      "permissions": "Requested permissions",
+      "account": "Account: {account}",
+      "approve": "Authorize",
+      "deny": "Deny",
+      "untrusted": "This app has not been reviewed by ModParks. Make sure you trust the developer.",
+      "invalidTitle": "Invalid authorization request",
+      "failed": "Something went wrong. Please try again."
+    },
+    "scopes": {
+      "openid": "Sign in with your account",
+      "email": "Read your email address",
+      "profile:read": "Read your profile (display name, username, avatar)",
+      "projects:read": "Read your projects",
+      "projects:write": "Create and edit projects",
+      "versions:read": "Read version information",
+      "versions:write": "Add and edit versions",
+      "ideas:read": "Read ideas",
+      "ideas:write": "Create and edit ideas",
+      "comments:write": "Post comments as you",
+      "notifications:read": "Read your notifications"
+    }
   }
 }

@@ -46,7 +46,7 @@ export default function ConnectedAppsList({ apps, onRevoke }: ConnectedAppsListP
           </ListItemAvatar>
           <ListItemText
             primary={app.name}
-            secondaryTypographyProps={{ component: "div" }}
+            slotProps={{ secondary: { component: "div" } }}
             secondary={
               <Box>
                 <Typography variant="caption" color="text.secondary" component="div">
