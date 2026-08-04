@@ -30,7 +30,14 @@ const LICENSES = [
   "All Rights Reserved",
 ] as const;
 
-export const CONTENT_TYPES = ["mod", "plugin"] as const;
+export const CONTENT_TYPES = [
+  "mod",
+  "plugin",
+  "resourcepack",
+  "datapack",
+  "shader",
+  "modpack",
+] as const;
 export type ContentType = (typeof CONTENT_TYPES)[number];
 export type Loader = string;
 export type License = (typeof LICENSES)[number];
