@@ -16,6 +16,8 @@ export const SENSITIVE_TABLES = new Set([
   "users",
   "account",
   "api_keys",
+  // client_secret のハッシュを持つ
+  "oauth_clients",
   "authenticator",
   "session",
   "password_reset_tokens",

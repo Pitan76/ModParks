@@ -57,6 +57,14 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
     strategy: "manual",
     reason: "失効させた API キーが復活すると、無効化した認証情報が再び有効になる",
   },
+  oauth_clients: {
+    strategy: "manual",
+    reason: "OAuth クライアントのシークレットとリダイレクト先。復活すると削除したはずの連携先が再びトークンを取れる",
+  },
+  oauth_grants: {
+    strategy: "manual",
+    reason: "外部アプリへの認可。復活すると解除したはずのアプリへの同意が戻る",
+  },
   authenticator: {
     strategy: "manual",
     reason: "2FA の認証器登録。解除した端末が復活しうる",

@@ -26,6 +26,7 @@ export const AccountSectionLazy = dynamic(() => import("./AccountSection"), { ss
 export const ThemeTabLazy = dynamic(() => import("./tabs/ThemeTab"), { ssr: false, loading: Loading });
 export const SecuritySectionLazy = dynamic(() => import("./SecuritySection"), { ssr: false, loading: Loading });
 export const ApiKeysTabLazy = dynamic(() => import("./tabs/ApiKeysTab"), { ssr: false, loading: Loading });
+export const OAuthAppsTabLazy = dynamic(() => import("./tabs/OAuthAppsTab"), { ssr: false, loading: Loading });
 export const PostingTabLazy = dynamic(() => import("./tabs/PostingTab"), { ssr: false, loading: Loading });
 export const NotificationsTabLazy = dynamic(() => import("./tabs/NotificationsTab"), { ssr: false, loading: Loading });
 export const IntegrationTabLazy = dynamic(() => import("./tabs/IntegrationTab"), { ssr: false, loading: Loading });
