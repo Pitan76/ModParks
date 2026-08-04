@@ -24,6 +24,9 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { parseJarFile } from "@/lib/utils/jarParser";
 import type { ParsedModData } from "@/lib/utils/jarParser";
+import { Link } from "@/lib/i18n/routing";
+import LinkButton from "@/components/ui/LinkButton";
+import MuiLink from "@mui/material/Link";
 
 export type NewProjectFormProps = {
   availableTags: { slug: string; name: string }[];
@@ -154,9 +157,14 @@ const NewProjectForm = ({
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
-      <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>
-        {t("create.title")}
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4, flexWrap: "wrap", gap: 2 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800 }}>
+          {t("create.title")}
+        </Typography>
+        <LinkButton href="/projects/import" variant="outlined" color="primary">
+          {t("batchImportTitle")}
+        </LinkButton>
+      </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4 }}>
         <Tabs 
@@ -214,6 +222,15 @@ const NewProjectForm = ({
             )}
             {importError && <Alert severity="error" sx={{ mt: 2 }}>{importError}</Alert>}
             {importData && !jarData && <Alert severity="success" sx={{ mt: 2 }}>{t("create.import.fetchSuccess")}</Alert>}
+            <Alert severity="info" sx={{ mt: 2 }}>
+              {t.rich("create.import.batchImportNotice", {
+                link: (chunks) => (
+                  <MuiLink component={Link} href="/projects/import" color="inherit" sx={{ fontWeight: "bold" }}>
+                    {chunks}
+                  </MuiLink>
+                )
+              })}
+            </Alert>
           </CardContent>
         </Card>
       )}

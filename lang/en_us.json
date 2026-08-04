@@ -290,7 +290,8 @@
         "fetchData": "Fetch Data",
         "modrinthKeyWarning": "Modrinth API key is not set. To fetch private projects, please register your API key in account settings.",
         "curseforgeKeyWarning": "CurseForge API key is not set. If fetching fails, please register your API key in account settings.",
-        "fetchSuccess": "Data fetched and applied to the form."
+        "fetchSuccess": "Data fetched and applied to the form.",
+        "batchImportNotice": "If you want to import multiple projects at once, please use <link>Batch Import</link>."
       },
       "jar": {
         "title": "Read info from .jar file",
