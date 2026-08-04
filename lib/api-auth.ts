@@ -28,7 +28,7 @@ export async function validateApiKey(request: Request) {
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashedKey = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-  
+
   const [apiKeyRecord] = await db
     .select()
     .from(apiKeys)
@@ -38,7 +38,7 @@ export async function validateApiKey(request: Request) {
   if (!apiKeyRecord) {
     return { valid: false, userId: null, scopes: null, error: "Invalid API key" };
   }
-  
+
   if (apiKeyRecord.expiresAt && apiKeyRecord.expiresAt < new Date()) {
     return { valid: false, userId: null, scopes: null, error: "API key has expired" };
   }
@@ -55,7 +55,7 @@ export async function validateApiKey(request: Request) {
 
 /**
  * リクエストから canManagePost に渡せる Viewer を組み立てる。
- * APIキーが無い・無効なら匿名として扱う（エラーにはしない — 公開APIは未認証でも読める）。
+ * APIキーが無い・無効なら匿名として扱う（エラーにはしない - 公開APIは未認証でも読める）。
  */
 export async function resolveViewer(request: Request): Promise<Viewer> {
   const auth = await validateApiKey(request);

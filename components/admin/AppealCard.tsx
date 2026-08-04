@@ -92,7 +92,7 @@ const AppealCard = ({ row }: { row: AppealRow }) => {
           <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2 }}>
             {findings.map((f, i) => (
               <li key={i}>
-                <Typography variant="caption">{f.rule} — {f.target}</Typography>
+                <Typography variant="caption">{f.rule} - {f.target}</Typography>
               </li>
             ))}
           </Box>

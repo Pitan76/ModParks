@@ -2,7 +2,7 @@
  * 公開API v2 の型。
  *
  * 命名はドメイン層（types/post.ts の ProjectPost / IdeaPost）とそのまま揃える。
- * DB の posts / projects 分割はここに持ち込まない — レスポンスは平坦な1オブジェクト。
+ * DB の posts / projects 分割はここに持ち込まない - レスポンスは平坦な1オブジェクト。
  * 詳細は docs-md/DESIGN.md の「公開APIも同じ名前に揃える」を参照。
  */
 

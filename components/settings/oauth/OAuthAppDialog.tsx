@@ -91,7 +91,7 @@ export default function OAuthAppDialog({ open, app, onClose, onSubmit }: OAuthAp
             <FormControlLabel
               key={scope}
               control={<Checkbox checked={form.scopes.includes(scope)} onChange={(e) => toggleScope(scope, e.target.checked)} />}
-              label={`${scope} — ${t(`oauthApps.scopeLabels.${scope}` as never)}`}
+              label={`${scope} - ${t(`oauthApps.scopeLabels.${scope}` as never)}`}
             />
           ))}
         </FormGroup>

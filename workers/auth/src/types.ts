@@ -27,7 +27,7 @@ export interface RegistrationOptionsRequest {
   userID: string;
   userName: string;
   userDisplayName: string;
-  /** 既存パスキー（base64url の credentialID）— excludeCredentials に使う */
+  /** 既存パスキー（base64url の credentialID）- excludeCredentials に使う */
   excludeCredentials: { id: string; transports?: AuthenticatorTransportFuture[] }[];
 }
 export type RegistrationOptionsResult = PublicKeyCredentialCreationOptionsJSON;

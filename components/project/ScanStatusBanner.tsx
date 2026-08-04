@@ -84,7 +84,7 @@ const ScanStatusBanner = ({ versionId, scanStatus, scanFindings, canAppeal }: Sc
             {findings.map((f, i) => (
               <li key={i}>
                 <Typography variant="caption">
-                  {f.rule} — {f.target}
+                  {f.rule} - {f.target}
                 </Typography>
               </li>
             ))}

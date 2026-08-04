@@ -13,16 +13,16 @@ import { CONTENT_TYPES } from "../../lib/data/projectTypes";
  * posts が持つ。単体では投稿として成立しないため、必ず posts と JOIN して使う。
  */
 export const projects = sqliteTable("projects", {
-  id:          text("id")
+  id: text("id")
     .primaryKey()
     .references(() => posts.id, { onDelete: "cascade" }),
-  iconUrl:     text("icon_url"),
-  type:        text("type", { enum: CONTENT_TYPES }).notNull(),
-  license:     text("license").notNull(),
-  sourceUrl:   text("source_url"),
-  links:       text("links"),
-  downloads:   integer("downloads").notNull().default(0),
-  modrinthId:  text("modrinth_id"),
+  iconUrl: text("icon_url"),
+  type: text("type", { enum: CONTENT_TYPES }).notNull(),
+  license: text("license").notNull(),
+  sourceUrl: text("source_url"),
+  links: text("links"),
+  downloads: integer("downloads").notNull().default(0),
+  modrinthId: text("modrinth_id"),
   curseforgeId: text("curseforge_id"),
   issueTrackerUrl: text("issue_tracker_url"),
   totalDownloads: integer("total_downloads").notNull().default(0),
@@ -70,31 +70,31 @@ export const projectCategories = sqliteTable(
 // ---- Versions ----
 
 export const versions = sqliteTable("versions", {
-  id:            text("id").primaryKey(),
+  id: text("id").primaryKey(),
   versionNumber: text("version_number").notNull(),
-  /** JSON: string[] — 対応 MC バージョン */
-  mcVersions:    text("mc_versions").notNull(),
-  /** JSON: string[] — 対応ローダー */
-  loaders:       text("loaders").notNull(),
-  changelog:     text("changelog").notNull(),
+  /** JSON: string[] - 対応 MC バージョン */
+  mcVersions: text("mc_versions").notNull(),
+  /** JSON: string[] - 対応ローダー */
+  loaders: text("loaders").notNull(),
+  changelog: text("changelog").notNull(),
   /** リリースチャネル: release(安定版) / beta / alpha */
   releaseChannel: text("release_channel").notNull().default("release"),
-  fileUrl:       text("file_url").notNull(),
-  fileName:      text("file_name").notNull(),
-  fileSize:      integer("file_size"),
-  fileSha256:    text("file_sha256"),
-  downloads:     integer("downloads").notNull().default(0),
+  fileUrl: text("file_url").notNull(),
+  fileName: text("file_name").notNull(),
+  fileSize: integer("file_size"),
+  fileSha256: text("file_sha256"),
+  downloads: integer("downloads").notNull().default(0),
   /** jar ヒューリスティック検査の判定: pending / clean / suspicious / malicious / skipped */
-  scanStatus:    text("scan_status").notNull().default("pending"),
-  /** JSON: ScanFinding[] — 検出内容。作者・管理者にのみ開示する */
-  scanFindings:  text("scan_findings"),
-  scanAt:        integer("scan_at", { mode: "timestamp" }),
+  scanStatus: text("scan_status").notNull().default("pending"),
+  /** JSON: ScanFinding[] - 検出内容。作者・管理者にのみ開示する */
+  scanFindings: text("scan_findings"),
+  scanAt: integer("scan_at", { mode: "timestamp" }),
   /** アーカイブ日時。null でなければアーカイブ済み（公開一覧・DLから除外、作者のみ閲覧可） */
-  archivedAt:    integer("archived_at", { mode: "timestamp" }),
-  projectId:     text("project_id")
+  archivedAt: integer("archived_at", { mode: "timestamp" }),
+  projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
-  createdAt:     integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 }, (table) => [
@@ -200,16 +200,16 @@ export const projectMembers = sqliteTable(
  * 動画は無料枠での配信負荷が大きいため対象外（画像のみ）。
  */
 export const projectMedia = sqliteTable("project_media", {
-  id:        text("id").primaryKey(),
+  id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
-  url:       text("url").notNull(),
-  caption:   text("caption"),
+  url: text("url").notNull(),
+  caption: text("caption"),
   /** 表示順。昇順で並べる */
   sortOrder: integer("sort_order").notNull().default(0),
   /** カルーセルに流すか。false のものは画像タブでのみ表示 */
-  featured:  integer("featured", { mode: "boolean" }).notNull().default(true),
+  featured: integer("featured", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
@@ -246,9 +246,9 @@ export const projectHiddenRecipes = sqliteTable(
  * projects の行。title も author も持たないため、これ単体で Project を表さない。
  * アプリが扱う Project は ProjectPost（Post & ProjectFields）。
  */
-export type ProjectFields        = typeof projects.$inferSelect;
-export type Version              = typeof versions.$inferSelect;
-export type ProjectMember        = typeof projectMembers.$inferSelect;
-export type ProjectDependency    = typeof projectDependencies.$inferSelect;
-export type ProjectMedia         = typeof projectMedia.$inferSelect;
-export type ProjectHiddenRecipe  = typeof projectHiddenRecipes.$inferSelect;
+export type ProjectFields = typeof projects.$inferSelect;
+export type Version = typeof versions.$inferSelect;
+export type ProjectMember = typeof projectMembers.$inferSelect;
+export type ProjectDependency = typeof projectDependencies.$inferSelect;
+export type ProjectMedia = typeof projectMedia.$inferSelect;
+export type ProjectHiddenRecipe = typeof projectHiddenRecipes.$inferSelect;

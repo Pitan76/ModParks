@@ -46,7 +46,7 @@ export default function AppSettingsGroupPanel({
       setForm(result.settings);
       setMessage(
         result.warning
-          ? { type: "warning", text: `${t("appSettingsSaved")} — ${result.warning}` }
+          ? { type: "warning", text: `${t("appSettingsSaved")} - ${result.warning}` }
           : { type: "success", text: t("appSettingsSaved") }
       );
     });
