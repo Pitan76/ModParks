@@ -11,6 +11,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import FormTextField from "@/components/ui/form/FormTextField";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
+import TagAutocomplete from "./TagAutocomplete";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
@@ -139,46 +140,15 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
         />
       </Stack>
 
-      <FormAutocomplete
-        multiple
-        freeSolo
-        disableCloseOnSelect
-        // @ts-ignore
-        options={availableTags}
-        getOptionLabel={(option: OptionItem | string) => {
-          const slug = typeof option === "string" ? option : option.slug;
-          try {
-            const translated = tTags(slug as any);
-            if (translated && !translated.includes(".")) return translated;
-          } catch {}
-          if (typeof option === "string") return option;
-          return option.name || option.slug || "";
-        }}
-        value={tags}
-        onChange={(_, newValue) => {
-          const stringValues = (newValue as (OptionItem | string)[]).map((v) => {
-            if (typeof v === "string") return v;
-            return v.slug || v.inputValue || "";
-          });
-          setTags(stringValues.filter(Boolean));
-        }}
-        // @ts-ignore
-        renderTags={(tagValue: readonly (OptionItem | string)[], getTagProps) =>
-          tagValue.map((option, index) => {
-            const optionSlug = typeof option === "string" ? option : (option.slug || option.inputValue);
-            const foundObj = availableTags.find((tObj) => tObj.slug === optionSlug);
-            let label = foundObj ? foundObj.name : optionSlug;
-            try { 
-              const translated = tTags(optionSlug as any);
-              if (translated && !translated.includes(".")) label = translated;
-            } catch {}
-            const { key, ...tagProps } = getTagProps({ index });
-            return <Chip variant="outlined" label={label} {...tagProps} key={key} />;
-          })
-        }
+      <TagAutocomplete
+        availableTags={availableTags}
+        tags={tags}
+        onChange={setTags}
         label={t("fields.tags")}
         placeholder={t("fields.tags")}
-        errorMessages={error?.tags}
+        error={!!error?.tags}
+        helperText={error?.tags?.[0]}
+        required={false}
       />
       {tags.map((tag) => (
         <input type="hidden" name="tags" value={tag} key={`hidden-tag-${tag}`} />

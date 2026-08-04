@@ -1,9 +1,7 @@
 "use client";
 
 import AbstractDialog from "@/components/ui/AbstractDialog";
-import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import FormTextField from "@/components/ui/form/FormTextField";
-import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
@@ -16,6 +14,7 @@ import McVersionAutocomplete from "./McVersionAutocomplete";
 import LoaderAutocomplete from "./LoaderAutocomplete";
 import { useState, useEffect } from "react";
 import type { ChangeEvent } from "react";
+import TagAutocomplete from "./TagAutocomplete";
 
 export type AdvancedSearchFilters = {
   author?: string;
@@ -170,46 +169,13 @@ const AdvancedSearchDialog = ({
           required={false}
         />
 
-        {/* @ts-ignore */}
-        <FormAutocomplete
-          multiple
-          freeSolo
-          options={availableTags}
-          getOptionLabel={(option: OptionItem | string) => {
-            const slug = typeof option === "string" ? option : option.slug;
-            try {
-              const translated = tTags(slug as any);
-              if (translated && !translated.includes(".")) return translated;
-            } catch {}
-            if (typeof option === "string") return option;
-            return option.name || option.slug || "";
-          }}
-          value={tempTags as any}
-          onChange={(_, val: (OptionItem | string)[]) => setTempTags(val.map(v => typeof v === "string" ? v : v.slug || v.inputValue || ""))}
+        <TagAutocomplete
+          availableTags={availableTags}
+          tags={tempTags}
+          onChange={setTempTags}
           label={t("tags")}
-          renderInputProps={{ size: "small" }}
-          renderOption={(props, option: OptionItem | string) => {
-            const slug = typeof option === "string" ? option : option.slug;
-            let label = typeof option === "string" ? option : option.name;
-            try {
-              const translated = tTags(slug as any);
-              if (translated && !translated.includes(".")) label = translated;
-            } catch {}
-            const { key, ...otherProps } = props;
-            return <li key={key} {...otherProps}>{label}</li>;
-          }}
-          // @ts-ignore
-          renderTags={(val: (OptionItem | string)[], getTagProps) => val.map((option, idx) => {
-            const slug = typeof option === "string" ? option : option.slug;
-            const foundObj = availableTags.find(tObj => tObj.slug === slug);
-            let label = foundObj ? foundObj.name : slug;
-            try { 
-              const translated = tTags(slug as any);
-              if (translated && !translated.includes(".")) label = translated;
-            } catch {}
-            const { key, ...tagProps } = getTagProps({ index: idx });
-            return <Chip key={key} label={label} size="small" {...tagProps} />;
-          })}
+          size="small"
+          required={false}
         />
 
       </Box>

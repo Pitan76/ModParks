@@ -56,7 +56,10 @@ export default function MultiChipAutocomplete({
     return getLabel ? getLabel(item) : item;
   }
 
-  /** 入力由来の値も含めて、options の並び順・重複なしに正規化する。 */
+  /**
+   * 入力由来の値も含めて重複なしに正規化する。
+   * 候補にある値は options の並び順、候補に無い値（自由入力タグ等）はその後ろへ入力順で並べる。
+   */
   function commit(nextValues: readonly string[]) {
     const picked = new Set<string>();
     for (const item of nextValues) {
@@ -66,7 +69,9 @@ export default function MultiChipAutocomplete({
       }
       expandInput?.(item).forEach((v) => picked.add(v));
     }
-    onChange(options.filter((v) => picked.has(v)));
+    const known = options.filter((v) => picked.has(v));
+    const extra = [...picked].filter((v) => !options.includes(v));
+    onChange([...known, ...extra]);
   }
 
   return (
@@ -84,8 +89,9 @@ export default function MultiChipAutocomplete({
           setInputValue("");
           return;
         }
-        // 区切り文字が入力された時点で確定させる（"1.18, 1.19," のような連続入力向け）
-        if (expandInput && /[,\s]$/.test(next)) {
+        // `,` が入力された時点で確定させる（"1.18,1.19," のような連続入力向け）。
+        // 空白は確定に使わない（タグ名に空白が含まれ得るため）。
+        if (expandInput && next.endsWith(",")) {
           const expanded = expandInput(next);
           if (expanded.length > 0) {
             commit([...value, ...expanded]);
