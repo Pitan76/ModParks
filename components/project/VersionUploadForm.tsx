@@ -4,9 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Autocomplete from "@mui/material/Autocomplete";
-import type { AutocompleteRenderGetTagProps } from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -19,12 +17,12 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
 import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
-import { MC_VERSIONS } from "@/lib/validations";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 import { useTranslations } from "next-intl";
 import LoaderAutocomplete from "./LoaderAutocomplete";
+import McVersionAutocomplete from "./McVersionAutocomplete";
 import PreviousVersionSettingsBanner, { type PreviousVersionSettings } from "./PreviousVersionSettings";
 
 type OptionItem = {
@@ -301,30 +299,12 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [], previousS
             </ToggleButtonGroup>
           </Box>
 
-          <Autocomplete
-            multiple
-            disableCloseOnSelect
-            options={MC_VERSIONS as unknown as string[]}
+          <McVersionAutocomplete
             value={mcVersions}
-            onChange={(_, newValue) => setMcVersions(newValue)}
-            // @ts-expect-error MUI typing issue with renderTags signature resolution
-            renderTags={(value: string[], getTagProps: AutocompleteRenderGetTagProps) =>
-              value.map((option: string, index: number) => {
-                const { key, ...tagProps } = getTagProps({ index });
-                return (
-                  <Chip variant="outlined" label={option} size="small" {...tagProps} key={key} />
-                );
-              })
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={tVersion("fields.mcVersions")}
-                error={!!error?.mcVersions}
-                helperText={error?.mcVersions?.[0]}
-                required={mcVersions.length === 0}
-              />
-            )}
+            onChange={setMcVersions}
+            label={tVersion("fields.mcVersions")}
+            error={!!error?.mcVersions}
+            helperText={error?.mcVersions?.[0]}
           />
 
           <LoaderAutocomplete

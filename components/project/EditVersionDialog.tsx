@@ -7,10 +7,9 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import FormTextField from "@/components/ui/form/FormTextField";
-import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import LoaderAutocomplete from "./LoaderAutocomplete";
+import McVersionAutocomplete from "./McVersionAutocomplete";
 import { updateVersion } from "@/lib/actions/version";
-import { MC_VERSIONS } from "@/lib/validations";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { useTranslations } from "next-intl";
 import type { ProjectVersion } from "./ProjectVersionsManager";
@@ -173,17 +172,12 @@ const EditVersionDialog = ({
           </ToggleButtonGroup>
         </Box>
 
-        <FormAutocomplete
-          multiple
-          options={MC_VERSIONS}
-          value={editMc as any}
-          onChange={(_, val) => setEditMc(val as string[])}
-          renderInputProps={{ 
-            label: t("fields.mcVersions"), 
-            required: editMc.length === 0, 
-            error: !!editError?.mcVersions, 
-            helperText: editError?.mcVersions?.[0]
-          }}
+        <McVersionAutocomplete
+          value={editMc as string[]}
+          onChange={setEditMc}
+          label={t("fields.mcVersions")}
+          error={!!editError?.mcVersions}
+          helperText={editError?.mcVersions?.[0]}
         />
 
         <LoaderAutocomplete

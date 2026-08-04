@@ -12,8 +12,8 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { useTranslations } from "next-intl";
-import { MC_VERSIONS } from "@/lib/validations";
-import { getLoaderInfo } from "@/lib/loaders";
+import McVersionAutocomplete from "./McVersionAutocomplete";
+import LoaderAutocomplete from "./LoaderAutocomplete";
 import { useState, useEffect } from "react";
 import type { ChangeEvent } from "react";
 
@@ -153,62 +153,21 @@ const AdvancedSearchDialog = ({
           fullWidth
         />
         
-        {/* @ts-ignore */}
-        <FormAutocomplete
-          multiple
-          options={availablePlatforms}
-          getOptionLabel={(option: OptionItem | string) => {
-            if (typeof option === "string") return option;
-            return option.name || option.slug || "";
-          }}
-          value={availablePlatforms.filter(p => tempLoaders.includes(p.slug)) as any}
-          onChange={(_, val: (OptionItem | string)[]) => setTempLoaders(val.map(v => typeof v === "string" ? v : v.slug))}
+        <LoaderAutocomplete
+          availablePlatforms={availablePlatforms}
+          loaders={tempLoaders}
+          onChange={setTempLoaders}
           label={t("platforms")}
-          renderInputProps={{ size: "small" }}
-          renderOption={(props, option: OptionItem | string) => {
-            const slug = typeof option === "string" ? option : option.slug;
-            const name = typeof option === "string" ? option : option.name;
-            const info = getLoaderInfo(slug);
-            const { key, ...otherProps } = props;
-            return (
-              <li key={key} {...otherProps} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {info.icon && <Box sx={{ display: "flex", alignItems: "center", color: `${info.color}.main` }}>{info.icon}</Box>}
-                {name}
-              </li>
-            );
-          }}
-          // @ts-ignore
-          renderTags={(val: (OptionItem | string)[], getTagProps) => val.map((option, idx) => {
-            const slug = typeof option === "string" ? option : option.slug;
-            const name = typeof option === "string" ? option : option.name;
-            const info = getLoaderInfo(slug);
-            const { key, ...tagProps } = getTagProps({ index: idx });
-            return (
-              <Chip 
-                key={key} 
-                label={name} 
-                size="small" 
-                color={info.color as any}
-                icon={info.icon}
-                {...tagProps} 
-              />
-            );
-          })}
+          size="small"
+          required={false}
         />
 
-        {/* @ts-ignore */}
-        <FormAutocomplete
-          multiple
-          options={MC_VERSIONS as unknown as string[]}
+        <McVersionAutocomplete
           value={tempMcVersions}
-          onChange={(_, val) => setTempMcVersions(val)}
+          onChange={setTempMcVersions}
           label={t("mcVersions")}
-          renderInputProps={{ size: "small" }}
-          // @ts-ignore
-          renderTags={(val: any, getTagProps: any) => val.map((option: any, idx: any) => {
-            const { key, ...tagProps } = getTagProps({ index: idx });
-            return <Chip key={key} label={option} size="small" {...tagProps} />;
-          })}
+          size="small"
+          required={false}
         />
 
         {/* @ts-ignore */}

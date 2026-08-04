@@ -14,11 +14,14 @@ export default function FormAutocomplete<T, Multiple extends boolean | undefined
   placeholder,
   errorMessages,
   renderInputProps,
+  filterSelectedOptions,
   ...props
 }: FormAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>) {
   return (
     <Autocomplete
       {...props}
+      // 複数選択では選択済みを候補から隠す（チップの × で戻る）
+      filterSelectedOptions={filterSelectedOptions ?? !!props.multiple}
       renderInput={(params) => (
         <TextField
           {...params}
