@@ -513,9 +513,9 @@
       "externalUrlHelper": "GitHub Releases, Modrinth, CurseForge のURLが使用できます",
       "extractRecipes": "JARからレシピを抽出してアップロード",
       "extracting": "レシピを抽出中...",
-      "reusePrevious": "前回のバージョン ({version}) の設定を流用できます",
-      "reuseApply": "流用する",
-      "reuseApplied": "流用しました"
+      "reusePrevious": "前回のバージョン ({version}) の設定を引き継げます",
+      "reuseApply": "引き継ぐ",
+      "reuseApplied": "引き継ぎました"
     },
     "loaders": {
       "fabric": "Fabric",

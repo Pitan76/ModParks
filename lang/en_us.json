@@ -508,8 +508,8 @@
       "extractRecipes": "Extract and upload recipes from JAR",
       "extracting": "Extracting recipes...",
       "reusePrevious": "You can reuse the settings from the previous version ({version})",
-      "reuseApply": "Reuse",
-      "reuseApplied": "Reused"
+      "reuseApply": "Apply",
+      "reuseApplied": "Applied"
     },
     "loaders": {
       "fabric": "Fabric",
