@@ -45,7 +45,12 @@ export const extractRecipesFromVersion = async (versionId: string, projectSlug: 
     const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
     const useCdnApi = process.env.USE_RECIPE_CDN_API === "true";
 
-    const { count: extractedCount, namespaces } = await extractRecipes(source, cdnUrl, useCdnApi);
+    // 対象 MC バージョンは version レコードが正。JAR の依存宣言より、公開者の申告を優先する。
+    const { count: extractedCount, namespaces } = await extractRecipes(source, cdnUrl, useCdnApi, {
+      mcVersions: parseJsonArray(version.mcVersions),
+      modVersion: version.versionNumber,
+      loader: parseJsonArray(version.loaders)[0] ?? null,
+    });
 
     if (namespaces.length > 0) {
       const existing = Array.isArray(project.recipeNamespaces) ? project.recipeNamespaces : [];
@@ -62,5 +67,19 @@ export const extractRecipesFromVersion = async (versionId: string, projectSlug: 
   } catch (err: unknown) {
     console.error("Failed to extract recipes:", err);
     return { error: err instanceof Error ? err.message : "Failed to extract recipes" };
+  }
+};
+
+/**
+ * JSON文字列で保持している配列カラムを読み出す。
+ * @param raw 保存されている値
+ * @returns 文字列の配列。壊れていれば空配列
+ */
+const parseJsonArray = (raw: string): string[] => {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
   }
 };

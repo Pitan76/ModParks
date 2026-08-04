@@ -1,4 +1,5 @@
 import type {
+  ExtractBuildInfo,
   ExtractRecipesRequest,
   ExtractRecipesResult,
   JarSource,
@@ -56,12 +57,14 @@ export function parseModJar(source: JarSource): Promise<ParsedModInfo> {
 export function extractRecipes(
   source: JarSource,
   cdnUrl: string,
-  useCdnApi: boolean
+  useCdnApi: boolean,
+  build?: ExtractBuildInfo
 ): Promise<ExtractRecipesResult> {
   return callJarWorker<ExtractRecipesResult>("/extract-recipes", {
     source,
     cdnUrl,
     useCdnApi,
+    build,
   } satisfies ExtractRecipesRequest);
 }
 

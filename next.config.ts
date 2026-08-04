@@ -68,6 +68,15 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  async rewrites() {
+    // OAuth/OIDC のディスカバリは仕様上 /.well-known/ 直下でなければならない。
+    // app/.well-known/ というドット始まりのディレクトリはビルドが解決できないため、
+    // 実体は /api/oauth/metadata に置いてここで公開URLへ結び付ける。
+    return [
+      { source: "/.well-known/openid-configuration", destination: "/api/oauth/metadata" },
+      { source: "/.well-known/oauth-authorization-server", destination: "/api/oauth/metadata" },
+    ];
+  },
   async headers() {
     // MUI(emotion)のinline styleとNext.jsのinline scriptを壊さないため、
     // script/styleは 'unsafe-inline' を許容した最低限のCSPに留める
