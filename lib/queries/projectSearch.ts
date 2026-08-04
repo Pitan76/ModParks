@@ -1,7 +1,8 @@
 import { posts, projects, userProfiles } from "@/db/schema";
 import { eq, desc, and, or, like, sql, inArray, type SQL } from "drizzle-orm";
+import type { ContentType } from "@/lib/data/projectTypes";
 
-type ContentType = "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
+
 
 export interface ProjectSearchParams {
   q?: string;

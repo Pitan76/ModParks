@@ -6,6 +6,7 @@ import { sqliteTable, text, integer, primaryKey, index } from "drizzle-orm/sqlit
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
 import { posts } from "./posts";
+import { CONTENT_TYPES } from "../../lib/data/projectTypes";
 
 /**
  * Project 固有の情報。共通部分（title / body / slug / visibility / author / 日時）は
@@ -16,7 +17,7 @@ export const projects = sqliteTable("projects", {
     .primaryKey()
     .references(() => posts.id, { onDelete: "cascade" }),
   iconUrl:     text("icon_url"),
-  type:        text("type", { enum: ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"] }).notNull(),
+  type:        text("type", { enum: CONTENT_TYPES }).notNull(),
   license:     text("license").notNull(),
   sourceUrl:   text("source_url"),
   links:       text("links"),
@@ -46,7 +47,7 @@ export const projects = sqliteTable("projects", {
 export const categories = sqliteTable("categories", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  type: text("type", { enum: ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"] }).notNull(),
+  type: text("type", { enum: CONTENT_TYPES }).notNull(),
 });
 
 export const projectCategories = sqliteTable(

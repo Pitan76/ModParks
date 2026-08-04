@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition, useEffect, useRef } from "react";
 import type { ChangeEvent } from "react";
 import dynamic from "next/dynamic";
+import { CONTENT_TYPES } from "@/lib/data/projectTypes";
 import type { AdvancedSearchFilters } from "./AdvancedSearchDialog";
 
 // ダイアログは開くまで不要なので client 専用で遅延ロードし、サーバーバンドルから外す。
@@ -42,7 +43,7 @@ export type ProjectSearchBarProps = {
 const ProjectSearchBar = ({ 
   initialQ = "", 
   initialAuthor = "",
-  initialTypes = ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"],
+  initialTypes = [...CONTENT_TYPES],
   initialSort = "updated",
   initialLoaders = [],
   initialMcVersions = [],

@@ -7,6 +7,7 @@ import type { ApiProject, PaginatedResponse } from "@/types/api-v1";
 import { createId } from "@paralleldrive/cuid2";
 import { withPublicCache } from "@/lib/http/cache";
 import { posts, projects, userProfiles, projectTags } from "@/db/schema";
+import { CONTENT_TYPES, type ContentType } from "@/lib/data/projectTypes";
 
 /**
  * v1 互換シム。
@@ -44,8 +45,8 @@ export async function GET(request: Request) {
   }
   if (!isMine) conditions.push(eq(posts.visibility, "public"));
 
-  if (type === "mod" || type === "plugin" || type === "resourcepack" || type === "datapack" || type === "shader" || type === "modpack") {
-    conditions.push(eq(projects.type, type));
+  if (type && (CONTENT_TYPES as readonly string[]).includes(type)) {
+    conditions.push(eq(projects.type, type as ContentType));
   }
   if (q) {
     conditions.push(like(posts.title, `%${q}%`));

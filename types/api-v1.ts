@@ -1,3 +1,5 @@
+import type { ContentType } from "@/lib/data/projectTypes";
+
 export interface ApiUser {
   username: string;
   displayName: string | null;
@@ -12,7 +14,7 @@ export interface ApiProject {
   name: string;
   description: string;
   iconUrl: string | null;
-  type: "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
+  type: ContentType;
   license: string;
   downloads: Record<string, number>;
   createdAt: number;

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { MC_VERSIONS, type McVersion } from "@/lib/data/minecraftVersions";
 import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
+import { CONTENT_TYPES, type ContentType } from "@/lib/data/projectTypes";
 
 const LICENSES = [
   "MIT",
@@ -30,15 +31,6 @@ const LICENSES = [
   "All Rights Reserved",
 ] as const;
 
-export const CONTENT_TYPES = [
-  "mod",
-  "plugin",
-  "resourcepack",
-  "datapack",
-  "shader",
-  "modpack",
-] as const;
-export type ContentType = (typeof CONTENT_TYPES)[number];
 export type Loader = string;
 export type License = (typeof LICENSES)[number];
 

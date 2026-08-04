@@ -6,6 +6,8 @@
  * 詳細は docs-md/DESIGN.md の「公開APIも同じ名前に揃える」を参照。
  */
 
+import type { ContentType } from "@/lib/data/projectTypes";
+
 export interface ApiUser {
   username: string;
   displayName: string | null;
@@ -29,7 +31,7 @@ export interface ApiPost {
 
 export interface ApiProject extends ApiPost {
   kind: "project";
-  type: "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
+  type: ContentType;
   license: string;
   iconUrl: string | null;
   downloads: Record<string, number>;

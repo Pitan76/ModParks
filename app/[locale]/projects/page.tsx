@@ -12,6 +12,7 @@ import { getProjectsWithCount } from "@/lib/actions/projectQuery";
 import { auth } from "@/lib/auth";
 import PaginationControls from "@/components/ui/PaginationControls";
 import AdSlot from "@/components/ads/AdSlot";
+import { CONTENT_TYPES } from "@/lib/data/projectTypes";
 
 interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
@@ -53,7 +54,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const authorId = author === "me" && session?.user?.id ? session.user.id : undefined;
   const authorUsername = author !== "me" && author ? author : undefined;
 
-  const typesArr = types ? types.split(",") : ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack"];
+  const typesArr = types ? types.split(",") : [...CONTENT_TYPES];
   const loadersArr = loaders ? loaders.split(",") : undefined;
   const mcVersionsArr = mcVersions ? mcVersions.split(",") : undefined;
   const tagsArr = tags ? tags.split(",") : undefined;
