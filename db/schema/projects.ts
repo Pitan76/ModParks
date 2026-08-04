@@ -36,11 +36,11 @@ export const projects = sqliteTable("projects", {
   githubRepo: text("github_repo"),
   /** 新バージョン公開時に告知を送る Discord Webhook URL */
   discordWebhookUrl: text("discord_webhook_url"),
-}, (table) => ({
+}, (table) => [
   // author / status / created_at / updated_at による絞り込みと並び替えは posts 側の索引が担う
-  typeIdx: index("projects_type_idx").on(table.type),
-  downloadsIdx: index("projects_downloads_idx").on(table.downloads),
-}));
+  index("projects_type_idx").on(table.type),
+  index("projects_downloads_idx").on(table.downloads),
+]);
 
 // ---- Project Categories ----
 
@@ -60,11 +60,11 @@ export const projectCategories = sqliteTable(
       .notNull()
       .references(() => categories.id, { onDelete: "cascade" }),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.projectId, t.categoryId] }),
-    projectIdx: index("project_categories_project_idx").on(t.projectId),
-    categoryIdx: index("project_categories_category_idx").on(t.categoryId),
-  })
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.categoryId] }),
+    index("project_categories_project_idx").on(t.projectId),
+    index("project_categories_category_idx").on(t.categoryId),
+  ]
 );
 
 // ---- Versions ----
@@ -97,10 +97,10 @@ export const versions = sqliteTable("versions", {
   createdAt:     integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-}, (table) => ({
-  projectIdx: index("versions_project_idx").on(table.projectId),
-  projectCreatedAtIdx: index("versions_project_created_at_idx").on(table.projectId, table.createdAt),
-}));
+}, (table) => [
+  index("versions_project_idx").on(table.projectId),
+  index("versions_project_created_at_idx").on(table.projectId, table.createdAt),
+]);
 
 // ---- Version Search Optimizations ----
 
@@ -112,11 +112,11 @@ export const versionLoaders = sqliteTable(
       .references(() => versions.id, { onDelete: "cascade" }),
     loader: text("loader").notNull(),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.versionId, t.loader] }),
-    versionIdx: index("version_loaders_version_idx").on(t.versionId),
-    loaderIdx: index("version_loaders_loader_idx").on(t.loader),
-  })
+  (t) => [
+    primaryKey({ columns: [t.versionId, t.loader] }),
+    index("version_loaders_version_idx").on(t.versionId),
+    index("version_loaders_loader_idx").on(t.loader),
+  ]
 );
 
 export const versionMcVersions = sqliteTable(
@@ -127,11 +127,11 @@ export const versionMcVersions = sqliteTable(
       .references(() => versions.id, { onDelete: "cascade" }),
     mcVersion: text("mc_version").notNull(),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.versionId, t.mcVersion] }),
-    versionIdx: index("version_mc_versions_version_idx").on(t.versionId),
-    mcVersionIdx: index("version_mc_versions_mc_version_idx").on(t.mcVersion),
-  })
+  (t) => [
+    primaryKey({ columns: [t.versionId, t.mcVersion] }),
+    index("version_mc_versions_version_idx").on(t.versionId),
+    index("version_mc_versions_mc_version_idx").on(t.mcVersion),
+  ]
 );
 
 // ---- Project Tags ----
@@ -144,10 +144,10 @@ export const projectTags = sqliteTable(
       .references(() => projects.id, { onDelete: "cascade" }),
     tag: text("tag").notNull(),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.projectId, t.tag] }),
-    projectIdx: index("project_tags_project_idx").on(t.projectId),
-  })
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.tag] }),
+    index("project_tags_project_idx").on(t.projectId),
+  ]
 );
 
 // ---- Project Dependencies ----
@@ -163,10 +163,10 @@ export const projectDependencies = sqliteTable(
     dependencyType: text("dependency_type").notNull().default("required"), // required, optional, incompatible, embedded
     createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
   },
-  (t) => ({
-    projectIdx: index("project_deps_project_idx").on(t.projectId),
-    targetIdx: index("project_deps_target_idx").on(t.targetProjectId),
-  })
+  (t) => [
+    index("project_deps_project_idx").on(t.projectId),
+    index("project_deps_target_idx").on(t.targetProjectId),
+  ]
 );
 
 // ---- Project Members ----
@@ -185,11 +185,11 @@ export const projectMembers = sqliteTable(
       .notNull()
       .default(sql`(unixepoch())`),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.projectId, t.userId] }),
-    projectIdx: index("project_members_project_idx").on(t.projectId),
-    userIdx: index("project_members_user_idx").on(t.userId),
-  })
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.userId] }),
+    index("project_members_project_idx").on(t.projectId),
+    index("project_members_user_idx").on(t.userId),
+  ]
 );
 
 // ---- Project Media (スクリーンショット) ----
@@ -213,9 +213,9 @@ export const projectMedia = sqliteTable("project_media", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-}, (table) => ({
-  projectIdx: index("project_media_project_idx").on(table.projectId, table.sortOrder),
-}));
+}, (table) => [
+  index("project_media_project_idx").on(table.projectId, table.sortOrder),
+]);
 
 /**
  * プロジェクトページで非表示にするレシピ。
@@ -236,10 +236,10 @@ export const projectHiddenRecipes = sqliteTable(
       .notNull()
       .default(sql`(unixepoch())`),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.projectId, t.recipeId] }),
-    projectIdx: index("project_hidden_recipes_project_idx").on(t.projectId),
-  })
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.recipeId] }),
+    index("project_hidden_recipes_project_idx").on(t.projectId),
+  ]
 );
 
 /**
