@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 /** ログイン画面で選択できる認証手段の識別子 */
 export type LoginMethod = "credentials" | "github" | "google" | "passkey" | "resend";
@@ -26,21 +26,25 @@ export function rememberLoginMethod(method: LoginMethod): void {
   }
 }
 
+function subscribe(onChange: () => void): () => void {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
+}
+
+function getSnapshot(): LoginMethod | null {
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    return isLoginMethod(stored) ? stored : null;
+  } catch {
+    // 読めない場合はバッジを出さないだけ
+    return null;
+  }
+}
+
 /**
  * 前回ログインに使った認証手段を返す。
- * SSR と初回描画の不一致を避けるため、マウント後に読み込む。
+ * サーバー描画時は不明なため null を返し、ハイドレート後にバッジが現れる。
  */
 export function useLastLoginMethod(): LoginMethod | null {
-  const [method, setMethod] = useState<LoginMethod | null>(null);
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (isLoginMethod(stored)) setMethod(stored);
-    } catch {
-      // 読めない場合はバッジを出さないだけ
-    }
-  }, []);
-
-  return method;
+  return useSyncExternalStore(subscribe, getSnapshot, () => null);
 }
