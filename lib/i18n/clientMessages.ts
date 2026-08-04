@@ -37,7 +37,7 @@ function pickBranch(source: AbstractIntlMessages, keys: readonly string[]): Abst
 /** SettingsSidebar が引く見出しキー。各セクションの title だけを残す */
 const SETTINGS_SIDEBAR_SECTIONS = [
   "account",
-  "apiKeys",
+  "developer",
   "integration",
   "notifications",
   "posting",
@@ -57,9 +57,17 @@ function pickSettingsSidebar(settings: AbstractIntlMessages): AbstractIntlMessag
   return picked;
 }
 
+/**
+ * 特定のルートでしか使わないネームスペース。
+ * クライアントから参照はされるが、そのページが自前の Provider で明示的に渡すため、
+ * ルート共通の配布物に含める必要がない。
+ */
+const ROUTE_SCOPED_NAMESPACES = ["OAuth"] as const;
+
 function omitServerOnly(messages: AbstractIntlMessages): AbstractIntlMessages {
   const rest = { ...messages };
   for (const namespace of SERVER_ONLY_NAMESPACES) delete rest[namespace];
+  for (const namespace of ROUTE_SCOPED_NAMESPACES) delete rest[namespace];
   return rest;
 }
 
