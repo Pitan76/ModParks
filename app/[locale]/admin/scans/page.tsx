@@ -52,8 +52,6 @@ export default async function AdminScansPage({ params, searchParams }: AdminScan
     getTopScanFindings(),
   ]);
 
-  const totalPages = Math.max(1, Math.ceil((counts[filter] ?? 0) / SCAN_LOG_PAGE_SIZE));
-
   return (
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>{tAdmin("scans.listTitle")}</Typography>
@@ -92,7 +90,12 @@ export default async function AdminScansPage({ params, searchParams }: AdminScan
         }}
       />
 
-      <PaginationControls currentPage={page} totalPages={totalPages} basePath={`/admin/scans?status=${filter}`} />
+      <PaginationControls
+        totalCount={counts[filter] ?? 0}
+        currentPage={page}
+        currentLimit={SCAN_LOG_PAGE_SIZE}
+        sx={{ mt: 3 }}
+      />
     </Box>
   );
 }
