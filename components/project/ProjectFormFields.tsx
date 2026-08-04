@@ -109,6 +109,7 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
             { value: "datapack", label: t("type.datapack") },
             { value: "shader", label: t("type.shader") },
             { value: "modpack", label: t("type.modpack") },
+            { value: "other", label: t("type.other") },
           ]}
           formControlProps={{ required: true }}
           onChange={onChange}

@@ -5,6 +5,7 @@ export const CONTENT_TYPES = [
   "datapack",
   "shader",
   "modpack",
+  "other",
 ] as const;
 
 export type ContentType = (typeof CONTENT_TYPES)[number];

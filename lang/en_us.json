@@ -206,7 +206,8 @@
       "resourcepack": "Resource Pack",
       "datapack": "Data Pack",
       "shader": "Shader",
-      "modpack": "Modpack"
+      "modpack": "Modpack",
+      "other": "Other"
     },
     "fields": {
       "name": "Project Name",
@@ -1138,7 +1139,8 @@
       "resourcepack": "Resource Pack",
       "datapack": "Data Pack",
       "shader": "Shader",
-      "modpack": "Modpack"
+      "modpack": "Modpack",
+      "other": "Other"
     },
     "sort": {
       "label": "Sort By",

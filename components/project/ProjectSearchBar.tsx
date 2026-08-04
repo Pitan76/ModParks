@@ -185,9 +185,10 @@ const ProjectSearchBar = ({
               { value: "datapack", label: t("filters.datapack") },
               { value: "shader", label: t("filters.shader") },
               { value: "modpack", label: t("filters.modpack") },
+              { value: "other", label: t("filters.other") },
             ]}
             renderSelected={(selected) => {
-              if (selected.length === 6) return t("filters.all");
+              if (selected.length === 7) return t("filters.all");
               if (selected.length >= 4) return selected.slice(0, 3).map((v) => t(`filters.${v}`)).join(", ") + "...";
               return selected.map((v) => t(`filters.${v}`)).join(", ");
             }}

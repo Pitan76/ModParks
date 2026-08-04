@@ -206,7 +206,8 @@
       "resourcepack": "リソースパック",
       "datapack": "データパック",
       "shader": "シェーダー",
-      "modpack": "MODパック"
+      "modpack": "MODパック",
+      "other": "その他"
     },
     "fields": {
       "name": "プロジェクト名",
@@ -1146,7 +1147,8 @@
       "resourcepack": "リソースパック",
       "datapack": "データパック",
       "shader": "シェーダー",
-      "modpack": "MODパック"
+      "modpack": "MODパック",
+      "other": "その他"
     },
     "sort": {
       "label": "並び順",

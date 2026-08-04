@@ -13,6 +13,7 @@ import { toPlainDescription } from "@/lib/utils/plainText";
 import { useCartEnabled } from "@/components/cart/cartStore";
 import ProjectTypeBadge from "./ProjectTypeBadge";
 import CartToggleButton from "./card/CartToggleButton";
+import { type ContentType } from "@/lib/data/projectTypes";
 import ProjectCardMeta from "./card/ProjectCardMeta";
 import { useProjectContextMenu } from "./card/useProjectContextMenu";
 
@@ -23,7 +24,7 @@ export type ProjectCardProps = {
     title:       string;
     body:        string;
     iconUrl:     string | null;
-    type:        "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
+    type:        ContentType;
     license:     string;
     downloads:   number;
     totalDownloads: number;

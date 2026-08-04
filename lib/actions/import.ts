@@ -8,13 +8,14 @@ import { createId } from "@paralleldrive/cuid2";
 import { revalidatePath } from "next/cache";
 import { fetchCfAuthorProjects } from "@/lib/curseforge";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
+import { type ContentType } from "@/lib/data/projectTypes";
 
 export interface ImportedProject {
   id: string;
   name: string;
   slug: string;
   description: string;
-  type: "mod" | "plugin" | "resourcepack" | "datapack" | "shader" | "modpack";
+  type: ContentType;
   license?: string;
   sourceUrl?: string;
   issueTrackerUrl?: string;

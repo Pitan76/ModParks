@@ -14,6 +14,7 @@ const TYPE_COLOR: Record<string, "primary" | "secondary" | "success" | "warning"
   datapack:     "warning",
   shader:       "info",
   modpack:      "error",
+  other:        "default",
 };
 
 /** プロジェクトの種別（mod, plugin等）に応じた色分けバッジ */
