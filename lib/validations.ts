@@ -2,7 +2,7 @@ import { z } from "zod";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { MC_VERSIONS, type McVersion } from "@/lib/data/minecraftVersions";
 import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
-import { CONTENT_TYPES, type ContentType } from "@/lib/data/projectTypes";
+import { CONTENT_TYPES } from "@/lib/data/projectTypes";
 
 const LICENSES = [
   "MIT",
