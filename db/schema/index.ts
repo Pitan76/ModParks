@@ -4,6 +4,7 @@
  * ファイルに分けたうえでここから再公開する。drizzle-kit もこのファイルを参照する。
  */
 export * from "./auth";
+export * from "./oauth";
 export * from "./posts";
 export * from "./projects";
 export * from "./ideas";

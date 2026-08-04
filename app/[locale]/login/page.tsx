@@ -41,6 +41,13 @@ export default function LoginPage() {
 
   const registered = searchParams?.get("registered") === "true";
 
+  // OAuth 同意画面などから来た場合に元の場所へ戻す。
+  // 外部URLを渡されると誘導に使われるため、自サイト内の相対パスだけを受け付ける。
+  const requestedCallback = searchParams?.get("callbackUrl") ?? "";
+  const callbackUrl = requestedCallback.startsWith("/") && !requestedCallback.startsWith("//")
+    ? requestedCallback
+    : `/${locale}/projects`;
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -89,19 +96,19 @@ export default function LoginPage() {
       setLoading(false);
     } else {
       rememberLoginMethod("credentials");
-      router.push(`/${locale}/projects`);
+      router.push(callbackUrl);
       router.refresh();
     }
   }
 
   const handleGithubLogin = () => {
     rememberLoginMethod("github");
-    signIn("github", { callbackUrl: `/${locale}/projects` });
+    signIn("github", { callbackUrl });
   };
 
   const handleGoogleLogin = () => {
     rememberLoginMethod("google");
-    signIn("google", { callbackUrl: `/${locale}/projects` });
+    signIn("google", { callbackUrl });
   };
 
   return (
