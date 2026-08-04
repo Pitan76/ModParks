@@ -88,19 +88,13 @@ npm run dev
 - `workers/`: メインアプリとは別にデプロイする Cloudflare Worker 群
 
 ## サイドカー Worker (`workers/jar`)
-
-JAR/ZIP の解析処理は、メインアプリではなく **`modparks-jar` という別 Worker** で動いています。
+jar/zipの解析処理は、メインアプリではなく **`modparks-jar` という別 Worker** で動いています。
 
 ### なぜ分けているか
-Cloudflare Workers の無料プランには 1 Worker あたり 3072 KiB (gzip) というスクリプトサイズ上限があり、
-本体はここに張り付いています。JAR を開くための `jszip` はサーバーバンドルに
-RSC 用 + SSR 用で複数コピー入るため、単体で 100 KiB 以上を占めていました。
+Cloudflare Workers の無料プランには 1 Worker あたり 3072 KiB (gzip) というスクリプトサイズ上限があり、本体はここに張り付いています。
+jarを開くための `jszip` はサーバーバンドルにRSC+SSRで複数コピー入るため、単体で100KiB以上を占めていました。
 
-重要なのは、この問題はアプリを機能ごとに分割しても解決しないという点です。
-本体バンドルの約 8 割は Next.js のランタイムであり、admin などを別 Worker に切り出しても
-両方が同じランタイムを丸ごと抱えるだけでサイズは減りません。
-対して素の Worker であるサイドカーはランタイム負担がほぼゼロなので、
-重量ライブラリの隔離先として機能します。今後また上限に迫った場合も、同じ形で逃がすのが定石です。
+本体バンドルの約8割はNext.jsのランタイムでした。サイドカーはランタイム負担がほぼゼロなので、重量ライブラリの隔離先として機能します。
 
 ### 構成
 
@@ -122,8 +116,8 @@ RSC 用 + SSR 用で複数コピー入るため、単体で 100 KiB 以上を占
 
 ### 制約
 
-- **この Worker は公開していません** (`workers_dev = false`, routes なし)。
-  `/extract-recipes` は R2 と CDN への書き込みを行うため、公開すると誰でも任意の内容を書き込めてしまいます。
+- このWorkerはURLとして外部公開してはなりません (`workers_dev = false`, routes なし)。
+  `/extract-recipes` は R2 と CDN への書き込みを行うため、公開すると誰でも任意の内容を書き込めるため。
 - **`workers/jar/` から親の `@/...` を import しないこと。** 将来この Worker を
   別リポジトリ (git submodule) に切り出せる状態を保つためです。
   共有が必要なドメインデータは `lib/data/` に置き、相対パスで参照します。
@@ -143,7 +137,7 @@ npx wrangler secret put RECIPE_CDN_SECRET
 アプリ内通知（`dispatchNotifications`）に相乗りして、ブラウザ/ホーム画面アプリへ Web Push を配信します。種別ごとの受信可否は既存の通知設定（`notificationPrefs`）を尊重し、端末単位の ON/OFF は設定 →「通知」タブのトグルで行います。
 
 - 本文暗号化（RFC 8291 aes128gcm）と VAPID 署名（RFC 8292）は Node crypto 依存の `web-push` が Workers で動かないため、`workers/push`（`modparks-push`）サイドカーに Web Crypto 実装として隔離しています。
-- iPhone/iPad はホーム画面に追加したPWAでのみプッシュを受信できます（iOS 16.4+、Safari のタブ状態では不可）。
+- iOSはホーム画面に追加したPWAでのみプッシュを受信できます（iOS 16.4+、Safari のタブ状態では不可）。
 
 ### セットアップ
 
