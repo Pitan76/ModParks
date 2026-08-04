@@ -141,7 +141,12 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
           {/* ProjectFormFields のフォームフィールド名（name/description）は
               Server Action (updateProject) の契約に合わせて変えていない。
               project.title / project.body から詰め替えて渡す */}
-          <ProjectFormFields error={error} project={{ ...project, name: project.title, description: project.body } as any} availableTags={availableTags}>
+          <ProjectFormFields
+            error={error}
+            project={{ ...project, name: project.title, description: project.body } as any}
+            availableTags={availableTags}
+            onChange={() => setDirty(true)}
+          >
             <FormControl fullWidth required>
               <InputLabel id="project-status-label">{t("fields.status")}</InputLabel>
               <Select
@@ -150,6 +155,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
                 name="status"
                 label={t("fields.status")}
                 defaultValue={project.visibility}
+                onChange={() => setDirty(true)}
               >
                 <MenuItem value="public">{tCommon("visibility.public")}</MenuItem>
                 <MenuItem value="unlisted">{tCommon("visibility.unlisted")}</MenuItem>
@@ -160,11 +166,11 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
           </ProjectFormFields>
 
           <FormControlLabel
-            control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} />}
+            control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} onChange={() => setDirty(true)} />}
             label={t("fields.commentsEnabled")}
           />
           <FormControlLabel
-            control={<Switch name="recipesEnabled" defaultChecked={!!project.recipesEnabled} />}
+            control={<Switch name="recipesEnabled" defaultChecked={!!project.recipesEnabled} onChange={() => setDirty(true)} />}
             label={t("fields.recipesEnabled")}
           />
 

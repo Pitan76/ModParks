@@ -12,7 +12,7 @@ import FormTextField from "@/components/ui/form/FormTextField";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import TagAutocomplete from "./TagAutocomplete";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
@@ -47,17 +47,27 @@ export type ProjectFormFieldsProps = {
   defaultLicense?: string;
   defaultBodyFormat?: string;
   children?: ReactNode;
+  onChange?: () => void;
 };
 
 /**
  * 新規作成や編集ページにおいて、プロジェクトの基本情報（名称、説明、タグ、ライセンス、リンク等）を編集するフォームフィールド群コンポーネント。
  */
-const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense, defaultBodyFormat, children }: ProjectFormFieldsProps) => {
+const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense, defaultBodyFormat, children, onChange }: ProjectFormFieldsProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Project");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
   
   const { links, addLink, removeLink, changeLink, moveLink } = useLinksEditor(project?.links);
+
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    onChange?.();
+  }, [links, onChange]);
 
   return (
     <>
@@ -101,6 +111,7 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
             { value: "modpack", label: t("type.modpack") },
           ]}
           formControlProps={{ required: true }}
+          onChange={onChange}
         />
         {children}
       </Stack>
@@ -119,6 +130,7 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
               { value: "pukiwiki", label: "PukiWiki" },
             ]}
             formControlProps={{ sx: { minWidth: 150 } }}
+            onChange={onChange}
           />
         </Box>
         <FormTextField
@@ -142,7 +154,10 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
       <TagAutocomplete
         availableTags={availableTags}
         tags={tags}
-        onChange={setTags}
+        onChange={(newTags) => {
+          setTags(newTags);
+          onChange?.();
+        }}
         label={t("fields.tags")}
         placeholder={t("fields.tags")}
         error={!!error?.tags}
@@ -163,6 +178,7 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
           label={t("fields.license")}
           errorMessages={error?.license}
           renderInputProps={{ name: "license", required: true }}
+          onChange={() => onChange?.()}
         />
         <FormTextField
           id="project-source"
