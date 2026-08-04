@@ -506,7 +506,10 @@
       "externalUrl": "Download URL",
       "externalUrlHelper": "Supports GitHub Releases, Modrinth, and CurseForge URLs",
       "extractRecipes": "Extract and upload recipes from JAR",
-      "extracting": "Extracting recipes..."
+      "extracting": "Extracting recipes...",
+      "reusePrevious": "You can reuse the settings from the previous version ({version})",
+      "reuseApply": "Reuse",
+      "reuseApplied": "Reused"
     },
     "loaders": {
       "fabric": "Fabric",
@@ -628,6 +631,7 @@
       "loginWithGoogle": "Log in with Google",
       "loginWithPasskey": "Log in with Passkey",
       "loginWithEmail": "Log in with Magic Link",
+      "lastUsed": "You used this method last time",
       "providerPasskey": "Passkey",
       "magicLinkDesc": "Enter your email address and we will send you a link to sign in without a password.",
       "sendMagicLink": "Send Sign-in Link",

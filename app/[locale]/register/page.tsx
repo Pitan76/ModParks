@@ -13,6 +13,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
 import { Link } from "@/lib/i18n/routing";
 import { sendRegistrationEmail } from "@/lib/actions/auth";
+import { rememberLoginMethod } from "@/lib/hooks/useLastLoginMethod";
 import { signIn } from "next-auth/react";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -25,10 +26,12 @@ const RegisterPage = () => {
   const locale = useLocale();
 
   const handleGithubLogin = () => {
+    rememberLoginMethod("github");
     signIn("github", { callbackUrl: `/${locale}/projects` });
   };
 
   const handleGoogleLogin = () => {
+    rememberLoginMethod("google");
     signIn("google", { callbackUrl: `/${locale}/projects` });
   };
 

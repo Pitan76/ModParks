@@ -123,7 +123,12 @@ const ProjectVersionsManager = ({
         cancelText={tCommon("close")}
       >
         <Box sx={{ mt: 2 }}>
-          <VersionUploadForm slug={projectSlug} openIdeas={openIdeas} availablePlatforms={availablePlatforms} />
+          <VersionUploadForm
+            slug={projectSlug}
+            openIdeas={openIdeas}
+            availablePlatforms={availablePlatforms}
+            previousSettings={m.previousSettings}
+          />
         </Box>
       </AbstractDialog>
     </Box>

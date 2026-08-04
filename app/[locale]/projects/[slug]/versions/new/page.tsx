@@ -6,6 +6,7 @@ import { inArray, eq } from "drizzle-orm";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import { getTranslations } from "next-intl/server";
 import { getAvailablePlatforms } from "@/lib/queries/masterData";
+import { getPreviousVersionSettings } from "@/lib/queries/previousVersionSettings";
 
 interface NewVersionPageProps {
   params: Promise<{ slug: string }>;
@@ -25,6 +26,7 @@ export default async function NewVersionPage({ params }: NewVersionPageProps) {
     .all();
 
   const availablePlatforms = await getAvailablePlatforms();
+  const previousSettings = await getPreviousVersionSettings(slug);
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
@@ -32,7 +34,12 @@ export default async function NewVersionPage({ params }: NewVersionPageProps) {
         {t("uploadNewVersion")}
       </Typography>
 
-      <VersionUploadForm slug={slug} openIdeas={openIdeas} availablePlatforms={availablePlatforms} />
+      <VersionUploadForm
+        slug={slug}
+        openIdeas={openIdeas}
+        availablePlatforms={availablePlatforms}
+        previousSettings={previousSettings}
+      />
     </Container>
   );
 }

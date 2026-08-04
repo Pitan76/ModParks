@@ -25,6 +25,7 @@ import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 import { useTranslations } from "next-intl";
 import LoaderAutocomplete from "./LoaderAutocomplete";
+import PreviousVersionSettingsBanner, { type PreviousVersionSettings } from "./PreviousVersionSettings";
 
 type OptionItem = {
   slug: string;
@@ -35,6 +36,8 @@ export type VersionUploadFormProps = {
   slug: string;
   openIdeas: { id: string; title: string }[];
   availablePlatforms?: OptionItem[];
+  /** 直前のバージョンの設定。渡された場合のみ流用ボタンを表示する */
+  previousSettings?: PreviousVersionSettings | null;
 };
 
 const MB_LIMIT = 5;
@@ -44,7 +47,7 @@ const FILE_SIZE_LIMIT = MB_LIMIT * 1024 * 1024;
  * プロジェクトの新バージョン（ファイル）をアップロードするフォームコンポーネント。
  * R2への署名付きアップロードと、DBへのバージョン情報登録を行います。
  */
-const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: VersionUploadFormProps) => {
+const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [], previousSettings = null }: VersionUploadFormProps) => {
   const router = useRouter();
   const tVersion = useTranslations("Version");
   const tCommon = useTranslations("Common");
@@ -61,7 +64,17 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
   const [extractRecipes, setExtractRecipes] = useState(true);
   const [parsing, setParsing] = useState(false);
   const [extracting, setExtracting] = useState(false);
+  const [reuseApplied, setReuseApplied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /** JAR 解析結果を上書きしないよう、流用はユーザーの明示操作に限る */
+  const handleReusePrevious = () => {
+    if (!previousSettings) return;
+    setMcVersions(previousSettings.mcVersions);
+    setLoaders(previousSettings.loaders);
+    setReleaseChannel(previousSettings.releaseChannel);
+    setReuseApplied(true);
+  };
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
@@ -173,6 +186,13 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [] }: Version
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}>
+      {previousSettings && (
+        <PreviousVersionSettingsBanner
+          settings={previousSettings}
+          applied={reuseApplied}
+          onApply={handleReusePrevious}
+        />
+      )}
       <Box>
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
           {tVersion("uploadForm.uploadMode")}

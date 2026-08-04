@@ -17,6 +17,8 @@ import DialogActions from "@mui/material/DialogActions";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
 import PasskeyLoginButton from "@/components/auth/PasskeyLoginButton";
+import LastUsedBadge from "@/components/auth/LastUsedBadge";
+import { useLastLoginMethod, rememberLoginMethod } from "@/lib/hooks/useLastLoginMethod";
 import { Link } from "@/lib/i18n/routing";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -32,6 +34,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const tAuth = useTranslations("Auth");
   const locale = useLocale();
+  const lastLoginMethod = useLastLoginMethod();
 
   const [token, setToken] = useState("");
   const [showTwoFactor, setShowTwoFactor] = useState(false);
@@ -85,16 +88,19 @@ export default function LoginPage() {
       }
       setLoading(false);
     } else {
+      rememberLoginMethod("credentials");
       router.push(`/${locale}/projects`);
       router.refresh();
     }
   }
 
   const handleGithubLogin = () => {
+    rememberLoginMethod("github");
     signIn("github", { callbackUrl: `/${locale}/projects` });
   };
 
   const handleGoogleLogin = () => {
+    rememberLoginMethod("google");
     signIn("google", { callbackUrl: `/${locale}/projects` });
   };
 
@@ -157,6 +163,12 @@ export default function LoginPage() {
           >
             {loading ? tAuth("login.loggingIn") : tAuth("login.title")}
           </Button>
+
+          {lastLoginMethod === "credentials" && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1, textAlign: "center" }}>
+              {tAuth("login.lastUsed")}
+            </Typography>
+          )}
         </form>
 
         <Divider sx={{ my: 3 }}>
@@ -164,35 +176,40 @@ export default function LoginPage() {
         </Divider>
 
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
-          <Tooltip title={tAuth("login.loginWithGithub")}>
-            <Button
-              variant="outlined"
-              aria-label={tAuth("login.loginWithGithub")}
-              onClick={handleGithubLogin}
-              sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
-            >
-              <GitHubIcon />
-            </Button>
-          </Tooltip>
+          <LastUsedBadge active={lastLoginMethod === "github"} sx={{ flex: "1 1 0" }}>
+            <Tooltip title={tAuth("login.loginWithGithub")}>
+              <Button
+                variant="outlined"
+                aria-label={tAuth("login.loginWithGithub")}
+                onClick={handleGithubLogin}
+                sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
+              >
+                <GitHubIcon />
+              </Button>
+            </Tooltip>
+          </LastUsedBadge>
 
-          <Tooltip title={tAuth("login.loginWithGoogle")}>
-            <Button
-              variant="outlined"
-              aria-label={tAuth("login.loginWithGoogle")}
-              onClick={handleGoogleLogin}
-              sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
-            >
-              <GoogleIcon />
-            </Button>
-          </Tooltip>
+          <LastUsedBadge active={lastLoginMethod === "google"} sx={{ flex: "1 1 0" }}>
+            <Tooltip title={tAuth("login.loginWithGoogle")}>
+              <Button
+                variant="outlined"
+                aria-label={tAuth("login.loginWithGoogle")}
+                onClick={handleGoogleLogin}
+                sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
+              >
+                <GoogleIcon />
+              </Button>
+            </Tooltip>
+          </LastUsedBadge>
 
-          <PasskeyLoginButton onError={setError} />
+          <PasskeyLoginButton onError={setError} lastUsed={lastLoginMethod === "passkey"} />
         </Box>
 
         <Box sx={{ mt: 2, textAlign: "center" }}>
           <Link href={`/${locale}/magic-link`} style={{ textDecoration: "none" }}>
             <Typography variant="body2" color="primary">
               {tAuth("login.loginWithEmail")}
+              {lastLoginMethod === "resend" && ` (${tAuth("login.lastUsed")})`}
             </Typography>
           </Link>
         </Box>

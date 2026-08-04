@@ -7,6 +7,7 @@ import { deleteVersion, setVersionArchived } from "@/lib/actions/version";
 import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
 import { importGithubRelease } from "@/lib/actions/github";
 import { normalizeReleaseChannel } from "@/lib/releaseChannels";
+import type { PreviousVersionSettings } from "./PreviousVersionSettings";
 
 export type ProjectVersion = {
   id: string;
@@ -51,6 +52,22 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
       return { ...v, releaseChannel: normalizeReleaseChannel(v.releaseChannel), parsedMcVersions: mcvs, date: new Date(v.createdAt) };
     });
   }, [localVersions]);
+
+  /** 新バージョン追加時に流用する、最新バージョンの設定 */
+  const previousSettings = useMemo((): PreviousVersionSettings | null => {
+    if (parsedVersions.length === 0) return null;
+    const latest = parsedVersions.reduce((a, b) => (b.date > a.date ? b : a));
+    let loaders: string[] = [];
+    try {
+      loaders = JSON.parse(latest.loaders) as string[];
+    } catch {}
+    return {
+      versionNumber: latest.versionNumber,
+      mcVersions: latest.parsedMcVersions,
+      loaders,
+      releaseChannel: latest.releaseChannel,
+    };
+  }, [parsedVersions]);
 
   useEffect(() => {
     if (!searchParams) return;
@@ -143,6 +160,7 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
   return {
     localVersions,
     parsedVersions,
+    previousSettings,
     deleteId,
     setDeleteId,
     editTarget,

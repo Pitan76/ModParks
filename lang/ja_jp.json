@@ -512,7 +512,10 @@
       "externalUrl": "ダウンロードURL",
       "externalUrlHelper": "GitHub Releases, Modrinth, CurseForge のURLが使用できます",
       "extractRecipes": "JARからレシピを抽出してアップロード",
-      "extracting": "レシピを抽出中..."
+      "extracting": "レシピを抽出中...",
+      "reusePrevious": "前回のバージョン ({version}) の設定を流用できます",
+      "reuseApply": "流用する",
+      "reuseApplied": "流用しました"
     },
     "loaders": {
       "fabric": "Fabric",
@@ -636,6 +639,7 @@
       "loginWithGoogle": "Google でログイン",
       "loginWithPasskey": "パスキーでログイン",
       "loginWithEmail": "マジックリンクでログイン",
+      "lastUsed": "前回はこの方法でログインしました",
       "providerPasskey": "パスキー",
       "magicLinkDesc": "メールアドレスを入力してください。パスワードなしでログインできるリンクを送信します。",
       "sendMagicLink": "ログインリンクを送信",

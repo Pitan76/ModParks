@@ -57,7 +57,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
         }}
       >
         {collection.iconUrl ? (
-          <Avatar src={collection.iconUrl} variant="rounded" sx={{ width: 56, height: 56, boxShadow: 1 }} />
+          <Avatar src={collection.iconUrl} variant="rounded" sx={{ width: 56, height: 56 }} />
         ) : (
           <Avatar variant="rounded" sx={{ width: 56, height: 56, bgcolor: "action.hover", color: "text.secondary" }}>
             {collection.name[0]?.toUpperCase()}

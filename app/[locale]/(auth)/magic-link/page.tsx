@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { Link } from "@/lib/i18n/routing";
 import { signIn } from "next-auth/react";
+import { rememberLoginMethod } from "@/lib/hooks/useLastLoginMethod";
 import { useTranslations, useLocale } from "next-intl";
 
 /**
@@ -23,6 +24,7 @@ export default function MagicLinkPage() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
+    rememberLoginMethod("resend");
     signIn("resend", { email, callbackUrl: `/${locale}/projects` });
   }
 
