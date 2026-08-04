@@ -76,6 +76,7 @@ export async function issueIdToken(claims: IdTokenClaims): Promise<string> {
 
 /** JWKS で配る公開鍵。秘密パラメータ d は必ず落とす */
 export async function getPublicJwks() {
-  const { d, ...pub } = await readPrivateJwk() as PrivateJwk & { d?: string };
-  return { keys: [{ ...pub, alg: ALG, use: "sig" }] };
+  const jwk = await readPrivateJwk() as PrivateJwk & { d?: string };
+  delete jwk.d;
+  return { keys: [{ ...jwk, alg: ALG, use: "sig" }] };
 }

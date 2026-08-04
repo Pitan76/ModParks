@@ -11,7 +11,7 @@ import { DEFAULT_CLIENT_SCOPES, isOAuthScope, formatScope } from "@/lib/oauth/sc
 import { deleteGrant } from "@/lib/oauth/grants";
 import { revokeClientTokens } from "@/lib/oauth/tokens";
 
-const SETTINGS_PATH = "/settings/oauth-apps";
+const SETTINGS_PATH = "/settings/developer";
 
 export type OAuthAppInput = {
   name: string;

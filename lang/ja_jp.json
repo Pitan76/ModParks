@@ -1532,6 +1532,10 @@
         "notFound": "アプリが見つかりませんでした。",
         "publicClient": "公開クライアントにはシークレットがありません。"
       }
+    },
+    "developer": {
+      "title": "開発者設定",
+      "description": "APIキーと OAuth アプリなど、外部から ModParks を利用するための設定です。"
     }
   },
   "Legal": {

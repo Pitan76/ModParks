@@ -9,7 +9,6 @@ import PostAddIcon from "@mui/icons-material/PostAdd";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import HubIcon from "@mui/icons-material/Hub";
 import RedeemIcon from "@mui/icons-material/Redeem";
-import AppsIcon from "@mui/icons-material/Apps";
 import { useTranslations } from "next-intl";
 import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
@@ -41,8 +40,7 @@ const SettingsSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onTogg
         { id: "settings-posting", label: t("posting.title"), path: "/settings/posting", icon: <PostAddIcon /> },
         { id: "settings-notifications", label: t("notifications.title"), path: "/settings/notifications", icon: <NotificationsIcon /> },
         { id: "settings-integration", label: t("integration.title"), path: "/settings/integration", icon: <HubIcon /> },
-        { id: "settings-api-keys", label: t("apiKeys.title"), path: "/settings/api-keys", icon: <VpnKeyIcon /> },
-        { id: "settings-oauth-apps", label: t("oauthApps.title"), path: "/settings/oauth-apps", icon: <AppsIcon /> },
+        { id: "settings-developer", label: t("developer.title"), path: "/settings/developer", icon: <VpnKeyIcon /> },
         { id: "settings-rewards", label: t("rewards.title"), path: "/settings/rewards", icon: <RedeemIcon /> },
       ]
     : [];

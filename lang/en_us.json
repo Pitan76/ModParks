@@ -1524,6 +1524,10 @@
         "notFound": "App not found.",
         "publicClient": "Public clients have no secret."
       }
+    },
+    "developer": {
+      "title": "Developer",
+      "description": "Settings for using ModParks from outside: API keys and OAuth apps."
     }
   },
   "Legal": {
