@@ -740,7 +740,8 @@
       "backup": "バックアップ",
       "audit": "監査ログ",
       "recipe": "レシピ管理",
-      "scans": "スキャンログ"
+      "scans": "スキャンログ",
+      "oauth": "OAuthアプリ管理"
     },
     "recipe": {
       "title": "レシピ管理",
@@ -795,6 +796,26 @@
       "error": "エラー",
       "loading": "処理中...",
       "resultPlaceholder": "実行した操作のログがここに表示されます。"
+    },
+    "oauth": {
+      "title": "OAuth アプリケーション管理",
+      "name": "アプリケーション名",
+      "clientId": "クライアントID",
+      "owner": "開発者",
+      "redirectUris": "リダイレクトURI",
+      "scopes": "スコープ",
+      "trusted": "公式連携",
+      "status": "ステータス",
+      "statusActive": "有効",
+      "statusDisabled": "無効",
+      "btnApprove": "承認 (Trust)",
+      "btnRevokeApprove": "承認解除",
+      "btnDisable": "無効化",
+      "btnEnable": "有効化",
+      "noClients": "登録されているOAuthアプリケーションはありません。",
+      "cardDesc": "外部連携用 OAuth アプリケーションの公式承認(Trust)や無効化の管理を行います。",
+      "success": "成功しました",
+      "error": "エラーが発生しました"
     },
     "appeals": {
       "listTitle": "スキャン異議申請",

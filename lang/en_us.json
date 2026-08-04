@@ -732,7 +732,8 @@
       "backup": "Backup",
       "audit": "Audit Logs",
       "recipe": "Recipe Management",
-      "scans": "Scan logs"
+      "scans": "Scan logs",
+      "oauth": "OAuth Apps"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -787,6 +788,26 @@
       "error": "Error",
       "loading": "Processing...",
       "resultPlaceholder": "Logs of executed actions will be displayed here."
+    },
+    "oauth": {
+      "title": "OAuth Applications",
+      "name": "App Name",
+      "clientId": "Client ID",
+      "owner": "Owner",
+      "redirectUris": "Redirect URIs",
+      "scopes": "Scopes",
+      "trusted": "Trusted",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusDisabled": "Disabled",
+      "btnApprove": "Trust",
+      "btnRevokeApprove": "Untrust",
+      "btnDisable": "Disable",
+      "btnEnable": "Enable",
+      "noClients": "No OAuth applications found.",
+      "cardDesc": "Manage OAuth applications for external integrations, including trust approval and disablement.",
+      "success": "Success",
+      "error": "Error occurred"
     },
     "appeals": {
       "listTitle": "Scan Appeals",

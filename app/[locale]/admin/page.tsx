@@ -12,6 +12,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import FlagIcon from "@mui/icons-material/Flag";
 import HistoryIcon from "@mui/icons-material/History";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 
 interface AdminDashboardProps {
   params: Promise<{ locale: string }>;
@@ -92,6 +93,27 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                   <LinkButton variant="outlined" href="/admin/recipe">
                     {tAdmin("sidebar.recipe")}
+                  </LinkButton>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card>
+            <CardContent>
+              <Stack spacing={2}>
+                <VpnKeyIcon sx={{ fontSize: 40, color: "info.main" }} />
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{tAdmin("oauth.title")}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {tAdmin("oauth.cardDesc")}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <LinkButton variant="outlined" href="/admin/oauth">
+                    {tAdmin("sidebar.oauth")}
                   </LinkButton>
                 </Box>
               </Stack>
