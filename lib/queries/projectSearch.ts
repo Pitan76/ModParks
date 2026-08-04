@@ -12,6 +12,7 @@ export interface ProjectSearchParams {
   loaders?: string[];
   mcVersions?: string[];
   tags?: string[];
+  licenses?: string[];
   searchMode?: "AND" | "OR";
   includeDesc?: boolean;
   includeTags?: boolean;
@@ -25,7 +26,7 @@ export interface ProjectSearchParams {
  */
 export function buildProjectSearchConditions(params: ProjectSearchParams): SQL[] {
   const {
-    q, types, authorId, authorUsername, loaders, mcVersions, tags,
+    q, types, authorId, authorUsername, loaders, mcVersions, tags, licenses,
     searchMode = "OR", includeDesc = true, includeTags = true, includeAuthor = true,
   } = params;
 
@@ -83,6 +84,10 @@ export function buildProjectSearchConditions(params: ProjectSearchParams): SQL[]
     conditions.push(
       sql`EXISTS (SELECT 1 FROM project_tags pt WHERE pt.project_id = ${projects.id} AND ${inArray(sql`pt.tag`, tags)})`
     );
+  }
+
+  if (licenses && licenses.length > 0) {
+    conditions.push(inArray(projects.license, licenses));
   }
 
   return conditions;

@@ -27,6 +27,7 @@ export type ProjectSearchBarProps = {
   initialLoaders?: string[];
   initialMcVersions?: string[];
   initialTags?: string[];
+  initialLicenses?: string[];
   initialSearchMode?: string;
   initialIncludeDesc?: boolean;
   initialIncludeTags?: boolean;
@@ -48,6 +49,7 @@ const ProjectSearchBar = ({
   initialLoaders = [],
   initialMcVersions = [],
   initialTags = [],
+  initialLicenses = [],
   initialSearchMode = "OR",
   initialIncludeDesc = true,
   initialIncludeTags = true,
@@ -72,6 +74,7 @@ const ProjectSearchBar = ({
     loaders: initialLoaders,
     mcVersions: initialMcVersions,
     tags: initialTags,
+    licenses: initialLicenses,
     searchMode: initialSearchMode,
     includeDesc: initialIncludeDesc,
     includeTags: initialIncludeTags,
@@ -93,6 +96,7 @@ const ProjectSearchBar = ({
       if (filters.loaders.length > 0) params.set("loaders", filters.loaders.join(","));
       if (filters.mcVersions.length > 0) params.set("mcVersions", filters.mcVersions.join(","));
       if (filters.tags.length > 0) params.set("tags", filters.tags.join(","));
+      if (filters.licenses.length > 0) params.set("licenses", filters.licenses.join(","));
       
       if (filters.searchMode !== "OR") params.set("searchMode", filters.searchMode);
       if (!filters.includeDesc) params.set("includeDesc", "false");
@@ -130,6 +134,7 @@ const ProjectSearchBar = ({
     advancedFilters.loaders.length > 0 || 
     advancedFilters.mcVersions.length > 0 || 
     advancedFilters.tags.length > 0 || 
+    advancedFilters.licenses.length > 0 || 
     appliedSort !== "updated" || 
     advancedFilters.searchMode !== "OR" || 
     !advancedFilters.includeDesc || 

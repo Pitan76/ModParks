@@ -15,12 +15,14 @@ import LoaderAutocomplete from "./LoaderAutocomplete";
 import { useState, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import TagAutocomplete from "./TagAutocomplete";
+import LicenseAutocomplete from "./LicenseAutocomplete";
 
 export type AdvancedSearchFilters = {
   author?: string;
   loaders: string[];
   mcVersions: string[];
   tags: string[];
+  licenses: string[];
   searchMode: string;
   includeDesc: boolean;
   includeTags: boolean;
@@ -61,6 +63,7 @@ const AdvancedSearchDialog = ({
   const [tempLoaders, setTempLoaders] = useState<string[]>(initialFilters.loaders);
   const [tempMcVersions, setTempMcVersions] = useState<string[]>(initialFilters.mcVersions);
   const [tempTags, setTempTags] = useState<string[]>(initialFilters.tags);
+  const [tempLicenses, setTempLicenses] = useState<string[]>(initialFilters.licenses || []);
   const [tempSearchMode, setTempSearchMode] = useState(initialFilters.searchMode);
   const [tempIncludeDesc, setTempIncludeDesc] = useState(initialFilters.includeDesc);
   const [tempIncludeTags, setTempIncludeTags] = useState(initialFilters.includeTags);
@@ -73,6 +76,7 @@ const AdvancedSearchDialog = ({
       setTempLoaders(initialFilters.loaders);
       setTempMcVersions(initialFilters.mcVersions);
       setTempTags(initialFilters.tags);
+      setTempLicenses(initialFilters.licenses || []);
       setTempSearchMode(initialFilters.searchMode);
       setTempIncludeDesc(initialFilters.includeDesc);
       setTempIncludeTags(initialFilters.includeTags);
@@ -87,6 +91,7 @@ const AdvancedSearchDialog = ({
       loaders: tempLoaders,
       mcVersions: tempMcVersions,
       tags: tempTags,
+      licenses: tempLicenses,
       searchMode: tempSearchMode,
       includeDesc: tempIncludeDesc,
       includeTags: tempIncludeTags,
@@ -173,6 +178,14 @@ const AdvancedSearchDialog = ({
           tags={tempTags}
           onChange={setTempTags}
           label={t("tags")}
+          size="small"
+          required={false}
+        />
+
+        <LicenseAutocomplete
+          value={tempLicenses}
+          onChange={setTempLicenses}
+          label={t("licenses")}
           size="small"
           required={false}
         />

@@ -17,7 +17,7 @@ import { CONTENT_TYPES } from "@/lib/data/projectTypes";
 interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
   searchParams: Promise<{ 
-    q?: string; types?: string; author?: string; sort?: string; loaders?: string; mcVersions?: string; tags?: string;
+    q?: string; types?: string; author?: string; sort?: string; loaders?: string; mcVersions?: string; tags?: string; licenses?: string;
     searchMode?: string; includeDesc?: string; includeTags?: string; includeAuthor?: string; includeExtDl?: string;
     page?: string; limit?: string;
   }>;
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: ProjectsPageProps): Promise<M
 export default async function ProjectsPage({ params, searchParams }: ProjectsPageProps) {
   const { locale } = await params;
   const { 
-    q, types, author, sort, loaders, mcVersions, tags,
+    q, types, author, sort, loaders, mcVersions, tags, licenses,
     searchMode, includeDesc, includeTags, includeAuthor, includeExtDl,
     page: pageStr, limit: limitStr
   } = await searchParams;
@@ -58,6 +58,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const loadersArr = loaders ? loaders.split(",") : undefined;
   const mcVersionsArr = mcVersions ? mcVersions.split(",") : undefined;
   const tagsArr = tags ? tags.split(",") : undefined;
+  const licensesArr = licenses ? licenses.split(",") : undefined;
 
   const isIncludeDesc = includeDesc !== "false";
   const isIncludeTags = includeTags !== "false";
@@ -79,6 +80,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     loaders: loadersArr,
     mcVersions: mcVersionsArr,
     tags: tagsArr,
+    licenses: licensesArr,
     searchMode: sm,
     includeDesc: isIncludeDesc,
     includeTags: isIncludeTags,
@@ -135,6 +137,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
         initialLoaders={loadersArr || []}
         initialMcVersions={mcVersionsArr || []}
         initialTags={tagsArr || []}
+        initialLicenses={licensesArr || []}
         initialSearchMode={sm}
         initialIncludeDesc={isIncludeDesc}
         initialIncludeTags={isIncludeTags}

@@ -17,6 +17,7 @@ type GetProjectsParams = {
   loaders?: string[];
   mcVersions?: string[];
   tags?: string[];
+  licenses?: string[];
   searchMode?: "AND" | "OR";
   includeDesc?: boolean;
   includeTags?: boolean;

@@ -1222,6 +1222,7 @@
     "platforms": "プラットフォーム",
     "mcVersions": "MCバージョン",
     "tags": "タグ (入力/選択)",
+    "licenses": "ライセンス",
     "apply": "適用",
     "filters": {
       "type": "種類",

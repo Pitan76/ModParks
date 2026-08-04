@@ -1214,6 +1214,7 @@
     "platforms": "Platforms / Loaders",
     "mcVersions": "MC Versions",
     "tags": "Tags (Type/Select)",
+    "licenses": "Licenses",
     "apply": "Apply",
     "filters": {
       "type": "Type",
