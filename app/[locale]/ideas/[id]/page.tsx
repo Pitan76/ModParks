@@ -21,6 +21,7 @@ import { canonicalUrl } from "@/lib/seo/canonical";
 import { getIdeaMeta, getIdeaDetail } from "./ideaDetailData";
 import ResolvedProjects from "./ResolvedProjects";
 import IdeaComments from "./IdeaComments";
+import ReportDialog from "@/components/project/ReportDialog";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { id, locale } = await params;
@@ -126,6 +127,9 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <IdeaLikeButton ideaId={id} initialCount={initialCount} initialLiked={initialLiked} isLoggedIn={!!session} variant="icon" />
             <ShareMenuButton url={`${SITE_URL}/ideas/${id}`} title={ideaData.title} />
+            {session?.user && session.user.id !== ideaData.authorId && (
+              <ReportDialog targetType="idea" targetId={id} />
+            )}
           </Box>
           <Box
             sx={{

@@ -84,6 +84,7 @@ export default async function AdminScansPage({ params, searchParams }: AdminScan
           findings: tAdmin("scans.columns.findings"),
           scannedAt: tAdmin("scans.columns.scannedAt"),
           appeal: tAdmin("scans.columns.appeal"),
+          actions: tAdmin("scans.columns.actions"),
           notScanned: tAdmin("scans.notScanned"),
           empty: tAdmin("scans.empty"),
           noFindings: tAdmin("scans.noFindings"),

@@ -539,7 +539,12 @@
   },
   "Report": {
     "title": "通報する",
-    "description": "このプロジェクトに問題があると思われる場合は、以下のフォームから通報してください。",
+    "description": {
+      "project": "このプロジェクトに問題があると思われる場合は、以下のフォームから通報してください。",
+      "idea": "このアイデアに問題があると思われる場合は、以下のフォームから通報してください。",
+      "comment": "このコメントに問題があると思われる場合は、以下のフォームから通報してください。",
+      "user": "このユーザーに問題があると思われる場合は、以下のフォームから通報してください。"
+    },
     "detail": "詳細（任意）",
     "reasons": {
       "copyright": "著作権侵害",
@@ -1077,6 +1082,9 @@
       "listTitle": "通報一覧",
       "noReports": "現在のところ通報はありません。",
       "project": "プロジェクト: {name}",
+      "idea": "アイデア: {name}",
+      "comment": "コメント: {content}",
+      "user": "ユーザー: {name}",
       "reporter": "通報者: {name}",
       "reasons": {
         "copyright": "著作権侵害",
@@ -1092,6 +1100,8 @@
       "actions": {
         "resolve": "対応済",
         "unpublish": "非公開にする",
+        "deleteComment": "削除する",
+        "suspendUser": "凍結する",
         "dismiss": "却下"
       }
     },
@@ -1181,12 +1191,26 @@
         "status": "判定",
         "findings": "検出内容",
         "scannedAt": "スキャン日時",
-        "appeal": "異議"
+        "appeal": "異議",
+        "actions": "操作"
       },
       "topFindings": "よく当たっているルール（直近500件）",
       "notScanned": "未実施",
       "noFindings": "検出なし",
-      "empty": "該当するスキャン結果はありません。"
+      "empty": "該当するスキャン結果はありません。",
+      "override": {
+        "action": "判定を変更",
+        "title": "スキャン判定の上書き",
+        "description": "現在の判定は「{current}」です。管理者の裁量で判定を付け替えます。",
+        "notePlaceholder": "理由・備考（作者に開示されます）",
+        "closesAppeal": "このバージョンには保留中の異議申請があります。この操作で同時に裁定されます。",
+        "cancel": "キャンセル",
+        "confirm": "変更する",
+        "errors": {
+          "notFound": "対象のバージョンが見つかりません。",
+          "noChange": "すでにその判定です。"
+        }
+      }
     }
   },
   "Search": {

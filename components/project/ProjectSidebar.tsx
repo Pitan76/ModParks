@@ -165,7 +165,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
 
       {/* 通報 */}
       {isAuthenticated && (
-        <ReportDialog projectId={p.id} />
+        <ReportDialog targetType="project" targetId={p.id} />
       )}
     </Box>
   );

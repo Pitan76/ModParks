@@ -10,6 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { Link } from "@/lib/i18n/routing";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
+import ScanOverrideDialog from "@/components/admin/ScanOverrideDialog";
 import type { ScanLogRow } from "@/lib/queries/adminScans";
 
 type ScanLogTableProps = {
@@ -20,6 +21,7 @@ type ScanLogTableProps = {
     findings: string;
     scannedAt: string;
     appeal: string;
+    actions: string;
     notScanned: string;
     empty: string;
     noFindings: string;
@@ -33,6 +35,9 @@ const STATUS_COLORS: Record<string, "default" | "success" | "warning" | "error" 
   malicious: "error",
   skipped: "default",
 };
+
+/** 管理者が判定を付け替えられる状態。未スキャン・対象外は対象外とする */
+const OVERRIDABLE_STATUSES = new Set(["clean", "suspicious", "malicious"]);
 
 /** scan_findings は JSON 文字列。壊れていても行の描画は止めない */
 function summarizeFindings(raw: string | null): string[] {
@@ -62,6 +67,7 @@ export default function ScanLogTable({ rows, labels }: ScanLogTableProps) {
             <TableCell>{labels.findings}</TableCell>
             <TableCell>{labels.scannedAt}</TableCell>
             <TableCell>{labels.appeal}</TableCell>
+            <TableCell>{labels.actions}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -98,6 +104,16 @@ export default function ScanLogTable({ rows, labels }: ScanLogTableProps) {
                 </TableCell>
                 <TableCell>
                   {row.appealStatus ? <Chip label={row.appealStatus} size="small" variant="outlined" /> : "-"}
+                </TableCell>
+                <TableCell>
+                  {/* スキャン済みの行だけ付け替えられる。未スキャン・対象外は覆す判定が無い */}
+                  {OVERRIDABLE_STATUSES.has(row.scanStatus) ? (
+                    <ScanOverrideDialog
+                      versionId={row.versionId}
+                      currentStatus={row.scanStatus}
+                      hasPendingAppeal={row.appealStatus === "pending"}
+                    />
+                  ) : "-"}
                 </TableCell>
               </TableRow>
             );

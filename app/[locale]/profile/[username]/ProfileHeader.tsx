@@ -6,6 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Link as RoutingLink } from "@/lib/i18n/routing";
 import FollowUserButton from "@/components/user/FollowUserButton";
 import { DownloadLabel } from "@/components/ui/ProjectInfoLabels";
+import ReportDialog from "@/components/project/ReportDialog";
 import ProfileLinks from "./ProfileLinks";
 import ProfileAvatar from "./ProfileAvatar";
 import type { ProfileUser } from "./profileData";
@@ -101,12 +102,18 @@ export default async function ProfileHeader({
             </Box>
           </Box>
 
-          {isOwner && (
+          {isOwner ? (
             <RoutingLink href="/settings/profile" prefetch={false} style={{ textDecoration: "none", flexShrink: 0 }}>
               <Button variant="outlined" startIcon={<EditIcon />} size="small" sx={{ whiteSpace: "nowrap" }}>
                 {tCommon("edit")}
               </Button>
             </RoutingLink>
+          ) : (
+            isLoggedIn && (
+              <Box sx={{ flexShrink: 0 }}>
+                <ReportDialog targetType="user" targetId={user.id} variant="profile" />
+              </Box>
+            )
           )}
         </Box>
 

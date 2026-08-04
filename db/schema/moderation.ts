@@ -9,11 +9,16 @@ import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqli
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
 import { projects, versions } from "./projects";
+import { ideas } from "./ideas";
+import { comments } from "./posts";
 
 // ---- Reports ----
 
 export const reports = sqliteTable("reports", {
   id:         text("id").primaryKey(),
+  targetType: text("target_type", {
+    enum: ["project", "idea", "comment", "user"],
+  }).notNull().default("project"),
   reason:     text("reason", {
     enum: ["copyright", "malware", "spam", "other"],
   }).notNull(),
@@ -25,14 +30,22 @@ export const reports = sqliteTable("reports", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   projectId:  text("project_id")
-    .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
+  ideaId:     text("idea_id")
+    .references(() => ideas.id, { onDelete: "cascade" }),
+  commentId:  text("comment_id")
+    .references(() => comments.id, { onDelete: "cascade" }),
+  userId:     text("user_id")
+    .references(() => users.id, { onDelete: "cascade" }),
   createdAt:  integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 }, (table) => ({
   reporterIdx: index("reports_reporter_idx").on(table.reporterId),
   projectIdx:  index("reports_project_idx").on(table.projectId),
+  ideaIdx:     index("reports_idea_idx").on(table.ideaId),
+  commentIdx:  index("reports_comment_idx").on(table.commentId),
+  userIdx:     index("reports_user_idx").on(table.userId),
 }));
 
 // ---- Scan Appeals ----
@@ -152,6 +165,8 @@ export const moderationAudit = sqliteTable("moderation_audit", {
       "role_change",
       "scan_appeal_approve",
       "scan_appeal_reject",
+      // 異議申請を経ずに管理者がスキャン判定を直接覆した場合
+      "scan_override",
       "suspend_user",
       "unsuspend_user",
       "premium_grant",

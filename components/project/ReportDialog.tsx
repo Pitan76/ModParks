@@ -19,13 +19,15 @@ import { createReport } from "@/lib/actions/report";
 import { REPORT_REASONS } from "@/lib/validations";
 
 export type ReportDialogProps = {
-  projectId: string;
+  targetType: "project" | "idea" | "comment" | "user";
+  targetId: string;
+  variant?: "sidebar" | "comment" | "profile";
 };
 
 /**
- * プロジェクトの問題（コンテンツ違反、バグなど）を通報するダイアログコンポーネント。
+ * コンテンツ違反などの問題を通報するダイアログコンポーネント。
  */
-const ReportDialog = ({ projectId }: ReportDialogProps) => {
+const ReportDialog = ({ targetType, targetId, variant = "sidebar" }: ReportDialogProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Report");
   const [open, setOpen] = useState(false);
@@ -39,13 +41,49 @@ const ReportDialog = ({ projectId }: ReportDialogProps) => {
     const fd = new FormData();
     fd.append("reason", reason);
     fd.append("detail", detail);
-    const result = await createReport(projectId, fd);
+    const result = await createReport(targetType, targetId, fd);
     setPending(false);
     if (result.success) setSuccess(true);
   };
 
-  return (
-    <>
+  const renderTrigger = () => {
+    if (variant === "comment") {
+      return (
+        <Button
+          id={`report-btn-comment-${targetId}`}
+          onClick={() => {
+            setOpen(true);
+            setSuccess(false);
+          }}
+          size="small"
+          color="error"
+          variant="text"
+          sx={{ minWidth: 0, textTransform: "none", ml: 1, px: 1, py: 0.25 }}
+        >
+          {t("title")}
+        </Button>
+      );
+    }
+
+    if (variant === "profile") {
+      return (
+        <Button
+          id="report-btn-profile"
+          onClick={() => {
+            setOpen(true);
+            setSuccess(false);
+          }}
+          startIcon={<FlagIcon />}
+          size="small"
+          color="error"
+          variant="outlined"
+        >
+          {t("title")}
+        </Button>
+      );
+    }
+
+    return (
       <Button
         id="report-btn"
         onClick={() => {
@@ -60,6 +98,12 @@ const ReportDialog = ({ projectId }: ReportDialogProps) => {
       >
         {t("title")}
       </Button>
+    );
+  };
+
+  return (
+    <>
+      {renderTrigger()}
 
       <Dialog
         open={open}
@@ -77,7 +121,7 @@ const ReportDialog = ({ projectId }: ReportDialogProps) => {
           ) : (
             <>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {t("description")}
+                {t(`description.${targetType}`)}
               </Typography>
               <RadioGroup
                 value={reason}

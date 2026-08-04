@@ -15,6 +15,7 @@ import { updateIdeaComment, deleteIdeaComment, createIdeaComment } from "@/lib/a
 import { Link } from "@/lib/i18n/routing";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import CommentForm from "@/components/ui/CommentForm";
+import ReportDialog from "@/components/project/ReportDialog";
 
 export interface IdeaCommentData {
   id: string;
@@ -113,10 +114,17 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
           </Box>
         )}
 
-        {ideaId && isLoggedIn && !editing && (
-          <Button size="small" startIcon={<ReplyIcon fontSize="small" />} onClick={() => setReplying((v) => !v)} sx={{ mt: 0.5 }}>
-            {t("reply")}
-          </Button>
+        {!editing && (
+          <Box sx={{ display: "flex", alignItems: "center", mt: 0.5, gap: 1 }}>
+            {ideaId && isLoggedIn && (
+              <Button size="small" startIcon={<ReplyIcon fontSize="small" />} onClick={() => setReplying((v) => !v)}>
+                {t("reply")}
+              </Button>
+            )}
+            {isLoggedIn && !canEdit && (
+              <ReportDialog targetType="comment" targetId={id} variant="comment" />
+            )}
+          </Box>
         )}
 
         {replying && (

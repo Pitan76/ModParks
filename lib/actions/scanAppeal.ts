@@ -95,6 +95,63 @@ export async function reviewScanAppeal(
   return { success: true };
 }
 
+/** 管理者が直接付け替えられる判定。pending / skipped へは戻せない */
+export type ScanOverrideStatus = "clean" | "suspicious" | "malicious";
+
+/**
+ * 異議申請を経ずに管理者がスキャン判定を上書きする。
+ *
+ * 誤検知に気づくのは作者だけとは限らず、申請が無いまま止まり続けるのを避けるため、
+ * 管理画面のスキャンログから直接承認（clean 化）・再遮断できるようにしている。
+ * 保留中の異議があれば、この裁定でそのまま決着させる（作者側に宙吊りの申請を残さない）。
+ */
+export async function overrideScanStatus(
+  versionId: string,
+  status: ScanOverrideStatus,
+  note?: string
+) {
+  const { db, userId } = await getAdminDb();
+
+  const version = await db
+    .select({ id: versions.id, scanStatus: versions.scanStatus })
+    .from(versions)
+    .where(eq(versions.id, versionId))
+    .get();
+  if (!version) return { error: "notFound" };
+  if (version.scanStatus === status) return { error: "noChange" };
+
+  const reviewNote = note?.trim().slice(0, REASON_MAX_LENGTH) || null;
+
+  await db.update(versions).set({ scanStatus: status }).where(eq(versions.id, versionId)).run();
+
+  // 保留中の異議は同じ裁定で閉じる。clean 化なら申請が通ったのと同義
+  const pending = await db
+    .select({ id: scanAppeals.id })
+    .from(scanAppeals)
+    .where(and(eq(scanAppeals.versionId, versionId), eq(scanAppeals.status, "pending")))
+    .get();
+
+  if (pending) {
+    await db.update(scanAppeals).set({
+      status: status === "clean" ? "approved" : "rejected",
+      reviewNote,
+      reviewedById: userId,
+      reviewedAt: new Date(),
+    }).where(eq(scanAppeals.id, pending.id)).run();
+  }
+
+  await recordModerationAudit(db, "scan_override", versionId, userId, {
+    from: version.scanStatus,
+    to: status,
+    note: reviewNote,
+    closedAppealId: pending?.id ?? null,
+  });
+
+  revalidatePath("/admin/scans");
+  revalidatePath("/admin/appeals");
+  return { success: true };
+}
+
 /** 一覧のフィルタ。"all" は裁定済みも含めた全件 */
 export type ScanAppealFilter = "pending" | "approved" | "rejected" | "all";
 

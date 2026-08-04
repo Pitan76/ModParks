@@ -1,12 +1,14 @@
 "use server";
 
 import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
-import { reports, posts, projects, users, userProfiles } from "@/db/schema";
+import { reports, posts, projects, users, userProfiles, comments, ideas } from "@/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, or } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import { revalidatePath } from "next/cache";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
+import { toggleUserSuspension } from "@/lib/actions/admin/users";
 
 /**
  * ユーザーがプロジェクトを通報する Server Action
@@ -15,7 +17,11 @@ import { recordModerationAudit } from "@/lib/actions/moderationAudit";
  * @returns { success: boolean } または { error: Record<string, string[]> }
  * @throws Unauthorized ログインしていない場合
  */
-export async function createReport(projectId: string, formData: FormData) {
+export async function createReport(
+  targetType: "project" | "idea" | "comment" | "user",
+  targetId: string,
+  formData: FormData
+) {
   const { db, userId } = await getAuthenticatedDb();
 
   const raw = {
@@ -35,7 +41,11 @@ export async function createReport(projectId: string, formData: FormData) {
     reason:     parsed.data.reason,
     detail:     parsed.data.detail || null,
     reporterId: userId,
-    projectId,
+    targetType,
+    projectId:  targetType === "project" ? targetId : null,
+    ideaId:     targetType === "idea" ? targetId : null,
+    commentId:  targetType === "comment" ? targetId : null,
+    userId:     targetType === "user" ? targetId : null,
   }).run();
 
   return { success: true };
@@ -77,25 +87,60 @@ export async function updateReportStatus(
 // ---- 管理者: プロジェクト非公開 ----
 
 /**
- * 管理者が問題のあるプロジェクトを非公開(draft)にする Server Action
- * @param projectId 対象のプロジェクトID
+ * 管理者が問題のあるプロジェクト/アイデアを非公開(draft)にする Server Action
+ * @param postId 対象の投稿ID
  * @returns { success: boolean }
  * @throws Forbidden 管理者権限がない場合
  */
-export async function unpublishProject(projectId: string, _formData?: FormData) {
+export async function unpublishProject(postId: string, _formData?: FormData) {
   const { db, userId } = await getAdminDb();
 
   // 公開範囲は posts が持つ。Idea も同じ経路で非公開にできる
   await db
     .update(posts)
     .set({ visibility: "draft", updatedAt: new Date() })
-    .where(eq(posts.id, projectId))
+    .where(eq(posts.id, postId))
     .run();
 
-  await recordModerationAudit(db, "post_unpublish", projectId, userId);
+  await recordModerationAudit(db, "post_unpublish", postId, userId);
 
   revalidatePath("/admin/reports");
   revalidatePath("/projects");
+  return { success: true };
+}
+
+/**
+ * 管理者が問題のあるコメントを削除する Server Action
+ * @param commentId 対象のコメントID
+ * @returns { success: boolean }
+ * @throws Forbidden 管理者権限がない場合
+ */
+export async function deleteCommentAction(commentId: string, _formData?: FormData) {
+  const { db, userId } = await getAdminDb();
+
+  await db.delete(comments).where(eq(comments.id, commentId)).run();
+
+  await recordModerationAudit(db, "report_resolve", commentId, userId);
+
+  revalidatePath("/admin/reports");
+  return { success: true };
+}
+
+/**
+ * 管理者が通報されたユーザーを凍結する Server Action
+ * @param targetUserId 対象のユーザーID
+ * @returns { success: boolean }
+ * @throws Forbidden 管理者権限がない場合
+ */
+export async function suspendUserFromReport(targetUserId: string, _formData?: FormData) {
+  const { db } = await getAdminDb();
+
+  const user = await db.select().from(users).where(eq(users.id, targetUserId)).get();
+  if (user && !user.suspendedAt) {
+    await toggleUserSuspension(targetUserId);
+  }
+
+  revalidatePath("/admin/reports");
   return { success: true };
 }
 
@@ -109,6 +154,12 @@ export async function unpublishProject(projectId: string, _formData?: FormData) 
 export async function getReports() {
   const { db } = await getAdminDb();
 
+  const reportedUser = alias(users, "reported_user");
+  const reportedUserProfile = alias(userProfiles, "reported_user_profile");
+  const reporter = alias(users, "reporter");
+  const reporterProfile = alias(userProfiles, "reporter_profile");
+  const commentParentPost = alias(posts, "comment_parent_post");
+
   return await db
     .select({
       report: reports,
@@ -117,16 +168,37 @@ export async function getReports() {
         slug: posts.slug,
         name: posts.title,
       },
+      idea: {
+        id: posts.id,
+        slug: posts.slug,
+        name: posts.title,
+      },
+      comment: {
+        id: comments.id,
+        content: comments.content,
+        postId: comments.postId,
+        postKind: commentParentPost.kind,
+        postSlug: commentParentPost.slug,
+        postTitle: commentParentPost.title,
+      },
+      reportedUser: {
+        id: reportedUser.id,
+        username: reportedUserProfile.username,
+        displayName: reportedUserProfile.displayName,
+      },
       reporter: {
-        username: userProfiles.username,
-        displayName: userProfiles.displayName,
+        username: reporterProfile.username,
+        displayName: reporterProfile.displayName,
       }
     })
     .from(reports)
-    .innerJoin(projects, eq(reports.projectId, projects.id))
-    .innerJoin(posts, eq(posts.id, projects.id))
-    .innerJoin(users, eq(reports.reporterId, users.id))
-    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .leftJoin(posts, or(eq(reports.projectId, posts.id), eq(reports.ideaId, posts.id)))
+    .leftJoin(comments, eq(reports.commentId, comments.id))
+    .leftJoin(commentParentPost, eq(comments.postId, commentParentPost.id))
+    .leftJoin(reportedUser, eq(reports.userId, reportedUser.id))
+    .leftJoin(reportedUserProfile, eq(reportedUser.id, reportedUserProfile.userId))
+    .innerJoin(reporter, eq(reports.reporterId, reporter.id))
+    .leftJoin(reporterProfile, eq(reporter.id, reporterProfile.userId))
     .orderBy(desc(reports.createdAt))
     .all();
 }

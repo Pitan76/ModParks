@@ -533,7 +533,12 @@
   },
   "Report": {
     "title": "Report",
-    "description": "If you believe this project violates rules, please report it using the form below.",
+    "description": {
+      "project": "If you believe this project violates rules, please report it using the form below.",
+      "idea": "If you believe this idea violates rules, please report it using the form below.",
+      "comment": "If you believe this comment violates rules, please report it using the form below.",
+      "user": "If you believe this user violates rules, please report it using the form below."
+    },
     "detail": "Details (Optional)",
     "reasons": {
       "copyright": "Copyright Infringement",
@@ -1069,6 +1074,9 @@
       "listTitle": "Reports List",
       "noReports": "There are no reports at this time.",
       "project": "Project: {name}",
+      "idea": "Idea: {name}",
+      "comment": "Comment: {content}",
+      "user": "User: {name}",
       "reporter": "Reporter: {name}",
       "reasons": {
         "copyright": "Copyright Infringement",
@@ -1084,6 +1092,8 @@
       "actions": {
         "resolve": "Resolve",
         "unpublish": "Unpublish",
+        "deleteComment": "Delete",
+        "suspendUser": "Suspend",
         "dismiss": "Dismiss"
       }
     },
@@ -1173,12 +1183,26 @@
         "status": "Verdict",
         "findings": "Findings",
         "scannedAt": "Scanned at",
-        "appeal": "Appeal"
+        "appeal": "Appeal",
+        "actions": "Actions"
       },
       "topFindings": "Most frequent rules (last 500)",
       "notScanned": "Not scanned",
       "noFindings": "None",
-      "empty": "No scan results match this filter."
+      "empty": "No scan results match this filter.",
+      "override": {
+        "action": "Change verdict",
+        "title": "Override scan verdict",
+        "description": "Current verdict is \"{current}\". Set it manually as an administrator.",
+        "notePlaceholder": "Reason or note (shown to the author)",
+        "closesAppeal": "This version has a pending appeal. It will be resolved by this action.",
+        "cancel": "Cancel",
+        "confirm": "Apply",
+        "errors": {
+          "notFound": "Version not found.",
+          "noChange": "Already set to that verdict."
+        }
+      }
     }
   },
   "Search": {

@@ -11,6 +11,7 @@ import ReplyIcon from "@mui/icons-material/Reply";
 import { useTranslations } from "next-intl";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import CommentForm from "@/components/ui/CommentForm";
+import ReportDialog from "@/components/project/ReportDialog";
 
 export type Comment = {
   id: string;
@@ -81,9 +82,14 @@ const ProjectCommentItem = ({
         </Box>
 
         {isLoggedIn && (
-          <Button size="small" startIcon={<ReplyIcon fontSize="small" />} onClick={() => setReplying((v) => !v)} sx={{ mt: 0.5 }}>
-            {t("reply")}
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", mt: 0.5, gap: 1 }}>
+            <Button size="small" startIcon={<ReplyIcon fontSize="small" />} onClick={() => setReplying((v) => !v)}>
+              {t("reply")}
+            </Button>
+            {currentUserId !== comment.authorId && (
+              <ReportDialog targetType="comment" targetId={comment.id} variant="comment" />
+            )}
+          </Box>
         )}
 
         {replying && (
