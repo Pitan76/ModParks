@@ -27,8 +27,12 @@ export const QUOTA_RECHECK_DAYS = 90;
 
 export type UsageOverview = {
   plan: UsagePlan;
-  /** 期間内の消費と枠。リクエスト以外は枠が未設定なら評価されない */
+  /** Cloudflare の実測値による消費と枠。判定はこれを使う */
   requests: QuotaUsage;
+  /** 実測値が1日も取得できていないか。トークン未設定ならこうなる */
+  measurementMissing: boolean;
+  /** ddos_slices 由来のリクエスト数。傾向の参考値で、実測より少なく出る */
+  sampledRequests: number;
   /** 期間内のダウンロード数（計上の可否を問わない） */
   downloads: number;
   /** 実際に統計へ計上したダウンロード数 */
@@ -78,8 +82,9 @@ export async function getUsageOverview(): Promise<UsageOverview> {
   const periodRows = selectPeriodRows(history, plan, today);
   const progress = periodProgress(plan);
 
+  const measuredRows = periodRows.filter((row) => row.cfRequests !== null);
   const requests = evaluateQuota(
-    sum(periodRows, (row) => row.requests),
+    sum(measuredRows, (row) => row.cfRequests ?? 0),
     settings.usageQuotaRequests,
     plan,
     progress
@@ -88,6 +93,8 @@ export async function getUsageOverview(): Promise<UsageOverview> {
   return {
     plan,
     requests,
+    measurementMissing: measuredRows.length === 0,
+    sampledRequests: sum(periodRows, (row) => row.requests),
     downloads: sum(periodRows, (row) => row.downloads),
     downloadsCounted: sum(periodRows, (row) => row.downloadsCounted),
     botRequests: sum(periodRows, (row) => row.botRequests),

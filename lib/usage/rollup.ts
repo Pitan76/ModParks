@@ -7,6 +7,7 @@
 import { and, gte, lt, sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
 import { ddosSlices, usageDaily, versionDownloadDaily } from "@/db/schema";
+import { fetchDailyRequests } from "@/lib/usage/analytics";
 
 type Db = Awaited<ReturnType<typeof getDatabase>>;
 
@@ -55,12 +56,20 @@ async function sumCountedDownloads(db: Db, date: number): Promise<number> {
   return row?.total ?? 0;
 }
 
+/** epoch day を UTC の ISO 日付へ */
+export function toIsoDate(day: number): string {
+  return new Date(day * 86_400_000).toISOString().slice(0, 10);
+}
+
 /**
  * 指定日の利用量サマリを作り直す。
  *
  * 合計を入れ直すだけなので、同じ日に何度実行しても結果は変わらない。
+ *
+ * @param cfRequests Cloudflare の実測値。undefined なら既存の値を保つ
+ *   （取得に失敗しただけで、取得済みの値を消さないため）
  */
-export async function rollupUsageForDay(date: number): Promise<void> {
+export async function rollupUsageForDay(date: number, cfRequests?: number): Promise<void> {
   const db = await getDatabase();
   const slices = await sumSlices(db, date);
   const downloadsCounted = await sumCountedDownloads(db, date);
@@ -77,8 +86,11 @@ export async function rollupUsageForDay(date: number): Promise<void> {
 
   await db
     .insert(usageDaily)
-    .values(values)
-    .onConflictDoUpdate({ target: usageDaily.date, set: values })
+    .values({ ...values, cfRequests: cfRequests ?? null })
+    .onConflictDoUpdate({
+      target: usageDaily.date,
+      set: cfRequests === undefined ? values : { ...values, cfRequests },
+    })
     .run();
 }
 
@@ -90,7 +102,11 @@ export async function rollupUsageForDay(date: number): Promise<void> {
  */
 export async function rollupRecentUsage(): Promise<void> {
   const today = toEpochDay();
+  const yesterday = today - 1;
 
-  await rollupUsageForDay(today);
-  await rollupUsageForDay(today - 1);
+  // 2日ぶんをまとめて取り、外部 API の呼び出しを 1 回に抑える
+  const measured = await fetchDailyRequests(toIsoDate(yesterday), toIsoDate(today));
+
+  await rollupUsageForDay(today, measured?.get(toIsoDate(today)));
+  await rollupUsageForDay(yesterday, measured?.get(toIsoDate(yesterday)));
 }

@@ -1270,7 +1270,10 @@
       "budgetLabel": "追加課金の上限（円/月）",
       "budgetHelp": "含有枠を超えて許容する月あたりの金額。0 にすると数円の超過でも警告が鳴り続けます。",
       "save": "保存",
-      "saved": "保存しました"
+      "saved": "保存しました",
+      "measurementMissing": "Cloudflare の実測値を取得できていません。CLOUDFLARE_ANALYTICS_TOKEN が未設定の可能性があります。実測値が無い間、消費率の判定と予算アラートは働きません。",
+      "sampledRequests": "参考値（内部集計）",
+      "sampledNote": "参考値は内部集計によるもので、書き出し前に破棄される分があるため実測より少なく出ます。枠の判定には使いません。"
     },
     "runtime": {
       "title": "機能スイッチ",

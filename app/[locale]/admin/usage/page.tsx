@@ -40,6 +40,10 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
         {t(`periodNote.${overview.plan}`)}
       </Typography>
 
+      {overview.measurementMissing && (
+        <Alert severity="warning" sx={{ mb: 3 }}>{t("measurementMissing")}</Alert>
+      )}
+
       {overview.quotaStale && (
         <Alert severity="info" sx={{ mb: 3 }}>{t("quotaStale", { days: QUOTA_RECHECK_DAYS })}</Alert>
       )}
@@ -67,9 +71,10 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
             <Metric label={t("downloadsCounted")} value={overview.downloadsCounted} />
             <Metric label={t("botDownloads")} value={overview.botDownloads} />
             <Metric label={t("botRequests")} value={overview.botRequests} />
+            <Metric label={t("sampledRequests")} value={overview.sampledRequests} />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
-            {t("countedNote")}
+            {t("countedNote")}{" "}{t("sampledNote")}
           </Typography>
         </CardContent>
       </Card>

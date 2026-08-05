@@ -12,8 +12,16 @@ import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 export const usageDaily = sqliteTable("usage_daily", {
   /** UTC 基準の epoch day (unixepoch() / 86400) */
   date: integer("date").primaryKey(),
-  /** 総リクエスト数。ddos_slices の合計 */
+  /**
+   * ddos_slices の合計。Isolate のメモリ集計を書き出す方式のため少なめに出る。
+   * 傾向を見る用であり、枠の判定には使わない。
+   */
   requests: integer("requests").notNull().default(0),
+  /**
+   * Cloudflare GraphQL Analytics API の実測値。枠の判定はこちらを使う。
+   * null は未取得（トークン未設定・取得失敗）を表し、0 と区別する。
+   */
+  cfRequests: integer("cf_requests"),
   /** /api/download へのリクエスト数。計上の可否を問わない */
   downloads: integer("downloads").notNull().default(0),
   /** Bot と判定されたリクエスト数 */

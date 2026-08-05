@@ -1262,7 +1262,10 @@
       "budgetLabel": "Additional charge limit (JPY/month)",
       "budgetHelp": "Monthly amount tolerated beyond the included quota. Setting 0 makes even a few yen trigger warnings.",
       "save": "Save",
-      "saved": "Saved"
+      "saved": "Saved",
+      "measurementMissing": "Cloudflare measurements are unavailable. CLOUDFLARE_ANALYTICS_TOKEN may not be configured. Quota evaluation and budget alerts do not run without them.",
+      "sampledRequests": "Sampled (internal)",
+      "sampledNote": "The sampled figure comes from internal aggregation and undercounts, since some batches are discarded before being flushed. It is not used for quota evaluation."
     },
     "runtime": {
       "title": "Feature switches",

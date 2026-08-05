@@ -1,0 +1,1 @@
+ALTER TABLE `usage_daily` ADD `cf_requests` integer;
