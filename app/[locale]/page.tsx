@@ -57,8 +57,9 @@ const TopPage = async ({ params }: TopPageProps) => {
             {t("newProjects")}
           </Typography>
           <LinkButton
-            href="/projects"
+            href="/projects?sort=newest"
             id="view-all-btn"
+            aria-label={`${t("newProjects")} - ${t("viewAll")}`}
             endIcon={<ArrowForwardIcon />}
             sx={{ color: "primary.main" }}
           >
@@ -83,6 +84,7 @@ const TopPage = async ({ params }: TopPageProps) => {
           <LinkButton
             href="/projects?sort=updated"
             id="view-updated-btn"
+            aria-label={`${t("updatedProjects")} - ${t("viewAll")}`}
             endIcon={<ArrowForwardIcon />}
             sx={{ color: "primary.main" }}
           >
