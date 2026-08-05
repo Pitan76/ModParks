@@ -6,7 +6,7 @@
  * 「公開範囲」と「項目」の二重の絞り込みを必ず通す。
  */
 import { and, eq, isNull } from "drizzle-orm";
-import { posts, projects, users, versions } from "@/db/schema";
+import { posts, projects, userProfiles, users, versions } from "@/db/schema";
 import { getR2PublicUrl } from "@/lib/r2";
 import {
   SNAPSHOT_VISIBILITY,
@@ -51,7 +51,7 @@ type ProjectRow = {
   links: string | null;
   downloads: number;
   authorId: string;
-  authorName: string;
+  authorName: string | null;
   authorUsername: string;
   authorAvatarUrl: string | null;
 };
@@ -97,13 +97,14 @@ async function selectPublicProjects(db: Db): Promise<ProjectRow[]> {
       links: projects.links,
       downloads: projects.downloads,
       authorId: posts.authorId,
-      authorName: users.displayName,
-      authorUsername: users.username,
-      authorAvatarUrl: users.avatarUrl,
+      authorName: userProfiles.displayName,
+      authorUsername: userProfiles.username,
+      authorAvatarUrl: userProfiles.avatarUrl,
     })
     .from(posts)
     .innerJoin(projects, eq(projects.id, posts.id))
     .innerJoin(users, eq(users.id, posts.authorId))
+    .innerJoin(userProfiles, eq(userProfiles.userId, users.id))
     .where(publishableCondition())
     .all();
 }
