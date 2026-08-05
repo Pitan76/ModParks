@@ -85,7 +85,7 @@ body {
   top: var(--header-height);
   width: var(--sidebar-width);
   height: calc(100vh - var(--header-height));
-  padding: 20px 10px;
+  padding: 16px 8px;
   border-right: 1px solid var(--line);
   background: var(--appbar);
   backdrop-filter: blur(8px);
@@ -96,14 +96,16 @@ body {
 .nav-item {
   display: flex;
   align-items: center;
+  min-height: 48px;
   padding: 8px 16px;
   border-radius: 4px;
   color: var(--fg);
   text-decoration: none;
   font-weight: 500;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
-.nav-item svg { color: var(--muted); margin-right: 16px; flex-shrink: 0; }
+/* MUI の ListItemIcon は min-width:40px で 24px アイコンを収めるため、実効の余白は 16px になる */
+.nav-item svg { color: var(--muted); min-width: 40px; flex-shrink: 0; }
 .nav-item:hover { background: var(--primary-hover); }
 .nav-item.selected { background: var(--primary); color: var(--on-primary); font-weight: 700; }
 .nav-item.selected svg { color: var(--on-primary); }
