@@ -60,7 +60,7 @@ export async function uploadViaCdn(
     const session = sessions.get(ns);
     const url = `${cdnUrl}/api/${ns}/bulk${session ? `?session=${encodeURIComponent(session)}` : ""}`;
     try {
-      const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(part) });
+      const res = await fetchWithTimeout(url, { method: "POST", headers, body: JSON.stringify(part) });
       if (res.ok) uploaded += count;
       else console.warn(`CDN bulk upload failed for ${ns}: ${res.status} ${res.statusText}`);
     } catch (e) {
@@ -110,8 +110,6 @@ async function beginSession(
   headers: Record<string, string>,
   build?: ExtractBuildInfo
 ): Promise<string | null> {
-  // 対象 MC バージョンを渡したセッションだけが build として確定する。
-  // 渡さなければ CDN 側は従来どおりフラットに上書きするだけで、挙動は変わらない。
   const body = JSON.stringify({
     mcVersions: build?.mcVersions ?? [],
     modVersion: build?.modVersion ?? null,
@@ -119,7 +117,7 @@ async function beginSession(
     source: "jar",
   });
   try {
-    const res = await fetch(`${cdnUrl}/api/${ns}/ingest/begin`, { method: "POST", headers, body });
+    const res = await fetchWithTimeout(`${cdnUrl}/api/${ns}/ingest/begin`, { method: "POST", headers, body });
     if (!res.ok) return null;
     const started = (await res.json()) as { session?: string };
     return started.session ?? null;
@@ -137,12 +135,27 @@ async function endSession(
   headers: Record<string, string>
 ): Promise<void> {
   try {
-    await fetch(`${cdnUrl}/api/${ns}/ingest/${action}?session=${encodeURIComponent(session)}`, {
+    await fetchWithTimeout(`${cdnUrl}/api/${ns}/ingest/${action}?session=${encodeURIComponent(session)}`, {
       method: "POST",
       headers,
     });
   } catch (e) {
     console.warn(`CDN ingest ${action} failed for ${ns}:`, e);
+  }
+}
+
+/**
+ * タイムアウト付きで fetch を実行します。
+ *
+ * デッドロックやネットワークエラーによる無制限のフリーズを防止します。
+ */
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 15000): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(id);
   }
 }
 
