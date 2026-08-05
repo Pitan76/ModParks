@@ -44,7 +44,7 @@ export type ProjectSearchBarProps = {
 const ProjectSearchBar = ({ 
   initialQ = "", 
   initialAuthor = "",
-  initialTypes = [...CONTENT_TYPES],
+  initialTypes = [],
   initialSort = "updated",
   initialLoaders = [],
   initialMcVersions = [],
@@ -90,7 +90,7 @@ const ProjectSearchBar = ({
       const params = new URLSearchParams();
       if (newQ) params.set("q", newQ);
       if (filters.author) params.set("author", filters.author);
-      if (newTypes.length > 0 && newTypes.length < 6) params.set("types", newTypes.join(","));
+      if (newTypes.length > 0 && newTypes.length < CONTENT_TYPES.length) params.set("types", newTypes.join(","));
       if (newSort && newSort !== "updated") params.set("sort", newSort);
       
       if (filters.loaders.length > 0) params.set("loaders", filters.loaders.join(","));
@@ -180,7 +180,6 @@ const ProjectSearchBar = ({
             onChange={(e) => {
               const val = e.target.value;
               const newTypes = typeof val === "string" ? val.split(",") : (val as string[]);
-              if (newTypes.length === 0) return; // Prevent unselecting all
               setTypes(newTypes);
             }}
             options={[
@@ -193,7 +192,7 @@ const ProjectSearchBar = ({
               { value: "other", label: t("filters.other") },
             ]}
             renderSelected={(selected) => {
-              if (selected.length === 7) return t("filters.all");
+              if (selected.length === 0 || selected.length === CONTENT_TYPES.length) return t("filters.all");
               if (selected.length >= 4) return selected.slice(0, 3).map((v) => t(`filters.${v}`)).join(", ") + "...";
               return selected.map((v) => t(`filters.${v}`)).join(", ");
             }}
