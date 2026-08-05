@@ -17,6 +17,8 @@ export type PublicProjectSummary = {
   downloads: number;
   authorName: string;
   updatedAt: number;
+  /** 新着順の並べ替えに使う */
+  createdAt: number;
 };
 
 /** 詳細。README と配布先を含む */
@@ -27,7 +29,6 @@ export type PublicProjectDetail = PublicProjectSummary & {
   sourceUrl: string | null;
   issueTrackerUrl: string | null;
   links: string | null;
-  createdAt: number;
   versions: PublicVersion[];
 };
 

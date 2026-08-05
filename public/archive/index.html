@@ -50,7 +50,20 @@
 
   <main class="main">
     <p id="notice" class="notice" hidden></p>
+    <div class="toolbar">
+      <span id="resultCount" class="result-count"></span>
+      <label class="sort">
+        <span id="sortLabel" class="sort-label"></span>
+        <select id="sort" class="select">
+          <option value="updated"></option>
+          <option value="downloads"></option>
+          <option value="newest"></option>
+        </select>
+      </label>
+    </div>
+
     <div id="view" class="view"></div>
+    <nav id="pager" class="pager" hidden></nav>
 
     <footer class="foot">
       <span id="generated"></span>

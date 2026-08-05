@@ -85,14 +85,11 @@ body {
   letter-spacing: -0.5px;
 }
 
-/* Chip 相当。本体の MuiChip は角丸 4px・線 1px */
+/* ロゴ横の補助表示。囲みは付けず、小さいグレー文字にとどめる */
 .brand-tag {
-  padding: 1px 8px;
-  border: 1px solid var(--divider);
-  border-radius: 4px;
   color: var(--muted);
   font-size: 0.75rem;
-  line-height: 1.8;
+  align-self: center;
 }
 
 .spacer { flex: 1; }
@@ -206,6 +203,78 @@ body {
   margin: 0 auto;
   padding: 20px;
 }
+
+.toolbar[hidden] { display: none; }
+
+/* ---- ツールバー（件数と並び順） ---- */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 20px 20px 0;
+}
+
+.result-count { color: var(--muted); font-size: 0.875rem; }
+.sort { display: flex; align-items: center; gap: 10px; }
+.sort-label { color: var(--muted); font-size: 0.875rem; }
+
+/* Select size=small 相当 */
+.select {
+  height: 40px;
+  padding: 0 32px 0 14px;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 16px center, right 11px center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.select:hover { border-color: var(--fg); }
+.select:focus { outline: none; border: 2px solid var(--primary); }
+.select option { background: var(--paper); color: var(--fg); }
+
+/* ---- ページ送り ---- */
+
+.pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 0 20px 30px;
+}
+
+.page-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.page-btn:hover:not(:disabled) { background: var(--primary-hover); }
+.page-btn:disabled { opacity: .35; cursor: default; }
+.page-btn.current { background: var(--primary); color: var(--on-primary); font-weight: 700; }
+.page-gap { color: var(--muted); padding: 0 4px; }
 
 /* ---- 一覧（本体の Card は透明・下線のみ） ---- */
 

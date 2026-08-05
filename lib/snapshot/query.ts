@@ -157,6 +157,7 @@ function toSummary(row: ProjectRow): PublicProjectSummary {
     downloads: row.downloads,
     authorName: row.authorName || row.authorUsername,
     updatedAt: row.updatedAt.getTime(),
+    createdAt: row.createdAt.getTime(),
   };
 }
 
@@ -191,7 +192,6 @@ export async function collectSnapshotData(db: Db): Promise<SnapshotData> {
       sourceUrl: row.sourceUrl,
       issueTrackerUrl: row.issueTrackerUrl,
       links: row.links,
-      createdAt: row.createdAt.getTime(),
       versions: await selectPublicVersions(db, row.id),
     });
 
