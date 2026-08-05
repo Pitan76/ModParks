@@ -54,7 +54,7 @@ const AdminSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleC
     ];
   }
 
-  return <BaseSidebar navItems={navItems} mobileOpen={mobileOpen} onMobileClose={onMobileClose} collapsed={collapsed} onToggleCollapse={onToggleCollapse} />;
+  return <BaseSidebar navItems={navItems} mobileOpen={mobileOpen} onMobileClose={onMobileClose} collapsed={collapsed} onToggleCollapse={onToggleCollapse} hideCart={true} />;
 };
 
 export default AdminSidebar;

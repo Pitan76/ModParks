@@ -52,6 +52,7 @@ const SettingsSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onTogg
       onMobileClose={onMobileClose}
       collapsed={collapsed}
       onToggleCollapse={onToggleCollapse}
+      hideCart={true}
     />
   );
 };

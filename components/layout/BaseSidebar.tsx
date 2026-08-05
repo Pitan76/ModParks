@@ -44,6 +44,7 @@ export type BaseSidebarProps = {
   navItems: NavItem[];
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  hideCart?: boolean;
 };
 
 const getIsSelected = (itemId: string, itemPath: string, pathname: string, isMyProjects: boolean): boolean => {
@@ -57,7 +58,7 @@ const getIsSelected = (itemId: string, itemPath: string, pathname: string, isMyP
  * デスクトップ表示（常時固定表示）とモバイル表示（ハンバーガーメニューからの一時Drawer表示）の双方に対応し、
  * ナビゲーションメニュー、言語切替、ダークモード切替などのコントロールを提供します。
  */
-const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, onToggleCollapse }: BaseSidebarProps) => {
+const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, onToggleCollapse, hideCart = false }: BaseSidebarProps) => {
   const pathname = usePathname();
   const { data: session } = useSession();
   const router = useRouter();
@@ -84,7 +85,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
   // モバイルはヘッダーにカートを置かないので、サイドバーから開けるようにする
   const [cartOpen, setCartOpen] = useState(false);
   const { items: cartItems } = useCart();
-  const cartEnabled = useCartEnabled();
+  const cartEnabled = useCartEnabled() && !hideCart;
 
   const handleCartClick = () => {
     onMobileClose();
