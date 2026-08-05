@@ -91,13 +91,13 @@ function projectCard(project) {
 
   const meta = el("div", "card-meta");
   const metaLeft = el("div", "card-meta-left");
-  metaLeft.appendChild(el("span", null, "by " + project.authorName));
+  metaLeft.appendChild(el("span", "card-author", "by " + project.authorName));
   metaLeft.appendChild(el("span", "dot", "·"));
-  metaLeft.appendChild(el("span", null, formatDate(project.updatedAt)));
+  metaLeft.appendChild(el("span", "card-date", formatDate(project.updatedAt)));
   metaLeft.appendChild(el("span", "dot", "·"));
-  
+
   const dlSpan = el("span", "card-dl");
-  dlSpan.innerHTML = '<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
+  dlSpan.innerHTML = '<svg class="meta-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
   dlSpan.appendChild(document.createTextNode(" " + project.downloads.toLocaleString()));
   metaLeft.appendChild(dlSpan);
   meta.appendChild(metaLeft);
@@ -329,7 +329,6 @@ async function boot() {
 
   document.getElementById("navHome").textContent = t("navHome");
   document.getElementById("navProjects").textContent = t("navProjects");
-  document.getElementById("sidebarNote").textContent = t("sidebarNote");
 
   document.getElementById("menu").addEventListener("click", () => {
     document.getElementById("sidebar").classList.toggle("open");
