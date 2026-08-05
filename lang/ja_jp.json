@@ -1322,7 +1322,12 @@
       "durationLabel": "期限",
       "durationHelp": "期限が来ると自動で通常運用へ戻ります。戻し忘れて止まったままになるのを防ぐためです。メンテナンスは自動復帰しません。",
       "hours": "{count} 時間",
-      "applyMode": "適用"
+      "applyMode": "適用",
+      "snapshotTitle": "静的スナップショット",
+      "snapshotHelp": "読み取り専用アーカイブのデータを今すぐ生成します。通常は毎日のバックアップに続けて自動生成されますが、モードを切り替える前に中身を確認したいときに使います。",
+      "snapshotGenerate": "今すぐ生成",
+      "snapshotRunning": "生成中…",
+      "snapshotDone": "生成しました（プロジェクト {projects} 件 / 作者 {authors} 件 / 削除 {deleted} 件）"
     }
   },
   "Search": {

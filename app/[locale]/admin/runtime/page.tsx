@@ -10,6 +10,7 @@ import { getRuntimeConfig } from "@/lib/runtime/state";
 import { effectiveMode, normalizeFeatures } from "@/lib/runtime/features";
 import FeatureSwitchList from "@/components/admin/FeatureSwitchList";
 import RuntimeModePanel from "@/components/admin/RuntimeModePanel";
+import SnapshotPanel from "@/components/admin/SnapshotPanel";
 
 interface AdminRuntimePageProps {
   params: Promise<{ locale: string }>;
@@ -51,10 +52,17 @@ export default async function AdminRuntimePage({ params }: AdminRuntimePageProps
         </CardContent>
       </Card>
 
-      <Card>
+      <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>{t("featuresTitle")}</Typography>
           <FeatureSwitchList initial={features} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>{t("snapshotTitle")}</Typography>
+          <SnapshotPanel />
         </CardContent>
       </Card>
     </Box>

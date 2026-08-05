@@ -101,3 +101,22 @@ export async function setRuntimeMode(
   revalidatePath("/admin/runtime");
   return { success: true };
 }
+
+/**
+ * 静的スナップショットを手動で生成する。
+ *
+ * 通常は日次のバックアップ Cron に相乗りしているが、それだと
+ * 内容の確認に丸一日かかる。切り替え前の動作確認に必要。
+ */
+export async function generateSnapshotNow(): Promise<
+  { success: true; detail: unknown } | { error: string }
+> {
+  await getAdminDb();
+
+  try {
+    const { generateSnapshot } = await import("@/lib/snapshot/generate");
+    return { success: true, detail: await generateSnapshot() };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Snapshot generation failed" };
+  }
+}

@@ -1314,7 +1314,12 @@
       "durationLabel": "Duration",
       "durationHelp": "Returns to normal automatically when the deadline passes, so a forgotten switch does not keep the site down. Maintenance does not auto-recover.",
       "hours": "{count} hours",
-      "applyMode": "Apply"
+      "applyMode": "Apply",
+      "snapshotTitle": "Static snapshot",
+      "snapshotHelp": "Generates the read-only archive data now. It is normally produced right after the daily backup; use this to check the contents before switching modes.",
+      "snapshotGenerate": "Generate now",
+      "snapshotRunning": "Generating…",
+      "snapshotDone": "Generated ({projects} projects / {authors} authors / {deleted} removed)"
     }
   },
   "Search": {
