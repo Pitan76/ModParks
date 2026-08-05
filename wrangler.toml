@@ -44,6 +44,13 @@ service = "modparks-push"
 [[r2_buckets]]
 bucket_name = "modparks-storage"
 binding = "modparks_storage"
+
+# 静的スナップショットの公開専用バケット。archive.modparks.pitan76.net を接続する。
+# ファイル配信用と分けているのは、R2 のカスタムドメインがバケット全体を公開するため。
+# 公開専用にしておけば「置いたものは全部公開」が前提になり、誤配置の余地が消える。
+[[r2_buckets]]
+bucket_name = "modparks-static"
+binding = "modparks_static"
 # binding     = "R2"
 # bucket_name = "modparks-files"
 
