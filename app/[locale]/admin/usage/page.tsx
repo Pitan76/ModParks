@@ -63,7 +63,10 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
 
           <Stack direction="row" spacing={4} useFlexGap sx={{ flexWrap: "wrap", mt: 3 }}>
             <Metric label={t("ownRequests")} value={overview.ownRequests} />
-            <Metric label={t("otherRequests")} value={Math.max(overview.requests.used - overview.ownRequests, 0)} />
+            <Metric
+              label={t("otherRequests")}
+              value={overview.ownRequests === null ? null : Math.max(overview.requests.used - overview.ownRequests, 0)}
+            />
             <Metric label={t("sampledRequests")} value={overview.sampledRequests} />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
@@ -104,11 +107,14 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
   );
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
+/** null は未取得。0 と同じ見た目にすると「消費なし」と誤読されるため区別する */
+function Metric({ label, value }: { label: string; value: number | null }) {
   return (
     <Box>
       <Typography variant="caption" color="text.secondary">{label}</Typography>
-      <Typography variant="h5" sx={{ fontWeight: 700 }}>{value.toLocaleString()}</Typography>
+      <Typography variant="h5" sx={{ fontWeight: 700 }}>
+        {value === null ? "-" : value.toLocaleString()}
+      </Typography>
     </Box>
   );
 }

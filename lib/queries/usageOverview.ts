@@ -33,8 +33,8 @@ export type UsageOverview = {
   measurementMissing: boolean;
   /** ddos_slices 由来のリクエスト数。傾向の参考値で、実測より少なく出る */
   sampledRequests: number;
-  /** 実測値のうち ModParks 由来のぶん */
-  ownRequests: number;
+  /** 実測値のうち ModParks 由来のぶん。null は未取得（内訳の取得前に書かれた行） */
+  ownRequests: number | null;
   /** 期間内のダウンロード数（計上の可否を問わない） */
   downloads: number;
   /** 実際に統計へ計上したダウンロード数 */
@@ -85,6 +85,8 @@ export async function getUsageOverview(): Promise<UsageOverview> {
   const progress = periodProgress(plan);
 
   const measuredRows = periodRows.filter((row) => row.cfRequests !== null);
+  // 内訳は実測値より後から入ったため、取得済みの行だけを対象にする
+  const ownRows = periodRows.filter((row) => row.cfRequestsOwn !== null);
   const requests = evaluateQuota(
     sum(measuredRows, (row) => row.cfRequests ?? 0),
     settings.usageQuotaRequests,
@@ -97,7 +99,7 @@ export async function getUsageOverview(): Promise<UsageOverview> {
     requests,
     measurementMissing: measuredRows.length === 0,
     sampledRequests: sum(periodRows, (row) => row.requests),
-    ownRequests: sum(measuredRows, (row) => row.cfRequestsOwn ?? 0),
+    ownRequests: ownRows.length > 0 ? sum(ownRows, (row) => row.cfRequestsOwn ?? 0) : null,
     downloads: sum(periodRows, (row) => row.downloads),
     downloadsCounted: sum(periodRows, (row) => row.downloadsCounted),
     botRequests: sum(periodRows, (row) => row.botRequests),
