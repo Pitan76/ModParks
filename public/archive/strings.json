@@ -19,7 +19,7 @@
     "projectsBy": "{name} のプロジェクト",
     "navHome": "ホーム",
     "navProjects": "プロジェクト",
-    "results": "{count} 件 of プロジェクト",
+    "results": "{count} 件のプロジェクト",
     "sortLabel": "並び順",
     "sort_updated": "更新日順",
     "sort_downloads": "ダウンロード順",
