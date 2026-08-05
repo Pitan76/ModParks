@@ -10,6 +10,8 @@
 export type PublicProjectSummary = {
   slug: string;
   title: string;
+  /** 一覧カード用の説明文。本体と同じ整形を通したプレーンテキスト */
+  excerpt: string;
   type: string;
   iconUrl: string | null;
   downloads: number;

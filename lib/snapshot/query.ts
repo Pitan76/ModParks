@@ -8,6 +8,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { posts, projects, userProfiles, users, versions } from "@/db/schema";
 import { getR2PublicUrl } from "@/lib/r2";
+import { toPlainDescription } from "@/lib/utils/plainText";
 import {
   SNAPSHOT_VISIBILITY,
   type PublicAuthor,
@@ -141,10 +142,16 @@ async function selectPublicVersions(db: Db, projectId: string): Promise<PublicVe
     }));
 }
 
+/** 一覧カードに載せる説明文の長さ。本体のカードは2行で切るため、その程度に収める */
+const EXCERPT_LENGTH = 160;
+
 function toSummary(row: ProjectRow): PublicProjectSummary {
+  const plain = toPlainDescription(row.body);
+
   return {
     slug: row.slug,
     title: row.title,
+    excerpt: plain.length > EXCERPT_LENGTH ? `${plain.slice(0, EXCERPT_LENGTH)}…` : plain,
     type: row.type,
     iconUrl: row.iconUrl,
     downloads: row.downloads,

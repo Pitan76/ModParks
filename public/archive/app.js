@@ -60,24 +60,49 @@ function currentRoute() {
   return { kind: "list" };
 }
 
+/** 日付は端末の書式に任せる。翻訳を増やさずに読める形になる */
+function formatDate(ms) {
+  return new Date(ms).toLocaleDateString();
+}
+
+/**
+ * 一覧カード。本体の ProjectCard と同じ構成にする。
+ * アイコン / タイトル + 種別 / 説明2行 / 作者・日付・DL数。
+ */
 function projectCard(project) {
   const card = el("a", "card");
   card.href = "#/projects/" + encodeURIComponent(project.slug);
 
+  const icon = el("div", "icon");
   if (project.iconUrl) {
-    const icon = el("img", "icon");
-    icon.src = project.iconUrl;
-    icon.alt = "";
-    icon.loading = "lazy";
-    card.appendChild(icon);
+    const img = el("img");
+    img.src = project.iconUrl;
+    img.alt = "";
+    img.loading = "lazy";
+    icon.appendChild(img);
+  } else {
+    icon.classList.add("icon-empty");
   }
+  card.appendChild(icon);
 
   const body = el("div", "card-body");
-  body.appendChild(el("div", "card-title", project.title));
-  body.appendChild(el("div", "card-meta", project.authorName));
-  body.appendChild(el("div", "card-meta", t("downloads") + ": " + project.downloads.toLocaleString()));
-  card.appendChild(body);
 
+  const head = el("div", "card-head");
+  head.appendChild(el("span", "card-title", project.title));
+  head.appendChild(el("span", "badge badge-" + project.type, project.type));
+  body.appendChild(head);
+
+  if (project.excerpt) body.appendChild(el("p", "card-desc", project.excerpt));
+
+  const meta = el("div", "card-meta");
+  meta.appendChild(el("span", null, "by " + project.authorName));
+  meta.appendChild(el("span", "dot", "·"));
+  meta.appendChild(el("span", null, formatDate(project.updatedAt)));
+  meta.appendChild(el("span", "dot", "·"));
+  meta.appendChild(el("span", null, project.downloads.toLocaleString() + " " + t("downloads")));
+  body.appendChild(meta);
+
+  card.appendChild(body);
   return card;
 }
 
@@ -94,9 +119,9 @@ function renderList(query) {
     return;
   }
 
-  const grid = el("div", "grid");
-  for (const project of matched) grid.appendChild(projectCard(project));
-  view.appendChild(grid);
+  const list = el("div", "list");
+  for (const project of matched) list.appendChild(projectCard(project));
+  view.appendChild(list);
 }
 
 function definition(label, value) {
@@ -125,11 +150,13 @@ async function renderProject(slug) {
   const project = await getJson("/projects/" + encodeURIComponent(slug) + ".json");
 
   view.replaceChildren();
-  view.appendChild(el("h1", "title", project.title));
+
+  const head = el("div", "detail-head");
+  head.appendChild(el("h1", "title", project.title));
+  head.appendChild(el("span", "badge badge-" + project.type, project.type));
+  view.appendChild(head);
 
   const meta = el("dl", "meta");
-  const authorLink = el("a", null, project.authorName);
-  authorLink.href = "#/authors/" + encodeURIComponent(project.authorName);
   meta.appendChild(definition(t("author"), project.authorName));
   meta.appendChild(definition(t("license"), project.license));
   meta.appendChild(definition(t("downloads"), project.downloads.toLocaleString()));
@@ -155,12 +182,12 @@ async function renderAuthor(username) {
   view.replaceChildren();
   view.appendChild(el("h1", "title", t("projectsBy", { name: author.displayName })));
 
-  const grid = el("div", "grid");
+  const list = el("div", "list");
   for (const slug of author.projectSlugs) {
     const summary = summaries.find((p) => p.slug === slug);
-    if (summary) grid.appendChild(projectCard(summary));
+    if (summary) list.appendChild(projectCard(summary));
   }
-  view.appendChild(grid);
+  view.appendChild(list);
 }
 
 async function route() {
