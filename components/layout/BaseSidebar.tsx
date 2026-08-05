@@ -94,26 +94,28 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* デスクトップはヘッダーにロゴを常設するため空スペーサー。モバイルはドロワーが前面に出るためロゴを表示 */}
-      <Box sx={{ height: { xs: 56, sm: 64 }, px: 2, display: "flex", alignItems: "center", gap: 1 }}>
-        <Link
-          href="/"
-          prefetch={false}
-          onClick={onMobileClose}
-          style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 8 }}
-        >
-          <Box
-            component="img"
-            src="/icon.svg"
-            alt="ModParks Logo"
-            sx={{ display: { xs: "block", md: "none" }, width: 32, height: 32, borderRadius: "8px", objectFit: "cover" }}
-          />
-          <Box sx={{ display: { xs: "block", md: "none" }, fontWeight: 800, fontSize: "1.1rem", letterSpacing: "-0.5px" }}>
-            ModParks
-          </Box>
-        </Link>
+      <Box sx={{ height: { xs: 56, sm: 64 }, px: 2, display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+        <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center" }}>
+          <Link
+            href="/"
+            prefetch={false}
+            onClick={onMobileClose}
+            style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 8 }}
+          >
+            <Box
+              component="img"
+              src="/icon.svg"
+              alt="ModParks Logo"
+              sx={{ width: 32, height: 32, borderRadius: "8px", objectFit: "cover" }}
+            />
+            <Box sx={{ fontWeight: 800, fontSize: "1.1rem", letterSpacing: "-0.5px" }}>
+              ModParks
+            </Box>
+          </Link>
+        </Box>
       </Box>
       <Divider />
-      <List sx={{ px: 1, py: 2 }}>
+      <List sx={{ px: 1, py: 2, flexGrow: 1, overflowY: "auto" }}>
         {navItems.map((item) => {
           const isSelected = getIsSelected(item.id, item.path, pathname, isMyProjects);
 
@@ -189,7 +191,7 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
 
       {/* ---- Bottom Section (Theme, Locale) - Mobile Only ---- */}
       {!session?.user && (
-      <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", mt: "auto" }}>
+      <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", mt: "auto", flexShrink: 0 }}>
         <Divider />
         <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
