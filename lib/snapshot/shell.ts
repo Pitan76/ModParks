@@ -12,6 +12,7 @@ const SHELL_FILES = [
   { path: "app.js", contentType: "text/javascript; charset=utf-8" },
   { path: "app.css", contentType: "text/css; charset=utf-8" },
   { path: "strings.json", contentType: "application/json; charset=utf-8" },
+  { path: "icon.svg", contentType: "image/svg+xml" },
 ];
 
 /**
@@ -53,7 +54,9 @@ export async function copyShell(bucket: R2Bucket): Promise<number> {
   for (const file of SHELL_FILES) {
     // 1 ファイルの失敗で残りを止めない。部分的にでも新しい方がよい
     try {
-      const res = await assets.fetch(`https://assets.invalid/archive/${file.path}`);
+      // ロゴは本体の public 直下にあるため、そちらから取る
+      const source = file.path === "icon.svg" ? "/icon.svg" : `/archive/${file.path}`;
+      const res = await assets.fetch(`https://assets.invalid${source}`);
       if (!res.ok) continue;
 
       await bucket.put(shellKey(file.path), await res.arrayBuffer(), {

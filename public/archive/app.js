@@ -190,8 +190,17 @@ async function renderAuthor(username) {
   view.appendChild(list);
 }
 
+/** サイドバーの選択状態を本体と同じ見た目で反映する */
+function syncNav(kind) {
+  for (const item of document.querySelectorAll(".nav-item")) {
+    item.classList.toggle("selected", item.dataset.route === kind);
+  }
+}
+
 async function route() {
   const target = currentRoute();
+  syncNav(target.kind === "list" ? "list" : "projects");
+  document.getElementById("sidebar").classList.remove("open");
   view.replaceChildren(el("p", "empty", t("loading")));
 
   try {
@@ -225,6 +234,14 @@ async function boot() {
 
   document.getElementById("generated").textContent =
     t("generatedAt", { at: new Date(manifest.generatedAt).toISOString().slice(0, 16).replace("T", " ") });
+
+  document.getElementById("navHome").textContent = t("navHome");
+  document.getElementById("navProjects").textContent = t("navProjects");
+  document.getElementById("sidebarNote").textContent = t("sidebarNote");
+
+  document.getElementById("menu").addEventListener("click", () => {
+    document.getElementById("sidebar").classList.toggle("open");
+  });
 
   document.getElementById("q").addEventListener("input", (e) => {
     if (currentRoute().kind === "list") renderList(e.target.value);

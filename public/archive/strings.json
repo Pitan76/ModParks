@@ -16,7 +16,10 @@
     "author": "作者",
     "noVersions": "公開中のバージョンはありません。",
     "externalDownload": "配布元を開く",
-    "projectsBy": "{name} のプロジェクト"
+    "projectsBy": "{name} のプロジェクト",
+    "navHome": "ホーム",
+    "navProjects": "プロジェクト",
+    "sidebarNote": "アーカイブでは閲覧のみできます。投稿・ログイン・カートなどの機能は本体サイトをご利用ください。"
   },
   "en": {
     "readOnlyNotice": "This is a read-only archive. Posting, downloading and signing in are unavailable.",
@@ -35,6 +38,9 @@
     "author": "Author",
     "noVersions": "No published versions.",
     "externalDownload": "Open distribution page",
-    "projectsBy": "Projects by {name}"
+    "projectsBy": "Projects by {name}",
+    "navHome": "Home",
+    "navProjects": "Projects",
+    "sidebarNote": "The archive is browse-only. Use the main site for posting, signing in and other features."
   }
 }
