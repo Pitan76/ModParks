@@ -9,11 +9,13 @@ import { getDatabase } from "@/lib/db";
 import { collectSnapshotData, type SnapshotData } from "./query";
 import { SNAPSHOT_SCHEMA_VERSION, type SnapshotManifest } from "./publicView";
 import { deleteKey, getSnapshotBucket, listKeys, putJson } from "./storage";
+import { copyShell } from "./shell";
 
 export type SnapshotResult = {
   projectCount: number;
   authorCount: number;
   deletedCount: number;
+  shellFiles: number;
 };
 
 /** 検索インデックス。名前・作者・タグ程度の前方一致に割り切る */
@@ -84,6 +86,8 @@ export async function generateSnapshot(): Promise<SnapshotResult> {
     (await pruneStale(bucket, "projects/", projectKeys)) +
     (await pruneStale(bucket, "authors/", authorKeys));
 
+  const shellFiles = await copyShell(bucket);
+
   const manifest: SnapshotManifest = {
     schemaVersion: SNAPSHOT_SCHEMA_VERSION,
     generatedAt: Date.now(),
@@ -96,5 +100,6 @@ export async function generateSnapshot(): Promise<SnapshotResult> {
     projectCount: data.summaries.length,
     authorCount: data.authors.size,
     deletedCount,
+    shellFiles,
   };
 }

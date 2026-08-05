@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 本体サイトと内容が重複するため、検索結果で競合させない -->
+<meta name="robots" content="noindex, nofollow">
+<!--
+  データの配信元。Worker を通さない経路を指すこと。
+  archive ホストから開いたときは同一オリジンの相対パスを使う（app.js が判定する）。
+-->
+<meta name="mp-data-origin" content="https://archive.modparks.pitan76.net">
+<title>ModParks Archive</title>
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header class="bar">
+  <a class="home" href="#/">ModParks <span class="tag">Archive</span></a>
+  <input id="q" class="search" type="search" autocomplete="off">
+</header>
+
+<p id="notice" class="notice" hidden></p>
+
+<main id="view" class="view"></main>
+
+<footer class="foot">
+  <span id="generated"></span>
+  <a id="mainSite" href="https://modparks.pitan76.net"></a>
+</footer>
+
+<script src="./app.js"></script>
+</body>
+</html>
