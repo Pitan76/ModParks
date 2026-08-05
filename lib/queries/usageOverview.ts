@@ -44,6 +44,12 @@ export type UsageOverview = {
   history: UsageDaily[];
   /** 含有枠と単価の確認が古い、または未確認か */
   quotaStale: boolean;
+  /** 設定フォームの初期値 */
+  settings: {
+    usagePlan: UsagePlan;
+    usageQuotaRequests: number;
+    usageBudgetJpy: number;
+  };
 };
 
 function sum(rows: UsageDaily[], pick: (row: UsageDaily) => number): number {
@@ -91,5 +97,10 @@ export async function getUsageOverview(): Promise<UsageOverview> {
     history: [...history].reverse(),
     quotaStale: settings.usageQuotaCheckedDay === 0
       || today - settings.usageQuotaCheckedDay > QUOTA_RECHECK_DAYS,
+    settings: {
+      usagePlan: plan,
+      usageQuotaRequests: settings.usageQuotaRequests,
+      usageBudgetJpy: settings.usageBudgetJpy,
+    },
   };
 }

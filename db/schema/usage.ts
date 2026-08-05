@@ -7,7 +7,7 @@
  * 月次の値は日次行の合計で導出する。逆は導出できないため、
  * Paid へ移っても行の粒度は日次のまま変えない。
  */
-import { sqliteTable, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
 export const usageDaily = sqliteTable("usage_daily", {
   /** UTC 基準の epoch day (unixepoch() / 86400) */
@@ -27,3 +27,19 @@ export const usageDaily = sqliteTable("usage_daily", {
 });
 
 export type UsageDaily = typeof usageDaily.$inferSelect;
+
+/**
+ * 予算アラートの通知済み状態。
+ *
+ * 判定は毎時走るため、同じ深刻度で鳴らし続けるとアラートが無視されるようになる。
+ * 期間ごとに「どこまで通知したか」を持ち、深刻度が上がったときだけ通知する。
+ */
+export const usageAlertState = sqliteTable("usage_alert_state", {
+  /** 判定期間。free は "YYYY-MM-DD"、paid は "YYYY-MM" */
+  periodKey: text("period_key").primaryKey(),
+  /** 最後に通知した深刻度 */
+  level: text("level").notNull(),
+  notifiedAt: integer("notified_at").notNull(),
+});
+
+export type UsageAlertState = typeof usageAlertState.$inferSelect;

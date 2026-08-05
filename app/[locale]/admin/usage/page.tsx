@@ -11,6 +11,7 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { getUsageOverview, QUOTA_RECHECK_DAYS } from "@/lib/queries/usageOverview";
 import UsageQuotaCard from "@/components/admin/UsageQuotaCard";
 import UsageHistoryTable from "@/components/admin/UsageHistoryTable";
+import UsageSettingsPanel from "@/components/admin/UsageSettingsPanel";
 
 interface AdminUsagePageProps {
   params: Promise<{ locale: string }>;
@@ -73,10 +74,17 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>{t("history")}</Typography>
           <UsageHistoryTable history={overview.history} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>{t("settings")}</Typography>
+          <UsageSettingsPanel initial={overview.settings} />
         </CardContent>
       </Card>
     </Box>

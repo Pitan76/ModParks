@@ -1248,7 +1248,20 @@
       "countedNote": "The gap between requests and counted downloads comes from author self-downloads, protection mode, bots, and deduplication. If bot downloads stay at zero, bot detection may be unavailable.",
       "history": "Daily history",
       "date": "Date",
-      "noData": "No usage data yet."
+      "noData": "No usage data yet.",
+      "settings": "Quota & budget settings",
+      "settingsHelp": "Quota values change when pricing is revised. Check the Cloudflare pricing page before entering them. Saving also records the check date.",
+      "planLabel": "Plan",
+      "planHelp": "Free resets daily and stops serving when exceeded; Paid is billed monthly.",
+      "quotaRequestsLabel": "Included requests",
+      "quotaRequestsHelp": {
+        "free": "Requests per day. Set 0 to skip ratio evaluation.",
+        "paid": "Requests per month. Set 0 to skip ratio evaluation."
+      },
+      "budgetLabel": "Additional charge limit (JPY/month)",
+      "budgetHelp": "Monthly amount tolerated beyond the included quota. Setting 0 makes even a few yen trigger warnings.",
+      "save": "Save",
+      "saved": "Saved"
     }
   },
   "Search": {
