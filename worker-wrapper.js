@@ -3,6 +3,7 @@ import { getDdosState } from "./worker/ddos-state.js";
 import { trackRequest } from "./worker/ddos-stats.js";
 import { handleDdosCron } from "./worker/ddos-cron.js";
 import { isBotRequest } from "./worker/bot-detect.js";
+import { getRuntimeMode, handleRestrictedMode } from "./worker/runtime-mode.js";
 
 // 式は wrangler.toml の [triggers] crons と一致させること
 const CRON_ROUTES = {
@@ -58,6 +59,16 @@ export default {
   /** OpenNext の fetch ハンドラをラップし、手前でDDoS統計の収集だけを行う */
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
+
+    // 運用モードの判定は最初に行う。止めている間は本体の処理を一切走らせない
+    const restricted = handleRestrictedMode(
+      req,
+      url,
+      await getRuntimeMode(env),
+      env.ARCHIVE_ORIGIN || url.origin
+    );
+    if (restricted) return restricted;
+
     const isDownload = isDownloadPath(url.pathname);
     let forwarded = req;
 

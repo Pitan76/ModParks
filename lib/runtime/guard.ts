@@ -5,7 +5,7 @@
  * 停止できる操作は必ずこの 1 本を通すこと。
  */
 import { getRuntimeConfig } from "@/lib/runtime/state";
-import { isFeatureEnabled, type RuntimeFeature } from "@/lib/runtime/features";
+import { effectiveMode, isFeatureEnabled, type RuntimeFeature } from "@/lib/runtime/features";
 
 /** 機能が停止されているときに投げる。呼び出し元は 503 として扱う */
 export class FeatureDisabledError extends Error {
@@ -23,6 +23,11 @@ export class FeatureDisabledError extends Error {
  */
 export async function assertFeatureEnabled(feature: RuntimeFeature): Promise<void> {
   const config = await getRuntimeConfig();
+
+  // Worker 層でも止めているが、内部呼び出しはそこを通らないため二重に見る
+  if (effectiveMode(config) !== "NORMAL") {
+    throw new FeatureDisabledError(feature, config.mode?.reason);
+  }
   if (isFeatureEnabled(config, feature)) return;
 
   throw new FeatureDisabledError(feature, config.features[feature]?.reason);
@@ -30,5 +35,8 @@ export async function assertFeatureEnabled(feature: RuntimeFeature): Promise<voi
 
 /** 例外を投げずに可否だけ知りたい場合に使う（画面の出し分けなど） */
 export async function checkFeatureEnabled(feature: RuntimeFeature): Promise<boolean> {
-  return isFeatureEnabled(await getRuntimeConfig(), feature);
+  const config = await getRuntimeConfig();
+  if (effectiveMode(config) !== "NORMAL") return false;
+
+  return isFeatureEnabled(config, feature);
 }

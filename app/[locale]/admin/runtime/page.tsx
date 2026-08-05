@@ -7,8 +7,9 @@ import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { getRuntimeConfig } from "@/lib/runtime/state";
-import { normalizeFeatures } from "@/lib/runtime/features";
+import { effectiveMode, normalizeFeatures } from "@/lib/runtime/features";
 import FeatureSwitchList from "@/components/admin/FeatureSwitchList";
+import RuntimeModePanel from "@/components/admin/RuntimeModePanel";
 
 interface AdminRuntimePageProps {
   params: Promise<{ locale: string }>;
@@ -25,7 +26,8 @@ export default async function AdminRuntimePage({ params }: AdminRuntimePageProps
   }
 
   const t = await getTranslations("Admin.runtime");
-  const features = normalizeFeatures(await getRuntimeConfig());
+  const config = await getRuntimeConfig();
+  const features = normalizeFeatures(config);
   const disabled = Object.values(features).filter((state) => !state.enabled).length;
 
   return (
@@ -39,8 +41,19 @@ export default async function AdminRuntimePage({ params }: AdminRuntimePageProps
         <Alert severity="warning" sx={{ mb: 3 }}>{t("disabledCount", { count: disabled })}</Alert>
       )}
 
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>{t("modeTitle")}</Typography>
+          <RuntimeModePanel
+            current={config.mode ?? { mode: "NORMAL" }}
+            effective={effectiveMode(config)}
+          />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>{t("featuresTitle")}</Typography>
           <FeatureSwitchList initial={features} />
         </CardContent>
       </Card>

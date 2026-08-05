@@ -1291,7 +1291,30 @@
       "reasonHelp": "Record why it is being disabled. This is what tells you later whether it is safe to re-enable.",
       "reasonLabel": "Reason",
       "disable": "Disable",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "modeTitle": "Operating mode",
+      "featuresTitle": "Feature switches",
+      "modeHelp": "Changes site-wide behaviour. Prefer feature switches when they suffice — a smaller blast radius means faster recovery.",
+      "modeLabel": "Mode",
+      "mode": {
+        "NORMAL": "Normal",
+        "STATIC": "Read-only (Static Mode)",
+        "MAINTENANCE": "Maintenance"
+      },
+      "modeDesc": {
+        "NORMAL": "Everything runs according to the feature switches.",
+        "STATIC": "Stops posting, uploads and downloads, and directs visitors to the static archive. Read APIs redirect to static JSON. The admin UI stays usable.",
+        "MAINTENANCE": "Stops everything except the admin UI. Does not recover automatically."
+      },
+      "modeActive": {
+        "STATIC": "Running in read-only mode.",
+        "MAINTENANCE": "Stopped for maintenance."
+      },
+      "until": "until {at}",
+      "durationLabel": "Duration",
+      "durationHelp": "Returns to normal automatically when the deadline passes, so a forgotten switch does not keep the site down. Maintenance does not auto-recover.",
+      "hours": "{count} hours",
+      "applyMode": "Apply"
     }
   },
   "Search": {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkCronAuth } from "@/lib/cron/auth";
 import { rollupSliceIncrements } from "@/lib/usage/sliceRollup";
+import { expireModeIfDue } from "@/lib/runtime/mode";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,10 @@ export async function GET(request: Request) {
 
   try {
     const requests = await rollupSliceIncrements();
-    return NextResponse.json({ success: true, requests });
+    // 戻し忘れで止まったままにならないよう、期限切れをここで後始末する
+    const modeRestored = await expireModeIfDue();
+
+    return NextResponse.json({ success: true, requests, modeRestored });
   } catch (error) {
     console.error("[CRON] Usage rollup error:", error);
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
