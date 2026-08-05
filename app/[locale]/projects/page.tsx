@@ -55,6 +55,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const authorUsername = author !== "me" && author ? author : undefined;
 
   const typesArr = types ? types.split(",") : [...CONTENT_TYPES];
+  const initialTypesVal = types ? types.split(",") : [];
   const loadersArr = loaders ? loaders.split(",") : undefined;
   const mcVersionsArr = mcVersions ? mcVersions.split(",") : undefined;
   const tagsArr = tags ? tags.split(",") : undefined;
@@ -132,7 +133,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
       <ProjectSearchBar
         initialQ={q} 
         initialAuthor={author}
-        initialTypes={typesArr} 
+        initialTypes={initialTypesVal} 
         initialSort={sort}
         initialLoaders={loadersArr || []}
         initialMcVersions={mcVersionsArr || []}
