@@ -744,7 +744,8 @@
       "recipe": "Recipe Management",
       "scans": "Scan logs",
       "oauth": "OAuth Apps",
-      "usage": "Usage & Cost"
+      "usage": "Usage & Cost",
+      "runtime": "Feature switches"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -1262,6 +1263,29 @@
       "budgetHelp": "Monthly amount tolerated beyond the included quota. Setting 0 makes even a few yen trigger warnings.",
       "save": "Save",
       "saved": "Saved"
+    },
+    "runtime": {
+      "title": "Feature switches",
+      "description": "Disable individual high-cost features. Keeps the blast radius small instead of taking the whole site down.",
+      "disabledCount": "{count} feature(s) currently disabled.",
+      "feature": {
+        "upload": "Uploads",
+        "jarAnalysis": "JAR analysis",
+        "download": "Downloads",
+        "comment": "Comments"
+      },
+      "featureHelp": {
+        "upload": "Stops new version uploads. Existing files stay downloadable.",
+        "jarAnalysis": "Stops only the JAR analysis on upload. Uploads still work and analysis can be re-run later.",
+        "download": "Stops downloads served through ModParks. External distribution links remain.",
+        "comment": "Stops new comments. Existing comments stay visible."
+      },
+      "disabledSince": "Disabled since {at}",
+      "disableTitle": "Disable feature",
+      "reasonHelp": "Record why it is being disabled. This is what tells you later whether it is safe to re-enable.",
+      "reasonLabel": "Reason",
+      "disable": "Disable",
+      "cancel": "Cancel"
     }
   },
   "Search": {

@@ -17,6 +17,7 @@ import {
   loadManageableIdea,
   resolveCommentParent,
 } from "./ideaShared";
+import { assertFeatureEnabled } from "@/lib/runtime/guard";
 
 // ---- アイデア作成 ----
 
@@ -164,6 +165,8 @@ export async function toggleIdeaFavorite(ideaId: string) {
 // ---- コメント作成 ----
 
 export async function createIdeaComment(ideaId: string, formData: FormData) {
+  await assertFeatureEnabled("comment");
+
   const { db, userId } = await getAuthenticatedDb();
 
   const raw = {
