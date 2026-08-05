@@ -45,7 +45,7 @@ export default function HomeHero({ labels }: HomeHeroProps) {
     >
       {/* 背景画像 (直接フィルターで暗くすることで、テキストのmixBlendModeを正常に機能させます) */}
       <Image
-        src="/hero.png"
+        src="/hero.webp"
         alt="Home Hero"
         fill
         priority
