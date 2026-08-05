@@ -7,7 +7,7 @@
 import { and, gte, lt, sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
 import { ddosSlices, usageDaily, versionDownloadDaily } from "@/db/schema";
-import { fetchDailyRequests } from "@/lib/usage/analytics";
+import { fetchDailyRequests, type DayRequests } from "@/lib/usage/analytics";
 
 type Db = Awaited<ReturnType<typeof getDatabase>>;
 
@@ -66,10 +66,10 @@ export function toIsoDate(day: number): string {
  *
  * 合計を入れ直すだけなので、同じ日に何度実行しても結果は変わらない。
  *
- * @param cfRequests Cloudflare の実測値。undefined なら既存の値を保つ
+ * @param measured Cloudflare の実測値。undefined なら既存の値を保つ
  *   （取得に失敗しただけで、取得済みの値を消さないため）
  */
-export async function rollupUsageForDay(date: number, cfRequests?: number): Promise<void> {
+export async function rollupUsageForDay(date: number, measured?: DayRequests): Promise<void> {
   const db = await getDatabase();
   const slices = await sumSlices(db, date);
   const downloadsCounted = await sumCountedDownloads(db, date);
@@ -84,12 +84,16 @@ export async function rollupUsageForDay(date: number, cfRequests?: number): Prom
     updatedAt: Date.now(),
   };
 
+  const cf = measured
+    ? { cfRequests: measured.total, cfRequestsOwn: measured.own }
+    : { cfRequests: null, cfRequestsOwn: null };
+
   await db
     .insert(usageDaily)
-    .values({ ...values, cfRequests: cfRequests ?? null })
+    .values({ ...values, ...cf })
     .onConflictDoUpdate({
       target: usageDaily.date,
-      set: cfRequests === undefined ? values : { ...values, cfRequests },
+      set: measured ? { ...values, ...cf } : values,
     })
     .run();
 }

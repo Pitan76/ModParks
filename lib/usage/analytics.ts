@@ -19,25 +19,48 @@ const QUERY = `query WorkerRequests($accountTag: string!, $from: Date!, $to: Dat
   viewer {
     accounts(filter: { accountTag: $accountTag }) {
       workersInvocationsAdaptive(
-        limit: ${MAX_DAYS * 20}
+        limit: ${MAX_DAYS * 100}
         filter: { date_geq: $from, date_leq: $to }
       ) {
-        dimensions { date }
+        dimensions { date scriptName }
         sum { requests }
       }
     }
   }
 }`;
 
+/**
+ * ModParks 由来と判定する Worker 名。
+ *
+ * 枠はアカウント単位なので判定には全スクリプトの合計を使うが、
+ * 「自分が何を消費しているか」を分けて見られないと、他プロジェクトが
+ * 原因のときに ModParks を止めるという無駄な対処をしてしまう。
+ */
+const OWN_SCRIPT_PREFIX = "modparks";
+const OWN_SCRIPT_EXTRA = new Set(["mp-recipe"]);
+
+function isOwnScript(scriptName: string): boolean {
+  if (OWN_SCRIPT_EXTRA.has(scriptName)) return true;
+  return scriptName === OWN_SCRIPT_PREFIX || scriptName.startsWith(`${OWN_SCRIPT_PREFIX}-`);
+}
+
+/** 1 日ぶんの実測値 */
+export type DayRequests = {
+  /** アカウント全体。枠の判定に使う */
+  total: number;
+  /** ModParks 由来のみ。責任範囲の把握に使う */
+  own: number;
+};
+
 /** 日付 (YYYY-MM-DD) ごとのリクエスト数 */
-export type DailyRequests = Map<string, number>;
+export type DailyRequests = Map<string, DayRequests>;
 
 type GraphQLResponse = {
   data?: {
     viewer?: {
       accounts?: {
         workersInvocationsAdaptive?: {
-          dimensions?: { date?: string };
+          dimensions?: { date?: string; scriptName?: string };
           sum?: { requests?: number };
         }[];
       }[];
@@ -71,7 +94,7 @@ async function resolveEnv(): Promise<AnalyticsEnv> {
   }
 }
 
-/** スクリプトが複数あっても、アカウント全体の合計として日ごとに畳む */
+/** アカウント全体の合計と、ModParks 由来の内訳を日ごとに畳む */
 function toDailyTotals(response: GraphQLResponse): DailyRequests {
   const totals: DailyRequests = new Map();
   const rows = response.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive ?? [];
@@ -79,7 +102,12 @@ function toDailyTotals(response: GraphQLResponse): DailyRequests {
   for (const row of rows) {
     const date = row.dimensions?.date;
     if (!date) continue;
-    totals.set(date, (totals.get(date) ?? 0) + (row.sum?.requests ?? 0));
+
+    const requests = row.sum?.requests ?? 0;
+    const current = totals.get(date) ?? { total: 0, own: 0 };
+    current.total += requests;
+    if (isOwnScript(row.dimensions?.scriptName ?? "")) current.own += requests;
+    totals.set(date, current);
   }
 
   return totals;

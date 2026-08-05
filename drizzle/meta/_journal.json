@@ -498,6 +498,13 @@
       "when": 1785921859832,
       "tag": "0070_usage_cf_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "6",
+      "when": 1785922811686,
+      "tag": "0071_usage_cf_requests_own",
+      "breakpoints": true
     }
   ]
 }

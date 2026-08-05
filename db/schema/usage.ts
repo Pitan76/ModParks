@@ -18,10 +18,17 @@ export const usageDaily = sqliteTable("usage_daily", {
    */
   requests: integer("requests").notNull().default(0),
   /**
-   * Cloudflare GraphQL Analytics API の実測値。枠の判定はこちらを使う。
+   * Cloudflare GraphQL Analytics API の実測値（アカウント全体）。
+   * Free 枠はアカウント単位で、他プロジェクトが跳ねれば道連れで止まるため、
+   * 枠の判定にはこちらを使う。
    * null は未取得（トークン未設定・取得失敗）を表し、0 と区別する。
    */
   cfRequests: integer("cf_requests"),
+  /**
+   * 同じく実測値のうち ModParks 由来のぶん。
+   * 原因が自分の側にあるのかを切り分けるために持つ。
+   */
+  cfRequestsOwn: integer("cf_requests_own"),
   /** /api/download へのリクエスト数。計上の可否を問わない */
   downloads: integer("downloads").notNull().default(0),
   /** Bot と判定されたリクエスト数 */

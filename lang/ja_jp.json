@@ -1273,7 +1273,10 @@
       "saved": "保存しました",
       "measurementMissing": "Cloudflare の実測値を取得できていません。CLOUDFLARE_ANALYTICS_TOKEN が未設定の可能性があります。実測値が無い間、消費率の判定と予算アラートは働きません。",
       "sampledRequests": "参考値（内部集計）",
-      "sampledNote": "参考値は内部集計によるもので、書き出し前に破棄される分があるため実測より少なく出ます。枠の判定には使いません。"
+      "sampledNote": "参考値は内部集計によるもので、書き出し前に破棄される分があるため実測より少なく出ます。枠の判定には使いません。",
+      "ownRequests": "ModParks経由",
+      "otherRequests": "外部サービス経由",
+      "ownNote": "含有枠はアカウント単位のため、他プロジェクトが跳ねると ModParks も道連れで停止します。判定はアカウント全体で行い、原因の切り分け用に内訳を出しています。"
     },
     "runtime": {
       "title": "機能スイッチ",

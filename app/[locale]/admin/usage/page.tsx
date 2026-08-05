@@ -60,6 +60,15 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <UsageQuotaCard labelKey="requests" usage={overview.requests} progress={overview.progress} />
+
+          <Stack direction="row" spacing={4} useFlexGap sx={{ flexWrap: "wrap", mt: 3 }}>
+            <Metric label={t("ownRequests")} value={overview.ownRequests} />
+            <Metric label={t("otherRequests")} value={Math.max(overview.requests.used - overview.ownRequests, 0)} />
+            <Metric label={t("sampledRequests")} value={overview.sampledRequests} />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
+            {t("ownNote")} {t("sampledNote")}
+          </Typography>
         </CardContent>
       </Card>
 
@@ -71,10 +80,9 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
             <Metric label={t("downloadsCounted")} value={overview.downloadsCounted} />
             <Metric label={t("botDownloads")} value={overview.botDownloads} />
             <Metric label={t("botRequests")} value={overview.botRequests} />
-            <Metric label={t("sampledRequests")} value={overview.sampledRequests} />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
-            {t("countedNote")}{" "}{t("sampledNote")}
+            {t("countedNote")}
           </Typography>
         </CardContent>
       </Card>

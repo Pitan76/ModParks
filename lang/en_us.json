@@ -1265,7 +1265,10 @@
       "saved": "Saved",
       "measurementMissing": "Cloudflare measurements are unavailable. CLOUDFLARE_ANALYTICS_TOKEN may not be configured. Quota evaluation and budget alerts do not run without them.",
       "sampledRequests": "Sampled (internal)",
-      "sampledNote": "The sampled figure comes from internal aggregation and undercounts, since some batches are discarded before being flushed. It is not used for quota evaluation."
+      "sampledNote": "The sampled figure comes from internal aggregation and undercounts, since some batches are discarded before being flushed. It is not used for quota evaluation.",
+      "ownRequests": "From ModParks",
+      "otherRequests": "From other projects",
+      "ownNote": "The quota is account-wide, so a spike in another project takes ModParks down with it. Evaluation uses the account total; the breakdown is here to tell where the load comes from."
     },
     "runtime": {
       "title": "Feature switches",

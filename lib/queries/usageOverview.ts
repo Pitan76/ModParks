@@ -33,6 +33,8 @@ export type UsageOverview = {
   measurementMissing: boolean;
   /** ddos_slices 由来のリクエスト数。傾向の参考値で、実測より少なく出る */
   sampledRequests: number;
+  /** 実測値のうち ModParks 由来のぶん */
+  ownRequests: number;
   /** 期間内のダウンロード数（計上の可否を問わない） */
   downloads: number;
   /** 実際に統計へ計上したダウンロード数 */
@@ -95,6 +97,7 @@ export async function getUsageOverview(): Promise<UsageOverview> {
     requests,
     measurementMissing: measuredRows.length === 0,
     sampledRequests: sum(periodRows, (row) => row.requests),
+    ownRequests: sum(measuredRows, (row) => row.cfRequestsOwn ?? 0),
     downloads: sum(periodRows, (row) => row.downloads),
     downloadsCounted: sum(periodRows, (row) => row.downloadsCounted),
     botRequests: sum(periodRows, (row) => row.botRequests),
