@@ -8,6 +8,7 @@ import { decideCountable } from "@/lib/download/countPolicy";
 import { shouldCountOnce } from "@/lib/download/dedupe";
 import { recordVersionDownload } from "@/lib/download/counter";
 import { getR2PublicUrl } from "@/lib/r2";
+import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { auth } from "@/lib/auth";
 import { validateApiKey } from "@/lib/api-auth";
 import { toStringArray } from "@/lib/utils/format";
@@ -139,6 +140,13 @@ async function countDownload(
  * - R2 のファイル URL または外部URLにリダイレクト
  */
 export async function GET(req: NextRequest) {
+  if (!await checkFeatureEnabled("download")) {
+    return NextResponse.json(
+      { error: "Downloads are temporarily disabled" },
+      { status: 503, headers: { "Retry-After": "3600" } }
+    );
+  }
+
   const versionIdParam = req.nextUrl.searchParams.get("versionId");
   const slug = req.nextUrl.searchParams.get("slug");
   if (!versionIdParam && !slug) {

@@ -751,7 +751,9 @@
       "audit": "監査ログ",
       "recipe": "レシピ管理",
       "scans": "スキャンログ",
-      "oauth": "OAuthアプリ管理"
+      "oauth": "OAuthアプリ管理",
+      "usage": "利用量とコスト",
+      "runtime": "機能スイッチ"
     },
     "recipe": {
       "title": "レシピ管理",
@@ -1215,6 +1217,83 @@
           "noChange": "すでにその判定です。"
         }
       }
+    },
+    "usage": {
+      "title": "利用量とコスト",
+      "description": "リクエスト数と計上状況を確認します",
+      "plan": {
+        "free": "Free プラン",
+        "paid": "Paid プラン"
+      },
+      "periodNote": {
+        "free": "Free は日次でリセットされ、枠を超えると停止します。当日ぶんを表示しています。",
+        "paid": "Paid は月次で集計され、枠を超えると課金されます。当月ぶんを表示しています。"
+      },
+      "requests": "リクエスト数",
+      "ofQuota": "{used} / {quota}",
+      "consumed": "消費 {percent}%",
+      "expectedPace": "想定ペース {percent}%",
+      "quotaUnset": "含有枠が未設定のため、割合は評価していません",
+      "quotaStale": "含有枠と単価を{days}日以上確認していません。料金ページを確認して設定を更新してください。",
+      "level": {
+        "notice": {
+          "free": "消費ペースが想定を上回っています。",
+          "paid": "消費ペースが想定を上回っています。"
+        },
+        "warning": {
+          "free": "当日枠の6割を超えました。管理画面が使えるうちに対処してください。",
+          "paid": "含有枠の8割を超えました。"
+        },
+        "critical": {
+          "free": "当日枠の8割を超えました。枠が尽きると管理画面も開けなくなります。",
+          "paid": "含有枠を超えました。追加課金が発生しています。"
+        }
+      },
+      "downloadBreakdown": "ダウンロードの内訳",
+      "downloads": "ダウンロード到達数",
+      "downloadsCounted": "計上したダウンロード数",
+      "botRequests": "Bot リクエスト数",
+      "botDownloads": "Bot ダウンロード数",
+      "countedNote": "到達数と計上数の差は、作者本人・防護中・Bot・重複排除による除外です。Bot ダウンロード数が常に0の場合、Bot 判定が利用できていない可能性があります。",
+      "history": "日次推移",
+      "date": "日付",
+      "noData": "まだ集計データがありません。",
+      "settings": "含有枠と予算の設定",
+      "settingsHelp": "含有枠の実値は料金改定で変わります。Cloudflare の料金ページを確認して入力してください。保存すると確認日も更新されます。",
+      "planLabel": "契約プラン",
+      "planHelp": "Free は日次リセットで超えると停止、Paid は月次で超えると課金されます。",
+      "quotaRequestsLabel": "リクエスト数の含有枠",
+      "quotaRequestsHelp": {
+        "free": "1日あたりのリクエスト数。0 にすると割合を評価しません。",
+        "paid": "1か月あたりのリクエスト数。0 にすると割合を評価しません。"
+      },
+      "budgetLabel": "追加課金の上限（円/月）",
+      "budgetHelp": "含有枠を超えて許容する月あたりの金額。0 にすると数円の超過でも警告が鳴り続けます。",
+      "save": "保存",
+      "saved": "保存しました"
+    },
+    "runtime": {
+      "title": "機能スイッチ",
+      "description": "コストの重い機能を個別に停止します。サイト全体を止めずに影響範囲を最小にするための操作です。",
+      "disabledCount": "{count} 件の機能が停止中です。",
+      "feature": {
+        "upload": "アップロード",
+        "jarAnalysis": "JAR 解析",
+        "download": "ダウンロード",
+        "comment": "コメント投稿"
+      },
+      "featureHelp": {
+        "upload": "バージョンファイルの新規アップロードを停止します。既存ファイルの配布は続きます。",
+        "jarAnalysis": "アップロード時の JAR 解析だけを停止します。アップロード自体は継続でき、解析は後から手動で実行できます。",
+        "download": "ModParks 経由のダウンロードを停止します。外部配布先へのリンクは残ります。",
+        "comment": "新規コメントの投稿を停止します。既存コメントの表示は続きます。"
+      },
+      "disabledSince": "{at} から停止",
+      "disableTitle": "機能を停止する",
+      "reasonHelp": "停止理由を残してください。後から「戻してよいか」を判断する材料になります。",
+      "reasonLabel": "停止理由",
+      "disable": "停止する",
+      "cancel": "キャンセル"
     }
   },
   "Search": {

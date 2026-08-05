@@ -6,6 +6,9 @@ import { toProjectPost } from "@/lib/queries/postRow";
 import { syncExternalProjectDataSystem } from "@/lib/actions/projectSync";
 import { purgeExpiredRateLimits } from "@/lib/rate-limit";
 import { rollupDownloadCounts } from "@/lib/download/counter";
+import { rollupRecentUsage } from "@/lib/usage/rollup";
+import { evaluateUsageAlert } from "@/lib/usage/alert";
+import { getAdminWebhookUrl } from "@/lib/usage/webhook";
 import { checkCronAuth } from "@/lib/cron/auth";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +26,10 @@ export async function GET(request: Request) {
 
     // 外部同期が失敗しても累積カウンタは反映したいので、先に済ませる
     const rolledUpDownloads = await rollupDownloadCounts();
+
+    // 利用量の集計は計上済みの件数を読むため、ダウンロード反映の後に置く
+    await rollupRecentUsage();
+    const alerted = await evaluateUsageAlert(await getAdminWebhookUrl());
 
     const threeDaysAgoMs = Date.now() - (3 * 24 * 60 * 60 * 1000);
 
@@ -47,7 +54,7 @@ export async function GET(request: Request) {
       .slice(0, 10); // 1回のCRON実行で最大10件まで（タイムアウト防止）
 
     if (projectsToSync.length === 0) {
-      return NextResponse.json({ success: true, message: "No projects to sync", rolledUpDownloads });
+      return NextResponse.json({ success: true, message: "No projects to sync", rolledUpDownloads, alerted });
     }
 
     const results = [];
@@ -62,7 +69,7 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, syncedCount: projectsToSync.length, rolledUpDownloads, results });
+    return NextResponse.json({ success: true, syncedCount: projectsToSync.length, rolledUpDownloads, alerted, results });
   } catch (error: any) {
     console.error("[CRON] Sync error:", error);
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });

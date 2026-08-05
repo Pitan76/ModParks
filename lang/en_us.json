@@ -743,7 +743,9 @@
       "audit": "Audit Logs",
       "recipe": "Recipe Management",
       "scans": "Scan logs",
-      "oauth": "OAuth Apps"
+      "oauth": "OAuth Apps",
+      "usage": "Usage & Cost",
+      "runtime": "Feature switches"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -1207,6 +1209,83 @@
           "noChange": "Already set to that verdict."
         }
       }
+    },
+    "usage": {
+      "title": "Usage & Cost",
+      "description": "Review request volume and download counting",
+      "plan": {
+        "free": "Free plan",
+        "paid": "Paid plan"
+      },
+      "periodNote": {
+        "free": "Free resets daily and stops serving once the quota runs out. Showing today.",
+        "paid": "Paid is billed monthly once the included quota is exceeded. Showing this month."
+      },
+      "requests": "Requests",
+      "ofQuota": "{used} / {quota}",
+      "consumed": "{percent}% used",
+      "expectedPace": "{percent}% expected",
+      "quotaUnset": "No quota configured, so no ratio is evaluated.",
+      "quotaStale": "The quota and unit prices have not been checked for over {days} days. Review the pricing page and update the settings.",
+      "level": {
+        "notice": {
+          "free": "Consumption is running ahead of the expected pace.",
+          "paid": "Consumption is running ahead of the expected pace."
+        },
+        "warning": {
+          "free": "Over 60% of today's quota. Act while the admin UI still works.",
+          "paid": "Over 80% of the included quota."
+        },
+        "critical": {
+          "free": "Over 80% of today's quota. The admin UI stops working once it runs out.",
+          "paid": "Included quota exceeded. Additional charges are accruing."
+        }
+      },
+      "downloadBreakdown": "Download breakdown",
+      "downloads": "Download requests",
+      "downloadsCounted": "Counted downloads",
+      "botRequests": "Bot requests",
+      "botDownloads": "Bot downloads",
+      "countedNote": "The gap between requests and counted downloads comes from author self-downloads, protection mode, bots, and deduplication. If bot downloads stay at zero, bot detection may be unavailable.",
+      "history": "Daily history",
+      "date": "Date",
+      "noData": "No usage data yet.",
+      "settings": "Quota & budget settings",
+      "settingsHelp": "Quota values change when pricing is revised. Check the Cloudflare pricing page before entering them. Saving also records the check date.",
+      "planLabel": "Plan",
+      "planHelp": "Free resets daily and stops serving when exceeded; Paid is billed monthly.",
+      "quotaRequestsLabel": "Included requests",
+      "quotaRequestsHelp": {
+        "free": "Requests per day. Set 0 to skip ratio evaluation.",
+        "paid": "Requests per month. Set 0 to skip ratio evaluation."
+      },
+      "budgetLabel": "Additional charge limit (JPY/month)",
+      "budgetHelp": "Monthly amount tolerated beyond the included quota. Setting 0 makes even a few yen trigger warnings.",
+      "save": "Save",
+      "saved": "Saved"
+    },
+    "runtime": {
+      "title": "Feature switches",
+      "description": "Disable individual high-cost features. Keeps the blast radius small instead of taking the whole site down.",
+      "disabledCount": "{count} feature(s) currently disabled.",
+      "feature": {
+        "upload": "Uploads",
+        "jarAnalysis": "JAR analysis",
+        "download": "Downloads",
+        "comment": "Comments"
+      },
+      "featureHelp": {
+        "upload": "Stops new version uploads. Existing files stay downloadable.",
+        "jarAnalysis": "Stops only the JAR analysis on upload. Uploads still work and analysis can be re-run later.",
+        "download": "Stops downloads served through ModParks. External distribution links remain.",
+        "comment": "Stops new comments. Existing comments stay visible."
+      },
+      "disabledSince": "Disabled since {at}",
+      "disableTitle": "Disable feature",
+      "reasonHelp": "Record why it is being disabled. This is what tells you later whether it is safe to re-enable.",
+      "reasonLabel": "Reason",
+      "disable": "Disable",
+      "cancel": "Cancel"
     }
   },
   "Search": {

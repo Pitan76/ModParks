@@ -16,6 +16,8 @@ const EARLY_FLUSH_INTERVAL_MS = 5000;
 let currentBucket = 0;
 let localRequestCount = 0;
 let localDownloadCount = 0;
+let localBotCount = 0;
+let localBotDownloadCount = 0;
 let localIPs = new Set();
 let localCountries = new Set();
 let localSlugs = {};
@@ -23,11 +25,13 @@ let localSlugs = {};
 let lastFlushTime = 0;
 let isFlushing = false;
 
-const UPSERT_SLICE_SQL = `INSERT INTO ddos_slices (slice_time, isolate_id, request_count, download_count, unique_ip_count, unique_country_count, top_slug, top_slug_count)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+const UPSERT_SLICE_SQL = `INSERT INTO ddos_slices (slice_time, isolate_id, request_count, download_count, unique_ip_count, unique_country_count, top_slug, top_slug_count, bot_count, bot_download_count)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(slice_time, isolate_id) DO UPDATE SET
          request_count = request_count + excluded.request_count,
          download_count = download_count + excluded.download_count,
+         bot_count = bot_count + excluded.bot_count,
+         bot_download_count = bot_download_count + excluded.bot_download_count,
          unique_ip_count = max(unique_ip_count, excluded.unique_ip_count),
          unique_country_count = max(unique_country_count, excluded.unique_country_count),
          top_slug = CASE WHEN excluded.top_slug_count > top_slug_count THEN excluded.top_slug ELSE top_slug END,
@@ -36,6 +40,8 @@ const UPSERT_SLICE_SQL = `INSERT INTO ddos_slices (slice_time, isolate_id, reque
 function resetLocalStats() {
   localRequestCount = 0;
   localDownloadCount = 0;
+  localBotCount = 0;
+  localBotDownloadCount = 0;
   localIPs.clear();
   localCountries.clear();
   localSlugs = {};
@@ -54,6 +60,8 @@ function getAndResetStats() {
   const stats = {
     requestCount:       localRequestCount,
     downloadCount:      localDownloadCount,
+    botCount:           localBotCount,
+    botDownloadCount:   localBotDownloadCount,
     uniqueIpCount:      localIPs.size,
     uniqueCountryCount: localCountries.size,
     topSlug,
@@ -83,6 +91,8 @@ async function flushIsolateStats(env, sliceTime, stats) {
       stats.uniqueCountryCount,
       stats.topSlug,
       stats.topSlugCount,
+      stats.botCount,
+      stats.botDownloadCount,
     ).run();
 
     console.log(`[DDOS-GUARD] Flushed stats for bucket=${sliceTime}: reqs=${stats.requestCount}, dls=${stats.downloadCount}, IPs=${stats.uniqueIpCount}, top=${stats.topSlug}(${stats.topSlugCount})`);
@@ -116,7 +126,7 @@ function trackDownload(url) {
  * リクエスト1件をメモリ上の集計へ加える。
  * cf-connecting-ip が無いリクエスト（内部呼び出しなど）は対象外。
  */
-export function trackRequest(req, url, env, ctx, isDownload) {
+export function trackRequest(req, url, env, ctx, isDownload, isBot) {
   const ip = req.headers.get("cf-connecting-ip");
   if (!ip) return;
 
@@ -127,9 +137,11 @@ export function trackRequest(req, url, env, ctx, isDownload) {
   if (localIPs.size < MAX_TRACKED_IPS) localIPs.add(ip);
   localCountries.add(req.headers.get("cf-ipcountry") || "XX");
   localRequestCount++;
+  if (isBot) localBotCount++;
 
   if (!isDownload) return;
   trackDownload(url);
+  if (isBot) localBotDownloadCount++;
 
   if (localRequestCount >= EARLY_FLUSH_REQUESTS && now - lastFlushTime >= EARLY_FLUSH_INTERVAL_MS) {
     lastFlushTime = now;

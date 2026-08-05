@@ -13,4 +13,5 @@ export * from "./social";
 export * from "./taxonomy";
 export * from "./moderation";
 export * from "./ddos";
+export * from "./usage";
 export * from "./reward";

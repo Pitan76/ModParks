@@ -15,11 +15,14 @@ import { after } from "next/server";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { findProjectPostBySlug } from "@/lib/queries/post";
+import { assertFeatureEnabled } from "@/lib/runtime/guard";
 
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
  */
 export const createVersion = async (projectSlug: string, formData: FormData) => {
+  await assertFeatureEnabled("upload");
+
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 

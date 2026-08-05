@@ -2,6 +2,7 @@ import openNextWorker from "./.open-next/worker.js";
 import { getDdosState } from "./worker/ddos-state.js";
 import { trackRequest } from "./worker/ddos-stats.js";
 import { handleDdosCron } from "./worker/ddos-cron.js";
+import { isBotRequest } from "./worker/bot-detect.js";
 
 // 式は wrangler.toml の [triggers] crons と一致させること
 const CRON_ROUTES = {
@@ -37,21 +38,6 @@ function isDownloadPath(path) {
 const DDOS_STATE_HEADER = "x-mp-ddos-state";
 const BOT_HEADER = "x-mp-bot";
 
-/** Cloudflare が「自動化されたリクエスト」とみなすスコアの上限 */
-const BOT_SCORE_THRESHOLD = 30;
-
-/**
- * Cloudflare の Bot 判定。
- * Bot Management のフィールドはプランによって欠けるため、無ければ Bot ではないとみなす。
- */
-function isBotRequest(req) {
-  const bot = req.cf?.botManagement;
-  if (!bot) return false;
-  if (bot.verifiedBot) return true;
-
-  return typeof bot.score === "number" && bot.score <= BOT_SCORE_THRESHOLD;
-}
-
 /**
  * ダウンロード計数の判定材料をヘッダへ載せ替える。
  *
@@ -76,13 +62,15 @@ export default {
     // 集計はあくまで付随処理なので、失敗しても Next.js への転送は必ず行う
     try {
       const state = await getDdosState(env.DB);
+      const isBot = isBotRequest(req);
+
       // 防護中は WAF 側が捌くため、集計するのは NORMAL のときだけ
       if (state.currentState === "NORMAL") {
-        trackRequest(req, url, env, ctx, isDownload);
+        trackRequest(req, url, env, ctx, isDownload, isBot);
       }
       // ヘッダの付け替えはコストがかかるため、判定を使うダウンロードのみに限る
       if (isDownload) {
-        forwarded = withCountSignals(req, state.currentState, isBotRequest(req));
+        forwarded = withCountSignals(req, state.currentState, isBot);
       }
     } catch (e) {
       console.error("[DDOS-GUARD] Intercept error:", e);

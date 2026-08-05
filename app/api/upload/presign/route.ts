@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { buildR2Key, getR2PublicUrl } from "@/lib/r2";
 import { getR2S3Config, createPresignedPutUrl } from "@/lib/r2Presign";
 import { createId } from "@paralleldrive/cuid2";
@@ -107,6 +108,10 @@ async function resolveUploadUrl(key: string, fileSize: number): Promise<string> 
  * ボディ: { fileName, contentType, fileSize, type, projectSlug? }
  */
 export async function POST(req: NextRequest) {
+  if (!await checkFeatureEnabled("upload")) {
+    return NextResponse.json({ error: "Uploads are temporarily disabled" }, { status: 503, headers: { "Retry-After": "3600" } });
+  }
+
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { uploadToR2, getR2Bucket } from "@/lib/r2";
 import { checkProjectUploadAccess, type UploadActor } from "@/lib/upload/access";
 import {
@@ -79,6 +80,10 @@ function checkPayload(key: string, contentType: string, contentLength: number): 
  * S3 クレデンシャル未設定時のフォールバック経路として Worker 経由で PUT を受ける。
  */
 export async function PUT(req: NextRequest) {
+  if (!await checkFeatureEnabled("upload")) {
+    return NextResponse.json({ error: "Uploads are temporarily disabled" }, { status: 503, headers: { "Retry-After": "3600" } });
+  }
+
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

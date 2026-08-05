@@ -4,6 +4,7 @@ import { versions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getR2KeyFromUrl } from "@/lib/r2";
 import { scanJar, type JarSource } from "@/lib/services/jar";
+import { checkFeatureEnabled } from "@/lib/runtime/guard";
 
 /** スキャン対象とする拡張子。zip 系以外は解凍できないため対象外 */
 const SCANNABLE_EXTS = [".jar", ".zip"];
@@ -25,7 +26,8 @@ function toJarSource(fileUrl: string): JarSource {
  * `after()` から呼ぶことを想定しており、呼び出し元へ例外は投げない。
  */
 export async function scanVersionFile(db: any, versionId: string, fileUrl: string, fileName: string) {
-  if (!isScannable(fileName)) {
+  // 解析を止めている間もアップロード自体は通す。後から手動で再実行できる
+  if (!isScannable(fileName) || !await checkFeatureEnabled("jarAnalysis")) {
     await db.update(versions)
       .set({ scanStatus: "skipped", scanAt: new Date() })
       .where(eq(versions.id, versionId))

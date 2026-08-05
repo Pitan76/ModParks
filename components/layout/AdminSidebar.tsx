@@ -8,6 +8,8 @@ import FolderIcon from "@mui/icons-material/Folder";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import BackupIcon from "@mui/icons-material/Backup";
 import HistoryIcon from "@mui/icons-material/History";
+import QueryStatsIcon from "@mui/icons-material/QueryStats";
+import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PolicyIcon from "@mui/icons-material/Policy";
@@ -50,6 +52,8 @@ const AdminSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleC
       { id: "admin-oauth", label: tAdmin("sidebar.oauth"), path: "/admin/oauth", icon: <VpnKeyIcon /> },
       { id: "admin-config", label: tAdmin("sidebar.config"), path: "/admin/config", icon: <SettingsIcon /> },
       { id: "admin-backup", label: tAdmin("sidebar.backup"), path: "/admin/backup", icon: <BackupIcon /> },
+      { id: "admin-usage", label: tAdmin("sidebar.usage"), path: "/admin/usage", icon: <QueryStatsIcon /> },
+      { id: "admin-runtime", label: tAdmin("sidebar.runtime"), path: "/admin/runtime", icon: <ToggleOnIcon /> },
       { id: "admin-logs", label: tAdmin("sidebar.audit"), path: "/admin/logs", icon: <HistoryIcon /> },
     ];
   }
