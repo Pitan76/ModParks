@@ -743,7 +743,8 @@
       "audit": "Audit Logs",
       "recipe": "Recipe Management",
       "scans": "Scan logs",
-      "oauth": "OAuth Apps"
+      "oauth": "OAuth Apps",
+      "usage": "Usage & Cost"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -1207,6 +1208,47 @@
           "noChange": "Already set to that verdict."
         }
       }
+    },
+    "usage": {
+      "title": "Usage & Cost",
+      "description": "Review request volume and download counting",
+      "plan": {
+        "free": "Free plan",
+        "paid": "Paid plan"
+      },
+      "periodNote": {
+        "free": "Free resets daily and stops serving once the quota runs out. Showing today.",
+        "paid": "Paid is billed monthly once the included quota is exceeded. Showing this month."
+      },
+      "requests": "Requests",
+      "ofQuota": "{used} / {quota}",
+      "consumed": "{percent}% used",
+      "expectedPace": "{percent}% expected",
+      "quotaUnset": "No quota configured, so no ratio is evaluated.",
+      "quotaStale": "The quota and unit prices have not been checked for over {days} days. Review the pricing page and update the settings.",
+      "level": {
+        "notice": {
+          "free": "Consumption is running ahead of the expected pace.",
+          "paid": "Consumption is running ahead of the expected pace."
+        },
+        "warning": {
+          "free": "Over 60% of today's quota. Act while the admin UI still works.",
+          "paid": "Over 80% of the included quota."
+        },
+        "critical": {
+          "free": "Over 80% of today's quota. The admin UI stops working once it runs out.",
+          "paid": "Included quota exceeded. Additional charges are accruing."
+        }
+      },
+      "downloadBreakdown": "Download breakdown",
+      "downloads": "Download requests",
+      "downloadsCounted": "Counted downloads",
+      "botRequests": "Bot requests",
+      "botDownloads": "Bot downloads",
+      "countedNote": "The gap between requests and counted downloads comes from author self-downloads, protection mode, bots, and deduplication. If bot downloads stay at zero, bot detection may be unavailable.",
+      "history": "Daily history",
+      "date": "Date",
+      "noData": "No usage data yet."
     }
   },
   "Search": {

@@ -751,7 +751,8 @@
       "audit": "監査ログ",
       "recipe": "レシピ管理",
       "scans": "スキャンログ",
-      "oauth": "OAuthアプリ管理"
+      "oauth": "OAuthアプリ管理",
+      "usage": "利用量とコスト"
     },
     "recipe": {
       "title": "レシピ管理",
@@ -1215,6 +1216,47 @@
           "noChange": "すでにその判定です。"
         }
       }
+    },
+    "usage": {
+      "title": "利用量とコスト",
+      "description": "リクエスト数と計上状況を確認します",
+      "plan": {
+        "free": "Free プラン",
+        "paid": "Paid プラン"
+      },
+      "periodNote": {
+        "free": "Free は日次でリセットされ、枠を超えると停止します。当日ぶんを表示しています。",
+        "paid": "Paid は月次で集計され、枠を超えると課金されます。当月ぶんを表示しています。"
+      },
+      "requests": "リクエスト数",
+      "ofQuota": "{used} / {quota}",
+      "consumed": "消費 {percent}%",
+      "expectedPace": "想定ペース {percent}%",
+      "quotaUnset": "含有枠が未設定のため、割合は評価していません",
+      "quotaStale": "含有枠と単価を{days}日以上確認していません。料金ページを確認して設定を更新してください。",
+      "level": {
+        "notice": {
+          "free": "消費ペースが想定を上回っています。",
+          "paid": "消費ペースが想定を上回っています。"
+        },
+        "warning": {
+          "free": "当日枠の6割を超えました。管理画面が使えるうちに対処してください。",
+          "paid": "含有枠の8割を超えました。"
+        },
+        "critical": {
+          "free": "当日枠の8割を超えました。枠が尽きると管理画面も開けなくなります。",
+          "paid": "含有枠を超えました。追加課金が発生しています。"
+        }
+      },
+      "downloadBreakdown": "ダウンロードの内訳",
+      "downloads": "ダウンロード到達数",
+      "downloadsCounted": "計上したダウンロード数",
+      "botRequests": "Bot リクエスト数",
+      "botDownloads": "Bot ダウンロード数",
+      "countedNote": "到達数と計上数の差は、作者本人・防護中・Bot・重複排除による除外です。Bot ダウンロード数が常に0の場合、Bot 判定が利用できていない可能性があります。",
+      "history": "日次推移",
+      "date": "日付",
+      "noData": "まだ集計データがありません。"
     }
   },
   "Search": {

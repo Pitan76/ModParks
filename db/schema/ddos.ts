@@ -14,6 +14,9 @@ export const ddosSlices = sqliteTable("ddos_slices", {
   uniqueCountryCount: integer("unique_country_count").notNull(), // Isolate内ユニーク国数
   topSlug:            text("top_slug"),                       // 最多アクセスのslug
   topSlugCount:       integer("top_slug_count"),              // そのslugへのアクセス数
+  // Bot 判定の内訳。計数から除外できているかを後から検証するために持つ
+  botCount:           integer("bot_count").notNull().default(0),
+  botDownloadCount:   integer("bot_download_count").notNull().default(0),
 }, (t) => [
   primaryKey({ columns: [t.sliceTime, t.isolateId] })
 ]);

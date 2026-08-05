@@ -48,6 +48,29 @@ export const appSettingsSchema = z.object({
   ddosThresholdIpRepeatRate: z.number().default(5.0),
   ddosDefaultProtectionDuration: z.number().int().default(600000),
 
+  // ---- 利用量と予算 ----
+  /**
+   * 契約プラン。超過時の結果が正反対のため、判定の期間と意味を切り替える。
+   * free は日次リセットで超えると停止、paid は月次で超えると課金。
+   */
+  usagePlan: z.enum(["free", "paid"]).default("free"),
+  /**
+   * リクエスト数の含有枠。free なら1日あたり、paid なら1か月あたり。
+   * 実値は変動するため、料金ページを見て管理画面から更新する。
+   */
+  usageQuotaRequests: z.number().int().min(0).default(100000),
+  /** D1 の書き込み行数の含有枠。0 なら評価しない */
+  usageQuotaD1RowsWritten: z.number().int().min(0).default(0),
+  /** D1 の読み取り行数の含有枠。0 なら評価しない */
+  usageQuotaD1RowsRead: z.number().int().min(0).default(0),
+  /**
+   * paid で許容する月あたりの追加課金額(円)。
+   * 0 にすると数円の超過でも警告が鳴り続けるため、無視してよい額を既定にする。
+   */
+  usageBudgetJpy: z.number().int().min(0).default(100),
+  /** 含有枠と単価を最後に確認した日 (epoch day)。古くなったら管理画面で促す */
+  usageQuotaCheckedDay: z.number().int().min(0).default(0),
+
   // ---- クリエイタ還元 ----
   /** 還元機能全体の有効化。false の間は計算も分配も出金も行わない */
   creatorRewardEnabled: z.boolean().default(false),
