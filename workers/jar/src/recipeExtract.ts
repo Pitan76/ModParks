@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { assertEntryCount, ExtractBudget, uncompressedSize } from "./limits";
 
 /** ネームスペース単位でまとめた抽出結果 */
 export interface NsBucket {
@@ -64,10 +65,24 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-/** JAR 内のレシピ・タグ・テクスチャ・モデルをネームスペース別に集める */
+/**
+ * JAR 内のレシピ・タグ・テクスチャ・モデルをネームスペース別に集める。
+ *
+ * 抽出量に予算を設けている。全エントリを無条件に展開すると、
+ * zip bomb や極端に大きい mod で Isolate のメモリを使い切るため。
+ * 予算を超えた分は取りこぼすが、解析が落ちるより部分的な結果の方が有用。
+ */
 export async function extractRecipes(arrayBuffer: ArrayBuffer): Promise<ExtractedRecipes> {
   const zip = await JSZip.loadAsync(arrayBuffer);
   const paths = Object.keys(zip.files).filter((p) => !zip.files[p].dir);
+  assertEntryCount(paths.length);
+
+  const budget = new ExtractBudget();
+  /** 展開してよいエントリか。サイズが分からないものは通す（旧来の挙動を保つ） */
+  const affordable = (path: string): boolean => {
+    const size = uncompressedSize(zip.files[path]);
+    return size === undefined ? true : budget.allow(size);
+  };
 
   const byNs: Record<string, NsBucket> = {};
   const ensureNs = (ns: string): NsBucket =>
@@ -77,9 +92,13 @@ export async function extractRecipes(arrayBuffer: ArrayBuffer): Promise<Extracte
   const craftingRecipes: RecipeSummary[] = [];
 
   for (const path of paths) {
+    if (budget.exhausted) break;
+
     const recipe = path.match(RECIPE_PATH);
     if (recipe) {
       const [, ns, id] = recipe;
+      if (!affordable(path)) continue;
+
       namespaces.add(ns);
       const content = await zip.files[path].async("string");
       ensureNs(ns).recipes[id] = content;
@@ -89,25 +108,28 @@ export async function extractRecipes(arrayBuffer: ArrayBuffer): Promise<Extracte
 
     const tag = path.match(TAG_PATH);
     if (tag) {
-      ensureNs(tag[1]).tags[tag[2]] = await zip.files[path].async("string");
+      if (affordable(path)) ensureNs(tag[1]).tags[tag[2]] = await zip.files[path].async("string");
       continue;
     }
 
     const texture = path.match(TEXTURE_PATH);
     if (texture) {
-      const bytes = new Uint8Array(await zip.files[path].async("arraybuffer"));
-      ensureNs(texture[1]).textures[`${texture[2]}.png`] = bytesToBase64(bytes);
+      // base64 化で 1.33 倍に膨らむため、予算はその分を見込んで引く
+      if (affordable(path)) {
+        const bytes = new Uint8Array(await zip.files[path].async("arraybuffer"));
+        ensureNs(texture[1]).textures[`${texture[2]}.png`] = bytesToBase64(bytes);
+      }
       continue;
     }
 
     const model = path.match(MODEL_PATH);
     if (model) {
-      ensureNs(model[1]).models[model[2]] = await zip.files[path].async("string");
+      if (affordable(path)) ensureNs(model[1]).models[model[2]] = await zip.files[path].async("string");
       continue;
     }
 
     const lang = path.match(LANG_PATH);
-    if (lang) ensureNs(lang[1]).langs[lang[2]] = await zip.files[path].async("string");
+    if (lang && affordable(path)) ensureNs(lang[1]).langs[lang[2]] = await zip.files[path].async("string");
   }
 
   return { byNs, namespaces: [...namespaces], craftingRecipes };

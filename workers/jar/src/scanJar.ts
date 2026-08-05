@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import type { ScanFinding, ScanJarResult, ScanLevel } from "./types";
+import { MAX_ENTRY_BYTES, uncompressedSize } from "./limits";
 
 type Zip = Awaited<ReturnType<JSZip["loadAsync"]>>;
 
@@ -32,9 +33,6 @@ const RAW_IP_URL = /https?:\/\/(?:\d{1,3}\.){3}\d{1,3}/;
 /** 定数プール走査の総バイト上限。巨大な Mod で CPU 時間を使い切らないための打ち切り */
 const CLASS_SCAN_BUDGET_BYTES = 12 * 1024 * 1024;
 
-/** 1エントリの展開後サイズ上限。展開前に弾かないと zip bomb でメモリを持っていかれる */
-const MAX_ENTRY_BYTES = 4 * 1024 * 1024;
-
 /** Jar-in-Jar を追う深さ。Fabric の JiJ は1階層で足りる */
 const MAX_NEST_DEPTH = 1;
 
@@ -55,10 +53,6 @@ function isPathTraversal(name: string) {
 }
 
 /** 展開後サイズ。JSZip は内部にしか持たないため取れなければ未知として扱う */
-function uncompressedSize(entry: unknown): number | undefined {
-  return (entry as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize;
-}
-
 /**
  * 1回のスキャン全体で共有する状態。
  * Jar-in-Jar を潜っても走査予算と「同じルールは1回だけ報告する」を跨いで効かせる。

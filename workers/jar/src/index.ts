@@ -3,6 +3,11 @@ import { scanJar } from "./scanJar";
 import { extractRecipes } from "./recipeExtract";
 import { uploadViaCdn, uploadDirectToR2, updateRecipeIndex } from "./recipeUpload";
 import { resolveJarSource } from "./source";
+import {
+  InputTooLargeError,
+  MAX_CONCURRENT_ANALYSES,
+  TooManyAnalysesError,
+} from "./limits";
 import type { JarWorkerEnv } from "./env";
 import type {
   ExtractRecipesRequest,
@@ -102,6 +107,40 @@ async function handleExtractRecipesBinary(
   return { count, namespaces };
 }
 
+/**
+ * この Isolate で実行中の解析数。
+ *
+ * Isolate をまたいだ制御はできないため厳密な上限にはならないが、
+ * 1 つの Isolate が解析で埋まって後続を巻き込むのは防げる。
+ */
+let inFlight = 0;
+
+/** 解析の同時実行数を抑えつつ実行する */
+async function withConcurrencyLimit<T>(run: () => Promise<T>): Promise<T> {
+  if (inFlight >= MAX_CONCURRENT_ANALYSES) throw new TooManyAnalysesError();
+
+  inFlight++;
+  try {
+    return await run();
+  } finally {
+    inFlight--;
+  }
+}
+
+/** 例外を HTTP ステータスへ対応づける。呼び出し側がリトライ可否を判断できるようにする */
+function toErrorResponse(e: unknown): Response {
+  if (e instanceof TooManyAnalysesError) {
+    return new Response(JSON.stringify({ error: e.message }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": "30" },
+    });
+  }
+  if (e instanceof InputTooLargeError) return json({ error: e.message }, 413);
+
+  console.error("jar worker failed:", e);
+  return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
+}
+
 const ROUTES: Record<string, (req: Request, env: JarWorkerEnv) => Promise<unknown>> = {
   "/parse-mod": handleParseMod,
   "/extract-recipes": handleExtractRecipes,
@@ -116,10 +155,9 @@ const worker = {
     if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
     try {
-      return json(await handler(req, env));
+      return json(await withConcurrencyLimit(() => handler(req, env)));
     } catch (e) {
-      console.error("jar worker failed:", e);
-      return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
+      return toErrorResponse(e);
     }
   },
 };
