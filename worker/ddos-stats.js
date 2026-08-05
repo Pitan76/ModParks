@@ -23,7 +23,14 @@ let localCountries = new Set();
 let localSlugs = {};
 
 let lastFlushTime = 0;
-let isFlushing = false;
+
+/**
+ * 書き出しの直列化用チェーン。
+ *
+ * 以前は実行中フラグで弾いていたが、呼び出し元は既に集計値を取り出した後
+ * なので、弾いた分がそのまま失われていた。順番待ちにすれば取りこぼさない。
+ */
+let flushChain = Promise.resolve();
 
 const UPSERT_SLICE_SQL = `INSERT INTO ddos_slices (slice_time, isolate_id, request_count, download_count, unique_ip_count, unique_country_count, top_slug, top_slug_count, bot_count, bot_download_count)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -76,10 +83,7 @@ function getAndResetStats() {
  * 集計値を D1 へ書き出し、続けて攻撃判定を実行する。
  * 判定を書き出し成功時だけに限ることで、D1 の読み込み負荷を抑えている。
  */
-async function flushIsolateStats(env, sliceTime, stats) {
-  if (isFlushing) return;
-  isFlushing = true;
-
+async function writeSlice(env, sliceTime, stats) {
   // 書き出しの失敗はリクエスト本体に影響させない
   try {
     await env.DB.prepare(UPSERT_SLICE_SQL).bind(
@@ -100,9 +104,18 @@ async function flushIsolateStats(env, sliceTime, stats) {
     await evaluateAndTriggerDdos(env, sliceTime);
   } catch (err) {
     console.error("[DDOS-GUARD] Failed to flush stats to D1:", err);
-  } finally {
-    isFlushing = false;
   }
+}
+
+/**
+ * 書き出しを順番待ちさせる。
+ *
+ * 集計値はスライスごとに独立しているため、待たせても混ざらない。
+ * 取り出した値を捨てないことだけを保証する。
+ */
+function flushIsolateStats(env, sliceTime, stats) {
+  flushChain = flushChain.then(() => writeSlice(env, sliceTime, stats));
+  return flushChain;
 }
 
 /** バケット境界を跨いだら、前バケットの未書き出し分を先に流す */
@@ -139,10 +152,12 @@ export function trackRequest(req, url, env, ctx, isDownload, isBot) {
   localRequestCount++;
   if (isBot) localBotCount++;
 
-  if (!isDownload) return;
-  trackDownload(url);
-  if (isBot) localBotDownloadCount++;
+  if (isDownload) {
+    trackDownload(url);
+    if (isBot) localBotDownloadCount++;
+  }
 
+  // ダウンロード以外でも件数が溜まったら流す。閲覧だけが続く間に取りこぼさないため
   if (localRequestCount >= EARLY_FLUSH_REQUESTS && now - lastFlushTime >= EARLY_FLUSH_INTERVAL_MS) {
     lastFlushTime = now;
     ctx.waitUntil(flushIsolateStats(env, bucket, getAndResetStats()));

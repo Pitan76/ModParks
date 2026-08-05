@@ -8,6 +8,8 @@ import { isBotRequest } from "./worker/bot-detect.js";
 const CRON_ROUTES = {
   "0 * * * *": "/api/cron/sync-external",
   "0 3 * * *": "/api/cron/backup",
+  // ddos_slices は 30 分で削除されるため、それより短い間隔で取り込む必要がある
+  "*/10 * * * *": "/api/cron/usage",
 };
 
 /** Cron から Next.js 側のルートを内部的に叩く */

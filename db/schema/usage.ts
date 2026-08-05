@@ -58,3 +58,18 @@ export const usageAlertState = sqliteTable("usage_alert_state", {
 });
 
 export type UsageAlertState = typeof usageAlertState.$inferSelect;
+
+/**
+ * スライス集計の取り込み位置。
+ *
+ * ddos_slices は 30 分で削除されるため、日次の合計を SUM で取り直すことができない
+ * （集計時点で残っているのは直近 30 分だけ）。
+ * どこまで取り込んだかを持ち、保持期間より短い間隔で増分だけを積む。
+ */
+export const usageRollupState = sqliteTable("usage_rollup_state", {
+  /** 値は常に 'global' */
+  stateKey: text("state_key").primaryKey(),
+  /** 取り込み済みのスライス時刻（Epoch 秒）。これより新しいものが次の対象 */
+  lastSliceTime: integer("last_slice_time").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+});

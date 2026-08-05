@@ -505,6 +505,13 @@
       "when": 1785922811686,
       "tag": "0071_usage_cf_requests_own",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "6",
+      "when": 1785925261337,
+      "tag": "0072_usage_rollup_state",
+      "breakpoints": true
     }
   ]
 }
