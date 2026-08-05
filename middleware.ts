@@ -9,5 +9,5 @@ import { routing } from "./lib/i18n/routing";
 export const middleware = createMiddleware(routing);
 
 export const config = {
-  matcher: ['/((?!api|\\.well-known|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|txt|webmanifest|js)$).*)'],
+  matcher: ['/((?!api|archive|\\.well-known|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|txt|webmanifest|js|json)$).*)'],
 };

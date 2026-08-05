@@ -1,7 +1,7 @@
 {
   "ja": {
     "readOnlyNotice": "これは読み取り専用のアーカイブです。投稿、ダウンロード、ログインはできません。",
-    "searchPlaceholder": "名前・作者で検索",
+    "searchPlaceholder": "プロジェクトを検索...",
     "generatedAt": "生成: {at}",
     "backToMain": "ModParks へ",
     "loading": "読み込み中…",
@@ -20,15 +20,28 @@
     "navHome": "ホーム",
     "navProjects": "プロジェクト",
     "sidebarNote": "アーカイブでは閲覧のみできます。投稿、ログイン、カートなどの機能は本体サイトをご利用ください。",
-    "results": "{count} 件のプロジェクト",
+    "results": "{count} 件 of プロジェクト",
     "sortLabel": "並び順",
     "sort_updated": "更新日順",
     "sort_downloads": "ダウンロード順",
-    "sort_newest": "新着順"
+    "sort_newest": "新着順",
+    "exploreTitle": "プロジェクトを探す",
+    "exploreDescription": "様々なMODやプラグインを見つけましょう。",
+    "filterTypeLabel": "種類",
+    "filterTypeAll": "すべて",
+    "type_mod": "MOD",
+    "type_plugin": "プラグイン",
+    "type_resourcepack": "リソースパック",
+    "type_datapack": "データパック",
+    "type_shader": "シェーダー",
+    "type_modpack": "MODパック",
+    "type_other": "その他",
+    "themeLight": "ライトモード",
+    "themeDark": "ダークモード"
   },
   "en": {
     "readOnlyNotice": "This is a read-only archive. Posting, downloading and signing in are unavailable.",
-    "searchPlaceholder": "Search by name or author",
+    "searchPlaceholder": "Search Mods & Plugins...",
     "generatedAt": "Generated: {at}",
     "backToMain": "Go to ModParks",
     "loading": "Loading…",
@@ -51,6 +64,19 @@
     "sortLabel": "Sort",
     "sort_updated": "Recently updated",
     "sort_downloads": "Downloads",
-    "sort_newest": "Newest"
+    "sort_newest": "Newest",
+    "exploreTitle": "Explore Projects",
+    "exploreDescription": "Discover various mods and plugins.",
+    "filterTypeLabel": "Type",
+    "filterTypeAll": "All",
+    "type_mod": "Mod",
+    "type_plugin": "Plugin",
+    "type_resourcepack": "Resource Pack",
+    "type_datapack": "Data Pack",
+    "type_shader": "Shader",
+    "type_modpack": "Modpack",
+    "type_other": "Other",
+    "themeLight": "Light Mode",
+    "themeDark": "Dark Mode"
   }
 }

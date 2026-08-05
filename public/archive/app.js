@@ -10,18 +10,14 @@
  *   - archive.modparks.pitan76.net   R2 直配信。ハッシュで辿る
  */
 
-/** データの配信元。archive ホストから開いたときは同一オリジンを使う */
 function dataBase() {
   if (location.hostname.startsWith("archive.")) return "/v1";
-
   const meta = document.querySelector('meta[name="mp-data-origin"]');
   return (meta ? meta.content : "") + "/v1";
 }
 
 const BASE = dataBase();
 const view = document.getElementById("view");
-
-/** 1ページの件数。本体の一覧と同じ */
 const PAGE_SIZE = 20;
 
 let strings = {};
@@ -29,7 +25,6 @@ let manifest = null;
 let summaries = null;
 let page = 1;
 
-/** 並び順。本体と同じ 3 種 */
 const SORTERS = {
   updated:   (a, b) => b.updatedAt - a.updatedAt,
   downloads: (a, b) => b.downloads - a.downloads,
@@ -39,14 +34,12 @@ const SORTERS = {
 function t(key, params) {
   const template = strings[key] || key;
   if (!params) return template;
-
   return Object.keys(params).reduce(
     (text, name) => text.replace("{" + name + "}", params[name]),
     template
   );
 }
 
-/** テキストは必ずここを通す。innerHTML に値を差し込まない */
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -60,26 +53,18 @@ async function getJson(path) {
   return res.json();
 }
 
-/** 現在のルート。パスを優先し、無ければハッシュを見る */
 function currentRoute() {
   const fromPath = location.pathname.match(/^\/(projects|authors)\/([^/]+)/);
   if (fromPath) return { kind: fromPath[1], id: decodeURIComponent(fromPath[2]) };
-
   const fromHash = location.hash.match(/^#\/(projects|authors)\/([^/]+)/);
   if (fromHash) return { kind: fromHash[1], id: decodeURIComponent(fromHash[2]) };
-
   return { kind: "list" };
 }
 
-/** 日付は端末の書式に任せる。翻訳を増やさずに読める形になる */
 function formatDate(ms) {
   return new Date(ms).toLocaleDateString();
 }
 
-/**
- * 一覧カード。本体の ProjectCard と同じ構成にする。
- * アイコン / タイトル + 種別 / 説明2行 / 作者・日付・DL数。
- */
 function projectCard(project) {
   const card = el("a", "card");
   card.href = "#/projects/" + encodeURIComponent(project.slug);
@@ -97,34 +82,50 @@ function projectCard(project) {
   card.appendChild(icon);
 
   const body = el("div", "card-body");
-
   const head = el("div", "card-head");
   head.appendChild(el("span", "card-title", project.title));
-  head.appendChild(el("span", "badge badge-" + project.type, project.type));
+  head.appendChild(el("span", "badge badge-" + project.type, t("type_" + project.type)));
   body.appendChild(head);
 
   if (project.excerpt) body.appendChild(el("p", "card-desc", project.excerpt));
 
   const meta = el("div", "card-meta");
-  meta.appendChild(el("span", null, "by " + project.authorName));
-  meta.appendChild(el("span", "dot", "·"));
-  meta.appendChild(el("span", null, formatDate(project.updatedAt)));
-  meta.appendChild(el("span", "dot", "·"));
-  meta.appendChild(el("span", null, project.downloads.toLocaleString() + " " + t("downloads")));
-  body.appendChild(meta);
+  const metaLeft = el("div", "card-meta-left");
+  metaLeft.appendChild(el("span", null, "by " + project.authorName));
+  metaLeft.appendChild(el("span", "dot", "·"));
+  metaLeft.appendChild(el("span", null, formatDate(project.updatedAt)));
+  metaLeft.appendChild(el("span", "dot", "·"));
+  
+  const dlSpan = el("span", "card-dl");
+  dlSpan.innerHTML = '<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
+  dlSpan.appendChild(document.createTextNode(" " + project.downloads.toLocaleString()));
+  metaLeft.appendChild(dlSpan);
+  meta.appendChild(metaLeft);
 
+  if (project.tags && project.tags.length > 0) {
+    const tagList = el("div", "card-tags");
+    for (const tag of project.tags.slice(0, 3)) {
+      tagList.appendChild(el("span", "tag-badge", tag));
+    }
+    meta.appendChild(tagList);
+  }
+
+  body.appendChild(meta);
   card.appendChild(body);
   return card;
 }
 
-/** 絞り込みと並べ替えを適用した一覧 */
 function visibleProjects() {
   const needle = document.getElementById("q").value.trim().toLowerCase();
-  const matched = needle
-    ? summaries.filter((p) =>
-        p.title.toLowerCase().includes(needle) || p.authorName.toLowerCase().includes(needle))
-    : summaries.slice();
-
+  const typeFilter = document.getElementById("filter-type").value;
+  let matched = summaries.slice();
+  if (needle) {
+    matched = matched.filter((p) =>
+      p.title.toLowerCase().includes(needle) || p.authorName.toLowerCase().includes(needle));
+  }
+  if (typeFilter) {
+    matched = matched.filter((p) => p.type === typeFilter);
+  }
   const sorter = SORTERS[document.getElementById("sort").value] || SORTERS.updated;
   return matched.sort(sorter);
 }
@@ -137,7 +138,6 @@ function pageButton(label, target, current) {
     button.disabled = true;
     return button;
   }
-
   button.addEventListener("click", () => {
     page = target;
     renderList();
@@ -146,7 +146,6 @@ function pageButton(label, target, current) {
   return button;
 }
 
-/** ページ番号。多すぎると並びきらないので現在地の前後だけ出す */
 function pageNumbers(current, total) {
   const numbers = new Set([1, total, current, current - 1, current + 1]);
   return [...numbers].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
@@ -155,20 +154,17 @@ function pageNumbers(current, total) {
 function renderPager(total) {
   const pager = document.getElementById("pager");
   pager.replaceChildren();
-
   const pages = Math.ceil(total / PAGE_SIZE);
   pager.hidden = pages <= 1;
   if (pager.hidden) return;
 
   pager.appendChild(pageButton("‹", page > 1 ? page - 1 : null, -1));
-
   let previous = 0;
   for (const number of pageNumbers(page, pages)) {
     if (number - previous > 1) pager.appendChild(el("span", "page-gap", "…"));
     pager.appendChild(pageButton(String(number), number, page));
     previous = number;
   }
-
   pager.appendChild(pageButton("›", page < pages ? page + 1 : null, -1));
 }
 
@@ -178,7 +174,6 @@ function renderList() {
   if (page > pages) page = pages;
 
   document.getElementById("resultCount").textContent = t("results", { count: matched.length });
-
   view.replaceChildren();
   if (matched.length === 0) {
     view.appendChild(el("p", "empty", t("empty")));
@@ -207,7 +202,6 @@ function versionRow(version) {
   row.appendChild(el("span", "vnum", version.versionNumber));
   row.appendChild(el("span", "vmeta", version.mcVersions.join(", ")));
   row.appendChild(el("span", "vmeta", version.loaders.join(", ")));
-
   if (version.externalUrl) {
     const link = el("a", "vlink", t("externalDownload"));
     link.href = version.externalUrl;
@@ -219,12 +213,11 @@ function versionRow(version) {
 
 async function renderProject(slug) {
   const project = await getJson("/projects/" + encodeURIComponent(slug) + ".json");
-
   view.replaceChildren();
 
   const head = el("div", "detail-head");
   head.appendChild(el("h1", "title", project.title));
-  head.appendChild(el("span", "badge badge-" + project.type, project.type));
+  head.appendChild(el("span", "badge badge-" + project.type, t("type_" + project.type)));
   view.appendChild(head);
 
   const meta = el("dl", "meta");
@@ -233,9 +226,7 @@ async function renderProject(slug) {
   meta.appendChild(definition(t("downloads"), project.downloads.toLocaleString()));
   view.appendChild(meta);
 
-  // README は Markdown だが、変換器を積むと依存が増えるため整形済みテキストとして出す
   view.appendChild(el("pre", "body", project.body));
-
   view.appendChild(el("h2", "sub", t("versions")));
   if (project.versions.length === 0) {
     view.appendChild(el("p", "empty", t("noVersions")));
@@ -249,7 +240,6 @@ async function renderProject(slug) {
 
 async function renderAuthor(username) {
   const author = await getJson("/authors/" + encodeURIComponent(username) + ".json");
-
   view.replaceChildren();
   view.appendChild(el("h1", "title", t("projectsBy", { name: author.displayName })));
 
@@ -261,7 +251,6 @@ async function renderAuthor(username) {
   view.appendChild(list);
 }
 
-/** サイドバーの選択状態を本体と同じ見た目で反映する */
 function syncNav(kind) {
   for (const item of document.querySelectorAll(".nav-item")) {
     item.classList.toggle("selected", item.dataset.route === kind);
@@ -274,8 +263,11 @@ async function route() {
 
   syncNav(isList ? "list" : "projects");
   document.getElementById("sidebar").classList.remove("open");
-  // 並び替えとページ送りは一覧でしか意味を持たない
-  document.querySelector(".toolbar").hidden = !isList;
+  
+  document.querySelector(".explore-header").style.display = isList ? "block" : "none";
+  document.querySelector(".search-bar-section").style.display = isList ? "flex" : "none";
+  document.querySelector(".toolbar").style.display = isList ? "flex" : "none";
+  
   document.getElementById("pager").hidden = true;
   view.replaceChildren(el("p", "empty", t("loading")));
 
@@ -293,11 +285,35 @@ async function boot() {
   const lang = (navigator.language || "en").toLowerCase().startsWith("ja") ? "ja" : "en";
   strings = (await fetch("./strings.json").then((r) => r.json()))[lang];
 
+  const themeToggle = document.getElementById("theme-toggle");
+  const currentTheme = localStorage.getItem("theme_mode") || "dark";
+  if (currentTheme === "light") {
+    document.documentElement.classList.add("theme-light");
+  }
+  themeToggle.title = t(currentTheme === "light" ? "themeDark" : "themeLight");
+  themeToggle.addEventListener("click", () => {
+    const isLight = document.documentElement.classList.toggle("theme-light");
+    localStorage.setItem("theme_mode", isLight ? "light" : "dark");
+    themeToggle.title = t(isLight ? "themeDark" : "themeLight");
+  });
+
   const notice = document.getElementById("notice");
   notice.textContent = t("readOnlyNotice");
   notice.hidden = false;
+  
+  document.getElementById("exploreTitle").textContent = t("exploreTitle");
+  document.getElementById("exploreDesc").textContent = t("exploreDescription");
   document.getElementById("q").placeholder = t("searchPlaceholder");
+  document.getElementById("filterTypeLabel").textContent = t("filterTypeLabel");
+  document.getElementById("sortLabel").textContent = t("sortLabel");
   document.getElementById("mainSite").textContent = t("backToMain");
+
+  document.getElementById("filterTypeAll").textContent = t("filterTypeAll");
+  const types = ["mod", "plugin", "resourcepack", "datapack", "shader", "modpack", "other"];
+  for (const type of types) {
+    const opt = document.getElementById("filterType" + type.charAt(0).toUpperCase() + type.slice(1));
+    if (opt) opt.textContent = t("type_" + type);
+  }
 
   try {
     manifest = await getJson("/manifest.json");
@@ -320,11 +336,15 @@ async function boot() {
   });
 
   const sort = document.getElementById("sort");
-  document.getElementById("sortLabel").textContent = t("sortLabel");
   for (const option of sort.options) option.textContent = t("sort_" + option.value);
 
   document.getElementById("q").addEventListener("input", () => {
     if (currentRoute().kind !== "list") return;
+    page = 1;
+    renderList();
+  });
+
+  document.getElementById("filter-type").addEventListener("change", () => {
     page = 1;
     renderList();
   });
