@@ -1,5 +1,4 @@
-PRAGMA foreign_keys=OFF;--> statement-breakpoint
-CREATE TABLE `__new_reports` (
+CREATE TABLE `reports_new` (
 	`id` text PRIMARY KEY NOT NULL,
 	`target_type` text DEFAULT 'project' NOT NULL,
 	`reason` text NOT NULL,
@@ -18,10 +17,9 @@ CREATE TABLE `__new_reports` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-INSERT INTO `__new_reports`("id", "target_type", "reason", "detail", "status", "reporter_id", "project_id", "idea_id", "comment_id", "user_id", "created_at") SELECT "id", "target_type", "reason", "detail", "status", "reporter_id", "project_id", "idea_id", "comment_id", "user_id", "created_at" FROM `reports`;--> statement-breakpoint
+INSERT INTO `reports_new` ("id", "target_type", "reason", "detail", "status", "reporter_id", "project_id", "idea_id", "comment_id", "user_id", "created_at") SELECT "id", 'project', "reason", "detail", "status", "reporter_id", "project_id", NULL, NULL, NULL, "created_at" FROM `reports`;--> statement-breakpoint
 DROP TABLE `reports`;--> statement-breakpoint
-ALTER TABLE `__new_reports` RENAME TO `reports`;--> statement-breakpoint
-PRAGMA foreign_keys=ON;--> statement-breakpoint
+ALTER TABLE `reports_new` RENAME TO `reports`;--> statement-breakpoint
 CREATE INDEX `reports_reporter_idx` ON `reports` (`reporter_id`);--> statement-breakpoint
 CREATE INDEX `reports_project_idx` ON `reports` (`project_id`);--> statement-breakpoint
 CREATE INDEX `reports_idea_idx` ON `reports` (`idea_id`);--> statement-breakpoint
