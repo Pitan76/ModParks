@@ -116,6 +116,9 @@ const DEDUPE_WINDOW_SEC = 10 * 60;
  *
  * 累積カウンタは Cron が反映するため、ここでは日次バッファへ積むだけに留める。
  * 攻撃中や Bot によるアクセスは計上しないが、配布そのものは妨げない。
+ *
+ * 計上は配布の付随処理なので、失敗しても呼び出し元へは伝播させない。
+ * 数字が欠けることより、ファイルを配れなくなることの方が害が大きい。
  */
 async function countDownload(
   req: NextRequest,
@@ -126,12 +129,16 @@ async function countDownload(
   const decision = decideCountable(req.headers, ctx);
   if (!decision.countable) return;
 
-  const ip = await resolveClientIp();
-  if (!await shouldCountOnce(`dl:${versionId}:${ip}`, DEDUPE_WINDOW_SEC)) return;
+  try {
+    const ip = await resolveClientIp();
+    if (!await shouldCountOnce(`dl:${versionId}:${ip}`, DEDUPE_WINDOW_SEC)) return;
 
-  await recordVersionDownload(versionId, projectId);
-  // 還元の配分計算は累積カウンタから期間差分を取れないため、日次でも積む
-  await recordProjectDownload(projectId);
+    await recordVersionDownload(versionId, projectId);
+    // 還元の配分計算は累積カウンタから期間差分を取れないため、日次でも積む
+    await recordProjectDownload(projectId);
+  } catch (err) {
+    console.error("[DOWNLOAD] Failed to record download:", err);
+  }
 }
 
 /** GET /api/download?versionId=... | ?slug=...
