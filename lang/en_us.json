@@ -745,7 +745,7 @@
       "scans": "Scan logs",
       "oauth": "OAuth Apps",
       "usage": "Usage & Cost",
-      "runtime": "Feature switches"
+      "runtime": "Operating mode"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -1271,8 +1271,8 @@
       "ownNote": "The quota is account-wide, so a spike in another project takes ModParks down with it. Evaluation uses the account total; the breakdown is here to tell where the load comes from."
     },
     "runtime": {
-      "title": "Feature switches",
-      "description": "Disable individual high-cost features. Keeps the blast radius small instead of taking the whole site down.",
+      "title": "Operating mode & switches",
+      "description": "Switch the site-wide operating mode and disable individual features. A smaller blast radius means faster recovery.",
       "disabledCount": "{count} feature(s) currently disabled.",
       "feature": {
         "upload": "Uploads",
