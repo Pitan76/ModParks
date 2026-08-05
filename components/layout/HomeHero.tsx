@@ -49,6 +49,7 @@ export default function HomeHero({ labels }: HomeHeroProps) {
         alt="Home Hero"
         fill
         priority
+        fetchPriority="high"
         sizes="100vw"
         style={{
           objectFit: "cover",
