@@ -1,9 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { versions, projects, projectMembers, users } from "@/db/schema";
-import { eq, and, sql, desc, isNull } from "drizzle-orm";
+import { versions, projectMembers, users } from "@/db/schema";
+import { eq, and, desc, isNull } from "drizzle-orm";
 import { findProjectPostBySlug, findProjectPostById } from "@/lib/queries/post";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { resolveClientIp } from "@/lib/rate-limit";
+import { decideCountable } from "@/lib/download/countPolicy";
+import { shouldCountOnce } from "@/lib/download/dedupe";
+import { recordVersionDownload } from "@/lib/download/counter";
 import { getR2PublicUrl } from "@/lib/r2";
 import { auth } from "@/lib/auth";
 import { validateApiKey } from "@/lib/api-auth";
@@ -104,6 +107,32 @@ async function getLatestVersion(
   return candidates.find((v) => matchesPreference(v, pref)) ?? candidates[0];
 }
 
+/** 同一IP・同一バージョンを二重に数えない窓 */
+const DEDUPE_WINDOW_SEC = 10 * 60;
+
+/**
+ * ダウンロードを統計へ計上する。
+ *
+ * 累積カウンタは Cron が反映するため、ここでは日次バッファへ積むだけに留める。
+ * 攻撃中や Bot によるアクセスは計上しないが、配布そのものは妨げない。
+ */
+async function countDownload(
+  req: NextRequest,
+  versionId: string,
+  projectId: string,
+  ctx: { excludedFromCount: boolean; silent: boolean }
+): Promise<void> {
+  const decision = decideCountable(req.headers, ctx);
+  if (!decision.countable) return;
+
+  const ip = await resolveClientIp();
+  if (!await shouldCountOnce(`dl:${versionId}:${ip}`, DEDUPE_WINDOW_SEC)) return;
+
+  await recordVersionDownload(versionId, projectId);
+  // 還元の配分計算は累積カウンタから期間差分を取れないため、日次でも積む
+  await recordProjectDownload(projectId);
+}
+
 /** GET /api/download?versionId=... | ?slug=...
  * - versionId 指定で該当バージョン、slug 指定でそのプロジェクトの最新バージョン
  * - ダウンロードカウントをインクリメント（silent=1 かつ管理者なら加算しない）
@@ -164,31 +193,10 @@ export async function GET(req: NextRequest) {
     // 一般利用者が silent=1 を付けてカウントを回避できないよう、管理者のみ有効。
     const silent = req.nextUrl.searchParams.get("silent") === "1" && relation.isAdmin;
 
-    // ダウンロードカウントをインクリメント（M-2: 重複排除 10分間）。
-    // 作者・メンバーによる自己ダウンロード（テスト等）は集計から除外する。
-    const rlRes = relation.excludedFromCount || silent
-      ? { success: false }
-      : await checkRateLimit(`download:${versionId}`, 1, 10 * 60 * 1000);
-
-    if (rlRes.success) {
-      await Promise.all([
-        db
-          .update(versions)
-          .set({ downloads: sql`${versions.downloads} + 1` })
-          .where(eq(versions.id, versionId))
-          .run(),
-        db
-          .update(projects)
-          .set({ 
-            downloads: sql`${projects.downloads} + 1`, 
-            totalDownloads: sql`${projects.totalDownloads} + 1` 
-          })
-          .where(eq(projects.id, project.id))
-          .run(),
-      ]);
-      // 還元の配分計算は累積カウンタから期間差分を取れないため、日次でも積む
-      await recordProjectDownload(project.id);
-    }
+    await countDownload(req, versionId, project.id, {
+      excludedFromCount: relation.excludedFromCount,
+      silent,
+    });
 
     // 外部URLの場合はそのままリダイレクト、R2の場合はプレフィックスを付加
     const fileUrl = version.fileUrl.startsWith("http")

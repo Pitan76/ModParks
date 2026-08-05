@@ -33,23 +33,62 @@ function isDownloadPath(path) {
   return path === "/api/download" || path.startsWith("/api/download/");
 }
 
+/** lib/download/countPolicy.ts と対応させること */
+const DDOS_STATE_HEADER = "x-mp-ddos-state";
+const BOT_HEADER = "x-mp-bot";
+
+/** Cloudflare が「自動化されたリクエスト」とみなすスコアの上限 */
+const BOT_SCORE_THRESHOLD = 30;
+
+/**
+ * Cloudflare の Bot 判定。
+ * Bot Management のフィールドはプランによって欠けるため、無ければ Bot ではないとみなす。
+ */
+function isBotRequest(req) {
+  const bot = req.cf?.botManagement;
+  if (!bot) return false;
+  if (bot.verifiedBot) return true;
+
+  return typeof bot.score === "number" && bot.score <= BOT_SCORE_THRESHOLD;
+}
+
+/**
+ * ダウンロード計数の判定材料をヘッダへ載せ替える。
+ *
+ * Next.js 側で D1 や cf を引き直さずに済ませるためのもの。
+ * クライアントが同名ヘッダを送ってきても、ここで必ず上書きするため詐称できない。
+ */
+function withCountSignals(req, state, isBot) {
+  const headers = new Headers(req.headers);
+  headers.set(DDOS_STATE_HEADER, state);
+  headers.set(BOT_HEADER, isBot ? "1" : "0");
+
+  return new Request(req, { headers });
+}
+
 export default {
   /** OpenNext の fetch ハンドラをラップし、手前でDDoS統計の収集だけを行う */
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
+    const isDownload = isDownloadPath(url.pathname);
+    let forwarded = req;
 
     // 集計はあくまで付随処理なので、失敗しても Next.js への転送は必ず行う
     try {
       const state = await getDdosState(env.DB);
       // 防護中は WAF 側が捌くため、集計するのは NORMAL のときだけ
       if (state.currentState === "NORMAL") {
-        trackRequest(req, url, env, ctx, isDownloadPath(url.pathname));
+        trackRequest(req, url, env, ctx, isDownload);
+      }
+      // ヘッダの付け替えはコストがかかるため、判定を使うダウンロードのみに限る
+      if (isDownload) {
+        forwarded = withCountSignals(req, state.currentState, isBotRequest(req));
       }
     } catch (e) {
       console.error("[DDOS-GUARD] Intercept error:", e);
     }
 
-    return openNextWorker.fetch(req, env, ctx);
+    return openNextWorker.fetch(forwarded, env, ctx);
   },
 
   /** Cloudflare Cron Triggers 用のハンドラ */

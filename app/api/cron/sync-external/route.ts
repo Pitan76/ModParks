@@ -5,6 +5,7 @@ import { eq, isNotNull, or } from "drizzle-orm";
 import { toProjectPost } from "@/lib/queries/postRow";
 import { syncExternalProjectDataSystem } from "@/lib/actions/projectSync";
 import { purgeExpiredRateLimits } from "@/lib/rate-limit";
+import { rollupDownloadCounts } from "@/lib/download/counter";
 import { checkCronAuth } from "@/lib/cron/auth";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +20,9 @@ export async function GET(request: Request) {
     const db = getDb(d1);
 
     await purgeExpiredRateLimits();
+
+    // 外部同期が失敗しても累積カウンタは反映したいので、先に済ませる
+    const rolledUpDownloads = await rollupDownloadCounts();
 
     const threeDaysAgoMs = Date.now() - (3 * 24 * 60 * 60 * 1000);
 
@@ -43,7 +47,7 @@ export async function GET(request: Request) {
       .slice(0, 10); // 1回のCRON実行で最大10件まで（タイムアウト防止）
 
     if (projectsToSync.length === 0) {
-      return NextResponse.json({ success: true, message: "No projects to sync" });
+      return NextResponse.json({ success: true, message: "No projects to sync", rolledUpDownloads });
     }
 
     const results = [];
@@ -58,7 +62,7 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, syncedCount: projectsToSync.length, results });
+    return NextResponse.json({ success: true, syncedCount: projectsToSync.length, rolledUpDownloads, results });
   } catch (error: any) {
     console.error("[CRON] Sync error:", error);
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
