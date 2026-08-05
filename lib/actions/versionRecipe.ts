@@ -71,6 +71,83 @@ export const extractRecipesFromVersion = async (versionId: string, projectSlug: 
 };
 
 /**
+ * クライアント側（ブラウザ）で抽出されたレシピ・テクスチャデータを受け取り、
+ * サーバー側から安全に CDN に中継アップロードしてプロジェクトに関連付ける Server Action。
+ */
+export const uploadClientExtractedRecipes = async (
+  versionId: string,
+  projectSlug: string,
+  byNs: Record<string, any>
+) => {
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await findProjectPostBySlug(db, projectSlug);
+  if (!project) return { error: "Project not found" };
+
+  await assertProjectAccess(db, project, session);
+
+  const version = await db
+    .select()
+    .from(versions)
+    .where(and(eq(versions.id, versionId), eq(versions.projectId, project.id)))
+    .get();
+
+  if (!version) return { error: "Version not found" };
+
+  const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
+  const cdnSecret = process.env.RECIPE_CDN_SECRET;
+
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (cdnSecret) headers["Authorization"] = `Bearer ${cdnSecret}`;
+
+  let totalCount = 0;
+  const namespaces: string[] = [];
+
+  try {
+    for (const [ns, bucket] of Object.entries(byNs)) {
+      const b = bucket as any;
+      const count = (Object.keys(b.recipes || {}).length +
+                     Object.keys(b.tags || {}).length +
+                     Object.keys(b.textures || {}).length +
+                     Object.keys(b.models || {}).length +
+                     Object.keys(b.langs || {}).length);
+      if (count === 0) continue;
+
+      namespaces.push(ns);
+
+      const res = await fetch(`${cdnUrl}/api/${ns}/bulk`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(bucket)
+      });
+
+      if (!res.ok) {
+        throw new Error(`CDN bulk upload failed for ${ns}: ${res.status} ${res.statusText}`);
+      }
+
+      const body = (await res.json()) as any;
+      totalCount += (body.recipes || 0) + (body.textures || 0) + (body.models || 0) + (body.tags || 0) + (body.langs || 0);
+    }
+
+    if (namespaces.length > 0) {
+      const existing = Array.isArray(project.recipeNamespaces) ? project.recipeNamespaces : [];
+      const merged = Array.from(new Set([...existing, ...namespaces])).sort();
+      if (merged.length !== existing.length) {
+        await db.update(projects).set({ recipeNamespaces: merged }).where(eq(projects.id, project.id)).run();
+      }
+    }
+
+    revalidatePath(`/projects/${projectSlug}`);
+    revalidatePath(`/[locale]/projects/${projectSlug}`, "page");
+
+    return { success: true, count: totalCount };
+  } catch (err: unknown) {
+    console.error("Failed to upload extracted recipes:", err);
+    return { error: err instanceof Error ? err.message : "Failed to upload extracted recipes" };
+  }
+};
+
+/**
  * JSON文字列で保持している配列カラムを読み出す。
  * @param raw 保存されている値
  * @returns 文字列の配列。壊れていれば空配列

@@ -16,7 +16,8 @@ import { useState, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createVersion } from "@/lib/actions/version";
-import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
+import { extractRecipesFromVersion, uploadClientExtractedRecipes } from "@/lib/actions/versionRecipe";
+import { analyzeJar } from "@/lib/utils/jarExtractor";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";
@@ -161,15 +162,46 @@ const VersionUploadForm = ({ slug, openIdeas, availablePlatforms = [], previousS
       // 失敗してもバージョン自体は作成済みなので、その旨を伝えてこのページに留まる。
       const versionId = result && "versionId" in result ? result.versionId : null;
       // トグルはファイルアップロード時のみ表示されるため、抽出もその場合に限る
-      if (extractRecipes && versionId && uploadMode === "file") {
+      if (extractRecipes && versionId && uploadMode === "file" && file) {
         setExtracting(true);
-        const extractRes = await extractRecipesFromVersion(versionId, slug);
-        setExtracting(false);
+        let success = false;
+        let errorMessage = "";
+        try {
+          // 1. クライアント側での解析と中継送信を試みる
+          const JSZip = (await import("jszip")).default;
+          const zip = await JSZip.loadAsync(file);
+          const { byNs } = await analyzeJar(zip);
 
-        if ("error" in extractRes && extractRes.error) {
-          setError({ fileUrl: [tVersion("uploadForm.error.extractFailed", { message: extractRes.error })] });
-          setPending(false);
-          return;
+          const uploadRes = await uploadClientExtractedRecipes(versionId, slug, byNs);
+          if (uploadRes && "success" in uploadRes && uploadRes.success) {
+            success = true;
+          } else if (uploadRes && "error" in uploadRes && uploadRes.error) {
+            errorMessage = uploadRes.error;
+          }
+        } catch (err) {
+          console.warn("Client extraction failed, falling back to server side:", err);
+          errorMessage = err instanceof Error ? err.message : "Client extraction error";
+        }
+
+        // 2. クライアント側で失敗した場合は、サーバー側処理にフォールバック
+        if (!success) {
+          console.log("Falling back to server-side extraction...");
+          const extractRes = await extractRecipesFromVersion(versionId, slug);
+          setExtracting(false);
+
+          if ("error" in extractRes && extractRes.error) {
+            setError({
+              fileUrl: [
+                tVersion("uploadForm.error.extractFailed", {
+                  message: `${errorMessage} -> ${extractRes.error}`,
+                }),
+              ],
+            });
+            setPending(false);
+            return;
+          }
+        } else {
+          setExtracting(false);
         }
       }
 
