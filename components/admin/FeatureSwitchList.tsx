@@ -7,6 +7,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
@@ -75,9 +76,18 @@ export default function FeatureSwitchList({ initial }: FeatureSwitchListProps) {
             sx={{ alignItems: "flex-start", justifyContent: "space-between" }}
           >
             <div>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {t(`feature.${feature}`)}
-              </Typography>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  {t(`feature.${feature}`)}
+                </Typography>
+                {/* スイッチの向きだけでは有効・停止が読み取りにくいため状態を文字で出す */}
+                <Chip
+                  size="small"
+                  color={state.enabled ? "success" : "error"}
+                  variant={state.enabled ? "outlined" : "filled"}
+                  label={t(state.enabled ? "statusEnabled" : "statusDisabled")}
+                />
+              </Stack>
               <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
                 {t(`featureHelp.${feature}`)}
               </Typography>

@@ -745,7 +745,7 @@
       "scans": "Scan logs",
       "oauth": "OAuth Apps",
       "usage": "Usage & Cost",
-      "runtime": "Operating mode"
+      "runtime": "Service controls"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -1271,9 +1271,9 @@
       "ownNote": "The quota is account-wide, so a spike in another project takes ModParks down with it. Evaluation uses the account total; the breakdown is here to tell where the load comes from."
     },
     "runtime": {
-      "title": "Operating mode & switches",
-      "description": "Switch the site-wide operating mode and disable individual features. A smaller blast radius means faster recovery.",
-      "disabledCount": "{count} feature(s) currently disabled.",
+      "title": "Service controls",
+      "description": "Switch the site-wide operating mode and stop individual features here. A smaller blast radius means faster recovery.",
+      "disabledCount": "{count} feature(s) stopped.",
       "feature": {
         "upload": "Uploads",
         "jarAnalysis": "JAR analysis",
@@ -1293,7 +1293,7 @@
       "disable": "Disable",
       "cancel": "Cancel",
       "modeTitle": "Operating mode",
-      "featuresTitle": "Feature switches",
+      "featuresTitle": "Stop individual features",
       "modeHelp": "Changes site-wide behaviour. Prefer feature switches when they suffice — a smaller blast radius means faster recovery.",
       "modeLabel": "Mode",
       "mode": {
@@ -1319,7 +1319,9 @@
       "snapshotHelp": "Generates the read-only archive data now. It is normally produced right after the daily backup; use this to check the contents before switching modes.",
       "snapshotGenerate": "Generate now",
       "snapshotRunning": "Generating…",
-      "snapshotDone": "Generated ({projects} projects / {authors} authors / {deleted} removed)"
+      "snapshotDone": "Generated ({projects} projects / {authors} authors / {deleted} removed)",
+      "statusEnabled": "Running",
+      "statusDisabled": "Stopped"
     }
   },
   "Search": {

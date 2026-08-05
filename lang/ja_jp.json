@@ -753,7 +753,7 @@
       "scans": "スキャンログ",
       "oauth": "OAuthアプリ管理",
       "usage": "利用量とコスト",
-      "runtime": "運用モードとスイッチ"
+      "runtime": "サービス制御"
     },
     "recipe": {
       "title": "レシピ管理",
@@ -1279,9 +1279,9 @@
       "ownNote": "含有枠はアカウント単位のため、他プロジェクトが跳ねると ModParks も道連れで停止します。判定はアカウント全体で行い、原因の切り分け用に内訳を出しています。"
     },
     "runtime": {
-      "title": "運用モードとスイッチ",
-      "description": "サイト全体の運用モードと、機能ごとの停止を切り替えます。影響範囲が小さいほど復旧も早くなります。",
-      "disabledCount": "{count} 件の機能が停止中です。",
+      "title": "サービス制御",
+      "description": "サイト全体の運用モードと、機能ごとの停止をここで切り替えます。影響範囲が小さいほど復旧も早くなります。",
+      "disabledCount": "{count} 件の機能を停止中です。",
       "feature": {
         "upload": "アップロード",
         "jarAnalysis": "JAR 解析",
@@ -1301,7 +1301,7 @@
       "disable": "停止する",
       "cancel": "キャンセル",
       "modeTitle": "運用モード",
-      "featuresTitle": "機能スイッチ",
+      "featuresTitle": "機能ごとの停止",
       "modeHelp": "サイト全体の動作を切り替えます。機能スイッチで足りるならそちらを使ってください。影響範囲が小さいほど復旧も早くなります。",
       "modeLabel": "モード",
       "mode": {
@@ -1327,7 +1327,9 @@
       "snapshotHelp": "読み取り専用アーカイブのデータを今すぐ生成します。通常は毎日のバックアップに続けて自動生成されますが、モードを切り替える前に中身を確認したいときに使います。",
       "snapshotGenerate": "今すぐ生成",
       "snapshotRunning": "生成中…",
-      "snapshotDone": "生成しました（プロジェクト {projects} 件 / 作者 {authors} 件 / 削除 {deleted} 件）"
+      "snapshotDone": "生成しました（プロジェクト {projects} 件 / 作者 {authors} 件 / 削除 {deleted} 件）",
+      "statusEnabled": "稼働中",
+      "statusDisabled": "停止中"
     }
   },
   "Search": {
