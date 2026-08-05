@@ -7,11 +7,13 @@ import IconButton from "@mui/material/IconButton";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";
-import AdminSidebar from "./AdminSidebar";
-import SettingsSidebar from "./SettingsSidebar";
 import AppHeader from "./AppHeader";
-import OnboardingTour from "./OnboardingTour";
+
+const AdminSidebar = dynamic(() => import("./AdminSidebar"), { ssr: false });
+const SettingsSidebar = dynamic(() => import("./SettingsSidebar"), { ssr: false });
+const OnboardingTour = dynamic(() => import("./OnboardingTour"), { ssr: false });
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
 import type { Session } from "next-auth";
 
@@ -51,7 +53,7 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
     });
   };
 
-  let SidebarComponent = AppSidebar;
+  let SidebarComponent: React.ComponentType<any> = AppSidebar;
   if (isAdminPage) SidebarComponent = AdminSidebar;
   else if (isSettingsPage) SidebarComponent = SettingsSidebar;
 
