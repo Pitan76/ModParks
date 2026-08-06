@@ -6,14 +6,17 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import { getAppTheme } from "@/lib/theme";
 import Cookies from "js-cookie";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { DEFAULT_THEME_TYPE, resolveThemeType, storeThemeType, type ThemeType } from "@/lib/themeType";
 
 export const ColorModeContext = React.createContext({
   mode: "dark" as "light" | "dark",
   toggleColorMode: () => {},
   setColorMode: (mode: "light" | "dark") => {},
+  themeType: DEFAULT_THEME_TYPE as ThemeType,
   isNewTheme: true,
-  setThemeType: (theme: "new" | "legacy") => {},
+  isPlainTheme: false,
+  setThemeType: (theme: ThemeType) => {},
 });
 
 export function useColorMode() {
@@ -25,34 +28,11 @@ interface ThemeRegistryProps {
   initialMode?: "light" | "dark";
 }
 
-function ThemeQueryChecker({ onThemeChange }: { onThemeChange: (isNew: boolean) => void }) {
+function ThemeQueryChecker({ onThemeChange }: { onThemeChange: (theme: ThemeType) => void }) {
   const searchParams = useSearchParams();
 
   React.useEffect(() => {
-    const themeParam = searchParams?.get("theme");
-    if (themeParam === "new") {
-      onThemeChange(true);
-      try {
-        window.localStorage.setItem("theme_type", "new");
-      } catch (e) {
-        // ignore
-      }
-    } else if (themeParam === "legacy") {
-      onThemeChange(false);
-      try {
-        window.localStorage.setItem("theme_type", "legacy");
-      } catch (e) {
-        // ignore
-      }
-    } else {
-      // ローカル保存設定を参照し、明示的レガシー設定以外は新テーマにする
-      try {
-        const savedTheme = window.localStorage.getItem("theme_type");
-        onThemeChange(savedTheme !== "legacy");
-      } catch (e) {
-        onThemeChange(true);
-      }
-    }
+    onThemeChange(resolveThemeType(searchParams?.get("theme")));
   }, [searchParams, onThemeChange]);
 
   return null;
@@ -60,22 +40,16 @@ function ThemeQueryChecker({ onThemeChange }: { onThemeChange: (isNew: boolean) 
 
 export default function ThemeRegistry({ children, initialMode = "dark" }: ThemeRegistryProps) {
   const [mode, setMode] = React.useState<"light" | "dark">(initialMode);
-  const [isNewTheme, setIsNewTheme] = React.useState<boolean>(true);
+  const [themeType, setThemeTypeState] = React.useState<ThemeType>(DEFAULT_THEME_TYPE);
+  const pathname = usePathname();
+  // 管理画面は作業効率を優先するため、Plain Theme の対象外とする
+  const effectiveThemeType: ThemeType =
+    themeType === "plain" && /^\/[^/]+\/admin(\/|$)/.test(pathname ?? "") ? "new" : themeType;
 
   // 初回マウント時にlocalStorageおよびURLを確認し、表示の切り替えラグを低減
   React.useEffect(() => {
-    try {
-      const savedTheme = window.localStorage.getItem("theme_type");
-      const urlParams = new URLSearchParams(window.location.search);
-      const themeParam = urlParams.get("theme");
-      if (themeParam === "legacy" || (savedTheme === "legacy" && themeParam !== "new")) {
-        setIsNewTheme(false);
-      } else {
-        setIsNewTheme(true);
-      }
-    } catch (e) {
-      setIsNewTheme(true);
-    }
+    const themeParam = new URLSearchParams(window.location.search).get("theme");
+    setThemeTypeState(resolveThemeType(themeParam));
   }, []);
 
   const colorMode = React.useMemo(
@@ -92,20 +66,18 @@ export default function ThemeRegistry({ children, initialMode = "dark" }: ThemeR
         setMode(newMode);
         Cookies.set("theme_mode", newMode, { expires: 365, path: "/" });
       },
-      isNewTheme,
-      setThemeType: (theme: "new" | "legacy") => {
-        setIsNewTheme(theme === "new");
-        try {
-          window.localStorage.setItem("theme_type", theme);
-        } catch (e) {
-          // ignore
-        }
+      themeType,
+      isNewTheme: effectiveThemeType !== "legacy",
+      isPlainTheme: effectiveThemeType === "plain",
+      setThemeType: (theme: ThemeType) => {
+        setThemeTypeState(theme);
+        storeThemeType(theme);
       },
     }),
-    [mode, isNewTheme]
+    [mode, themeType, effectiveThemeType]
   );
 
-  const theme = React.useMemo(() => getAppTheme(mode, isNewTheme), [mode, isNewTheme]);
+  const theme = React.useMemo(() => getAppTheme(mode, effectiveThemeType), [mode, effectiveThemeType]);
 
   return (
     <ColorModeContext.Provider value={colorMode}>
@@ -114,7 +86,7 @@ export default function ThemeRegistry({ children, initialMode = "dark" }: ThemeR
           <CssBaseline enableColorScheme />
           {children}
           <React.Suspense fallback={null}>
-            <ThemeQueryChecker onThemeChange={setIsNewTheme} />
+            <ThemeQueryChecker onThemeChange={setThemeTypeState} />
           </React.Suspense>
         </ThemeProvider>
       </AppRouterCacheProvider>

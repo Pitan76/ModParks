@@ -1698,6 +1698,8 @@
       "label": "Display Theme",
       "newTheme": "Default Theme",
       "legacyTheme": "Legacy Theme",
+      "plainTheme": "Plain Theme (lightweight)",
+      "plainThemeDesc": "Minimal styling that favors browser defaults. Best for low-spec devices and slow connections.",
       "colorModeLabel": "Color Mode",
       "lightMode": "Light",
       "darkMode": "Dark",

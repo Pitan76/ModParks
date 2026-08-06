@@ -8,6 +8,7 @@ import FormLabel from "@mui/material/FormLabel";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
+import FormHelperText from "@mui/material/FormHelperText";
 import Checkbox from "@mui/material/Checkbox";
 import Alert from "@mui/material/Alert";
 import { useColorMode } from "@/components/ThemeRegistry";
@@ -15,6 +16,7 @@ import { useContextMenuContext } from "@/components/ui/ContextMenu";
 import { cartEnabledStore, useCartEnabled } from "@/components/cart/cartStore";
 import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
 import StickySaveBar from "@/components/ui/StickySaveBar";
+import type { ThemeType } from "@/lib/themeType";
 
 /**
  * テーマ設定タブコンポーネント。
@@ -22,14 +24,14 @@ import StickySaveBar from "@/components/ui/StickySaveBar";
  */
 export default function ThemeTab() {
   const t = useTranslations("Settings.theme");
-  const { isNewTheme, setThemeType, mode, setColorMode } = useColorMode();
+  const { themeType, setThemeType, mode, setColorMode } = useColorMode();
   const { setIsDisabled } = useContextMenuContext();
   const cartEnabled = useCartEnabled();
   const [success, setSuccess] = useState(false);
 
   const form = useDirtyForm(
     {
-      selectedTheme: (isNewTheme ? "new" : "legacy") as "new" | "legacy",
+      selectedTheme: themeType,
       colorMode: mode as "light" | "dark",
       useCustomContextMenu: true,
       useCart: cartEnabled,
@@ -59,8 +61,8 @@ export default function ThemeTab() {
     } catch (e) {
       // ignore
     }
-    commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled, colorMode: mode }));
-  }, [cartEnabled, commit, mode]);
+    commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled, colorMode: mode, selectedTheme: themeType }));
+  }, [cartEnabled, commit, mode, themeType]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, maxWidth: 500 }}>
@@ -73,7 +75,7 @@ export default function ThemeTab() {
         <RadioGroup
           aria-labelledby="theme-select-label"
           value={selectedTheme}
-          onChange={(e) => form.setField("selectedTheme", e.target.value as "new" | "legacy")}
+          onChange={(e) => form.setField("selectedTheme", e.target.value as ThemeType)}
         >
           <FormControlLabel
             value="new"
@@ -85,7 +87,13 @@ export default function ThemeTab() {
             control={<Radio />}
             label={t("legacyTheme")}
           />
+          <FormControlLabel
+            value="plain"
+            control={<Radio />}
+            label={t("plainTheme")}
+          />
         </RadioGroup>
+        <FormHelperText>{t("plainThemeDesc")}</FormHelperText>
       </FormControl>
 
       <FormControl>

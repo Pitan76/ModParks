@@ -1706,6 +1706,8 @@
       "label": "表示テーマ",
       "newTheme": "デフォルトテーマ",
       "legacyTheme": "レガシーテーマ",
+      "plainTheme": "プレーンテーマ（軽量）",
+      "plainThemeDesc": "装飾を最小限にし、ブラウザ標準の表示を優先します。低スペック端末や低速回線向けです。",
       "colorModeLabel": "カラーモード",
       "lightMode": "ライトモード",
       "darkMode": "ダークモード",

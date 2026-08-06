@@ -1,7 +1,10 @@
 "use client";
 
-import { createTheme } from "@mui/material/styles";
+import { createTheme, type ThemeOptions } from "@mui/material/styles";
+import { deepmerge } from "@mui/utils";
 import { Roboto } from "next/font/google";
+import type { ThemeType } from "@/lib/themeType";
+import { getPlainThemeOverrides, PLAIN_FONT_FAMILY } from "@/lib/plainTheme";
 
 export const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -9,8 +12,20 @@ export const roboto = Roboto({
   display: "swap",
 });
 
-export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false) => createTheme({
+/**
+ * テーマ種別とカラーモードからMUIテーマを生成する。
+ * Plain Themeの軽量化設定は、spacingやpaletteが正しく解決されるよう生成前にマージする。
+ */
+export const getAppTheme = (mode: "light" | "dark", themeType: ThemeType = "legacy") => {
+  const isPlainTheme = themeType === "plain";
+  const base = getBaseOptions(mode, themeType !== "legacy", isPlainTheme);
+  if (!isPlainTheme) return createTheme(base);
+  return createTheme(deepmerge(base, getPlainThemeOverrides(mode)));
+};
+
+const getBaseOptions = (mode: "light" | "dark", isNewTheme: boolean, isPlainTheme: boolean): ThemeOptions => ({
   isNewTheme,
+  isPlainTheme,
   spacing: isNewTheme ? 10 : 8,
   palette: {
     mode,
@@ -120,7 +135,7 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
           })),
   },
   typography: {
-    fontFamily: roboto.style.fontFamily,
+    fontFamily: isPlainTheme ? PLAIN_FONT_FAMILY : roboto.style.fontFamily,
     h1: { fontWeight: 700 },
     h2: { fontWeight: 700 },
     h3: { fontWeight: 600 },
@@ -283,9 +298,11 @@ export const getAppTheme = (mode: "light" | "dark", isNewTheme: boolean = false)
 declare module "@mui/material/styles" {
   interface Theme {
     isNewTheme: boolean;
+    isPlainTheme: boolean;
   }
   interface ThemeOptions {
     isNewTheme?: boolean;
+    isPlainTheme?: boolean;
   }
   interface Palette {
     surface: { main: string };
