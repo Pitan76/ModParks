@@ -87,6 +87,38 @@ export async function reviewScanAppeal(
     await applyScanCleared(appeal.versionId, "scan appeal approved");
   }
 
+  // 裁定通知の送信
+  try {
+    const project = await db
+      .select({
+        projectName: posts.title,
+        projectSlug: posts.slug,
+        iconUrl: projects.iconUrl,
+        versionNumber: versions.versionNumber,
+      })
+      .from(versions)
+      .innerJoin(projects, eq(versions.projectId, projects.id))
+      .innerJoin(posts, eq(posts.id, projects.id))
+      .where(eq(versions.id, appeal.versionId))
+      .get();
+
+    if (project) {
+      const statusLabel = decision === "approved" ? "承認 (approved)" : "却下 (rejected)";
+      const { notifyToUser } = await import("@/lib/notifications/notify");
+      await notifyToUser(db, appeal.appellantId, "system", "scan_appeal_result", {
+        projectName: project.projectName,
+        slug: project.projectSlug,
+        versionNumber: project.versionNumber,
+        versionId: appeal.versionId,
+        statusLabel,
+        reviewNote: reviewNote?.trim() || "なし",
+        iconUrl: project.iconUrl || "",
+      });
+    }
+  } catch (err) {
+    console.error("Failed to send appeal review notification:", err);
+  }
+
   await recordModerationAudit(
     db,
     decision === "approved" ? "scan_appeal_approve" : "scan_appeal_reject",
@@ -137,18 +169,51 @@ export async function overrideScanStatus(
 
   // 保留中の異議は同じ裁定で閉じる。clean 化なら申請が通ったのと同義
   const pending = await db
-    .select({ id: scanAppeals.id })
+    .select({ id: scanAppeals.id, appellantId: scanAppeals.appellantId })
     .from(scanAppeals)
     .where(and(eq(scanAppeals.versionId, versionId), eq(scanAppeals.status, "pending")))
     .get();
 
   if (pending) {
+    const decision = status === "clean" ? "approved" : "rejected";
     await db.update(scanAppeals).set({
-      status: status === "clean" ? "approved" : "rejected",
+      status: decision,
       reviewNote,
       reviewedById: userId,
       reviewedAt: new Date(),
     }).where(eq(scanAppeals.id, pending.id)).run();
+
+    // 裁定通知の送信
+    try {
+      const project = await db
+        .select({
+          projectName: posts.title,
+          projectSlug: posts.slug,
+          iconUrl: projects.iconUrl,
+          versionNumber: versions.versionNumber,
+        })
+        .from(versions)
+        .innerJoin(projects, eq(versions.projectId, projects.id))
+        .innerJoin(posts, eq(posts.id, projects.id))
+        .where(eq(versions.id, versionId))
+        .get();
+
+      if (project) {
+        const statusLabel = decision === "approved" ? "承認 (approved)" : "却下 (rejected)";
+        const { notifyToUser } = await import("@/lib/notifications/notify");
+        await notifyToUser(db, pending.appellantId, "system", "scan_appeal_result", {
+          projectName: project.projectName,
+          slug: project.projectSlug,
+          versionNumber: project.versionNumber,
+          versionId: versionId,
+          statusLabel,
+          reviewNote: reviewNote || "なし",
+          iconUrl: project.iconUrl || "",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to send override appeal notification:", err);
+    }
   }
 
   await recordModerationAudit(db, "scan_override", versionId, userId, {
@@ -158,9 +223,61 @@ export async function overrideScanStatus(
     closedAppealId: pending?.id ?? null,
   });
 
+  // 手動判定で異常ステータス（suspicious/malicious）になった場合は作者に通知
+  if (status === "suspicious" || status === "malicious") {
+    try {
+      const project = await db
+        .select({
+          authorId: posts.authorId,
+          projectName: posts.title,
+          projectSlug: posts.slug,
+          iconUrl: projects.iconUrl,
+          versionNumber: versions.versionNumber,
+        })
+        .from(versions)
+        .innerJoin(projects, eq(versions.projectId, projects.id))
+        .innerJoin(posts, eq(posts.id, projects.id))
+        .where(eq(versions.id, versionId))
+        .get();
+
+      if (project) {
+        const statusLabel = status === "malicious" ? "悪質 (malicious)" : status === "suspicious" ? "疑わしい (suspicious)" : "スキャン失敗 (failed)";
+        const { notifyToUser } = await import("@/lib/notifications/notify");
+        await notifyToUser(db, project.authorId, "system", "scan_result", {
+          projectName: project.projectName,
+          slug: project.projectSlug,
+          versionNumber: project.versionNumber,
+          versionId: versionId,
+          statusLabel,
+          iconUrl: project.iconUrl || "",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to send scan override notice:", err);
+    }
+  }
+
   revalidatePath("/admin/scans");
   revalidatePath("/admin/appeals");
   return { success: true };
+}
+
+export async function getLatestScanAppeal(versionId: string) {
+  const { getDatabase } = await import("@/lib/db");
+  const { scanAppeals } = await import("@/db/schema");
+  const { eq, desc } = await import("drizzle-orm");
+
+  const db = await getDatabase();
+  return db
+    .select({
+      status: scanAppeals.status,
+      reviewNote: scanAppeals.reviewNote,
+    })
+    .from(scanAppeals)
+    .where(eq(scanAppeals.versionId, versionId))
+    .orderBy(desc(scanAppeals.createdAt))
+    .limit(1)
+    .get();
 }
 
 /** 一覧のフィルタ。"all" は裁定済みも含めた全件 */

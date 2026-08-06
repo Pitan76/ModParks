@@ -122,6 +122,9 @@
   "Scan": {
     "appeal": "異議を申請",
     "appealSubmitted": "異議を申請しました。管理者の確認をお待ちください。",
+    "appealPending": "異議申請は保留中です（管理者による確認をお待ちください）",
+    "appealRejected": "異議申請が却下されました",
+    "appealReviewNote": "管理者コメント: {note}",
     "appealDialogTitle": "スキャン判定への異議申請",
     "appealDialogDesc": "この判定が誤りだと考える理由を記入してください。管理者が内容を確認します。",
     "appealReasonPlaceholder": "例: 同梱の .dll は LWJGL の正規ネイティブライブラリです",
@@ -1905,7 +1908,9 @@
       "favorite": "自分の投稿のお気に入り登録",
       "follow": "フォローされたとき",
       "list_add": "自分のプロジェクトがリストに追加されたとき",
-      "comment_reply": "自分のコメントへの返信"
+      "comment_reply": "自分のコメントへの返信",
+      "scan_result": "スキャン結果に問題またはエラーが検出されたとき",
+      "scan_appeal_result": "スキャン結果への異議申請に対する裁定が行われたとき"
     },
     "message": {
       "new_project": "{authorName} が新しいプロジェクト「{title}」を公開しました",
@@ -1914,7 +1919,9 @@
       "list_add": "{actorName} が「{title}」をリスト「{collectionName}」に追加しました",
       "comment_reply": "{actorName} があなたのコメントに返信しました",
       "comment": "{actorName} が「{title}」にコメントしました",
-      "favorite": "{actorName} が「{title}」をお気に入りに登録しました"
+      "favorite": "{actorName} が「{title}」をお気に入りに登録しました",
+      "scan_result": "「{projectName}」v{versionNumber} のセキュリティスキャン判定が「{statusLabel}」になりました",
+      "scan_appeal_result": "「{projectName}」v{versionNumber} の異議申請が「{statusLabel}」されました。コメント: {reviewNote}"
     }
   },
   "ContextMenu": {

@@ -10,6 +10,8 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import SecurityIcon from "@mui/icons-material/Security";
+import GavelIcon from "@mui/icons-material/Gavel";
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { Notification } from "@/db/schema";
 
@@ -29,6 +31,8 @@ const TYPE_ICONS: Record<string, SvgIconComponent> = {
   list_add: PlaylistAddIcon,
   new_version: NewReleasesIcon,
   new_project: AutoAwesomeIcon,
+  scan_result: SecurityIcon,
+  scan_appeal_result: GavelIcon,
 };
 
 interface Props {

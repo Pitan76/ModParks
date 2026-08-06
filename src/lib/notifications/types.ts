@@ -14,6 +14,8 @@ export const NOTIFICATION_TYPES = [
   "follow",
   "list_add",
   "comment_reply",
+  "scan_result",
+  "scan_appeal_result",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

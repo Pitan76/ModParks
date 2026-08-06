@@ -122,6 +122,9 @@
   "Scan": {
     "appeal": "Appeal",
     "appealSubmitted": "Your appeal has been submitted. Please wait for an administrator to review it.",
+    "appealPending": "Your appeal is pending (waiting for administrator review)",
+    "appealRejected": "Your appeal was rejected",
+    "appealReviewNote": "Admin note: {note}",
     "appealDialogTitle": "Appeal scan result",
     "appealDialogDesc": "Explain why you believe this result is incorrect. An administrator will review it.",
     "appealReasonPlaceholder": "e.g. The bundled .dll is a legitimate LWJGL native library",
@@ -1897,7 +1900,9 @@
       "favorite": "Someone favorites your post",
       "follow": "Someone follows you",
       "list_add": "Your project is added to a list",
-      "comment_reply": "A reply to your comment"
+      "comment_reply": "A reply to your comment",
+      "scan_result": "When a security scan flags an issue or fails",
+      "scan_appeal_result": "When a verdict is reached on your scan appeal"
     },
     "message": {
       "new_project": "{authorName} published a new project \"{title}\"",
@@ -1906,7 +1911,9 @@
       "list_add": "{actorName} added \"{title}\" to list \"{collectionName}\"",
       "comment_reply": "{actorName} replied to your comment",
       "comment": "{actorName} commented on \"{title}\"",
-      "favorite": "{actorName} favorited \"{title}\""
+      "favorite": "{actorName} favorited \"{title}\"",
+      "scan_result": "Security scan for \"{projectName}\" v{versionNumber} resolved to \"{statusLabel}\"",
+      "scan_appeal_result": "Scan appeal for \"{projectName}\" v{versionNumber} was \"{statusLabel}\". Note: {reviewNote}"
     }
   },
   "ContextMenu": {

@@ -22,6 +22,8 @@ export type ScanStatusBannerProps = {
   scanFindings?: string | null;
   /** 作者・メンバー・管理者のみ異議申請できる */
   canAppeal: boolean;
+  appealStatus?: string | null;
+  reviewNote?: string | null;
 };
 
 const parseFindings = (raw?: string | null): ScanFinding[] => {
@@ -38,7 +40,7 @@ const parseFindings = (raw?: string | null): ScanFinding[] => {
  * バージョンのスキャン判定を表示する。
  * suspicious は警告、malicious はブロック表示。作者には異議申請導線を出す。
  */
-const ScanStatusBanner = ({ versionId, scanStatus, scanFindings, canAppeal }: ScanStatusBannerProps) => {
+const ScanStatusBanner = ({ versionId, scanStatus, scanFindings, canAppeal, appealStatus, reviewNote }: ScanStatusBannerProps) => {
   const t = useTranslations("Scan");
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -69,7 +71,7 @@ const ScanStatusBanner = ({ versionId, scanStatus, scanFindings, canAppeal }: Sc
       <Alert
         severity={severity}
         action={
-          canAppeal && result !== "success" ? (
+          canAppeal && result !== "success" && appealStatus !== "pending" ? (
             <Button color="inherit" size="small" onClick={() => setOpen(true)}>
               {t("appeal")}
             </Button>
@@ -91,10 +93,23 @@ const ScanStatusBanner = ({ versionId, scanStatus, scanFindings, canAppeal }: Sc
           </Box>
         )}
 
-        {result === "success" && (
-          <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-            {t("appealSubmitted")}
+        {(result === "success" || appealStatus === "pending") && (
+          <Typography variant="caption" sx={{ display: "block", mt: 1, fontWeight: "bold" }}>
+            {t("appealPending")}
           </Typography>
+        )}
+
+        {appealStatus === "rejected" && (
+          <Box sx={{ mt: 1.5, pt: 1.5, borderTop: 1, borderColor: "divider" }}>
+            <Typography variant="caption" sx={{ display: "block", fontWeight: "bold" }}>
+              {t("appealRejected")}
+            </Typography>
+            {reviewNote && (
+              <Typography variant="body2" sx={{ mt: 0.5, fontStyle: "italic" }}>
+                {t("appealReviewNote", { note: reviewNote })}
+              </Typography>
+            )}
+          </Box>
         )}
       </Alert>
 

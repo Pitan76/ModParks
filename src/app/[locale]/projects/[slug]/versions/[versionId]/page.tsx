@@ -23,6 +23,7 @@ import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import FileHashChip from "@/components/project/FileHashChip";
 import ScanStatusBanner from "@/components/project/ScanStatusBanner";
+import { getLatestScanAppeal } from "@/lib/actions/scanAppeal";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
 import { canonicalUrl } from "@/lib/seo/canonical";
@@ -80,10 +81,11 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
   const { locale, slug, versionId } = await params;
   setRequestLocale(locale);
 
-  const [project, version, session] = await Promise.all([
+  const [project, version, session, appeal] = await Promise.all([
     getProjectBySlug(slug),
     getVersionById(versionId),
     auth(),
+    getLatestScanAppeal(versionId),
   ]);
 
   if (!project || !version) notFound();
@@ -150,6 +152,8 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
         scanStatus={version.scanStatus}
         scanFindings={canEdit ? version.scanFindings : null}
         canAppeal={canEdit}
+        appealStatus={appeal?.status || null}
+        reviewNote={appeal?.reviewNote || null}
       />
 
       <Card variant="outlined" sx={{ mb: 4 }}>

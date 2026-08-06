@@ -10,6 +10,7 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { getTrustDetail } from "@/lib/queries/adminTrust";
 import { tierFromScore } from "@/lib/trust/score";
 import TrustEventTable from "@/components/admin/TrustEventTable";
+import TrustActionsPanel from "@/components/admin/TrustActionsPanel";
 import { TIER_COLORS } from "@/components/admin/trustTierColors";
 
 interface AdminTrustDetailPageProps {
@@ -77,6 +78,12 @@ export default async function AdminTrustDetailPage({ params }: AdminTrustDetailP
         <Alert severity="info" sx={{ mb: 2 }}>{t("trust.detail.frozenNotice")}</Alert>
       )}
 
+      <TrustActionsPanel
+        userId={detail.userId}
+        frozen={detail.frozen}
+        tierOverride={detail.tierOverride}
+      />
+
       <Divider sx={{ my: 3 }} />
 
       <Typography variant="h6" sx={{ fontWeight: 700 }}>{t("trust.detail.ledger")}</Typography>
@@ -84,7 +91,7 @@ export default async function AdminTrustDetailPage({ params }: AdminTrustDetailP
         {t("trust.detail.ledgerHint")}
       </Typography>
 
-      <TrustEventTable events={detail.events} locale={locale} />
+      <TrustEventTable events={detail.events} locale={locale} userId={detail.userId} />
     </Box>
   );
 }

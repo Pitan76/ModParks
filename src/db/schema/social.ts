@@ -187,7 +187,8 @@ export const notifications = sqliteTable("notifications", {
   type: text("type", {
     enum: [
       "new_version", "new_project", "comment", "favorite",
-      "follow", "list_add", "comment_reply",
+      "follow", "list_add", "comment_reply", "scan_result",
+      "scan_appeal_result",
     ],
   }).notNull(),
   /** 表示に必要な情報 (projectSlug, projectName, versionNumber 等)。type ごとに構造が異なる */

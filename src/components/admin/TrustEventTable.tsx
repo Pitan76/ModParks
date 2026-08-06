@@ -7,10 +7,12 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { getTranslations } from "next-intl/server";
 import type { TrustEventRow } from "@/lib/queries/adminTrust";
+import TrustEventReverseButton from "./TrustEventReverseButton";
 
 export type TrustEventTableProps = {
   events: TrustEventRow[];
   locale: string;
+  userId: string;
 };
 
 function signed(value: number): string {
@@ -27,7 +29,7 @@ function deltaColor(value: number): "success.main" | "error.main" | "text.second
  * 台帳。生の値と減衰後の寄与を併記することで、
  * 「なぜ今このスコアなのか」を画面だけで追えるようにする。
  */
-export default async function TrustEventTable({ events, locale }: TrustEventTableProps) {
+export default async function TrustEventTable({ events, locale, userId }: TrustEventTableProps) {
   const t = await getTranslations("Admin");
 
   if (events.length === 0) {
@@ -49,6 +51,7 @@ export default async function TrustEventTable({ events, locale }: TrustEventTabl
           <TableCell>{t("trust.detail.columns.subject")}</TableCell>
           <TableCell>{t("trust.detail.columns.reason")}</TableCell>
           <TableCell>{t("trust.detail.columns.actor")}</TableCell>
+          <TableCell align="right" />
         </TableRow>
       </TableHead>
       <TableBody>
@@ -88,6 +91,12 @@ export default async function TrustEventTable({ events, locale }: TrustEventTabl
             </TableCell>
             <TableCell>
               <Typography variant="caption" color="text.secondary">{event.actorEmail ?? "-"}</Typography>
+            </TableCell>
+            <TableCell align="right">
+              {/* 打ち消し行そのものと、既に無効化された行は却下できない */}
+              {!event.reversed && event.kind !== "reversal" && (
+                <TrustEventReverseButton userId={userId} eventId={event.id} />
+              )}
             </TableCell>
           </TableRow>
         ))}

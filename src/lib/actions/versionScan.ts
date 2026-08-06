@@ -1,6 +1,6 @@
 "use server";
 
-import { versions } from "@/db/schema";
+import { versions, projects, posts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getR2KeyFromUrl } from "@/lib/r2";
 import { scanJar, type JarSource } from "@/lib/services/jar";
@@ -50,6 +50,10 @@ export async function scanVersionFile(db: any, versionId: string, fileUrl: strin
       const { applyScanMalicious } = await import("@/lib/services/trustModeration");
       await applyScanMalicious(versionId, `scan: ${fileName}`);
     }
+
+    if (result.level === "suspicious" || result.level === "malicious") {
+      await notifyScanIssue(db, versionId, result.level);
+    }
   } catch (e) {
     console.error(`jar scan failed for version ${versionId}:`, e);
     const errorMsg = e instanceof Error ? e.message : String(e);
@@ -61,5 +65,50 @@ export async function scanVersionFile(db: any, versionId: string, fileUrl: strin
       })
       .where(eq(versions.id, versionId))
       .run();
+
+    await notifyScanIssue(db, versionId, "failed");
+  }
+}
+
+async function notifyScanIssue(
+  db: any,
+  versionId: string,
+  status: "suspicious" | "malicious" | "failed"
+) {
+  try {
+    const project = await db
+      .select({
+        authorId: posts.authorId,
+        projectName: posts.title,
+        projectSlug: posts.slug,
+        iconUrl: projects.iconUrl,
+        versionNumber: versions.versionNumber,
+      })
+      .from(versions)
+      .innerJoin(projects, eq(versions.projectId, projects.id))
+      .innerJoin(posts, eq(posts.id, projects.id))
+      .where(eq(versions.id, versionId))
+      .get();
+
+    if (project) {
+      const statusLabel =
+        status === "malicious"
+          ? "悪質 (malicious)"
+          : status === "suspicious"
+          ? "疑わしい (suspicious)"
+          : "スキャン失敗 (failed)";
+
+      const { notifyToUser } = await import("@/lib/notifications/notify");
+      await notifyToUser(db, project.authorId, "system", "scan_result", {
+        projectName: project.projectName,
+        slug: project.projectSlug,
+        versionNumber: project.versionNumber,
+        versionId: versionId,
+        statusLabel,
+        iconUrl: project.iconUrl || "",
+      });
+    }
+  } catch (err) {
+    console.error("Failed to send scan result notification:", err);
   }
 }
