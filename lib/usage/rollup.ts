@@ -9,6 +9,7 @@ import { sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
 import { usageDaily, versionDownloadDaily } from "@/db/schema";
 import { fetchDailyRequests, type DayRequests } from "@/lib/usage/analytics";
+import { writeAnalyticsStatus } from "@/lib/usage/analyticsStatus";
 
 type Db = Awaited<ReturnType<typeof getDatabase>>;
 
@@ -67,8 +68,10 @@ export async function rollupRecentUsage(): Promise<void> {
   const yesterday = today - 1;
 
   // 2日ぶんをまとめて取り、外部 API の呼び出しを 1 回に抑える
-  const measured = await fetchDailyRequests(toIsoDate(yesterday), toIsoDate(today));
+  const result = await fetchDailyRequests(toIsoDate(yesterday), toIsoDate(today));
+  await writeAnalyticsStatus(result.ok ? undefined : result.failure);
 
+  const measured = result.ok ? result.data : null;
   await refreshUsageForDay(today, measured?.get(toIsoDate(today)));
   await refreshUsageForDay(yesterday, measured?.get(toIsoDate(yesterday)));
 }

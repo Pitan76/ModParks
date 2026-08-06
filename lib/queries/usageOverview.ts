@@ -18,6 +18,7 @@ import {
   type UsagePlan,
 } from "@/lib/usage/quota";
 import { toEpochDay } from "@/lib/usage/rollup";
+import { readAnalyticsStatus, type AnalyticsStatus } from "@/lib/usage/analyticsStatus";
 
 /** 推移グラフに出す日数 */
 const HISTORY_DAYS = 30;
@@ -31,6 +32,8 @@ export type UsageOverview = {
   requests: QuotaUsage;
   /** 実測値が1日も取得できていないか。トークン未設定ならこうなる */
   measurementMissing: boolean;
+  /** 最後の取得試行の結果。null は一度も試していない（Cron 未実行など） */
+  analyticsStatus: AnalyticsStatus | null;
   /** ddos_slices 由来のリクエスト数。傾向の参考値で、実測より少なく出る */
   sampledRequests: number;
   /** 実測値のうち ModParks 由来のぶん。null は未取得（内訳の取得前に書かれた行） */
@@ -73,6 +76,8 @@ export async function getUsageOverview(): Promise<UsageOverview> {
   const settings = await getAppSettings();
   const today = toEpochDay();
 
+  const analyticsStatus = await readAnalyticsStatus();
+
   const history = await db
     .select()
     .from(usageDaily)
@@ -98,6 +103,7 @@ export async function getUsageOverview(): Promise<UsageOverview> {
     plan,
     requests,
     measurementMissing: measuredRows.length === 0,
+    analyticsStatus,
     sampledRequests: sum(periodRows, (row) => row.requests),
     ownRequests: ownRows.length > 0 ? sum(ownRows, (row) => row.cfRequestsOwn ?? 0) : null,
     downloads: sum(periodRows, (row) => row.downloads),

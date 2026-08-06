@@ -12,6 +12,7 @@ import { getUsageOverview, QUOTA_RECHECK_DAYS } from "@/lib/queries/usageOvervie
 import UsageQuotaCard from "@/components/admin/UsageQuotaCard";
 import UsageHistoryTable from "@/components/admin/UsageHistoryTable";
 import UsageSettingsPanel from "@/components/admin/UsageSettingsPanel";
+import type { AnalyticsStatus } from "@/lib/usage/analyticsStatus";
 
 interface AdminUsagePageProps {
   params: Promise<{ locale: string }>;
@@ -41,7 +42,10 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
       </Typography>
 
       {overview.measurementMissing && (
-        <Alert severity="warning" sx={{ mb: 3 }}>{t("measurementMissing")}</Alert>
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          {t("measurementMissing")}
+          <MeasurementDiagnosis t={t} locale={locale} status={overview.analyticsStatus} />
+        </Alert>
       )}
 
       {overview.quotaStale && (
@@ -105,6 +109,43 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
       </Card>
     </Box>
   );
+}
+
+type Translate = Awaited<ReturnType<typeof getTranslations>>;
+
+/**
+ * 最後の取得試行が何で落ちたかを出す。
+ *
+ * 取得は Cron の中で走るため、原文のメッセージまで見せないと
+ * 権限不足なのか停止中なのかの切り分けができない。
+ */
+function MeasurementDiagnosis({ t, locale, status }: { t: Translate; locale: string; status: AnalyticsStatus | null }) {
+  if (!status) return <Detail text={t("analyticsFailure.neverRun")} />;
+  if (!status.failure) return <Detail text={t("analyticsFailure.lastOkButEmpty")} />;
+
+  const { kind, status: httpStatus, detail } = status.failure;
+  const at = new Date(status.at).toLocaleString(locale);
+  const reason = t(`analyticsFailure.${kind}`);
+  const head = httpStatus ? `${reason} (HTTP ${httpStatus})` : reason;
+
+  return (
+    <>
+      <Detail text={t("analyticsFailure.lastAttempt", { at, reason: head })} />
+      {detail && (
+        <Typography
+          variant="caption"
+          component="pre"
+          sx={{ mt: 0.5, whiteSpace: "pre-wrap", wordBreak: "break-word", opacity: 0.85 }}
+        >
+          {detail}
+        </Typography>
+      )}
+    </>
+  );
+}
+
+function Detail({ text }: { text: string }) {
+  return <Typography variant="body2" sx={{ mt: 1 }}>{text}</Typography>;
 }
 
 /** null は未取得。0 と同じ見た目にすると「消費なし」と誤読されるため区別する */

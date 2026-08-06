@@ -10,6 +10,12 @@
  * シークレット書き込み権限を持つ CLOUDFLARE_API_TOKEN は流用しない。
  */
 
+import {
+  truncateDetail,
+  type AnalyticsFailure,
+  type AnalyticsFailureKind,
+} from "@/lib/usage/analyticsStatus";
+
 const GRAPHQL_ENDPOINT = "https://api.cloudflare.com/client/v4/graphql";
 
 /** 1 リクエストで取得する最大日数。日次で回す前提なので小さくてよい */
@@ -66,7 +72,7 @@ type GraphQLResponse = {
       }[];
     };
   };
-  errors?: { message?: string }[];
+  errors?: { message?: string; path?: string[]; extensions?: { code?: string } }[];
 };
 
 type AnalyticsEnv = {
@@ -74,8 +80,19 @@ type AnalyticsEnv = {
   CLOUDFLARE_ANALYTICS_TOKEN?: string;
 };
 
+/** 取得できなかった理由を握りつぶさずに返す */
+export type AnalyticsResult =
+  | { ok: true; data: DailyRequests }
+  | { ok: false; failure: AnalyticsFailure };
+
+function fail(kind: AnalyticsFailureKind, detail?: string, status?: number): AnalyticsResult {
+  const failure: AnalyticsFailure = { kind, ...(detail ? { detail: truncateDetail(detail) } : {}), ...(status ? { status } : {}) };
+  console.error("[USAGE] Analytics unavailable:", failure);
+  return { ok: false, failure };
+}
+
 /** Workers 本番では secret がバインディング env 側にあるため、process.env だけでは取れない */
-async function resolveEnv(): Promise<AnalyticsEnv> {
+async function resolveEnv(): Promise<AnalyticsEnv | { error: string }> {
   const fromProcess = process.env as unknown as AnalyticsEnv;
   if (fromProcess.CLOUDFLARE_ANALYTICS_TOKEN) return fromProcess;
 
@@ -89,8 +106,7 @@ async function resolveEnv(): Promise<AnalyticsEnv> {
     const { env } = await getCloudflareContext({ async: true });
     return env as unknown as AnalyticsEnv;
   } catch (err) {
-    console.error("[USAGE] Failed to resolve analytics env:", err);
-    return {};
+    return { error: err instanceof Error ? `${err.name}: ${err.message}` : String(err) };
   }
 }
 
@@ -118,14 +134,16 @@ function toDailyTotals(response: GraphQLResponse): DailyRequests {
  *
  * @param from 開始日 (YYYY-MM-DD, UTC)
  * @param to   終了日 (YYYY-MM-DD, UTC)
- * @returns 取得できなければ null。トークン未設定と取得失敗を区別しない
- *   （どちらも「Cloudflare の実測値が無い」として扱えば足りる）
+ * @returns 成功なら日次の実測値。失敗時は理由を添えて返し、呼び出し元が記録できるようにする
  */
-export async function fetchDailyRequests(from: string, to: string): Promise<DailyRequests | null> {
+export async function fetchDailyRequests(from: string, to: string): Promise<AnalyticsResult> {
   const env = await resolveEnv();
+  if ("error" in env) return fail("envUnavailable", env.error);
+
   const accountTag = env.CLOUDFLARE_ACCOUNT_ID;
   const token = env.CLOUDFLARE_ANALYTICS_TOKEN;
-  if (!accountTag || !token) return null;
+  if (!accountTag) return fail("missingAccountId");
+  if (!token) return fail("missingToken");
 
   // 外部 API 境界。失敗しても利用量の集計そのものは続ける
   try {
@@ -138,19 +156,35 @@ export async function fetchDailyRequests(from: string, to: string): Promise<Dail
       body: JSON.stringify({ query: QUERY, variables: { accountTag, from, to } }),
     });
 
-    const body = (await res.json()) as GraphQLResponse;
-    if (body.errors?.length) {
-      console.error("[USAGE] Analytics API returned errors:", body.errors.map((e) => e.message).join(", "));
-      return null;
-    }
-    if (!res.ok) {
-      console.error("[USAGE] Analytics API failed:", res.status);
-      return null;
-    }
+    // GraphQL 以外のエラー（認証失敗など）は JSON ですらないことがある
+    const text = await res.text();
+    const body = parseBody(text);
+    if (!body) return fail("httpError", text, res.status);
+    if (body.errors?.length) return fail("graphqlErrors", formatGraphQLErrors(body.errors), res.status);
+    if (!res.ok) return fail("httpError", text, res.status);
 
-    return toDailyTotals(body);
+    return { ok: true, data: toDailyTotals(body) };
   } catch (err) {
-    console.error("[USAGE] Analytics API request failed:", err);
+    return fail("networkError", err instanceof Error ? `${err.name}: ${err.message}` : String(err));
+  }
+}
+
+function parseBody(text: string): GraphQLResponse | null {
+  try {
+    return JSON.parse(text) as GraphQLResponse;
+  } catch {
     return null;
   }
+}
+
+/** message だけだと権限名などが落ちるため、コードやパスも残す */
+function formatGraphQLErrors(errors: NonNullable<GraphQLResponse["errors"]>): string {
+  return errors
+    .map((e) => {
+      const code = e.extensions?.code;
+      const path = e.path?.join(".");
+      const suffix = [code && `code=${code}`, path && `path=${path}`].filter(Boolean).join(" ");
+      return suffix ? `${e.message ?? "unknown error"} (${suffix})` : (e.message ?? "unknown error");
+    })
+    .join(" / ");
 }
