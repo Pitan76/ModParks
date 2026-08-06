@@ -41,7 +41,14 @@ const PlainProjectTable = ({ projects }: PlainProjectTableProps) => {
           <tr key={project.id} id={`project-row-${project.slug}`}>
             <td>
               {/* 一覧の全件をプリフェッチすると通信量が増えるため無効にする */}
-              <Link href={`/projects/${project.slug}`} prefetch={false}>
+              <Link href={`/projects/${project.slug}`} prefetch={false} className={styles.nameLink}>
+                {project.iconUrl ? (
+                  // next/image は最適化のための追加処理を伴うため、軽量化を優先して素の img を使う
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={project.iconUrl} alt="" className={styles.icon} loading="lazy" decoding="async" />
+                ) : (
+                  <span className={styles.iconFallback} aria-hidden="true" />
+                )}
                 {project.title}
               </Link>
               {project.tags?.length > 0 && (

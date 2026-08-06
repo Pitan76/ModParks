@@ -20,6 +20,27 @@
   white-space: nowrap;
 }
 
+.nameLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+/* アイコン未設定でも名前の開始位置が揃うよう同寸法の枠を確保する */
+.iconFallback {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid GrayText;
+}
+
 .numeric {
   text-align: right;
 }
