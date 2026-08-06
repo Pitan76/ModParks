@@ -16,6 +16,7 @@ import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";
+import type { ActionResult } from "@/lib/actions/actionResult";
 
 /**
  * バージョン単体を操作する Server Action の共通前処理。
@@ -210,9 +211,9 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
 /**
  * プロジェクトのバージョン（ファイル）を削除する Server Action。
  */
-export const deleteVersion = async (versionId: string, projectSlug: string) => {
+export const deleteVersion = async (versionId: string, projectSlug: string): Promise<ActionResult> => {
   const loaded = await loadManageableVersion(versionId, projectSlug);
-  if ("error" in loaded) return loaded;
+  if ("error" in loaded) return { error: loaded.error };
   const { db, project, version } = loaded;
 
   const r2Key = getR2KeyFromUrl(version.fileUrl);
@@ -237,10 +238,14 @@ export const deleteVersion = async (versionId: string, projectSlug: string) => {
 /**
  * バージョンのアーカイブ状態を切り替える Server Action。
  */
-export const setVersionArchived = async (versionId: string, projectSlug: string, archived: boolean) => {
+export const setVersionArchived = async (
+  versionId: string,
+  projectSlug: string,
+  archived: boolean,
+): Promise<ActionResult> => {
   const loaded = await loadManageableVersion(versionId, projectSlug);
-  if ("error" in loaded) return loaded;
-  const { db } = loaded;
+  if ("error" in loaded) return { error: loaded.error };
+  const { db, project } = loaded;
 
   await db
     .update(versions)
