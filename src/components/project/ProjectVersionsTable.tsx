@@ -5,6 +5,8 @@ import ProjectVersionsDesktopTable from "./ProjectVersionsDesktopTable";
 import ProjectVersionsMobileList from "./ProjectVersionsMobileList";
 import { useProjectVersions } from "./useProjectVersions";
 import { useVersionMenu } from "./useVersionMenu";
+import { useColorMode } from "@/components/ThemeRegistry";
+import PlainProjectVersionsTable from "@/components/plain/project/PlainProjectVersionsTable";
 
 export type ProjectVersionsTableProps = {
   versions: {
@@ -31,6 +33,24 @@ export type ProjectVersionsTableProps = {
 const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTableProps) => {
   const state = useProjectVersions(versions);
   const buildMenu = useVersionMenu(projectSlug);
+  const { isPlainTheme } = useColorMode();
+
+  if (isPlainTheme) {
+    return (
+      <PlainProjectVersionsTable
+        versions={state.versions}
+        projectSlug={projectSlug}
+        filterChannel={state.filterChannel}
+        onChannelChange={state.setFilterChannel}
+        filterLoader={state.filterLoader}
+        onLoaderChange={state.setFilterLoader}
+        filterMc={state.filterMc}
+        onMcChange={state.setFilterMc}
+        loaderOptions={state.loaderOptions}
+        mcOptions={state.mcOptions}
+      />
+    );
+  }
 
   return (
     <>

@@ -253,6 +253,10 @@
       "recipesEnabled": "Enable Recipes Tab"
     },
     "table": {
+      "name": "Project",
+      "author": "Author",
+      "downloads": "Downloads",
+      "updated": "Updated",
       "version": "Version",
       "platformMcVersion": "Platform / MC Version",
       "sizeDownloadDate": "Size / DLs / Date",
@@ -331,12 +335,6 @@
       "publishedAt": "{date}",
       "updatedAt": "{date}",
       "addVersion": "Add Version"
-    },
-    "table": {
-      "name": "Project",
-      "author": "Author",
-      "downloads": "Downloads",
-      "updated": "Updated"
     },
     "versions": "Versions",
     "noVersions": "No versions available yet.",

@@ -253,6 +253,10 @@
       "recipesEnabled": "レシピタブを有効化 (試験的機能)"
     },
     "table": {
+      "name": "プロジェクト",
+      "author": "作者",
+      "downloads": "DL数",
+      "updated": "更新日",
       "version": "バージョン",
       "platformMcVersion": "プラットフォーム / MCバージョン",
       "sizeDownloadDate": "サイズ / DL / 日付",
@@ -337,12 +341,6 @@
       "publishedAt": "{date}",
       "updatedAt": "{date}",
       "addVersion": "新バージョンを追加"
-    },
-    "table": {
-      "name": "プロジェクト",
-      "author": "作者",
-      "downloads": "DL数",
-      "updated": "更新日"
     },
     "versions": "バージョン",
     "noVersions": "バージョンがまだありません",
