@@ -94,11 +94,21 @@ export const versions = sqliteTable("versions", {
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
+  /**
+   * このバージョンを実際にアップロードしたユーザ。
+   *
+   * 共同管理プロジェクトでは投稿者 (posts.authorId) と一致しない。
+   * 信頼ポイントの加減点は実行者本人に入れるため、プロジェクトの持ち主とは別に持つ。
+   * アカウントを消してもバージョンは残したいので、参照は切って null にする。
+   */
+  uploaderId: text("uploader_id")
+    .references(() => users.id, { onDelete: "set null" }),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 }, (table) => [
   index("versions_project_idx").on(table.projectId),
+  index("versions_uploader_idx").on(table.uploaderId),
   index("versions_project_created_at_idx").on(table.projectId, table.createdAt),
 ]);
 

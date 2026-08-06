@@ -13,6 +13,8 @@ export interface VersionRecordInput {
   fileSize?: number | null;
   fileSha256?: string | null;
   projectId: string;
+  /** アップロードを実行したユーザ。信頼ポイントの加減点はこの人に入る */
+  uploaderId: string;
 }
 
 /**
@@ -35,6 +37,7 @@ export async function insertVersionRecord(db: any, input: VersionRecordInput): P
       fileSize: input.fileSize ?? null,
       fileSha256: input.fileSha256 ?? null,
       projectId: input.projectId,
+      uploaderId: input.uploaderId,
       createdAt: new Date(),
     })
   );

@@ -45,6 +45,11 @@ export async function scanVersionFile(db: any, versionId: string, fileUrl: strin
       })
       .where(eq(versions.id, versionId))
       .run();
+
+    if (result.level === "malicious") {
+      const { applyScanMalicious } = await import("@/lib/services/trustModeration");
+      await applyScanMalicious(versionId, `scan: ${fileName}`);
+    }
   } catch (e) {
     console.error(`jar scan failed for version ${versionId}:`, e);
     await db.update(versions)

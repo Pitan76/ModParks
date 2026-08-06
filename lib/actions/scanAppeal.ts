@@ -81,6 +81,10 @@ export async function reviewScanAppeal(
       .set({ scanStatus: "clean" })
       .where(eq(versions.id, appeal.versionId))
       .run();
+
+    // 誤検知だったので、確定検知で積んだ減点も取り消す
+    const { applyScanCleared } = await import("@/lib/services/trustModeration");
+    await applyScanCleared(appeal.versionId, "scan appeal approved");
   }
 
   await recordModerationAudit(
@@ -123,6 +127,13 @@ export async function overrideScanStatus(
   const reviewNote = note?.trim().slice(0, REASON_MAX_LENGTH) || null;
 
   await db.update(versions).set({ scanStatus: status }).where(eq(versions.id, versionId)).run();
+
+  const trust = await import("@/lib/services/trustModeration");
+  if (status === "malicious") {
+    await trust.applyScanMalicious(versionId, reviewNote ?? "manual override");
+  } else if (version.scanStatus === "malicious") {
+    await trust.applyScanCleared(versionId, reviewNote ?? "manual override");
+  }
 
   // 保留中の異議は同じ裁定で閉じる。clean 化なら申請が通ったのと同義
   const pending = await db

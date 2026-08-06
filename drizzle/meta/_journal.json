@@ -519,6 +519,13 @@
       "when": 1785977433042,
       "tag": "0073_trust_credit",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "6",
+      "when": 1785978582221,
+      "tag": "0074_user_last_login",
+      "breakpoints": true
     }
   ]
 }

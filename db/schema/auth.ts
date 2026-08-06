@@ -31,6 +31,11 @@ export const users = sqliteTable("users", {
   /** プレミアムの有効期限。null は無期限（買い切り／手動付与の既定） */
   premiumUntil:  integer("premium_until", { mode: "timestamp" }),
   twoFactorSecret: text("two_factor_secret"),
+  /**
+   * 最終ログイン日時。信頼ポイントの在籍加点で、休眠アカウントを進めないために使う。
+   * 放置されたアカウントが乗っ取られて自動的に高スコアになるのを避ける。
+   */
+  lastLoginAt:   integer("last_login_at", { mode: "timestamp" }),
   deletedAt:     integer("deleted_at", { mode: "timestamp" }),
   deactivatedAt: integer("deactivated_at", { mode: "timestamp" }),
   suspendedAt:   integer("suspended_at", { mode: "timestamp" }),

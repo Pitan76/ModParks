@@ -54,6 +54,27 @@ export async function createReport(
 // ---- 管理者: 通報ステータス更新 ----
 
 /**
+ * 通報の処理結果を信頼ポイントへ反映する。
+ * 信頼ポイントの記録が失敗しても通報の処理自体は成立させたいので、ここで握る。
+ */
+async function applyReportTrust(
+  report: typeof reports.$inferSelect,
+  status: "resolved" | "dismissed",
+  penalizeReporter: boolean
+) {
+  try {
+    const trust = await import("@/lib/services/trustModeration");
+    if (status === "resolved") {
+      await trust.applyReportUpheld(report);
+      return;
+    }
+    await trust.applyReportRejected(report, { penalizeReporter });
+  } catch (e) {
+    console.error("Failed to apply trust events for report:", report.id, e);
+  }
+}
+
+/**
  * 管理者が通報のステータスを更新する Server Action
  * @param reportId 対象の通報ID
  * @param status 変更後のステータス ("resolved" または "dismissed")
@@ -63,15 +84,22 @@ export async function createReport(
 export async function updateReportStatus(
   reportId: string,
   status: "resolved" | "dismissed",
-  _formData?: FormData
+  _formData?: FormData,
+  /** 却下時に通報者を減点するか。既定は減点しない（→ memo/TRUST_CREDIT.md 3.2） */
+  penalizeReporter = false
 ) {
   const { db, userId } = await getAdminDb();
+
+  const report = await db.select().from(reports).where(eq(reports.id, reportId)).get();
+  if (!report) return { success: false };
 
   await db
     .update(reports)
     .set({ status })
     .where(eq(reports.id, reportId))
     .run();
+
+  await applyReportTrust(report, status, penalizeReporter);
 
   await recordModerationAudit(
     db,

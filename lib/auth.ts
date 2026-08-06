@@ -59,6 +59,11 @@ export const authConfig = {
           await db.update(users).set({ deactivatedAt: null }).where(eq(users.id, dbUser.id)).run();
         }
 
+        // 在籍加点の休眠判定に使う。ログイン経路を問わずここを通るため一箇所で足りる
+        if (dbUser) {
+          await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, dbUser.id)).run();
+        }
+
         if (account?.provider === "github" && profile?.login && dbUser) {
           const { generateUniqueUsername } = await import("@/lib/utils/username");
           const fallbackUsername = await generateUniqueUsername(db, {
