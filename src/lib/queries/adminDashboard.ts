@@ -25,9 +25,9 @@ export async function getAdminStats(): Promise<AdminStats> {
   ]);
 
   return {
-    pendingReports: reportsRes?.[0]?.value ?? 0,
-    pendingAppeals: appealsRes?.[0]?.value ?? 0,
-    totalUsers: usersRes?.[0]?.value ?? 0,
-    totalProjects: projectsRes?.[0]?.value ?? 0,
+    pendingReports: Number(reportsRes?.[0]?.value ?? 0),
+    pendingAppeals: Number(appealsRes?.[0]?.value ?? 0),
+    totalUsers: Number(usersRes?.[0]?.value ?? 0),
+    totalProjects: Number(projectsRes?.[0]?.value ?? 0),
   };
 }
