@@ -140,7 +140,7 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
     setErrorMsg("");
     try {
       const res = await setVersionArchived(v.id, projectSlug, nextArchived);
-      if (res.error) {
+      if (isActionError(res)) {
         setErrorMsg(res.error);
       } else {
         setLocalVersions((prev) =>

@@ -17,6 +17,8 @@ import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";
 import type { ActionResult } from "@/lib/actions/actionResult";
+import type { Database } from "@/lib/db";
+import type { ProjectPost } from "@/types/post";
 
 /**
  * バージョン単体を操作する Server Action の共通前処理。
@@ -27,7 +29,11 @@ import type { ActionResult } from "@/lib/actions/actionResult";
  *
  * @returns 失敗時は表示用エラー、成功時は接続・プロジェクト・バージョン
  */
-async function loadManageableVersion(versionId: string, projectSlug: string) {
+type ManageableVersion =
+  | { error: string }
+  | { error?: undefined; db: Database; project: ProjectPost; version: typeof versions.$inferSelect };
+
+async function loadManageableVersion(versionId: string, projectSlug: string): Promise<ManageableVersion> {
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
@@ -213,7 +219,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
  */
 export const deleteVersion = async (versionId: string, projectSlug: string): Promise<ActionResult> => {
   const loaded = await loadManageableVersion(versionId, projectSlug);
-  if ("error" in loaded) return { error: loaded.error };
+  if (loaded.error !== undefined) return { error: loaded.error };
   const { db, project, version } = loaded;
 
   const r2Key = getR2KeyFromUrl(version.fileUrl);
@@ -244,7 +250,7 @@ export const setVersionArchived = async (
   archived: boolean,
 ): Promise<ActionResult> => {
   const loaded = await loadManageableVersion(versionId, projectSlug);
-  if ("error" in loaded) return { error: loaded.error };
+  if (loaded.error !== undefined) return { error: loaded.error };
   const { db, project } = loaded;
 
   await db
