@@ -63,7 +63,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
 
   const getTagLabel = (tag: string) => {
     const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-    return tTags.has(key as any) ? tTags(key as any) : tag;
+    return tTags.has(key) ? tTags(key) : tag;
   };
 
   return (
