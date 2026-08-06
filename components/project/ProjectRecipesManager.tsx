@@ -23,6 +23,8 @@ export type ManagedRecipe = {
   id: string;
   name: string;
   url: string;
+  /** `url` が404だったときの取得先。CDNのWorkerが画像を生成して返す */
+  fallbackUrl: string;
 };
 
 export type ProjectRecipesManagerProps = {
@@ -42,6 +44,9 @@ type RecipeCardProps = {
 };
 
 const RecipeCard = ({ recipe, isHidden, busy, onToggle, labelVisible, labelHidden }: RecipeCardProps) => {
+  // R2から直接取る URL は未生成の画像だと404になる。そのときだけCDNのWorkerに生成させる。
+  const [failed, setFailed] = useState(false);
+
   return (
     <Box
       sx={{
@@ -55,9 +60,10 @@ const RecipeCard = ({ recipe, isHidden, busy, onToggle, labelVisible, labelHidde
       {/* レシピ画像はCDNが生成した固定サイズのPNG。next/image を通す利点がないため img で出す */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={recipe.url}
+        src={failed ? recipe.fallbackUrl : recipe.url}
         alt={recipe.name}
         loading="lazy"
+        onError={() => setFailed(true)}
         style={{ width: "100%", height: "auto", imageRendering: "pixelated" }}
       />
       <Typography variant="body2" noWrap title={recipe.name} sx={{ mt: 0.5 }}>

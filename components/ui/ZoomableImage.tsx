@@ -21,6 +21,8 @@ type ZoomableImageProps = {
   className?: string;
   style?: React.CSSProperties;
   loading?: "lazy" | "eager";
+  /** 読み込みに失敗したとき。差し替え先を持つ画像で使う */
+  onError?: React.ReactEventHandler<HTMLImageElement>;
 };
 
 const ZOOM_STEP = 1.4;
@@ -30,7 +32,7 @@ const ZOOM_STEP = 1.4;
  * ダイアログではホイール/ボタンでの拡大縮小、ドラッグでの移動ができる。
  * リンク内に置かれた画像には使用せず、その場合は通常の <img> を描画すること。
  */
-const ZoomableImage = ({ src, alt, pixelated, className, style, loading }: ZoomableImageProps) => {
+const ZoomableImage = ({ src, alt, pixelated, className, style, loading, onError }: ZoomableImageProps) => {
   const t = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const zoom = useImageZoom();
@@ -53,6 +55,7 @@ const ZoomableImage = ({ src, alt, pixelated, className, style, loading }: Zooma
         loading={loading}
         className={className}
         onClick={() => setOpen(true)}
+        onError={onError}
         style={{ cursor: "zoom-in", imageRendering: rendering, ...style }}
       />
       <Dialog open={open} onClose={() => setOpen(false)} fullScreen slotProps={{ paper: { sx: { bgcolor: "rgba(0,0,0,0.92)" } } }}>

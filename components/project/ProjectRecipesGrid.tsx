@@ -13,6 +13,8 @@ import ZoomableImage from "@/components/ui/ZoomableImage";
 export type RecipeItem = {
   id: string;
   url: string;
+  /** `url` が404だったときの取得先。CDNのWorkerが画像を生成して返す */
+  fallbackUrl: string;
   title: string;
 };
 
@@ -30,10 +32,15 @@ type RecipeGridItemProps = {
 };
 
 const RecipeGridItem = ({ recipe }: RecipeGridItemProps) => {
+  // R2から直接取る URL は未生成の画像だと404になる。そのときだけCDNのWorkerに生成させる。
+  const [failed, setFailed] = useState(false);
+  const src = failed ? recipe.fallbackUrl : recipe.url;
+
   return (
     <Box>
       <ZoomableImage
-        src={recipe.url}
+        src={src}
+        onError={() => setFailed(true)}
         alt={recipe.title}
         loading="lazy"
         pixelated

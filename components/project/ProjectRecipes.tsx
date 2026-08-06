@@ -35,7 +35,7 @@ const ProjectRecipes = async ({ projectId, projectSlug, namespaces }: ProjectRec
   // 非表示指定はCDNではなくmodparks側が持つため、描画直前にここで落とす。
   const recipes = toRecipeItems(cdnUrl, lists)
     .filter((r) => !hiddenIds.has(r.id))
-    .map(({ id, name, url }) => ({ id, title: name, url }));
+    .map(({ id, name, url, fallbackUrl }) => ({ id, title: name, url, fallbackUrl }));
 
   if (error) {
     return (

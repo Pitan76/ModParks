@@ -18,12 +18,25 @@ export type RecipeListEntry = {
   name: string;
 };
 
+/** レシピCDNのR2直接配信の情報。`base` が空、または未提供なら直接配信は使えません。 */
+export type RecipeAssets = {
+  base: string;
+  rv: string;
+};
+
 /** ネームスペース1つ分の索引。 */
 export type NamespaceList = {
   namespace: string;
   version: string;
   recipes: RecipeListEntry[];
+  assets?: RecipeAssets;
 };
+
+/** レシピCDNの既定の拡大率。R2のキーに含まれるため、CDN側の DEFAULT_SCALE と揃える。 */
+const IMAGE_SCALE = 2;
+
+/** レシピCDNの既定のタグ位置。同上。 */
+const IMAGE_TAG_OFFSET = 0;
 
 /**
  * アプリのロケールを Minecraft のロケール名に変換します。
@@ -40,9 +53,36 @@ export type RecipeItem = {
   id: string;
   /** 完成品のアイテム名。未翻訳ならアイテムIDが入る */
   name: string;
-  /** レシピ画像のURL */
+  /** レシピ画像のURL。直接配信が使えるならR2のURL */
   url: string;
+  /** `url` が404だったときの取得先。CDNのWorkerが画像を生成して返す */
+  fallbackUrl: string;
 };
+
+/**
+ * レンダリング済み画像をR2から直接取るURLを組み立てます。
+ *
+ * CDNのWorkerを起こさずに済むぶん安く速く返りますが、まだ生成されていない画像は404になります。
+ * 呼び出し側は404のときだけ {@link RecipeItem.fallbackUrl} へ切り替えてください（Workerが生成して
+ * R2へ保存するため、次回からは直接ヒットします）。
+ * @param assets CDNが返した配信情報
+ * @param namespace ネームスペース
+ * @param itemId レシピID（ネームスペースを除いた部分）
+ * @param version アセットバージョン
+ * @returns 直接配信できないときは null
+ */
+function directUrl(
+  assets: RecipeAssets | undefined,
+  namespace: string,
+  itemId: string,
+  version: string
+): string | null {
+  if (!assets?.base || !version || version === "0") return null;
+
+  const key = `cache/img/${assets.rv}/${namespace}/${version}/${itemId}@${IMAGE_SCALE}+${IMAGE_TAG_OFFSET}.png`;
+  const base = assets.base.endsWith("/") ? assets.base.slice(0, -1) : assets.base;
+  return `${base}/${key.split("/").map(encodeURIComponent).join("/")}`;
+}
 
 /**
  * 索引を表示用のレシピ一覧に変換します。
@@ -50,14 +90,15 @@ export type RecipeItem = {
  * @param lists ネームスペース単位の索引
  */
 export function toRecipeItems(cdnUrl: string, lists: NamespaceList[]): RecipeItem[] {
-  return lists.flatMap(({ version, recipes }) =>
+  return lists.flatMap(({ version, recipes, assets }) =>
     recipes.map(({ id, name }) => {
       const [namespace, itemId] = id.split(":");
       // URL にアセットバージョンを埋めると CDN 側がバージョン参照の R2 往復を省略でき、
       // レスポンスが immutable になるため再訪時はネットワークに出なくなる。
       // 未設定を意味する "0" のときに付けると、まだ何も入っていない画像を1年間焼き付けてしまう。
       const pin = version && version !== "0" ? `?v=${encodeURIComponent(version)}` : "";
-      return { id, name, url: `${cdnUrl}/api/${namespace}/${itemId}.png${pin}` };
+      const fallbackUrl = `${cdnUrl}/api/${namespace}/${itemId}.png${pin}`;
+      return { id, name, url: directUrl(assets, namespace, itemId, version) ?? fallbackUrl, fallbackUrl };
     })
   );
 }
