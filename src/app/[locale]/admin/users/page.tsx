@@ -1,5 +1,5 @@
 import { getAdminDb } from "@/lib/auth-helpers";
-import { users, userProfiles } from "@/db/schema";
+import { users, userProfiles, userTrust } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import UsersClient from "./UsersClientLazy";
@@ -24,8 +24,14 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
       suspendedAt: users.suspendedAt,
       twoFactorEnabled: users.twoFactorEnabled,
       premiumTier: users.premiumTier,
-      premiumUntil: users.premiumUntil
-  }).from(users).leftJoin(userProfiles, eq(users.id, userProfiles.userId)).orderBy(desc(users.createdAt)).all() as any[];
+      premiumUntil: users.premiumUntil,
+      trustScore: userTrust.score,
+      trustTier: userTrust.tier,
+  }).from(users)
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .leftJoin(userTrust, eq(users.id, userTrust.userId))
+    .orderBy(desc(users.createdAt))
+    .all() as any[];
 
   const { accounts } = await import("@/db/schema");
   const allAccounts = await db.select({ userId: accounts.userId, provider: accounts.provider }).from(accounts).all();

@@ -49,6 +49,8 @@ export interface User {
   hasGithub?: boolean;
   premiumTier?: string | null;
   premiumUntil?: Date | number | null;
+  trustScore?: number | null;
+  trustTier?: string | null;
 }
 
 /**

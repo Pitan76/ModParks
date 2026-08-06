@@ -4,7 +4,7 @@ import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
 import { reports, posts, projects, users, userProfiles, comments, ideas } from "@/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, desc, or } from "drizzle-orm";
+import { count, eq, desc, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { revalidatePath } from "next/cache";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
@@ -48,7 +48,36 @@ export async function createReport(
     userId:     targetType === "user" ? targetId : null,
   }).run();
 
+  await notifyNewReport(db);
   return { success: true };
+}
+
+/**
+ * 通報が入ったことを管理者へ即時に知らせる。
+ *
+ * 通報だけでは何も自動で起きないため、気づかれないと放置される。
+ * 通知の失敗で通報そのものを失敗させたくないので、ここで握る。
+ */
+async function notifyNewReport(db: any) {
+  try {
+    const [{ getAdminWebhookUrl }, { buildReportQueueEmbed, sendTrustAlert }] = await Promise.all([
+      import("@/lib/usage/webhook"),
+      import("@/lib/services/trustAlert"),
+    ]);
+
+    const pending = await db
+      .select({ total: count() })
+      .from(reports)
+      .where(eq(reports.status, "pending"))
+      .get();
+
+    await sendTrustAlert(await getAdminWebhookUrl(), buildReportQueueEmbed({
+      pending: Number(pending?.total ?? 1),
+      reminder: false,
+    }));
+  } catch (e) {
+    console.error("Failed to notify new report:", e);
+  }
 }
 
 // ---- 管理者: 通報ステータス更新 ----

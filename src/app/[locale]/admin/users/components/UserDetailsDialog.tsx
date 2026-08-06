@@ -9,6 +9,9 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import { Link } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
+import Chip from "@mui/material/Chip";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import type { User } from "../UsersClient";
 
 interface UserDetailsDialogProps {
@@ -59,6 +62,47 @@ export default function UserDetailsDialog({ open, onClose, user }: UserDetailsDi
             </TableRow>
             <TableRow>
               <TableCell variant="head" sx={{ fontWeight: "bold" }}>
+                {tAdmin("detailsTrustTier")}
+              </TableCell>
+              <TableCell>
+                {user.trustTier ? (
+                  <Chip
+                    label={user.trustTier}
+                    size="small"
+                    color={
+                      user.trustTier === "veteran"
+                        ? "success"
+                        : user.trustTier === "trusted"
+                        ? "info"
+                        : user.trustTier === "member"
+                        ? "primary"
+                        : "default"
+                    }
+                  />
+                ) : (
+                  "-"
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head" sx={{ fontWeight: "bold" }}>
+                {tAdmin("detailsTrustScore")}
+              </TableCell>
+              <TableCell>
+                {user.trustScore !== undefined && user.trustScore !== null ? (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <span>{user.trustScore}</span>
+                    <Link href={`/admin/trust/${user.id}`} style={{ color: "#1976d2" }}>
+                      {tAdmin("detailsViewTrustLedger")}
+                    </Link>
+                  </Box>
+                ) : (
+                  "-"
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head" sx={{ fontWeight: "bold" }}>
                 {tAdmin("detailsProfileLink")}
               </TableCell>
               <TableCell>
@@ -98,7 +142,7 @@ export default function UserDetailsDialog({ open, onClose, user }: UserDetailsDi
                 {tAdmin("detailsDeactivatedStatus")}
               </TableCell>
               <TableCell>
-                {user.deactivatedAt ? new Date(user.deactivatedAt).toLocaleString() : tAdmin("detailsStatusActive")}
+                {user.deactivatedAt ? new Date(user.deactivatedAt).toLocaleString() : "-"}
               </TableCell>
             </TableRow>
             <TableRow>
@@ -106,7 +150,7 @@ export default function UserDetailsDialog({ open, onClose, user }: UserDetailsDi
                 {tAdmin("detailsSuspendedStatus")}
               </TableCell>
               <TableCell>
-                {user.suspendedAt ? new Date(user.suspendedAt).toLocaleString() : tAdmin("detailsStatusActive")}
+                {user.suspendedAt ? new Date(user.suspendedAt).toLocaleString() : "-"}
               </TableCell>
             </TableRow>
             <TableRow>
@@ -114,7 +158,7 @@ export default function UserDetailsDialog({ open, onClose, user }: UserDetailsDi
                 {tAdmin("detailsDeletedStatus")}
               </TableCell>
               <TableCell>
-                {user.deletedAt ? new Date(user.deletedAt).toLocaleString() : tAdmin("detailsStatusActive")}
+                {user.deletedAt ? new Date(user.deletedAt).toLocaleString() : "-"}
               </TableCell>
             </TableRow>
           </TableBody>

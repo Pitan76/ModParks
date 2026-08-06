@@ -3,6 +3,8 @@ import { checkCronAuth } from "@/lib/cron/auth";
 import { syncTrustForActiveUsers } from "@/lib/services/trustAttributes";
 import { syncVersionCleanCredits } from "@/lib/services/trustActivity";
 import { recomputeStaleTrust } from "@/lib/services/trust";
+import { notifyStalledReports } from "@/lib/services/trustReportQueue";
+import { getAdminWebhookUrl } from "@/lib/usage/webhook";
 import { describeError } from "@/lib/errors/describe";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +29,10 @@ export async function GET(request: Request) {
     const staleBefore = new Date(Date.now() - STALE_HOURS * 3600_000);
     const recomputed = await recomputeStaleTrust(staleBefore);
 
-    return NextResponse.json({ success: true, users, versionsCredited, recomputed });
+    // 判断は人間に残すため、キューが放置されていないかをここで見る
+    const stalledReports = await notifyStalledReports(await getAdminWebhookUrl());
+
+    return NextResponse.json({ success: true, users, versionsCredited, recomputed, stalledReports });
   } catch (error) {
     const reason = describeError(error);
     console.error("[CRON] Trust sync error:", reason);

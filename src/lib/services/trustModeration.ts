@@ -6,8 +6,8 @@
  */
 import { and, eq } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { comments, posts, projects, trustEvents, versions, type Report } from "@/db/schema";
-import { recordMalwareDetected, recordTrustEvent, reverseTrustEvent } from "./trust";
+import { comments, posts, projects, trustEvents, users, userProfiles, versions, type Report } from "@/db/schema";
+import { getTrustState, recordMalwareDetected, recordTrustEvent, reverseTrustEvent } from "./trust";
 
 /** 通報対象の持ち主を引く。持ち主が特定できない通報は減点の対象にしない */
 async function findReportedOwnerId(report: Report): Promise<string | null> {
@@ -116,7 +116,38 @@ export async function applyScanMalicious(versionId: string, reason: string): Pro
   const uploaderId = await findVersionUploaderId(versionId);
   if (!uploaderId) return false;
 
-  return recordMalwareDetected(uploaderId, versionId, reason);
+  const { score } = await getTrustState(uploaderId);
+  const recorded = await recordMalwareDetected(uploaderId, versionId, reason);
+  if (recorded) await notifyMalware(uploaderId, versionId, score);
+  return recorded;
+}
+
+/**
+ * 確定検知を管理者へ知らせる。
+ * 誤検知でも重い処分になるため、人の目に入らないまま放置されないようにする。
+ */
+async function notifyMalware(userId: string, versionId: string, previousScore: number): Promise<void> {
+  const db = await getDatabase();
+  const target = await db
+    .select({ projectName: posts.title, username: userProfiles.username, email: users.email })
+    .from(versions)
+    .innerJoin(projects, eq(projects.id, versions.projectId))
+    .innerJoin(posts, eq(posts.id, projects.id))
+    .leftJoin(userProfiles, eq(userProfiles.userId, userId))
+    .leftJoin(users, eq(users.id, userId))
+    .where(eq(versions.id, versionId))
+    .get();
+
+  const { getAdminWebhookUrl } = await import("@/lib/usage/webhook");
+  const { buildMalwareEmbed, sendTrustAlert } = await import("./trustAlert");
+
+  await sendTrustAlert(await getAdminWebhookUrl(), buildMalwareEmbed({
+    userId,
+    userLabel: target?.username ?? target?.email ?? userId,
+    versionId,
+    projectName: target?.projectName ?? "-",
+    delta: -previousScore,
+  }));
 }
 
 /**
