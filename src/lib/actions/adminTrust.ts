@@ -3,9 +3,10 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { userTrust, TRUST_TIERS, type TrustTier } from "@/db/schema";
+import { userTrust, users, TRUST_TIERS, type TrustTier } from "@/db/schema";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 import { recomputeTrust, recordTrustEvent, reverseTrustEvent } from "@/lib/services/trust";
+import { syncTrustAttributes, syncAccountAge } from "@/lib/services/trustAttributes";
 
 const REASON_MAX_LENGTH = 500;
 
@@ -151,6 +152,14 @@ export async function reverseTrustEventAction(
 /** 係数や閾値を変えた後に、そのユーザのキャッシュを作り直す */
 export async function recomputeTrustAction(userId: string): Promise<ActionResult> {
   const { db, userId: adminId } = await getAdminDb();
+
+  // ユーザーの最新の連携状態等をスキャンして台帳に反映する
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+  if (user) {
+    const now = new Date();
+    await syncTrustAttributes(user);
+    await syncAccountAge(user, now);
+  }
 
   await recomputeTrust(userId);
   await recordModerationAudit(db, "trust_recompute", userId, adminId);
