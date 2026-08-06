@@ -15,3 +15,4 @@ export * from "./moderation";
 export * from "./ddos";
 export * from "./usage";
 export * from "./reward";
+export * from "./trust";

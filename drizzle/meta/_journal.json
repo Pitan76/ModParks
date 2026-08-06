@@ -512,6 +512,13 @@
       "when": 1785925261337,
       "tag": "0072_usage_rollup_state",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "6",
+      "when": 1785977433042,
+      "tag": "0073_trust_credit",
+      "breakpoints": true
     }
   ]
 }
