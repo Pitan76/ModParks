@@ -52,7 +52,7 @@ const TopPage = async ({ params }: TopPageProps) => {
           border: 0,
         }}
       >
-        ModParks
+        {t("hero.title")}
       </h1>
 
       {/* Hero */}
