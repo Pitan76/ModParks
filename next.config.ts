@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import path from "path";
-import { CSP_IMG_SRC } from "./lib/config/imageHosts";
+import { CSP_IMG_SRC } from "./src/lib/config/imageHosts";
 
-const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
+const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   // Cloudflare Workers (Edge Runtime) 向け設定
@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
         ...(config.resolve.alias || {}),
         "@/components/ui/MarkdownRendererInner": path.resolve(
           __dirname,
-          "components/ui/MarkdownRendererEmpty.tsx"
+          "src/components/ui/MarkdownRendererEmpty.tsx"
         ),
       };
       // react-markdown 関連の依存パッケージ群をサーバービルドから完全に排除（空モジュール化）
