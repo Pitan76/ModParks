@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import ProjectCard from "@/components/project/ProjectCard";
 import type { ProjectCardProps } from "@/components/project/ProjectCard";
 import { useColorMode } from "@/components/ThemeRegistry";
+import PlainProjectCardList from "@/components/plain/project/PlainProjectCardList";
 
 type CardLayout = "list" | "grid";
 
@@ -47,20 +48,38 @@ const ProjectCardList = ({
   footer,
 }: ProjectCardListProps) => {
   const tCommon = useTranslations("Common");
-  const { isNewTheme } = useColorMode();
+  const { isNewTheme, isPlainTheme } = useColorMode();
   const [layout, setLayout] = useState<CardLayout>(defaultLayout);
 
   useEffect(() => {
     setLayout(readStoredLayout(storageKey, defaultLayout));
   }, [storageKey, defaultLayout]);
 
-  const handleChange = (_: unknown, value: CardLayout | null) => {
-    if (!value) return;
+  const applyLayout = (value: CardLayout) => {
     setLayout(value);
     window.localStorage.setItem(storageKey, value);
   };
 
+  const handleChange = (_: unknown, value: CardLayout | null) => {
+    if (!value) return;
+    applyLayout(value);
+  };
+
   const activeLayout = layout;
+
+  if (isPlainTheme) {
+    return (
+      <PlainProjectCardList
+        projects={projects}
+        layout={activeLayout}
+        onLayoutChange={applyLayout}
+        headerLeft={headerLeft}
+        headerRight={headerRight}
+        emptyContent={emptyContent}
+        footer={footer}
+      />
+    );
+  }
   const hasHeader = headerLeft || headerRight || projects.length > 0;
 
   return (
