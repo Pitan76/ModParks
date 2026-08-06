@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { deleteVersion, setVersionArchived } from "@/lib/actions/version";
+import { isActionError } from "@/lib/actions/actionResult";
 import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
 import { importGithubRelease } from "@/lib/actions/github";
 import type { GithubImportMode } from "@/lib/utils/github";
@@ -32,6 +33,7 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations("Version");
+  const tError = useTranslations("ServerErrors");
 
   const [localVersions, setLocalVersions] = useState(initialVersions);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -106,14 +108,14 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
     setErrorMsg("");
     try {
       const res = await deleteVersion(deleteId, projectSlug);
-      if ("error" in res) {
-        setErrorMsg(res.error || "Failed to delete version");
+      if (isActionError(res)) {
+        setErrorMsg(res.error || tError("version.deleteFailed"));
       } else {
         setLocalVersions((prev) => prev.filter((v) => v.id !== deleteId));
         setDeleteId(null);
       }
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Failed to delete version");
+      setErrorMsg(err instanceof Error ? err.message : tError("version.deleteFailed"));
     } finally {
       setPending(false);
     }
