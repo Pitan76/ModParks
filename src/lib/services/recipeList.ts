@@ -102,8 +102,13 @@ export function toRecipeItems(cdnUrl: string, lists: NamespaceList[]): RecipeIte
       // URL にアセットバージョンを埋めると CDN 側がバージョン参照の R2 往復を省略でき、
       // レスポンスが immutable になるため再訪時はネットワークに出なくなる。
       // 未設定を意味する "0" のときに付けると、まだ何も入っていない画像を1年間焼き付けてしまう。
+      //
+      // `rv` も併せて載せる。レンダラーの更新や共通タグの追加では、このネームスペースの
+      // アセットバージョンは動かない。URL が変わらないままだと、CDN が新しい絵を作っていても
+      // immutable で焼き付いた古い応答をブラウザが1年間返し続ける。
       const pin = version && version !== "0" ? `?v=${encodeURIComponent(version)}` : "";
-      const fallbackUrl = `${cdnUrl}/api/${namespace}/${itemId}.${ext}${pin}`;
+      const rv = assets?.rv ? `${pin ? "&" : "?"}rv=${encodeURIComponent(assets.rv)}` : "";
+      const fallbackUrl = `${cdnUrl}/api/${namespace}/${itemId}.${ext}${pin}${rv}`;
       return { id, name, url: directUrl(assets, namespace, itemId, version, ext) ?? fallbackUrl, fallbackUrl };
     })
   );
