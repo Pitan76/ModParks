@@ -16,6 +16,8 @@ export const VERSION_CLEAN_DAYS = 14;
 
 export type CleanVersion = {
   versionId: string;
+  /** アップロード実行者。取り込み前の古い行は null なので投稿者で補う */
+  uploaderId: string | null;
   authorId: string;
   publishedAt: Date;
 };
@@ -36,6 +38,7 @@ async function findCleanVersions(now: Date, limit: number): Promise<CleanVersion
   const rows = await db
     .select({
       versionId: versions.id,
+      uploaderId: versions.uploaderId,
       authorId: posts.authorId,
       publishedAt: versions.createdAt,
     })
@@ -67,7 +70,8 @@ export async function syncVersionCleanCredits(now: Date = new Date(), limit = 50
   let recorded = 0;
   for (const candidate of candidates) {
     const inserted = await recordTrustEvent({
-      userId: candidate.authorId,
+      // 加点は実行者本人に入れる。uploaderId 導入前の行だけ投稿者にフォールバックする
+      userId: candidate.uploaderId ?? candidate.authorId,
       kind: "version_clean",
       subjectType: "version",
       subjectId: candidate.versionId,

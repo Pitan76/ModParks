@@ -88,18 +88,21 @@ export async function applyReportRejected(
   });
 }
 
-/** バージョンの持ち主。プロジェクトの投稿者を辿る */
-async function findVersionAuthorId(versionId: string): Promise<string | null> {
+/**
+ * 減点を入れる相手。**アップロードを実行した本人**であって、プロジェクトの持ち主ではない。
+ * uploaderId 導入前に作られた行だけ、投稿者にフォールバックする。
+ */
+async function findVersionUploaderId(versionId: string): Promise<string | null> {
   const db = await getDatabase();
   const row = await db
-    .select({ authorId: posts.authorId })
+    .select({ uploaderId: versions.uploaderId, authorId: posts.authorId })
     .from(versions)
     .innerJoin(projects, eq(projects.id, versions.projectId))
     .innerJoin(posts, eq(posts.id, projects.id))
     .where(eq(versions.id, versionId))
     .get();
 
-  return row?.authorId ?? null;
+  return row?.uploaderId ?? row?.authorId ?? null;
 }
 
 /**
@@ -110,10 +113,10 @@ async function findVersionAuthorId(versionId: string): Promise<string | null> {
  * 誤検知はありうるので、管理者が判定を覆したときは打ち消しイベントで戻す。
  */
 export async function applyScanMalicious(versionId: string, reason: string): Promise<boolean> {
-  const authorId = await findVersionAuthorId(versionId);
-  if (!authorId) return false;
+  const uploaderId = await findVersionUploaderId(versionId);
+  if (!uploaderId) return false;
 
-  return recordMalwareDetected(authorId, versionId, reason);
+  return recordMalwareDetected(uploaderId, versionId, reason);
 }
 
 /**

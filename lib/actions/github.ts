@@ -137,7 +137,8 @@ function linkToAsset(asset: GithubReleaseAsset): ImportedFile | { error: string 
  */
 export async function importGithubReleaseSystem(
   db: any,
-  project: { id: string; slug: string; githubRepo: string | null },
+  /** authorId は Webhook 経由の自動取り込みで、アップロード実行者として記録する */
+  project: { id: string; slug: string; githubRepo: string | null; authorId: string },
   releaseId?: number,
   prefetchedRelease?: GithubRelease | null,
   /** 非公開リポジトリを扱う場合に必要な GitHub App の installation token */
@@ -206,6 +207,8 @@ export async function importGithubReleaseSystem(
     fileSize: stored.fileSize,
     fileSha256: stored.fileSha256,
     projectId: project.id,
+    // 自動取り込みには実行者がいないため、連携を設定したプロジェクト作者に帰属させる
+    uploaderId: project.authorId,
   });
 
   // updatedAt は posts が持つ（projects 側には無い）

@@ -526,6 +526,13 @@
       "when": 1785978582221,
       "tag": "0074_user_last_login",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "6",
+      "when": 1785978845103,
+      "tag": "0075_version_uploader",
+      "breakpoints": true
     }
   ]
 }

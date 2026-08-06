@@ -68,6 +68,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
     fileSize:      formData.get("fileSize") ? Number(formData.get("fileSize")) : null,
     fileSha256:    formData.get("fileSha256") as string | null,
     projectId:     project.id,
+    uploaderId:    session.user.id,
   });
 
   await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
