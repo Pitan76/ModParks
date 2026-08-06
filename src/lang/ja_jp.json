@@ -763,9 +763,9 @@
       "usage": "利用量とコスト",
       "runtime": "サービス制御",
       "trust": "信頼ポイント",
-      "groupContent": "コンテンツ・ユーザー",
-      "groupModeration": "モデレーション・セキュリティ",
-      "groupSystem": "システム・設定"
+      "groupContent": "コンテンツ",
+      "groupModeration": "モデレーション",
+      "groupSystem": "システム"
     },
     "dashboard": {
       "statsPendingReports": "未処理の通報",
@@ -773,8 +773,8 @@
       "statsTotalUsers": "総ユーザー数",
       "statsTotalProjects": "総プロジェクト数",
       "sections": {
-        "contents": "コンテンツ・モデレーション",
-        "system": "システム設定・ユーティリティ"
+        "contents": "モデレーション",
+        "system": "システム"
       }
     },
     "recipe": {
