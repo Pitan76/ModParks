@@ -8,6 +8,7 @@ import { findProjectPostBySlug } from "@/lib/queries/post";
 import { listProjectPosts } from "@/lib/queries/postList";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
 import { canViewPost } from "@/lib/auth/postAccess";
+import { isAdminUser } from "@/lib/auth/roles";
 import { withPublicCache } from "@/lib/http/cache";
 
 /**
@@ -90,8 +91,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ sl
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  const userRecord = await db.select().from(users).where(eq(users.id, auth.userId)).get();
-  if (project.authorId !== auth.userId && userRecord?.role !== "admin") {
+  if (project.authorId !== auth.userId && !(await isAdminUser(db, auth.userId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

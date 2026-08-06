@@ -33,7 +33,7 @@ export type AdminSidebarProps = {
 
 /**
  * 管理者ダッシュボード用のサイドバーコンポーネント。
- * 管理者権限（role === "admin"）を持つユーザーに対して、ダッシュボード、ユーザー一覧、プロジェクト一覧、
+ * 管理者権限を持つユーザーに対して、ダッシュボード、ユーザー一覧、プロジェクト一覧、
  * アイデア、通報、構成、バックアップ、監査ログなどの管理用リンクを表示します。
  */
 const AdminSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleCollapse }: AdminSidebarProps) => {
