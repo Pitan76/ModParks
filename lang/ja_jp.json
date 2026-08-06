@@ -346,6 +346,7 @@
       "empty": "レシピがありません。バージョンのファイル管理から抽出してください。"
     },
     "searchRecipes": "レシピを検索",
+    "openInRecipeSite": "ModParks Recipeで開く",
     "noRecipeMatch": "一致するレシピがありません。",
     "showMore": "もっと見る",
     "downloads": "ダウンロード",

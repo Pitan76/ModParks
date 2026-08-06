@@ -340,6 +340,7 @@
       "empty": "No recipes yet. Extract them from the files tab of a version."
     },
     "searchRecipes": "Search recipes",
+    "openInRecipeSite": "Open in ModParks Recipe",
     "noRecipeMatch": "No matching recipes.",
     "showMore": "Show more",
     "downloads": "Downloads",

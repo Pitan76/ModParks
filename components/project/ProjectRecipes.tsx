@@ -56,10 +56,12 @@ const ProjectRecipes = async ({ projectId, projectSlug, namespaces }: ProjectRec
   return (
     <ProjectRecipesGrid
       recipes={recipes}
+      openUrl={`${cdnUrl}/?ns=${encodeURIComponent(lists[0].namespace)}&lang=${encodeURIComponent(locale)}`}
       labels={{
         search: t("searchRecipes"),
         noMatch: t("noRecipeMatch"),
         showMore: t("showMore"),
+        openInRecipeSite: t("openInRecipeSite"),
       }}
     />
   );

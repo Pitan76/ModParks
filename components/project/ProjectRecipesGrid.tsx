@@ -7,6 +7,8 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Pagination from "@mui/material/Pagination";
 import SearchIcon from "@mui/icons-material/Search";
+import Button from "@mui/material/Button";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useColorMode } from "@/components/ThemeRegistry";
 import ZoomableImage from "@/components/ui/ZoomableImage";
 
@@ -20,10 +22,13 @@ export type RecipeItem = {
 
 type ProjectRecipesGridProps = {
   recipes: RecipeItem[];
+  /** レシピCDNの検索ページ（このプロジェクトのネームスペースで絞った状態）へのリンク */
+  openUrl: string;
   labels: {
     search: string;
     noMatch: string;
     showMore: string;
+    openInRecipeSite: string;
   };
 };
 
@@ -72,7 +77,7 @@ const PAGE_SIZE = 24;
  * プロジェクトに含まれるレシピ画像をグリッド表示するクライアントコンポーネント。
  * クエリでのフィルタリング、ページング表示に対応しています。
  */
-const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
+const ProjectRecipesGrid = ({ recipes, openUrl, labels }: ProjectRecipesGridProps) => {
   const { isNewTheme } = useColorMode();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -116,6 +121,17 @@ const ProjectRecipesGrid = ({ recipes, labels }: ProjectRecipesGridProps) => {
         <Typography variant="body2" color="text.secondary">
           {shown.length + (page - 1) * PAGE_SIZE} / {filtered.length}
         </Typography>
+        <Button
+          component="a"
+          href={openUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          size="small"
+          endIcon={<OpenInNewIcon />}
+          sx={{ ml: "auto" }}
+        >
+          {labels.openInRecipeSite}
+        </Button>
       </Box>
 
       {filtered.length === 0 ? (
