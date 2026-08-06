@@ -39,6 +39,22 @@ const TopPage = async ({ params }: TopPageProps) => {
       {/* 検索結果にドメイン名ではなくサイト名を出すためのシグナル。トップページのみ */}
       <JsonLd data={[websiteSchema(tm("description")), organizationSchema()]} />
 
+      {/* SEO用に見出しを明示（ビジュアル上は非表示にするが、クローラーには認識させる） */}
+      <h1
+        style={{
+          position: "absolute",
+          width: "1px",
+          height: "1px",
+          padding: 0,
+          margin: "-1px",
+          overflow: "hidden",
+          clip: "rect(0, 0, 0, 0)",
+          border: 0,
+        }}
+      >
+        ModParks
+      </h1>
+
       {/* Hero */}
       <HomeHero
         labels={{

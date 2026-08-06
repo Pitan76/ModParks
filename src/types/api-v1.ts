@@ -1,12 +1,15 @@
-import type { ContentType } from "@/lib/data/projectTypes";
+/**
+ * 公開API v1 の型。
+ *
+ * v2（types/api.ts）とはワイヤ形式が異なる。v1 は name/description を返し、
+ * kind / bodyFormat を持たない。既存クライアントが依存しているため、
+ * v2 に合わせて改名してはならない。共通部分は types/apiShared.ts を参照。
+ */
 
-export interface ApiUser {
-  username: string;
-  displayName: string | null;
-  avatarUrl: string | null;
-  bio?: string | null;
-  githubUsername?: string | null;
-}
+import type { ContentType } from "@/lib/data/projectTypes";
+import type { ApiUser } from "@/types/apiShared";
+
+export type { ApiUser, ApiVersion, PaginatedResponse } from "@/types/apiShared";
 
 export interface ApiProject {
   id: string;
@@ -23,21 +26,6 @@ export interface ApiProject {
   tags: string[];
 }
 
-export interface ApiVersion {
-  id: string;
-  versionNumber: string;
-  changelog: string;
-  releaseChannel: string;
-  downloads: number;
-  fileUrl: string;
-  fileName: string;
-  fileSize: number | null;
-  fileSha256: string | null;
-  loaders: string[];
-  mcVersions: string[];
-  createdAt: number;
-}
-
 export interface ApiIdea {
   id: string;
   title: string;
@@ -46,15 +34,6 @@ export interface ApiIdea {
   author: ApiUser;
   createdAt: number;
   updatedAt: number;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: {
-    limit: number;
-    offset: number;
-    count: number;
-  };
 }
 
 export interface ApiDependency {

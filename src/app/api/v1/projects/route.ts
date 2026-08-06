@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { validateApiKey } from "@/lib/api-auth";
 import { getAppSettings } from "@/lib/config/readSettings";
-import { eq, desc, and, inArray, like } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import type { ApiProject, PaginatedResponse } from "@/types/api-v1";
 import { createId } from "@paralleldrive/cuid2";
 import { withPublicCache } from "@/lib/http/cache";
-import { posts, projects, userProfiles, projectTags } from "@/db/schema";
+import { posts, projects, userProfiles } from "@/db/schema";
 import { CONTENT_TYPES, type ContentType } from "@/lib/data/projectTypes";
+import { listProjectPosts, type ProjectListSort } from "@/lib/queries/postList";
+import { toApiProjectV1 } from "@/lib/api/toApiV1";
 
 /**
  * v1 互換シム。
@@ -16,6 +18,13 @@ import { CONTENT_TYPES, type ContentType } from "@/lib/data/projectTypes";
  * 内部では使わず、この境界だけで posts/projects から詰め替える。
  * 詳細は docs-md/DESIGN.md の「15. 外部ツールへの影響」を参照。
  */
+/** v1 の sort パラメータを共有クエリの並び順へ写す。既定は downloads（v1 の従来挙動） */
+function toListSort(raw: string | null): ProjectListSort {
+  if (raw === "updated") return "updated";
+  if (raw === "newest") return "newest";
+  return "downloads";
+}
+
 export async function GET(request: Request) {
   const db = await getDatabase();
 
@@ -29,84 +38,40 @@ export async function GET(request: Request) {
 
   const type = searchParams.get("type");
   const q = searchParams.get("q");
-  const sort = searchParams.get("sort") || "downloads";
   const author = searchParams.get("author");
 
-  const conditions = [eq(posts.kind, "project" as const)];
-
-  let isMine = false;
+  let authorId: string | undefined;
+  // 自分自身の一覧を見るときだけ非公開を含める。他人の author= 指定では常に公開分のみ
+  let includeHidden = false;
   if (author) {
-    const auth = await validateApiKey(request);
-    if (auth.valid && auth.userId) {
-      const u = await db.select().from(userProfiles).where(eq(userProfiles.username, author)).get();
-      if (u && u.userId === auth.userId) isMine = true;
+    const authorProfile = await db
+      .select({ userId: userProfiles.userId })
+      .from(userProfiles)
+      .where(eq(userProfiles.username, author))
+      .get();
+    if (!authorProfile) {
+      const empty: PaginatedResponse<ApiProject> = { data: [], meta: { limit, offset, count: 0 } };
+      return withPublicCache(NextResponse.json(empty));
     }
-    conditions.push(eq(userProfiles.username, author));
-  }
-  if (!isMine) conditions.push(eq(posts.visibility, "public"));
+    authorId = authorProfile.userId;
 
-  if (type && (CONTENT_TYPES as readonly string[]).includes(type)) {
-    conditions.push(eq(projects.type, type as ContentType));
-  }
-  if (q) {
-    conditions.push(like(posts.title, `%${q}%`));
+    const auth = await validateApiKey(request);
+    includeHidden = !!auth.valid && auth.userId === authorId;
   }
 
-  let orderBy;
-  if (sort === "updated") orderBy = desc(posts.updatedAt);
-  else if (sort === "newest") orderBy = desc(posts.createdAt);
-  else orderBy = desc(projects.downloads);
+  const rows = await listProjectPosts(db, {
+    authorId,
+    includeHidden,
+    // v1 は author= を伴わない一覧で自分の下書きを返さない契約
+    publicOnly: true,
+    type: type && (CONTENT_TYPES as readonly string[]).includes(type) ? (type as ContentType) : undefined,
+    q: q ?? undefined,
+    sort: toListSort(searchParams.get("sort")),
+    limit,
+    offset,
+  });
 
-  const results = await db
-    .select({
-      post: posts,
-      project: projects,
-      authorUsername: userProfiles.username,
-      authorDisplayName: userProfiles.displayName,
-      authorAvatarUrl: userProfiles.avatarUrl,
-    })
-    .from(posts)
-    .innerJoin(projects, eq(projects.id, posts.id))
-    .leftJoin(userProfiles, eq(posts.authorId, userProfiles.userId))
-    .where(and(...conditions))
-    .orderBy(orderBy)
-    .limit(limit)
-    .offset(offset)
-    .all();
-
-  const projectIds = results.map(r => r.post.id);
-  let tagsMap: Record<string, string[]> = {};
-  if (projectIds.length > 0) {
-    const tags = await db.select().from(projectTags).where(inArray(projectTags.projectId, projectIds));
-    tags.forEach(t => {
-      if (!tagsMap[t.projectId]) tagsMap[t.projectId] = [];
-      tagsMap[t.projectId].push(t.tag);
-    });
-  }
-
-  const data: ApiProject[] = results.map(r => ({
-    id: r.post.id,
-    slug: r.post.slug,
-    name: r.post.title,
-    description: r.post.body,
-    iconUrl: r.project.iconUrl,
-    type: r.project.type,
-    license: r.project.license,
-    downloads: {
-      total: r.project.totalDownloads,
-      native: r.project.downloads,
-      ...(r.project.externalDownloads as Record<string, number>),
-    },
-    createdAt: r.post.createdAt ? new Date(r.post.createdAt).getTime() : 0,
-    updatedAt: r.post.updatedAt ? new Date(r.post.updatedAt).getTime() : 0,
-    author: {
-      username: r.authorUsername || "unknown",
-      displayName: r.authorDisplayName || null,
-      avatarUrl: r.authorAvatarUrl || null,
-    },
-    tags: tagsMap[r.post.id] || [],
-  }));
-
+  const data = rows.map(toApiProjectV1);
   const response: PaginatedResponse<ApiProject> = { data, meta: { limit, offset, count: data.length } };
   return withPublicCache(NextResponse.json(response));
 }

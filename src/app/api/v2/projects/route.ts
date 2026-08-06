@@ -38,17 +38,15 @@ export async function GET(request: Request) {
     includeHidden = viewer.userId === authorId;
   }
 
-  // ページング前提の一覧なので limit/offset をそのままクエリに渡す。
-  // listProjectPosts は内部で limit を受けるが offset は未対応のため、ここで多めに取って切る。
   const rows = await listProjectPosts(db, {
     viewerId: viewer.userId,
     authorId,
     includeHidden,
-    limit: offset + limit,
+    limit,
+    offset,
   });
-  const page = rows.slice(offset, offset + limit);
 
-  const data = page.map((row) => toApiProject(row, viewer, row.tags)) as ApiProject[] | ApiProjectPrivate[];
+  const data = rows.map((row) => toApiProject(row, viewer, row.tags)) as ApiProject[] | ApiProjectPrivate[];
 
   const response: PaginatedResponse<ApiProject> = {
     data: data as ApiProject[],

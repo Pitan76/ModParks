@@ -1,6 +1,7 @@
-import { eq, and, or, sql, desc, inArray, type SQL } from "drizzle-orm";
+import { eq, and, or, sql, desc, inArray, like, type SQL } from "drizzle-orm";
 import { posts, projects, ideas, users, userProfiles, favorites, comments, projectTags } from "@/db/schema";
 import type { IdeaPostView, ProjectPostView } from "@/types/post";
+import type { ContentType } from "@/lib/data/projectTypes";
 
 /**
  * 投稿一覧の取得。表示に必要な形（PostView）まで組み立てて返す。
@@ -121,13 +122,46 @@ export function toIdeaCardData(idea: IdeaPostView) {
   };
 }
 
+/** プロジェクト一覧の並び順。API v1 の sort パラメータと対応する */
+export type ProjectListSort = "downloads" | "updated" | "newest";
+
 export interface ListProjectPostsParams {
   viewerId?: string | null;
   authorId?: string;
   postIds?: string[];
   /** 非公開・下書きも含める。本人・管理者向け */
   includeHidden?: boolean;
+  /**
+   * 公開分だけに厳格化する。viewerId 本人の非公開も含めない。
+   * API v1 が「author= を伴わない一覧では自分の下書きも返さない」契約のため用意する。
+   */
+  publicOnly?: boolean;
+  /** 種別で絞る */
+  type?: ContentType;
+  /** タイトルの部分一致で絞る */
+  q?: string;
+  sort?: ProjectListSort;
   limit?: number;
+  offset?: number;
+}
+
+/** sort 値から ORDER BY を決める */
+function projectOrderBy(sort: ProjectListSort) {
+  if (sort === "downloads") return desc(projects.downloads);
+  if (sort === "updated") return desc(posts.updatedAt);
+  return desc(posts.createdAt);
+}
+
+/** 公開範囲の WHERE 条件。null なら絞り込み不要（全件） */
+function visibilityCondition(
+  viewerId: string | null,
+  includeHidden: boolean,
+  publicOnly: boolean,
+): SQL | null {
+  if (includeHidden) return null;
+  if (publicOnly || !viewerId) return eq(posts.visibility, "public");
+  // 自分の投稿は非公開でも見える
+  return or(eq(posts.visibility, "public"), eq(posts.authorId, viewerId))!;
 }
 
 /**
@@ -141,18 +175,26 @@ export async function listProjectPosts(
   db: Db,
   params: ListProjectPostsParams = {},
 ): Promise<ProjectPostViewWithTags[]> {
-  const { viewerId = null, authorId, postIds, includeHidden = false, limit = 50 } = params;
+  const {
+    viewerId = null,
+    authorId,
+    postIds,
+    includeHidden = false,
+    publicOnly = false,
+    type,
+    q,
+    sort = "newest",
+    limit = 50,
+    offset = 0,
+  } = params;
 
   const conditions: SQL[] = [eq(posts.kind, "project")];
 
-  if (!includeHidden) {
-    conditions.push(
-      viewerId
-        ? or(eq(posts.visibility, "public"), eq(posts.authorId, viewerId))!
-        : eq(posts.visibility, "public"),
-    );
-  }
+  const visibility = visibilityCondition(viewerId, includeHidden, publicOnly);
+  if (visibility) conditions.push(visibility);
   if (authorId) conditions.push(eq(posts.authorId, authorId));
+  if (type) conditions.push(eq(projects.type, type));
+  if (q) conditions.push(like(posts.title, `%${q}%`));
   if (postIds) {
     if (postIds.length === 0) return [];
     conditions.push(inArray(posts.id, postIds));
@@ -170,8 +212,9 @@ export async function listProjectPosts(
     .innerJoin(users, eq(posts.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(and(...conditions))
-    .orderBy(desc(posts.createdAt))
+    .orderBy(projectOrderBy(sort))
     .limit(limit)
+    .offset(offset)
     .all();
 
   return rows.map((row: any) => {

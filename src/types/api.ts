@@ -7,14 +7,9 @@
  */
 
 import type { ContentType } from "@/lib/data/projectTypes";
+import type { ApiUser } from "@/types/apiShared";
 
-export interface ApiUser {
-  username: string;
-  displayName: string | null;
-  avatarUrl: string | null;
-  bio?: string | null;
-  githubUsername?: string | null;
-}
+export type { ApiUser, ApiVersion, PaginatedResponse } from "@/types/apiShared";
 
 /** Project / Idea に共通するフィールド */
 export interface ApiPost {
@@ -63,21 +58,6 @@ export interface ApiIdeaPrivate extends ApiIdea {
   visibility: "draft" | "public" | "unlisted" | "private";
 }
 
-export interface ApiVersion {
-  id: string;
-  versionNumber: string;
-  changelog: string;
-  releaseChannel: string;
-  downloads: number;
-  fileUrl: string;
-  fileName: string;
-  fileSize: number | null;
-  fileSha256: string | null;
-  loaders: string[];
-  mcVersions: string[];
-  createdAt: number;
-}
-
 export interface ApiComment {
   id: string;
   content: string;
@@ -86,15 +66,6 @@ export interface ApiComment {
   author: ApiUser;
   createdAt: number;
   updatedAt: number;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: {
-    limit: number;
-    offset: number;
-    count: number;
-  };
 }
 
 export interface ApiDependency {
