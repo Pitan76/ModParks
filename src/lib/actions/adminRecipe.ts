@@ -105,6 +105,22 @@ export async function seedAssetVersionsAction() {
 }
 
 /**
+ * 使われなくなった世代のレンダリング済み画像を掃除します。
+ *
+ * L1 のキーは世代（レンダラー版と共有ネームスペースのバージョンから決まる値）を含むため、
+ * 更新のたびに古い世代が参照されないまま残ります。消えてもCDNが作り直すだけです。
+ * @param apply true なら実際に削除します。false なら件数を数えるだけです
+ */
+export async function gcImageCacheAction(apply: boolean) {
+  try {
+    const data = await callRecipeAdminApi("/admin/gc-images", apply ? { delete: "1" } : {});
+    return { success: true, data };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+/**
  * R2内のオブジェクト一覧を取得します。
  */
 export async function listR2ObjectsAction(prefix?: string, limit?: number, cursor?: string) {

@@ -825,7 +825,13 @@
       "success": "Success",
       "error": "Error",
       "loading": "Processing...",
-      "resultPlaceholder": "Logs of executed actions will be displayed here."
+      "resultPlaceholder": "Logs of executed actions will be displayed here.",
+      "gcImages": {
+        "title": "Image cache generation cleanup",
+        "desc": "Deletes rendered images from generations that are no longer referenced. Removing them does not affect display; the CDN re-renders on demand. Count first, then delete.",
+        "countBtn": "Count",
+        "deleteBtn": "Delete"
+      }
     },
     "oauth": {
       "title": "OAuth Applications",

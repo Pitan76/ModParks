@@ -8,6 +8,7 @@ import {
   sweepIngestsAction,
   cleanNamespaceFolderAction,
   seedAssetVersionsAction,
+  gcImageCacheAction,
   listR2ObjectsAction,
   render3dIconAction,
 } from "@/lib/actions/adminRecipe";
@@ -59,6 +60,8 @@ export function useRecipeAdmin() {
   const runReindex = () => handleAction(t("reindex.title"), reindexRecipesAction());
   const runSweep = () => handleAction(t("sweep.title"), sweepIngestsAction());
   const runSeed = () => handleAction(t("seed.title"), seedAssetVersionsAction());
+  // 既定は数えるだけ。削除は取り消せないため、実行を明示的に分けている。
+  const runGcImages = (apply: boolean) => handleAction(t("gcImages.title"), gcImageCacheAction(apply));
 
   const runPurge = () => {
     if (!purgeNamespace) return;
@@ -125,6 +128,7 @@ export function useRecipeAdmin() {
     runReindex,
     runSweep,
     runSeed,
+    runGcImages,
     runPurge,
     runClean,
     runLs,
