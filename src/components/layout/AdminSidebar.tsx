@@ -14,6 +14,7 @@ import GppMaybeIcon from "@mui/icons-material/GppMaybe";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PolicyIcon from "@mui/icons-material/Policy";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import ShieldIcon from "@mui/icons-material/Shield";
 import { useTranslations } from "next-intl";
 import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
@@ -48,6 +49,7 @@ const AdminSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleC
       { id: "admin-reports", label: tAdmin("sidebar.reports"), path: "/admin/reports", icon: <ReportIcon /> },
       { id: "admin-appeals", label: tAdmin("sidebar.appeals"), path: "/admin/appeals", icon: <GppMaybeIcon /> },
       { id: "admin-scans", label: tAdmin("sidebar.scans"), path: "/admin/scans", icon: <PolicyIcon /> },
+      { id: "admin-trust", label: tAdmin("sidebar.trust"), path: "/admin/trust", icon: <ShieldIcon /> },
       { id: "admin-recipe", label: tAdmin("sidebar.recipe"), path: "/admin/recipe", icon: <MenuBookIcon /> },
       { id: "admin-oauth", label: tAdmin("sidebar.oauth"), path: "/admin/oauth", icon: <VpnKeyIcon /> },
       { id: "admin-config", label: tAdmin("sidebar.config"), path: "/admin/config", icon: <SettingsIcon /> },

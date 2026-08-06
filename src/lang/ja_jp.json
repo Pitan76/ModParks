@@ -130,11 +130,15 @@
     "status": {
       "suspicious": {
         "title": "セキュリティスキャンで注意が検出されました",
-        "body": "このファイルには注意すべき疑いがあります。ダウンロードは可能ですが、内容をご確認ください。"
+        "body": "このファイルには注意すべき疑いがあります。ダウンロード、実行の際はご注意ください。"
       },
       "malicious": {
         "title": "セキュリティスキャンにより配布が停止されています",
         "body": "このファイルにはマルウェアの疑いのある構造が検出されたため、一般ユーザーへの配布を停止しています。"
+      },
+      "failed": {
+        "title": "セキュリティスキャンが完了していません",
+        "body": "ファイルの破損やシステムエラーなどにより、ファイルの解析・セキュリティ検査を完了できませんでした。ダウンロード、実行の際はご注意ください。"
       }
     },
     "errors": {
@@ -754,7 +758,8 @@
       "scans": "スキャンログ",
       "oauth": "OAuthアプリ管理",
       "usage": "利用量とコスト",
-      "runtime": "サービス制御"
+      "runtime": "サービス制御",
+      "trust": "信頼ポイント"
     },
     "recipe": {
       "title": "レシピ管理",
@@ -1191,7 +1196,8 @@
         "clean": "問題なし",
         "suspicious": "疑わしい",
         "malicious": "悪質",
-        "skipped": "対象外"
+        "skipped": "対象外",
+        "failed": "スキャン失敗"
       },
       "columns": {
         "version": "バージョン",
@@ -1342,6 +1348,56 @@
       "snapshotDone": "生成しました（プロジェクト {projects} 件 / 作者 {authors} 件 / 削除 {deleted} 件）",
       "statusEnabled": "稼働中",
       "statusDisabled": "停止中"
+    },
+    "trust": {
+      "listTitle": "信頼ポイント",
+      "description": "モデレーションの目安として、ユーザごとの信頼値を管理します。値はここでしか見られず、本人にも公開されません。",
+      "disclaimer": "信頼値は参考値です。BAN や削除といった処分は、この数値ではなく個々のイベントの中身に基づいて判断してください。",
+      "filters": {
+        "all": "すべて",
+        "restricted": "制限中",
+        "new": "新規",
+        "member": "通常",
+        "trusted": "信頼",
+        "veteran": "古参",
+        "frozen": "凍結中",
+        "overridden": "段階を上書き中"
+      },
+      "columns": {
+        "user": "ユーザー",
+        "score": "スコア",
+        "tier": "段階",
+        "state": "状態",
+        "computedAt": "最終計算"
+      },
+      "distribution": "段階の分布",
+      "empty": "該当するユーザーはいません。",
+      "searchPlaceholder": "ユーザー名・メールアドレスで検索",
+      "frozen": "凍結中",
+      "overridden": "上書き中",
+      "detail": {
+        "title": "信頼ポイントの詳細",
+        "score": "現在のスコア",
+        "tier": "段階",
+        "toNextTier": "次の段階まであと {points}",
+        "maxTier": "最上位です",
+        "overrideNotice": "この段階は管理者が直接指定しています（スコアからの導出値: {derived}）",
+        "overrideUntil": "期限: {date}",
+        "frozenNotice": "凍結中のため自動加点が止まっています。減点は通常どおり反映されます。",
+        "ledger": "イベント台帳",
+        "ledgerHint": "「生の値」は記録時の増減、「現在の寄与」は減衰を適用した今の影響です。",
+        "columns": {
+          "occurredAt": "発生日時",
+          "kind": "種別",
+          "delta": "生の値",
+          "effective": "現在の寄与",
+          "subject": "対象",
+          "reason": "理由",
+          "actor": "操作者"
+        },
+        "reversed": "取り消し済み",
+        "empty": "まだイベントがありません。"
+      }
     }
   },
   "Search": {

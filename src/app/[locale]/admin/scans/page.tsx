@@ -15,7 +15,7 @@ import ScanLogTable from "@/components/admin/ScanLogTable";
 import StatusFilterTabs from "@/components/admin/StatusFilterTabs";
 import PaginationControls from "@/components/ui/PaginationControls";
 
-const FILTERS: ScanLogFilter[] = ["all", "pending", "clean", "suspicious", "malicious", "skipped"];
+const FILTERS: ScanLogFilter[] = ["all", "pending", "clean", "suspicious", "malicious", "skipped", "failed"];
 
 interface AdminScansPageProps {
   params: Promise<{ locale: string }>;

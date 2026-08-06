@@ -9,7 +9,7 @@ import { versions, projects, posts, scanAppeals } from "@/db/schema";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 
 /** 一覧のフィルタ。"all" は未スキャンや対象外も含めた全件 */
-export type ScanLogFilter = "all" | "pending" | "clean" | "suspicious" | "malicious" | "skipped";
+export type ScanLogFilter = "all" | "pending" | "clean" | "suspicious" | "malicious" | "skipped" | "failed";
 
 export const SCAN_LOG_PAGE_SIZE = 50;
 
@@ -70,7 +70,7 @@ export async function getScanLogCounts(): Promise<Record<string, number>> {
     .groupBy(versions.scanStatus)
     .all();
 
-  const counts: Record<string, number> = { pending: 0, clean: 0, suspicious: 0, malicious: 0, skipped: 0, all: 0 };
+  const counts: Record<string, number> = { pending: 0, clean: 0, suspicious: 0, malicious: 0, skipped: 0, failed: 0, all: 0 };
   for (const row of rows) {
     counts[row.status] = row.count;
     counts.all += row.count;

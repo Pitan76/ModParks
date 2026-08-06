@@ -52,8 +52,13 @@ export async function scanVersionFile(db: any, versionId: string, fileUrl: strin
     }
   } catch (e) {
     console.error(`jar scan failed for version ${versionId}:`, e);
+    const errorMsg = e instanceof Error ? e.message : String(e);
     await db.update(versions)
-      .set({ scanStatus: "skipped", scanAt: new Date() })
+      .set({
+        scanStatus: "failed",
+        scanFindings: JSON.stringify([{ rule: "scan_error", target: errorMsg }]),
+        scanAt: new Date(),
+      })
       .where(eq(versions.id, versionId))
       .run();
   }

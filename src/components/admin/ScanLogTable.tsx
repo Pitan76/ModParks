@@ -34,10 +34,11 @@ const STATUS_COLORS: Record<string, "default" | "success" | "warning" | "error" 
   suspicious: "warning",
   malicious: "error",
   skipped: "default",
+  failed: "warning",
 };
 
 /** 管理者が判定を付け替えられる状態。未スキャン・対象外は対象外とする */
-const OVERRIDABLE_STATUSES = new Set(["clean", "suspicious", "malicious"]);
+const OVERRIDABLE_STATUSES = new Set(["clean", "suspicious", "malicious", "failed"]);
 
 /** scan_findings は JSON 文字列。壊れていても行の描画は止めない */
 function summarizeFindings(raw: string | null): string[] {
@@ -91,9 +92,16 @@ export default function ScanLogTable({ rows, labels }: ScanLogTableProps) {
                     <Typography variant="caption" color="text.disabled">{labels.noFindings}</Typography>
                   ) : (
                     <Box component="ul" sx={{ m: 0, pl: 2 }}>
-                      {findings.map((text, i) => (
-                        <li key={i}><Typography variant="caption">{text}</Typography></li>
-                      ))}
+                      {findings.map((text, i) => {
+                        const isError = text.startsWith("scan_error:");
+                        return (
+                          <li key={i}>
+                            <Typography variant="caption" color={isError ? "error.main" : "text.primary"}>
+                              {text}
+                            </Typography>
+                          </li>
+                        );
+                      })}
                     </Box>
                   )}
                 </TableCell>

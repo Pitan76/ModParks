@@ -45,7 +45,7 @@ const ScanStatusBanner = ({ versionId, scanStatus, scanFindings, canAppeal }: Sc
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<"success" | string | null>(null);
 
-  if (scanStatus !== "suspicious" && scanStatus !== "malicious") return null;
+  if (scanStatus !== "suspicious" && scanStatus !== "malicious" && scanStatus !== "failed") return null;
 
   const findings = canAppeal ? parseFindings(scanFindings) : [];
   const severity = scanStatus === "malicious" ? "error" : "warning";

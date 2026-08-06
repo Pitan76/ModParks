@@ -135,6 +135,10 @@
       "malicious": {
         "title": "Distribution blocked by security scan",
         "body": "Malware-like structures were detected, so distribution to the public has been blocked."
+      },
+      "failed": {
+        "title": "Security scan could not be completed",
+        "body": "We were unable to complete the security scan due to file corruption or a system error. Please use with caution."
       }
     },
     "errors": {
@@ -746,7 +750,8 @@
       "scans": "Scan logs",
       "oauth": "OAuth Apps",
       "usage": "Usage & Cost",
-      "runtime": "Service controls"
+      "runtime": "Service controls",
+      "trust": "Trust credit"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -1183,7 +1188,8 @@
         "clean": "Clean",
         "suspicious": "Suspicious",
         "malicious": "Malicious",
-        "skipped": "Skipped"
+        "skipped": "Skipped",
+        "failed": "Scan failed"
       },
       "columns": {
         "version": "Version",
@@ -1334,6 +1340,56 @@
       "snapshotDone": "Generated ({projects} projects / {authors} authors / {deleted} removed)",
       "statusEnabled": "Running",
       "statusDisabled": "Stopped"
+    },
+    "trust": {
+      "listTitle": "Trust credit",
+      "description": "Per-user trust values used as a moderation aid. Values are visible here only and are never shown to the user.",
+      "disclaimer": "Trust values are advisory. Base bans and removals on the individual events, not on this number.",
+      "filters": {
+        "all": "All",
+        "restricted": "Restricted",
+        "new": "New",
+        "member": "Member",
+        "trusted": "Trusted",
+        "veteran": "Veteran",
+        "frozen": "Frozen",
+        "overridden": "Tier overridden"
+      },
+      "columns": {
+        "user": "User",
+        "score": "Score",
+        "tier": "Tier",
+        "state": "State",
+        "computedAt": "Last computed"
+      },
+      "distribution": "Tier distribution",
+      "empty": "No matching users.",
+      "searchPlaceholder": "Search by username or email",
+      "frozen": "Frozen",
+      "overridden": "Overridden",
+      "detail": {
+        "title": "Trust credit detail",
+        "score": "Current score",
+        "tier": "Tier",
+        "toNextTier": "{points} to next tier",
+        "maxTier": "Highest tier",
+        "overrideNotice": "This tier was set manually by an admin (derived from score: {derived})",
+        "overrideUntil": "Until: {date}",
+        "frozenNotice": "Frozen: automatic credits are paused. Penalties still apply.",
+        "ledger": "Event ledger",
+        "ledgerHint": "\"Raw\" is the value at record time; \"current\" is its effect today after decay.",
+        "columns": {
+          "occurredAt": "Occurred",
+          "kind": "Kind",
+          "delta": "Raw",
+          "effective": "Current",
+          "subject": "Subject",
+          "reason": "Reason",
+          "actor": "Actor"
+        },
+        "reversed": "Reversed",
+        "empty": "No events yet."
+      }
     }
   },
   "Search": {
