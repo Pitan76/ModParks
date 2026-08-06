@@ -4,6 +4,7 @@ import { getDatabase } from "@/lib/db";
 import { collections } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { recordDeletion } from "@/lib/backup/tombstone";
+import { isAdminSession } from "@/lib/auth/roles";
 
 export async function PUT(
   request: Request,
@@ -37,7 +38,7 @@ export async function PUT(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    if (targetCollection.userId !== session.user.id && session.user.role !== "admin") {
+    if (targetCollection.userId !== session.user.id && !isAdminSession(session)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -80,7 +81,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    if (targetCollection.userId !== session.user.id && session.user.role !== "admin") {
+    if (targetCollection.userId !== session.user.id && !isAdminSession(session)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

@@ -7,6 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
 import { findProjectPostById, findProjectPostBySlug } from "@/lib/queries/post";
+import { isAdminSession } from "@/lib/auth/roles";
 
 export type DependencyType = "required" | "optional" | "incompatible" | "embedded";
 
@@ -98,7 +99,7 @@ export async function addProjectDependencyBySlug(projectId: string, targetSlug: 
   }
 
   const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+  if (project.authorId !== session.user.id && !member && !isAdminSession(session)) {
     throw new Error("Forbidden");
   }
 
@@ -130,7 +131,7 @@ export async function addExternalProjectDependency(projectId: string, externalNa
   if (!project) throw new Error("Project not found");
 
   const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+  if (project.authorId !== session.user.id && !member && !isAdminSession(session)) {
     throw new Error("Forbidden");
   }
 
@@ -161,7 +162,7 @@ export async function removeProjectDependency(dependencyId: string) {
   if (!project) throw new Error("Project not found");
 
   const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  if (project.authorId !== session.user.id && !member && session.user.role !== "admin") {
+  if (project.authorId !== session.user.id && !member && !isAdminSession(session)) {
     throw new Error("Forbidden");
   }
 

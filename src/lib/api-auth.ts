@@ -1,5 +1,6 @@
 import { getDatabase } from "@/lib/db";
-import { apiKeys, users } from "@/db/schema";
+import { apiKeys } from "@/db/schema";
+import { isAdminUser } from "@/lib/auth/roles";
 import { eq } from "drizzle-orm";
 import type { Viewer } from "@/lib/auth/postAccess";
 import { isOAuthAccessToken } from "@/lib/oauth/bearer";
@@ -62,8 +63,7 @@ export async function resolveViewer(request: Request): Promise<Viewer> {
   if (!auth.valid || !auth.userId) return { userId: null, isAdmin: false };
 
   const db = await getDatabase();
-  const user = await db.select({ role: users.role }).from(users).where(eq(users.id, auth.userId)).get();
-  return { userId: auth.userId, isAdmin: user?.role === "admin" };
+  return { userId: auth.userId, isAdmin: await isAdminUser(db, auth.userId) };
 }
 
 /**

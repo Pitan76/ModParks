@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
 import type { NavItem } from "./BaseSidebar";
+import { isAdminSession } from "@/lib/auth/roles";
 
 export { SIDEBAR_WIDTH };
 
@@ -40,7 +41,7 @@ const AdminSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleC
 
   let navItems: NavItem[] = [];
 
-  if (session?.user?.role === "admin") {
+  if (isAdminSession(session)) {
     navItems = [
       { id: "admin-home", label: tAdmin("sidebar.dashboard"), path: "/admin", icon: <DashboardIcon /> },
       {

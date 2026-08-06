@@ -1,4 +1,5 @@
-import { posts, ideas, comments, users } from "@/db/schema";
+import { posts, ideas, comments } from "@/db/schema";
+import { isAdminUser } from "@/lib/auth/roles";
 import { findIdeaPostById } from "@/lib/queries/post";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -23,8 +24,7 @@ export function revalidateIdea(ideaId: string) {
 /** 投稿者本人か管理者かを判定する */
 export async function canManageIdea(db: Database, authorId: string, userId: string): Promise<boolean> {
   if (authorId === userId) return true;
-  const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
-  return dbUser?.role === "admin";
+  return isAdminUser(db, userId);
 }
 
 /**

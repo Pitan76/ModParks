@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getDatabase } from "@/lib/db";
-import { versions, projectMembers, users } from "@/db/schema";
+import { getDatabase, type Database } from "@/lib/db";
+import { versions, projectMembers } from "@/db/schema";
+import { isAdminUser } from "@/lib/auth/roles";
 import { eq, and, desc, isNull } from "drizzle-orm";
 import { findProjectPostBySlug, findProjectPostById } from "@/lib/queries/post";
 import { resolveClientIp } from "@/lib/rate-limit";
@@ -55,8 +56,7 @@ async function resolveRelation(
 ): Promise<Relation> {
   if (!userId) return { canAccessRestricted: false, excludedFromCount: false, isAdmin: false };
 
-  const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
-  const isAdmin = dbUser?.role === "admin";
+  const isAdmin = await isAdminUser(db, userId);
 
   if (project.authorId === userId) {
     return { canAccessRestricted: true, excludedFromCount: true, isAdmin };

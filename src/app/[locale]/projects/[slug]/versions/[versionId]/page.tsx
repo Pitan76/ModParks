@@ -28,6 +28,7 @@ import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
 import { canonicalUrl } from "@/lib/seo/canonical";
 import { formatBytes, toStringArray } from "@/lib/utils/format";
+import { isAdminSession } from "@/lib/auth/roles";
 
 interface VersionDetailPageProps {
   params: Promise<{ locale: string; slug: string; versionId: string }>;
@@ -93,7 +94,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
   let canEdit = false;
   if (session?.user) {
     const isOwner = session.user.id === project.authorId;
-    const isAdmin = session.user.role === "admin";
+    const isAdmin = isAdminSession(session);
     let isMember = false;
     if (!isOwner && !isAdmin) {
       const members = await getProjectMembers(project.id);

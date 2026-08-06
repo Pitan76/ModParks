@@ -22,6 +22,7 @@ import { getIdeaMeta, getIdeaDetail } from "./ideaDetailData";
 import ResolvedProjects from "./ResolvedProjects";
 import IdeaComments from "./IdeaComments";
 import ReportDialog from "@/components/project/ReportDialog";
+import { isAdminSession } from "@/lib/auth/roles";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { id, locale } = await params;
@@ -65,7 +66,7 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
 
   const { ideaData, initialCount, initialLiked, comments, resolvedProjects } = detail;
   const canManage =
-    !!session?.user && (session.user.id === ideaData.authorId || (session.user as any).role === "admin");
+    !!session?.user && (session.user.id === ideaData.authorId || isAdminSession(session));
 
   return (
     <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>

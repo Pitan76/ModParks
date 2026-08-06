@@ -5,6 +5,7 @@ import { setRequestLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { pickAdminMessages } from "@/lib/i18n/clientMessages";
 import Box from "@mui/material/Box";
+import { isAdminSession } from "@/lib/auth/roles";
 
 /** 管理者専用画面なので検索結果に出さない */
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default async function AdminLayout({
   if (!session?.user) {
     redirect(`/api/auth/signin?callbackUrl=/${locale}/admin`);
   }
-  if (session.user.role !== "admin") {
+  if (!isAdminSession(session)) {
     redirect(`/${locale}`);
   }
 

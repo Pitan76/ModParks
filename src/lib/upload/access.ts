@@ -5,6 +5,8 @@
  * 片方だけ条件が緩むとそちらが素通り口になるため、判定はこの 1 箇所に集約する。
  */
 
+import { ADMIN_ROLE } from "@/lib/auth/roles";
+
 /** 権限判定の結果。失敗時はそのまま HTTP 応答に使えるステータスと文言を持つ。 */
 export type UploadAccess = { ok: true; projectType?: string } | { ok: false; status: number; error: string };
 
@@ -40,7 +42,7 @@ export async function checkProjectUploadAccess(
   const project = await findProjectPostBySlug(db, projectSlug);
   if (!project) return NOT_FOUND;
   if (project.authorId === actor.id) return { ok: true, projectType: project.type };
-  if (actor.role === "admin") return { ok: true, projectType: project.type };
+  if (actor.role === ADMIN_ROLE) return { ok: true, projectType: project.type };
 
   const member = await db
     .select()

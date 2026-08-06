@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import type { Database } from "@/lib/db";
+import type { Session } from "next-auth";
+import { isAdminUser } from "@/lib/auth/roles";
 
 /**
  * 認証済みセッションとDBインスタンスを一括で取得するヘルパー。
@@ -41,10 +43,7 @@ export async function getAuditEmail(db: Database, userId: string): Promise<strin
  */
 export async function getAdminDb() {
   const { db, session, userId } = await getAuthenticatedDb();
-  const { users } = await import("@/db/schema");
-  const { eq } = await import("drizzle-orm");
-  const user = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
-  if (user?.role !== "admin") throw new Error("Forbidden");
+  if (!(await isAdminUser(db, userId))) throw new Error("Forbidden");
   return { db, session, userId };
 }
 
@@ -82,16 +81,15 @@ export async function getReauthenticatedAdminDb(totpToken: string) {
  * プロジェクトの編集権限（オーナー、メンバー、管理者）を確認するヘルパー。
  * 権限がない場合は "Forbidden" エラーをスローします。
  */
-export async function assertProjectAccess(db: Database, project: { id: string; authorId: string }, session: any) {
+export async function assertProjectAccess(db: Database, project: { id: string; authorId: string }, session: Session) {
   if (project.authorId === session.user.id) {
     return true; // Author
   }
-  
-  const { users, projectMembers } = await import("@/db/schema");
+
+  const { projectMembers } = await import("@/db/schema");
   const { eq, and } = await import("drizzle-orm");
-  
-  const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, session.user.id)).get();
-  if (dbUser?.role === "admin") {
+
+  if (await isAdminUser(db, session.user.id)) {
     return true; // Admin
   }
 

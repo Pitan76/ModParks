@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getSettingsAudits, getBackupAudits, getDdosAudits } from "@/lib/actions/admin";
 import LogsClient from "@/components/admin/LogsClientLazy";
+import { isAdminSession } from "@/lib/auth/roles";
 
 interface LogsPageProps {
   params: Promise<{ locale: string }>;
@@ -13,7 +14,7 @@ export default async function AdminLogsPage({ params }: LogsPageProps) {
   setRequestLocale(locale);
 
   const session = await auth();
-  if (!session?.user || session.user.role !== "admin") {
+  if (!isAdminSession(session)) {
     redirect(`/${locale}`);
   }
 

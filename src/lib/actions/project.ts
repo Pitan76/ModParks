@@ -12,6 +12,7 @@ import { notifyNewProject } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import type { Database } from "@/lib/db";
+import { isAdminSession } from "@/lib/auth/roles";
 
 type PublishProject = {
   slug: string;
@@ -273,7 +274,7 @@ export const transferOwnership = async (projectId: string, newOwnerId: string) =
   const project = await findProjectPostById(db, projectId);
   if (!project) throw new Error("Not found");
 
-  if (project.authorId !== session.user.id && session.user.role !== "admin") {
+  if (project.authorId !== session.user.id && !isAdminSession(session)) {
     throw new Error("Forbidden: Only owner can transfer ownership");
   }
 
@@ -300,7 +301,7 @@ export const batchUpdateProjectStatus = async (projectIds: string[], status: "pu
 
   // 公開範囲も作者も posts が持つため、projects を触る必要がない
   const isOwnerCondition = eq(posts.authorId, session.user.id);
-  const conditions = session.user.role === "admin" ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
+  const conditions = isAdminSession(session) ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
 
   // 下書きから出るものは、その時点を作成日時に付け直す（updateProject と同じ扱い）
   if (status !== "draft") {
@@ -326,7 +327,7 @@ export const batchDeleteProjects = async (projectIds: string[]) => {
   if (!projectIds.length) return { success: true };
 
   const isOwnerCondition = eq(posts.authorId, session.user.id);
-  const conditions = session.user.role === "admin" ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
+  const conditions = isAdminSession(session) ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
 
   const deletable = await db.select({ id: posts.id }).from(posts).where(conditions).all();
 

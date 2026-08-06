@@ -5,6 +5,7 @@ import { comments, projectMembers } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { recordDeletion } from "@/lib/backup/tombstone";
 import { findProjectPostById } from "@/lib/queries/post";
+import { isAdminSession } from "@/lib/auth/roles";
 
 /**
  * comments テーブルは Post 統合で共通化済みのため、v1/v2 でレスポンス形が変わらない。
@@ -75,7 +76,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
       comment.authorId !== session.user.id &&
       !isProjectOwner &&
       !isProjectMember &&
-      session.user.role !== "admin"
+      !isAdminSession(session)
     ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

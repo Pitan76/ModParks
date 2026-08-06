@@ -11,6 +11,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "next-intl";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import type { Session } from "next-auth";
+import { ADMIN_ROLE } from "@/lib/auth/roles";
 
 export type UserMenuProps = {
   user: NonNullable<Session["user"]>;
@@ -62,7 +63,7 @@ const UserMenu = ({ user }: UserMenuProps) => {
         <LinkMenuItem href="/settings" onClick={handleMenuClose} id="user-menu-settings">
           {t("settings")}
         </LinkMenuItem>
-        {user.role === "admin" && (
+        {user.role === ADMIN_ROLE && (
           <LinkMenuItem href="/admin" onClick={handleMenuClose} id="user-menu-admin">
             {t("admin")}
           </LinkMenuItem>

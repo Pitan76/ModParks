@@ -18,6 +18,7 @@ import { getProjectDependencies } from "@/lib/actions/dependency";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { versions, posts, ideas } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
+import { isAdminSession } from "@/lib/auth/roles";
 
 interface EditProjectPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -47,7 +48,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   const isMember = members.some(m => m.id === session.user.id);
 
   // 権限チェック (オーナー、メンバー、または管理者のみ編集可能)
-  if (!isOwner && !isMember && session.user.role !== "admin") {
+  if (!isOwner && !isMember && !isAdminSession(session)) {
     redirect(`/projects/${slug}`);
   }
 
