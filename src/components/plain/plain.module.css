@@ -60,6 +60,23 @@
   text-align: right;
 }
 
+.searchForm {
+  margin-bottom: 1rem;
+}
+
+.searchRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.grow {
+  flex: 1;
+  min-width: 12rem;
+}
+
 .pagination {
   display: flex;
   flex-wrap: wrap;

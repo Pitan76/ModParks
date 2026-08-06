@@ -15,6 +15,8 @@ import type { ChangeEvent } from "react";
 import dynamic from "next/dynamic";
 import { CONTENT_TYPES } from "@/lib/data/projectTypes";
 import type { AdvancedSearchFilters } from "./AdvancedSearchDialog";
+import { useColorMode } from "@/components/ThemeRegistry";
+import PlainProjectSearchBar from "@/components/plain/project/PlainProjectSearchBar";
 
 // ダイアログは開くまで不要なので client 専用で遅延ロードし、サーバーバンドルから外す。
 const AdvancedSearchDialog = dynamic(() => import("./AdvancedSearchDialog"), { ssr: false });
@@ -59,6 +61,7 @@ const ProjectSearchBar = ({
   availablePlatforms = []
 }: ProjectSearchBarProps) => {
   const t = useTranslations("Search");
+  const { isPlainTheme } = useColorMode();
   const router = useRouter();
   const pathname = usePathname();
   const [, startTransition] = useTransition();
@@ -141,6 +144,18 @@ const ProjectSearchBar = ({
     !advancedFilters.includeTags || 
     !advancedFilters.includeAuthor ||
     advancedFilters.includeExtDl;
+
+  if (isPlainTheme) {
+    return (
+      <PlainProjectSearchBar
+        initialQ={initialQ}
+        initialTypes={types}
+        initialSort={appliedSort}
+        initialFilters={advancedFilters}
+        onSubmit={updateSearch}
+      />
+    );
+  }
 
   return (
     <Box sx={{ mb: 4 }}>
