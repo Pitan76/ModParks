@@ -754,7 +754,10 @@
       "oauth": "OAuth Apps",
       "usage": "Usage & Cost",
       "runtime": "Service controls",
-      "trust": "Trust credit"
+      "trust": "Trust credit",
+      "groupContent": "Content & Users",
+      "groupModeration": "Moderation & Security",
+      "groupSystem": "System & Settings"
     },
     "recipe": {
       "title": "Recipe Management",
@@ -1435,7 +1438,8 @@
           "hint": "Invalidates this row. It appends a reversal rather than deleting, so history is kept.",
           "submit": "Reverse"
         }
-      }
+      },
+      "notComputed": "Not computed"
     }
   },
   "Search": {

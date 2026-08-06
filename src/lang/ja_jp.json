@@ -762,7 +762,10 @@
       "oauth": "OAuthアプリ管理",
       "usage": "利用量とコスト",
       "runtime": "サービス制御",
-      "trust": "信頼ポイント"
+      "trust": "信頼ポイント",
+      "groupContent": "コンテンツ・ユーザー",
+      "groupModeration": "モデレーション・セキュリティ",
+      "groupSystem": "システム・設定"
     },
     "recipe": {
       "title": "レシピ管理",
@@ -1443,7 +1446,8 @@
           "hint": "この行を無効化します。削除ではなく打ち消しイベントを積むため、履歴には残ります。",
           "submit": "却下する"
         }
-      }
+      },
+      "notComputed": "未計算"
     }
   },
   "Search": {

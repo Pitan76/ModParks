@@ -4,7 +4,7 @@
  * スコアを見られるのは管理者とシステムだけなので、ここが唯一の閲覧窓口になる。
  * 「なぜ今この値なのか」を画面だけで追えるよう、台帳の生値と減衰後の寄与を併せて返す。
  */
-import { and, desc, eq, inArray, like, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, like, or, sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
 import {
   trustEvents,
@@ -14,7 +14,7 @@ import {
   type TrustTier,
 } from "@/db/schema";
 import { effectiveDelta, resolveTier, tierFromScore } from "@/lib/trust/score";
-import { TRUST_TIER_FLOORS } from "@/lib/trust/config";
+import { TRUST_BASE_SCORE, TRUST_TIER_FLOORS } from "@/lib/trust/config";
 
 export const TRUST_PAGE_SIZE = 50;
 
@@ -29,14 +29,23 @@ export type TrustListRow = {
   tier: TrustTier;
   frozen: boolean;
   overridden: boolean;
-  computedAt: Date;
+  /** 未計算（台帳が空）なら null */
+  computedAt: Date | null;
 };
+
+/**
+ * user_trust の行はイベントが積まれて初めて作られる。
+ * 行がないユーザも「まだ何も無い状態」として一覧に出したいので、既定値で補う。
+ */
+const SCORE_EXPR = sql<number>`coalesce(${userTrust.score}, ${TRUST_BASE_SCORE})`;
+const TIER_EXPR = sql<TrustTier>`coalesce(${userTrust.tier}, 'new')`;
+const FROZEN_EXPR = sql<boolean>`coalesce(${userTrust.frozen}, 0)`;
 
 function filterCondition(filter: TrustFilter) {
   if (filter === "all") return undefined;
-  if (filter === "frozen") return eq(userTrust.frozen, true);
+  if (filter === "frozen") return eq(FROZEN_EXPR, true);
   if (filter === "overridden") return sql`${userTrust.tierOverride} is not null`;
-  return eq(userTrust.tier, filter);
+  return eq(TIER_EXPR, filter);
 }
 
 /** 一覧。スコアの低い順に並べる（対処が要るのは下から） */
@@ -50,26 +59,26 @@ export async function getTrustList(
 
   const rows = await db
     .select({
-      userId: userTrust.userId,
+      userId: users.id,
       username: userProfiles.username,
       email: users.email,
-      score: userTrust.score,
-      tier: userTrust.tier,
-      frozen: userTrust.frozen,
+      score: SCORE_EXPR,
+      frozen: FROZEN_EXPR,
       tierOverride: userTrust.tierOverride,
       tierOverrideUntil: userTrust.tierOverrideUntil,
       computedAt: userTrust.computedAt,
     })
-    .from(userTrust)
-    .innerJoin(users, eq(users.id, userTrust.userId))
-    .leftJoin(userProfiles, eq(userProfiles.userId, userTrust.userId))
+    .from(users)
+    .leftJoin(userTrust, eq(userTrust.userId, users.id))
+    .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
     .where(and(
+      isNull(users.deletedAt),
       filterCondition(filter),
       keyword
         ? or(like(userProfiles.username, `%${keyword}%`), like(users.email, `%${keyword}%`))
         : undefined,
     ))
-    .orderBy(userTrust.score)
+    .orderBy(SCORE_EXPR)
     .limit(TRUST_PAGE_SIZE)
     .offset(Math.max(0, page - 1) * TRUST_PAGE_SIZE)
     .all();
@@ -81,8 +90,9 @@ export async function getTrustList(
     email: row.email,
     score: row.score,
     tier: resolveTier(row.score, row, now),
-    frozen: row.frozen,
+    frozen: Boolean(row.frozen),
     overridden: resolveTier(row.score, row, now) !== tierFromScore(row.score),
+    /** 台帳が空のうちは計算されていないので、未計算であることを呼び出し側に伝える */
     computedAt: row.computedAt,
   }));
 }
@@ -94,10 +104,11 @@ export async function countTrustList(filter: TrustFilter, search?: string): Prom
 
   const row = await db
     .select({ total: sql<number>`count(*)` })
-    .from(userTrust)
-    .innerJoin(users, eq(users.id, userTrust.userId))
-    .leftJoin(userProfiles, eq(userProfiles.userId, userTrust.userId))
+    .from(users)
+    .leftJoin(userTrust, eq(userTrust.userId, users.id))
+    .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
     .where(and(
+      isNull(users.deletedAt),
       filterCondition(filter),
       keyword
         ? or(like(userProfiles.username, `%${keyword}%`), like(users.email, `%${keyword}%`))
@@ -112,9 +123,11 @@ export async function countTrustList(filter: TrustFilter, search?: string): Prom
 export async function getTrustDistribution(): Promise<Record<string, number>> {
   const db = await getDatabase();
   const rows = await db
-    .select({ tier: userTrust.tier, count: sql<number>`count(*)` })
-    .from(userTrust)
-    .groupBy(userTrust.tier)
+    .select({ tier: TIER_EXPR, count: sql<number>`count(*)` })
+    .from(users)
+    .leftJoin(userTrust, eq(userTrust.userId, users.id))
+    .where(isNull(users.deletedAt))
+    .groupBy(TIER_EXPR)
     .all();
 
   const distribution: Record<string, number> = {};
@@ -167,23 +180,24 @@ function distanceToNextTier(score: number): number | null {
 export async function getTrustDetail(userId: string): Promise<TrustDetail | null> {
   const db = await getDatabase();
 
-  const state = await db
+  const row = await db
     .select({
-      userId: userTrust.userId,
+      userId: users.id,
       username: userProfiles.username,
       email: users.email,
-      score: userTrust.score,
-      frozen: userTrust.frozen,
+      score: SCORE_EXPR,
+      frozen: FROZEN_EXPR,
       tierOverride: userTrust.tierOverride,
       tierOverrideUntil: userTrust.tierOverrideUntil,
     })
-    .from(userTrust)
-    .innerJoin(users, eq(users.id, userTrust.userId))
-    .leftJoin(userProfiles, eq(userProfiles.userId, userTrust.userId))
-    .where(eq(userTrust.userId, userId))
+    .from(users)
+    .leftJoin(userTrust, eq(userTrust.userId, users.id))
+    .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
+    .where(eq(users.id, userId))
     .get();
 
-  if (!state) return null;
+  if (!row) return null;
+  const state = { ...row, frozen: Boolean(row.frozen) };
 
   const events = await db
     .select()

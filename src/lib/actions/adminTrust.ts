@@ -18,6 +18,17 @@ function normalizeReason(reason: string): string | null {
   return trimmed.slice(0, REASON_MAX_LENGTH);
 }
 
+/**
+ * user_trust の行を確実に用意する。
+ *
+ * 行はイベントが積まれて初めて作られるため、まだ何も無いユーザに対して
+ * UPDATE を投げても無言で 0 件になる。凍結や段階の上書きは
+ * 「まだ何もしていないユーザ」にこそ使いたいので、先に行を作る。
+ */
+async function ensureTrustRow(userId: string): Promise<void> {
+  await recomputeTrust(userId);
+}
+
 function revalidateTrust(userId: string) {
   revalidatePath("/admin/trust");
   revalidatePath(`/admin/trust/${userId}`);
@@ -75,6 +86,7 @@ export async function setTrustTierOverride(
   const normalized = normalizeReason(reason);
   if (!normalized) return { error: "reasonRequired" };
 
+  await ensureTrustRow(userId);
   await db
     .update(userTrust)
     .set({ tierOverride: tier, tierOverrideUntil: tier ? until ?? null : null })
@@ -101,6 +113,7 @@ export async function setTrustFrozen(
   const normalized = normalizeReason(reason);
   if (!normalized) return { error: "reasonRequired" };
 
+  await ensureTrustRow(userId);
   await db.update(userTrust).set({ frozen }).where(eq(userTrust.userId, userId)).run();
   // 凍結の切り替えは加点の扱いを変えるため、スコアを作り直す
   await recomputeTrust(userId);

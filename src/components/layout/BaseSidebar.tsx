@@ -16,13 +16,16 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
+import Collapse from "@mui/material/Collapse";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { usePathname, useRouter, Link } from "@/lib/i18n/routing";
 import { LOCALE_OPTIONS } from "@/lib/i18n/localeLabels";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";
 import { useContextMenuHandler, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Badge from "@mui/material/Badge";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -36,6 +39,7 @@ export type NavItem = {
   label: string;
   path: string;
   icon: React.ReactNode;
+  children?: Omit<NavItem, "children">[];
 };
 
 export type BaseSidebarProps = {
@@ -92,6 +96,30 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
     setCartOpen(true);
   };
 
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const nextState: Record<string, boolean> = {};
+    navItems.forEach((item) => {
+      if (item.children) {
+        const hasActiveChild = item.children.some((child) => child.path === pathname);
+        if (hasActiveChild) {
+          nextState[item.id] = true;
+        }
+      }
+    });
+    if (Object.keys(nextState).length > 0) {
+      setOpenGroups((prev) => ({ ...prev, ...nextState }));
+    }
+  }, [pathname, navItems]);
+
+  const toggleGroup = (groupId: string) => {
+    setOpenGroups((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
+  };
+
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* デスクトップはヘッダーにロゴを常設するため空スペーサー。モバイルはドロワーが前面に出るためロゴを表示 */}
@@ -118,6 +146,82 @@ const BaseSidebar = ({ mobileOpen, onMobileClose, navItems, collapsed = false, o
       <Divider />
       <List sx={{ px: 1, py: 2, flexGrow: 1, overflowY: "auto" }}>
         {navItems.map((item) => {
+          if (item.children) {
+            const isOpen = !!openGroups[item.id];
+            const hasActiveChild = item.children.some((child) => child.path === pathname);
+
+            return (
+              <Box key={item.id} sx={{ mb: 0.5 }}>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => toggleGroup(item.id)}
+                    sx={{
+                      borderRadius: 1,
+                      color: hasActiveChild ? "primary.main" : "text.primary",
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 40, color: hasActiveChild ? "primary.main" : "text.secondary" }}>
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Typography sx={{ fontWeight: hasActiveChild ? 700 : 500 }}>
+                          {item.label}
+                        </Typography>
+                      }
+                    />
+                    {isOpen ? <ExpandLess /> : <ExpandMore />}
+                  </ListItemButton>
+                </ListItem>
+                <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding sx={{ pl: 2, mt: 0.5 }}>
+                    {item.children.map((child) => {
+                      const isChildSelected = getIsSelected(child.id, child.path, pathname, isMyProjects);
+
+                      return (
+                        <ListItem key={child.id} disablePadding sx={{ mb: 0.5 }}>
+                          <ListItemButton
+                            onClick={() => handleNavigation(child.path)}
+                            onContextMenu={(e) => {
+                              openMenu(e, [
+                                c.open(child.path, tMenu("open")),
+                                c.openNewTab(child.path),
+                                { type: "divider" },
+                                c.copyLink(child.path),
+                              ]);
+                            }}
+                            selected={isChildSelected}
+                            sx={{
+                              WebkitTouchCallout: isDisabled ? "default" : "none",
+                              borderRadius: 1,
+                              "&.Mui-selected": {
+                                bgcolor: "primary.main",
+                                color: "primary.contrastText",
+                                "&:hover": { bgcolor: "primary.dark" },
+                                "& .MuiListItemIcon-root": { color: "primary.contrastText" },
+                              },
+                            }}
+                          >
+                            <ListItemIcon sx={{ minWidth: 40, color: pathname === child.path ? "inherit" : "text.secondary" }}>
+                              {child.icon}
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Typography sx={{ fontWeight: isChildSelected ? 700 : 500 }}>
+                                  {child.label}
+                                </Typography>
+                              }
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      );
+                    })}
+                  </List>
+                </Collapse>
+              </Box>
+            );
+          }
+
           const isSelected = getIsSelected(item.id, item.path, pathname, isMyProjects);
 
           return (

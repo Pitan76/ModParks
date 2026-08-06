@@ -67,7 +67,7 @@ export default async function TrustListTable({ rows, locale }: TrustListTablePro
             </TableCell>
             <TableCell>
               <Typography variant="caption" color="text.secondary">
-                {row.computedAt.toLocaleString(locale)}
+                {row.computedAt ? row.computedAt.toLocaleString(locale) : t("trust.notComputed")}
               </Typography>
             </TableCell>
           </TableRow>

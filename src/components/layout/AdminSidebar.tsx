@@ -43,20 +43,44 @@ const AdminSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleC
   if (session?.user?.role === "admin") {
     navItems = [
       { id: "admin-home", label: tAdmin("sidebar.dashboard"), path: "/admin", icon: <DashboardIcon /> },
-      { id: "admin-users", label: tAdmin("sidebar.users"), path: "/admin/users", icon: <PeopleIcon /> },
-      { id: "admin-projects", label: tAdmin("sidebar.projects"), path: "/admin/projects", icon: <FolderIcon /> },
-      { id: "admin-ideas", label: tAdmin("sidebar.ideas"), path: "/admin/ideas", icon: <LightbulbIcon /> },
-      { id: "admin-reports", label: tAdmin("sidebar.reports"), path: "/admin/reports", icon: <ReportIcon /> },
-      { id: "admin-appeals", label: tAdmin("sidebar.appeals"), path: "/admin/appeals", icon: <GppMaybeIcon /> },
-      { id: "admin-scans", label: tAdmin("sidebar.scans"), path: "/admin/scans", icon: <PolicyIcon /> },
-      { id: "admin-trust", label: tAdmin("sidebar.trust"), path: "/admin/trust", icon: <ShieldIcon /> },
-      { id: "admin-recipe", label: tAdmin("sidebar.recipe"), path: "/admin/recipe", icon: <MenuBookIcon /> },
-      { id: "admin-oauth", label: tAdmin("sidebar.oauth"), path: "/admin/oauth", icon: <VpnKeyIcon /> },
-      { id: "admin-config", label: tAdmin("sidebar.config"), path: "/admin/config", icon: <SettingsIcon /> },
-      { id: "admin-backup", label: tAdmin("sidebar.backup"), path: "/admin/backup", icon: <BackupIcon /> },
-      { id: "admin-usage", label: tAdmin("sidebar.usage"), path: "/admin/usage", icon: <QueryStatsIcon /> },
-      { id: "admin-runtime", label: tAdmin("sidebar.runtime"), path: "/admin/runtime", icon: <ToggleOnIcon /> },
-      { id: "admin-logs", label: tAdmin("sidebar.audit"), path: "/admin/logs", icon: <HistoryIcon /> },
+      {
+        id: "admin-group-content",
+        label: tAdmin("sidebar.groupContent"),
+        path: "",
+        icon: <FolderIcon />,
+        children: [
+          { id: "admin-users", label: tAdmin("sidebar.users"), path: "/admin/users", icon: <PeopleIcon /> },
+          { id: "admin-projects", label: tAdmin("sidebar.projects"), path: "/admin/projects", icon: <FolderIcon /> },
+          { id: "admin-ideas", label: tAdmin("sidebar.ideas"), path: "/admin/ideas", icon: <LightbulbIcon /> },
+          { id: "admin-recipe", label: tAdmin("sidebar.recipe"), path: "/admin/recipe", icon: <MenuBookIcon /> },
+        ],
+      },
+      {
+        id: "admin-group-moderation",
+        label: tAdmin("sidebar.groupModeration"),
+        path: "",
+        icon: <ShieldIcon />,
+        children: [
+          { id: "admin-reports", label: tAdmin("sidebar.reports"), path: "/admin/reports", icon: <ReportIcon /> },
+          { id: "admin-appeals", label: tAdmin("sidebar.appeals"), path: "/admin/appeals", icon: <GppMaybeIcon /> },
+          { id: "admin-scans", label: tAdmin("sidebar.scans"), path: "/admin/scans", icon: <PolicyIcon /> },
+          { id: "admin-trust", label: tAdmin("sidebar.trust"), path: "/admin/trust", icon: <ShieldIcon /> },
+        ],
+      },
+      {
+        id: "admin-group-system",
+        label: tAdmin("sidebar.groupSystem"),
+        path: "",
+        icon: <SettingsIcon />,
+        children: [
+          { id: "admin-oauth", label: tAdmin("sidebar.oauth"), path: "/admin/oauth", icon: <VpnKeyIcon /> },
+          { id: "admin-config", label: tAdmin("sidebar.config"), path: "/admin/config", icon: <SettingsIcon /> },
+          { id: "admin-backup", label: tAdmin("sidebar.backup"), path: "/admin/backup", icon: <BackupIcon /> },
+          { id: "admin-usage", label: tAdmin("sidebar.usage"), path: "/admin/usage", icon: <QueryStatsIcon /> },
+          { id: "admin-runtime", label: tAdmin("sidebar.runtime"), path: "/admin/runtime", icon: <ToggleOnIcon /> },
+          { id: "admin-logs", label: tAdmin("sidebar.audit"), path: "/admin/logs", icon: <HistoryIcon /> },
+        ],
+      },
     ];
   }
 
