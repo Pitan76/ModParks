@@ -13,6 +13,8 @@ import { revalidatePath } from "next/cache";
 import { withPublicCache } from "@/lib/http/cache";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { canManagePost } from "@/lib/auth/postAccess";
+import { isAllowedUpload } from "@/lib/upload/fileTypes";
+import { getTrustState } from "@/lib/services/trust";
 
 /**
  * バージョンには title/body 系のリネーム対象フィールドが無いため、
@@ -134,6 +136,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   if (file) {
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 413 });
+    }
+
+    const trustState = await getTrustState(auth.userId);
+    const userTier = trustState.tier;
+
+    if (!isAllowedUpload("mod", file.type || "", file.name, project.type, userTier)) {
+      const name = file.name.toLowerCase();
+      const isExeOrSimilar =
+        name.endsWith(".exe") ||
+        name.endsWith(".msi") ||
+        name.endsWith(".dmg") ||
+        name.endsWith(".app");
+
+      if (isExeOrSimilar && project.type === "other" && !(userTier === "member" || userTier === "trusted" || userTier === "veteran")) {
+        return NextResponse.json({ error: "Only users with Member tier or higher can upload executable files (e.g. .exe)." }, { status: 403 });
+      }
+
+      const allowedMsg = project.type === "other"
+        ? "Only .jar, .zip, .exe, .msi, .dmg, and .app files are allowed (executables require Member tier)."
+        : "Only .jar and .zip files are allowed.";
+      return NextResponse.json({ error: `Invalid file type. ${allowedMsg}` }, { status: 400 });
     }
 
     let R2: R2Bucket;

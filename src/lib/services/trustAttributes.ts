@@ -14,7 +14,7 @@ import { recordTrustEvent } from "./trust";
 const DAY_MS = 86_400_000;
 
 /** ソーシャル連携の有無。プロバイダ数によらず 1 回だけ加点する */
-async function hasSocialAccount(userId: string): Promise<boolean> {
+export async function hasSocialAccount(userId: string): Promise<boolean> {
   const db = await getDatabase();
   const linked = await db
     .select({ userId: accounts.userId })

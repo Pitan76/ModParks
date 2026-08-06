@@ -54,12 +54,39 @@ export function uploadTypeFromKey(key: string): UploadType | null {
  * 種別ごとに switch で網羅する。「mod 以外は画像」のフォールスルーにすると、
  * UploadType に種別を足した瞬間に黙って画像ルールが適用されてしまう。
  */
-export function isAllowedUpload(type: UploadType, contentType: string, fileName: string): boolean {
+export function isAllowedUpload(
+  type: UploadType,
+  contentType: string,
+  fileName: string,
+  projectType?: string,
+  userTier?: string
+): boolean {
   const normalized = contentType.split(";")[0].trim().toLowerCase();
   const name = fileName.toLowerCase();
 
   switch (type) {
     case "mod":
+      if (projectType === "other") {
+        const isExeOrSimilar =
+          name.endsWith(".exe") ||
+          name.endsWith(".msi") ||
+          name.endsWith(".dmg") ||
+          name.endsWith(".app");
+
+        if (isExeOrSimilar) {
+          const isHighTrust =
+            userTier === "member" ||
+            userTier === "trusted" ||
+            userTier === "veteran";
+          if (!isHighTrust) return false;
+        }
+
+        return (
+          name.endsWith(".jar") ||
+          name.endsWith(".zip") ||
+          isExeOrSimilar
+        );
+      }
       return name.endsWith(".jar") || name.endsWith(".zip");
     case "icon":
     case "avatar":

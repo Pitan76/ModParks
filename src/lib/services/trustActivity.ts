@@ -28,7 +28,7 @@ export type CleanVersion = {
  * 条件は「公開済みプロジェクトに属し」「スキャンで無警告」「アーカイブされておらず」
  * 「14 日が経過」「そのプロジェクトへの通報がない」こと。
  */
-async function findCleanVersions(now: Date, limit: number): Promise<CleanVersion[]> {
+export async function listCleanVersions(now: Date, limit: number): Promise<CleanVersion[]> {
   const db = await getDatabase();
   const threshold = new Date(now.getTime() - VERSION_CLEAN_DAYS * DAY_MS);
 
@@ -65,7 +65,7 @@ async function findCleanVersions(now: Date, limit: number): Promise<CleanVersion
  * 既に加点済みのバージョンが対象に含まれていても二重には積まれない。
  */
 export async function syncVersionCleanCredits(now: Date = new Date(), limit = 500): Promise<number> {
-  const candidates = await findCleanVersions(now, limit);
+  const candidates = await listCleanVersions(now, limit);
 
   let recorded = 0;
   for (const candidate of candidates) {

@@ -60,11 +60,20 @@ async function writeWatermark(db: Db, sliceTime: number): Promise<void> {
     .run();
 }
 
+/**
+ * epoch 秒を epoch day へ落とす式。
+ *
+ * 日数はプレースホルダで渡さずリテラルで埋める。バインドすると SQLite 側で
+ * REAL として扱われ、除算結果が小数になって INTEGER 主キーへの挿入が
+ * SQLITE_MISMATCH で落ちる。cast は結果の整数化を式の中で保証するため。
+ */
+const EPOCH_DAY = sql<number>`cast(${ddosSlices.sliceTime} / ${sql.raw(String(SECONDS_PER_DAY))} as integer)`;
+
 /** 未取り込みのスライスを日ごとに畳む */
 async function collectDeltas(db: Db, from: number, to: number): Promise<DayDelta[]> {
   return db
     .select({
-      day: sql<number>`${ddosSlices.sliceTime} / ${SECONDS_PER_DAY}`,
+      day: EPOCH_DAY,
       requests: sql<number>`coalesce(sum(${ddosSlices.requestCount}), 0)`,
       downloads: sql<number>`coalesce(sum(${ddosSlices.downloadCount}), 0)`,
       botRequests: sql<number>`coalesce(sum(${ddosSlices.botCount}), 0)`,
@@ -72,7 +81,7 @@ async function collectDeltas(db: Db, from: number, to: number): Promise<DayDelta
     })
     .from(ddosSlices)
     .where(and(gt(ddosSlices.sliceTime, from), lte(ddosSlices.sliceTime, to)))
-    .groupBy(sql`${ddosSlices.sliceTime} / ${SECONDS_PER_DAY}`)
+    .groupBy(EPOCH_DAY)
     .all();
 }
 

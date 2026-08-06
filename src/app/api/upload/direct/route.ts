@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { uploadToR2, getR2Bucket } from "@/lib/r2";
 import { checkProjectUploadAccess, type UploadActor } from "@/lib/upload/access";
+import { getTrustState } from "@/lib/services/trust";
 import {
   isAllowedUpload,
   uploadTypeFromKey,
@@ -12,7 +13,7 @@ import {
 } from "@/lib/upload/fileTypes";
 
 /** そのキーへ書いてよいかの判定結果。失敗時はそのまま HTTP 応答に使う。 */
-type KeyCheck = { ok: true } | { ok: false; status: number; error: string };
+type KeyCheck = { ok: true; projectType?: string } | { ok: false; status: number; error: string };
 
 const OK: KeyCheck = { ok: true };
 
@@ -61,7 +62,7 @@ async function checkUploadKey(key: string, actor: UploadActor): Promise<KeyCheck
  * 保存した Content-Type は配信時にそのまま返る可能性があるので、
  * presign と同じホワイトリストをここでも必ず通す。
  */
-function checkPayload(key: string, contentType: string, contentLength: number): KeyCheck {
+function checkPayload(key: string, contentType: string, contentLength: number, projectType?: string, userTier?: string): KeyCheck {
   if (contentLength > MAX_UPLOAD_BYTES) {
     return deny(`File size exceeds ${MAX_UPLOAD_BYTES / 1024 / 1024}MB limit`, 413);
   }
@@ -69,7 +70,7 @@ function checkPayload(key: string, contentType: string, contentLength: number): 
   const uploadType = uploadTypeFromKey(key);
   const fileName = key.split("/").pop() ?? "";
   if (!uploadType) return deny("Invalid file type", 400);
-  if (!isAllowedUpload(uploadType, contentType, fileName)) return deny("Invalid file type", 400);
+  if (!isAllowedUpload(uploadType, contentType, fileName, projectType, userTier)) return deny("Invalid file type", 400);
 
   return OK;
 }
@@ -103,8 +104,11 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Missing or invalid Content-Length" }, { status: 411 });
   }
 
+  const trustState = await getTrustState(session.user.id);
+  const userTier = trustState.tier;
+
   const contentType = req.headers.get("content-type") || "application/octet-stream";
-  const payloadCheck = checkPayload(key, contentType, contentLength);
+  const payloadCheck = checkPayload(key, contentType, contentLength, keyCheck.projectType, userTier);
   if (!payloadCheck.ok) {
     return NextResponse.json({ error: payloadCheck.error }, { status: payloadCheck.status });
   }

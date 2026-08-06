@@ -6,7 +6,7 @@
  */
 
 /** 権限判定の結果。失敗時はそのまま HTTP 応答に使えるステータスと文言を持つ。 */
-export type UploadAccess = { ok: true } | { ok: false; status: number; error: string };
+export type UploadAccess = { ok: true; projectType?: string } | { ok: false; status: number; error: string };
 
 const DENIED: UploadAccess = {
   ok: false,
@@ -39,8 +39,8 @@ export async function checkProjectUploadAccess(
   const db = await getDatabase();
   const project = await findProjectPostBySlug(db, projectSlug);
   if (!project) return NOT_FOUND;
-  if (project.authorId === actor.id) return { ok: true };
-  if (actor.role === "admin") return { ok: true };
+  if (project.authorId === actor.id) return { ok: true, projectType: project.type };
+  if (actor.role === "admin") return { ok: true, projectType: project.type };
 
   const member = await db
     .select()
@@ -48,5 +48,5 @@ export async function checkProjectUploadAccess(
     .where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, actor.id)))
     .get();
 
-  return member ? { ok: true } : DENIED;
+  return member ? { ok: true, projectType: project.type } : DENIED;
 }

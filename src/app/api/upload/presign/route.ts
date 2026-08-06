@@ -4,7 +4,8 @@ import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { buildR2Key, getR2PublicUrl } from "@/lib/r2";
 import { getR2S3Config, createPresignedPutUrl } from "@/lib/r2Presign";
 import { createId } from "@paralleldrive/cuid2";
-import { checkProjectUploadAccess, type UploadActor } from "@/lib/upload/access";
+import { checkProjectUploadAccess, type UploadActor, type UploadAccess } from "@/lib/upload/access";
+import { getTrustState } from "@/lib/services/trust";
 import {
   isAllowedUpload,
   isUploadType,
@@ -53,9 +54,6 @@ function parseRequest(body: unknown): Parsed {
   }
   if (projectSlug !== undefined && typeof projectSlug !== "string") return invalid("Missing fields");
   if (type !== "avatar" && !projectSlug) return invalid("Missing projectSlug");
-  if (!isAllowedUpload(type, contentType, fileName)) {
-    return invalid(`Invalid file type for ${type}`);
-  }
 
   return { ok: true, value: { fileName, contentType, type, fileSize, projectSlug } };
 }
@@ -67,7 +65,7 @@ function parseRequest(body: unknown): Parsed {
  * 誰でも通せてしまう経路なので、アイコン（画像）に限定したうえで
  * キーを呼び出し元のユーザーIDで区切り、影響範囲を閉じる（キー生成は buildKey 側）。
  */
-async function authorize(req: PresignRequest, actor: UploadActor) {
+async function authorize(req: PresignRequest, actor: UploadActor): Promise<UploadAccess> {
   if (req.type === "avatar") return { ok: true } as const;
   if (req.projectSlug !== NEW_PROJECT_SLUG) {
     return await checkProjectUploadAccess(req.projectSlug!, actor);
@@ -120,6 +118,24 @@ export async function POST(req: NextRequest) {
 
   const access = await authorize(parsed.value, session.user);
   if (!access.ok) return NextResponse.json({ error: access.error }, { status: access.status });
+
+  const trustState = await getTrustState(session.user.id);
+  const userTier = trustState.tier;
+
+  if (!isAllowedUpload(parsed.value.type, parsed.value.contentType, parsed.value.fileName, access.projectType, userTier)) {
+    const name = parsed.value.fileName.toLowerCase();
+    const isExeOrSimilar =
+      name.endsWith(".exe") ||
+      name.endsWith(".msi") ||
+      name.endsWith(".dmg") ||
+      name.endsWith(".app");
+
+    if (isExeOrSimilar && access.projectType === "other" && !(userTier === "member" || userTier === "trusted" || userTier === "veteran")) {
+      return NextResponse.json({ error: "Only users with Member tier or higher can upload executable files." }, { status: 403 });
+    }
+
+    return NextResponse.json({ error: `Invalid file type for ${parsed.value.type}` }, { status: 400 });
+  }
 
   const key = buildKey(parsed.value, session.user);
 
