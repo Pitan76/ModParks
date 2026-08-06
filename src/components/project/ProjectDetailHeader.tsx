@@ -1,3 +1,5 @@
+"use client";
+
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
@@ -12,6 +14,8 @@ import ProjectHeaderMenu from "./ProjectHeaderMenu";
 import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
 import { SITE_URL } from "@/lib/config";
 import ProjectTypeBadge from "./ProjectTypeBadge";
+import { useColorMode } from "@/components/ThemeRegistry";
+import PlainProjectDetailHeader from "@/components/plain/project/PlainProjectDetailHeader";
 
 export type ProjectDetailHeaderProps = {
   /** 対象プロジェクトの情報 */
@@ -67,6 +71,21 @@ const ProjectDetailHeader = ({
 }: ProjectDetailHeaderProps) => {
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
+  const { isPlainTheme } = useColorMode();
+
+  if (isPlainTheme) {
+    return (
+      <PlainProjectDetailHeader
+        project={p}
+        canEdit={canEdit}
+        isFavorited={isFavorited}
+        favoritesCount={favoritesCount}
+        isLoggedIn={isLoggedIn}
+        currentUserId={currentUserId}
+        isSubscribed={isSubscribed}
+      />
+    );
+  }
 
   return (
     <>

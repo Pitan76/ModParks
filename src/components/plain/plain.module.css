@@ -96,6 +96,62 @@
   color: GrayText;
 }
 
+.detailHeader {
+  margin-bottom: 1rem;
+}
+
+.detailIcon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.definitions {
+  margin: 0 0 1rem;
+}
+
+.definitions dt {
+  font-weight: 700;
+  margin-top: 0.75rem;
+}
+
+.definitions dd {
+  margin: 0.25rem 0 0;
+}
+
+.plainList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.commentForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.commentForm textarea {
+  width: 100%;
+  max-width: 40rem;
+}
+
+.commentMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.25rem;
+}
+
+/* 投稿本文は改行を保持しつつ、長いURLなどで横に溢れさせない */
+.commentBody {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 /* 横に収まらない場合はテーブル単位で横スクロールさせ、本文側は溢れさせない */
 .tableScroll {
   overflow-x: auto;

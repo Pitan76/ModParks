@@ -1,3 +1,5 @@
+"use client";
+
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
@@ -17,6 +19,8 @@ import ReportDialog from "@/components/project/ReportDialog";
 import { Link } from "@/lib/i18n/routing";
 import { parseLinks } from "@/lib/utils/links";
 import { toProxiedImageUrl } from "@/lib/utils/imageProxy";
+import { useColorMode } from "@/components/ThemeRegistry";
+import PlainProjectSidebar from "@/components/plain/project/PlainProjectSidebar";
 
 export type ProjectSidebarProps = {
   /** 対象プロジェクトの情報 */
@@ -53,6 +57,9 @@ const getLinkIcon = (url: string) => {
 const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) => {
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
+  const { isPlainTheme } = useColorMode();
+
+  if (isPlainTheme) return <PlainProjectSidebar project={p} isAuthenticated={isAuthenticated} />;
 
   const getTagLabel = (tag: string) => {
     const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, '_');

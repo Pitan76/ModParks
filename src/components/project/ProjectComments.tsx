@@ -7,6 +7,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useTranslations } from "next-intl";
 import ProjectCommentItem, { type Comment } from "./ProjectCommentItem";
 import CommentForm from "@/components/ui/CommentForm";
+import { useColorMode } from "@/components/ThemeRegistry";
+import PlainProjectComments from "@/components/plain/project/PlainProjectComments";
 
 type ProjectCommentsProps = {
   projectSlug: string;
@@ -21,6 +23,8 @@ type ProjectCommentsProps = {
  */
 const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId, defaultCommentBodyFormat }: ProjectCommentsProps) => {
   const t = useTranslations("Comment");
+  const tCommon = useTranslations("Common");
+  const { isPlainTheme } = useColorMode();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,6 +67,7 @@ const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId, defaultCommen
   };
 
   if (loading) {
+    if (isPlainTheme) return <p>{tCommon("loading")}</p>;
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
         <CircularProgress />
@@ -72,6 +77,18 @@ const ProjectComments = ({ projectSlug, isLoggedIn, currentUserId, defaultCommen
 
   const topLevel = comments.filter((c) => !c.parentId);
   const repliesOf = (id: string) => comments.filter((c) => c.parentId === id);
+
+  if (isPlainTheme) {
+    return (
+      <PlainProjectComments
+        comments={comments}
+        isLoggedIn={isLoggedIn}
+        currentUserId={currentUserId}
+        onDelete={handleDelete}
+        onPost={(content, parentId) => postComment(content, parentId)}
+      />
+    );
+  }
 
   return (
     <Box sx={{ mt: 4 }}>
