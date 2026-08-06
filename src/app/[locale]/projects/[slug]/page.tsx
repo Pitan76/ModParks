@@ -40,7 +40,7 @@ interface ProjectDetailPageProps {
 }
 
 export async function generateMetadata({ params }: ProjectDetailPageProps) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const [project, session] = await Promise.all([
     getProjectBySlug(slug),
     auth(),
@@ -55,7 +55,10 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
 
   const title = `${project.title}`;
   const plainDesc = toPlainDescription(project.body);
-  const description = plainDesc.length > 150 ? plainDesc.substring(0, 150) + "..." : plainDesc || "Minecraft Java Edition向けのMOD/プラグイン";
+  const tMeta = await getTranslations({ locale, namespace: "Metadata" });
+  const description = plainDesc.length > 150
+    ? plainDesc.substring(0, 150) + "..."
+    : plainDesc || tMeta("projectFallbackDescription");
   const imageUrl = project.iconUrl || SITE_URL + "/icon.png";
 
   // 統合先がある場合は canonical を統合先に向け、重複ページとして扱わせない

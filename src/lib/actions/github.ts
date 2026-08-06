@@ -25,6 +25,7 @@ import {
 } from "@/lib/utils/github";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { getRepoAccessToken } from "@/lib/utils/githubRepoAccess";
+import type { Database } from "@/lib/db";
 
 /** Worker のメモリ制約を踏まえたダウンロード/解析の上限 */
 const MAX_ASSET_SIZE = 50 * 1024 * 1024; // 50MB
@@ -136,7 +137,7 @@ function linkToAsset(asset: GithubReleaseAsset): ImportedFile | { error: string 
  * 内部システム用のインポート関数（セッション・権限チェックなし）。Webhook等から使用する。
  */
 export async function importGithubReleaseSystem(
-  db: any,
+  db: Database,
   /** authorId は Webhook 経由の自動取り込みで、アップロード実行者として記録する */
   project: { id: string; slug: string; githubRepo: string | null; authorId: string },
   releaseId?: number,

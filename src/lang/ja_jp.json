@@ -2,7 +2,9 @@
   "Metadata": {
     "title": "ModParks - Minecraft Mod & Plugin Platform",
     "description": "Minecraft Java Edition向けのMod/Pluginを簡単に公開、検索、ダウンロードできる日本発プラットフォーム",
-    "keywords": "Minecraft, Mod, Plugin, Java Edition, Fabric, Forge, Paper"
+    "keywords": "Minecraft, Mod, Plugin, Java Edition, Fabric, Forge, Paper",
+    "projectFallbackDescription": "Minecraft Java Edition向けのMOD/プラグイン",
+    "profileDescription": "{name} のプロフィールページです。"
   },
   "Common": {
     "appName": "ModParks",
@@ -57,6 +59,12 @@
       "markdown": "Markdown",
       "plaintext": "Plain Text",
       "pukiwiki": "PukiWiki"
+    },
+    "errorOccurred": "エラーが発生しました",
+    "retry": "再試行",
+    "errorPage": {
+      "title": "エラーが発生しました",
+      "description": "問題が発生したため、ページを正常に読み込むことができませんでした"
     }
   },
   "Comment": {
@@ -314,7 +322,8 @@
         "title": ".jarファイルから情報を読み取る",
         "select": "ファイルを選択",
         "fetchSuccess": "データを取得しました。フォームに反映されました。",
-        "fetchError": "情報の読み取りに失敗しました"
+        "fetchError": "情報の読み取りに失敗しました",
+        "hint": "fabric.mod.json, META-INF/mods.toml, META-INF/neoforge.mods.toml, mcmod.info 等のファイルからプロジェクト情報を自動取得します。"
       }
     },
     "edit": {
@@ -1196,7 +1205,15 @@
       "mergeTable": "テーブル",
       "mergeStrategy": "方式",
       "mergeNoChanges": "取り込む差分はありません",
-      "mergeReviewNote": "ユーザーや認証情報など、自動でマージすると危険なテーブルの差分です。これらは今回の実行では変更されません。"
+      "mergeReviewNote": "ユーザーや認証情報など、自動でマージすると危険なテーブルの差分です。これらは今回の実行では変更されません。",
+      "restoreScope": "復元範囲の設定",
+      "restoreModeAll": "データベース全体を復元",
+      "restoreModeAllDesc": "既存の全データを削除し、バックアップ時点の状態に完全に置き換えます。",
+      "restoreModeDownloads": "ダウンロード数のみ復元",
+      "restoreModeDownloadsDesc": "既存データは一切削除せず、DDoS等でインフレしたプロジェクト・バージョンのダウンロード数値のみをバックアップから復旧・修正します。",
+      "restoreModeTables": "一部のテーブルのみ削除して復元",
+      "restoreModeTablesDesc": "選択したテーブルのデータのみをクリアし、バックアップから復旧します。",
+      "selectTables": "対象テーブルを選択してください"
     },
     "audit": {
       "title": "監査ログ",
@@ -1826,7 +1843,9 @@
       "exportMd": "Markdown形式",
       "exportTxt": "テキスト形式",
       "exportFormat": "形式",
-      "exportBtn": "エクスポート"
+      "exportBtn": "エクスポート",
+      "deletePasswordPrompt": "アカウントを削除するには、パスワード（または2要素認証コード）を入力してください。",
+      "deactivatePasswordPrompt": "アカウントを無効化するには、パスワード（または2要素認証コード）を入力してください。"
     },
     "notifications": {
       "title": "通知設定",
@@ -1929,7 +1948,8 @@
     "iconUrlLabel": "アイコンのURL (またはアップロード)",
     "iconUrlHelper": "※アップロード機能は将来実装予定です。現在はURLを入力してください。",
     "noProjectsInList": "リストにプロジェクトがありません。",
-    "preview": "プレビュー:"
+    "preview": "プレビュー:",
+    "emptyProjects": "このリストにはまだプロジェクトが追加されていません。"
   },
   "Notifications": {
     "title": "通知",
@@ -1982,17 +2002,26 @@
     "unpin": "ピン留めを解除",
     "pinned": "ピン留めしました",
     "unpinned": "ピン留めを解除しました",
-    "pinLimit": "ピン留めは最大{max}件までです"
+    "pinLimit": "ピン留めは最大{max}件までです",
+    "browserMenu": "ブラウザ標準メニュー（Shift+右クリック）",
+    "browserMenuHint": "ブラウザの標準メニューを開くには、Shiftキーを押しながら右クリックしてください。",
+    "disableConfirm": "このカスタムコンテキストメニューを無効化し、常にブラウザの標準メニューを表示しますか？（設定 -> テーマ設定から再度有効化できます）",
+    "disabled": "カスタムコンテキストメニューを無効化しました。もう一度右クリックしてください。"
   },
   "ServerErrors": {
     "common": {
       "notFound": "対象が見つかりません",
-      "forbidden": "権限がありません"
+      "forbidden": "権限がありません",
+      "staleAction": "新しいバージョンが公開されたようです。ページを再読み込みしてからもう一度お試しください。",
+      "serverError": "サーバー側でエラーが発生しました。時間をおいて再度お試しください。解決しない場合は運営者にお問い合わせください。",
+      "reloading": "新しいバージョンが反映されました。ページを更新しています...",
+      "networkRetryFailed": "通信エラーが発生しました（{count}回再試行失敗）。少し時間を置いてからやり直してください。"
     },
     "project": {
       "slugTaken": "このスラッグは既に他のプロジェクトで使用されています。",
       "invalidDiscordWebhook": "Discord の Webhook URL を入力してください。",
-      "invalidGithubRepo": "'owner/repo' 形式、または GitHub リポジトリの URL を入力してください。"
+      "invalidGithubRepo": "'owner/repo' 形式、または GitHub リポジトリの URL を入力してください。",
+      "cfSlugNotFound": "CurseForge で指定された Slug が見つかりませんでした。正しいか確認してください。"
     },
     "version": {
       "fileRequired": "ファイルをアップロードするか、外部URLを入力してください",
@@ -2079,5 +2108,25 @@
       "comments:write": "あなたとしてコメントを投稿する",
       "notifications:read": "通知を読み取る"
     }
+  },
+  "Validation": {
+    "slugFormat": "小文字英数字とハイフンのみ",
+    "slugReserved": "この slug は予約語のため使用できません",
+    "nameMin": "3文字以上",
+    "nameMax": "64文字以内",
+    "descriptionMin": "10文字以上",
+    "descriptionMax": "2000文字以内",
+    "licenseRequired": "ライセンスを入力してください",
+    "licenseMax": "64文字以内",
+    "invalidUrl": "有効なURLを入力してください",
+    "tagsMax": "タグは10個まで",
+    "versionNumberFormat": "バージョン番号の形式が不正です",
+    "titleMin": "3文字以上",
+    "titleMax": "100文字以内",
+    "ideaContentMin": "10文字以上",
+    "ideaContentMax": "5000文字以内",
+    "commentMin": "1文字以上入力してください",
+    "commentMax": "2000文字以内",
+    "slugTaken": "このスラッグは既に他のプロジェクトで使用されています。"
   }
 }

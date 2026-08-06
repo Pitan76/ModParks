@@ -1,9 +1,12 @@
+"use client";
+
 import React from "react";
 import FormControl, { FormControlProps } from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { SelectProps } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
+import { useValidationMessage } from "@/lib/i18n/validationMessage";
 
 export interface FormSelectOption {
   value: string;
@@ -24,6 +27,7 @@ export default function FormSelect({
   label, 
   ...props 
 }: FormSelectProps) {
+  const resolveMessage = useValidationMessage();
   const labelId = `${id}-label`;
   const hasError = !!errorMessages && errorMessages.length > 0;
 
@@ -49,7 +53,7 @@ export default function FormSelect({
       </Select>
       {hasError && (
         <Typography color="error" variant="caption">
-          {errorMessages[0]}
+          {resolveMessage(errorMessages)}
         </Typography>
       )}
     </FormControl>

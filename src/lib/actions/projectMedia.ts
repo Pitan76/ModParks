@@ -8,11 +8,12 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq, and, asc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { findProjectPostById } from "@/lib/queries/post";
+import type { Database } from "@/lib/db";
 
 /** 1プロジェクトあたりの画像上限。無料枠の容量を守るための歯止め */
 const MAX_MEDIA_PER_PROJECT = 12;
 
-async function assertMediaAccess(db: any, projectId: string, session: any) {
+async function assertMediaAccess(db: Database, projectId: string, session: any) {
   const project = await findProjectPostById(db, projectId);
   if (!project) throw new Error("Project not found");
   await assertProjectAccess(db, project, session);

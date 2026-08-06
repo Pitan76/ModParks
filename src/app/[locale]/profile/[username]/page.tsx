@@ -33,7 +33,8 @@ export async function generateMetadata({ params }: PublicProfileProps) {
   }
 
   const title = `${user.displayName || user.username} (@${user.username})`;
-  const description = user.bio || `${user.displayName || user.username} のプロフィールページです。`;
+  const tMeta = await getTranslations({ locale, namespace: "Metadata" });
+  const description = user.bio || tMeta("profileDescription", { name: user.displayName || user.username });
   const imageUrl = user.avatarUrl || SITE_URL + "/icon.png";
   const image = { url: imageUrl, width: 256, height: 256 };
 

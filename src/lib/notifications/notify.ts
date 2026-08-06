@@ -4,13 +4,14 @@ import type { ProjectPost } from "@/types/post";
 import { sendDiscordVersionNotification } from "@/lib/notifications/discord";
 import { isTypeEnabled, type NotificationType, type NotificationPayload } from "@/lib/notifications/types";
 import { sendPushToRecipients } from "@/lib/notifications/push";
+import type { Database } from "@/lib/db";
 
 /**
  * 通知の中央ディスパッチャ。受信者候補それぞれの通知設定を確認し、
  * その種別を無効化していない相手にのみアプリ内通知を挿入する。
  */
 export async function dispatchNotifications(
-  db: any,
+  db: Database,
   recipientIds: string[],
   type: NotificationType,
   payload: NotificationPayload,
@@ -35,7 +36,7 @@ function dedupe(ids: string[]): string[] {
   return [...new Set(ids.filter(Boolean))];
 }
 
-async function filterByPreference(db: any, ids: string[], type: NotificationType): Promise<string[]> {
+async function filterByPreference(db: Database, ids: string[], type: NotificationType): Promise<string[]> {
   if (ids.length === 0) return [];
 
   const rows = await db
@@ -57,7 +58,7 @@ async function filterByPreference(db: any, ids: string[], type: NotificationType
  * 新バージョン公開: プロジェクト購読者へ通知 + Discord Webhook 告知。
  */
 export async function notifyNewVersion(
-  db: any,
+  db: Database,
   project: Pick<ProjectPost, "id" | "slug" | "title" | "iconUrl" | "authorId" | "discordWebhookUrl">,
   versionNumber: string,
 ): Promise<void> {
@@ -94,7 +95,7 @@ export async function notifyNewVersion(
  * フォローとは独立した購読（developer_subscriptions）を対象とする。
  */
 export async function notifyNewProject(
-  db: any,
+  db: Database,
   project: Pick<ProjectPost, "slug" | "title" | "iconUrl" | "authorId">,
   authorName: string,
 ): Promise<void> {
@@ -122,7 +123,7 @@ export async function notifyNewProject(
  * 戻り値はそのまま payload へ spread する前提。actorImage は通知一覧のアバターと
  * Web Push の通知アイコンの両方に使う。
  */
-export async function resolveActor(db: any, actorId: string): Promise<NotificationPayload> {
+export async function resolveActor(db: Database, actorId: string): Promise<NotificationPayload> {
   const row = await db
     .select({
       displayName: userProfiles.displayName,
@@ -146,7 +147,7 @@ export async function resolveActor(db: any, actorId: string): Promise<Notificati
 
 /** 単一受信者向けイベント（コメント・いいね・お気に入り・フォロー・リスト追加） */
 export async function notifyToUser(
-  db: any,
+  db: Database,
   recipientId: string,
   actorId: string,
   type: NotificationType,

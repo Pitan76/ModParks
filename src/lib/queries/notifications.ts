@@ -2,6 +2,7 @@ import { getDatabase } from "@/lib/db";
 import { notifications, users, userProfiles } from "@/db/schema";
 import { eq, and, or, desc, count, inArray } from "drizzle-orm";
 import type { Notification } from "@/db/schema";
+import type { Database } from "@/lib/db";
 
 /** ベルのドロップダウン等で使う最近の通知一覧 */
 export async function getNotifications(userId: string, limit = 20): Promise<Notification[]> {
@@ -27,7 +28,7 @@ export async function getNotifications(userId: string, limit = 20): Promise<Noti
  * どれも当たらなければ payload の値にフォールバックする
  * （最終的に表示側で頭文字アバターになる）。
  */
-async function withActorAvatars(db: any, rows: Notification[]): Promise<Notification[]> {
+async function withActorAvatars(db: Database, rows: Notification[]): Promise<Notification[]> {
   const ids = new Set<string>();
   const usernames = new Set<string>();
   const displayNames = new Set<string>();

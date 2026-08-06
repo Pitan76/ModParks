@@ -2,6 +2,7 @@ import { pushSubscriptions, userSettings } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { NotificationType, NotificationPayload } from "@/lib/notifications/types";
 import { sendPush } from "@/lib/services/push";
+import type { Database } from "@/lib/db";
 
 /**
  * Web Push（PWA プッシュ通知）配信。
@@ -94,7 +95,7 @@ function targetUrl(locale: string, payload: NotificationPayload): string {
  * 端末を持たない受信者は無視。失効した購読は DB から削除する。
  */
 export async function sendPushToRecipients(
-  db: any,
+  db: Database,
   recipientIds: string[],
   type: NotificationType,
   payload: NotificationPayload,

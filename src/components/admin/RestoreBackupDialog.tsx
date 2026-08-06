@@ -39,6 +39,13 @@ export type RestoreBackupDialogProps = {
 
 const RESTORE_CONFIRM_PHRASE = "RESTORE";
 
+/** 復元範囲の選択肢。値は Server Action の契約なので変更しない */
+const RESTORE_MODES = [
+  { value: "all", labelKey: "backup.restoreModeAll", descriptionKey: "backup.restoreModeAllDesc", mb: 2 },
+  { value: "downloads_only", labelKey: "backup.restoreModeDownloads", descriptionKey: "backup.restoreModeDownloadsDesc", mb: 2 },
+  { value: "selected_tables", labelKey: "backup.restoreModeTables", descriptionKey: "backup.restoreModeTablesDesc", mb: 1 },
+] as const;
+
 const SCHEMA_TABLES_LIST = [
   "users",
   "user_profiles",
@@ -143,57 +150,30 @@ const RestoreBackupDialog = ({
         {/* 復元モード選択セクション */}
         <FormControl component="fieldset" sx={{ width: "100%", mb: 3 }}>
           <FormLabel component="legend" sx={{ fontWeight: "bold", mb: 1, color: "text.primary" }}>
-            復元範囲の設定 (Restore Scope Mode)
+            {tAdmin("backup.restoreScope")}
           </FormLabel>
           <RadioGroup
             value={restoreMode}
-            onChange={(e) => onChangeRestoreMode(e.target.value as any)}
+            onChange={(e) => onChangeRestoreMode(e.target.value as RestoreBackupDialogProps["restoreMode"])}
           >
-            <FormControlLabel
-              value="all"
-              control={<Radio />}
-              label={
-                <Box>
-                  <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                    データベース全体を復元 (Full Database Restore)
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    既存の全データを削除し、バックアップ時点の状態に完全に置き換えます。
-                  </Typography>
-                </Box>
-              }
-              sx={{ mb: 2, alignItems: "flex-start" }}
-            />
-            <FormControlLabel
-              value="downloads_only"
-              control={<Radio />}
-              label={
-                <Box>
-                  <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                    ダウンロード数のみ復元 (Download Counts Only)
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    既存データは一切削除せず、DDoS等でインフレしたプロジェクト・バージョンのダウンロード数値のみをバックアップから復旧・修正します。
-                  </Typography>
-                </Box>
-              }
-              sx={{ mb: 2, alignItems: "flex-start" }}
-            />
-            <FormControlLabel
-              value="selected_tables"
-              control={<Radio />}
-              label={
-                <Box>
-                  <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                    一部のテーブルのみ削除して復元 (Selected Tables)
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    選択したテーブルのデータのみをクリアし、バックアップから復旧します。
-                  </Typography>
-                </Box>
-              }
-              sx={{ mb: 1, alignItems: "flex-start" }}
-            />
+            {RESTORE_MODES.map(({ value, labelKey, descriptionKey, mb }) => (
+              <FormControlLabel
+                key={value}
+                value={value}
+                control={<Radio />}
+                label={
+                  <Box>
+                    <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+                      {tAdmin(labelKey)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {tAdmin(descriptionKey)}
+                    </Typography>
+                  </Box>
+                }
+                sx={{ mb, alignItems: "flex-start" }}
+              />
+            ))}
           </RadioGroup>
         </FormControl>
 
@@ -201,7 +181,7 @@ const RestoreBackupDialog = ({
         {restoreMode === "selected_tables" && (
           <Box sx={{ pl: 4, mb: 3 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
-              対象テーブルを選択してください (Select Tables):
+              {tAdmin("backup.selectTables")}
             </Typography>
             <Box
               sx={{

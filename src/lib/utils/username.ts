@@ -1,5 +1,6 @@
 import { userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import type { Database } from "@/lib/db";
 
 /** username に使用可能な文字は [a-zA-Z0-9_-] のみ（settings.ts の変更バリデーションと一致） */
 function sanitizeBase(raw: string): string {
@@ -20,7 +21,7 @@ function sanitizeBase(raw: string): string {
  * @returns 既存と衝突しない username
  */
 export async function generateUniqueUsername(
-  db: any,
+  db: Database,
   hints: { email?: string | null; name?: string | null }
 ): Promise<string> {
   const source =

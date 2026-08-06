@@ -62,7 +62,7 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
       onClose();
     } catch (error) {
       console.error(error);
-      alert("エラーが発生しました");
+      alert(tCommon("errorOccurred"));
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export default function EditListDialog({ open, onClose, collection, ownerUsernam
       router.push(ownerUsername ? `/profile/${ownerUsername}` : "/");
     } catch (error) {
       console.error(error);
-      alert("エラーが発生しました");
+      alert(tCommon("errorOccurred"));
     } finally {
       setLoading(false);
     }

@@ -4,6 +4,7 @@ import { getAdminDb, getReauthenticatedAdminDb } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 import { dumpToR2, getActor, importBackupData, loadBackupTables, writeAuditLog, RestoreOptions } from "@/lib/backup/core";
 import { loadBackupFromR2 } from "./adminBackupQuery";
+import type { Database } from "@/lib/db";
 
 export type ActionError = { success: false; error: string; message: string };
 
@@ -131,7 +132,7 @@ export const createPreRestoreSnapshot = async () => {
  * 検証済みのテーブルデータで DB を置換します。
  */
 const performRestore = async (
-  db: any,
+  db: Database,
   payload: any,
   snapshotKey: string | undefined,
   actor: { performedBy?: string; performedByEmail?: string },
@@ -190,7 +191,7 @@ export const restoreBackup = async (key: string, totpToken: string, snapshotKey?
  * マージを実行します。
  */
 export const applyMerge = async (key: string, totpToken: string, snapshotKey?: string) => {
-  let db: any, actor: { performedBy?: string; performedByEmail?: string };
+  let db: Database, actor: { performedBy?: string; performedByEmail?: string };
   let payload: any, effectiveSnapshotKey: string;
 
   try {

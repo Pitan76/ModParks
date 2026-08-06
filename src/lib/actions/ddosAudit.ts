@@ -1,6 +1,7 @@
 import { ddosAudit } from "@/db/schema";
 import { getAuditEmail } from "@/lib/auth-helpers";
 import type { DdosAudit } from "@/db/schema";
+import type { Database } from "@/lib/db";
 
 type DdosAction = DdosAudit["action"];
 
@@ -11,7 +12,7 @@ type DdosAction = DdosAudit["action"];
  * performedBy を省略した場合はシステム（自動検知・Cron）による遷移として記録する。
  */
 export async function recordDdosAudit(
-  db: any,
+  db: Database,
   action: DdosAction,
   state: string,
   detail?: Record<string, unknown>,

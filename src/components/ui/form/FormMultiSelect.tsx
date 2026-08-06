@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import FormControl, { FormControlProps } from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -7,6 +9,7 @@ import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import OutlinedInput from "@mui/material/OutlinedInput";
+import { useValidationMessage } from "@/lib/i18n/validationMessage";
 
 export interface FormMultiSelectOption {
   value: string;
@@ -30,6 +33,7 @@ export default function FormMultiSelect({
   renderSelected,
   ...props
 }: FormMultiSelectProps) {
+  const resolveMessage = useValidationMessage();
   const labelId = `${id}-label`;
   const hasError = !!errorMessages && errorMessages.length > 0;
   const currentValues = Array.isArray(value) ? value : [];
@@ -67,7 +71,7 @@ export default function FormMultiSelect({
       </Select>
       {hasError && (
         <Typography color="error" variant="caption">
-          {errorMessages[0]}
+          {resolveMessage(errorMessages)}
         </Typography>
       )}
     </FormControl>

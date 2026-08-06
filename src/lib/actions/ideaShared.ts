@@ -3,9 +3,10 @@ import { findIdeaPostById } from "@/lib/queries/post";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
+import type { Database } from "@/lib/db";
 
 /** アイデアの投稿者・タイトルを取得する（通知の宛先・表示用） */
-export async function getIdeaTarget(db: any, ideaId: string) {
+export async function getIdeaTarget(db: Database, ideaId: string) {
   return db
     .select({ authorId: posts.authorId, title: posts.title, slug: posts.slug })
     .from(posts)
@@ -20,7 +21,7 @@ export function revalidateIdea(ideaId: string) {
 }
 
 /** 投稿者本人か管理者かを判定する */
-export async function canManageIdea(db: any, authorId: string, userId: string): Promise<boolean> {
+export async function canManageIdea(db: Database, authorId: string, userId: string): Promise<boolean> {
   if (authorId === userId) return true;
   const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).get();
   return dbUser?.role === "admin";
@@ -30,7 +31,7 @@ export async function canManageIdea(db: any, authorId: string, userId: string): 
  * アイデアを取得し、操作者が管理権限を持つかを検証する。
  * 失敗時は表示用エラーメッセージ、成功時はアイデア本体を返す。
  */
-export async function loadManageableIdea(db: any, ideaId: string, userId: string, deniedKey: string) {
+export async function loadManageableIdea(db: Database, ideaId: string, userId: string, deniedKey: string) {
   const t = await getServerErrors();
   const idea = await findIdeaPostById(db, ideaId);
   if (!idea) return { error: t("idea.notFound") };
@@ -39,7 +40,7 @@ export async function loadManageableIdea(db: any, ideaId: string, userId: string
 }
 
 /** 返信先の正規化（1階層のみ）。親コメントIDと親投稿者IDを返す */
-export async function resolveCommentParent(db: any, ideaId: string, rawParentId: string | null) {
+export async function resolveCommentParent(db: Database, ideaId: string, rawParentId: string | null) {
   if (!rawParentId) return { parentId: null as string | null, parentAuthorId: null as string | null };
   const parent = await db
     .select({ id: comments.id, authorId: comments.authorId, parentId: comments.parentId })

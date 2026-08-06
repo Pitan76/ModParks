@@ -3,6 +3,7 @@ import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels
 import { MC_VERSIONS, type McVersion } from "@/lib/data/minecraftVersions";
 import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
 import { CONTENT_TYPES } from "@/lib/data/projectTypes";
+import { vk } from "@/lib/validationKeys";
 
 const LICENSES = [
   "MIT",
@@ -52,31 +53,31 @@ const projectSlugSchema = z
   .string()
   .min(3)
   .max(64)
-  .regex(/^[a-z0-9-]+$/, "小文字英数字とハイフンのみ")
+  .regex(/^[a-z0-9-]+$/, vk("slugFormat"))
   .refine(
     (slug) => !(RESERVED_PROJECT_SLUGS as readonly string[]).includes(slug),
-    "この slug は予約語のため使用できません"
+    vk("slugReserved")
   );
 
 export const createProjectSchema = z.object({
-  name:        z.string().min(3, "3文字以上").max(64, "64文字以内"),
+  name:        z.string().min(3, vk("nameMin")).max(64, vk("nameMax")),
   slug:        projectSlugSchema,
-  description: z.string().min(10, "10文字以上").max(2000, "2000文字以内"),
+  description: z.string().min(10, vk("descriptionMin")).max(2000, vk("descriptionMax")),
   descriptionFormat: z.enum(["markdown", "plaintext", "pukiwiki"]).default("markdown").optional(),
   type:        z.enum(CONTENT_TYPES),
-  license:     z.string().min(1, "ライセンスを入力してください").max(64, "64文字以内"),
-  sourceUrl:   z.string().url("有効なURLを入力してください").optional().or(z.literal("")),
+  license:     z.string().min(1, vk("licenseRequired")).max(64, vk("licenseMax")),
+  sourceUrl:   z.string().url(vk("invalidUrl")).optional().or(z.literal("")),
   links:       z.string().optional().or(z.literal("")),
   modrinthId:  z.string().optional().nullable(),
   curseforgeId: z.string().optional().nullable(),
   githubRepo:  z.string().max(140).optional().nullable(),
-  discordWebhookUrl: z.string().url("有効なURLを入力してください").max(255).optional().or(z.literal("")).nullable(),
-  tags:        z.array(z.string().max(32)).max(10, "タグは10個まで"),
+  discordWebhookUrl: z.string().url(vk("invalidUrl")).max(255).optional().or(z.literal("")).nullable(),
+  tags:        z.array(z.string().max(32)).max(10, vk("tagsMax")),
 });
 
 export const updateProjectSchema = createProjectSchema.partial().extend({
   slug: projectSlugSchema.optional(),
-  issueTrackerUrl: z.string().url("有効なURLを入力してください").optional().or(z.literal("")).nullable(),
+  issueTrackerUrl: z.string().url(vk("invalidUrl")).optional().or(z.literal("")).nullable(),
   status: z.enum(["draft", "public", "unlisted", "private"]).optional(),
 });
 
@@ -90,7 +91,7 @@ export const createVersionSchema = z.object({
     .string()
     .min(1)
     .max(32)
-    .regex(/^[0-9a-zA-Z.\-+]+$/, "バージョン番号の形式が不正です"),
+    .regex(/^[0-9a-zA-Z.\-+]+$/, vk("versionNumberFormat")),
   // リソースパック/データパック等はローダーやMCバージョンを持たないため任意
   mcVersions: z.array(z.enum(MC_VERSIONS)).default([]),
   loaders: z.array(z.string()).default([]),
@@ -105,11 +106,11 @@ export const updateVersionSchema = createVersionSchema.partial().extend({
     .string()
     .min(1)
     .max(32)
-    .regex(/^[0-9a-zA-Z.\-+]+$/, "バージョン番号の形式が不正です")
+    .regex(/^[0-9a-zA-Z.\-+]+$/, vk("versionNumberFormat"))
     .optional(),
   mcVersions: z.array(z.enum(MC_VERSIONS)).optional(),
   loaders: z.array(z.string()).optional(),
-  fileUrl: z.string().url("有効なURLを入力してください").optional(),
+  fileUrl: z.string().url(vk("invalidUrl")).optional(),
 });
 
 export type UpdateVersionInput = z.infer<typeof updateVersionSchema>;
@@ -164,14 +165,14 @@ export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 // ---- Idea Schema ----
 
 export const createIdeaSchema = z.object({
-  title:      z.string().min(3, "3文字以上").max(100, "100文字以内"),
-  content:    z.string().min(10, "10文字以上").max(5000, "5000文字以内"),
+  title:      z.string().min(3, vk("titleMin")).max(100, vk("titleMax")),
+  content:    z.string().min(10, vk("ideaContentMin")).max(5000, vk("ideaContentMax")),
   contentFormat: z.enum(["markdown", "plaintext", "pukiwiki"]).optional().default("markdown"),
   visibility: z.enum(["draft", "public", "unlisted", "private"]).optional().default("public"),
 });
 
 export const createIdeaCommentSchema = z.object({
-  content: z.string().min(1, "1文字以上入力してください").max(2000, "2000文字以内"),
+  content: z.string().min(1, vk("commentMin")).max(2000, vk("commentMax")),
   contentFormat: z.enum(["markdown", "plaintext", "pukiwiki"]).optional().default("markdown"),
 });
 

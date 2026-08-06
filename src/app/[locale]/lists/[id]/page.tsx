@@ -12,7 +12,7 @@ import ProjectCard from "@/components/project/ProjectCard";
 import ListActions from "@/components/list/ListActions";
 import FollowListButton from "@/components/list/FollowListButton";
 import AddListToCartButton from "@/components/list/AddListToCartButton";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getDatabase } from "@/lib/db";
 import { collectionFollows } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
@@ -25,9 +25,11 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
   const { locale, id } = await params;
   setRequestLocale(locale);
 
-  const [collection, session] = await Promise.all([
+  const [collection, session, tCommon, tList] = await Promise.all([
     getCollectionById(id),
-    auth()
+    auth(),
+    getTranslations("Common"),
+    getTranslations("List"),
   ]);
 
   if (!collection) {
@@ -66,7 +68,7 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
                 {collection.name}
               </Typography>
               <Chip 
-                label={collection.visibility === "public" ? "公開" : collection.visibility === "unlisted" ? "限定公開" : "非公開"} 
+                label={tCommon(`visibility.${collection.visibility === "public" || collection.visibility === "unlisted" ? collection.visibility : "private"}`)}
                 color={collection.visibility === "public" ? "primary" : "default"}
                 size="small"
               />
@@ -133,7 +135,7 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
         </>
       ) : (
         <Alert severity="info">
-          このリストにはまだプロジェクトが追加されていません。
+          {tList("emptyProjects")}
         </Alert>
       )}
     </Container>

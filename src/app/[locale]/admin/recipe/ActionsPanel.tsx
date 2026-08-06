@@ -190,6 +190,20 @@ export default function ActionsPanel({ state }: { state: RecipeAdminState }) {
             {t("seed.btn")}
           </Button>
         </Box>
+
+        <Divider />
+
+        <Box>
+          <SectionHeader title={t("gcImages.title")} desc={t("gcImages.desc")} />
+          <Stack direction="row" spacing={1}>
+            <Button variant="outlined" color="inherit" onClick={() => state.runGcImages(false)} disabled={loading}>
+              {t("gcImages.countBtn")}
+            </Button>
+            <Button variant="contained" color="error" onClick={() => state.runGcImages(true)} disabled={loading}>
+              {t("gcImages.deleteBtn")}
+            </Button>
+          </Stack>
+        </Box>
       </Stack>
     </Paper>
   );

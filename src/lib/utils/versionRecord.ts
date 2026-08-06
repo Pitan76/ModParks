@@ -1,4 +1,5 @@
 import { versions, versionLoaders, versionMcVersions } from "@/db/schema";
+import type { Database } from "@/lib/db";
 
 /** バージョン本体＋関連テーブル（ローダー / MCバージョン）への挿入に必要な入力 */
 export interface VersionRecordInput {
@@ -21,7 +22,7 @@ export interface VersionRecordInput {
  * versions テーブルと、その検索最適化用の versionLoaders / versionMcVersions を
  * まとめて挿入する共通ヘルパー。手動アップロードと GitHub Release 取り込みで共有する。
  */
-export async function insertVersionRecord(db: any, input: VersionRecordInput): Promise<void> {
+export async function insertVersionRecord(db: Database, input: VersionRecordInput): Promise<void> {
   const stmts = [];
   
   stmts.push(

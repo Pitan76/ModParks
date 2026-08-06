@@ -9,7 +9,7 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
-import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/routing";
 import { useTheme } from "@mui/material/styles";
 import { isLongPressEvent, useLongPressContextMenu } from "./useLongPressContextMenu";
@@ -78,7 +78,7 @@ export function shouldPassthrough(
 export function useContextMenuContext(): ContextMenuContextValue {
   const ctx = React.useContext(ContextMenuContext);
   if (!ctx) {
-    throw new Error("useContextMenu は <ContextMenuProvider> の内側で使ってください");
+    throw new Error("useContextMenu must be used inside <ContextMenuProvider>");
   }
   return ctx;
 }
@@ -88,7 +88,7 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
   const [state, setState] = React.useState<OpenState | null>(null);
   const [toast, setToast] = React.useState<string | null>(null);
   const [isDisabled, setIsDisabled] = React.useState<boolean>(false);
-  const locale = useLocale();
+  const t = useTranslations("ContextMenu");
   const router = useRouter();
 
   const notify = React.useCallback((message: string) => setToast(message), []);
@@ -101,11 +101,6 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
       // ignore
     }
   }, []);
-
-  const browserLabel = locale === "en" ? "Browser menu (Shift + right-click)" : "ブラウザ標準メニュー（Shift+右クリック）";
-  const browserToastLabel = locale === "en"
-    ? "To open the browser's default menu, hold down the Shift key and right-click."
-    : "ブラウザの標準メニューを開くには、Shiftキーを押しながら右クリックしてください。";
 
   const lastTouchRef = useLongPressContextMenu(!isDisabled);
 
@@ -202,28 +197,19 @@ export default function ContextMenuProvider({ children }: { children: React.Reac
           // JS からネイティブメニューは開けないため、Shift+右クリックを案内する項目
           <MenuItem key="browser-hint" onClick={() => {
             close();
-            const confirmDisable = window.confirm(
-              locale === "en"
-                ? "Would you like to disable this custom context menu and always use the browser's default menu? (You can re-enable it in Settings -> Theme Settings)"
-                : "このカスタムコンテキストメニューを無効化し、常にブラウザの標準メニューを表示しますか？（設定 -> テーマ設定から再度有効化できます）"
-            );
-            if (confirmDisable) {
-              window.localStorage.setItem("disable_custom_context_menu", "true");
-              setIsDisabled(true);
-              notify(
-                locale === "en"
-                  ? "Custom context menu disabled. Please right-click again."
-                  : "カスタムコンテキストメニューを無効化しました。もう一度右クリックしてください。"
-              );
-            } else {
-              notify(browserToastLabel);
+            if (!window.confirm(t("disableConfirm"))) {
+              notify(t("browserMenuHint"));
+              return;
             }
+            window.localStorage.setItem("disable_custom_context_menu", "true");
+            setIsDisabled(true);
+            notify(t("disabled"));
           }}>
             <ListItemIcon>
               <OpenInBrowserIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText
-              primary={browserLabel}
+              primary={t("browserMenu")}
               slotProps={{ primary: { variant: "body2", color: "text.secondary" } }}
             />
           </MenuItem>,

@@ -41,6 +41,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
   const router = useRouter();
   const t = useTranslations("Project");
   const tManage = useTranslations("Project.managePage");
+  const tError = useTranslations("ServerErrors");
   
   const formRef = useRef<HTMLFormElement>(null);
   const [dirty, setDirty] = useState(false);
@@ -56,12 +57,12 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
       setToast({ message: tManage("syncSuccess"), severity: "success" });
     } catch (e: any) {
       if (e.message?.includes("Failed to find Server Action") || e.message?.includes("UnrecognizedActionError")) {
-        setToast({ message: "新しいバージョンが反映されました。ページを更新しています...", severity: "info" });
+        setToast({ message: tError("common.reloading"), severity: "info" });
         setTimeout(() => window.location.reload(), 1500);
       } else if (e.message?.includes("CF_API_KEY_MISSING")) {
         setToast({ message: tManage("apiKeyMissing"), severity: "error" });
       } else if (e.message?.includes("CF_SLUG_NOT_FOUND")) {
-        setToast({ message: "CurseForgeで指定されたSlugが見つかりませんでした。正しいか確認してください。", severity: "error" });
+        setToast({ message: tError("project.cfSlugNotFound"), severity: "error" });
       } else {
         setToast({ message: tManage("syncError"), severity: "error" });
       }
@@ -110,14 +111,14 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
         console.error(`Save attempt ${retries} failed:`, err);
         
         if (err?.message?.includes("Failed to find Server Action") || err?.message?.includes("UnrecognizedActionError")) {
-          setToast({ message: "新しいバージョンが反映されました。ページを更新しています...", severity: "info" });
+          setToast({ message: tError("common.reloading"), severity: "info" });
           setPending(false);
           setTimeout(() => window.location.reload(), 1500);
           return;
         }
 
         if (retries >= maxRetries) {
-          setToast({ message: `通信エラーが発生しました（${maxRetries}回再試行失敗）。少し時間を置いてからやり直してください。`, severity: "error" });
+          setToast({ message: tError("common.networkRetryFailed", { count: maxRetries }), severity: "error" });
           setPending(false);
         } else {
           // リトライ前に待機 (1回目: 1秒, 2回目: 2秒...)

@@ -2,7 +2,9 @@
   "Metadata": {
     "title": "ModParks - Minecraft Mod & Plugin Platform",
     "description": "A Japan-based platform to easily publish, search, and download Minecraft Java Edition Mods and Plugins.",
-    "keywords": "Minecraft, Mod, Plugin, Java Edition, Fabric, Forge, Paper"
+    "keywords": "Minecraft, Mod, Plugin, Java Edition, Fabric, Forge, Paper",
+    "projectFallbackDescription": "Mods and plugins for Minecraft: Java Edition",
+    "profileDescription": "Profile page of {name}."
   },
   "Common": {
     "appName": "ModParks",
@@ -57,6 +59,12 @@
       "markdown": "Markdown",
       "plaintext": "Plain Text",
       "pukiwiki": "PukiWiki"
+    },
+    "errorOccurred": "An error occurred",
+    "retry": "Retry",
+    "errorPage": {
+      "title": "Something went wrong",
+      "description": "The page could not be loaded because an error occurred."
     }
   },
   "Comment": {
@@ -308,7 +316,8 @@
         "title": "Read info from .jar file",
         "select": "Select File",
         "fetchSuccess": "Data fetched and applied to the form.",
-        "fetchError": "Failed to read information"
+        "fetchError": "Failed to read information",
+        "hint": "Project information is read automatically from files such as fabric.mod.json, META-INF/mods.toml, META-INF/neoforge.mods.toml and mcmod.info."
       }
     },
     "edit": {
@@ -1188,7 +1197,15 @@
       "mergeTable": "Table",
       "mergeStrategy": "Strategy",
       "mergeNoChanges": "No changes to import",
-      "mergeReviewNote": "Differences in tables that are unsafe to merge automatically (users, credentials). These are not changed by this run."
+      "mergeReviewNote": "Differences in tables that are unsafe to merge automatically (users, credentials). These are not changed by this run.",
+      "restoreScope": "Restore scope",
+      "restoreModeAll": "Full database restore",
+      "restoreModeAllDesc": "Deletes all existing data and replaces it entirely with the state at the time of the backup.",
+      "restoreModeDownloads": "Download counts only",
+      "restoreModeDownloadsDesc": "Deletes nothing. Only restores project and version download counts that were inflated by DDoS or similar.",
+      "restoreModeTables": "Selected tables",
+      "restoreModeTablesDesc": "Clears only the selected tables and restores them from the backup.",
+      "selectTables": "Select the tables to restore"
     },
     "audit": {
       "title": "Audit Logs",
@@ -1818,7 +1835,9 @@
       "exportMd": "Markdown Format",
       "exportTxt": "Text Format",
       "exportFormat": "Format",
-      "exportBtn": "Export"
+      "exportBtn": "Export",
+      "deletePasswordPrompt": "Enter your password (or two-factor code) to delete your account.",
+      "deactivatePasswordPrompt": "Enter your password (or two-factor code) to deactivate your account."
     },
     "notifications": {
       "title": "Notifications",
@@ -1921,7 +1940,8 @@
     "iconUrlLabel": "Icon URL (or Upload)",
     "iconUrlHelper": "* Upload feature is coming soon. Please enter URL for now.",
     "noProjectsInList": "There are no projects in the list.",
-    "preview": "Preview:"
+    "preview": "Preview:",
+    "emptyProjects": "No projects have been added to this list yet."
   },
   "Notifications": {
     "title": "Notifications",
@@ -1974,17 +1994,26 @@
     "unpin": "Unpin",
     "pinned": "Pinned",
     "unpinned": "Unpinned",
-    "pinLimit": "You can pin up to {max} items"
+    "pinLimit": "You can pin up to {max} items",
+    "browserMenu": "Browser menu (Shift + right-click)",
+    "browserMenuHint": "To open the browser's default menu, hold down the Shift key and right-click.",
+    "disableConfirm": "Would you like to disable this custom context menu and always use the browser's default menu? (You can re-enable it in Settings -> Theme Settings)",
+    "disabled": "Custom context menu disabled. Please right-click again."
   },
   "ServerErrors": {
     "common": {
       "notFound": "Not found",
-      "forbidden": "You do not have permission"
+      "forbidden": "You do not have permission",
+      "staleAction": "A new version seems to have been released. Reload the page and try again.",
+      "serverError": "A server-side error occurred. Try again later, and contact the operators if it persists.",
+      "reloading": "A new version has been deployed. Reloading the page...",
+      "networkRetryFailed": "A network error occurred ({count} retries failed). Please wait a moment and try again."
     },
     "project": {
       "slugTaken": "This slug is already used by another project.",
       "invalidDiscordWebhook": "Enter a valid Discord webhook URL.",
-      "invalidGithubRepo": "Enter it as 'owner/repo' or as a GitHub repository URL."
+      "invalidGithubRepo": "Enter it as 'owner/repo' or as a GitHub repository URL.",
+      "cfSlugNotFound": "The slug specified for CurseForge was not found. Check that it is correct."
     },
     "version": {
       "fileRequired": "Upload a file or enter an external URL.",
@@ -2071,5 +2100,25 @@
       "comments:write": "Post comments as you",
       "notifications:read": "Read your notifications"
     }
+  },
+  "Validation": {
+    "slugFormat": "Lowercase letters, digits and hyphens only",
+    "slugReserved": "This slug is reserved and cannot be used",
+    "nameMin": "At least 3 characters",
+    "nameMax": "64 characters or fewer",
+    "descriptionMin": "At least 10 characters",
+    "descriptionMax": "2000 characters or fewer",
+    "licenseRequired": "Enter a license",
+    "licenseMax": "64 characters or fewer",
+    "invalidUrl": "Enter a valid URL",
+    "tagsMax": "Up to 10 tags",
+    "versionNumberFormat": "Invalid version number format",
+    "titleMin": "At least 3 characters",
+    "titleMax": "100 characters or fewer",
+    "ideaContentMin": "At least 10 characters",
+    "ideaContentMax": "5000 characters or fewer",
+    "commentMin": "Enter at least 1 character",
+    "commentMax": "2000 characters or fewer",
+    "slugTaken": "This slug is already used by another project."
   }
 }

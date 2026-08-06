@@ -28,10 +28,16 @@ export type BatchImportClientProps = {
   hasCurseForgeProject: boolean;
 };
 
-const toDisplayError = (err: unknown, fallback: string): string => {
+/**
+ * Server Action 呼び出しの例外を表示用メッセージへ変換する。
+ * @param err 捕捉した例外
+ * @param fallback 該当パターンが無い場合の代替文言
+ * @param tError ServerErrors.common の翻訳関数
+ */
+const toDisplayError = (err: unknown, fallback: string, tError: (key: string) => string): string => {
   const raw = err instanceof Error ? err.message : String(err);
-  if (raw.includes("Failed to find Server Action")) return "新しいバージョンが公開されたようです。ページを再読み込みしてからもう一度お試しください。";
-  if (raw.includes("Server Components render") || raw.includes("digest")) return "サーバー側でエラーが発生しました。時間をおいて再度お試しください。解決しない場合は運営者にお問い合わせください。";
+  if (raw.includes("Failed to find Server Action")) return tError("staleAction");
+  if (raw.includes("Server Components render") || raw.includes("digest")) return tError("serverError");
   return raw || fallback;
 };
 
@@ -41,6 +47,7 @@ const toDisplayError = (err: unknown, fallback: string): string => {
 const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProject }: BatchImportClientProps) => {
   const t = useTranslations("Project");
   const tSettings = useTranslations("Settings");
+  const tError = useTranslations("ServerErrors.common");
   const [projects, setProjects] = useState<ImportedProject[]>([]);
   const [source, setSource] = useState<"modrinth" | "curseforge">("modrinth");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -66,7 +73,7 @@ const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProj
       setSource(targetSource);
       setSelected(new Set(result.projects.map(p => p.id)));
     } catch (err: unknown) {
-      setError(toDisplayError(err, t("fetchFailed", { source: targetSource })));
+      setError(toDisplayError(err, t("fetchFailed", { source: targetSource }), tError));
     } finally {
       setLoading(false);
     }
@@ -103,7 +110,7 @@ const BatchImportClient = ({ hasModrinthKey, hasCurseForgeKey, hasCurseForgeProj
       setProjects([]);
       setSelected(new Set());
     } catch (err: unknown) {
-      setError(toDisplayError(err, t("importFail")));
+      setError(toDisplayError(err, t("importFail"), tError));
     } finally {
       setImporting(false);
     }

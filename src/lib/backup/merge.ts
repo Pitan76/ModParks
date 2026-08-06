@@ -17,6 +17,7 @@ import {
 } from "@/lib/backup/core";
 import { MERGE_POLICIES } from "@/lib/backup/mergePolicy";
 import { getTombstonedKeys, recordKeyFromRow } from "@/lib/backup/tombstone";
+import type { Database } from "@/lib/db";
 
 /** テーブル1つ分のマージ結果の内訳 */
 export interface TableMergeSummary {
@@ -60,7 +61,7 @@ function updatedAtValue(row: Record<string, any>): number | null {
  * この関数はDBを変更しません。
  */
 async function computeMerge(
-  db: any,
+  db: Database,
   tables: Record<string, any[]>
 ): Promise<{ plan: MergePlan; operations: MergeOperations }> {
   const summaries: TableMergeSummary[] = [];
@@ -195,7 +196,7 @@ async function computeMerge(
  * マージ内容を試算します（DBは変更しません）。
  * 管理者に確認させるための要約を返します。
  */
-export async function planMerge(db: any, payload: unknown): Promise<MergePlan> {
+export async function planMerge(db: Database, payload: unknown): Promise<MergePlan> {
   const tables = await loadBackupTables(payload);
   const { plan } = await computeMerge(db, tables);
   return plan;
@@ -215,7 +216,7 @@ function primaryKeyCondition(tableObj: any, table: string, row: Record<string, a
  * 現行DBが変化していた場合もその時点の状態に基づいて適用されます。
  * 実際に適用した件数を返すので、確認時の要約と突き合わせられます。
  */
-export async function applyMerge(db: any, payload: unknown): Promise<MergePlan> {
+export async function applyMerge(db: Database, payload: unknown): Promise<MergePlan> {
   const tables = await loadBackupTables(payload);
   const { plan, operations } = await computeMerge(db, tables);
 

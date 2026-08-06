@@ -5,11 +5,12 @@ import { projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { findProjectPostById } from "@/lib/queries/post";
+import type { Database } from "@/lib/db";
 
 /**
  * 外部プラットフォーム（Modrinth, CurseForge）からプロジェクトのダウンロード数を同期するシステム関数
  */
-export const syncExternalProjectDataSystem = async (db: any, project: any, settings: any) => {
+export const syncExternalProjectDataSystem = async (db: Database, project: any, settings: any) => {
   let newExtDl = 0;
   let modrinthDl = 0;
   let curseforgeDl = 0;

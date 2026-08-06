@@ -8,6 +8,7 @@
  */
 import { deletedRecords } from "@/db/schema";
 import { TABLE_PRIMARY_KEYS } from "@/lib/backup/core";
+import type { Database } from "@/lib/db";
 
 /**
  * 墓標を意図的に記録していない削除箇所。
@@ -49,7 +50,7 @@ export function recordKeyFromRow(tableName: string, row: Record<string, any>): s
  * 削除操作自体を失敗させるより軽微だからです。
  */
 export async function recordDeletion(
-  db: any,
+  db: Database,
   tableName: string,
   recordKeys: string | string[]
 ) {
@@ -74,7 +75,7 @@ export async function recordDeletion(
  * 指定テーブルについて、墓標に載っている主キーの集合を返します。
  * マージ時に「復活させてはいけない行」を判定するために使います。
  */
-export async function getTombstonedKeys(db: any, tableName: string): Promise<Set<string>> {
+export async function getTombstonedKeys(db: Database, tableName: string): Promise<Set<string>> {
   const { eq } = await import("drizzle-orm");
 
   const rows = await db

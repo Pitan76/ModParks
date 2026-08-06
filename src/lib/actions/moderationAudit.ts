@@ -1,6 +1,7 @@
 import { moderationAudit } from "@/db/schema";
 import { getAuditEmail } from "@/lib/auth-helpers";
 import type { ModerationAudit } from "@/db/schema";
+import type { Database } from "@/lib/db";
 
 type ModerationAction = ModerationAudit["action"];
 
@@ -11,7 +12,7 @@ type ModerationAction = ModerationAudit["action"];
  * （呼び出し側は既に権限チェック済みの管理操作を完了している）
  */
 export async function recordModerationAudit(
-  db: any,
+  db: Database,
   action: ModerationAction,
   targetId: string,
   performedBy: string,

@@ -9,6 +9,7 @@ import { alias } from "drizzle-orm/sqlite-core";
 import { revalidatePath } from "next/cache";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 import { toggleUserSuspension } from "@/lib/actions/admin/users";
+import type { Database } from "@/lib/db";
 
 /**
  * ユーザーがプロジェクトを通報する Server Action
@@ -58,7 +59,7 @@ export async function createReport(
  * 通報だけでは何も自動で起きないため、気づかれないと放置される。
  * 通知の失敗で通報そのものを失敗させたくないので、ここで握る。
  */
-async function notifyNewReport(db: any) {
+async function notifyNewReport(db: Database) {
   try {
     const [{ getAdminWebhookUrl }, { buildReportQueueEmbed, sendTrustAlert }] = await Promise.all([
       import("@/lib/usage/webhook"),

@@ -1,4 +1,5 @@
 import * as schema from "@/db/schema";
+import type { Database } from "@/lib/db";
 
 export { SCHEMA_TABLES, TABLE_RESTORE_ORDER, TABLE_PRIMARY_KEYS } from "./schemaConfig";
 export { BACKUP_FORMAT_VERSION, dumpToR2, pruneOldBackups, runAutoBackup } from "./backupExport";
@@ -27,7 +28,7 @@ export type AuditEntry = {
 /**
  * バックアップ操作を監査ログに記録します。
  */
-export const writeAuditLog = async (db: any, entry: AuditEntry) => {
+export const writeAuditLog = async (db: Database, entry: AuditEntry) => {
   try {
     await db.insert(schema.backupAudit).values({
       action: entry.action,
@@ -46,7 +47,7 @@ export const writeAuditLog = async (db: any, entry: AuditEntry) => {
 /**
  * 監査ログに残す操作者情報を取得します。
  */
-export const getActor = async (db: any, userId: string) => {
+export const getActor = async (db: Database, userId: string) => {
   try {
     const { eq } = await import("drizzle-orm");
     const user = await db

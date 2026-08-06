@@ -241,7 +241,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
       >
         <DialogContentText sx={{ mb: 2 }}>{t("account.deleteAccountConfirm")}</DialogContentText>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          アカウントを削除するには、パスワード（または2要素認証コード）を入力してください。
+          {t("account.deletePasswordPrompt")}
         </Typography>
         <FormTextField
           autoFocus
@@ -273,7 +273,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
       >
         <DialogContentText sx={{ mb: 2 }}>{t("account.deactivateAccountConfirm")}</DialogContentText>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          アカウントを無効化するには、パスワード（または2要素認証コード）を入力してください。
+          {t("account.deactivatePasswordPrompt")}
         </Typography>
         <FormTextField
           autoFocus

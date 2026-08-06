@@ -4,6 +4,7 @@ import { posts, projects, projectTags } from "@/db/schema";
 import { createProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
+import { vk } from "@/lib/validationKeys";
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     const existingProject = await db.select({ id: posts.id }).from(posts).where(and(eq(posts.kind, "project"), eq(posts.slug, slug))).get();
     if (existingProject) {
-      return NextResponse.json({ error: { slug: ["このスラッグは既に他のプロジェクトで使用されています。"] } }, { status: 400 });
+      return NextResponse.json({ error: { slug: [vk("slugTaken")] } }, { status: 400 });
     }
 
     const { userSettings, ideas } = await import("@/db/schema");

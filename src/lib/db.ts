@@ -13,6 +13,12 @@ if (process.env.NODE_ENV === "development") {
   }
 }
 
+/**
+ * schema を紐付けた Drizzle インスタンスの型。
+ * ヘルパーへ db を引き回す際は any ではなくこれを使う。
+ */
+export type Database = DrizzleD1Database<typeof schema>;
+
 /** Cloudflare Workers バインディングの型 */
 export type Env = {
   DB: D1Database;
@@ -29,7 +35,7 @@ export type Env = {
  * @param d1 Cloudflare D1データベースのバインディング
  * @returns schemaを設定済みの Drizzle D1 Database インスタンス
  */
-export const getDb = (d1: D1Database): DrizzleD1Database<typeof schema> => drizzle(d1, { schema });
+export const getDb = (d1: D1Database): Database => drizzle(d1, { schema });
 
 // HMRで localD1Proxy が消失しないよう、globalThisにキャッシュする
 const globalForD1 = globalThis as unknown as {
@@ -64,7 +70,7 @@ export const getD1 = async (): Promise<D1Database> => {
 
 // 同時リクエストで初期化が多重実行されないよう、値ではなくPromiseをキャッシュする
 const globalForDb = globalThis as unknown as {
-  cachedDbPromise?: Promise<DrizzleD1Database<typeof schema>>;
+  cachedDbPromise?: Promise<Database>;
 };
 
 /**
@@ -74,7 +80,7 @@ const globalForDb = globalThis as unknown as {
  * ローカル開発環境では、Wrangler Proxyの通信オーバーヘッドを避けるため、
  * .wranglerディレクトリ内のSQLiteファイルを直接 node:sqlite でオープンします。
  */
-export const getDatabase = async (): Promise<DrizzleD1Database<typeof schema>> => {
+export const getDatabase = async (): Promise<Database> => {
   if (!globalForDb.cachedDbPromise) {
     // 失敗したPromiseを残すと以降のリクエストが永続的に失敗するため破棄する
     globalForDb.cachedDbPromise = initDatabase().catch((err) => {
@@ -86,7 +92,7 @@ export const getDatabase = async (): Promise<DrizzleD1Database<typeof schema>> =
 };
 
 /** getDatabase の実体。キャッシュ判定を持たない初期化処理。 */
-const initDatabase = async (): Promise<DrizzleD1Database<typeof schema>> => {
+const initDatabase = async (): Promise<Database> => {
   if (
     process.env.NODE_ENV === "development" &&
     process.env.NEXT_RUNTIME === "nodejs"
@@ -94,7 +100,7 @@ const initDatabase = async (): Promise<DrizzleD1Database<typeof schema>> => {
     try {
       const { createLocalSqliteDb } = await import("./db-local");
       const localDb = await createLocalSqliteDb();
-      if (localDb) return localDb as unknown as DrizzleD1Database<typeof schema>;
+      if (localDb) return localDb as unknown as Database;
     } catch (err) {
       console.warn("[D1 Local] Failed to connect directly to SQLite, falling back to wrangler proxy:", err);
     }

@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { notifyNewProject } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
+import type { Database } from "@/lib/db";
 
 type PublishProject = {
   slug: string;
@@ -21,7 +22,7 @@ type PublishProject = {
 };
 
 /** 下書き→公開の初回公開時のみ、作者フォロワーへ新プロジェクト通知を送る */
-async function maybeNotifyPublish(db: any, project: PublishProject, newSlug: string, newVisibility: string | undefined): Promise<void> {
+async function maybeNotifyPublish(db: Database, project: PublishProject, newSlug: string, newVisibility: string | undefined): Promise<void> {
   if (project.visibility !== "draft") return;
   if (newVisibility !== "public" && newVisibility !== "unlisted") return;
 

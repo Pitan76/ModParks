@@ -8,6 +8,7 @@
 import { githubInstallations } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { normalizeGithubRepo } from "@/lib/utils/github";
+import type { Database } from "@/lib/db";
 import {
   createInstallationToken,
   findInstallationIdForRepo,
@@ -20,7 +21,7 @@ import {
  * 呼び出し側は公開リポジトリとして（サーバの GITHUB_TOKEN で）取得する。
  */
 export async function getRepoAccessToken(
-  db: any,
+  db: Database,
   userId: string | null | undefined,
   repo: string
 ): Promise<string | undefined> {

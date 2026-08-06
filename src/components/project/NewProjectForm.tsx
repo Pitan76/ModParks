@@ -251,7 +251,7 @@ const NewProjectForm = ({
               </Button>
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              fabric.mod.json, META-INF/mods.toml, META-INF/neoforge.mods.toml, mcmod.info 等のファイルからプロジェクト情報を自動取得します。
+              {t("create.jar.hint")}
             </Typography>
             {jarError && <Alert severity="error" sx={{ mt: 2 }}>{jarError}</Alert>}
             {jarData && <Alert severity="success" sx={{ mt: 2 }}>{t("create.jar.fetchSuccess")}</Alert>}

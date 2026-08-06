@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
+import type { Database } from "@/lib/db";
 
 /**
  * 認証済みセッションとDBインスタンスを一括で取得するヘルパー。
@@ -19,7 +20,7 @@ export async function getAuthenticatedDb() {
  * users が入れ替わってもログを読めるよう、操作時点の値を控えておきます。
  * 取得失敗はログ記録の付加情報が欠けるだけなので、例外にせず undefined を返します。
  */
-export async function getAuditEmail(db: any, userId: string): Promise<string | undefined> {
+export async function getAuditEmail(db: Database, userId: string): Promise<string | undefined> {
   try {
     const { users } = await import("@/db/schema");
     const { eq } = await import("drizzle-orm");
@@ -81,7 +82,7 @@ export async function getReauthenticatedAdminDb(totpToken: string) {
  * プロジェクトの編集権限（オーナー、メンバー、管理者）を確認するヘルパー。
  * 権限がない場合は "Forbidden" エラーをスローします。
  */
-export async function assertProjectAccess(db: any, project: { id: string; authorId: string }, session: any) {
+export async function assertProjectAccess(db: Database, project: { id: string; authorId: string }, session: any) {
   if (project.authorId === session.user.id) {
     return true; // Author
   }

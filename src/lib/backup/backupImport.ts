@@ -1,5 +1,6 @@
 import { getTableColumns, eq } from "drizzle-orm";
 import { SCHEMA_TABLES, TABLE_RESTORE_ORDER } from "./schemaConfig";
+import type { Database } from "@/lib/db";
 
 export const SUPPORTED_BACKUP_VERSIONS = ["1.0"];
 const D1_MAX_BOUND_PARAMS = 100;
@@ -95,7 +96,7 @@ const chunkRows = (rows: any[]): any[][] => {
  * 指定されたテーブルデータを用いてデータベースをリストアします。
  */
 export const importBackupData = async (
-  db: any,
+  db: Database,
   tablesData: Record<string, any[]>,
   options?: RestoreOptions
 ) => {

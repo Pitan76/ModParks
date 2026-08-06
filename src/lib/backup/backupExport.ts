@@ -1,5 +1,6 @@
 import { SCHEMA_TABLES } from "./schemaConfig";
 import { writeAuditLog } from "./core";
+import type { Database } from "@/lib/db";
 
 export const BACKUP_FORMAT_VERSION = "1.0";
 
@@ -47,7 +48,7 @@ const mirrorToDrive = async (key: string, jsonStr: string): Promise<DriveMirrorR
 /**
  * 全テーブルのデータをダンプして R2 に保存し、そのキーを返します。
  */
-export const dumpToR2 = async (db: any, prefix: "backup" | "snapshot") => {
+export const dumpToR2 = async (db: Database, prefix: "backup" | "snapshot") => {
   const { SENSITIVE_TABLES, encryptJson } = await import("@/lib/backup/crypto");
 
   const backupData: Record<string, any> = {};
@@ -98,7 +99,7 @@ export const pruneOldBackups = async (keepCount: number): Promise<string[]> => {
 /**
  * cron から呼ばれる自動バックアップ。
  */
-export const runAutoBackup = async (db: any) => {
+export const runAutoBackup = async (db: Database) => {
   const { getAppSettings } = await import("@/lib/config/readSettings");
   const settings = await getAppSettings();
 
