@@ -2024,7 +2024,8 @@
       "notFound": "Version not found",
       "notInProject": "This version does not belong to the specified project",
       "noFileUrl": "This version has no file URL",
-      "recipeDomainNotAllowed": "Recipes cannot be extracted from this external URL domain"
+      "recipeDomainNotAllowed": "Recipes cannot be extracted from this external URL domain",
+      "deleteFailed": "Failed to delete the version"
     },
     "member": {
       "userNotFound": "User not found",

@@ -2032,7 +2032,8 @@
       "notFound": "バージョンが見つかりません",
       "notInProject": "このバージョンは対象のプロジェクトに属していません",
       "noFileUrl": "このバージョンにはファイルURLがありません",
-      "recipeDomainNotAllowed": "この外部URLのドメインからはレシピを抽出できません"
+      "recipeDomainNotAllowed": "この外部URLのドメインからはレシピを抽出できません",
+      "deleteFailed": "バージョンの削除に失敗しました"
     },
     "member": {
       "userNotFound": "ユーザーが見つかりません",
