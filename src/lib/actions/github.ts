@@ -215,11 +215,25 @@ export async function importGithubReleaseSystem(
   // updatedAt は posts が持つ（projects 側には無い）
   await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
-  const fullProject = await db.select().from(projects).where(eq(projects.id, project.id)).get();
-  if (fullProject) {
+  // 通知は projects 側（アイコン・Webhook）と posts 側（タイトル）の双方を必要とする
+  const notifyTarget = await db
+    .select({
+      id: projects.id,
+      iconUrl: projects.iconUrl,
+      discordWebhookUrl: projects.discordWebhookUrl,
+      title: posts.title,
+      slug: posts.slug,
+      authorId: posts.authorId,
+    })
+    .from(projects)
+    .innerJoin(posts, eq(posts.id, projects.id))
+    .where(eq(projects.id, project.id))
+    .get();
+
+  if (notifyTarget) {
     after(async () => {
       await scanVersionFile(db, id, stored.fileUrl, asset.name);
-      await notifyNewVersion(db, fullProject, versionNumber);
+      await notifyNewVersion(db, notifyTarget, versionNumber);
     });
   }
 
