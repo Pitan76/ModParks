@@ -2007,18 +2007,24 @@
       "staleAction": "A new version seems to have been released. Reload the page and try again.",
       "serverError": "A server-side error occurred. Try again later, and contact the operators if it persists.",
       "reloading": "A new version has been deployed. Reloading the page...",
-      "networkRetryFailed": "A network error occurred ({count} retries failed). Please wait a moment and try again."
+      "networkRetryFailed": "A network error occurred ({count} retries failed). Please wait a moment and try again.",
+      "settingsNotFound": "Settings not found"
     },
     "project": {
       "slugTaken": "This slug is already used by another project.",
       "invalidDiscordWebhook": "Enter a valid Discord webhook URL.",
       "invalidGithubRepo": "Enter it as 'owner/repo' or as a GitHub repository URL.",
-      "cfSlugNotFound": "The slug specified for CurseForge was not found. Check that it is correct."
+      "cfSlugNotFound": "The slug specified for CurseForge was not found. Check that it is correct.",
+      "notFound": "Project not found"
     },
     "version": {
       "fileRequired": "Upload a file or enter an external URL.",
       "disallowedDomain": "That domain is not allowed. Use a GitHub, Modrinth or CurseForge URL.",
-      "uploadedFileUrlImmutable": "The URL of a directly uploaded file cannot be changed."
+      "uploadedFileUrlImmutable": "The URL of a directly uploaded file cannot be changed.",
+      "notFound": "Version not found",
+      "notInProject": "This version does not belong to the specified project",
+      "noFileUrl": "This version has no file URL",
+      "recipeDomainNotAllowed": "Recipes cannot be extracted from this external URL domain"
     },
     "member": {
       "userNotFound": "User not found",
@@ -2043,6 +2049,13 @@
       "modrinthAuthFailed": "Modrinth authentication failed. Check that the API key (Personal Access Token) saved in settings is correct. A PAT starts with 'mrp_'.",
       "curseforgeNotVerifiedDetail": "CurseForge ownership is not verified yet. Verify ownership in settings.",
       "curseforgeNotVerified": "CurseForge ownership is not verified yet."
+    },
+    "github": {
+      "notLinked": "No GitHub repository is linked to this project",
+      "invalidRepo": "The linked GitHub repository is not valid",
+      "releaseNotFound": "No release found in the linked repository",
+      "assetNotFound": "No downloadable .jar or .zip asset found in the release",
+      "assetUrlNotAllowed": "The release asset URL is not on an allowed domain"
     }
   },
   "Cart": {

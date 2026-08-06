@@ -18,6 +18,35 @@ import { findProjectPostBySlug } from "@/lib/queries/post";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";
 
 /**
+ * バージョン単体を操作する Server Action の共通前処理。
+ *
+ * プロジェクト解決 → 編集権限 → バージョン解決 → 所属確認 を 1 つにまとめる。
+ * 個別に書くと所属確認の抜けが他プロジェクトのバージョンへの操作を許してしまうため、
+ * ここに集約して同じ順序で必ず通す。
+ *
+ * @returns 失敗時は表示用エラー、成功時は接続・プロジェクト・バージョン
+ */
+async function loadManageableVersion(versionId: string, projectSlug: string) {
+  const t = await getServerErrors();
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await findProjectPostBySlug(db, projectSlug);
+  if (!project) return { error: t("project.notFound") };
+
+  try {
+    await assertProjectAccess(db, project, session);
+  } catch {
+    return { error: t("common.forbidden") };
+  }
+
+  const version = await db.select().from(versions).where(eq(versions.id, versionId)).get();
+  if (!version) return { error: t("version.notFound") };
+  if (version.projectId !== project.id) return { error: t("version.notInProject") };
+
+  return { db, project, version };
+}
+
+/**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
  */
 export const createVersion = async (projectSlug: string, formData: FormData) => {
@@ -182,26 +211,9 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
  * プロジェクトのバージョン（ファイル）を削除する Server Action。
  */
 export const deleteVersion = async (versionId: string, projectSlug: string) => {
-  const { db, session } = await getAuthenticatedDb();
-
-  const project = await findProjectPostBySlug(db, projectSlug);
-
-  if (!project) return { error: "Project not found" };
-
-  try {
-    await assertProjectAccess(db, project, session);
-  } catch (e) {
-    return { error: "Forbidden" };
-  }
-
-  const version = await db
-    .select()
-    .from(versions)
-    .where(eq(versions.id, versionId))
-    .get();
-
-  if (!version) return { error: "Version not found" };
-  if (version.projectId !== project.id) return { error: "Forbidden: Version does not belong to this project" };
+  const loaded = await loadManageableVersion(versionId, projectSlug);
+  if ("error" in loaded) return loaded;
+  const { db, project, version } = loaded;
 
   const r2Key = getR2KeyFromUrl(version.fileUrl);
   if (r2Key) {
@@ -226,26 +238,9 @@ export const deleteVersion = async (versionId: string, projectSlug: string) => {
  * バージョンのアーカイブ状態を切り替える Server Action。
  */
 export const setVersionArchived = async (versionId: string, projectSlug: string, archived: boolean) => {
-  const { db, session } = await getAuthenticatedDb();
-
-  const project = await findProjectPostBySlug(db, projectSlug);
-
-  if (!project) return { error: "Project not found" };
-
-  try {
-    await assertProjectAccess(db, project, session);
-  } catch (e) {
-    return { error: "Forbidden" };
-  }
-
-  const version = await db
-    .select()
-    .from(versions)
-    .where(eq(versions.id, versionId))
-    .get();
-
-  if (!version) return { error: "Version not found" };
-  if (version.projectId !== project.id) return { error: "Forbidden: Version does not belong to this project" };
+  const loaded = await loadManageableVersion(versionId, projectSlug);
+  if ("error" in loaded) return loaded;
+  const { db } = loaded;
 
   await db
     .update(versions)

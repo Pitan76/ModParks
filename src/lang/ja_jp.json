@@ -2015,18 +2015,24 @@
       "staleAction": "新しいバージョンが公開されたようです。ページを再読み込みしてからもう一度お試しください。",
       "serverError": "サーバー側でエラーが発生しました。時間をおいて再度お試しください。解決しない場合は運営者にお問い合わせください。",
       "reloading": "新しいバージョンが反映されました。ページを更新しています...",
-      "networkRetryFailed": "通信エラーが発生しました（{count}回再試行失敗）。少し時間を置いてからやり直してください。"
+      "networkRetryFailed": "通信エラーが発生しました（{count}回再試行失敗）。少し時間を置いてからやり直してください。",
+      "settingsNotFound": "設定が見つかりません"
     },
     "project": {
       "slugTaken": "このスラッグは既に他のプロジェクトで使用されています。",
       "invalidDiscordWebhook": "Discord の Webhook URL を入力してください。",
       "invalidGithubRepo": "'owner/repo' 形式、または GitHub リポジトリの URL を入力してください。",
-      "cfSlugNotFound": "CurseForge で指定された Slug が見つかりませんでした。正しいか確認してください。"
+      "cfSlugNotFound": "CurseForge で指定された Slug が見つかりませんでした。正しいか確認してください。",
+      "notFound": "プロジェクトが見つかりません"
     },
     "version": {
       "fileRequired": "ファイルをアップロードするか、外部URLを入力してください",
       "disallowedDomain": "許可されていないドメインのURLです。GitHub, Modrinth, CurseForge のURLを使用してください。",
-      "uploadedFileUrlImmutable": "直接アップロードされたファイルはURLを変更できません。"
+      "uploadedFileUrlImmutable": "直接アップロードされたファイルはURLを変更できません。",
+      "notFound": "バージョンが見つかりません",
+      "notInProject": "このバージョンは対象のプロジェクトに属していません",
+      "noFileUrl": "このバージョンにはファイルURLがありません",
+      "recipeDomainNotAllowed": "この外部URLのドメインからはレシピを抽出できません"
     },
     "member": {
       "userNotFound": "ユーザーが見つかりません",
@@ -2051,6 +2057,13 @@
       "modrinthAuthFailed": "Modrinthの認証に失敗しました。設定画面に登録したAPIキー (Personal Access Token) が正しいか確認してください。PATは 'mrp_' から始まります。",
       "curseforgeNotVerifiedDetail": "CurseForge の所有確認が未完了です。設定画面で所有確認を行ってください。",
       "curseforgeNotVerified": "CurseForge の所有確認が未完了です。"
+    },
+    "github": {
+      "notLinked": "このプロジェクトに GitHub リポジトリが紐付いていません",
+      "invalidRepo": "紐付いている GitHub リポジトリの指定が不正です",
+      "releaseNotFound": "対象のリポジトリに Release が見つかりません",
+      "assetNotFound": "Release にダウンロード可能な .jar / .zip がありません",
+      "assetUrlNotAllowed": "Release アセットのURLが許可されていないドメインです"
     }
   },
   "Cart": {
