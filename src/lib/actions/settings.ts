@@ -5,6 +5,7 @@ import { users, userProfiles, userSettings, apiKeys, accounts, authenticators } 
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 
 /**
@@ -140,6 +141,7 @@ export const disconnectGoogle = async () => {
  * プロフィール上でのGitHubリンク表示・非表示を切り替える Server Action。
  */
 export const toggleGithubVisibility = async (show: boolean) => {
+  const t = await getServerErrors();
   const { db, userId } = await getAuthenticatedDb();
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
@@ -203,6 +205,7 @@ export const updateIntegrations = async (modrinthKey: string) => {
  * 初回オンボーディング完了をマークする Server Action。
  */
 export const completeOnboarding = async () => {
+  const t = await getServerErrors();
   const { db, userId } = await getAuthenticatedDb();
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();

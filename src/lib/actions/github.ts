@@ -26,6 +26,7 @@ import {
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { getRepoAccessToken } from "@/lib/utils/githubRepoAccess";
 import type { Database } from "@/lib/db";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 /** Worker のメモリ制約を踏まえたダウンロード/解析の上限 */
 const MAX_ASSET_SIZE = 50 * 1024 * 1024; // 50MB
@@ -51,6 +52,7 @@ export async function listGithubReleases(projectSlug: string): Promise<
   { success: true; releases: Pick<GithubRelease, "id" | "tag_name" | "name" | "prerelease" | "published_at">[] } | { error: string }
 > {
   try {
+    const t = await getServerErrors();
     const { db, session } = await getAuthenticatedDb();
     const project = await findProjectPostBySlug(db, projectSlug);
     if (!project) return { error: t("project.notFound") };
@@ -146,6 +148,7 @@ export async function importGithubReleaseSystem(
   repoToken?: string,
   mode: GithubImportMode = "file"
 ): Promise<ImportResult> {
+  const t = await getServerErrors();
   const repo = project.githubRepo ? normalizeGithubRepo(project.githubRepo) : null;
   if (!repo) return { error: t("github.invalidRepo") };
 
@@ -251,6 +254,7 @@ export async function importGithubRelease(
   releaseId?: number,
   mode: GithubImportMode = "file"
 ): Promise<ImportResult> {
+  const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
   const project = await findProjectPostBySlug(db, projectSlug);

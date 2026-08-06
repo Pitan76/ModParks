@@ -8,12 +8,14 @@ import { extractRecipes, type JarSource } from "@/lib/services/jar";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { findProjectPostBySlug } from "@/lib/queries/post";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
 
 /**
  * JARファイル内のクラフティングレシピを抽出し、CDN/R2にアップロードして
  * プロジェクトに関連付けられたレシピデータを作成する Server Action。
  */
 export const extractRecipesFromVersion = async (versionId: string, projectSlug: string) => {
+  const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
   const project = await findProjectPostBySlug(db, projectSlug);
@@ -79,6 +81,7 @@ export const uploadClientExtractedRecipes = async (
   projectSlug: string,
   byNs: Record<string, any>
 ) => {
+  const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
 
   const project = await findProjectPostBySlug(db, projectSlug);
