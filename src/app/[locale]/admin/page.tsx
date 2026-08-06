@@ -66,27 +66,25 @@ function StatsSection({ stats, tAdmin }: { stats: AdminStats; tAdmin: any }) {
     <Grid container spacing={3}>
       {items.map((item) => (
         <Grid key={item.id} size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card
-            component={Link}
-            href={item.path}
-            sx={{
-              textDecoration: "none",
-              color: "inherit",
-              transition: "transform 0.2s, box-shadow 0.2s",
-              "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
-              borderLeft: "6px solid",
-              borderColor: item.col,
-            }}
-          >
-            <CardContent>
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                {item.label}
-              </Typography>
-              <Typography variant="h3" sx={{ fontWeight: 800, mt: 1, color: item.id === "rep" && item.val > 0 ? "error.main" : "text.primary" }}>
-                {item.val}
-              </Typography>
-            </CardContent>
-          </Card>
+          <Link href={item.path} style={{ textDecoration: "none", color: "inherit" }}>
+            <Card
+              sx={{
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
+                borderLeft: "6px solid",
+                borderColor: item.col,
+              }}
+            >
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  {item.label}
+                </Typography>
+                <Typography variant="h3" sx={{ fontWeight: 800, mt: 1, color: item.id === "rep" && item.val > 0 ? "error.main" : "text.primary" }}>
+                  {item.val}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Link>
         </Grid>
       ))}
     </Grid>
