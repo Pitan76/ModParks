@@ -52,6 +52,12 @@ const AppFooter = () => {
             <Typography variant="body2" color="text.secondary">
               {t("description")}
             </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+              {t("contact")}:{" "}
+              <Link href="mailto:admin@pitan76.net" color="inherit" sx={{ textDecoration: "underline" }}>
+                admin@pitan76.net
+              </Link>
+            </Typography>
           </Box>
 
           {/* リンク群 */}
