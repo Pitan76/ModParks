@@ -54,6 +54,9 @@ binding = "modparks_static"
 # binding     = "R2"
 # bucket_name = "modparks-files"
 
+[images]
+binding = "IMAGES"
+
 # ─── 環境変数 ─────────────────────────────────────────────────────────────────
 [vars]
 NEXTAUTH_URL       = "https://modparks.pitan76.net"
