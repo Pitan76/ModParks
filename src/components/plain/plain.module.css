@@ -1,86 +1,34 @@
 /* Plain Theme 共通スタイル。装飾は持たず、レイアウト調整のみに用いる */
 
-.list {
-  display: flex;
-  flex-direction: column;
+.table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-  gap: 0.5rem;
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid GrayText;
+  vertical-align: top;
 }
 
-.card {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid;
-  border-color: GrayText;
-  color: inherit;
-  text-decoration: none;
-}
-
-.card:hover .title {
-  text-decoration: underline;
-}
-
-.icon {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  object-fit: contain;
-}
-
-/* アイコン未設定でもレイアウトが崩れないよう同寸法の枠を確保する */
-.iconFallback {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border: 1px solid GrayText;
-}
-
-.main {
-  flex: 1;
-  min-width: 0;
-}
-
-.title {
-  font-weight: 700;
-  margin: 0;
-  font-size: 1rem;
-}
-
-.body {
-  margin: 0.25rem 0 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* 作者・DL数・更新日は幅を取らせず、プロジェクト名の列を優先して広げる */
+.table th:not(:first-child),
+.table td:not(:first-child) {
+  width: 1%;
   white-space: nowrap;
 }
 
-.meta {
-  margin: 0.25rem 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-}
-
-.meta > * {
-  margin: 0;
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin: 0.25rem 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 0.85rem;
+.numeric {
+  text-align: right;
 }
 
 .dim {
   color: GrayText;
+}
+
+/* 横に収まらない場合はテーブル単位で横スクロールさせ、本文側は溢れさせない */
+.tableScroll {
+  overflow-x: auto;
 }

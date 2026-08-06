@@ -332,6 +332,12 @@
       "updatedAt": "{date}",
       "addVersion": "Add Version"
     },
+    "table": {
+      "name": "Project",
+      "author": "Author",
+      "downloads": "Downloads",
+      "updated": "Updated"
+    },
     "versions": "Versions",
     "noVersions": "No versions available yet.",
     "noRecipes": "No recipes found.",

@@ -1,15 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useTranslations } from "next-intl";
 import type { ProjectCardProps } from "@/components/project/ProjectCard";
-import PlainProjectCard from "./PlainProjectCard";
-import styles from "../plain.module.css";
+import PlainProjectTable from "./PlainProjectTable";
 
 export type PlainProjectCardListProps = {
   projects: ProjectCardProps["project"][];
-  layout: "list" | "grid";
-  onLayoutChange: (layout: "list" | "grid") => void;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
   emptyContent?: ReactNode;
@@ -17,48 +13,22 @@ export type PlainProjectCardListProps = {
 };
 
 /**
- * Plain Theme 用のプロジェクト一覧表示。
- * 表示形式の保持は呼び出し元（ProjectCardList）が担い、ここは描画のみを行う。
+ * Plain Theme 用のプロジェクト一覧の外枠。
+ * リスト/グリッドの切り替えは持たず、常にテーブル表示にする。
  */
-const PlainProjectCardList = ({
-  projects,
-  layout,
-  onLayoutChange,
-  headerLeft,
-  headerRight,
-  emptyContent,
-  footer,
-}: PlainProjectCardListProps) => {
-  const tCommon = useTranslations("Common");
-
-  return (
-    <div>
+const PlainProjectCardList = ({ projects, headerLeft, headerRight, emptyContent, footer }: PlainProjectCardListProps) => (
+  <div>
+    {(headerLeft || headerRight) && (
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.5rem" }}>
         {headerLeft}
-        <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          {headerRight}
-          {projects.length > 0 && (
-            <select value={layout} onChange={(e) => onLayoutChange(e.target.value as "list" | "grid")}>
-              <option value="list">{tCommon("view.list")}</option>
-              <option value="grid">{tCommon("view.grid")}</option>
-            </select>
-          )}
-        </span>
+        <span style={{ marginLeft: "auto" }}>{headerRight}</span>
       </div>
+    )}
 
-      {projects.length === 0 ? (
-        emptyContent
-      ) : (
-        <div className={layout === "grid" ? styles.grid : styles.list}>
-          {projects.map((project) => (
-            <PlainProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      )}
+    {projects.length === 0 ? emptyContent : <PlainProjectTable projects={projects} />}
 
-      {footer && <div style={{ marginTop: "1rem" }}>{footer}</div>}
-    </div>
-  );
-};
+    {footer && <div style={{ marginTop: "1rem" }}>{footer}</div>}
+  </div>
+);
 
 export default PlainProjectCardList;

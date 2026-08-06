@@ -71,8 +71,6 @@ const ProjectCardList = ({
     return (
       <PlainProjectCardList
         projects={projects}
-        layout={activeLayout}
-        onLayoutChange={applyLayout}
         headerLeft={headerLeft}
         headerRight={headerRight}
         emptyContent={emptyContent}

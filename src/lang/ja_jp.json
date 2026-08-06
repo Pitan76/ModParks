@@ -338,6 +338,12 @@
       "updatedAt": "{date}",
       "addVersion": "新バージョンを追加"
     },
+    "table": {
+      "name": "プロジェクト",
+      "author": "作者",
+      "downloads": "DL数",
+      "updated": "更新日"
+    },
     "versions": "バージョン",
     "noVersions": "バージョンがまだありません",
     "noRecipes": "レシピが見つかりません。",
