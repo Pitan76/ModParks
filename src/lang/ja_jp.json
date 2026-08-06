@@ -767,6 +767,16 @@
       "groupModeration": "モデレーション・セキュリティ",
       "groupSystem": "システム・設定"
     },
+    "dashboard": {
+      "statsPendingReports": "未処理の通報",
+      "statsPendingAppeals": "未処理の異議",
+      "statsTotalUsers": "総ユーザー数",
+      "statsTotalProjects": "総プロジェクト数",
+      "sections": {
+        "contents": "コンテンツ・モデレーション",
+        "system": "システム設定・ユーティリティ"
+      }
+    },
     "recipe": {
       "title": "レシピ管理",
       "desc": "modparks-recipe のキャッシュ破棄やインデックスの再構築などの管理操作を行います。",

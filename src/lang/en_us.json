@@ -759,6 +759,16 @@
       "groupModeration": "Moderation & Security",
       "groupSystem": "System & Settings"
     },
+    "dashboard": {
+      "statsPendingReports": "Pending Reports",
+      "statsPendingAppeals": "Pending Appeals",
+      "statsTotalUsers": "Total Users",
+      "statsTotalProjects": "Total Projects",
+      "sections": {
+        "contents": "Content & Moderation",
+        "system": "System Settings & Utilities"
+      }
+    },
     "recipe": {
       "title": "Recipe Management",
       "desc": "Perform administrative operations for modparks-recipe, such as cache purging and index rebuilding.",
