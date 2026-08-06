@@ -157,3 +157,41 @@ export async function recomputeTrustAction(userId: string): Promise<ActionResult
   revalidateTrust(userId);
   return { success: true };
 }
+
+/**
+ * 複数のユーザーに対して、スコアを一括で手動増減する。
+ */
+export async function adjustTrustScores(
+  userIds: string[],
+  delta: number,
+  reason: string
+): Promise<ActionResult> {
+  const { db, session, userId: adminId } = await getAdminDb();
+
+  if (!Number.isInteger(delta) || delta === 0) return { error: "invalidDelta" };
+
+  const normalized = normalizeReason(reason);
+  if (!normalized) return { error: "reasonRequired" };
+
+  if (!Array.isArray(userIds) || userIds.length === 0) return { error: "noUsersSelected" };
+
+  for (const userId of userIds) {
+    await recordTrustEvent({
+      userId,
+      kind: delta > 0 ? "manual_grant" : "manual_penalty",
+      delta,
+      subjectType: "user",
+      subjectId: crypto.randomUUID(),
+      reason: normalized,
+      actorEmail: session.user?.email ?? undefined,
+    });
+    await recordModerationAudit(db, "trust_adjust", userId, adminId, { delta, reason: normalized });
+  }
+
+  revalidatePath("/admin/trust");
+  for (const userId of userIds) {
+    revalidatePath(`/admin/trust/${userId}`);
+  }
+  return { success: true };
+}
+

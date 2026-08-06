@@ -24,13 +24,14 @@ export type TrustFilter = TrustTier | "all" | "frozen" | "overridden";
 export type TrustListRow = {
   userId: string;
   username: string | null;
+  displayName: string | null;
   email: string | null;
   score: number;
   tier: TrustTier;
   frozen: boolean;
   overridden: boolean;
-  /** 未計算（台帳が空）なら null */
-  computedAt: Date | null;
+  /** 未計算（台帳が空）なら null (Client Component に渡すため、シリアライズ可能な string にする) */
+  computedAt: string | null;
 };
 
 /**
@@ -61,6 +62,7 @@ export async function getTrustList(
     .select({
       userId: users.id,
       username: userProfiles.username,
+      displayName: userProfiles.displayName,
       email: users.email,
       score: SCORE_EXPR,
       frozen: FROZEN_EXPR,
@@ -87,13 +89,14 @@ export async function getTrustList(
   return rows.map((row) => ({
     userId: row.userId,
     username: row.username,
+    displayName: row.displayName,
     email: row.email,
     score: row.score,
     tier: resolveTier(row.score, row, now),
     frozen: Boolean(row.frozen),
     overridden: resolveTier(row.score, row, now) !== tierFromScore(row.score),
     /** 台帳が空のうちは計算されていないので、未計算であることを呼び出し側に伝える */
-    computedAt: row.computedAt,
+    computedAt: row.computedAt ? row.computedAt.toISOString() : null,
   }));
 }
 
@@ -155,6 +158,7 @@ export type TrustEventRow = {
 export type TrustDetail = {
   userId: string;
   username: string | null;
+  displayName: string | null;
   email: string | null;
   score: number;
   tier: TrustTier;
@@ -184,6 +188,7 @@ export async function getTrustDetail(userId: string): Promise<TrustDetail | null
     .select({
       userId: users.id,
       username: userProfiles.username,
+      displayName: userProfiles.displayName,
       email: users.email,
       score: SCORE_EXPR,
       frozen: FROZEN_EXPR,

@@ -1421,6 +1421,7 @@
         "title": "管理操作",
         "reason": "理由（必須）",
         "reasonRequired": "理由を入力してください。",
+        "noUsersSelected": "ユーザーが選択されていません。",
         "invalidDelta": "0 以外の整数を入力してください。",
         "invalidTier": "段階の指定が不正です。",
         "notReversible": "このイベントは取り消せません。",
@@ -1430,6 +1431,12 @@
           "hint": "スコアを直接書き換えるのではなく、台帳に手動イベントを積みます。",
           "delta": "増減値（負数で減点）",
           "submit": "適用"
+        },
+        "bulkAdjust": {
+          "title": "選択したユーザーのスコアを一括変更",
+          "hint": "チェックを入れたユーザー全員の台帳へ手動イベントを積みます。",
+          "submit": "選択ユーザーに適用",
+          "selectedCount": "{count} 人のユーザーが選択されています"
         },
         "override": {
           "title": "段階を直接指定",
@@ -1448,7 +1455,8 @@
         "recompute": {
           "title": "再計算",
           "hint": "係数や閾値を変更した後に、このユーザのスコアを台帳から作り直します。",
-          "submit": "再計算する"
+          "submit": "再計算する",
+          "submitShort": "計算"
         },
         "reverse": {
           "action": "却下",

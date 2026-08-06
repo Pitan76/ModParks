@@ -1413,6 +1413,7 @@
         "title": "Admin actions",
         "reason": "Reason (required)",
         "reasonRequired": "A reason is required.",
+        "noUsersSelected": "No users selected.",
         "invalidDelta": "Enter a non-zero integer.",
         "invalidTier": "Invalid tier.",
         "notReversible": "This event cannot be reversed.",
@@ -1422,6 +1423,12 @@
           "hint": "Records a manual event in the ledger rather than overwriting the score.",
           "delta": "Amount (negative to penalize)",
           "submit": "Apply"
+        },
+        "bulkAdjust": {
+          "title": "Bulk Adjust Score for Selected Users",
+          "hint": "Add manual events to the ledgers of all checked users.",
+          "submit": "Apply to Selected",
+          "selectedCount": "{count} users selected"
         },
         "override": {
           "title": "Override tier",
@@ -1440,7 +1447,8 @@
         "recompute": {
           "title": "Recompute",
           "hint": "Rebuilds this user's score from the ledger after changing coefficients.",
-          "submit": "Recompute"
+          "submit": "Recompute",
+          "submitShort": "Compute"
         },
         "reverse": {
           "action": "Reverse",

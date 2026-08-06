@@ -37,7 +37,8 @@ export default async function AdminTrustDetailPage({ params }: AdminTrustDetailP
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>{t("trust.detail.title")}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {detail.username ?? detail.email ?? detail.userId}
+        {detail.displayName ? `${detail.displayName} (${detail.username ?? detail.userId})` : (detail.username ?? detail.email ?? detail.userId)}
+        {detail.email && ` - ${detail.email}`}
       </Typography>
 
       <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
