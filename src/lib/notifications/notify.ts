@@ -153,6 +153,52 @@ export async function notifyToUser(
   payload: NotificationPayload,
 ): Promise<void> {
   if (recipientId === actorId) return;
-  // actorId を必ず載せる。表示時はこれを辿って「今の」アバターを解決する
   await dispatchNotifications(db, [recipientId], type, { ...payload, actorId });
+
+  const settings = await db
+    .select({ locale: userSettings.locale, discordWebhookUrl: userSettings.discordWebhookUrl })
+    .from(userSettings)
+    .where(eq(userSettings.userId, recipientId))
+    .get();
+
+  if (settings?.discordWebhookUrl) {
+    const { isValidDiscordWebhookUrl } = await import("@/lib/notifications/discord");
+    if (isValidDiscordWebhookUrl(settings.discordWebhookUrl)) {
+      sendUserDiscordNotification(settings.discordWebhookUrl, settings.locale || "ja", type, payload);
+    }
+  }
+}
+
+/**
+ * ユーザー宛ての通知内容を Discord Webhook へ送信する。
+ * 例外は内部で処理し、呼び出し元の処理を妨げない。
+ */
+async function sendUserDiscordNotification(
+  webhookUrl: string,
+  locale: "ja" | "en",
+  type: NotificationType,
+  payload: NotificationPayload,
+): Promise<void> {
+  try {
+    const { getTranslations } = await import("next-intl/server");
+    const t = await getTranslations({ locale, namespace: "Notifications.message" });
+    const message = t(type, payload as any);
+
+    const embed = {
+      title: "ModParks Notification",
+      description: message,
+      color: 0x38bdf8,
+      timestamp: new Date().toISOString(),
+      thumbnail: payload.actorImage ? { url: payload.actorImage } : undefined,
+      footer: { text: "ModParks" },
+    };
+
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds: [embed] }),
+    });
+  } catch (err) {
+    console.error("Failed to send user webhook notification:", err);
+  }
 }

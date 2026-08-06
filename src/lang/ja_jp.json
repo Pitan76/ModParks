@@ -1804,7 +1804,12 @@
       "pushEnabled": "プッシュ通知を有効にしました。",
       "pushDisabled": "プッシュ通知を無効にしました。",
       "pushDenied": "通知の許可がブロックされています。ブラウザの設定で許可してください。",
-      "pushError": "プッシュ通知の設定に失敗しました。"
+      "pushError": "プッシュ通知の設定に失敗しました。",
+      "webhookTitle": "Webhook通知",
+      "webhookDescription": "通知が届いたときに、指定した Discord の Webhook に同じ内容を通知します。",
+      "webhookUrlLabel": "Discord Webhook URL",
+      "webhookHelp": "https://discord.com/api/webhooks/... 形式のURLを入力してください。",
+      "webhookError": "有効な Discord Webhook URL を入力してください。"
     },
     "rewards": {
       "title": "クリエイタ還元"

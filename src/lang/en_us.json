@@ -1796,7 +1796,12 @@
       "pushEnabled": "Push notifications enabled.",
       "pushDisabled": "Push notifications disabled.",
       "pushDenied": "Notification permission is blocked. Please allow it in your browser settings.",
-      "pushError": "Failed to configure push notifications."
+      "pushError": "Failed to configure push notifications.",
+      "webhookTitle": "Webhook Notifications",
+      "webhookDescription": "When you receive a notification, it will also be sent to the specified Discord Webhook.",
+      "webhookUrlLabel": "Discord Webhook URL",
+      "webhookHelp": "Enter a URL in the format https://discord.com/api/webhooks/...",
+      "webhookError": "Please enter a valid Discord Webhook URL."
     },
     "rewards": {
       "title": "Creator Reward"

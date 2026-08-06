@@ -99,6 +99,7 @@ export async function getSettingsPreferences(userId: string) {
     curseforgeVerified: !!settings?.curseforgeVerifiedAt,
     curseforgeVerifyCode: settings?.curseforgeVerifyCode || "",
     notificationPrefs: settings?.notificationPrefs ?? null,
+    discordWebhookUrl: settings?.discordWebhookUrl ?? "",
     isGitHubConnected: userAccounts.some((acc) => acc.provider === "github"),
     isGoogleConnected: userAccounts.some((acc) => acc.provider === "google"),
   };

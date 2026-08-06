@@ -15,20 +15,37 @@ import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import { isPushSupported, getPushSubscription, enablePush, disablePush } from "@/lib/push-client";
+import TextField from "@mui/material/TextField";
 
 interface Props {
   initialPrefs: Record<string, boolean> | null;
+  initialWebhookUrl?: string | null;
 }
 
-export default function NotificationsTab({ initialPrefs }: Props) {
+export default function NotificationsTab({ initialPrefs, initialWebhookUrl }: Props) {
   const t = useTranslations("Settings");
   const tn = useTranslations("Notifications");
   const { message, flash } = useFlashMessage();
-  const form = useDirtyForm({ prefs: normalizePrefs(initialPrefs) }, async (values) => {
-    await updateNotificationPrefs(values.prefs);
+  const [webhookError, setWebhookError] = useState<string | null>(null);
+
+  const form = useDirtyForm({
+    prefs: normalizePrefs(initialPrefs),
+    discordWebhookUrl: initialWebhookUrl || "",
+  }, async (values) => {
+    setWebhookError(null);
+    const res = await updateNotificationPrefs(values.prefs, values.discordWebhookUrl);
+    if (res && res.success === false && res.error === "invalid_webhook") {
+      setWebhookError(t("notifications.webhookError"));
+      return;
+    }
     flash("success", t("notifications.successUpdate"));
   });
   const prefs = form.values.prefs;
+
+  const handleWebhookChange = (val: string) => {
+    setWebhookError(null);
+    form.setField("discordWebhookUrl", val);
+  };
 
   // ---- Web Push（PWA プッシュ通知）の端末単位トグル ----
   const [pushSupported, setPushSupported] = useState(false);
@@ -103,7 +120,34 @@ export default function NotificationsTab({ initialPrefs }: Props) {
         ))}
       </FormGroup>
 
-      <StickySaveBar open={form.dirty} saving={form.saving} onSave={form.submit} onDiscard={form.reset} />
+      <Divider sx={{ my: 3 }} />
+
+      {/* Webhook通知設定 */}
+      <Typography variant="h6" sx={{ mb: 1 }}>{t("notifications.webhookTitle")}</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        {t("notifications.webhookDescription")}
+      </Typography>
+      <TextField
+        fullWidth
+        name="discordWebhookUrl"
+        label={t("notifications.webhookUrlLabel")}
+        placeholder="https://discord.com/api/webhooks/..."
+        value={form.values.discordWebhookUrl}
+        onChange={(e) => handleWebhookChange(e.target.value)}
+        error={!!webhookError}
+        helperText={webhookError || t("notifications.webhookHelp")}
+        sx={{ mb: 4 }}
+      />
+
+      <StickySaveBar
+        open={form.dirty}
+        saving={form.saving}
+        onSave={form.submit}
+        onDiscard={() => {
+          setWebhookError(null);
+          form.reset();
+        }}
+      />
     </Box>
   );
 }

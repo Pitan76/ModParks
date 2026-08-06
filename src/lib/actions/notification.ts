@@ -35,17 +35,26 @@ export async function markAllNotificationsRead() {
   return { success: true };
 }
 
-/** 通知種別ごとの受信ON/OFFを保存する */
-export async function updateNotificationPrefs(prefs: Record<string, boolean>) {
+/** 通知種別ごとの受信ON/OFFとWebhook URLを保存する */
+export async function updateNotificationPrefs(prefs: Record<string, boolean>, discordWebhookUrl?: string | null) {
   const { db, userId } = await getAuthenticatedDb();
 
   const sanitized: Record<string, boolean> = {};
   for (const type of NOTIFICATION_TYPES) sanitized[type] = prefs[type] !== false;
 
+  let normalizedWebhook: string | null = null;
+  if (discordWebhookUrl) {
+    const { isValidDiscordWebhookUrl } = await import("@/lib/notifications/discord");
+    if (!isValidDiscordWebhookUrl(discordWebhookUrl)) {
+      return { success: false, error: "invalid_webhook" };
+    }
+    normalizedWebhook = discordWebhookUrl;
+  }
+
   await db
     .insert(userSettings)
-    .values({ userId, notificationPrefs: sanitized })
-    .onConflictDoUpdate({ target: userSettings.userId, set: { notificationPrefs: sanitized } })
+    .values({ userId, notificationPrefs: sanitized, discordWebhookUrl: normalizedWebhook })
+    .onConflictDoUpdate({ target: userSettings.userId, set: { notificationPrefs: sanitized, discordWebhookUrl: normalizedWebhook } })
     .run();
 
   revalidatePath("/[locale]/settings", "page");

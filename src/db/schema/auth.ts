@@ -85,6 +85,8 @@ export const userSettings = sqliteTable("user_settings", {
   defaultRecipesEnabled: integer("default_recipes_enabled", { mode: "boolean" }).notNull().default(false),
   /** 通知種別ごとの受信ON/OFF。未設定の種別はデフォルトON扱い */
   notificationPrefs: text("notification_prefs", { mode: "json" }).$type<Record<string, boolean>>(),
+  /** Discord 通知用の Webhook URL */
+  discordWebhookUrl: text("discord_webhook_url"),
   /** クリエイタ還元に参加するか。false のユーザーは配分対象から除外する */
   creatorRewardOptIn: integer("creator_reward_opt_in", { mode: "boolean" }).notNull().default(false),
 });

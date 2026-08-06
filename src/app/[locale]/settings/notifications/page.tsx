@@ -17,7 +17,7 @@ export default async function NotificationsSettingsPage() {
 
   return (
     <SettingsSection title={t("notifications.title")}>
-      <NotificationsTabLazy initialPrefs={prefs.notificationPrefs} />
+      <NotificationsTabLazy initialPrefs={prefs.notificationPrefs} initialWebhookUrl={prefs.discordWebhookUrl} />
     </SettingsSection>
   );
 }
