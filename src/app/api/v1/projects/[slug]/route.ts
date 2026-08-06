@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { posts, projects, users } from "@/db/schema";
+import { posts, projects } from "@/db/schema";
 import { validateApiKey, resolveViewer } from "@/lib/api-auth";
 import { eq, and } from "drizzle-orm";
 import type { ApiProjectDetail } from "@/types/api-v1";
