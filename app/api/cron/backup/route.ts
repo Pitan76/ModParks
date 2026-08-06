@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { runAutoBackup } from "@/lib/backup/core";
 import { checkCronAuth } from "@/lib/cron/auth";
+import { describeError } from "@/lib/errors/describe";
 import { generateSnapshot } from "@/lib/snapshot/generate";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ async function runSnapshot(): Promise<{ ok: boolean; detail?: unknown }> {
   try {
     return { ok: true, detail: await generateSnapshot() };
   } catch (error) {
-    console.error("[CRON] Snapshot generation failed:", error);
+    console.error("[CRON] Snapshot generation failed:", describeError(error));
     return { ok: false };
   }
 }
@@ -51,7 +52,8 @@ export async function GET(request: Request) {
       snapshot,
     });
   } catch (error: any) {
-    console.error("[CRON] Auto backup error:", error);
-    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    const reason = describeError(error);
+    console.error("[CRON] Auto backup error:", reason);
+    return NextResponse.json({ success: false, error: reason }, { status: 500 });
   }
 }

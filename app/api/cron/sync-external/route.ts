@@ -10,6 +10,7 @@ import { rollupRecentUsage } from "@/lib/usage/rollup";
 import { evaluateUsageAlert } from "@/lib/usage/alert";
 import { getAdminWebhookUrl } from "@/lib/usage/webhook";
 import { checkCronAuth } from "@/lib/cron/auth";
+import { describeError } from "@/lib/errors/describe";
 
 export const dynamic = "force-dynamic";
 
@@ -64,14 +65,16 @@ export async function GET(request: Request) {
         await syncExternalProjectDataSystem(db, project, settings);
         results.push({ id: project.id, slug: project.slug, status: "success" });
       } catch (err: any) {
-        console.error(`[CRON] Failed to sync project ${project.id}:`, err);
-        results.push({ id: project.id, slug: project.slug, status: "error", error: err.message });
+        const reason = describeError(err);
+        console.error(`[CRON] Failed to sync project ${project.id}:`, reason);
+        results.push({ id: project.id, slug: project.slug, status: "error", error: reason });
       }
     }
 
     return NextResponse.json({ success: true, syncedCount: projectsToSync.length, rolledUpDownloads, alerted, results });
   } catch (error: any) {
-    console.error("[CRON] Sync error:", error);
-    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    const reason = describeError(error);
+    console.error("[CRON] Sync error:", reason);
+    return NextResponse.json({ success: false, error: reason }, { status: 500 });
   }
 }

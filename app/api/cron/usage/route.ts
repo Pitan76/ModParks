@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { checkCronAuth } from "@/lib/cron/auth";
 import { rollupSliceIncrements } from "@/lib/usage/sliceRollup";
 import { expireModeIfDue } from "@/lib/runtime/mode";
+import { describeError } from "@/lib/errors/describe";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, requests, modeRestored });
   } catch (error) {
-    console.error("[CRON] Usage rollup error:", error);
-    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    // Cron の応答は誰も読まないので、理由はログと応答の両方に残す
+    const reason = describeError(error);
+    console.error("[CRON] Usage rollup error:", reason);
+    return NextResponse.json({ success: false, error: reason }, { status: 500 });
   }
 }
