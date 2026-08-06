@@ -40,6 +40,8 @@ const PlainProjectTable = ({ projects }: PlainProjectTableProps) => {
         {projects.map((project) => (
           <tr key={project.id} id={`project-row-${project.slug}`}>
             <td>
+              {/* インライン要素のままだとアイコンとタグがベースライン揃いになるため flex で中央に揃える */}
+              <div className={styles.nameCell}>
               {/* 一覧の全件をプリフェッチすると通信量が増えるため無効にする */}
               <Link href={`/projects/${project.slug}`} prefetch={false} className={styles.nameLink}>
                 {project.iconUrl ? (
@@ -63,6 +65,7 @@ const PlainProjectTable = ({ projects }: PlainProjectTableProps) => {
                   )}
                 </span>
               )}
+              </div>
             </td>
             <td>
               {project.authorUsername ? (

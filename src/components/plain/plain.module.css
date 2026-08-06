@@ -41,11 +41,18 @@
   border: 1px solid GrayText;
 }
 
+.nameCell {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .tags {
-  display: inline-flex;
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin-left: 0.5rem;
   font-size: 0.85em;
 }
 
