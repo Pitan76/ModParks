@@ -171,6 +171,12 @@ export const moderationAudit = sqliteTable("moderation_audit", {
       "unsuspend_user",
       "premium_grant",
       "premium_revoke",
+      // 信頼ポイント。段階の上書きと打ち消しは、誰がいつ何を理由に行ったか追えないと運用が破綻する
+      "trust_adjust",
+      "trust_tier_override",
+      "trust_freeze",
+      "trust_event_reverse",
+      "trust_recompute",
     ],
   }).notNull(),
   /** 操作対象の識別子（projectId / userId / versionId など） */

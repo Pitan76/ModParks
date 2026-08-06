@@ -1389,6 +1389,46 @@
         },
         "reversed": "Reversed",
         "empty": "No events yet."
+      },
+      "actions": {
+        "title": "Admin actions",
+        "reason": "Reason (required)",
+        "reasonRequired": "A reason is required.",
+        "invalidDelta": "Enter a non-zero integer.",
+        "invalidTier": "Invalid tier.",
+        "notReversible": "This event cannot be reversed.",
+        "failed": "The operation failed.",
+        "adjust": {
+          "title": "Adjust score manually",
+          "hint": "Records a manual event in the ledger rather than overwriting the score.",
+          "delta": "Amount (negative to penalize)",
+          "submit": "Apply"
+        },
+        "override": {
+          "title": "Override tier",
+          "hint": "Pins the tier independently of the score. Overusing this makes trust values meaningless.",
+          "tier": "Tier",
+          "none": "No override (derive from score)",
+          "until": "Until (blank for indefinite)",
+          "submit": "Apply"
+        },
+        "freeze": {
+          "title": "Freeze",
+          "hint": "Pauses automatic credits only. Penalties still apply.",
+          "freeze": "Freeze",
+          "unfreeze": "Unfreeze"
+        },
+        "recompute": {
+          "title": "Recompute",
+          "hint": "Rebuilds this user's score from the ledger after changing coefficients.",
+          "submit": "Recompute"
+        },
+        "reverse": {
+          "action": "Reverse",
+          "title": "Reverse event",
+          "hint": "Invalidates this row. It appends a reversal rather than deleting, so history is kept.",
+          "submit": "Reverse"
+        }
       }
     }
   },
