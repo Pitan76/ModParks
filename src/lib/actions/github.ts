@@ -53,9 +53,9 @@ export async function listGithubReleases(projectSlug: string): Promise<
   try {
     const { db, session } = await getAuthenticatedDb();
     const project = await findProjectPostBySlug(db, projectSlug);
-    if (!project) return { error: "Project not found" };
+    if (!project) return { error: t("project.notFound") };
     await assertProjectAccess(db, project, session);
-    if (!project.githubRepo) return { error: "No GitHub repository linked to this project." };
+    if (!project.githubRepo) return { error: t("github.notLinked") };
 
     // 非公開リポジトリは、本人がインストールした GitHub App のトークンでのみ読める
     const repoToken = await getRepoAccessToken(db, project.authorId, project.githubRepo);
@@ -147,7 +147,7 @@ export async function importGithubReleaseSystem(
   mode: GithubImportMode = "file"
 ): Promise<ImportResult> {
   const repo = project.githubRepo ? normalizeGithubRepo(project.githubRepo) : null;
-  if (!repo) return { error: "No valid GitHub repository linked to this project." };
+  if (!repo) return { error: t("github.invalidRepo") };
 
   let release: GithubRelease | null = null;
   try {
@@ -155,10 +155,10 @@ export async function importGithubReleaseSystem(
   } catch (e: any) {
     return { error: e?.message || "Failed to fetch GitHub release." };
   }
-  if (!release) return { error: "No release found in the linked repository." };
+  if (!release) return { error: t("github.releaseNotFound") };
 
   const asset = pickPrimaryAsset(release);
-  if (!asset) return { error: "No downloadable .jar/.zip asset found in the release." };
+  if (!asset) return { error: t("github.assetNotFound") };
 
   // R2 へのアップロードを解析より先に行うのは、非公開リポジトリのアセット URL を
   // jar Worker 側から取得できない（トークンを持たない）ため。
@@ -254,7 +254,7 @@ export async function importGithubRelease(
   const { db, session } = await getAuthenticatedDb();
 
   const project = await findProjectPostBySlug(db, projectSlug);
-  if (!project) return { error: "Project not found" };
+  if (!project) return { error: t("project.notFound") };
   await assertProjectAccess(db, project, session);
 
   const repoToken = await getRepoAccessToken(db, project.authorId, project.githubRepo ?? "");

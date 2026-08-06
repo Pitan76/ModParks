@@ -143,7 +143,7 @@ export const toggleGithubVisibility = async (show: boolean) => {
   const { db, userId } = await getAuthenticatedDb();
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
-  if (!settings) return { error: "Settings not found" };
+  if (!settings) return { error: t("common.settingsNotFound") };
 
   const customObj = (settings.custom as Record<string, any>) || {};
   customObj.showGithubLink = show;
@@ -206,7 +206,7 @@ export const completeOnboarding = async () => {
   const { db, userId } = await getAuthenticatedDb();
 
   const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
-  if (!settings) return { error: "Settings not found" };
+  if (!settings) return { error: t("common.settingsNotFound") };
 
   const customObj = (settings.custom as Record<string, any>) || {};
   customObj.onboardingCompleted = true;

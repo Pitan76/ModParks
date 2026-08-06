@@ -18,7 +18,7 @@ export const extractRecipesFromVersion = async (versionId: string, projectSlug: 
 
   const project = await findProjectPostBySlug(db, projectSlug);
 
-  if (!project) return { error: "Project not found" };
+  if (!project) return { error: t("project.notFound") };
 
   await assertProjectAccess(db, project, session);
 
@@ -28,12 +28,12 @@ export const extractRecipesFromVersion = async (versionId: string, projectSlug: 
     .where(and(eq(versions.id, versionId), eq(versions.projectId, project.id)))
     .get();
 
-  if (!version) return { error: "Version not found" };
-  if (!version.fileUrl) return { error: "No file URL associated with this version" };
+  if (!version) return { error: t("version.notFound") };
+  if (!version.fileUrl) return { error: t("version.noFileUrl") };
 
   const r2Key = getR2KeyFromUrl(version.fileUrl);
   if (!r2Key && !isAllowedExternalUrl(version.fileUrl)) {
-    return { error: "Cannot extract recipes from this external URL domain." };
+    return { error: t("version.recipeDomainNotAllowed") };
   }
 
   // ファイルの取得も解析も modparks-jar Worker 側で行う（jszip を本体に載せないため）
@@ -82,7 +82,7 @@ export const uploadClientExtractedRecipes = async (
   const { db, session } = await getAuthenticatedDb();
 
   const project = await findProjectPostBySlug(db, projectSlug);
-  if (!project) return { error: "Project not found" };
+  if (!project) return { error: t("project.notFound") };
 
   await assertProjectAccess(db, project, session);
 
@@ -92,7 +92,7 @@ export const uploadClientExtractedRecipes = async (
     .where(and(eq(versions.id, versionId), eq(versions.projectId, project.id)))
     .get();
 
-  if (!version) return { error: "Version not found" };
+  if (!version) return { error: t("version.notFound") };
 
   const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
   const cdnSecret = process.env.RECIPE_CDN_SECRET;
