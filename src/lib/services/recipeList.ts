@@ -16,6 +16,8 @@ export type RecipeListEntry = {
   result: string | null;
   type: string;
   name: string;
+  /** タグ由来の素材を持ち、素材が切り替わりうる。持たない索引は静止画として扱う */
+  tagged?: boolean;
 };
 
 /** レシピCDNのR2直接配信の情報。`base` が空、または未提供なら直接配信は使えません。 */
@@ -75,11 +77,12 @@ function directUrl(
   assets: RecipeAssets | undefined,
   namespace: string,
   itemId: string,
-  version: string
+  version: string,
+  ext: string
 ): string | null {
   if (!assets?.base || !version || version === "0") return null;
 
-  const key = `cache/img/${assets.rv}/${namespace}/${version}/${itemId}@${IMAGE_SCALE}+${IMAGE_TAG_OFFSET}.png`;
+  const key = `cache/img/${assets.rv}/${namespace}/${version}/${itemId}@${IMAGE_SCALE}+${IMAGE_TAG_OFFSET}.${ext}`;
   const base = assets.base.endsWith("/") ? assets.base.slice(0, -1) : assets.base;
   return `${base}/${key.split("/").map(encodeURIComponent).join("/")}`;
 }
@@ -91,14 +94,17 @@ function directUrl(
  */
 export function toRecipeItems(cdnUrl: string, lists: NamespaceList[]): RecipeItem[] {
   return lists.flatMap(({ version, recipes, assets }) =>
-    recipes.map(({ id, name }) => {
+    recipes.map(({ id, name, tagged }) => {
       const [namespace, itemId] = id.split(":");
+      // 素材が切り替わるレシピだけアニメーションで見せる。静止画をGIFで配ると
+      // 色数が落ちるうえPNGより重くなるため、タグを持たないものはPNGのままにする。
+      const ext = tagged ? "gif" : "png";
       // URL にアセットバージョンを埋めると CDN 側がバージョン参照の R2 往復を省略でき、
       // レスポンスが immutable になるため再訪時はネットワークに出なくなる。
       // 未設定を意味する "0" のときに付けると、まだ何も入っていない画像を1年間焼き付けてしまう。
       const pin = version && version !== "0" ? `?v=${encodeURIComponent(version)}` : "";
-      const fallbackUrl = `${cdnUrl}/api/${namespace}/${itemId}.png${pin}`;
-      return { id, name, url: directUrl(assets, namespace, itemId, version) ?? fallbackUrl, fallbackUrl };
+      const fallbackUrl = `${cdnUrl}/api/${namespace}/${itemId}.${ext}${pin}`;
+      return { id, name, url: directUrl(assets, namespace, itemId, version, ext) ?? fallbackUrl, fallbackUrl };
     })
   );
 }
