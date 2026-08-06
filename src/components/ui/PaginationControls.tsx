@@ -3,16 +3,21 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Pagination from "@mui/material/Pagination";
-import Select from "@mui/material/Select";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
+import type { SxProps, Theme } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useColorMode } from "@/components/ThemeRegistry";
+import PlainPaginationControls from "@/components/plain/ui/PlainPaginationControls";
+
+const LIMIT_OPTIONS = [10, 20, 30, 40, 50, 60, 70, 80];
 
 interface PaginationControlsProps {
   totalCount: number;
   currentPage: number;
   currentLimit: number;
-  sx?: any;
+  sx?: SxProps<Theme>;
 }
 
 export default function PaginationControls({ totalCount, currentPage, currentLimit, sx }: PaginationControlsProps) {
@@ -20,6 +25,7 @@ export default function PaginationControls({ totalCount, currentPage, currentLim
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations("Common");
+  const { isPlainTheme } = useColorMode();
 
   const totalPages = Math.max(1, Math.ceil(totalCount / currentLimit));
 
@@ -36,11 +42,24 @@ export default function PaginationControls({ totalCount, currentPage, currentLim
     router.push(`${pathname}?${createQueryString("page", value.toString())}`);
   };
 
-  const handleLimitChange = (event: any) => {
-    router.push(`${pathname}?${createQueryString("limit", event.target.value)}`);
+  const handleLimitChange = (event: SelectChangeEvent<number>) => {
+    router.push(`${pathname}?${createQueryString("limit", String(event.target.value))}`);
   };
 
   if (totalCount === 0) return null;
+
+  if (isPlainTheme) {
+    return (
+      <PlainPaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        currentLimit={currentLimit}
+        limitOptions={LIMIT_OPTIONS}
+        buildPageHref={(page) => `${pathname}?${createQueryString("page", page.toString())}`}
+        onLimitChange={(limit) => router.push(`${pathname}?${createQueryString("limit", limit.toString())}`)}
+      />
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", mt: 4, gap: 2, ...sx }}>
@@ -58,14 +77,9 @@ export default function PaginationControls({ totalCount, currentPage, currentLim
           onChange={handleLimitChange}
           sx={{ minWidth: 80 }}
         >
-          <MenuItem value={10}>10</MenuItem>
-          <MenuItem value={20}>20</MenuItem>
-          <MenuItem value={30}>30</MenuItem>
-          <MenuItem value={40}>40</MenuItem>
-          <MenuItem value={50}>50</MenuItem>
-          <MenuItem value={60}>60</MenuItem>
-          <MenuItem value={70}>70</MenuItem>
-          <MenuItem value={80}>80</MenuItem>
+          {LIMIT_OPTIONS.map((option) => (
+            <MenuItem key={option} value={option}>{option}</MenuItem>
+          ))}
         </Select>
       </Box>
     </Box>

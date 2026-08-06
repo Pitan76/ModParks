@@ -52,14 +52,27 @@ const PlainProjectTable = ({ projects }: PlainProjectTableProps) => {
                 {project.title}
               </Link>
               {project.tags?.length > 0 && (
-                <span className={styles.dim}>
-                  {" "}
-                  {project.tags.slice(0, VISIBLE_TAG_COUNT).map((tag) => `#${tag}`).join(" ")}
-                  {project.tags.length > VISIBLE_TAG_COUNT && ` +${project.tags.length - VISIBLE_TAG_COUNT}`}
+                <span className={styles.tags}>
+                  {project.tags.slice(0, VISIBLE_TAG_COUNT).map((tag) => (
+                    <Link key={tag} href={`/projects?tags=${encodeURIComponent(tag)}`} prefetch={false}>
+                      #{tag}
+                    </Link>
+                  ))}
+                  {project.tags.length > VISIBLE_TAG_COUNT && (
+                    <span className={styles.dim}>+{project.tags.length - VISIBLE_TAG_COUNT}</span>
+                  )}
                 </span>
               )}
             </td>
-            <td>{project.authorDisplayName || project.authorUsername || "Unknown"}</td>
+            <td>
+              {project.authorUsername ? (
+                <Link href={`/profile/${project.authorUsername}`} prefetch={false}>
+                  {project.authorDisplayName || project.authorUsername}
+                </Link>
+              ) : (
+                project.authorDisplayName || "Unknown"
+              )}
+            </td>
             <td className={styles.numeric}>
               {formatCompactNumber(project.totalDownloads ?? project.downloads, locale)}
             </td>

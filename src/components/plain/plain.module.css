@@ -10,7 +10,7 @@
   text-align: left;
   padding: 0.25rem 0.5rem;
   border-bottom: 1px solid GrayText;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 /* 作者・DL数・更新日は幅を取らせず、プロジェクト名の列を優先して広げる */
@@ -41,8 +41,31 @@
   border: 1px solid GrayText;
 }
 
+.tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-left: 0.5rem;
+  font-size: 0.85em;
+}
+
 .numeric {
   text-align: right;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.pagination a,
+.pagination strong,
+.pagination span > span {
+  padding: 0 0.35rem;
 }
 
 .dim {
