@@ -25,6 +25,16 @@ export interface ExtractedRecipes {
   craftingRecipes: RecipeSummary[];
 }
 
+/**
+ * 特定の mod の持ち物ではなく、みんなが書き足していくネームスペース。
+ *
+ * mp-recipe 側の `core/namespaces.ts` と同じ内容。別デプロイの Worker なので実体は共有できない。
+ * 増やすときは両方に入れること。
+ */
+const SHARED_NAMESPACES = ["c", "forge", "neoforge", "minecraft"];
+
+const isSharedNamespace = (ns: string): boolean => SHARED_NAMESPACES.includes(ns);
+
 // MC 1.21.2+ でフォルダ名が単数形 (recipe / tag) になったため両対応する
 const RECIPE_PATH = /^data\/([^/]+)\/recipes?\/(.+)\.json$/;
 const TAG_PATH = /^data\/([^/]+)\/tags?\/(.+)\.json$/;
@@ -159,6 +169,10 @@ export async function extractRecipes(arrayBuffer: ArrayBuffer): Promise<Extracte
   for (const path of paths) {
     if (budget.exhausted) break;
     await processPath(zip, path, budget, byNs, namespaces, craftingRecipes, ensureNs);
+  }
+
+  for (const ns of Object.keys(byNs)) {
+    if (isSharedNamespace(ns)) byNs[ns] = { recipes: {}, tags: byNs[ns].tags, textures: {}, models: {}, langs: {} };
   }
 
   return { byNs, namespaces: [...namespaces], craftingRecipes };
