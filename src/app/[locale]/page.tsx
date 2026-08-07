@@ -37,7 +37,8 @@ const TopPage = async ({ params }: TopPageProps) => {
   return (
     <Box>
       {/* 検索結果にドメイン名ではなくサイト名を出すためのシグナル。トップページのみ */}
-      <JsonLd data={[websiteSchema(tm("description")), organizationSchema()]} />
+      <JsonLd data={websiteSchema(tm("description"))} />
+      <JsonLd data={organizationSchema()} />
 
       {/* SEO用に見出しを明示（ビジュアル上は非表示にするが、クローラーには認識させる） */}
       <h1
