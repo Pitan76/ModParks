@@ -2015,7 +2015,8 @@
       "invalidDiscordWebhook": "Enter a valid Discord webhook URL.",
       "invalidGithubRepo": "Enter it as 'owner/repo' or as a GitHub repository URL.",
       "cfSlugNotFound": "The slug specified for CurseForge was not found. Check that it is correct.",
-      "notFound": "Project not found"
+      "notFound": "Project not found",
+      "createFailed": "Failed to create the project"
     },
     "version": {
       "fileRequired": "Upload a file or enter an external URL.",

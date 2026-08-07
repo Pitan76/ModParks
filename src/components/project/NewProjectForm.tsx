@@ -53,6 +53,7 @@ const NewProjectForm = ({
   const t = useTranslations("Project");
   const tCommon = useTranslations("Common");
   const tSettings = useTranslations("Settings");
+  const tError = useTranslations("ServerErrors");
   const locale = useLocale();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
@@ -141,7 +142,7 @@ const NewProjectForm = ({
           setError(result.error as { [key: string]: string[] });
         } else {
           console.error(result);
-          setError({ _form: ["Failed to create project"] });
+          setError({ _form: [tError("project.createFailed")] });
         }
         setPending(false);
       } else {
@@ -150,7 +151,7 @@ const NewProjectForm = ({
       }
     } catch (err) {
       console.error(err);
-      setError({ _form: ["An unexpected error occurred"] });
+      setError({ _form: [tError("common.serverError")] });
       setPending(false);
     }
   };
@@ -265,6 +266,13 @@ const NewProjectForm = ({
         {importData?.curseforgeId && <input type="hidden" name="curseforgeId" value={importData.curseforgeId} />}
         {importData?.externalDownloads !== undefined && <input type="hidden" name="externalDownloads" value={importData.externalDownloads} />}
         {importData?.issueTrackerUrl && <input type="hidden" name="issueTrackerUrl" value={importData.issueTrackerUrl} />}
+
+        {/* どのフィールドにも紐付かないエラー（作成API自体の失敗）はフォーム先頭に出す */}
+        {error?._form && (
+          <Alert severity="error" onClose={() => setError(null)}>
+            {error._form[0]}
+          </Alert>
+        )}
 
         <ProjectFormFields key={formKey} error={error} project={importData || undefined} availableTags={availableTags} defaultLicense={defaultLicense} defaultBodyFormat={defaultBodyFormat} />
 

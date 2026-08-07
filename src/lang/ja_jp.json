@@ -2023,7 +2023,8 @@
       "invalidDiscordWebhook": "Discord の Webhook URL を入力してください。",
       "invalidGithubRepo": "'owner/repo' 形式、または GitHub リポジトリの URL を入力してください。",
       "cfSlugNotFound": "CurseForge で指定された Slug が見つかりませんでした。正しいか確認してください。",
-      "notFound": "プロジェクトが見つかりません"
+      "notFound": "プロジェクトが見つかりません",
+      "createFailed": "プロジェクトの作成に失敗しました"
     },
     "version": {
       "fileRequired": "ファイルをアップロードするか、外部URLを入力してください",
