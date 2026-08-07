@@ -56,15 +56,21 @@ export async function uploadViaCdn(
   }
 
   let uploaded = 0;
+  // 失敗した送信。1つでもあれば commit してはいけない。
+  //
+  // 以前はここで警告を出すだけで先へ進んでいた。全量の取り込みでは「今回来なかったもの＝削除」と
+  // 判断されるため、レシピの送信だけが落ちた回に、既に登録されていたレシピが丸ごと消えた。
+  // 部分的に入った状態を公開するくらいなら、何も変えないほうが害が小さい。
+  const failures: string[] = [];
   const postBulk = async (ns: string, part: Partial<NsBucket>, count: number) => {
     const session = sessions.get(ns);
     const url = `${cdnUrl}/api/${ns}/bulk${session ? `?session=${encodeURIComponent(session)}` : ""}`;
     try {
       const res = await fetchWithTimeout(url, { method: "POST", headers, body: JSON.stringify(part) });
       if (res.ok) uploaded += count;
-      else console.warn(`CDN bulk upload failed for ${ns}: ${res.status} ${res.statusText}`);
+      else failures.push(`${ns}: ${res.status} ${res.statusText}`);
     } catch (e) {
-      console.warn(`CDN bulk upload error for ${ns}:`, e);
+      failures.push(`${ns}: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
 
@@ -93,6 +99,7 @@ export async function uploadViaCdn(
     await phase((b) => b.langs, (c) => ({ langs: c }), 10, 6_000_000);
     await phase((b) => b.recipes, (c) => ({ recipes: c }), 200);
 
+    if (failures.length > 0) throw new Error(`Upload incomplete (${failures.length}): ${failures.join("; ")}`);
     for (const [ns, session] of sessions) await endSession(cdnUrl, ns, session, "commit", headers);
   } catch (e) {
     // 途中失敗時はセッションを破棄し、壊れた中間状態を公開しない
