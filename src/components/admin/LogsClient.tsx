@@ -3,24 +3,15 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
-import { alpha } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Pagination from "@mui/material/Pagination";
-import CircularProgress from "@mui/material/CircularProgress";
 import { getSettingsAudits, getBackupAudits, getDdosAudits } from "@/lib/actions/admin";
 import AuditSettingsRow from "./AuditSettingsRow";
 import AuditBackupRow from "./AuditBackupRow";
 import AuditDdosRow from "./AuditDdosRow";
-import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
+import AuditLogTable from "./AuditLogTable";
+import { useAuditLogPage } from "./useAuditLogPage";
 
 type SettingsLog = {
   id: string;
@@ -79,62 +70,9 @@ const LogsClient = ({ initialSettings, initialBackups, initialDdos }: LogsClient
   const t = useTranslations("Admin.audit");
   const [tabIndex, setTabIndex] = useState(0);
 
-  const [settingsPage, setSettingsPage] = useState(1);
-  const [settingsLogs, setSettingsLogs] = useState(initialSettings.logs);
-  const [settingsTotal, setSettingsTotal] = useState(initialSettings.total);
-  const [loadingSettings, setLoadingSettings] = useState(false);
-
-  const [backupsPage, setBackupsPage] = useState(1);
-  const [backupsLogs, setBackupsLogs] = useState(initialBackups.logs);
-  const [backupsTotal, setBackupsTotal] = useState(initialBackups.total);
-  const [loadingBackups, setLoadingBackups] = useState(false);
-
-  const [ddosPage, setDdosPage] = useState(1);
-  const [ddosLogs, setDdosLogs] = useState(initialDdos.logs);
-  const [ddosTotal, setDdosTotal] = useState(initialDdos.total);
-  const [loadingDdos, setLoadingDdos] = useState(false);
-
-  const handleSettingsPageChange = async (_event: unknown, newPage: number) => {
-    setSettingsPage(newPage);
-    setLoadingSettings(true);
-    try {
-      const res = await getSettingsAudits(10, (newPage - 1) * 10);
-      setSettingsLogs(res.logs);
-      setSettingsTotal(res.total);
-    } catch (e: unknown) {
-      console.error(e);
-    } finally {
-      setLoadingSettings(false);
-    }
-  };
-
-  const handleBackupsPageChange = async (_event: unknown, newPage: number) => {
-    setBackupsPage(newPage);
-    setLoadingBackups(true);
-    try {
-      const res = await getBackupAudits(10, (newPage - 1) * 10);
-      setBackupsLogs(res.logs);
-      setBackupsTotal(res.total);
-    } catch (e: unknown) {
-      console.error(e);
-    } finally {
-      setLoadingBackups(false);
-    }
-  };
-
-  const handleDdosPageChange = async (_event: unknown, newPage: number) => {
-    setDdosPage(newPage);
-    setLoadingDdos(true);
-    try {
-      const res = await getDdosAudits(10, (newPage - 1) * 10);
-      setDdosLogs(res.logs);
-      setDdosTotal(res.total);
-    } catch (e: unknown) {
-      console.error(e);
-    } finally {
-      setLoadingDdos(false);
-    }
-  };
+  const settings = useAuditLogPage<SettingsLog>(initialSettings, getSettingsAudits);
+  const backups = useAuditLogPage<BackupLog>(initialBackups, getBackupAudits);
+  const ddos = useAuditLogPage<DdosLog>(initialDdos, getDdosAudits);
 
   return (
     <Box>
@@ -150,151 +88,31 @@ const LogsClient = ({ initialSettings, initialBackups, initialDdos }: LogsClient
         </Tabs>
       </Box>
 
-      {/* Settings Logs Tab */}
       {tabIndex === 0 && (
-        <Box sx={{ position: "relative" }}>
-          {loadingSettings && (
-            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", justifyContent: "center", alignItems: "center", bgcolor: (theme) => alpha(theme.palette.background.paper, 0.6), zIndex: 1 }}>
-              <CircularProgress />
-            </Box>
-          )}
-
-          <TableContainer component={Paper} sx={[tableContainerSx, { opacity: loadingSettings ? 0.6 : 1 }]}>
-            <Table sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
-              <TableHead sx={tableHeadSx}>
-                <TableRow>
-                  <TableCell />
-                  <TableCell>{t("date")}</TableCell>
-                  <TableCell>{t("operator")}</TableCell>
-                  <TableCell>{t("scope")}</TableCell>
-                  <TableCell>{t("key")}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {settingsLogs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
-                      {t("noLogs")}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  settingsLogs.map((log) => (
-                    <AuditSettingsRow key={log.id} log={log} t={t} />
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          {settingsTotal > 10 && (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-              <Pagination
-                count={Math.ceil(settingsTotal / 10)}
-                page={settingsPage}
-                onChange={handleSettingsPageChange}
-                color="primary"
-              />
-            </Box>
-          )}
-        </Box>
+        <AuditLogTable
+          state={settings}
+          headers={[t("date"), t("operator"), t("scope"), t("key")]}
+          emptyLabel={t("noLogs")}
+          renderRow={(log) => <AuditSettingsRow key={log.id} log={log} t={t} />}
+        />
       )}
 
-      {/* Backup Logs Tab */}
       {tabIndex === 1 && (
-        <Box sx={{ position: "relative" }}>
-          {loadingBackups && (
-            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", justifyContent: "center", alignItems: "center", bgcolor: (theme) => alpha(theme.palette.background.paper, 0.6), zIndex: 1 }}>
-              <CircularProgress />
-            </Box>
-          )}
-
-          <TableContainer component={Paper} sx={[tableContainerSx, { opacity: loadingBackups ? 0.6 : 1 }]}>
-            <Table sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
-              <TableHead sx={tableHeadSx}>
-                <TableRow>
-                  <TableCell />
-                  <TableCell>{t("date")}</TableCell>
-                  <TableCell>{t("operator")}</TableCell>
-                  <TableCell>{t("action")}</TableCell>
-                  <TableCell>{t("status")}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {backupsLogs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
-                      {t("noLogs")}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  backupsLogs.map((log) => (
-                    <AuditBackupRow key={log.id} log={log} t={t} />
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          {backupsTotal > 10 && (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-              <Pagination
-                count={Math.ceil(backupsTotal / 10)}
-                page={backupsPage}
-                onChange={handleBackupsPageChange}
-                color="primary"
-              />
-            </Box>
-          )}
-        </Box>
+        <AuditLogTable
+          state={backups}
+          headers={[t("date"), t("operator"), t("action"), t("status")]}
+          emptyLabel={t("noLogs")}
+          renderRow={(log) => <AuditBackupRow key={log.id} log={log} t={t} />}
+        />
       )}
 
-      {/* DDoS Protection Logs Tab */}
       {tabIndex === 2 && (
-        <Box sx={{ position: "relative" }}>
-          {loadingDdos && (
-            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", justifyContent: "center", alignItems: "center", bgcolor: (theme) => alpha(theme.palette.background.paper, 0.6), zIndex: 1 }}>
-              <CircularProgress />
-            </Box>
-          )}
-
-          <TableContainer component={Paper} sx={[tableContainerSx, { opacity: loadingDdos ? 0.6 : 1 }]}>
-            <Table sx={[tableRootSx, { minWidth: TABLE_MIN_WIDTH }]}>
-              <TableHead sx={tableHeadSx}>
-                <TableRow>
-                  <TableCell />
-                  <TableCell>{t("date")}</TableCell>
-                  <TableCell>{t("operator")}</TableCell>
-                  <TableCell>{t("action")}</TableCell>
-                  <TableCell>{t("state")}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {ddosLogs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
-                      {t("noLogs")}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  ddosLogs.map((log) => (
-                    <AuditDdosRow key={log.id} log={log} t={t} />
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          {ddosTotal > 10 && (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-              <Pagination
-                count={Math.ceil(ddosTotal / 10)}
-                page={ddosPage}
-                onChange={handleDdosPageChange}
-                color="primary"
-              />
-            </Box>
-          )}
-        </Box>
+        <AuditLogTable
+          state={ddos}
+          headers={[t("date"), t("operator"), t("action"), t("state")]}
+          emptyLabel={t("noLogs")}
+          renderRow={(log) => <AuditDdosRow key={log.id} log={log} t={t} />}
+        />
       )}
     </Box>
   );
