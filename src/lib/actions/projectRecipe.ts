@@ -1,10 +1,11 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { projects, projectHiddenRecipes } from "@/db/schema";
+import { projects, projectHiddenRecipes, projectRecipeNames } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
+import { getCustomRecipeNames } from "@/lib/queries/recipeNames";
 import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 
@@ -150,12 +151,77 @@ export async function getProjectRecipesAction(
   locale: string
 ) {
   try {
+    const { db, project } = await authorizeProject(projectSlug);
     const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
     const nsList = recipeNamespaces && recipeNamespaces.length > 0 ? recipeNamespaces : [projectSlug];
-    const lists = await fetchRecipeLists(cdnUrl, nsList, locale);
-    const recipes = toRecipeItems(cdnUrl, lists);
+
+    const [lists, customNames] = await Promise.all([
+      fetchRecipeLists(cdnUrl, nsList, locale),
+      getCustomRecipeNames(project.id),
+    ]);
+
+    const recipes = toRecipeItems(cdnUrl, lists).map((r) => {
+      const customName = customNames.get(r.id);
+      return {
+        ...r,
+        originalName: r.name,
+        name: customName || r.name,
+      };
+    });
+
     return { success: true, recipes };
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Failed to fetch recipes" };
+  }
+}
+
+/**
+ * レシピの表示名を上書き設定（またはクリア）します。
+ * @param slug プロジェクトのスラッグ
+ * @param recipeId 完全修飾レシピID
+ * @param customName 上書きする名前（空なら上書き削除）
+ */
+export async function setRecipeCustomNameAction(slug: string, recipeId: string, customName: string) {
+  if (!recipeId) return { error: "Recipe id is required" };
+
+  try {
+    const { db, session, project } = await authorizeProject(slug);
+
+    const trimmed = customName.trim();
+    if (trimmed) {
+      await db
+        .insert(projectRecipeNames)
+        .values({
+          projectId: project.id,
+          recipeId,
+          customName: trimmed,
+          updatedBy: session.user.id,
+          updatedAt: new Date(),
+        })
+        .onConflictDoUpdate({
+          target: [projectRecipeNames.projectId, projectRecipeNames.recipeId],
+          set: {
+            customName: trimmed,
+            updatedBy: session.user.id,
+            updatedAt: new Date(),
+          },
+        })
+        .run();
+    } else {
+      await db
+        .delete(projectRecipeNames)
+        .where(
+          and(
+            eq(projectRecipeNames.projectId, project.id),
+            eq(projectRecipeNames.recipeId, recipeId)
+          )
+        )
+        .run();
+    }
+
+    revalidatePath(`/projects/${slug}`);
+    return { success: true, customName: trimmed || null };
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : "Failed to update recipe name" };
   }
 }

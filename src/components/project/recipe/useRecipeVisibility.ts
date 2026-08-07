@@ -6,6 +6,7 @@ import {
   setRecipesHiddenAction,
   getHiddenRecipeIdsAction,
   getProjectRecipesAction,
+  setRecipeCustomNameAction,
 } from "@/lib/actions/projectRecipe";
 import type { ManagedRecipe } from "./RecipeCard";
 
@@ -134,6 +135,30 @@ export function useRecipeVisibility({
     setPage(1);
   };
 
+  /** レシピのカスタム名を更新する。失敗したら元の状態に戻す。 */
+  const updateCustomName = async (id: string, name: string) => {
+    const previous = [...recipes];
+
+    setRecipes((prev) =>
+      prev.map((r) => {
+        if (r.id !== id) return r;
+        const nextName = name.trim() || r.originalName || r.name;
+        return { ...r, name: nextName };
+      })
+    );
+
+    setBusy(true);
+    setError(null);
+    const res = await setRecipeCustomNameAction(projectSlug, id, name);
+    setBusy(false);
+
+    if (res.error) {
+      setRecipes(previous);
+      setError(res.error);
+      return { error: res.error };
+    }
+  };
+
   return {
     recipes,
     hidden,
@@ -149,5 +174,6 @@ export function useRecipeVisibility({
     setError,
     toggle,
     toggleAll,
+    updateCustomName,
   };
 }

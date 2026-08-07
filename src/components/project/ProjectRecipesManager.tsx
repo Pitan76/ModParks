@@ -42,6 +42,7 @@ const ProjectRecipesManager = (props: ProjectRecipesManagerProps) => {
     setError,
     toggle,
     toggleAll,
+    updateCustomName,
   } = useRecipeVisibility(props);
 
   if (loading) {
@@ -109,6 +110,7 @@ const ProjectRecipesManager = (props: ProjectRecipesManagerProps) => {
             isHidden={hidden.has(recipe.id)}
             busy={busy}
             onToggle={() => toggle(recipe.id)}
+            onRename={(newName) => updateCustomName(recipe.id, newName)}
             labelVisible={t("visible")}
             labelHidden={t("hidden")}
           />

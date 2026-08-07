@@ -253,6 +253,30 @@ export const projectHiddenRecipes = sqliteTable(
 );
 
 /**
+ * プロジェクト側でレシピ名を上書きして変更するテーブル。
+ */
+export const projectRecipeNames = sqliteTable(
+  "project_recipe_names",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    /** 完全修飾レシピID（例 "mymod:widget"）。CDN の索引が返す id と同じ表記 */
+    recipeId: text("recipe_id").notNull(),
+    /** プロジェクト側で上書きしたレシピ名 */
+    customName: text("custom_name").notNull(),
+    updatedBy: text("updated_by").references(() => users.id, { onDelete: "set null" }),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.recipeId] }),
+    index("project_recipe_names_project_idx").on(t.projectId),
+  ]
+);
+
+/**
  * projects の行。title も author も持たないため、これ単体で Project を表さない。
  * アプリが扱う Project は ProjectPost（Post & ProjectFields）。
  */
@@ -262,3 +286,5 @@ export type ProjectMember = typeof projectMembers.$inferSelect;
 export type ProjectDependency = typeof projectDependencies.$inferSelect;
 export type ProjectMedia = typeof projectMedia.$inferSelect;
 export type ProjectHiddenRecipe = typeof projectHiddenRecipes.$inferSelect;
+export type ProjectRecipeName = typeof projectRecipeNames.$inferSelect;
+
