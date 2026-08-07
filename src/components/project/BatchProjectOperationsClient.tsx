@@ -21,7 +21,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { formatCompactNumber } from "@/lib/utils/format";
 import { Link } from "@/lib/i18n/routing";
-import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/project";
+import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/projectBatch";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 import SortableTableCell from "@/components/ui/SortableTableCell";

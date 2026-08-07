@@ -1,42 +1,22 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { posts, projects, projectTags, projectMembers, users, userProfiles } from "@/db/schema";
+import { posts, projects, projectTags, projectMembers, users } from "@/db/schema";
 import { findProjectPostById } from "@/lib/queries/post";
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { notifyNewProject } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import type { Database } from "@/lib/db";
 import { isAdminSession } from "@/lib/auth/roles";
-
-type PublishProject = {
-  slug: string;
-  title: string;
-  iconUrl: string | null;
-  authorId: string;
-  visibility: string;
-};
-
-/** 下書き→公開の初回公開時のみ、作者フォロワーへ新プロジェクト通知を送る */
-async function maybeNotifyPublish(db: Database, project: PublishProject, newSlug: string, newVisibility: string | undefined): Promise<void> {
-  if (project.visibility !== "draft") return;
-  if (newVisibility !== "public" && newVisibility !== "unlisted") return;
-
-  const author = await db
-    .select({ displayName: userProfiles.displayName, username: users.name })
-    .from(users)
-    .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
-    .where(eq(users.id, project.authorId))
-    .get();
-
-  const authorName = author?.displayName || author?.username || "";
-  await notifyNewProject(db, { ...project, slug: newSlug, title: project.title }, authorName);
-}
+import {
+  normalizeExternalLinks,
+  resolveSlugChange,
+  syncProjectTags,
+  maybeNotifyPublish,
+} from "@/lib/actions/projectUpdateHelpers";
 
 // ---- プロジェクト作成 ----
 
@@ -143,36 +123,13 @@ export const updateProject = async (projectId: string, formData: FormData) => {
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
   const { tags, githubRepo, discordWebhookUrl, ...fields } = parsed.data;
-  const t = await getServerErrors();
 
-  let normalizedWebhook: string | null = null;
-  if (discordWebhookUrl) {
-    const { isValidDiscordWebhookUrl } = await import("@/lib/notifications/discord");
-    if (!isValidDiscordWebhookUrl(discordWebhookUrl)) {
-      return { error: { discordWebhookUrl: [t("project.invalidDiscordWebhook")] } };
-    }
-    normalizedWebhook = discordWebhookUrl;
-  }
+  const links = await normalizeExternalLinks(githubRepo, discordWebhookUrl);
+  if ("error" in links) return links;
 
-  let normalizedGithubRepo: string | null = null;
-  if (githubRepo) {
-    const { normalizeGithubRepo } = await import("@/lib/utils/github");
-    normalizedGithubRepo = normalizeGithubRepo(githubRepo);
-    if (!normalizedGithubRepo) {
-      return { error: { githubRepo: [t("project.invalidGithubRepo")] } };
-    }
-  }
-
-  let previousSlugToSet: string | undefined = undefined;
-  if (fields.slug && fields.slug !== project.slug) {
-    const existingSlug = await db
-      .select({ id: posts.id })
-      .from(posts)
-      .where(and(eq(posts.kind, "project"), eq(posts.slug, fields.slug)))
-      .get();
-    if (existingSlug) return { error: { slug: [t("project.slugTaken")] } };
-    previousSlugToSet = project.slug;
-  }
+  const slugChange = await resolveSlugChange(db, project.slug, fields.slug);
+  if ("error" in slugChange) return slugChange;
+  const previousSlugToSet = slugChange.previousSlug;
 
   // 共通カラムは posts、Project 固有のカラムは projects へ。
   // 2 つの UPDATE がちぐはぐな状態で残らないよう batch でまとめる。
@@ -202,8 +159,8 @@ export const updateProject = async (projectId: string, formData: FormData) => {
         issueTrackerUrl: fields.issueTrackerUrl !== undefined ? fields.issueTrackerUrl : project.issueTrackerUrl,
         sourceUrl: fields.sourceUrl || null,
         links: fields.links || null,
-        githubRepo: normalizedGithubRepo,
-        discordWebhookUrl: normalizedWebhook,
+        githubRepo: links.githubRepo,
+        discordWebhookUrl: links.discordWebhookUrl,
         commentsEnabled: formData.get("commentsEnabled") === "on",
         recipesEnabled: formData.get("recipesEnabled") === "on",
         iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
@@ -211,27 +168,7 @@ export const updateProject = async (projectId: string, formData: FormData) => {
       .where(eq(projects.id, project.id)),
   ]);
 
-  if (tags !== undefined) {
-    const previousTags = await db
-      .select({ tag: projectTags.tag })
-      .from(projectTags)
-      .where(eq(projectTags.projectId, project.id))
-      .all();
-
-    await db.delete(projectTags).where(eq(projectTags.projectId, project.id)).run();
-
-    await recordDeletion(
-      db,
-      "project_tags",
-      previousTags.map((t: { tag: string }) => buildRecordKey(project.id, t.tag))
-    );
-
-    if (tags.length > 0) {
-      await db.insert(projectTags).values(
-        tags.map((tag) => ({ projectId: project.id, tag }))
-      ).run();
-    }
-  }
+  if (tags !== undefined) await syncProjectTags(db, project.id, tags);
 
   await maybeNotifyPublish(db, project, fields.slug ?? project.slug, fields.status);
 
@@ -287,56 +224,5 @@ export const transferOwnership = async (projectId: string, newOwnerId: string) =
   await recordDeletion(db, "project_members", buildRecordKey(projectId, newOwnerId));
 
   revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
-  return { success: true };
-};
-
-// ---- 一括操作 ----
-
-/**
- * 複数のプロジェクトの公開ステータスを一括変更する Server Action。
- */
-export const batchUpdateProjectStatus = async (projectIds: string[], status: "public" | "unlisted" | "private" | "draft") => {
-  const { db, session } = await getAuthenticatedDb();
-  if (!projectIds.length) return { success: true };
-
-  // 公開範囲も作者も posts が持つため、projects を触る必要がない
-  const isOwnerCondition = eq(posts.authorId, session.user.id);
-  const conditions = isAdminSession(session) ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
-
-  // 下書きから出るものは、その時点を作成日時に付け直す（updateProject と同じ扱い）
-  if (status !== "draft") {
-    await db
-      .update(posts)
-      .set({ createdAt: new Date() })
-      .where(and(conditions, eq(posts.visibility, "draft")))
-      .run();
-  }
-
-  await db.update(posts).set({ visibility: status, updatedAt: new Date() }).where(conditions).run();
-
-  revalidatePath("/projects");
-  revalidatePath("/projects/manage");
-  return { success: true };
-};
-
-/**
- * 複数のプロジェクトを一括削除する Server Action。
- */
-export const batchDeleteProjects = async (projectIds: string[]) => {
-  const { db, session } = await getAuthenticatedDb();
-  if (!projectIds.length) return { success: true };
-
-  const isOwnerCondition = eq(posts.authorId, session.user.id);
-  const conditions = isAdminSession(session) ? inArray(posts.id, projectIds) : and(inArray(posts.id, projectIds), isOwnerCondition);
-
-  const deletable = await db.select({ id: posts.id }).from(posts).where(conditions).all();
-
-  // posts を削除すると projects は cascade で消える。逆向きに消すと posts が孤児になる
-  await db.delete(posts).where(conditions).run();
-
-  await recordDeletion(db, "posts", deletable.map((p: { id: string }) => p.id));
-
-  revalidatePath("/projects");
-  revalidatePath("/projects/manage");
   return { success: true };
 };

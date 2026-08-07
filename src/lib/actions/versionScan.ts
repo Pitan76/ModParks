@@ -6,6 +6,7 @@ import { getR2KeyFromUrl } from "@/lib/r2";
 import { scanJar, type JarSource } from "@/lib/services/jar";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import type { Database } from "@/lib/db";
+import { scanStatusLabel } from "@/lib/notifications/scanLabels";
 
 /** スキャン対象とする拡張子。zip 系以外は解凍できないため対象外 */
 const SCANNABLE_EXTS = [".jar", ".zip"];
@@ -92,20 +93,13 @@ async function notifyScanIssue(
       .get();
 
     if (project) {
-      const statusLabel =
-        status === "malicious"
-          ? "悪質 (malicious)"
-          : status === "suspicious"
-          ? "疑わしい (suspicious)"
-          : "スキャン失敗 (failed)";
-
       const { notifyToUser } = await import("@/lib/notifications/notify");
       await notifyToUser(db, project.authorId, "system", "scan_result", {
         projectName: project.projectName,
         slug: project.projectSlug,
         versionNumber: project.versionNumber,
         versionId: versionId,
-        statusLabel,
+        statusLabel: scanStatusLabel(status),
         iconUrl: project.iconUrl || "",
       });
     }

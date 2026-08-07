@@ -23,7 +23,7 @@ import { getLoaderInfo } from "@/lib/loaders";
 import ReleaseChannelChip from "@/components/project/ReleaseChannelChip";
 import FileHashChip from "@/components/project/FileHashChip";
 import ScanStatusBanner from "@/components/project/ScanStatusBanner";
-import { getLatestScanAppeal } from "@/lib/actions/scanAppeal";
+import { getLatestScanAppeal } from "@/lib/actions/scanAppealQuery";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
 import { canonicalUrl } from "@/lib/seo/canonical";

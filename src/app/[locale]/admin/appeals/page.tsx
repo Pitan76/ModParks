@@ -4,7 +4,7 @@ import Stack from "@mui/material/Stack";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { getScanAppeals, getScanAppealCounts, type ScanAppealFilter } from "@/lib/actions/scanAppeal";
+import { getScanAppeals, getScanAppealCounts, type ScanAppealFilter } from "@/lib/actions/scanAppealQuery";
 import AppealCard from "@/components/admin/AppealCard";
 import StatusFilterTabs from "@/components/admin/StatusFilterTabs";
 
