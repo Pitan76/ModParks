@@ -16,7 +16,7 @@ import type { AbstractIntlMessages } from "next-intl";
  */
 
 /** クライアントコンポーネントから参照されないネームスペース。サーバ側でしか使わない */
-const SERVER_ONLY_NAMESPACES = ["Legal"] as const;
+const SERVER_ONLY_NAMESPACES = ["Legal", "Export"] as const;
 
 /**
  * サイドバーが必要とする見出しだけを抜き出す。

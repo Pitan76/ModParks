@@ -2135,5 +2135,32 @@
     "commentMin": "Enter at least 1 character",
     "commentMax": "2000 characters or fewer",
     "slugTaken": "This slug is already used by another project."
+  },
+  "Export": {
+    "title": "ModParks account data export",
+    "exportedAt": "Exported at",
+    "notSet": "(not set)",
+    "profileSection": "Profile",
+    "userId": "User ID",
+    "username": "Username",
+    "displayName": "Display name",
+    "email": "Email address",
+    "registeredAt": "Registered at",
+    "createdAt": "Created at",
+    "bio": "Bio",
+    "statsSection": "Statistics",
+    "projectsCount": "Projects",
+    "ideasCount": "Ideas",
+    "collectionsCount": "Collections",
+    "listsCount": "Lists",
+    "commentsCount": "Comments",
+    "projectsSection": "Projects",
+    "noProjects": "No projects.",
+    "noDescription": "No description",
+    "status": "Status",
+    "type": "Type",
+    "downloads": "Downloads",
+    "ideasSection": "Ideas",
+    "noIdeas": "No ideas."
   }
 }

@@ -3,12 +3,15 @@ import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { eq } from "drizzle-orm";
 import { users, userProfiles, userSettings, collections, comments } from "@/db/schema";
 import { listProjectPosts, listIdeaPosts } from "@/lib/queries/postList";
+import { getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/lib/i18n/routing";
+import { buildCsv, buildTextReport, type ExportData } from "./exportFormats";
 
 export async function GET(req: NextRequest) {
   try {
     const { db, session } = await getAuthenticatedDb();
     const userId = session.user.id;
-    
+
     const { searchParams } = new URL(req.url);
     const format = searchParams.get("format") || "json"; // json, csv, md, txt
 
@@ -16,7 +19,7 @@ export async function GET(req: NextRequest) {
     const user = await db.select().from(users).where(eq(users.id, userId)).get();
     const profile = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).get();
     const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
-    
+
     // Fetch related content
     // 本人のデータなので非公開・下書きも含めて全件取得する
     const userProjects = await listProjectPosts(db, { authorId: userId, includeHidden: true, limit: 10000 });
@@ -74,23 +77,13 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    if (format === "csv") {
-      // Create a simplified CSV for the user profile and stats
-      const header = ["ユーザーID", "ユーザー名", "表示名", "メールアドレス", "作成日", "プロジェクト数", "アイデア数", "リスト数", "コメント数"];
-      const row = [
-        data.user.id || "",
-        data.profile?.username || "",
-        data.profile?.displayName || "",
-        data.user.email || "",
-        data.user.createdAt ? new Date(data.user.createdAt).toISOString() : "",
-        data.stats.projectsCount.toString(),
-        data.stats.ideasCount.toString(),
-        data.stats.collectionsCount.toString(),
-        data.stats.commentsCount.toString(),
-      ];
+    // 文言は閲覧中の画面ではなく、本人の言語設定に合わせる
+    const locale = (settings?.locale ?? "ja") as AppLocale;
+    const t = await getTranslations({ locale, namespace: "Export" });
 
-      const csvContent = [header.join(","), row.map(r => `"${String(r).replace(/"/g, '""')}"`).join(",")].join("\n");
-      
+    if (format === "csv") {
+      const csvContent = buildCsv(data as ExportData, t);
+
       return new NextResponse(csvContent, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
@@ -101,65 +94,7 @@ export async function GET(req: NextRequest) {
 
     if (format === "md" || format === "txt") {
       const isMd = format === "md";
-      const h1 = isMd ? "# " : "";
-      const h2 = isMd ? "## " : "";
-      const li = isMd ? "- " : "・";
-      const b = isMd ? "**" : "";
-
-      let content = `${h1}ModParks アカウントデータ エクスポート\n\n`;
-      content += `エクスポート日時: ${new Date().toLocaleString("ja-JP")}\n\n`;
-      
-      content += `${h2}プロフィール情報\n`;
-      content += `${li}${b}ユーザーID${b}: ${data.user.id}\n`;
-      content += `${li}${b}ユーザー名${b}: ${data.profile?.username}\n`;
-      content += `${li}${b}表示名${b}: ${data.profile?.displayName || "(未設定)"}\n`;
-      content += `${li}${b}メールアドレス${b}: ${data.user.email}\n`;
-      content += `${li}${b}登録日${b}: ${data.user.createdAt ? new Date(data.user.createdAt).toLocaleString("ja-JP") : ""}\n`;
-      content += `${li}${b}自己紹介${b}:\n${data.profile?.bio || "(未設定)"}\n\n`;
-
-      content += `${h2}統計\n`;
-      content += `${li}${b}公開プロジェクト数${b}: ${data.stats.projectsCount}\n`;
-      content += `${li}${b}アイデア投稿数${b}: ${data.stats.ideasCount}\n`;
-      content += `${li}${b}コレクション数${b}: ${data.stats.collectionsCount}\n`;
-      content += `${li}${b}総コメント数${b}: ${data.stats.commentsCount}\n\n`;
-
-      content += `${h2}プロジェクト一覧\n`;
-      if (data.projects.length === 0) {
-        content += "プロジェクトはありません。\n";
-      } else {
-        data.projects.forEach(p => {
-          const ext = (p.externalDownloads as Record<string, number>) || {};
-          const modrinth = ext.modrinth || 0;
-          const curseforge = ext.curseforge || 0;
-          
-          let dlText = `${p.totalDownloads || p.downloads}`;
-          if (modrinth > 0 || curseforge > 0) {
-            dlText += ` (ModParks: ${p.downloads}`;
-            if (modrinth > 0) dlText += `, Modrinth: ${modrinth}`;
-            if (curseforge > 0) dlText += `, CurseForge: ${curseforge}`;
-            dlText += `)`;
-          } else if (p.totalDownloads && p.totalDownloads !== p.downloads) {
-            dlText += ` (ModParks: ${p.downloads})`;
-          }
-
-          if (isMd) {
-            content += `### ${p.name} (${p.slug})\n${p.description || "説明なし"}\n\n状態: ${p.status}\nDL数: ${dlText}\nタイプ: ${p.type}\n\n`;
-          } else {
-            content += `${li}${p.name} (${p.slug}) - タイプ: ${p.type}, 状態: ${p.status}, DL数: ${dlText}\n`;
-          }
-        });
-      }
-      content += "\n";
-
-      content += `${h2}アイデア一覧\n`;
-      if (data.ideas.length === 0) {
-        content += "アイデアはありません。\n";
-      } else {
-        data.ideas.forEach(i => {
-          content += `${li}${i.title} - 状態: ${i.status}\n`;
-        });
-      }
-      content += "\n";
+      const content = buildTextReport(data as ExportData, t, locale, isMd);
 
       return new NextResponse(content, {
         headers: {

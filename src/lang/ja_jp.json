@@ -2143,5 +2143,32 @@
     "commentMin": "1文字以上入力してください",
     "commentMax": "2000文字以内",
     "slugTaken": "このスラッグは既に他のプロジェクトで使用されています。"
+  },
+  "Export": {
+    "title": "ModParks アカウントデータ エクスポート",
+    "exportedAt": "エクスポート日時",
+    "notSet": "(未設定)",
+    "profileSection": "プロフィール情報",
+    "userId": "ユーザーID",
+    "username": "ユーザー名",
+    "displayName": "表示名",
+    "email": "メールアドレス",
+    "registeredAt": "登録日",
+    "createdAt": "作成日",
+    "bio": "自己紹介",
+    "statsSection": "統計",
+    "projectsCount": "公開プロジェクト数",
+    "ideasCount": "アイデア投稿数",
+    "collectionsCount": "コレクション数",
+    "listsCount": "リスト数",
+    "commentsCount": "総コメント数",
+    "projectsSection": "プロジェクト一覧",
+    "noProjects": "プロジェクトはありません。",
+    "noDescription": "説明なし",
+    "status": "状態",
+    "type": "タイプ",
+    "downloads": "DL数",
+    "ideasSection": "アイデア一覧",
+    "noIdeas": "アイデアはありません。"
   }
 }
