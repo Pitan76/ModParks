@@ -61,9 +61,6 @@ const RecipeCard = ({ recipe, isHidden, busy, onToggle, onRename, labelVisible, 
     <Box
       sx={{
         p: 1,
-        border: 1,
-        borderColor: "divider",
-        borderRadius: 1,
         opacity: isHidden ? 0.45 : 1,
       }}
     >
