@@ -91,11 +91,14 @@ function downloadsText(project: ExportData["projects"][number]): string {
   return text;
 }
 
-/** Markdown / プレーンテキストの記号。md のときだけ装飾を付ける */
-const marks = (isMd: boolean) => ({
+/**
+ * Markdown / プレーンテキストの記号。md のときだけ装飾を付ける。
+ * プレーンテキストの行頭記号は言語に合わせる（`・` は日本語の組版にしか馴染まない）。
+ */
+const marks = (isMd: boolean, locale: AppLocale) => ({
   h1: isMd ? "# " : "",
   h2: isMd ? "## " : "",
-  li: isMd ? "- " : "・",
+  li: isMd || locale !== "ja" ? "- " : "・",
   b: isMd ? "**" : "",
 });
 
@@ -104,7 +107,7 @@ const marks = (isMd: boolean) => ({
  * @param isMd true なら Markdown、false ならプレーンテキスト
  */
 export function buildTextReport(data: ExportData, t: Translate, locale: AppLocale, isMd: boolean): string {
-  const { h1, h2, li, b } = marks(isMd);
+  const { h1, h2, li, b } = marks(isMd, locale);
   const notSet = t("notSet");
   const formatDate = (value: Date | string) => new Date(value).toLocaleString(dateLocale(locale));
   const field = (label: string, value: unknown) => `${li}${b}${label}${b}: ${value}\n`;
