@@ -352,7 +352,7 @@
     "noRecipes": "No recipes found.",
     "recipesUnavailable": "Could not load recipes. Please try again later.",
     "recipeManager": {
-      "desc": "Choose which recipes appear on the project page. Recipes themselves are extracted from the JAR, so only visibility can be changed here.",
+      "desc": "",
       "search": "Search recipes",
       "hideAll": "Hide all shown",
       "showAll": "Show all shown",
@@ -362,7 +362,7 @@
       "empty": "No recipes yet. Extract them from the files tab of a version.",
       "settings": {
         "title": "Recipe image appearance",
-        "desc": "Adjusts how recipe images look on the project page. This applies to every recipe, separately from per-recipe visibility.",
+        "desc": "",
         "tagNs": "Namespaces for tags",
         "tagNsHelp": "Empty means vanilla only. Comma-separated to add, * for all",
         "crop": "Crop margins",

@@ -50,11 +50,8 @@ const RecipeSettingsForm = ({ projectSlug, settings, onError }: RecipeSettingsFo
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
         {t("title")}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {t("desc")}
       </Typography>
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { sm: "flex-start" } }}>

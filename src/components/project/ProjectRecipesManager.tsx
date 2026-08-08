@@ -66,10 +66,6 @@ const ProjectRecipesManager = (props: ProjectRecipesManagerProps) => {
 
   return (
     <Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {t("desc")}
-      </Typography>
-
       <RecipeSettingsForm
         projectSlug={props.projectSlug}
         settings={props.recipeSettings ?? {}}
