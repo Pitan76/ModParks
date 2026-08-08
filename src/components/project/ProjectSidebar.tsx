@@ -9,6 +9,8 @@ import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import GavelIcon from "@mui/icons-material/Gavel";
+import ExtensionIcon from "@mui/icons-material/Extension";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import CodeIcon from "@mui/icons-material/Code";
 import LinkIcon from "@mui/icons-material/Link";
 import XIcon from "@mui/icons-material/X";
@@ -21,6 +23,8 @@ import { parseLinks } from "@/lib/utils/links";
 import { toProxiedImageUrl } from "@/lib/utils/imageProxy";
 import { useColorMode } from "@/components/ThemeRegistry";
 import PlainProjectSidebar from "@/components/plain/project/PlainProjectSidebar";
+import { summarizeProjectVersions, type SummarizableVersion } from "@/lib/utils/projectVersionSummary";
+import { getLoaderInfo } from "@/lib/loaders";
 
 export type ProjectSidebarProps = {
   /** 対象プロジェクトの情報 */
@@ -30,6 +34,7 @@ export type ProjectSidebarProps = {
     sourceUrl?: string | null;
     links?: string | null;
     tags: string[];
+    versions: SummarizableVersion[];
   };
   /** ログイン済みか (通報ボタンの表示判定用) */
   isAuthenticated: boolean;
@@ -66,6 +71,8 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
     return tTags.has(key) ? tTags(key) : tag;
   };
 
+  const { mcVersions, loaders } = summarizeProjectVersions(p.versions);
+
   return (
     <Box
       sx={{
@@ -77,6 +84,39 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
         // 追従は広告枠を含む親側で行う（ここで sticky にすると広告と重なる）
       }}
     >
+      {/* 対応ローダー */}
+      {loaders.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <ExtensionIcon fontSize="small" color="action" />
+            {t("sidebar.platforms")}
+          </Typography>
+          <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+            {loaders.map((loader) => {
+              const info = getLoaderInfo(loader);
+              return <Chip key={loader} label={info.name} size="small" color={info.color} icon={info.icon} />;
+            })}
+          </Stack>
+        </Box>
+      )}
+
+      {/* 対応MCバージョン */}
+      {mcVersions.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <SportsEsportsIcon fontSize="small" color="action" />
+            {t("sidebar.gameVersions")}
+          </Typography>
+          <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+            {mcVersions.map((mc) => (
+              <Chip key={mc} label={mc} size="small" variant="outlined" sx={{ borderColor: "divider", color: "text.secondary" }} />
+            ))}
+          </Stack>
+        </Box>
+      )}
+
+      {(loaders.length > 0 || mcVersions.length > 0) && <Divider sx={{ mb: 2 }} />}
+
       {/* ライセンス */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>

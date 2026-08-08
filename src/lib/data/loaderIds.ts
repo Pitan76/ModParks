@@ -28,3 +28,9 @@ export const LOADERS_DATA: { id: string; name: string; color: LoaderColor }[] = 
 ];
 
 export const AVAILABLE_LOADERS = LOADERS_DATA.map((l) => l.id);
+
+/** ローダーIDの表示名を返す。未知のIDは先頭を大文字にしてそのまま使う */
+export const getLoaderName = (id: string): string => {
+  const found = LOADERS_DATA.find((l) => l.id === id.toLowerCase());
+  return found ? found.name : id.charAt(0).toUpperCase() + id.slice(1);
+};

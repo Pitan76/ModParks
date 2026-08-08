@@ -338,7 +338,9 @@
       "license": "License",
       "sourceCode": "Source Code",
       "tags": "Tags",
-      "report": "Report"
+      "report": "Report",
+      "platforms": "Platforms",
+      "gameVersions": "Game Versions"
     },
     "header": {
       "publishedAt": "{date}",

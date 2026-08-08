@@ -344,7 +344,9 @@
       "license": "ライセンス",
       "sourceCode": "ソースコード",
       "tags": "タグ",
-      "report": "通報"
+      "report": "通報",
+      "platforms": "プラットフォーム",
+      "gameVersions": "ゲームバージョン"
     },
     "header": {
       "publishedAt": "{date}",

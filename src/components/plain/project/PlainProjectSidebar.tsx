@@ -5,6 +5,8 @@ import { Link } from "@/lib/i18n/routing";
 import { parseLinks } from "@/lib/utils/links";
 import ReportDialog from "@/components/project/ReportDialog";
 import type { ProjectSidebarProps } from "@/components/project/ProjectSidebar";
+import { summarizeProjectVersions } from "@/lib/utils/projectVersionSummary";
+import { getLoaderName } from "@/lib/data/loaderIds";
 import styles from "../plain.module.css";
 
 /**
@@ -15,6 +17,7 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
   const links = parseLinks(p.links);
+  const { mcVersions, loaders } = summarizeProjectVersions(p.versions);
 
   const getTagLabel = (tag: string) => {
     const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, "_");
@@ -24,6 +27,20 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
   return (
     <aside>
       <dl className={styles.definitions}>
+        {loaders.length > 0 && (
+          <>
+            <dt>{t("sidebar.platforms")}</dt>
+            <dd>{loaders.map(getLoaderName).join(", ")}</dd>
+          </>
+        )}
+
+        {mcVersions.length > 0 && (
+          <>
+            <dt>{t("sidebar.gameVersions")}</dt>
+            <dd>{mcVersions.join(", ")}</dd>
+          </>
+        )}
+
         <dt>{t("sidebar.license")}</dt>
         <dd>{p.license}</dd>
 
