@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
+import CardGrid from "@/components/ui/CardGrid";
 import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
@@ -125,13 +125,11 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
             }))}
           />
         </Box>
-        <Grid container spacing={3}>
+        <CardGrid gap={3}>
           {collection.items.map(p => (
-            <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={p} layout="grid" />
-            </Grid>
+            <ProjectCard key={p.id} project={p} layout="grid" />
           ))}
-        </Grid>
+        </CardGrid>
         </>
       ) : (
         <Alert severity="info">

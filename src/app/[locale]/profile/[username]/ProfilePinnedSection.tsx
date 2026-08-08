@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
+import CardGrid from "@/components/ui/CardGrid";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import ProjectCard from "@/components/project/ProjectCard";
 import IdeaCard from "@/components/idea/IdeaCard";
@@ -19,19 +19,15 @@ export default async function ProfilePinnedSection({ items }: { items: PinnedIte
         <PushPinIcon fontSize="small" color="action" />
         {t("pinned")}
       </Typography>
-      <Grid container spacing={2}>
+      <CardGrid gap={2}>
         {items.map((item) =>
           item.kind === "project" ? (
-            <Grid key={`project-${item.project.id}`} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={item.project} layout="grid" />
-            </Grid>
+            <ProjectCard key={`project-${item.project.id}`} project={item.project} layout="grid" />
           ) : (
-            <Grid key={`idea-${item.idea.id}`} size={{ xs: 12, sm: 6, md: 4 }}>
-              <IdeaCard idea={item.idea} />
-            </Grid>
+            <IdeaCard key={`idea-${item.idea.id}`} idea={item.idea} />
           )
         )}
-      </Grid>
+      </CardGrid>
     </Box>
   );
 }

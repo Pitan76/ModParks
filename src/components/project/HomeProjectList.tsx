@@ -1,7 +1,7 @@
 "use client";
 
-import Grid from "@mui/material/Grid";
 import { useColorMode } from "@/components/ThemeRegistry";
+import CardGrid from "@/components/ui/CardGrid";
 import ProjectCard from "@/components/project/ProjectCard";
 import type { ProjectCardProps } from "@/components/project/ProjectCard";
 import PlainProjectTable from "@/components/plain/project/PlainProjectTable";
@@ -20,13 +20,11 @@ const HomeProjectList = ({ projects }: HomeProjectListProps) => {
   if (isPlainTheme) return <PlainProjectTable projects={projects} />;
 
   return (
-    <Grid container spacing={isNewTheme ? 0 : 2}>
+    <CardGrid gap={isNewTheme ? 0 : 2}>
       {projects.map((project) => (
-        <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
-          <ProjectCard project={project} layout="grid" showCart={false} />
-        </Grid>
+        <ProjectCard key={project.id} project={project} layout="grid" showCart={false} />
       ))}
-    </Grid>
+    </CardGrid>
   );
 };
 

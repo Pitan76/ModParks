@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Tooltip from "@mui/material/Tooltip";
@@ -14,6 +13,7 @@ import ProjectCard from "@/components/project/ProjectCard";
 import type { ProjectCardProps } from "@/components/project/ProjectCard";
 import { useColorMode } from "@/components/ThemeRegistry";
 import PlainProjectCardList from "@/components/plain/project/PlainProjectCardList";
+import CardGrid from "@/components/ui/CardGrid";
 
 type CardLayout = "list" | "grid";
 
@@ -110,13 +110,11 @@ const ProjectCardList = ({
       {projects.length === 0 ? (
         emptyContent
       ) : activeLayout === "grid" ? (
-        <Grid container spacing={isNewTheme ? 0 : 2}>
+        <CardGrid gap={isNewTheme ? 0 : 2}>
           {projects.map((project) => (
-            <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <ProjectCard project={project} layout="grid" />
-            </Grid>
+            <ProjectCard key={project.id} project={project} layout="grid" />
           ))}
-        </Grid>
+        </CardGrid>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: isNewTheme ? 0 : 2 }}>
           {projects.map((project) => (

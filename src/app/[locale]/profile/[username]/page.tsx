@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
+import CardGrid from "@/components/ui/CardGrid";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import ProjectCardList from "@/components/project/ProjectCardList";
@@ -154,13 +154,11 @@ export default async function PublicProfilePage({ params, searchParams }: Public
       </Typography>
 
       {userCollections.length > 0 ? (
-        <Grid container spacing={2}>
+        <CardGrid gap={2}>
           {userCollections.map((c) => (
-            <Grid key={c.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <CollectionCard collection={c as any} />
-            </Grid>
+            <CollectionCard key={c.id} collection={c as any} />
           ))}
-        </Grid>
+        </CardGrid>
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>{t("noLists")}</Alert>
       )}
