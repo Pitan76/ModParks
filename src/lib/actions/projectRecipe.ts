@@ -8,6 +8,7 @@ import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
 import { getCustomRecipeNames } from "@/lib/queries/recipeNames";
 import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 import { findProjectPostBySlug } from "@/lib/queries/post";
+import { normalizeRecipeSettings, type RecipeSettings } from "@/lib/recipe/settings";
 
 /**
  * 1文に載せるレシピIDの数。D1 は 1クエリあたりのバインド変数が 100 個までなので、
@@ -160,7 +161,7 @@ export async function getProjectRecipesAction(
       getCustomRecipeNames(project.id),
     ]);
 
-    const recipes = toRecipeItems(cdnUrl, lists).map((r) => {
+    const recipes = toRecipeItems(cdnUrl, lists, project.recipeSettings).map((r) => {
       const customName = customNames.get(r.id);
       return {
         ...r,
@@ -223,5 +224,27 @@ export async function setRecipeCustomNameAction(slug: string, recipeId: string, 
     return { success: true, customName: trimmed || null };
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Failed to update recipe name" };
+  }
+}
+
+/**
+ * レシピ画像の見せ方を保存します。
+ *
+ * `tagNs` はレシピCDNへ渡って描かれるアイテムを変え、`crop` は表示側のCSSでしか使いません。
+ * 保存の時点では区別せず、そのまま持ちます。
+ * @param slug プロジェクトのスラッグ
+ * @param settings 画面から受け取った設定
+ */
+export async function setRecipeSettingsAction(slug: string, settings: RecipeSettings) {
+  try {
+    const { db, project } = await authorizeProject(slug);
+    const normalized = normalizeRecipeSettings(settings);
+
+    await db.update(projects).set({ recipeSettings: normalized }).where(eq(projects.id, project.id)).run();
+
+    revalidatePath(`/projects/${slug}`);
+    return { success: true, settings: normalized };
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : "Failed to update recipe settings" };
   }
 }

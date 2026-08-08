@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `recipe_settings` text DEFAULT '{}' NOT NULL;

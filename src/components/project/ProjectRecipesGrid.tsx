@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useColorMode } from "@/components/ThemeRegistry";
 import ZoomableImage from "@/components/ui/ZoomableImage";
+import { cropGeometry } from "@/lib/recipe/settings";
 
 export type RecipeItem = {
   id: string;
@@ -22,6 +23,8 @@ export type RecipeItem = {
 
 type ProjectRecipesGridProps = {
   recipes: RecipeItem[];
+  /** 上下左右から削る余白の量（ネイティブpx）。切り抜きはCDNに作り直させず、ここのCSSで行う */
+  crop?: number;
   /** レシピCDNの検索ページ（このプロジェクトのネームスペースで絞った状態）へのリンク */
   openUrl: string;
   labels: {
@@ -34,23 +37,39 @@ type ProjectRecipesGridProps = {
 
 type RecipeGridItemProps = {
   recipe: RecipeItem;
+  crop?: number;
 };
 
-const RecipeGridItem = ({ recipe }: RecipeGridItemProps) => {
+const RecipeGridItem = ({ recipe, crop }: RecipeGridItemProps) => {
   // R2から直接取る URL は未生成の画像だと404になる。そのときだけCDNのWorkerに生成させる。
   const [failed, setFailed] = useState(false);
   const src = failed ? recipe.fallbackUrl : recipe.url;
+  const geometry = cropGeometry(crop);
+
+  const image = (
+    <ZoomableImage
+      src={src}
+      onError={() => setFailed(true)}
+      alt={recipe.title}
+      loading="lazy"
+      pixelated
+      style={{ objectFit: "contain", width: "100%", height: "auto" }}
+    />
+  );
 
   return (
     <Box>
-      <ZoomableImage
-        src={src}
-        onError={() => setFailed(true)}
-        alt={recipe.title}
-        loading="lazy"
-        pixelated
-        style={{ objectFit: "contain", width: "100%", height: "auto" }}
-      />
+      {/* 枠からはみ出させて隠すことで切り抜く。寸法はすべて百分率なので、
+          列数や画面幅が変わっても同じ位置で切れる。 */}
+      {geometry ? (
+        <Box sx={{ position: "relative", overflow: "hidden", width: "100%", aspectRatio: geometry.aspectRatio }}>
+          <Box sx={{ position: "absolute", left: geometry.left, top: geometry.top, width: geometry.width, height: geometry.height }}>
+            {image}
+          </Box>
+        </Box>
+      ) : (
+        image
+      )}
       <Typography
         variant="body2"
         color="text.secondary"
@@ -77,7 +96,7 @@ const PAGE_SIZE = 24;
  * プロジェクトに含まれるレシピ画像をグリッド表示するクライアントコンポーネント。
  * クエリでのフィルタリング、ページング表示に対応しています。
  */
-const ProjectRecipesGrid = ({ recipes, openUrl, labels }: ProjectRecipesGridProps) => {
+const ProjectRecipesGrid = ({ recipes, crop, openUrl, labels }: ProjectRecipesGridProps) => {
   const { isNewTheme } = useColorMode();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -153,7 +172,7 @@ const ProjectRecipesGrid = ({ recipes, openUrl, labels }: ProjectRecipesGridProp
           }}
         >
           {shown.map((recipe) => (
-            <RecipeGridItem key={recipe.id} recipe={recipe} />
+            <RecipeGridItem key={recipe.id} recipe={recipe} crop={crop} />
           ))}
         </Box>
       )}

@@ -5,18 +5,20 @@ import ProjectRecipesGrid from "./ProjectRecipesGrid";
 import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
 import { getCustomRecipeNames } from "@/lib/queries/recipeNames";
+import { normalizeCrop, type RecipeSettings } from "@/lib/recipe/settings";
 
 type ProjectRecipesProps = {
   projectId: string;
   projectSlug: string;
   namespaces?: string[] | null;
+  settings?: RecipeSettings | null;
 };
 
 /**
  * プロジェクトのレシピ一覧を取得・描画するサーバーコンポーネント。
  * CDNからこのプロジェクトのネームスペース分だけの索引を取得し、グリッド表示します。
  */
-const ProjectRecipes = async ({ projectId, projectSlug, namespaces }: ProjectRecipesProps) => {
+const ProjectRecipes = async ({ projectId, projectSlug, namespaces, settings }: ProjectRecipesProps) => {
   const t = await getTranslations("Project");
   const locale = await getLocale();
   const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
@@ -35,7 +37,7 @@ const ProjectRecipes = async ({ projectId, projectSlug, namespaces }: ProjectRec
   const error = lists.length === 0 ? t("recipesUnavailable") : null;
 
   // 非表示指定はCDNではなくmodparks側が持つため、描画直前にここで落とす。
-  const recipes = toRecipeItems(cdnUrl, lists)
+  const recipes = toRecipeItems(cdnUrl, lists, settings)
     .filter((r) => !hiddenIds.has(r.id))
     .map(({ id, name, url, fallbackUrl }) => ({ id, title: customNames.get(id) || name, url, fallbackUrl }));
 
@@ -59,6 +61,7 @@ const ProjectRecipes = async ({ projectId, projectSlug, namespaces }: ProjectRec
   return (
     <ProjectRecipesGrid
       recipes={recipes}
+      crop={normalizeCrop(settings?.crop)}
       openUrl={`${cdnUrl}/?ns=${encodeURIComponent(lists[0].namespace)}&lang=${encodeURIComponent(locale)}`}
       labels={{
         search: t("searchRecipes"),

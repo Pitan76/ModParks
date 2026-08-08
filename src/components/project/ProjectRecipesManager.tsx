@@ -10,6 +10,8 @@ import Pagination from "@mui/material/Pagination";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useTranslations } from "next-intl";
 import RecipeCard from "./recipe/RecipeCard";
+import RecipeSettingsForm from "./recipe/RecipeSettingsForm";
+import type { RecipeSettings } from "@/lib/recipe/settings";
 import { useRecipeVisibility } from "./recipe/useRecipeVisibility";
 
 export type { ManagedRecipe } from "./recipe/RecipeCard";
@@ -18,6 +20,7 @@ export type ProjectRecipesManagerProps = {
   projectId: string;
   projectSlug: string;
   recipeNamespaces?: string[] | null;
+  recipeSettings?: RecipeSettings | null;
   locale: string;
 };
 
@@ -66,6 +69,12 @@ const ProjectRecipesManager = (props: ProjectRecipesManagerProps) => {
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {t("desc")}
       </Typography>
+
+      <RecipeSettingsForm
+        projectSlug={props.projectSlug}
+        settings={props.recipeSettings ?? {}}
+        onError={setError}
+      />
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

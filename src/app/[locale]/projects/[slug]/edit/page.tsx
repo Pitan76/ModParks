@@ -121,6 +121,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         projectId={project.id}
         projectSlug={project.slug}
         recipeNamespaces={project.recipeNamespaces}
+        recipeSettings={project.recipeSettings}
         locale={locale}
         ownershipTransfer={<ProjectOwnershipTransfer projectId={project.id} />}
       />

@@ -1,4 +1,5 @@
 import { localeToFileMap, type AppLocale } from "@/lib/i18n/routing";
+import { tagNsQuery, type RecipeSettings } from "@/lib/recipe/settings";
 
 /**
  * レシピCDN（mp-recipe）からネームスペース単位のレシピ索引を取得するモジュール。
@@ -41,6 +42,21 @@ const IMAGE_SCALE = 2;
 const IMAGE_TAG_OFFSET = 0;
 
 /**
+ * R2 のキーに載る、タグに使うネームスペースの部分を組み立てます。
+ *
+ * CDN 側の `tagNamespaceKey` と同じ規則です。既定（バニラのみ）では空文字を返します。
+ * ここがずれると、生成済みの画像があるのに直接配信が 404 になり、毎回 Worker が起きます。
+ * @param settings プロジェクトの設定
+ */
+function tagNsKey(settings: RecipeSettings | null | undefined): string {
+  const query = tagNsQuery(settings);
+  if (!query) return "";
+  if (query === "*") return "~*";
+  // CDN 側は既定の minecraft を必ず含めたうえで並べ替えるため、こちらも同じ形に揃える。
+  return `~${Array.from(new Set(["minecraft", ...query.split(",")])).sort().join(".")}`;
+}
+
+/**
  * アプリのロケールを Minecraft のロケール名に変換します。
  * `messages/` のファイル名がそのまま Minecraft の表記（ja_jp など）と一致しているため、
  * i18n の対応表をそのまま使えます。
@@ -78,11 +94,12 @@ function directUrl(
   namespace: string,
   itemId: string,
   version: string,
-  ext: string
+  ext: string,
+  settings: RecipeSettings | null | undefined
 ): string | null {
   if (!assets?.base || !version || version === "0") return null;
 
-  const key = `cache/img/${assets.rv}/${namespace}/${version}/${itemId}@${IMAGE_SCALE}+${IMAGE_TAG_OFFSET}.${ext}`;
+  const key = `cache/img/${assets.rv}/${namespace}/${version}/${itemId}@${IMAGE_SCALE}+${IMAGE_TAG_OFFSET}${tagNsKey(settings)}.${ext}`;
   const base = assets.base.endsWith("/") ? assets.base.slice(0, -1) : assets.base;
   return `${base}/${key.split("/").map(encodeURIComponent).join("/")}`;
 }
@@ -91,8 +108,14 @@ function directUrl(
  * 索引を表示用のレシピ一覧に変換します。
  * @param cdnUrl レシピCDNのベースURL
  * @param lists ネームスペース単位の索引
+ * @param settings プロジェクトのレシピ表示設定。`crop` は表示側のCSSで効くためここでは使いません
  */
-export function toRecipeItems(cdnUrl: string, lists: NamespaceList[]): RecipeItem[] {
+export function toRecipeItems(
+  cdnUrl: string,
+  lists: NamespaceList[],
+  settings?: RecipeSettings | null
+): RecipeItem[] {
+  const tagNs = tagNsQuery(settings);
   return lists.flatMap(({ version, recipes, assets }) =>
     recipes.map(({ id, name, tagged }) => {
       const [namespace, itemId] = id.split(":");
@@ -106,10 +129,16 @@ export function toRecipeItems(cdnUrl: string, lists: NamespaceList[]): RecipeIte
       // `rv` も併せて載せる。レンダラーの更新や共通タグの追加では、このネームスペースの
       // アセットバージョンは動かない。URL が変わらないままだと、CDN が新しい絵を作っていても
       // immutable で焼き付いた古い応答をブラウザが1年間返し続ける。
-      const pin = version && version !== "0" ? `?v=${encodeURIComponent(version)}` : "";
-      const rv = assets?.rv ? `${pin ? "&" : "?"}rv=${encodeURIComponent(assets.rv)}` : "";
-      const fallbackUrl = `${cdnUrl}/api/${namespace}/${itemId}.${ext}${pin}${rv}`;
-      return { id, name, url: directUrl(assets, namespace, itemId, version, ext) ?? fallbackUrl, fallbackUrl };
+      const query = new URLSearchParams();
+      if (version && version !== "0") query.set("v", version);
+      if (assets?.rv) query.set("rv", assets.rv);
+      // 描かれるアイテム自体が変わるため、これだけは CDN へ渡す必要がある。
+      if (tagNs) query.set("tagNs", tagNs);
+
+      const qs = query.toString();
+      const fallbackUrl = `${cdnUrl}/api/${namespace}/${itemId}.${ext}${qs ? `?${qs}` : ""}`;
+      const direct = directUrl(assets, namespace, itemId, version, ext, settings);
+      return { id, name, url: direct ?? fallbackUrl, fallbackUrl };
     })
   );
 }

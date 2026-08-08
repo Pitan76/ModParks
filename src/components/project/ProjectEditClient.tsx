@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import TabbedPanel from "@/components/ui/TabbedPanel";
 import { type ReactNode, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
+import type { RecipeSettings } from "@/lib/recipe/settings";
 
 import dynamic from "next/dynamic";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -20,6 +21,7 @@ export type ProjectEditClientProps = {
   projectId: string;
   projectSlug: string;
   recipeNamespaces?: string[] | null;
+  recipeSettings?: RecipeSettings | null;
   locale: string;
 };
 
@@ -46,6 +48,7 @@ const ProjectEditClient = ({
   projectId,
   projectSlug,
   recipeNamespaces,
+  recipeSettings,
   locale
 }: ProjectEditClientProps) => {
   const tProject = useTranslations("Project");
@@ -68,6 +71,7 @@ const ProjectEditClient = ({
           projectId={projectId}
           projectSlug={projectSlug}
           recipeNamespaces={recipeNamespaces}
+          recipeSettings={recipeSettings}
           locale={locale}
         />
       ),

@@ -235,7 +235,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             }
             recipesContent={
               <Box sx={{ mt: 2 }}>
-                <ProjectRecipes projectId={p.id} projectSlug={p.slug} namespaces={p.recipeNamespaces} />
+                <ProjectRecipes projectId={p.id} projectSlug={p.slug} namespaces={p.recipeNamespaces} settings={p.recipeSettings} />
               </Box>
             }
             descriptionContent={

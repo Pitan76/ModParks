@@ -7,6 +7,7 @@ import { sql } from "drizzle-orm";
 import { users } from "./auth";
 import { posts } from "./posts";
 import { CONTENT_TYPES } from "../../lib/data/projectTypes";
+import type { RecipeSettings } from "../../lib/recipe/settings";
 
 /**
  * Project 固有の情報。共通部分（title / body / slug / visibility / author / 日時）は
@@ -31,6 +32,8 @@ export const projects = sqliteTable("projects", {
   recipesEnabled: integer("recipes_enabled", { mode: "boolean" }).notNull().default(false),
   /** レシピ抽出時に検出したデータパックのネームスペース一覧（slug と一致しないことが多いため保持）。JSON文字列配列 */
   recipeNamespaces: text("recipe_namespaces", { mode: "json" }).$type<string[]>().notNull().default([]),
+  /** レシピ画像の見せ方（タグに使うネームスペース・余白のクリップ）。項目が増えても列を足さずに済むようJSONで持つ */
+  recipeSettings: text("recipe_settings", { mode: "json" }).$type<RecipeSettings>().notNull().default({}),
   sourceIdeaId: text("source_idea_id"),
   /** 連携する GitHub リポジトリ ("owner/repo" 形式)。Release 自動取り込みに使用 */
   githubRepo: text("github_repo"),
