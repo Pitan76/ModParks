@@ -9,6 +9,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
+import { isSharedNamespace } from "@/lib/data/sharedNamespaces";
 
 /**
  * JARファイル内のクラフティングレシピを抽出し、CDN/R2にアップロードして
@@ -107,7 +108,11 @@ export const uploadClientExtractedRecipes = async (
   const namespaces: string[] = [];
 
   try {
-    for (const [ns, bucket] of Object.entries(byNs)) {
+    for (const [ns, rawBucket] of Object.entries(byNs)) {
+      // ブラウザから届いた中身をそのまま流さない。この経路は共有シークレットを持つため
+      // CDN 側の「共有NSはタグのみ」判定を素通りする。実際、これで共有 minecraft NS に
+      // バニラのレシピ 1056 件が流れ込んだ。
+      const bucket = isSharedNamespace(ns) ? { ...emptyBucket(), tags: (rawBucket as any).tags ?? {} } : rawBucket;
       const b = bucket as any;
       const count = (Object.keys(b.recipes || {}).length +
                      Object.keys(b.tags || {}).length +
@@ -152,6 +157,9 @@ export const uploadClientExtractedRecipes = async (
     return { error: err instanceof Error ? err.message : "Failed to upload extracted recipes" };
   }
 };
+
+/** 種別が揃った空のバケット。共有ネームスペースをタグだけに削るときの土台。 */
+const emptyBucket = () => ({ recipes: {}, tags: {}, textures: {}, models: {}, langs: {} });
 
 /**
  * JSON文字列で保持している配列カラムを読み出す。
