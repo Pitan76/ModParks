@@ -156,7 +156,7 @@ async function endSession(
  *
  * デッドロックやネットワークエラーによる無制限のフリーズを防止します。
  */
-async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 15000): Promise<Response> {
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 30000): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
