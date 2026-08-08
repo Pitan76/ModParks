@@ -127,10 +127,10 @@ export const authConfig = {
               token.isDeleted = !!dbUser.deletedAt;
               token.isDeactivated = !!dbUser.deactivatedAt;
               token.isSuspended = !!dbUser.suspendedAt;
-              if (dbUser.avatarUrl) token.avatarUrl = dbUser.avatarUrl;
-              if (dbUser.displayName) token.displayName = dbUser.displayName;
-              if (dbUser.username) token.username = dbUser.username;
-              if (dbUser.locale) token.locale = dbUser.locale;
+              token.avatarUrl = dbUser.avatarUrl ?? null;
+              token.displayName = dbUser.displayName ?? null;
+              token.username = dbUser.username ?? null;
+              token.locale = dbUser.locale ?? null;
               
               let customObj: any = {};
               if (typeof dbUser.custom === "string") {
@@ -156,6 +156,7 @@ export const authConfig = {
         session.user.id = (token.sub ?? token.id) as string;
         session.user.username = (token.username ?? null) as string | null;
         session.user.displayName = (token.displayName ?? null) as string | null;
+        session.user.name = (token.displayName ?? token.username ?? token.name ?? null) as string | null;
         session.user.avatarUrl = (token.avatarUrl ?? null) as string | null;
         session.user.role = (token.role ?? "user") as string;
         session.user.isPremium = !!token?.isPremium;

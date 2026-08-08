@@ -60,7 +60,7 @@ export default async function OAuthConsentPage({
         <ConsentFormLazy
           rawQuery={rawQuery}
           scopes={scopes}
-          accountName={session.user.name ?? session.user.email ?? ""}
+          accountName={session.user.displayName ?? session.user.username ?? session.user.name ?? session.user.email ?? ""}
           client={{
             name: client.name,
             description: client.description,
