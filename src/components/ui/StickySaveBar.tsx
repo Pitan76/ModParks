@@ -42,7 +42,7 @@ export default function StickySaveBar({
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: (theme) => theme.zIndex.appBar,
+          zIndex: (theme) => theme.zIndex.modal - 1,
           display: "flex",
           justifyContent: "center",
           px: 2,
