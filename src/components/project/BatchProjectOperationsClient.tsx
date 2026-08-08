@@ -23,6 +23,7 @@ import { formatCompactNumber } from "@/lib/utils/format";
 import { Link } from "@/lib/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/projectBatch";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
+import ProjectVersionCell from "./ProjectVersionCell";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 import SortableTableCell from "@/components/ui/SortableTableCell";
 import { useTableSort } from "@/lib/hooks/useTableSort";
@@ -35,6 +36,8 @@ type ProjectForManagement = {
   visibility: string;
   downloads: number | null;
   totalDownloads: number | null;
+  githubRepo?: string | null;
+  latestVersionNumber?: string | null;
 };
 
 export type BatchProjectOperationsClientProps = {
@@ -185,13 +188,14 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
               <SortableTableCell columnKey="type" activeKey={orderBy} order={order} onSort={handleSort}>{t("colType")}</SortableTableCell>
               <SortableTableCell columnKey="status" activeKey={orderBy} order={order} onSort={handleSort}>{t("colStatus")}</SortableTableCell>
               <SortableTableCell columnKey="downloads" activeKey={orderBy} order={order} onSort={handleSort} align="right">{t("colDownloads")}</SortableTableCell>
+              <TableCell align="center">{t("colVersion")}</TableCell>
               <TableCell align="center">{t("colActions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {projects.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                   {t("empty")}
                 </TableCell>
               </TableRow>
@@ -211,6 +215,14 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
                     <TableCell>{p.type}</TableCell>
                     <TableCell>{getStatusLabel(p.visibility)}</TableCell>
                     <TableCell align="right">{formatCompactNumber(totalDl, "ja")}</TableCell>
+                    <TableCell align="center">
+                      <ProjectVersionCell
+                        projectId={p.id}
+                        projectSlug={p.slug}
+                        githubRepo={p.githubRepo || null}
+                        latestVersionNumber={p.latestVersionNumber || null}
+                      />
+                    </TableCell>
                     <TableCell align="center">
                       <Button component={Link} href={`/projects/${p.slug}/edit`} size="small">
                         {t("edit")}

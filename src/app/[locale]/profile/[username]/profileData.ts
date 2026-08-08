@@ -138,6 +138,7 @@ async function getPinnedItems(userId: string, isOwner: boolean): Promise<PinnedI
               ...getTableColumns(projects),
               body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
               tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`,
+              latestVersionNumber: sql<string | null>`(SELECT version_number FROM versions WHERE project_id = posts.id AND archived_at IS NULL ORDER BY created_at DESC LIMIT 1)`
             },
             author: {
               username: userProfiles.username,
