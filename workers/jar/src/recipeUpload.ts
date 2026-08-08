@@ -158,9 +158,18 @@ async function endSession(
  */
 async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 30000): Promise<Response> {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
+  let isTimeout = false;
+  const id = setTimeout(() => {
+    isTimeout = true;
+    controller.abort();
+  }, timeoutMs);
   try {
     return await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (isTimeout) {
+      throw new Error(`Request timed out after ${timeoutMs}ms (url: ${url})`);
+    }
+    throw e;
   } finally {
     clearTimeout(id);
   }
