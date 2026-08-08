@@ -44,8 +44,10 @@ async function guarded<T>(run: () => Promise<T>): Promise<{ success: true; data:
  */
 export async function findRecipeIdentitiesAction(query: string) {
   return guarded(async () => {
-    const data = await callRecipeAdminApi("/admin/identities", query ? { q: query } : undefined);
-    return (data.identities ?? []) as RecipeIdentity[];
+    const data = (await callRecipeAdminApi("/admin/identities", query ? { q: query } : undefined)) as {
+      identities?: RecipeIdentity[];
+    };
+    return data.identities ?? [];
   });
 }
 

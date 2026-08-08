@@ -77,7 +77,7 @@ function IdentityList({
   if (identities.length === 0) return <Typography variant="body2">{t("noIdentities")}</Typography>;
 
   return (
-    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
       {identities.map((i) => (
         <Chip
           key={i.id}
@@ -88,7 +88,7 @@ function IdentityList({
           disabled={state.loading}
         />
       ))}
-    </Stack>
+    </Box>
   );
 }
 
@@ -112,11 +112,11 @@ function LimitsDetail({
         {t("namespaces")}: {limits.namespaces.length} / {shown(limits.limits.nsLimit)}
       </Typography>
 
-      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
         {limits.namespaces.map((n) => (
           <Chip key={n.ns} size="small" variant="outlined" label={`${n.ns} (${n.trust})`} />
         ))}
-      </Stack>
+      </Box>
 
       <Typography variant="caption" color="text.secondary">
         {t("hint")}

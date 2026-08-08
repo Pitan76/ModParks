@@ -12,13 +12,7 @@ const getCdnSecret = () => process.env.RECIPE_CDN_SECRET || "";
  * @param searchParams クエリパラメータの辞書
  */
 export async function callRecipeAdminApi(path: string, searchParams?: Record<string, string>) {
-  await getAdminDb();
-
-  const url = new URL(path, getCdnUrl());
-  url.searchParams.set("secret", getCdnSecret());
-  for (const [key, val] of Object.entries(searchParams ?? {})) url.searchParams.set(key, val);
-
-  const res = await fetch(url.toString(), { method: "GET", cache: "no-store" });
+  const res = await fetch(await recipeAdminUrl(path, searchParams), { method: "GET", cache: "no-store" });
   if (!res.ok) {
     throw new Error(`API failed: ${res.status} ${res.statusText} - ${await res.text()}`);
   }
@@ -26,4 +20,21 @@ export async function callRecipeAdminApi(path: string, searchParams?: Record<str
   const contentType = res.headers.get("content-type");
   if (contentType?.includes("application/json")) return res.json();
   return { message: await res.text() };
+}
+
+/**
+ * 管理APIのURLを組み立てます。
+ *
+ * 画像のように JSON で返らない応答は呼び出し側が自分で読む必要があるため、URLだけを渡します。
+ * 権限確認はここでも行います。
+ * @param path エンドポイントのパス
+ * @param searchParams クエリパラメータの辞書
+ */
+export async function recipeAdminUrl(path: string, searchParams?: Record<string, string>): Promise<string> {
+  await getAdminDb();
+
+  const url = new URL(path, getCdnUrl());
+  url.searchParams.set("secret", getCdnSecret());
+  for (const [key, val] of Object.entries(searchParams ?? {})) url.searchParams.set(key, val);
+  return url.toString();
 }

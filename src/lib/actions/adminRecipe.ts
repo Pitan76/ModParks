@@ -1,6 +1,6 @@
 "use server";
 
-import { callRecipeAdminApi } from "@/lib/services/recipeAdminApi";
+import { callRecipeAdminApi, recipeAdminUrl } from "@/lib/services/recipeAdminApi";
 
 /**
  * レシピインデックスを再構築します。
@@ -104,18 +104,9 @@ export async function render3dIconAction(namespace: string, path: string, format
   if (!namespace || !path) return { error: "Namespace and path are required" };
 
   try {
-    await getAdminDb();
-
-    const baseUrl = getCdnUrl();
-    const secret = getCdnSecret();
-    const url = new URL(`/admin/render3d/${namespace}/${path}`, baseUrl);
-    url.searchParams.set("secret", secret);
-    if (format) url.searchParams.set("format", format);
-
-    const res = await fetch(url.toString(), {
-      method: "GET",
-      cache: "no-store",
-    });
+    // 画像は JSON で返らないため、共通の呼び出しではなくURLだけを借りる。
+    const url = await recipeAdminUrl(`/admin/render3d/${namespace}/${path}`, format ? { format } : undefined);
+    const res = await fetch(url, { method: "GET", cache: "no-store" });
 
     if (!res.ok) {
       const text = await res.text();
