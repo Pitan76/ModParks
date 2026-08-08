@@ -87,8 +87,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
       {/* 対応ローダー */}
       {loaders.length > 0 && (
         <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-            <ExtensionIcon fontSize="small" color="action" />
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
             {t("sidebar.platforms")}
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
@@ -103,8 +102,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
       {/* 対応MCバージョン */}
       {mcVersions.length > 0 && (
         <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-            <SportsEsportsIcon fontSize="small" color="action" />
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
             {t("sidebar.gameVersions")}
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
