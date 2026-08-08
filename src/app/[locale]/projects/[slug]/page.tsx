@@ -1,6 +1,5 @@
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
@@ -34,6 +33,9 @@ import { SITE_URL } from "@/lib/config";
 import { canonicalUrl } from "@/lib/seo/canonical";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbSchema, projectSchema } from "@/lib/seo/schema";
+
+/** サイドバーを右カラムに回すのに必要なコンテンツ領域の幅(px) */
+const TWO_COLUMN_MIN_WIDTH = 700;
 
 interface ProjectDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -191,11 +193,23 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     : null;
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 }, containerType: "inline-size" }}>
       {structuredData && <JsonLd data={structuredData} />}
-      <Grid container spacing={{ xs: 3, md: 4 }}>
+      {/* 左のナビゲーションサイドバーの開閉で使える幅が変わるため、
+          ビューポート幅ではなくコンテナクエリで段組みを切り替える */}
+      <Box
+        sx={{
+          display:             "grid",
+          gap:                 { xs: 3, md: 4 },
+          gridTemplateColumns: "minmax(0, 1fr)",
+          [`@container (min-width: ${TWO_COLUMN_MIN_WIDTH}px)`]: {
+            gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
+            alignItems:          "start",
+          },
+        }}
+      >
         {/* ---- 左カラム: プロジェクト情報 ---- */}
-        <Grid size={{ xs: 12, md: 8 }} sx={{ minWidth: 0, maxWidth: "100%" }}>
+        <Box sx={{ minWidth: 0, maxWidth: "100%" }}>
           
           <ProjectDetailHeader 
             project={p} 
@@ -267,16 +281,18 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               defaultCommentBodyFormat={settingsRecord?.defaultCommentBodyFormat || "markdown"}
             />
           )}
-        </Grid>
+        </Box>
 
         {/* ---- 右カラム: サイドバー ---- */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Box>
           {/* 情報カードと広告をまとめて追従させる。個別に sticky にすると
               固定されない側が上を通過して重なるため、必ずこのラッパーで行う */}
           <Box
             sx={{
-              position: { md: "sticky" },
-              top: { md: 80 },
+              [`@container (min-width: ${TWO_COLUMN_MIN_WIDTH}px)`]: {
+                position: "sticky",
+                top:      80,
+              },
             }}
           >
             <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
@@ -288,8 +304,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </Box>
             )}
           </Box>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 }
