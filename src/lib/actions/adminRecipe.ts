@@ -1,46 +1,6 @@
 "use server";
 
-import { getAdminDb } from "@/lib/auth-helpers";
-
-const getCdnUrl = () => process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
-const getCdnSecret = () => process.env.RECIPE_CDN_SECRET || "";
-
-/**
- * modparks-recipe (レシピCDN) の管理者用APIを呼び出します。
- * @param path エンドポイントのパス (例: "/admin/reindex")
- * @param searchParams クエリパラメータの辞書
- */
-async function callRecipeAdminApi(path: string, searchParams?: Record<string, string>) {
-  // 管理者権限のチェック。権限がなければエラーを投げる
-  await getAdminDb();
-
-  const baseUrl = getCdnUrl();
-  const secret = getCdnSecret();
-
-  const url = new URL(path, baseUrl);
-  url.searchParams.set("secret", secret);
-  if (searchParams) {
-    for (const [key, val] of Object.entries(searchParams)) {
-      url.searchParams.set(key, val);
-    }
-  }
-
-  const res = await fetch(url.toString(), {
-    method: "GET",
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`API failed: ${res.status} ${res.statusText} - ${text}`);
-  }
-
-  const contentType = res.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
-    return res.json();
-  }
-  return { message: await res.text() };
-}
+import { callRecipeAdminApi } from "@/lib/services/recipeAdminApi";
 
 /**
  * レシピインデックスを再構築します。

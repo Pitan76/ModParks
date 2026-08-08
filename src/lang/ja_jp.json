@@ -864,6 +864,23 @@
         "desc": "参照されなくなった古い世代のレンダリング済み画像を削除します。消えてもCDNが作り直すため表示には影響しません。まず件数を確認してから削除してください。",
         "countBtn": "件数を数える",
         "deleteBtn": "削除を実行"
+      },
+      "limits": {
+        "title": "投稿上限",
+        "desc": "レシピCDNへの投稿を止める上限を、投稿者ごとに確認・変更します。-1 は無制限です。",
+        "search": "検索",
+        "searchPlaceholder": "表示名で検索",
+        "noIdentities": "該当する投稿者がいません。",
+        "daily": "本日の投稿",
+        "namespaces": "所有ネームスペース",
+        "hint": "空欄の項目は変更しません。-1 で無制限、default で既定値に戻します。",
+        "nsLimit": "ネームスペース上限",
+        "dailyLimit": "日次上限",
+        "apply": "上限を変更",
+        "resetQuota": "本日の枠を戻す",
+        "release": "所有を解除",
+        "releasePlaceholder": "解除するネームスペース",
+        "unlimited": "無制限"
       }
     },
     "oauth": {

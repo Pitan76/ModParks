@@ -856,6 +856,23 @@
         "desc": "Deletes rendered images from generations that are no longer referenced. Removing them does not affect display; the CDN re-renders on demand. Count first, then delete.",
         "countBtn": "Count",
         "deleteBtn": "Delete"
+      },
+      "limits": {
+        "title": "Upload limits",
+        "desc": "Review and change the limits that block uploads to the recipe CDN, per uploader. -1 means unlimited.",
+        "search": "Search",
+        "searchPlaceholder": "Search by display name",
+        "noIdentities": "No uploader matched.",
+        "daily": "Uploads today",
+        "namespaces": "Namespaces owned",
+        "hint": "Empty fields are left unchanged. Use -1 for unlimited, or default to restore the default.",
+        "nsLimit": "Namespace limit",
+        "dailyLimit": "Daily limit",
+        "apply": "Apply limits",
+        "resetQuota": "Reset today's quota",
+        "release": "Release ownership",
+        "releasePlaceholder": "Namespace to release",
+        "unlimited": "Unlimited"
       }
     },
     "oauth": {

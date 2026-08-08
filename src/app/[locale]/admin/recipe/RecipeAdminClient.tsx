@@ -7,6 +7,7 @@ import Grid from "@mui/material/Grid";
 import { useRecipeAdmin } from "./useRecipeAdmin";
 import ActionsPanel from "./ActionsPanel";
 import ResultPanel from "./ResultPanel";
+import LimitsPanel from "./LimitsPanel";
 
 export default function RecipeAdminClient() {
   const t = useTranslations("Admin.recipe");
@@ -24,6 +25,7 @@ export default function RecipeAdminClient() {
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 7 }}>
           <ActionsPanel state={state} />
+          <LimitsPanel />
         </Grid>
         <Grid size={{ xs: 12, md: 5 }}>
           <ResultPanel logs={state.logs} loading={state.loading} previewImage={state.previewImage} />
