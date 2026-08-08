@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import { assertEntryCount, ExtractBudget, uncompressedSize } from "./limits";
+import { isSharedNamespace } from "../../../src/lib/data/sharedNamespaces";
 
 /** ネームスペース単位でまとめた抽出結果 */
 export interface NsBucket {
@@ -24,16 +25,6 @@ export interface ExtractedRecipes {
   namespaces: string[];
   craftingRecipes: RecipeSummary[];
 }
-
-/**
- * 特定の mod の持ち物ではなく、みんなが書き足していくネームスペース。
- *
- * mp-recipe 側の `core/namespaces.ts` と同じ内容。別デプロイの Worker なので実体は共有できない。
- * 増やすときは両方に入れること。
- */
-const SHARED_NAMESPACES = ["c", "forge", "neoforge", "minecraft"];
-
-const isSharedNamespace = (ns: string): boolean => SHARED_NAMESPACES.includes(ns);
 
 // MC 1.21.2+ でフォルダ名が単数形 (recipe / tag) になったため両対応する
 const RECIPE_PATH = /^data\/([^/]+)\/recipes?\/(.+)\.json$/;
@@ -126,6 +117,10 @@ async function processPath(
   let m: RegExpMatchArray | null;
   if ((m = path.match(RECIPE_PATH))) {
     const [, ns, id] = m;
+    // 共有ネームスペースのレシピは後段で捨てるため、索引にも「このmodのNS」にも載せない。
+    // ここで載せると、mod が同梱した data/minecraft/recipes が投稿者のNSとして記録され、
+    // プロジェクトの一覧にバニラのレシピが丸ごと並ぶ。
+    if (isSharedNamespace(ns)) return;
     const content = await extractWithBudget(zip, path, budget, false);
     if (content === null) return;
     namespaces.add(ns);
