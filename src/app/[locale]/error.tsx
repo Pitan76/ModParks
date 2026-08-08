@@ -19,6 +19,17 @@ const ErrorBoundary = ({ error, reset }: ErrorBoundaryProps) => {
 
   useEffect(() => {
     console.error("Route error:", error);
+
+    // ChunkLoadError（チャンクのロード失敗）を検知した場合は自動でリロードして最新版を試みる
+    if (error && (error.name === "ChunkLoadError" || (error.message && error.message.indexOf("Loading chunk") !== -1))) {
+      const now = Date.now();
+      const lastReload = sessionStorage.getItem("chunk_error_reload");
+      // 10秒以内の連続リロードを防ぎ、無限ループを回避する
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        sessionStorage.setItem("chunk_error_reload", now.toString());
+        window.location.reload();
+      }
+    }
   }, [error]);
 
   return (

@@ -142,6 +142,24 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(event) {
+                var error = event.error;
+                if (error && (error.name === 'ChunkLoadError' || (error.message && error.message.indexOf('Loading chunk') !== -1))) {
+                  event.preventDefault();
+                  var now = Date.now();
+                  var lastReload = sessionStorage.getItem('chunk_error_reload');
+                  if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+                    sessionStorage.setItem('chunk_error_reload', now.toString());
+                    window.location.reload();
+                  }
+                }
+              });
+            `
+          }}
+        />
         {/* Google Analytics (gtag.js) */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
