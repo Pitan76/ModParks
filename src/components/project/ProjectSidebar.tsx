@@ -9,8 +9,6 @@ import Stack from "@mui/material/Stack";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import GavelIcon from "@mui/icons-material/Gavel";
-import ExtensionIcon from "@mui/icons-material/Extension";
-import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import CodeIcon from "@mui/icons-material/Code";
 import LinkIcon from "@mui/icons-material/Link";
 import XIcon from "@mui/icons-material/X";

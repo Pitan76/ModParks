@@ -116,7 +116,10 @@ export const uploadClientExtractedRecipes = async (
                      Object.keys(b.langs || {}).length);
       if (count === 0) continue;
 
-      namespaces.push(ns);
+      // レシピを持たない ns（data/minecraft/tags だけ同梱など）を混ぜると、CDN の共有
+      // minecraft 名前空間を丸ごと引いてバニラレシピが一覧に並んでしまう。
+      // アップロードはタグやテクスチャの描画に要るので全 ns 行う。
+      if (Object.keys(b.recipes || {}).length > 0) namespaces.push(ns);
 
       const res = await fetch(`${cdnUrl}/api/${ns}/bulk`, {
         method: "POST",
