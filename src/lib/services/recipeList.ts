@@ -52,8 +52,12 @@ function tagNsKey(settings: RecipeSettings | null | undefined): string {
   const query = tagNsQuery(settings);
   if (!query) return "";
   if (query === "*") return "~*";
+
   // CDN 側は既定の minecraft を必ず含めたうえで並べ替えるため、こちらも同じ形に揃える。
-  return `~${Array.from(new Set(["minecraft", ...query.split(",")])).sort().join(".")}`;
+  const list = Array.from(new Set(["minecraft", ...query.split(",")])).sort();
+  // 追加が minecraft だけなら既定と同じ絵になり、CDN 側のキーには何も付かない。
+  if (list.length === 1) return "";
+  return `~${list.join(".")}`;
 }
 
 /**

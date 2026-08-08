@@ -57,7 +57,7 @@ const RecipeSettingsForm = ({ projectSlug, settings, onError }: RecipeSettingsFo
         {t("desc")}
       </Typography>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "flex-start" }}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { sm: "flex-start" } }}>
         <TextField
           size="small"
           label={t("tagNs")}
