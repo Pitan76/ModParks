@@ -1,6 +1,7 @@
 import { getDb, getD1 } from "@/lib/db";
 import { posts, ideas, favorites, comments as commentsTable, users, userProfiles, versions, versionIdeas, projects } from "@/db/schema";
 import { eq, and, or, sql, desc } from "drizzle-orm";
+import { getProjectsByIds } from "@/lib/actions/projectQuery";
 
 export async function getIdeaMeta(id: string) {
   const d1 = await getD1();
@@ -146,12 +147,24 @@ export async function getIdeaDetail(id: string, userId?: string) {
     fetchSource(db, postId),
   ]);
 
+  const merged = mergeResolvedProjects(linkedVersions, sourceIdeaProjects);
+  const projectIds = merged.map((p) => p.projectId);
+  const projectDetails = await getProjectsByIds(projectIds);
+
+  const resolvedProjects = projectDetails.map((detail) => {
+    const m = merged.find((p) => p.projectId === detail.id);
+    return {
+      ...detail,
+      versionNumber: m?.versionNumber ?? null,
+    };
+  });
+
   return {
     ideaData,
     initialCount: likesData?.count || 0,
     initialLiked: !!userLike,
     comments,
-    resolvedProjects: mergeResolvedProjects(linkedVersions, sourceIdeaProjects),
+    resolvedProjects,
   };
 }
 

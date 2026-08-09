@@ -1,13 +1,15 @@
 import { getTranslations } from "next-intl/server";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import LinkButton from "@/components/ui/LinkButton";
-import type { IdeaDetail } from "./ideaDetailData";
+import ProjectCard from "@/components/project/ProjectCard";
+import type { ProjectCardProps } from "@/components/project/ProjectCard";
 
-export default async function ResolvedProjects({ projects }: { projects: IdeaDetail["resolvedProjects"] }) {
+type ResolvedProjectItem = ProjectCardProps["project"] & {
+  versionNumber: string | null;
+};
+
+export default async function ResolvedProjects({ projects }: { projects: ResolvedProjectItem[] }) {
   if (projects.length === 0) return null;
   const tIdea = await getTranslations("Idea");
 
@@ -19,35 +21,32 @@ export default async function ResolvedProjects({ projects }: { projects: IdeaDet
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {projects.map((p) => (
-          <Card key={p.projectId} variant="outlined" sx={{ borderRadius: 2, bgcolor: "success.50", borderColor: "success.main" }}>
-            <CardContent
-              sx={{
-                py: 2,
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                justifyContent: "space-between",
-                alignItems: { xs: "stretch", sm: "center" },
-                gap: 2,
-                "&:last-child": { pb: 2 },
-              }}
-            >
-              <Box sx={{ minWidth: 0 }}>
-                <Typography variant="body1" sx={{ fontWeight: 600, color: "success.dark", wordBreak: "break-word" }}>
-                  {p.projectName} {p.versionNumber ? `(v${p.versionNumber})` : ""}
-                </Typography>
-                {p.projectDescription && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    {p.projectDescription}
-                  </Typography>
-                )}
+          <Box key={p.id} sx={{ position: "relative" }}>
+            {p.versionNumber && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 12,
+                  right: 12,
+                  zIndex: 2,
+                  bgcolor: "success.light",
+                  color: "success.contrastText",
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1,
+                  fontSize: "0.75rem",
+                  fontWeight: "bold",
+                  pointerEvents: "none",
+                }}
+              >
+                v{p.versionNumber}
               </Box>
-              <LinkButton variant="outlined" size="small" href={`/projects/${p.projectSlug}`} sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
-                {tIdea("viewProject")}
-              </LinkButton>
-            </CardContent>
-          </Card>
+            )}
+            <ProjectCard project={p} layout="list" showCart={false} />
+          </Box>
         ))}
       </Box>
     </Box>
   );
 }
+

@@ -1,6 +1,6 @@
 import { getDatabase } from "@/lib/db";
 import { posts, projects, projectTags, users, userProfiles, versions } from "@/db/schema";
-import { eq, desc, and, or, sql, isNull, getTableColumns } from "drizzle-orm";
+import { eq, desc, and, or, sql, isNull, getTableColumns, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
 import { mapProjectRow } from "@/lib/queries/projectRow";
@@ -199,3 +199,42 @@ export const getUserProjectStats = async (authorId: string) => {
     curseforgeDownloads: result?.curseforgeDownloads || 0,
   };
 };
+
+/**
+ * @param ids
+ */
+export const getProjectsByIds = async (ids: string[]) => {
+  if (ids.length === 0) return [];
+  const db = await getDatabase();
+
+  try {
+    const { body, ...restPosts } = getTableColumns(posts);
+    const rows = await db
+      .select({
+        project: {
+          ...restPosts,
+          ...getTableColumns(projects),
+          body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
+          tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`,
+          latestVersionNumber: sql<string | null>`(SELECT version_number FROM versions WHERE project_id = posts.id AND archived_at IS NULL ORDER BY created_at DESC LIMIT 1)`
+        },
+        author: {
+          username: userProfiles.username,
+          displayName: userProfiles.displayName,
+          avatarUrl: userProfiles.avatarUrl,
+        }
+      })
+      .from(posts)
+      .innerJoin(projects, eq(projects.id, posts.id))
+      .leftJoin(users, eq(posts.authorId, users.id))
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(inArray(posts.id, ids))
+      .all();
+
+    return rows.map(mapProjectRow);
+  } catch (err: unknown) {
+    console.error("D1 getProjectsByIds Error:", err);
+    throw err;
+  }
+};
+
