@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { ChangeEvent, SyntheticEvent } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import FormTextField from "@/components/ui/form/FormTextField";
 import LoaderAutocomplete from "./LoaderAutocomplete";
@@ -25,6 +27,7 @@ export type EditVersionDialogProps = {
   version: ProjectVersion | null;
   projectSlug: string;
   availablePlatforms: OptionItem[];
+  openIdeas?: { id: string; title: string }[];
   onSuccess: (updated: ProjectVersion) => void;
 };
 
@@ -37,6 +40,7 @@ const EditVersionDialog = ({
   version,
   projectSlug,
   availablePlatforms,
+  openIdeas = [],
   onSuccess
 }: EditVersionDialogProps) => {
   const tCommon = useTranslations("Common");
@@ -52,6 +56,7 @@ const EditVersionDialog = ({
   const [editChannel, setEditChannel] = useState<string>(DEFAULT_RELEASE_CHANNEL);
   const [editFileUrl, setEditFileUrl] = useState<string>("");
   const [isExternalEdit, setIsExternalEdit] = useState<boolean>(false);
+  const [selectedIdea, setSelectedIdea] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     if (version) {
@@ -68,9 +73,24 @@ const EditVersionDialog = ({
         setEditMc([]);
         setEditLoaders([]);
       }
+      if (version.ideaId && version.ideaTitle) {
+        setSelectedIdea({ id: version.ideaId, title: version.ideaTitle });
+      } else {
+        setSelectedIdea(null);
+      }
       setEditError(null);
     }
   }, [version]);
+
+  const ideaOptions = useMemo(() => {
+    const list = [...openIdeas];
+    if (version?.ideaId && version?.ideaTitle) {
+      if (!list.some((item) => item.id === version.ideaId)) {
+        list.push({ id: version.ideaId, title: version.ideaTitle });
+      }
+    }
+    return list;
+  }, [openIdeas, version]);
 
   const handleEditSubmit = async (e?: SyntheticEvent<HTMLFormElement>) => {
     e?.preventDefault?.();
@@ -87,6 +107,11 @@ const EditVersionDialog = ({
     if (isExternalEdit && editFileUrl) {
       formData.append("fileUrl", editFileUrl);
     }
+    if (selectedIdea) {
+      formData.append("ideaId", selectedIdea.id);
+    } else {
+      formData.append("ideaId", "");
+    }
 
     try {
       const res = await updateVersion(version.id, projectSlug, formData);
@@ -100,7 +125,9 @@ const EditVersionDialog = ({
           releaseChannel: editChannel,
           mcVersions: JSON.stringify(editMc),
           loaders: JSON.stringify(editLoaders),
-          ...(isExternalEdit ? { fileUrl: editFileUrl } : {})
+          ...(isExternalEdit ? { fileUrl: editFileUrl } : {}),
+          ideaId: selectedIdea?.id || null,
+          ideaTitle: selectedIdea?.title || null
         });
         onClose();
       }
@@ -190,6 +217,23 @@ const EditVersionDialog = ({
           helperText={editError?.loaders?.[0]}
           required={false}
         />
+
+        {ideaOptions.length > 0 && (
+          <Autocomplete
+            options={ideaOptions}
+            getOptionLabel={(option) => option.title}
+            onChange={(_, newValue) => setSelectedIdea(newValue)}
+            value={selectedIdea}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={t("uploadForm.resolveIdea")}
+                placeholder={t("uploadForm.none")}
+                size="small"
+              />
+            )}
+          />
+        )}
 
         <FormTextField
           label={t("fields.changelog")}

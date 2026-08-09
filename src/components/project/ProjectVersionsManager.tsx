@@ -138,6 +138,7 @@ const ProjectVersionsManager = ({
         version={m.editTarget}
         projectSlug={projectSlug}
         availablePlatforms={availablePlatforms}
+        openIdeas={openIdeas}
         onSuccess={m.handleEditSuccess}
       />
 

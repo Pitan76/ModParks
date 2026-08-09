@@ -24,6 +24,8 @@ export type ProjectVersion = {
   archivedAt?: Date | null;
   isExternal?: boolean;
   canExtractRecipes?: boolean;
+  ideaId?: string | null;
+  ideaTitle?: string | null;
 };
 
 type ImportMsg = { text: string; severity: "success" | "error" } | null;

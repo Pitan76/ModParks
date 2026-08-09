@@ -8,7 +8,7 @@ import { scanVersionFile } from "@/lib/actions/versionScan";
 import { createVersionSchema, updateVersionSchema } from "@/lib/validations";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
@@ -208,9 +208,39 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
     await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId, mcVersion: mc }))).run();
   }
 
+  const ideaId = formData.get("ideaId") as string | null;
+  const existingIdea = await db
+    .select({ ideaId: versionIdeas.ideaId })
+    .from(versionIdeas)
+    .where(eq(versionIdeas.versionId, versionId))
+    .get();
+
+  if (existingIdea && existingIdea.ideaId !== ideaId) {
+    await db
+      .delete(versionIdeas)
+      .where(and(eq(versionIdeas.versionId, versionId), eq(versionIdeas.ideaId, existingIdea.ideaId)))
+      .run();
+    const otherReferences = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(versionIdeas)
+      .where(eq(versionIdeas.ideaId, existingIdea.ideaId))
+      .get();
+    if (!otherReferences || otherReferences.count === 0) {
+      await db.update(ideas).set({ status: "open" }).where(eq(ideas.id, existingIdea.ideaId)).run();
+      revalidatePath(`/ideas/${existingIdea.ideaId}`);
+    }
+  }
+
+  if (ideaId && (!existingIdea || existingIdea.ideaId !== ideaId)) {
+    await db.insert(versionIdeas).values({ versionId, ideaId }).run();
+    await db.update(ideas).set({ status: "fulfilled" }).where(eq(ideas.id, ideaId)).run();
+    revalidatePath(`/ideas/${ideaId}`);
+  }
+
   await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
   revalidatePath(`/projects/${projectSlug}`);
+  revalidatePath(`/ideas`);
   return { success: true };
 };
 

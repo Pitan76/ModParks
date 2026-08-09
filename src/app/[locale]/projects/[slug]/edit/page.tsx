@@ -16,7 +16,7 @@ import ProjectDependenciesManager from "@/components/project/ProjectDependencies
 import { getProjectMembers } from "@/lib/actions/member";
 import { getProjectDependencies } from "@/lib/actions/dependency";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { versions, posts, ideas } from "@/db/schema";
+import { versions, posts, ideas, versionIdeas } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
 import { isAdminSession } from "@/lib/auth/roles";
 
@@ -57,8 +57,25 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   const { db } = await getAuthenticatedDb();
   const rawVersions = await db
-    .select()
+    .select({
+      id: versions.id,
+      versionNumber: versions.versionNumber,
+      mcVersions: versions.mcVersions,
+      loaders: versions.loaders,
+      createdAt: versions.createdAt,
+      downloads: versions.downloads,
+      changelog: versions.changelog,
+      releaseChannel: versions.releaseChannel,
+      fileUrl: versions.fileUrl,
+      archivedAt: versions.archivedAt,
+      projectId: versions.projectId,
+      uploaderId: versions.uploaderId,
+      ideaId: versionIdeas.ideaId,
+      ideaTitle: posts.title,
+    })
     .from(versions)
+    .leftJoin(versionIdeas, eq(versions.id, versionIdeas.versionId))
+    .leftJoin(posts, eq(versionIdeas.ideaId, posts.id))
     .where(eq(versions.projectId, project.id))
     .orderBy(desc(versions.createdAt))
     .all();
