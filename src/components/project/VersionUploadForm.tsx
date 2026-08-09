@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -43,6 +44,7 @@ const VersionUploadForm = ({
   const tCommon = useTranslations("Common");
   const form = useVersionUpload(slug, previousSettings);
   const { error } = form;
+  const [selectedIdea, setSelectedIdea] = useState<{ id: string; title: string } | null>(null);
 
   const submitDisabled = form.pending || (form.uploadMode === "file" ? !form.file : !form.externalUrl);
 
@@ -79,13 +81,17 @@ const VersionUploadForm = ({
         <Autocomplete
           options={openIdeas}
           getOptionLabel={(option) => option.title}
+          onChange={(_, newValue) => setSelectedIdea(newValue)}
+          value={selectedIdea}
           renderInput={(params) => (
-            <TextField
-              {...params}
-              name="ideaId"
-              label={tVersion("uploadForm.resolveIdea")}
-              placeholder={tVersion("uploadForm.none")}
-            />
+            <>
+              <TextField
+                {...params}
+                label={tVersion("uploadForm.resolveIdea")}
+                placeholder={tVersion("uploadForm.none")}
+              />
+              <input type="hidden" name="ideaId" value={selectedIdea?.id || ""} />
+            </>
           )}
         />
       )}
