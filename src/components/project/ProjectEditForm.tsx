@@ -45,7 +45,6 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
   
   const formRef = useRef<HTMLFormElement>(null);
   const [dirty, setDirty] = useState(false);
-  const [formKey, setFormKey] = useState(0);
   const [pending, setPending] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [toast, setToast] = useState<{ message: string; severity: "success" | "error" | "info" } | null>(null);
@@ -94,7 +93,6 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
           return; // バリデーションエラー時はリトライ不要
         } else {
           setDirty(false);
-          setFormKey((prev) => prev + 1);
           success = true;
           setPending(false);
           setToast({ message: tCommon("saved"), severity: "success" });
@@ -135,7 +133,6 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
       {/* フォームは非制御のため、入力・選択の発生だけを見て未保存状態を立てる */}
       <Box
         component="form"
-        key={formKey}
         ref={formRef}
         onSubmit={handleSubmit}
         onInput={() => setDirty(true)}
