@@ -139,18 +139,17 @@ export async function fetchLatestGithubRelease(repo: string, token?: string): Pr
   return stable ?? releases[0] ?? null;
 }
 
-/** Release のアセットから取り込むべき .jar を選ぶ。無ければ .zip、それも無ければ null */
-export function pickPrimaryAsset(release: GithubRelease): GithubReleaseAsset | null {
+/** Release のアセットから取り込むべき主要アセット（.jar、無ければ .zip）をすべて抽出する */
+export function pickPrimaryAssets(release: GithubRelease): GithubReleaseAsset[] {
   const isDist = (a: GithubReleaseAsset) => {
     const n = a.name.toLowerCase();
     // sources / javadoc / dev などの補助成果物を除外
     return !/(sources|javadoc|-dev|-api|-slim)\.jar$/i.test(n);
   };
-  const jars = release.assets.filter((a) => a.name.toLowerCase().endsWith(".jar"));
-  const primaryJar = jars.find(isDist) ?? jars[0];
-  if (primaryJar) return primaryJar;
+  const jars = release.assets.filter((a) => a.name.toLowerCase().endsWith(".jar") && isDist(a));
+  if (jars.length > 0) return jars;
   const zip = release.assets.find((a) => a.name.toLowerCase().endsWith(".zip"));
-  return zip ?? null;
+  return zip ? [zip] : [];
 }
 
 /**

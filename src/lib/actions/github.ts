@@ -16,7 +16,7 @@ import { isAllowedExternalUrl } from "@/lib/validations";
 import {
   fetchGithubReleases,
   fetchLatestGithubRelease,
-  pickPrimaryAsset,
+  pickPrimaryAssets,
   downloadGithubAsset,
   normalizeGithubRepo,
   type GithubRelease,
@@ -160,88 +160,123 @@ export async function importGithubReleaseSystem(
   }
   if (!release) return { error: t("github.releaseNotFound") };
 
-  const asset = pickPrimaryAsset(release);
-  if (!asset) return { error: t("github.assetNotFound") };
+  const assets = pickPrimaryAssets(release);
+  if (assets.length === 0) return { error: t("github.assetNotFound") };
 
-  // R2 へのアップロードを解析より先に行うのは、非公開リポジトリのアセット URL を
-  // jar Worker 側から取得できない（トークンを持たない）ため。
-  // R2 キー経由なら公開/非公開を問わず解析できる。
-  const stored = mode === "link" ? linkToAsset(asset) : await storeAssetToR2(project.slug, asset, repoToken);
-  if ("error" in stored) return stored;
+  const importedVersions: string[] = [];
+  let lastVersionId = "";
+  let lastError = "";
 
-  // 解析。Service Binding 越しに巨大なバイト列を渡さず、所在だけを Worker に渡す
-  let parsed = { detectedVersion: "", detectedLoaders: [] as string[], detectedMcVersions: [] as string[] };
-  try {
-    parsed = await parseModJar(stored.r2Key ? { kind: "r2", key: stored.r2Key } : { kind: "url", url: stored.fileUrl });
-  } catch {
-    // 解析失敗時はタグ名などのフォールバックで続行
-  }
+  for (const asset of assets) {
+    // R2 へのアップロードを解析より先に行うのは、非公開リポジトリのアセット URL を
+    // jar Worker 側から取得できない（トークンを持たない）ため。
+    // R2 キー経由なら公開/非公開を問わず解析できる。
+    const stored = mode === "link" ? linkToAsset(asset) : await storeAssetToR2(project.slug, asset, repoToken);
+    if ("error" in stored) {
+      lastError = stored.error;
+      continue;
+    }
 
-  const versionNumber = parsed.detectedVersion || stripVPrefix(release.tag_name) || release.tag_name;
+    // 解析。Service Binding 越しに巨大なバイト列を渡さず、所在だけを Worker に渡す
+    let parsed = { detectedVersion: "", detectedLoaders: [] as string[], detectedMcVersions: [] as string[] };
+    try {
+      parsed = await parseModJar(stored.r2Key ? { kind: "r2", key: stored.r2Key } : { kind: "url", url: stored.fileUrl });
+    } catch {
+      // 解析失敗時はタグ名などのフォールバックで続行
+    }
 
-  // 重複チェック（同一プロジェクトで同じバージョン番号が既にある）。
-  // バージョン番号は解析結果に依存するためアップロード後にしか判定できず、
-  // 重複だった場合は置いたばかりのオブジェクトを消してから戻る。
-  const existing = await db
-    .select({ id: versions.id })
-    .from(versions)
-    .where(and(eq(versions.projectId, project.id), eq(versions.versionNumber, versionNumber)))
-    .get();
-  if (existing) {
-    if (stored.r2Key) {
-      try {
-        await deleteFromR2(await getR2Bucket(), stored.r2Key);
-      } catch (e: unknown) {
-        console.error("Failed to clean up R2 object after duplicate version:", e);
+    const baseVersion = parsed.detectedVersion || stripVPrefix(release.tag_name) || release.tag_name;
+    let versionNumber = baseVersion;
+
+    if (assets.length > 1) {
+      let loaderSuffix = "";
+      if (parsed.detectedLoaders.length === 1) {
+        loaderSuffix = parsed.detectedLoaders[0].toLowerCase();
+      } else {
+        const nameLower = asset.name.toLowerCase();
+        if (nameLower.includes("fabric")) loaderSuffix = "fabric";
+        else if (nameLower.includes("forge")) loaderSuffix = "forge";
+        else if (nameLower.includes("neoforge")) loaderSuffix = "neoforge";
+        else if (nameLower.includes("quilt")) loaderSuffix = "quilt";
+      }
+
+      if (loaderSuffix) {
+        versionNumber = `${baseVersion}-${loaderSuffix}`;
       }
     }
-    return { error: `Version '${versionNumber}' has already been imported.` };
+
+    // 重複チェック（同一プロジェクトで同じバージョン番号が既にある）。
+    // バージョン番号は解析結果に依存するためアップロード後にしか判定できず、
+    // 重複だった場合は置いたばかりのオブジェクトを消してから戻る。
+    const existing = await db
+      .select({ id: versions.id })
+      .from(versions)
+      .where(and(eq(versions.projectId, project.id), eq(versions.versionNumber, versionNumber)))
+      .get();
+    if (existing) {
+      if (stored.r2Key) {
+        try {
+          await deleteFromR2(await getR2Bucket(), stored.r2Key);
+        } catch (e: unknown) {
+          console.error("Failed to clean up R2 object after duplicate version:", e);
+        }
+      }
+      lastError = `Version '${versionNumber}' has already been imported.`;
+      continue;
+    }
+
+    const id = createId();
+    await insertVersionRecord(db, {
+      id,
+      versionNumber,
+      mcVersions: parsed.detectedMcVersions,
+      loaders: parsed.detectedLoaders,
+      changelog: release.body || "",
+      releaseChannel: channelFromGithubPrerelease(release.prerelease),
+      fileUrl: stored.fileUrl,
+      fileName: asset.name,
+      fileSize: stored.fileSize,
+      fileSha256: stored.fileSha256,
+      projectId: project.id,
+      // 自動取り込みには実行者がいないため、連携を設定したプロジェクト作者に帰属させる
+      uploaderId: project.authorId,
+    });
+
+    lastVersionId = id;
+    importedVersions.push(versionNumber);
+
+    // 通知は projects 側（アイコン・Webhook）と posts 側（タイトル）の双方を必要とする
+    const notifyTarget = await db
+      .select({
+        id: projects.id,
+        iconUrl: projects.iconUrl,
+        discordWebhookUrl: projects.discordWebhookUrl,
+        title: posts.title,
+        slug: posts.slug,
+        authorId: posts.authorId,
+      })
+      .from(projects)
+      .innerJoin(posts, eq(posts.id, projects.id))
+      .where(eq(projects.id, project.id))
+      .get();
+
+    if (notifyTarget) {
+      after(async () => {
+        await scanVersionFile(db, id, stored.fileUrl, asset.name);
+        await notifyNewVersion(db, notifyTarget, versionNumber);
+      });
+    }
   }
 
-  const id = createId();
-  await insertVersionRecord(db, {
-    id,
-    versionNumber,
-    mcVersions: parsed.detectedMcVersions,
-    loaders: parsed.detectedLoaders,
-    changelog: release.body || "",
-    releaseChannel: channelFromGithubPrerelease(release.prerelease),
-    fileUrl: stored.fileUrl,
-    fileName: asset.name,
-    fileSize: stored.fileSize,
-    fileSha256: stored.fileSha256,
-    projectId: project.id,
-    // 自動取り込みには実行者がいないため、連携を設定したプロジェクト作者に帰属させる
-    uploaderId: project.authorId,
-  });
+  if (importedVersions.length === 0) {
+    return { error: lastError || "No assets were imported." };
+  }
 
   // updatedAt は posts が持つ（projects 側には無い）
   await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
-  // 通知は projects 側（アイコン・Webhook）と posts 側（タイトル）の双方を必要とする
-  const notifyTarget = await db
-    .select({
-      id: projects.id,
-      iconUrl: projects.iconUrl,
-      discordWebhookUrl: projects.discordWebhookUrl,
-      title: posts.title,
-      slug: posts.slug,
-      authorId: posts.authorId,
-    })
-    .from(projects)
-    .innerJoin(posts, eq(posts.id, projects.id))
-    .where(eq(projects.id, project.id))
-    .get();
-
-  if (notifyTarget) {
-    after(async () => {
-      await scanVersionFile(db, id, stored.fileUrl, asset.name);
-      await notifyNewVersion(db, notifyTarget, versionNumber);
-    });
-  }
-
   revalidatePath(`/projects/${project.slug}`);
-  return { success: true, versionId: id, versionNumber };
+  return { success: true, versionId: lastVersionId, versionNumber: importedVersions.join(", ") };
 }
 
 /**
