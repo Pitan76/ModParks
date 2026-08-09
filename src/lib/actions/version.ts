@@ -1,9 +1,9 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions } from "@/db/schema";
+import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, comments } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
-import { notifyNewVersion } from "@/lib/notifications/notify";
+import { notifyNewVersion, notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import { scanVersionFile } from "@/lib/actions/versionScan";
 import { createVersionSchema, updateVersionSchema } from "@/lib/validations";
 import { isAllowedExternalUrl } from "@/lib/validations";
@@ -51,6 +51,51 @@ async function loadManageableVersion(versionId: string, projectSlug: string): Pr
   if (version.projectId !== project.id) return { error: t("version.notInProject") };
 
   return { db, project, version };
+}
+
+/**
+ * アイデアが解決された際に自動でシステムコメントを追加し、起票者へ通知を送るヘルパー関数。
+ */
+async function createSystemCommentForResolvedIdea(
+  db: Database,
+  ideaId: string,
+  versionId: string,
+  versionNumber: string,
+  projectSlug: string,
+  userId: string
+) {
+  const commentId = createId();
+  const content = `このアイデアはバージョン [${versionNumber}](/projects/${projectSlug}) で解決されました。`;
+
+  await db.insert(comments).values({
+    id: commentId,
+    postId: ideaId,
+    content,
+    contentFormat: "markdown",
+    authorId: userId,
+  }).run();
+
+  const idea = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      authorId: posts.authorId,
+    })
+    .from(ideas)
+    .innerJoin(posts, eq(posts.id, ideas.id))
+    .where(eq(ideas.id, ideaId))
+    .get();
+
+  if (idea) {
+    const actor = await resolveActor(db, userId);
+    await notifyToUser(db, idea.authorId, userId, "comment", {
+      kind: "idea",
+      slug: idea.slug,
+      title: idea.title,
+      ...actor,
+    });
+  }
 }
 
 /**
@@ -118,6 +163,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
   if (ideaId) {
     await db.insert(versionIdeas).values({ versionId: id, ideaId }).run();
     await db.update(ideas).set({ status: "fulfilled" }).where(eq(ideas.id, ideaId)).run();
+    await createSystemCommentForResolvedIdea(db, ideaId, id, parsed.data.versionNumber, projectSlug, session.user.id);
   }
 
   revalidatePath(`/projects/${projectSlug}`);
@@ -234,6 +280,8 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
   if (ideaId && (!existingIdea || existingIdea.ideaId !== ideaId)) {
     await db.insert(versionIdeas).values({ versionId, ideaId }).run();
     await db.update(ideas).set({ status: "fulfilled" }).where(eq(ideas.id, ideaId)).run();
+    const finalVersionNumber = parsed.data.versionNumber ?? version.versionNumber;
+    await createSystemCommentForResolvedIdea(db, ideaId, versionId, finalVersionNumber, projectSlug, session.user.id);
     revalidatePath(`/ideas/${ideaId}`);
   }
 

@@ -143,8 +143,8 @@ export async function fetchLatestGithubRelease(repo: string, token?: string): Pr
 export function pickPrimaryAssets(release: GithubRelease): GithubReleaseAsset[] {
   const isDist = (a: GithubReleaseAsset) => {
     const n = a.name.toLowerCase();
-    // sources / javadoc / dev などの補助成果物を除外
-    return !/(sources|javadoc|-dev|-api|-slim)\.jar$/i.test(n);
+    // sources / javadoc / dev / shadow などの補助成果物を除外
+    return !/(sources|javadoc|-dev|-api|-slim|-shadow|dev-shadow|-dev-shadow)\.jar$/i.test(n);
   };
   const jars = release.assets.filter((a) => a.name.toLowerCase().endsWith(".jar") && isDist(a));
   if (jars.length > 0) return jars;
