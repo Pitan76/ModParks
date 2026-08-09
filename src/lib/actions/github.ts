@@ -179,9 +179,11 @@ export async function importGithubReleaseSystem(
 
     // 解析。Service Binding 越しに巨大なバイト列を渡さず、所在だけを Worker に渡す
     let parsed = { detectedVersion: "", detectedLoaders: [] as string[], detectedMcVersions: [] as string[] };
+    let parseFailed = false;
     try {
       parsed = await parseModJar(stored.r2Key ? { kind: "r2", key: stored.r2Key } : { kind: "url", url: stored.fileUrl });
-    } catch {
+    } catch (e: unknown) {
+      parseFailed = true;
       // 解析失敗時はタグ名などのフォールバックで続行
     }
 
@@ -190,7 +192,7 @@ export async function importGithubReleaseSystem(
 
     if (assets.length > 1) {
       let loaderSuffix = "";
-      if (parsed.detectedLoaders.length === 1) {
+      if (!parseFailed && parsed.detectedLoaders.length === 1) {
         loaderSuffix = parsed.detectedLoaders[0].toLowerCase();
       } else {
         const nameLower = asset.name.toLowerCase();

@@ -51,7 +51,14 @@ function matchByRange(ranges: string[]): string[] {
 
 /** MC_VERSIONS のうち、レンジ文字列に名前が含まれるものを返す（Forge 系の緩い表記向け） */
 const matchBySubstring = (ranges: string[]): string[] =>
-  MC_VERSIONS.filter((v) => ranges.some((r) => typeof r === "string" && r.includes(v)));
+  MC_VERSIONS.filter((v) =>
+    ranges.some((r) => {
+      if (typeof r !== "string") return false;
+      const escaped = v.replace(/\./g, "\\.");
+      const regex = new RegExp(`(?<=^|[^0-9.])${escaped}(?=[^0-9.]|$)`);
+      return regex.test(r);
+    })
+  );
 
 async function readJson<T>(zip: Zip, path: string): Promise<T | null> {
   const entry = zip.file(path);
