@@ -71,7 +71,9 @@ export async function parseModJar(file: File | ArrayBuffer | Uint8Array): Promis
          const mcDep = deps.find(d => d.modId === "minecraft");
          if (mcDep && mcDep.versionRange) {
            MC_VERSIONS.forEach(v => {
-             if (mcDep.versionRange.includes(v)) detectedMcVersions.push(v);
+             const escaped = v.replace(/\./g, "\\.");
+             const regex = new RegExp(`(?<![0-9.])${escaped}(?![0-9.])`);
+             if (regex.test(mcDep.versionRange)) detectedMcVersions.push(v);
            });
          }
       }
@@ -97,7 +99,9 @@ export async function parseModJar(file: File | ArrayBuffer | Uint8Array): Promis
          const mcDep = deps.find(d => d.modId === "minecraft");
          if (mcDep && mcDep.versionRange) {
            MC_VERSIONS.forEach(v => {
-             if (mcDep.versionRange.includes(v)) detectedMcVersions.push(v);
+             const escaped = v.replace(/\./g, "\\.");
+             const regex = new RegExp(`(?<![0-9.])${escaped}(?![0-9.])`);
+             if (regex.test(mcDep.versionRange)) detectedMcVersions.push(v);
            });
          }
       }
