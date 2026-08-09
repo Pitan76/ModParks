@@ -49,16 +49,53 @@ function matchByRange(ranges: string[]): string[] {
   );
 }
 
-/** MC_VERSIONS のうち、レンジ文字列に名前が含まれるものを返す（Forge 系の緩い表記向け） */
-const matchBySubstring = (ranges: string[]): string[] =>
-  MC_VERSIONS.filter((v) =>
+/** MC_VERSIONS のうち、レンジ文字列に名前が含まれる、または範囲指定を満たすものを返す（Forge 系の表記向け） */
+const matchBySubstring = (ranges: string[]): string[] => {
+  return MC_VERSIONS.filter((v) =>
     ranges.some((r) => {
       if (typeof r !== "string") return false;
+      // まずは SemVer 範囲指定として解釈を試みる
+      try {
+        // [1.18, 1.19) のような Maven/Forge の範囲指定表記を SemVer 形式に緩く変換
+        let rangeStr = r.trim();
+        // [1.18,1.19) => >=1.18.0 <1.19.0
+        // [1.18, ] => >=1.18.0
+        // (,1.19] => <=1.19.0
+        if (rangeStr.startsWith("[") || rangeStr.startsWith("(")) {
+          const isStartInclusive = rangeStr.startsWith("[");
+          const isEndInclusive = rangeStr.endsWith("]");
+          const inner = rangeStr.slice(1, -1).trim();
+          const parts = inner.split(",").map((p) => p.trim());
+          if (parts.length === 2) {
+            const start = parts[0];
+            const end = parts[1];
+            let semverRange = "";
+            if (start) {
+              const startNormalized = start + (start.split(".").length === 2 ? ".0" : "");
+              semverRange += `${isStartInclusive ? ">=" : ">"}${startNormalized}`;
+            }
+            if (end) {
+              const endNormalized = end + (end.split(".").length === 2 ? ".0" : "");
+              if (semverRange) semverRange += " ";
+              semverRange += `${isEndInclusive ? "<=" : "<"}${endNormalized}`;
+            }
+            if (semverRange) {
+              const vNormalized = v + (v.split(".").length === 2 ? ".0" : "");
+              return semver.satisfies(vNormalized, semverRange, { includePrerelease: true });
+            }
+          }
+        }
+      } catch {
+        // 変換やパースに失敗した場合は部分一致フォールバックへ進む
+      }
+
+      // 単純一致または境界正規表現によるマッチング
       const escaped = v.replace(/\./g, "\\.");
       const regex = new RegExp(`(?<=^|[^0-9.])${escaped}(?=[^0-9.]|$)`);
       return regex.test(r);
     })
   );
+};
 
 async function readJson<T>(zip: Zip, path: string): Promise<T | null> {
   const entry = zip.file(path);

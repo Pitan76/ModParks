@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { User } from "@/db/schema";
-import { groupCleanVersionsByUser, projectScore } from "./trustProjection";
-import type { CleanVersion } from "./trustActivity";
+import { groupCleanVersionsByUser, projectScore } from "../src/lib/services/trustProjection";
+import type { CleanVersion } from "../src/lib/services/trustActivity";
 import { TRUST_BASE_SCORE } from "@/lib/trust/config";
 
 const NOW = new Date("2026-08-06T00:00:00Z");

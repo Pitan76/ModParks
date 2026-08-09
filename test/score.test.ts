@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TrustEvent, TrustEventKind } from "@/db/schema";
-import { computeScore, effectiveDelta, resolveTier, tierFromScore } from "./score";
-import { TRUST_BASE_SCORE } from "./config";
+import { computeScore, effectiveDelta, resolveTier, tierFromScore } from "../src/lib/trust/score";
+import { TRUST_BASE_SCORE } from "../src/lib/trust/config";
 
 const NOW = new Date("2026-08-06T00:00:00Z");
 const DAY_MS = 86_400_000;
