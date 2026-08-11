@@ -121,7 +121,7 @@ export function compactMcVersions(versions: string[]): string[] {
         return false;
       }).length;
 
-      const isAllVersions = (expectedCount > 0 && count === expectedCount) || count >= 4;
+      const isAllVersions = (expectedCount > 0 && count === expectedCount && count >= 2) || count >= 4;
 
       if (isAllVersions && group[endIdx].patch === 0) {
         result.push(`${prefix}.x`);
