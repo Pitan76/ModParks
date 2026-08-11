@@ -1,3 +1,5 @@
+import { MC_VERSIONS } from "../data/minecraftVersions";
+
 const KB = 1024;
 const MB = KB * KB;
 
@@ -108,10 +110,24 @@ export function compactMcVersions(versions: string[]): string[] {
       }
 
       const count = endIdx - startIdx + 1;
-      if (count >= 4 && group[endIdx].patch === 0) {
+
+      // MC_VERSIONS から該当プレフィックスの全パッチバージョン数を取得
+      const expectedCount = MC_VERSIONS.filter((v) => {
+        const parts = v.split(".");
+        if (parts.length === 2) return v === prefix;
+        if (parts.length >= 3) {
+          return parts.slice(0, 2).join(".") === prefix && !isNaN(parseInt(parts[2], 10));
+        }
+        return false;
+      }).length;
+
+      const isAllVersions = (expectedCount > 0 && count === expectedCount) || count >= 4;
+
+      if (isAllVersions && group[endIdx].patch === 0) {
         result.push(`${prefix}.x`);
       } else if (count >= 2) {
-        result.push(`${group[startIdx].original}～${group[endIdx].original}`);
+        // 小さいバージョン～大きいバージョンの順に表示
+        result.push(`${group[endIdx].original}～${group[startIdx].original}`);
       } else {
         result.push(group[startIdx].original);
       }
