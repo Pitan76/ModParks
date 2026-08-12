@@ -27,6 +27,7 @@ INSERT OR IGNORE INTO tags (id, name, slug) VALUES
 ('tag_food', 'Food', 'food'),
 ('tag_tool', 'Tool', 'tool'),
 ('tag_equipment', 'Equipment', 'equipment'),
+('tag_addon', 'Addon', 'addon'),
 ('tag_library', 'Library', 'library');
 
 INSERT OR IGNORE INTO platforms (id, name, slug) VALUES 
