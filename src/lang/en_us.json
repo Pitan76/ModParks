@@ -278,11 +278,17 @@
       "noVersionsInChannel": "No versions found."
     },
     "iconUpload": {
-      "title": "Project Icon (Max 400x400)",
+      "title": "Icon",
       "select": "Select Icon",
       "autoResizeNote": "*Large images will be automatically resized to 400x400",
       "error": "Failed to upload icon",
       "change": "Change"
+    },
+    "uploadForm": {
+      "title": "Icon",
+      "select": "Select Icon",
+      "autoResizeNote": "*Large images will be automatically resized to 400x400",
+      "error": "Failed to upload icon"
     },
     "explore": {
       "title": "Explore Projects",
@@ -1600,6 +1606,7 @@
     "food": "Food",
     "tool": "Tool",
     "equipment": "Equipment",
+    "addon": "Addon",
     "library": "Library"
   },
   "Dashboard": {

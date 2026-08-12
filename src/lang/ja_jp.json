@@ -1608,6 +1608,7 @@
     "food": "食料",
     "tool": "ツール",
     "equipment": "装備",
+    "addon": "アドオン",
     "library": "前提MOD"
   },
   "Dashboard": {
