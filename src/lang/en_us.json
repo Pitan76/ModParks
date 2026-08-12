@@ -585,6 +585,7 @@
       "copyright": "Copyright Infringement",
       "malware": "Malware/Virus",
       "spam": "Spam",
+      "harassment": "Harassment",
       "other": "Other"
     },
     "sending": "Sending...",

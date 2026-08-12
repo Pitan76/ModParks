@@ -29,10 +29,11 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
   const reports = await getReports();
 
   const reasonLabels: Record<string, string> = {
-    copyright: tAdmin("reports.reasons.copyright"),
-    malware:   tAdmin("reports.reasons.malware"),
-    spam:      tAdmin("reports.reasons.spam"),
-    other:     tAdmin("reports.reasons.other"),
+    copyright:  tAdmin("reports.reasons.copyright"),
+    malware:    tAdmin("reports.reasons.malware"),
+    spam:       tAdmin("reports.reasons.spam"),
+    harassment: tAdmin("reports.reasons.harassment"),
+    other:      tAdmin("reports.reasons.other"),
   };
 
   const statusColors: Record<string, "warning" | "success" | "default"> = {

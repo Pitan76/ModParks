@@ -143,7 +143,7 @@ export function isAllowedExternalUrl(url: string): boolean {
 
 // ---- Report Schema ----
 
-export const REPORT_REASONS = ["copyright", "malware", "spam", "other"] as const;
+export const REPORT_REASONS = ["copyright", "malware", "spam", "harassment", "other"] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
 
 export const createReportSchema = z.object({
