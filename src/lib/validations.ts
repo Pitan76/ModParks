@@ -7,6 +7,7 @@ import { vk } from "@/lib/validationKeys";
 
 const LICENSES = [
   "MIT",
+  "MIT-0",
   "Apache-2.0",
   "GPL-2.0-only",
   "GPL-2.0-or-later",
@@ -28,6 +29,7 @@ const LICENSES = [
   "Unlicense",
   "BSD-2-Clause",
   "BSD-3-Clause",
+  "0BSD",
   "Proprietary",
   "All Rights Reserved",
 ] as const;
