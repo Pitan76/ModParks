@@ -20,7 +20,7 @@ export const reports = sqliteTable("reports", {
     enum: ["project", "idea", "comment", "user"],
   }).notNull().default("project"),
   reason:     text("reason", {
-    enum: ["copyright", "malware", "spam", "other"],
+    enum: ["copyright", "malware", "spam", "harassment", "other"],
   }).notNull(),
   detail:     text("detail"),
   status:     text("status", {
