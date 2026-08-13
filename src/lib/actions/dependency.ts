@@ -8,8 +8,19 @@ import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
 import { findProjectPostById, findProjectPostBySlug } from "@/lib/queries/post";
 import { isAdminSession } from "@/lib/auth/roles";
+import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@/lib/dependencies/scope";
+import { toStringArray } from "@/lib/utils/format";
+import type { DependencyType } from "@/lib/dependencies/types";
 
-export type DependencyType = "required" | "optional" | "incompatible" | "embedded";
+export type { DependencyType } from "@/lib/dependencies/types";
+
+/** 依存の適用範囲。バージョン限定にするか、どのプラットフォームに要るか */
+export type DependencyScope = {
+  /** 指定するとそのバージョン限定の依存になる。省略時はプロジェクト全体 */
+  versionId?: string | null;
+  /** 依存が要るプラットフォーム。空なら全プラットフォーム */
+  loaders?: string[];
+};
 
 /** 依存関係カードに出す最小限のプロジェクト情報。存在しない外部依存も同じ形で表す */
 export interface DependencyProjectSummary {
@@ -30,6 +41,8 @@ export type DependencyEntry = {
   versionId: string | null;
   /** バージョン限定の依存の表示用バージョン番号 */
   versionNumber: string | null;
+  /** 依存が要るプラットフォーム。空なら全プラットフォーム */
+  loaders: string[];
 };
 
 const DEPENDENCY_COLUMNS = {
@@ -41,6 +54,7 @@ const DEPENDENCY_COLUMNS = {
   externalName: projectDependencies.externalName,
   versionId: projectDependencies.versionId,
   versionNumber: versions.versionNumber,
+  loaders: projectDependencies.loaders,
 };
 
 type DependencyRow = {
@@ -52,6 +66,7 @@ type DependencyRow = {
   externalName: string | null;
   versionId: string | null;
   versionNumber: string | null;
+  loaders: string | null;
 };
 
 const toDependencyEntry = (d: DependencyRow): DependencyEntry => ({
@@ -64,6 +79,7 @@ const toDependencyEntry = (d: DependencyRow): DependencyEntry => ({
   externalName: d.externalName,
   versionId: d.versionId,
   versionNumber: d.versionNumber,
+  loaders: parseDependencyLoaders(d.loaders),
 });
 
 /**
@@ -96,24 +112,40 @@ export async function getProjectDependencies(projectId: string, includeVersionSc
  *
  * そのバージョン限定のものと、プロジェクト全体のものを両方返す。
  * どちらなのかは versionId で見分けられる。
+ *
+ * プロジェクト全体の依存にプラットフォーム指定がある場合（Fabric なら Fabric API など）は、
+ * そのバージョンのローダーに合うものだけを返す。合わないものを並べると、
+ * 利用者には「要らないものを要求されている」ようにしか見えないため。
  */
 export async function getVersionDependencies(projectId: string, versionId: string): Promise<DependencyEntry[]> {
   const db = await getDatabase();
 
-  const deps = await db
-    .select(DEPENDENCY_COLUMNS)
-    .from(projectDependencies)
-    .leftJoin(projects, eq(projectDependencies.targetProjectId, projects.id))
-    .leftJoin(posts, eq(posts.id, projects.id))
-    .leftJoin(versions, eq(projectDependencies.versionId, versions.id))
-    .where(and(
-      eq(projectDependencies.projectId, projectId),
-      or(isNull(projectDependencies.versionId), eq(projectDependencies.versionId, versionId)),
-    ))
-    .all();
+  const [deps, version] = await Promise.all([
+    db
+      .select(DEPENDENCY_COLUMNS)
+      .from(projectDependencies)
+      .leftJoin(projects, eq(projectDependencies.targetProjectId, projects.id))
+      .leftJoin(posts, eq(posts.id, projects.id))
+      .leftJoin(versions, eq(projectDependencies.versionId, versions.id))
+      .where(and(
+        eq(projectDependencies.projectId, projectId),
+        or(isNull(projectDependencies.versionId), eq(projectDependencies.versionId, versionId)),
+      ))
+      .all(),
+    db
+      .select({ loaders: versions.loaders })
+      .from(versions)
+      .where(eq(versions.id, versionId))
+      .get(),
+  ]);
 
-  // バージョン限定のものを先に出す。実際に効く条件から読ませたい
-  return deps.map(toDependencyEntry).sort((a, b) => Number(!!b.versionId) - Number(!!a.versionId));
+  const versionLoaders = version ? toStringArray(version.loaders) : [];
+
+  return deps
+    .map(toDependencyEntry)
+    .filter((dep) => dependencyAppliesToLoaders(dep.loaders, versionLoaders))
+    // バージョン限定のものを先に出す。実際に効く条件から読ませたい
+    .sort((a, b) => Number(!!b.versionId) - Number(!!a.versionId));
 }
 
 /**
@@ -190,6 +222,15 @@ async function resolveDependencyVersionId(
   return version.id;
 }
 
+/**
+ * プラットフォーム指定を DB へ入れる形に整える。
+ * 空指定は「全プラットフォーム」を意味するので、空配列ではなく null で持つ。
+ */
+function normalizeScopeLoaders(loaders?: string[]): string | null {
+  const cleaned = (loaders ?? []).map((l) => l.trim()).filter(Boolean);
+  return cleaned.length > 0 ? JSON.stringify(cleaned) : null;
+}
+
 /** 依存関係の追加・削除後に貼り替えが要るページ */
 function revalidateDependencyPaths(slug: string) {
   revalidatePath(`/projects/${slug}`);
@@ -206,7 +247,7 @@ export async function addProjectDependencyBySlug(
   projectId: string,
   targetSlug: string,
   dependencyType: DependencyType,
-  versionId?: string | null,
+  scope: DependencyScope = {},
 ) {
   const { db, session } = await getAuthenticatedDb();
 
@@ -219,9 +260,11 @@ export async function addProjectDependencyBySlug(
     throw new Error("Cannot depend on itself");
   }
 
-  const scopedVersionId = await resolveDependencyVersionId(db, projectId, versionId);
+  const scopedVersionId = await resolveDependencyVersionId(db, projectId, scope.versionId);
+  const loaders = normalizeScopeLoaders(scope.loaders);
 
-  // 同じ相手でも、プロジェクト全体とバージョン限定は別物として持てる
+  // 同じ相手でも、プロジェクト全体とバージョン限定は別物として持てる。
+  // プラットフォームが違えば別の依存（Fabric用とForge用）なので重複としない。
   const existing = await db
     .select({ id: projectDependencies.id })
     .from(projectDependencies)
@@ -229,6 +272,7 @@ export async function addProjectDependencyBySlug(
       eq(projectDependencies.projectId, projectId),
       eq(projectDependencies.targetProjectId, targetProject.id),
       scopedVersionId ? eq(projectDependencies.versionId, scopedVersionId) : isNull(projectDependencies.versionId),
+      loaders ? eq(projectDependencies.loaders, loaders) : isNull(projectDependencies.loaders),
     ))
     .get();
 
@@ -241,6 +285,7 @@ export async function addProjectDependencyBySlug(
     targetProjectId: targetProject.id,
     dependencyType,
     versionId: scopedVersionId,
+    loaders,
   }).run();
 
   revalidateDependencyPaths(project.slug);
@@ -252,12 +297,12 @@ export async function addExternalProjectDependency(
   externalName: string,
   externalUrl: string,
   dependencyType: DependencyType,
-  versionId?: string | null,
+  scope: DependencyScope = {},
 ) {
   const { db, session } = await getAuthenticatedDb();
 
   const project = await assertDependencyEditable(db, session, projectId);
-  const scopedVersionId = await resolveDependencyVersionId(db, projectId, versionId);
+  const scopedVersionId = await resolveDependencyVersionId(db, projectId, scope.versionId);
 
   await db.insert(projectDependencies).values({
     projectId,
@@ -265,6 +310,7 @@ export async function addExternalProjectDependency(
     externalUrl,
     dependencyType,
     versionId: scopedVersionId,
+    loaders: normalizeScopeLoaders(scope.loaders),
   }).run();
 
   revalidateDependencyPaths(project.slug);

@@ -180,6 +180,14 @@ export const projectDependencies = sqliteTable(
      * 取れる形を保つため。
      */
     versionId: text("version_id").references(() => versions.id, { onDelete: "cascade" }),
+    /**
+     * 依存が要るプラットフォーム（JSON: string[]）。null または空配列で全プラットフォーム。
+     *
+     * 前提 MOD はローダーごとに違う（Fabric なら Fabric API、Forge なら別物）ため、
+     * プロジェクト全体の依存を 1 本に潰すと、どちらの利用者にも嘘になる。
+     * versions.loaders と同じ JSON 文字列配列で持ち、突き合わせは配列の交差で行う。
+     */
+    loaders: text("loaders"),
     externalUrl: text("external_url"),
     externalName: text("external_name"),
     dependencyType: text("dependency_type").notNull().default("required"), // required, optional, incompatible, embedded

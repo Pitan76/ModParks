@@ -431,7 +431,10 @@
       "noDependents": "このプロジェクトに依存しているプロジェクトはありません。",
       "forVersion": "このバージョンの依存関係",
       "projectWide": "プロジェクト全体",
-      "versionScopeHint": "ここで追加した依存関係は、このバージョンにだけ適用されます。プロジェクト全体の依存関係は編集画面の「依存関係」タブで管理します。"
+      "versionScopeHint": "ここで追加した依存関係は、このバージョンにだけ適用されます。プロジェクト全体の依存関係は編集画面の「依存関係」タブで管理します。",
+      "platformScope": "対象プラットフォーム（任意）",
+      "platformScopeHint": "選ぶと、そのプラットフォームに対応したバージョンにだけ表示されます（例: Fabric を選ぶと Fabric 版でのみ Fabric API を要求）。未選択なら全プラットフォーム。",
+      "allPlatforms": "全プラットフォーム"
     },
     "members": {
       "title": "メンバー管理",
@@ -2181,7 +2184,8 @@
     "ideaContentMax": "5000文字以内",
     "commentMin": "1文字以上入力してください",
     "commentMax": "2000文字以内",
-    "slugTaken": "このスラッグは既に他のプロジェクトで使用されています。"
+    "slugTaken": "このスラッグは既に他のプロジェクトで使用されています。",
+    "dependencyTargetRequired": "依存先のプロジェクトスラッグ、または名前とURLを指定してください"
   },
   "Export": {
     "title": "ModParks アカウントデータ エクスポート",

@@ -4,6 +4,7 @@ import { MC_VERSIONS, type McVersion } from "@/lib/data/minecraftVersions";
 import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
 import { CONTENT_TYPES } from "@/lib/data/projectTypes";
 import { vk } from "@/lib/validationKeys";
+import { DEPENDENCY_TYPES, MAX_DEPENDENCY_DRAFTS } from "@/lib/dependencies/types";
 
 const LICENSES = [
   "MIT",
@@ -102,6 +103,29 @@ export const createVersionSchema = z.object({
 });
 
 export type CreateVersionInput = z.infer<typeof createVersionSchema>;
+
+/**
+ * バージョン登録と同時に渡される依存関係の下書き。
+ *
+ * 相手はプロジェクト（スラッグ）か外部URLのどちらか。存在確認と
+ * ドメイン許可の判定は保存側（resolveDependencyDrafts）で行う。
+ */
+export const dependencyDraftSchema = z
+  .object({
+    dependencyType: z.enum(DEPENDENCY_TYPES),
+    targetSlug: z.string().max(120).optional(),
+    externalName: z.string().max(120).optional(),
+    externalUrl: z.string().url(vk("invalidUrl")).optional(),
+    loaders: z.array(z.string().max(60)).max(20).default([]),
+  })
+  .refine(
+    (d) => !!d.targetSlug?.trim() || (!!d.externalName?.trim() && !!d.externalUrl?.trim()),
+    { message: vk("dependencyTargetRequired") },
+  );
+
+export const dependencyDraftsSchema = z.array(dependencyDraftSchema).max(MAX_DEPENDENCY_DRAFTS);
+
+export type DependencyDraftInput = z.infer<typeof dependencyDraftSchema>;
 
 export const updateVersionSchema = createVersionSchema.partial().extend({
   versionNumber: z

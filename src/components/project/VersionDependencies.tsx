@@ -14,6 +14,7 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/routing";
+import { getLoaderInfo } from "@/lib/loaders";
 import type { DependencyEntry, DependencyType } from "@/lib/actions/dependency";
 
 export const DEPENDENCY_COLOR: Record<DependencyType, "error" | "success" | "warning" | "default"> = {
@@ -74,6 +75,9 @@ export default function VersionDependencies({ dependencies, showTitle = true }: 
                 }
               />
               <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexShrink: 0 }}>
+                {dep.loaders.map((loader) => (
+                  <Chip key={loader} size="small" variant="outlined" label={getLoaderInfo(loader).name} sx={{ height: 22 }} />
+                ))}
                 {!dep.versionId && (
                   <Chip size="small" variant="outlined" label={t("projectWide")} sx={{ height: 22 }} />
                 )}

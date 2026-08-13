@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 import LoaderAutocomplete from "./LoaderAutocomplete";
 import McVersionAutocomplete from "./McVersionAutocomplete";
 import PreviousVersionSettingsBanner, { type PreviousVersionSettings } from "./PreviousVersionSettings";
+import DependencyDraftEditor from "./DependencyDraftEditor";
 import VersionFileInput from "./version/VersionFileInput";
 import { useVersionUpload } from "./version/useVersionUpload";
 
@@ -155,6 +156,19 @@ const VersionUploadForm = ({
         error={!!error?.changelog}
         helperText={error?.changelog?.[0]}
       />
+
+      <Box>
+        <DependencyDraftEditor
+          value={form.dependencies}
+          onChange={form.setDependencies}
+          disabled={form.pending}
+        />
+        {error?.dependencies && (
+          <Typography variant="caption" color="error" sx={{ display: "block", mt: 1 }}>
+            {error.dependencies[0]}
+          </Typography>
+        )}
+      </Box>
 
       <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
         <Button variant="outlined" onClick={() => form.router.back()} disabled={form.pending}>

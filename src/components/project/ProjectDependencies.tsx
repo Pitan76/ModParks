@@ -13,6 +13,7 @@ import Stack from "@mui/material/Stack";
 import { Link } from "@/lib/i18n/routing";
 import MuiLink from "@mui/material/Link";
 import ExtensionIcon from "@mui/icons-material/Extension";
+import { getLoaderInfo } from "@/lib/loaders";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 type DependencyProject = {
@@ -31,6 +32,8 @@ type ProjectDependenciesProps = {
     externalName?: string | null;
     /** バージョン限定の依存なら、その表示用バージョン番号 */
     versionNumber?: string | null;
+    /** 依存が要るプラットフォーム。空なら全プラットフォーム */
+    loaders?: string[];
   }[];
   dependents: {
     id: string;
@@ -89,6 +92,9 @@ const ProjectDependencies = ({ dependencies, dependents }: ProjectDependenciesPr
                   }
                 />
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexShrink: 0 }}>
+                  {(dep.loaders ?? []).map((loader) => (
+                    <Chip key={loader} size="small" variant="outlined" label={getLoaderInfo(loader).name} />
+                  ))}
                   {dep.versionNumber && (
                     <Chip size="small" variant="outlined" label={`v${dep.versionNumber}`} />
                   )}

@@ -4,6 +4,7 @@ import { posts, projects, projectDependencies, versions, projectMembers, version
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, desc, and, getTableColumns, isNull } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";
+import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@/lib/dependencies/scope";
 import type { ApiVersion, ApiVersionDependency } from "@/types/api";
 import { createVersionSchema, isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -63,6 +64,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
         dependencyType: projectDependencies.dependencyType,
         externalUrl: projectDependencies.externalUrl,
         externalName: projectDependencies.externalName,
+        loaders: projectDependencies.loaders,
         targetSlug: posts.slug,
         targetTitle: posts.title,
       })
@@ -80,6 +82,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     externalUrl: d.externalUrl,
     externalName: d.externalName,
     versionScoped: !!d.versionId,
+    loaders: parseDependencyLoaders(d.loaders),
   });
 
   const data: ApiVersion[] = results.map(v => ({
@@ -95,9 +98,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     loaders: JSON.parse(v.loaders),
     mcVersions: JSON.parse(v.mcVersions),
     fileUrl: `/api/download?versionId=${v.id}`,
-    // バージョン限定のものと、プロジェクト全体のものを両方返す
+    // バージョン限定のものと、プロジェクト全体のものを両方返す。
+    // 全体側にプラットフォーム指定があるものは、そのバージョンのローダーに合うものだけ
     dependencies: dependencyRows
       .filter((d) => d.versionId === null || d.versionId === v.id)
+      .filter((d) => dependencyAppliesToLoaders(parseDependencyLoaders(d.loaders), JSON.parse(v.loaders)))
       .map(toApiDependency),
   }));
 

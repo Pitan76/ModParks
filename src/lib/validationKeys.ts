@@ -26,7 +26,8 @@ export type ValidationKey =
   | "ideaContentMin"
   | "ideaContentMax"
   | "commentMin"
-  | "commentMax";
+  | "commentMax"
+  | "dependencyTargetRequired";
 
 /** zod スキーマに渡す翻訳キー付きメッセージを組み立てる */
 export const vk = (key: ValidationKey): string => `${VALIDATION_KEY_PREFIX}${key}`;
