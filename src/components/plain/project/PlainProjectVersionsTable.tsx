@@ -18,11 +18,6 @@ export type PlainProjectVersionsTableProps = {
   onMcChange: (value: string) => void;
   loaderOptions: string[];
   mcOptions: string[];
-  /** 0 始まりの現在ページ */
-  page: number;
-  lastPage: number;
-  totalCount: number;
-  onPageChange: (page: number) => void;
 };
 
 const CHANNELS = ["release", "beta", "alpha"] as const;
@@ -42,10 +37,6 @@ const PlainProjectVersionsTable = ({
   onMcChange,
   loaderOptions,
   mcOptions,
-  page,
-  lastPage,
-  totalCount,
-  onPageChange,
 }: PlainProjectVersionsTableProps) => {
   const t = useTranslations("Project");
   const tVersion = useTranslations("Version");
@@ -129,18 +120,6 @@ const PlainProjectVersionsTable = ({
             </tbody>
           </table>
         </div>
-      )}
-
-      {lastPage > 0 && (
-        <p className={styles.dim}>
-          <button type="button" onClick={() => onPageChange(page - 1)} disabled={page <= 0}>
-            {t("table.prevPage")}
-          </button>{" "}
-          {t("table.pageOf", { page: page + 1, pages: lastPage + 1, count: totalCount })}{" "}
-          <button type="button" onClick={() => onPageChange(page + 1)} disabled={page >= lastPage}>
-            {t("table.nextPage")}
-          </button>
-        </p>
       )}
     </div>
   );

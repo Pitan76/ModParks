@@ -276,12 +276,7 @@
       },
       "sortBy": "Sort",
       "noVersionsInChannel": "No versions found.",
-      "size": "Size",
-      "rowsPerPage": "Rows per page:",
-      "pageRange": "{from}-{to} of {count}",
-      "pageOf": "Page {page} of {pages} ({count} versions)",
-      "prevPage": "Previous",
-      "nextPage": "Next"
+      "size": "Size"
     },
     "iconUpload": {
       "title": "Icon",

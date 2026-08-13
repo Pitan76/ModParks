@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import TablePagination from "@mui/material/TablePagination";
-import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import ProjectVersionsFilters from "./ProjectVersionsFilters";
 import ProjectVersionsDesktopTable from "./ProjectVersionsDesktopTable";
 import ProjectVersionsMobileList from "./ProjectVersionsMobileList";
 import { useProjectVersions } from "./useProjectVersions";
 import { useVersionMenu } from "./useVersionMenu";
 import { useColorMode } from "@/components/ThemeRegistry";
+import PaginationControls from "@/components/ui/PaginationControls";
 import PlainProjectVersionsTable from "@/components/plain/project/PlainProjectVersionsTable";
 
 export type ProjectVersionRow = {
@@ -28,8 +28,15 @@ export type ProjectVersionsTableProps = {
   projectSlug: string;
 };
 
-const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
-const DEFAULT_ROWS_PER_PAGE = 20;
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+
+/** URL の数値パラメータを読む。壊れた値でも一覧が出せるよう既定値へ倒す */
+const readNumberParam = (value: string | null | undefined, fallback: number, max: number): number => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.min(Math.trunc(parsed), max);
+};
 
 /**
  * プロジェクト詳細ページの「バージョン」タブで、リリースバージョン一覧を
@@ -38,11 +45,12 @@ const DEFAULT_ROWS_PER_PAGE = 20;
  *
  * 全バージョンを受け取り、絞り込み・並び替えを適用したうえでページに切り出す。
  * 読み込み済みの分だけを対象にすると、絞り込みの選択肢も件数も実態とずれるため。
+ * ページと表示件数はサイト共通の PaginationControls に合わせて URL で持つ。
  */
 const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTableProps) => {
-  const t = useTranslations("Project.table");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
+  const searchParams = useSearchParams();
+  const limit = readNumberParam(searchParams?.get("limit"), DEFAULT_LIMIT, MAX_LIMIT);
+  const requestedPage = readNumberParam(searchParams?.get("page"), 1, Number.MAX_SAFE_INTEGER);
 
   const state = useProjectVersions(versions);
   const buildMenu = useVersionMenu(projectSlug);
@@ -50,52 +58,35 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
 
   const filteredCount = state.versions.length;
   // 絞り込みで件数が減ったときに空ページへ取り残されないよう、描画時に丸める
-  const lastPage = Math.max(0, Math.ceil(filteredCount / rowsPerPage) - 1);
-  const safePage = Math.min(page, lastPage);
+  const lastPage = Math.max(1, Math.ceil(filteredCount / limit));
+  const page = Math.min(requestedPage, lastPage);
 
   const pageRows = useMemo(
-    () => state.versions.slice(safePage * rowsPerPage, safePage * rowsPerPage + rowsPerPage),
-    [state.versions, safePage, rowsPerPage],
+    () => state.versions.slice((page - 1) * limit, page * limit),
+    [state.versions, page, limit],
   );
 
-  const handleChangeRowsPerPage = (value: number) => {
-    setRowsPerPage(value);
-    setPage(0);
-  };
-
-  const pagination = filteredCount > ROWS_PER_PAGE_OPTIONS[0] && (
-    <TablePagination
-      component="div"
-      count={filteredCount}
-      page={safePage}
-      onPageChange={(_, next) => setPage(next)}
-      rowsPerPage={rowsPerPage}
-      onRowsPerPageChange={(e) => handleChangeRowsPerPage(Number(e.target.value))}
-      rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-      labelRowsPerPage={t("rowsPerPage")}
-      labelDisplayedRows={({ from, to, count }) => t("pageRange", { from, to, count })}
-      sx={{ mt: 1 }}
-    />
+  const pager = filteredCount > limit && (
+    <PaginationControls totalCount={filteredCount} currentPage={page} currentLimit={limit} sx={{ mt: 2 }} />
   );
 
   if (isPlainTheme) {
     return (
-      <PlainProjectVersionsTable
-        versions={pageRows}
-        projectSlug={projectSlug}
-        filterChannel={state.filterChannel}
-        onChannelChange={state.setFilterChannel}
-        filterLoader={state.filterLoader}
-        onLoaderChange={state.setFilterLoader}
-        filterMc={state.filterMc}
-        onMcChange={state.setFilterMc}
-        loaderOptions={state.loaderOptions}
-        mcOptions={state.mcOptions}
-        page={safePage}
-        lastPage={lastPage}
-        totalCount={filteredCount}
-        onPageChange={setPage}
-      />
+      <>
+        <PlainProjectVersionsTable
+          versions={pageRows}
+          projectSlug={projectSlug}
+          filterChannel={state.filterChannel}
+          onChannelChange={state.setFilterChannel}
+          filterLoader={state.filterLoader}
+          onLoaderChange={state.setFilterLoader}
+          filterMc={state.filterMc}
+          onMcChange={state.setFilterMc}
+          loaderOptions={state.loaderOptions}
+          mcOptions={state.mcOptions}
+        />
+        {pager}
+      </>
     );
   }
 
@@ -127,7 +118,7 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
         buildMenu={buildMenu}
       />
 
-      {pagination}
+      {pager}
     </>
   );
 };

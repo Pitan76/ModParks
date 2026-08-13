@@ -276,12 +276,7 @@
       },
       "sortBy": "並び替え",
       "noVersionsInChannel": "該当するバージョンがありません。",
-      "size": "サイズ",
-      "rowsPerPage": "表示件数:",
-      "pageRange": "{from}-{to} / {count} 件",
-      "pageOf": "{page} / {pages} ページ ({count} 件)",
-      "prevPage": "前へ",
-      "nextPage": "次へ"
+      "size": "サイズ"
     },
     "iconUpload": {
       "title": "アイコン",
