@@ -277,8 +277,11 @@
       "sortBy": "Sort",
       "noVersionsInChannel": "No versions found.",
       "size": "Size",
-      "loadMore": "Load more",
-      "shownCount": "Showing {shown} of {total}"
+      "rowsPerPage": "Rows per page:",
+      "pageRange": "{from}-{to} of {count}",
+      "pageOf": "Page {page} of {pages} ({count} versions)",
+      "prevPage": "Previous",
+      "nextPage": "Next"
     },
     "iconUpload": {
       "title": "Icon",

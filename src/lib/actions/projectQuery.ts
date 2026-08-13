@@ -3,7 +3,7 @@ import { posts, projects, projectTags, users, userProfiles } from "@/db/schema";
 import { eq, and, or, sql, getTableColumns, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
-import { countPublicProjectVersions, listPublicProjectVersions, PROJECT_VERSIONS_PAGE_SIZE } from "@/lib/queries/versionList";
+import { listPublicProjectVersions } from "@/lib/queries/versionList";
 import { mapProjectRow } from "@/lib/queries/projectRow";
 import { toProjectPost } from "@/lib/queries/postRow";
 
@@ -148,13 +148,9 @@ export const getProjectBySlug = async (slug: string) => {
   const project = toProjectPost(row);
   const tagsRows = await db.select().from(projectTags).where(eq(projectTags.projectId, project.id)).all();
 
-  // 1ページ分だけ載せ、残りは「さらに読み込む」で取りに行く。
-  // 以前は 20 件で打ち切っていたため、それ以上あるプロジェクトは古いバージョンに
-  // 一切たどり着けなかった。総数を返して残りの有無を画面側で判断できるようにする。
-  const [versionsRows, versionsTotal] = await Promise.all([
-    listPublicProjectVersions(db, project.id, { limit: PROJECT_VERSIONS_PAGE_SIZE }),
-    countPublicProjectVersions(db, project.id),
-  ]);
+  // 以前は 20 件で打ち切っていたため、それ以上あるプロジェクトは古いバージョンへ
+  // 一切たどり着けなかった。ページ送りは画面側で行うので、ここでは全件返す。
+  const versionsRows = await listPublicProjectVersions(db, project.id);
 
   return {
     ...project,
@@ -162,7 +158,6 @@ export const getProjectBySlug = async (slug: string) => {
     sourceIdeaTitle: row.sourceIdeaTitle,
     tags: tagsRows.map((t) => t.tag),
     versions: versionsRows,
-    versionsTotal,
     redirectSlug: project.slug !== slug ? project.slug : undefined,
   };
 };

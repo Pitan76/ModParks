@@ -263,7 +263,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </Box>
 
                 {p.versions.length > 0 ? (
-                  <ProjectVersionsTable versions={p.versions} projectSlug={slug} totalVersions={p.versionsTotal} />
+                  <ProjectVersionsTable versions={p.versions} projectSlug={slug} />
                 ) : (
                   <Typography color="text.secondary">{t("noVersions")}</Typography>
                 )}
