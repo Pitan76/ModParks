@@ -1,19 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import CircularProgress from "@mui/material/CircularProgress";
-import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import ProjectVersionsFilters from "./ProjectVersionsFilters";
 import ProjectVersionsDesktopTable from "./ProjectVersionsDesktopTable";
 import ProjectVersionsMobileList from "./ProjectVersionsMobileList";
 import { useProjectVersions } from "./useProjectVersions";
 import { useVersionMenu } from "./useVersionMenu";
 import { useColorMode } from "@/components/ThemeRegistry";
+import PaginationControls from "@/components/ui/PaginationControls";
 import PlainProjectVersionsTable from "@/components/plain/project/PlainProjectVersionsTable";
-import { loadMoreProjectVersions } from "@/lib/actions/versionList";
 
 export type ProjectVersionRow = {
   id:            string;
@@ -22,8 +18,6 @@ export type ProjectVersionRow = {
   mcVersions:    string | string[];
   loaders:       string | string[];
   changelog:     string;
-  fileUrl:       string;
-  fileName:      string;
   fileSize:      number | null;
   downloads:     number;
   createdAt:     Date | number;
@@ -32,98 +26,67 @@ export type ProjectVersionRow = {
 export type ProjectVersionsTableProps = {
   versions: ProjectVersionRow[];
   projectSlug: string;
-  /** 公開バージョンの総数。読み込み済みより多ければ続きを取りに行く */
-  totalVersions?: number;
+};
+
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+
+/** URL の数値パラメータを読む。壊れた値でも一覧が出せるよう既定値へ倒す */
+const readNumberParam = (value: string | null | undefined, fallback: number, max: number): number => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.min(Math.trunc(parsed), max);
 };
 
 /**
  * プロジェクト詳細ページの「バージョン」タブで、リリースバージョン一覧を
- * 絞り込み(チャンネル/ローダー/MC)・並び替え付きで表示するコンポーネント。
+ * 絞り込み(チャンネル/ローダー/MC)・並び替え・ページ送り付きで表示するコンポーネント。
  * デスクトップはテーブル、モバイルはカードで表示する。
  *
- * 初期表示は 1 ページ分だけで、残りは「さらに読み込む」で継ぎ足す。
- * 絞り込みは読み込み済みの行に対して効くため、件数も併記して取りこぼしを分かるようにしている。
+ * 全バージョンを受け取り、絞り込み・並び替えを適用したうえでページに切り出す。
+ * 読み込み済みの分だけを対象にすると、絞り込みの選択肢も件数も実態とずれるため。
+ * ページと表示件数はサイト共通の PaginationControls に合わせて URL で持つ。
  */
-const ProjectVersionsTable = ({ versions, projectSlug, totalVersions }: ProjectVersionsTableProps) => {
-  const t = useTranslations("Project.table");
-  // サーバから渡る先頭ページはそのまま使い、続きだけを状態に持つ。
-  // こうしておくと再取得で先頭ページが差し替わっても、同期用の効果が要らない。
-  const [extraRows, setExtraRows] = useState<ProjectVersionRow[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadFailed, setLoadFailed] = useState(false);
+const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTableProps) => {
+  const searchParams = useSearchParams();
+  const limit = readNumberParam(searchParams?.get("limit"), DEFAULT_LIMIT, MAX_LIMIT);
+  const requestedPage = readNumberParam(searchParams?.get("page"), 1, Number.MAX_SAFE_INTEGER);
 
-  const rows = useMemo(() => {
-    const known = new Set(versions.map((v) => v.id));
-    return [...versions, ...extraRows.filter((v) => !known.has(v.id))];
-  }, [versions, extraRows]);
-
-  const total = totalVersions ?? versions.length;
-  const hasMore = !loadFailed && rows.length < total;
-
-  const handleLoadMore = async () => {
-    setLoading(true);
-    try {
-      const more = await loadMoreProjectVersions(projectSlug, rows.length);
-      if (more.length === 0) {
-        // 取得できるものが無いのに残数だけ残ると押し続けられてしまう
-        setLoadFailed(true);
-        return;
-      }
-      setExtraRows((prev) => {
-        const known = new Set(prev.map((v) => v.id));
-        return [...prev, ...more.filter((v) => !known.has(v.id))];
-      });
-    } catch {
-      setLoadFailed(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const state = useProjectVersions(rows);
+  const state = useProjectVersions(versions);
   const buildMenu = useVersionMenu(projectSlug);
   const { isPlainTheme } = useColorMode();
 
-  // 全部載っていて絞り込みもかかっていないなら、件数表示はただの雑音になる
-  const showFooter = hasMore || state.versions.length !== total;
+  const filteredCount = state.versions.length;
+  // 絞り込みで件数が減ったときに空ページへ取り残されないよう、描画時に丸める
+  const lastPage = Math.max(1, Math.ceil(filteredCount / limit));
+  const page = Math.min(requestedPage, lastPage);
 
-  const footer = showFooter && (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, mt: 1.5 }}>
-      <Typography variant="caption" color="text.secondary">
-        {t("shownCount", { shown: state.versions.length, total })}
-      </Typography>
-      {hasMore && (
-        <Button
-          size="small"
-          onClick={handleLoadMore}
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : undefined}
-        >
-          {t("loadMore")}
-        </Button>
-      )}
-    </Box>
+  const pageRows = useMemo(
+    () => state.versions.slice((page - 1) * limit, page * limit),
+    [state.versions, page, limit],
+  );
+
+  const pager = filteredCount > limit && (
+    <PaginationControls totalCount={filteredCount} currentPage={page} currentLimit={limit} sx={{ mt: 2 }} />
   );
 
   if (isPlainTheme) {
     return (
-      <PlainProjectVersionsTable
-        versions={state.versions}
-        projectSlug={projectSlug}
-        filterChannel={state.filterChannel}
-        onChannelChange={state.setFilterChannel}
-        filterLoader={state.filterLoader}
-        onLoaderChange={state.setFilterLoader}
-        filterMc={state.filterMc}
-        onMcChange={state.setFilterMc}
-        loaderOptions={state.loaderOptions}
-        mcOptions={state.mcOptions}
-        shownCount={state.versions.length}
-        totalCount={total}
-        hasMore={hasMore}
-        loadingMore={loading}
-        onLoadMore={handleLoadMore}
-      />
+      <>
+        <PlainProjectVersionsTable
+          versions={pageRows}
+          projectSlug={projectSlug}
+          filterChannel={state.filterChannel}
+          onChannelChange={state.setFilterChannel}
+          filterLoader={state.filterLoader}
+          onLoaderChange={state.setFilterLoader}
+          filterMc={state.filterMc}
+          onMcChange={state.setFilterMc}
+          loaderOptions={state.loaderOptions}
+          mcOptions={state.mcOptions}
+        />
+        {pager}
+      </>
     );
   }
 
@@ -141,7 +104,7 @@ const ProjectVersionsTable = ({ versions, projectSlug, totalVersions }: ProjectV
       />
 
       <ProjectVersionsDesktopTable
-        versions={state.versions}
+        versions={pageRows}
         projectSlug={projectSlug}
         order={state.order}
         orderBy={state.orderBy}
@@ -150,12 +113,12 @@ const ProjectVersionsTable = ({ versions, projectSlug, totalVersions }: ProjectV
       />
 
       <ProjectVersionsMobileList
-        versions={state.versions}
+        versions={pageRows}
         projectSlug={projectSlug}
         buildMenu={buildMenu}
       />
 
-      {footer}
+      {pager}
     </>
   );
 };

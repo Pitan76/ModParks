@@ -276,9 +276,7 @@
       },
       "sortBy": "Sort",
       "noVersionsInChannel": "No versions found.",
-      "size": "Size",
-      "loadMore": "Load more",
-      "shownCount": "Showing {shown} of {total}"
+      "size": "Size"
     },
     "iconUpload": {
       "title": "Icon",

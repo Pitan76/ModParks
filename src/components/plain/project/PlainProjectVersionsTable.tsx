@@ -18,11 +18,6 @@ export type PlainProjectVersionsTableProps = {
   onMcChange: (value: string) => void;
   loaderOptions: string[];
   mcOptions: string[];
-  shownCount: number;
-  totalCount: number;
-  hasMore: boolean;
-  loadingMore: boolean;
-  onLoadMore: () => void;
 };
 
 const CHANNELS = ["release", "beta", "alpha"] as const;
@@ -42,11 +37,6 @@ const PlainProjectVersionsTable = ({
   onMcChange,
   loaderOptions,
   mcOptions,
-  shownCount,
-  totalCount,
-  hasMore,
-  loadingMore,
-  onLoadMore,
 }: PlainProjectVersionsTableProps) => {
   const t = useTranslations("Project");
   const tVersion = useTranslations("Version");
@@ -130,20 +120,6 @@ const PlainProjectVersionsTable = ({
             </tbody>
           </table>
         </div>
-      )}
-
-      {(hasMore || shownCount !== totalCount) && (
-        <p className={styles.dim}>
-          {t("table.shownCount", { shown: shownCount, total: totalCount })}
-          {hasMore && (
-            <>
-              {" "}
-              <button type="button" onClick={onLoadMore} disabled={loadingMore}>
-                {t("table.loadMore")}
-              </button>
-            </>
-          )}
-        </p>
       )}
     </div>
   );

@@ -276,9 +276,7 @@
       },
       "sortBy": "並び替え",
       "noVersionsInChannel": "該当するバージョンがありません。",
-      "size": "サイズ",
-      "loadMore": "さらに読み込む",
-      "shownCount": "{shown} / {total} 件を表示"
+      "size": "サイズ"
     },
     "iconUpload": {
       "title": "アイコン",
