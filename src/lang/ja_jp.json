@@ -2108,6 +2108,13 @@
       "releaseNotFound": "対象のリポジトリに Release が見つかりません",
       "assetNotFound": "Release にダウンロード可能な .jar / .zip がありません",
       "assetUrlNotAllowed": "Release アセットのURLが許可されていないドメインです"
+    },
+    "dependency": {
+      "targetNotFound": "依存先のプロジェクトが見つかりません。スラッグを確認してください。",
+      "selfDependency": "自分自身を依存先には指定できません。",
+      "alreadyExists": "同じ依存関係が既に登録されています。",
+      "notFound": "依存関係が見つかりません。",
+      "versionNotInProject": "指定されたバージョンはこのプロジェクトのものではありません。"
     }
   },
   "Cart": {

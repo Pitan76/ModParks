@@ -2106,6 +2106,13 @@
       "releaseNotFound": "No release found in the linked repository",
       "assetNotFound": "No downloadable .jar or .zip asset found in the release",
       "assetUrlNotAllowed": "The release asset URL is not on an allowed domain"
+    },
+    "dependency": {
+      "targetNotFound": "Target project not found. Check the slug.",
+      "selfDependency": "A project cannot depend on itself.",
+      "alreadyExists": "That dependency is already registered.",
+      "notFound": "Dependency not found.",
+      "versionNotInProject": "That version does not belong to this project."
     }
   },
   "Cart": {

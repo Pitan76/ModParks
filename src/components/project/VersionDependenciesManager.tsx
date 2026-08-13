@@ -25,6 +25,8 @@ import {
   removeProjectDependency,
   type DependencyEntry,
 } from "@/lib/actions/dependency";
+import { isActionError, type ActionResult } from "@/lib/actions/actionResult";
+import { isStaleServerActionError } from "@/lib/errors/staleAction";
 import { DEPENDENCY_TYPES, type DependencyType } from "@/lib/dependencies/types";
 import { DEPENDENCY_COLOR } from "./VersionDependencies";
 
@@ -41,6 +43,7 @@ type Props = {
  */
 export default function VersionDependenciesManager({ projectId, versionId }: Props) {
   const t = useTranslations("Project.dependencies");
+  const tError = useTranslations("ServerErrors");
   const [entries, setEntries] = useState<DependencyEntry[] | null>(null);
   const [mode, setMode] = useState<"internal" | "external">("internal");
   const [targetSlug, setTargetSlug] = useState("");
@@ -67,38 +70,49 @@ export default function VersionDependenciesManager({ projectId, versionId }: Pro
 
   const canSubmit = mode === "internal" ? !!targetSlug.trim() : !!extName.trim() && !!extUrl.trim();
 
+  /**
+   * Server Action の結果を捌く。想定内の拒否は理由をそのまま出し、
+   * デプロイを跨いだ古いタブからの送信だけは再読み込みを促す。
+   */
+  const runAction = async (action: () => Promise<ActionResult>): Promise<boolean> => {
+    try {
+      const result = await action();
+      if (isActionError(result)) {
+        setError(result.error);
+        return false;
+      }
+      return true;
+    } catch (err: unknown) {
+      setError(isStaleServerActionError(err) ? tError("common.staleAction") : tError("common.serverError"));
+      return false;
+    }
+  };
+
   const handleAdd = async () => {
     if (!canSubmit) return;
     setPending(true);
     setError(null);
-    try {
-      if (mode === "internal") {
-        await addProjectDependencyBySlug(projectId, targetSlug.trim(), depType, { versionId });
-      } else {
-        await addExternalProjectDependency(projectId, extName.trim(), extUrl.trim(), depType, { versionId });
-      }
+
+    const ok = await runAction(() => mode === "internal"
+      ? addProjectDependencyBySlug(projectId, targetSlug.trim(), depType, { versionId })
+      : addExternalProjectDependency(projectId, extName.trim(), extUrl.trim(), depType, { versionId }));
+
+    if (ok) {
       setTargetSlug("");
       setExtName("");
       setExtUrl("");
       await reload();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("addError"));
-    } finally {
-      setPending(false);
     }
+    setPending(false);
   };
 
   const handleRemove = async (dependencyId: string) => {
     setPending(true);
     setError(null);
-    try {
-      await removeProjectDependency(dependencyId);
+    if (await runAction(() => removeProjectDependency(dependencyId))) {
       await reload();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("addError"));
-    } finally {
-      setPending(false);
     }
+    setPending(false);
   };
 
   return (
