@@ -37,9 +37,16 @@ export default function ProjectVersionsFilters({
   const tVersion = useTranslations("Version");
 
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 2 }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs value={filterChannel} onChange={(_, val) => onChannelChange(val)} aria-label={t("filters.channel")}>
+        <Tabs
+          value={filterChannel}
+          onChange={(_, val) => onChannelChange(val)}
+          aria-label={t("filters.channel")}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ minHeight: 40, "& .MuiTab-root": { minHeight: 40, py: 0 } }}
+        >
           <Tab label={t("filters.all")} value="all" />
           <Tab label={tVersion("channels.release")} value="release" />
           <Tab label={tVersion("channels.beta")} value="beta" />
@@ -47,7 +54,7 @@ export default function ProjectVersionsFilters({
         </Tabs>
       </Box>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 2 }}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 1.5 }}>
         <TextField
           select
           size="small"

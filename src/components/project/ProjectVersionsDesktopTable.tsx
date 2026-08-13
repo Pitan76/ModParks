@@ -7,7 +7,6 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 import DownloadIcon from "@mui/icons-material/Download";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -38,6 +37,12 @@ type Props = {
   buildMenu:   (versionId: string, versionNumber: string) => ContextMenuItem[];
 };
 
+/** 行の高さを揃えるためのセル余白。既定値は 1 行の情報量に対して広すぎる */
+const cellSx = { py: 1 } as const;
+
+/** 数値・日付は折り返すと桁が縦に割れて読めなくなる */
+const compactCellSx = { ...cellSx, whiteSpace: "nowrap" } as const;
+
 /**
  * 公開バージョン一覧のデスクトップ向けテーブル。ヘッダクリックで並び替え可能。
  */
@@ -47,27 +52,28 @@ export default function ProjectVersionsDesktopTable({ versions, projectSlug, ord
   const openMenu = useContextMenuHandler();
 
   return (
-    <TableContainer component={Paper} sx={[tableContainerSx, { mb: 2, display: { xs: "none", md: "block" } }]}>
-      <Table sx={[tableRootSx, { minWidth: 650 }]}>
+    <TableContainer component={Paper} sx={[tableContainerSx, { display: { xs: "none", md: "block" } }]}>
+      <Table size="small" sx={[tableRootSx, { minWidth: 720 }]}>
         <TableHead sx={tableHeadSx}>
           <TableRow>
             <SortableTableCell columnKey="version" activeKey={orderBy} order={order} onSort={onSort}>
               {t("table.version")}
             </SortableTableCell>
             <TableCell>{t("table.platformMcVersion")}</TableCell>
-            <SortableTableCell columnKey="downloads" activeKey={orderBy} order={order} onSort={onSort}>
-              {t("table.sizeDownloadDate")}
+            <SortableTableCell columnKey="downloads" activeKey={orderBy} order={order} onSort={onSort} align="right">
+              {t("table.downloads")}
             </SortableTableCell>
+            <TableCell align="right">{t("table.size")}</TableCell>
             <SortableTableCell columnKey="date" activeKey={orderBy} order={order} onSort={onSort}>
               {t("createdAt")}
             </SortableTableCell>
-            <TableCell align="right"></TableCell>
+            <TableCell align="right" sx={{ width: 56 }}></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {versions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} align="center" sx={{ py: 4, color: "text.secondary" }}>
+              <TableCell colSpan={6} align="center" sx={{ py: 3, color: "text.secondary" }}>
                 {t("table.noVersionsInChannel")}
               </TableCell>
             </TableRow>
@@ -80,10 +86,10 @@ export default function ProjectVersionsDesktopTable({ versions, projectSlug, ord
                 onContextMenu={(e: MouseEvent<HTMLTableRowElement>) => openMenu(e, buildMenu(version.id, version.versionNumber))}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell>
+                <TableCell sx={cellSx}>
                   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                     <Link href={versionUrl} style={{ textDecoration: "none" }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main", "&:hover": { textDecoration: "underline" } }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, color: "primary.main", whiteSpace: "nowrap", "&:hover": { textDecoration: "underline" } }}>
                         v{version.versionNumber}
                       </Typography>
                     </Link>
@@ -93,49 +99,40 @@ export default function ProjectVersionsDesktopTable({ versions, projectSlug, ord
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", mt: 0.5, maxWidth: 250 }}
+                      title={version.changelog}
+                      sx={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 260 }}
                     >
                       {version.changelog}
                     </Typography>
                   )}
                 </TableCell>
-                <TableCell>
-                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 0.5 }}>
+                <TableCell sx={cellSx}>
+                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", alignItems: "center" }}>
                     {version.parsedLoaders.map((l) => {
                       const info = getLoaderInfo(l);
-                      return <Chip key={l} label={info.name} size="small" color={info.color as any} icon={info.icon} />;
+                      return <Chip key={l} label={info.name} size="small" color={info.color as any} icon={info.icon} sx={{ height: 22 }} />;
                     })}
-                  </Box>
-                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                     {version.parsedMcVersions.map((mc) => (
-                      <Chip key={mc} label={mc} size="small" variant="outlined" sx={{ borderColor: "divider", color: "text.secondary" }} />
+                      <Chip key={mc} label={mc} size="small" variant="outlined" sx={{ height: 22, borderColor: "divider", color: "text.secondary" }} />
                     ))}
                   </Box>
                 </TableCell>
-                <TableCell>
-                  <Stack direction="row" spacing={1.5}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <DownloadIcon sx={{ fontSize: 14, color: "text.disabled" }} />
-                      <Typography variant="caption" color="text.disabled">
-                        {version.downloads.toLocaleString()}
-                      </Typography>
-                    </Box>
-                    {version.fileSize && (
-                      <Typography variant="caption" color="text.disabled">
-                        {formatBytes(version.fileSize)}
-                      </Typography>
-                    )}
-                  </Stack>
+                <TableCell align="right" sx={compactCellSx}>
+                  <Typography variant="body2" color="text.secondary">
+                    {version.downloads.toLocaleString()}
+                  </Typography>
                 </TableCell>
-                <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <CalendarTodayIcon sx={{ fontSize: 14, color: "text.disabled" }} />
-                    <Typography variant="caption" color="text.disabled" suppressHydrationWarning>
-                      {version.date.toLocaleDateString(locale)}
-                    </Typography>
-                  </Box>
+                <TableCell align="right" sx={compactCellSx}>
+                  <Typography variant="body2" color="text.secondary">
+                    {version.fileSize ? formatBytes(version.fileSize) : "-"}
+                  </Typography>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell sx={compactCellSx}>
+                  <Typography variant="body2" color="text.secondary" suppressHydrationWarning>
+                    {version.date.toLocaleDateString(locale)}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right" sx={cellSx}>
                   <Tooltip title={t("download")}>
                     <IconButton
                       id={`download-btn-${version.id}`}
@@ -144,7 +141,7 @@ export default function ProjectVersionsDesktopTable({ versions, projectSlug, ord
                       aria-label={t("download")}
                       href={buildVersionDownloadUrl(version.id)}
                     >
-                      <DownloadIcon />
+                      <DownloadIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 </TableCell>

@@ -275,7 +275,10 @@
         "all": "All"
       },
       "sortBy": "Sort",
-      "noVersionsInChannel": "No versions found."
+      "noVersionsInChannel": "No versions found.",
+      "size": "Size",
+      "loadMore": "Load more",
+      "shownCount": "Showing {shown} of {total}"
     },
     "iconUpload": {
       "title": "Icon",
@@ -427,7 +430,10 @@
       "addError": "Failed to add dependency.",
       "removeSuccess": "Dependency removed.",
       "dependents": "Dependents",
-      "noDependents": "No projects depend on this project."
+      "noDependents": "No projects depend on this project.",
+      "forVersion": "Dependencies for this version",
+      "projectWide": "Project-wide",
+      "versionScopeHint": "Dependencies added here apply to this version only. Project-wide dependencies are managed in the Dependencies tab of the edit page."
     },
     "members": {
       "title": "Member Management",

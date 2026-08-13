@@ -63,7 +63,7 @@ export default function VersionsManagerTable({
               {t("manager.columns.version")}
             </SortableTableCell>
             <TableCell>{t("manager.columns.mc")}</TableCell>
-            <SortableTableCell columnKey="downloads" activeKey={orderBy} order={order} onSort={handleSort}>
+            <SortableTableCell columnKey="downloads" activeKey={orderBy} order={order} onSort={handleSort} align="right">
               {t("manager.columns.downloads")}
             </SortableTableCell>
             <SortableTableCell columnKey="date" activeKey={orderBy} order={order} onSort={handleSort}>
@@ -85,8 +85,8 @@ export default function VersionsManagerTable({
                   </Stack>
                 </TableCell>
                 <TableCell>{v.parsedMcVersions.join(", ")}</TableCell>
-                <TableCell>{v.downloads}</TableCell>
-                <TableCell>{format.dateTime(v.date, { dateStyle: "short", timeStyle: "short" })}</TableCell>
+                <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>{v.downloads.toLocaleString()}</TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>{format.dateTime(v.date, { dateStyle: "short", timeStyle: "short" })}</TableCell>
                 <TableCell align="right">
                   <Tooltip title={t("manager.extractRecipes")}>
                     <span>

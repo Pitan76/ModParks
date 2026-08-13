@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, comments } from "@/db/schema";
+import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, comments, projectDependencies } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion, notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import { scanVersionFile } from "@/lib/actions/versionScan";
@@ -308,6 +308,18 @@ export const deleteVersion = async (versionId: string, projectSlug: string): Pro
     } catch (e) {
       console.error(`[deleteVersion] Failed to delete R2 object: ${r2Key}`, e);
     }
+  }
+
+  // バージョン限定の依存は外部キーで消えるが、バックアップ側は墓標が無いと残り続ける
+  const scopedDeps = await db
+    .select({ id: projectDependencies.id })
+    .from(projectDependencies)
+    .where(eq(projectDependencies.versionId, versionId))
+    .all();
+
+  if (scopedDeps.length > 0) {
+    await db.delete(projectDependencies).where(eq(projectDependencies.versionId, versionId)).run();
+    await recordDeletion(db, "project_dependencies", scopedDeps.map((d: { id: string }) => d.id));
   }
 
   await db.delete(versions).where(eq(versions.id, versionId)).run();

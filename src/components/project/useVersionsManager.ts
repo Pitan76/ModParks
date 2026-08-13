@@ -13,6 +13,7 @@ import type { PreviousVersionSettings } from "./PreviousVersionSettings";
 
 export type ProjectVersion = {
   id: string;
+  projectId: string;
   versionNumber: string;
   mcVersions: string;
   loaders: string;

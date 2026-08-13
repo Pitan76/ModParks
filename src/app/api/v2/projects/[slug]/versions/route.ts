@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1, type Env } from "@/lib/db";
-import { posts, versions, projectMembers, versionLoaders, versionMcVersions } from "@/db/schema";
+import { posts, projects, projectDependencies, versions, projectMembers, versionLoaders, versionMcVersions } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
-import { eq, desc, and, isNull } from "drizzle-orm";
-import type { ApiVersion } from "@/types/api";
+import { eq, desc, and, getTableColumns, isNull } from "drizzle-orm";
+import { displayDownloadsSql } from "@/lib/queries/versionList";
+import type { ApiVersion, ApiVersionDependency } from "@/types/api";
 import { createVersionSchema, isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { buildR2Key, getR2PublicUrl, uploadToR2 } from "@/lib/r2";
@@ -46,11 +47,40 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     }
   }
 
-  const results = await db
-    .select()
-    .from(versions)
-    .where(and(eq(versions.projectId, project.id), isNull(versions.archivedAt)))
-    .orderBy(desc(versions.createdAt));
+  const [results, dependencyRows] = await Promise.all([
+    db
+      .select({
+        ...getTableColumns(versions),
+        // 累積カウンタに未反映の分を足す。画面と同じ数字を返すため
+        downloads: displayDownloadsSql,
+      })
+      .from(versions)
+      .where(and(eq(versions.projectId, project.id), isNull(versions.archivedAt)))
+      .orderBy(desc(versions.createdAt)),
+    db
+      .select({
+        versionId: projectDependencies.versionId,
+        dependencyType: projectDependencies.dependencyType,
+        externalUrl: projectDependencies.externalUrl,
+        externalName: projectDependencies.externalName,
+        targetSlug: posts.slug,
+        targetTitle: posts.title,
+      })
+      .from(projectDependencies)
+      .leftJoin(projects, eq(projectDependencies.targetProjectId, projects.id))
+      .leftJoin(posts, eq(posts.id, projects.id))
+      .where(eq(projectDependencies.projectId, project.id))
+      .all(),
+  ]);
+
+  const toApiDependency = (d: typeof dependencyRows[number]): ApiVersionDependency => ({
+    dependencyType: d.dependencyType,
+    projectSlug: d.targetSlug ?? null,
+    projectTitle: d.targetTitle ?? null,
+    externalUrl: d.externalUrl,
+    externalName: d.externalName,
+    versionScoped: !!d.versionId,
+  });
 
   const data: ApiVersion[] = results.map(v => ({
     id: v.id,
@@ -64,7 +94,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     createdAt: v.createdAt ? new Date(v.createdAt).getTime() : 0,
     loaders: JSON.parse(v.loaders),
     mcVersions: JSON.parse(v.mcVersions),
-    fileUrl: `/api/download?versionId=${v.id}`
+    fileUrl: `/api/download?versionId=${v.id}`,
+    // バージョン限定のものと、プロジェクト全体のものを両方返す
+    dependencies: dependencyRows
+      .filter((d) => d.versionId === null || d.versionId === v.id)
+      .map(toApiDependency),
   }));
 
   return withPublicCache(NextResponse.json({ data }));

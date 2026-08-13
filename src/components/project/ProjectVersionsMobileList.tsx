@@ -36,9 +36,9 @@ export default function ProjectVersionsMobileList({ versions, projectSlug, build
   const openMenu = useContextMenuHandler();
 
   return (
-    <Stack spacing={2} sx={{ display: { xs: "flex", md: "none" } }}>
+    <Stack spacing={1.5} sx={{ display: { xs: "flex", md: "none" } }}>
       {versions.length === 0 ? (
-        <Box sx={{ py: 4, textAlign: "center", color: "text.secondary" }}>
+        <Box sx={{ py: 3, textAlign: "center", color: "text.secondary" }}>
           {t("table.noVersionsInChannel")}
         </Box>
       ) : versions.map((version) => {
@@ -49,7 +49,7 @@ export default function ProjectVersionsMobileList({ versions, projectSlug, build
             variant="outlined"
             onContextMenu={(e: MouseEvent<HTMLDivElement>) => openMenu(e, buildMenu(version.id, version.versionNumber))}
           >
-            <CardContent sx={{ pb: 1 }}>
+            <CardContent sx={{ p: 2, pb: 1, "&:last-child": { pb: 1 } }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                   <Link href={versionUrl} style={{ textDecoration: "none" }}>
@@ -94,14 +94,14 @@ export default function ProjectVersionsMobileList({ versions, projectSlug, build
                 </Typography>
               )}
 
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
                 <CalendarTodayIcon sx={{ fontSize: 14, color: "text.disabled" }} />
                 <Typography variant="caption" color="text.disabled" suppressHydrationWarning>
                   {version.date.toLocaleDateString(locale)}
                 </Typography>
               </Box>
             </CardContent>
-            <CardActions sx={{ px: 2, pb: 2, pt: 0 }}>
+            <CardActions sx={{ px: 2, pb: 1.5, pt: 0 }}>
               <Button
                 id={`mobile-download-btn-${version.id}`}
                 variant="contained"

@@ -11,6 +11,7 @@ import AbstractDialog from "@/components/ui/AbstractDialog";
 import FormTextField from "@/components/ui/form/FormTextField";
 import LoaderAutocomplete from "./LoaderAutocomplete";
 import McVersionAutocomplete from "./McVersionAutocomplete";
+import VersionDependenciesManager from "./VersionDependenciesManager";
 import { updateVersion } from "@/lib/actions/version";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { useTranslations } from "next-intl";
@@ -245,6 +246,13 @@ const EditVersionDialog = ({
           error={!!editError?.changelog}
           helperText={editError?.changelog?.[0]}
         />
+
+        {/* 依存関係の追加・削除は即時反映のため、保存ボタンとは独立して動く */}
+        {version && (
+          <Box sx={{ borderTop: "1px solid", borderColor: "divider", pt: 2.5 }}>
+            <VersionDependenciesManager key={version.id} projectId={version.projectId} versionId={version.id} />
+          </Box>
+        )}
       </Box>
     </AbstractDialog>
   );
