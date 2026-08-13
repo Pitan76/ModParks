@@ -21,11 +21,17 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Link from "@mui/material/Link";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
 import ActionRow from "@/components/ui/ActionRow";
+import LoaderAutocomplete from "./LoaderAutocomplete";
+import { getLoaderInfo } from "@/lib/loaders";
 import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/actions/dependency";
 import type { DependencyType, DependencyProjectSummary } from "@/lib/actions/dependency";
 import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
+
+type PlatformOption = { slug: string; name: string };
 
 export type ProjectDependenciesManagerProps = {
   projectId: string;
@@ -35,19 +41,23 @@ export type ProjectDependenciesManagerProps = {
     project: DependencyProjectSummary;
     externalUrl?: string | null;
     externalName?: string | null;
+    /** 依存が要るプラットフォーム。空なら全プラットフォーム */
+    loaders?: string[];
   }[];
+  availablePlatforms?: PlatformOption[];
 };
 
 /**
  * プロジェクトの依存関係を管理（追加・削除）する管理者向けクライアントコンポーネント。
  * ModParks内部プロジェクトへの参照、または外部URLによる依存定義を切り替えて登録できます。
  */
-const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependenciesManagerProps) => {
+const ProjectDependenciesManager = ({ projectId, dependencies, availablePlatforms = [] }: ProjectDependenciesManagerProps) => {
   const [tab, setTab] = useState(0);
   const [targetSlug, setTargetSlug] = useState("");
   const [extName, setExtName] = useState("");
   const [extUrl, setExtUrl] = useState("");
   const [depType, setDepType] = useState<DependencyType>("required");
+  const [depLoaders, setDepLoaders] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; severity: "success" | "error" } | null>(null);
   const router = useRouter();
@@ -58,15 +68,16 @@ const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependen
     try {
       if (tab === 0) {
         if (!targetSlug) throw new Error("Target slug is required");
-        await addProjectDependencyBySlug(projectId, targetSlug, depType);
+        await addProjectDependencyBySlug(projectId, targetSlug, depType, { loaders: depLoaders });
       } else {
         if (!extName || !extUrl) throw new Error("Name and URL are required");
-        await addExternalProjectDependency(projectId, extName, extUrl, depType);
+        await addExternalProjectDependency(projectId, extName, extUrl, depType, { loaders: depLoaders });
       }
       setToast({ message: t("addSuccess"), severity: "success" });
       setTargetSlug("");
       setExtName("");
       setExtUrl("");
+      setDepLoaders([]);
       router.refresh();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t("addError");
@@ -156,6 +167,20 @@ const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependen
         </Button>
       </ActionRow>
 
+      {/* 前提MODはローダーごとに違う（Fabric なら Fabric API など）ので、
+          プラットフォームを絞れるようにする。未選択なら全プラットフォーム */}
+      <Box sx={{ mb: 4, mt: -2 }}>
+        <LoaderAutocomplete
+          availablePlatforms={availablePlatforms}
+          loaders={depLoaders}
+          onChange={setDepLoaders}
+          label={t("platformScope")}
+          size="small"
+          required={false}
+          helperText={t("platformScopeHint")}
+        />
+      </Box>
+
       <Typography variant="h6" gutterBottom>{t("current")}</Typography>
       <List>
         {dependencies.map((dep) => (
@@ -166,8 +191,13 @@ const ProjectDependenciesManager = ({ projectId, dependencies }: ProjectDependen
                   {dep.externalName} <OpenInNewIcon fontSize="small" />
                 </Link>
               ) : dep.project.title} 
-              secondary={`${t("type")}: ${t(dep.dependencyType)} | ${dep.externalUrl ? "External" : `Slug: ${dep.project.slug}`}`} 
+              secondary={`${t("type")}: ${t(dep.dependencyType)} | ${dep.externalUrl ? "External" : `Slug: ${dep.project.slug}`}`}
             />
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexWrap: "wrap", mr: 5 }}>
+              {(dep.loaders ?? []).map((loader) => (
+                <Chip key={loader} size="small" label={getLoaderInfo(loader).name} sx={{ height: 22 }} />
+              ))}
+            </Stack>
             <ListItemSecondaryAction>
               <IconButton edge="end" onClick={() => handleRemove(dep.id)} disabled={loading}>
                 <DeleteIcon />

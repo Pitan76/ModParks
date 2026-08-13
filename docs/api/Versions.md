@@ -40,7 +40,8 @@
       "projectTitle": "string | null",
       "externalUrl": "string | null",
       "externalName": "string | null",
-      "versionScoped": "boolean"
+      "versionScoped": "boolean",
+      "loaders": ["string"]
     }
   ]
 }
@@ -49,6 +50,8 @@
 `dependencies` には、そのバージョンに適用される依存関係が入ります。
 バージョンごとに設定したものは `versionScoped` が `true`、プロジェクト全体に設定したものは `false` です。
 `dependencyType` は `required` / `optional` / `incompatible` / `embedded` のいずれかです。
+`loaders` は依存が要るプラットフォーム（空配列なら全プラットフォーム）で、
+プラットフォーム指定のある全体依存は、そのバージョンのローダーに合うものだけが入ります。
 
 ## メソッド一覧
 

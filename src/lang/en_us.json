@@ -431,7 +431,10 @@
       "noDependents": "No projects depend on this project.",
       "forVersion": "Dependencies for this version",
       "projectWide": "Project-wide",
-      "versionScopeHint": "Dependencies added here apply to this version only. Project-wide dependencies are managed in the Dependencies tab of the edit page."
+      "versionScopeHint": "Dependencies added here apply to this version only. Project-wide dependencies are managed in the Dependencies tab of the edit page.",
+      "platformScope": "Target platforms (optional)",
+      "platformScopeHint": "When set, the dependency is only shown for versions built for those platforms (e.g. pick Fabric to require Fabric API only on Fabric builds). Leave empty to apply to every platform.",
+      "allPlatforms": "All platforms"
     },
     "members": {
       "title": "Member Management",
@@ -2179,7 +2182,8 @@
     "ideaContentMax": "5000 characters or fewer",
     "commentMin": "Enter at least 1 character",
     "commentMax": "2000 characters or fewer",
-    "slugTaken": "This slug is already used by another project."
+    "slugTaken": "This slug is already used by another project.",
+    "dependencyTargetRequired": "Provide a target project slug, or a name and URL"
   },
   "Export": {
     "title": "ModParks account data export",

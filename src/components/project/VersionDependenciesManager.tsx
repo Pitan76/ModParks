@@ -24,11 +24,9 @@ import {
   getVersionDependencies,
   removeProjectDependency,
   type DependencyEntry,
-  type DependencyType,
 } from "@/lib/actions/dependency";
+import { DEPENDENCY_TYPES, type DependencyType } from "@/lib/dependencies/types";
 import { DEPENDENCY_COLOR } from "./VersionDependencies";
-
-const DEPENDENCY_TYPES: DependencyType[] = ["required", "optional", "incompatible", "embedded"];
 
 type Props = {
   projectId: string;
@@ -75,9 +73,9 @@ export default function VersionDependenciesManager({ projectId, versionId }: Pro
     setError(null);
     try {
       if (mode === "internal") {
-        await addProjectDependencyBySlug(projectId, targetSlug.trim(), depType, versionId);
+        await addProjectDependencyBySlug(projectId, targetSlug.trim(), depType, { versionId });
       } else {
-        await addExternalProjectDependency(projectId, extName.trim(), extUrl.trim(), depType, versionId);
+        await addExternalProjectDependency(projectId, extName.trim(), extUrl.trim(), depType, { versionId });
       }
       setTargetSlug("");
       setExtName("");

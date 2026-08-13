@@ -9,6 +9,7 @@ import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 import { DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { runRecipeExtraction } from "./extractRecipes";
+import type { DependencyDraft } from "@/lib/dependencies/types";
 import type { PreviousVersionSettings } from "../PreviousVersionSettings";
 
 const MB_LIMIT = 5;
@@ -38,6 +39,7 @@ export function useVersionUpload(slug: string, previousSettings: PreviousVersion
   const [parsing, setParsing] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [reuseApplied, setReuseApplied] = useState(false);
+  const [dependencies, setDependencies] = useState<DependencyDraft[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const failWithFileError = (messageKey: string) => {
@@ -115,6 +117,11 @@ export function useVersionUpload(slug: string, previousSettings: PreviousVersion
       mcVersions.forEach((v) => formData.append("mcVersions", v));
       loaders.forEach((l) => formData.append("loaders", l));
       formData.set("releaseChannel", releaseChannel);
+      // 依存関係はバージョンと同じ送信で渡す。作成後に別途保存すると、
+      // 途中で失敗したときに依存の無いバージョンだけが残る
+      if (dependencies.length > 0) {
+        formData.set("dependencies", JSON.stringify(dependencies));
+      }
 
       if (!(await attachFile(formData))) {
         setPending(false);
@@ -176,6 +183,8 @@ export function useVersionUpload(slug: string, previousSettings: PreviousVersion
     parsing,
     extracting,
     reuseApplied,
+    dependencies,
+    setDependencies,
     fileInputRef,
     handleReusePrevious,
     handleFileChange,

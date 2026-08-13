@@ -1,0 +1,1 @@
+ALTER TABLE `project_dependencies` ADD `loaders` text;

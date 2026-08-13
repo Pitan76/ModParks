@@ -5,7 +5,9 @@ import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion, notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import { scanVersionFile } from "@/lib/actions/versionScan";
-import { createVersionSchema, updateVersionSchema } from "@/lib/validations";
+import { createVersionSchema, dependencyDraftsSchema, updateVersionSchema } from "@/lib/validations";
+import { resolveDependencyDrafts } from "@/lib/dependencies/create";
+import type { DependencyDraft } from "@/lib/dependencies/types";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, sql } from "drizzle-orm";
@@ -99,6 +101,30 @@ async function createSystemCommentForResolvedIdea(
 }
 
 /**
+ * フォームから来た依存関係の下書き（JSON文字列）を検証して取り出す。
+ *
+ * 依存が無いのが普通なので、未指定は空配列として扱い、
+ * 壊れた JSON だけをエラーにする。
+ */
+function parseDependencyDraftsField(
+  raw: FormDataEntryValue | null,
+): { success: true; data: DependencyDraft[] } | { success: false; error: string } {
+  if (typeof raw !== "string" || raw.trim() === "") return { success: true, data: [] };
+
+  let json: unknown;
+  try {
+    json = JSON.parse(raw);
+  } catch {
+    return { success: false, error: "Invalid dependencies payload" };
+  }
+
+  const parsed = dependencyDraftsSchema.safeParse(json);
+  if (!parsed.success) return { success: false, error: "Invalid dependencies payload" };
+
+  return { success: true, data: parsed.data };
+}
+
+/**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
  */
 export const createVersion = async (projectSlug: string, formData: FormData) => {
@@ -137,6 +163,14 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
 
   const id = createId();
 
+  // 依存関係はバージョンを作る前に解決する。スラッグの打ち間違いで
+  // 「バージョンだけ出来て依存が入らない」状態になるのを防ぐため
+  const drafts = parseDependencyDraftsField(formData.get("dependencies"));
+  if (!drafts.success) return { error: { dependencies: [drafts.error] } };
+
+  const resolvedDeps = await resolveDependencyDrafts(db, project.id, id, drafts.data);
+  if (!resolvedDeps.ok) return { error: { dependencies: [resolvedDeps.error] } };
+
   await insertVersionRecord(db, {
     id,
     versionNumber: parsed.data.versionNumber,
@@ -151,6 +185,10 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
     projectId:     project.id,
     uploaderId:    session.user.id,
   });
+
+  if (resolvedDeps.rows.length > 0) {
+    await db.insert(projectDependencies).values(resolvedDeps.rows).run();
+  }
 
   await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 

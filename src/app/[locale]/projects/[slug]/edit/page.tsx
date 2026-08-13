@@ -134,7 +134,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
           />
         }
         dependenciesManager={
-          <ProjectDependenciesManager projectId={project.id} dependencies={dependencies} />
+          <ProjectDependenciesManager projectId={project.id} dependencies={dependencies} availablePlatforms={availablePlatforms} />
         }
         projectId={project.id}
         projectSlug={project.slug}

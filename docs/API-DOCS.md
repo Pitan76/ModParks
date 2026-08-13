@@ -139,7 +139,8 @@ Fetches all public versions of a specific project.
             "projectTitle": "Fabric API",
             "externalUrl": null,
             "externalName": null,
-            "versionScoped": true
+            "versionScoped": true,
+            "loaders": ["fabric"]
           }
         ]
       }
@@ -150,6 +151,8 @@ Fetches all public versions of a specific project.
 `dependencies` はそのバージョンに効く依存関係で、バージョン限定のもの（`versionScoped: true`）と
 プロジェクト全体のもの（`versionScoped: false`）の両方を含みます。
 外部サイトへの依存は `projectSlug` / `projectTitle` が `null` になり、`externalName` / `externalUrl` に入ります。
+`loaders` はその依存が要るプラットフォームで、空配列なら全プラットフォームです。
+プラットフォーム指定のあるプロジェクト全体の依存は、そのバージョンのローダーに合うものだけが返ります。
 
 ---
 

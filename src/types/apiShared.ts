@@ -25,6 +25,8 @@ export interface ApiVersionDependency {
   externalName: string | null;
   /** true ならこのバージョン限定、false ならプロジェクト全体の依存 */
   versionScoped: boolean;
+  /** 依存が要るプラットフォーム。空ならすべてのプラットフォームで要る */
+  loaders: string[];
 }
 
 export interface ApiVersion {
