@@ -28,6 +28,8 @@ import LoaderAutocomplete from "./LoaderAutocomplete";
 import { getLoaderInfo } from "@/lib/loaders";
 import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/actions/dependency";
 import type { DependencyType, DependencyProjectSummary } from "@/lib/actions/dependency";
+import { isActionError, type ActionResult } from "@/lib/actions/actionResult";
+import { isStaleServerActionError } from "@/lib/errors/staleAction";
 import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 
@@ -62,39 +64,58 @@ const ProjectDependenciesManager = ({ projectId, dependencies, availablePlatform
   const [toast, setToast] = useState<{ message: string; severity: "success" | "error" } | null>(null);
   const router = useRouter();
   const t = useTranslations("Project.dependencies");
+  const tError = useTranslations("ServerErrors");
+
+  /**
+   * Server Action の結果を捌く。
+   *
+   * 想定内の拒否は理由がそのまま返るので出すだけ。デプロイを跨いだ古いタブからの
+   * 送信だけは再読み込みで直るため、その旨を出して自動で読み直す。
+   */
+  const runAction = async (action: () => Promise<ActionResult>, successMessage: string): Promise<boolean> => {
+    try {
+      const result = await action();
+      if (isActionError(result)) {
+        setToast({ message: result.error, severity: "error" });
+        return false;
+      }
+      setToast({ message: successMessage, severity: "success" });
+      return true;
+    } catch (err: unknown) {
+      if (isStaleServerActionError(err)) {
+        setToast({ message: tError("common.staleAction"), severity: "error" });
+        setTimeout(() => window.location.reload(), 1500);
+        return false;
+      }
+      setToast({ message: tError("common.serverError"), severity: "error" });
+      return false;
+    }
+  };
 
   const handleAdd = async () => {
     setLoading(true);
-    try {
-      if (tab === 0) {
-        if (!targetSlug) throw new Error("Target slug is required");
-        await addProjectDependencyBySlug(projectId, targetSlug, depType, { loaders: depLoaders });
-      } else {
-        if (!extName || !extUrl) throw new Error("Name and URL are required");
-        await addExternalProjectDependency(projectId, extName, extUrl, depType, { loaders: depLoaders });
-      }
-      setToast({ message: t("addSuccess"), severity: "success" });
+
+    const ok = await runAction(
+      () => tab === 0
+        ? addProjectDependencyBySlug(projectId, targetSlug, depType, { loaders: depLoaders })
+        : addExternalProjectDependency(projectId, extName, extUrl, depType, { loaders: depLoaders }),
+      t("addSuccess"),
+    );
+
+    if (ok) {
       setTargetSlug("");
       setExtName("");
       setExtUrl("");
       setDepLoaders([]);
       router.refresh();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t("addError");
-      setToast({ message, severity: "error" });
     }
     setLoading(false);
   };
 
   const handleRemove = async (depId: string) => {
     setLoading(true);
-    try {
-      await removeProjectDependency(depId);
-      setToast({ message: t("removeSuccess"), severity: "success" });
+    if (await runAction(() => removeProjectDependency(depId), t("removeSuccess"))) {
       router.refresh();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to remove dependency";
-      setToast({ message, severity: "error" });
     }
     setLoading(false);
   };
