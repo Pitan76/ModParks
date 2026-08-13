@@ -131,11 +131,25 @@ Fetches all public versions of a specific project.
         "fileName": "sample-mod-1.0.0.jar",
         "fileSize": 1024000,
         "downloads": 500,
-        "createdAt": "2026-06-01T00:00:00Z"
+        "createdAt": "2026-06-01T00:00:00Z",
+        "dependencies": [
+          {
+            "dependencyType": "required",
+            "projectSlug": "fabric-api",
+            "projectTitle": "Fabric API",
+            "externalUrl": null,
+            "externalName": null,
+            "versionScoped": true
+          }
+        ]
       }
     ]
   }
   ```
+
+`dependencies` はそのバージョンに効く依存関係で、バージョン限定のもの（`versionScoped: true`）と
+プロジェクト全体のもの（`versionScoped: false`）の両方を含みます。
+外部サイトへの依存は `projectSlug` / `projectTitle` が `null` になり、`externalName` / `externalUrl` に入ります。
 
 ---
 

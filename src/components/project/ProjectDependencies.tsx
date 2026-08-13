@@ -9,6 +9,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
 import { Link } from "@/lib/i18n/routing";
 import MuiLink from "@mui/material/Link";
 import ExtensionIcon from "@mui/icons-material/Extension";
@@ -28,6 +29,8 @@ type ProjectDependenciesProps = {
     project: DependencyProject;
     externalUrl?: string | null;
     externalName?: string | null;
+    /** バージョン限定の依存なら、その表示用バージョン番号 */
+    versionNumber?: string | null;
   }[];
   dependents: {
     id: string;
@@ -85,7 +88,12 @@ const ProjectDependencies = ({ dependencies, dependents }: ProjectDependenciesPr
                     </Box>
                   }
                 />
-                <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={DEP_COLOR[dep.dependencyType] || "default"} />
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexShrink: 0 }}>
+                  {dep.versionNumber && (
+                    <Chip size="small" variant="outlined" label={`v${dep.versionNumber}`} />
+                  )}
+                  <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={DEP_COLOR[dep.dependencyType] || "default"} />
+                </Stack>
               </ListItem>
             );
           })}

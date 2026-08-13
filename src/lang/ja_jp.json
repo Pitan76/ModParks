@@ -275,7 +275,10 @@
         "all": "すべて"
       },
       "sortBy": "並び替え",
-      "noVersionsInChannel": "該当するバージョンがありません。"
+      "noVersionsInChannel": "該当するバージョンがありません。",
+      "size": "サイズ",
+      "loadMore": "さらに読み込む",
+      "shownCount": "{shown} / {total} 件を表示"
     },
     "iconUpload": {
       "title": "アイコン",
@@ -427,7 +430,10 @@
       "addError": "依存関係の追加に失敗しました。",
       "removeSuccess": "依存関係を削除しました。",
       "dependents": "依存されているプロジェクト",
-      "noDependents": "このプロジェクトに依存しているプロジェクトはありません。"
+      "noDependents": "このプロジェクトに依存しているプロジェクトはありません。",
+      "forVersion": "このバージョンの依存関係",
+      "projectWide": "プロジェクト全体",
+      "versionScopeHint": "ここで追加した依存関係は、このバージョンにだけ適用されます。プロジェクト全体の依存関係は編集画面の「依存関係」タブで管理します。"
     },
     "members": {
       "title": "メンバー管理",

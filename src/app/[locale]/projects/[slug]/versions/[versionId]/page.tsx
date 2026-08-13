@@ -4,6 +4,8 @@ import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { getVersionById } from "@/lib/actions/versionQuery";
+import { getVersionDependencies } from "@/lib/actions/dependency";
+import VersionDependencies from "@/components/project/VersionDependencies";
 import { getProjectMembers } from "@/lib/actions/member";
 import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";
@@ -91,6 +93,9 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
 
   if (!project || !version) notFound();
 
+  // このバージョンに効く依存（バージョン限定 + プロジェクト全体）
+  const dependencies = await getVersionDependencies(project.id, version.id);
+
   let canEdit = false;
   if (session?.user) {
     const isOwner = session.user.id === project.authorId;
@@ -117,7 +122,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
   const dateStr = new Date(typeof version.createdAt === "number" ? version.createdAt * 1000 : version.createdAt).toLocaleDateString(locale);
 
   return (
-    <Container maxWidth="md" sx={{ py: 5 }}>
+    <Container maxWidth="md" sx={{ py: { xs: 3, md: 4 } }}>
       <Breadcrumb
         items={[
           { label: tCommon("projects"), href: "/projects" },
@@ -127,7 +132,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
         ]}
       />
 
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
         <LinkButton
           href={`/projects/${project.slug}?tab=files`}
           startIcon={<ArrowBackIcon />}
@@ -157,9 +162,9 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
         reviewNote={appeal?.reviewNote || null}
       />
 
-      <Card variant="outlined" sx={{ mb: 4 }}>
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, mb: 3, gap: 2 }}>
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, mb: 2.5, gap: 2 }}>
             <Box>
               <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 1 }}>
                 <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
@@ -200,26 +205,30 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
 
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary", fontWeight: 600 }}>{t("table.platformMcVersion")}</Typography>
-            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
+            <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
               {parsedLoaders.map((l) => {
                 const info = getLoaderInfo(l);
-                return <Chip key={l} label={info.name} color={info.color as any} icon={info.icon} />;
+                return <Chip key={l} label={info.name} size="small" color={info.color as any} icon={info.icon} />;
               })}
-            </Box>
-            <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
               {parsedMcVersions.map((mc) => (
-                <Chip key={mc} label={mc} variant="outlined" sx={{ borderColor: "divider" }} />
+                <Chip key={mc} label={mc} size="small" variant="outlined" sx={{ borderColor: "divider" }} />
               ))}
             </Box>
           </Box>
 
+          {dependencies.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <VersionDependencies dependencies={dependencies} />
+            </Box>
+          )}
+
           {version.changelog ? (
-            <Box sx={{ mt: 4, pt: 4, borderTop: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 3, pt: 3, borderTop: "1px solid", borderColor: "divider" }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>Changelog</Typography>
               <MarkdownRenderer content={version.changelog} />
             </Box>
           ) : (
-            <Box sx={{ mt: 4, pt: 4, borderTop: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 3, pt: 3, borderTop: "1px solid", borderColor: "divider" }}>
               <Typography color="text.secondary">No changelog provided.</Typography>
             </Box>
           )}

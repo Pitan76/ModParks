@@ -132,7 +132,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const [favoritesData, userFavoriteData, dependencies, dependents, userSubscription, media, membership, settingsRecord] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(favorites).where(eq(favorites.postId, project.id)).get(),
     session?.user?.id ? db.select().from(favorites).where(and(eq(favorites.postId, project.id), eq(favorites.userId, session.user.id))).get() : null,
-    getProjectDependencies(project.id),
+    // バージョン限定の依存もタブに出す（どのバージョン向けかはカード側で示す）
+    getProjectDependencies(project.id, true),
     getProjectDependents(project.id),
     session?.user?.id ? db.select().from(projectSubscriptions).where(and(eq(projectSubscriptions.projectId, project.id), eq(projectSubscriptions.userId, session.user.id))).get() : null,
     getPublicProjectMedia(project.id),
@@ -262,7 +263,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </Box>
 
                 {p.versions.length > 0 ? (
-                  <ProjectVersionsTable versions={p.versions} projectSlug={slug} />
+                  <ProjectVersionsTable versions={p.versions} projectSlug={slug} totalVersions={p.versionsTotal} />
                 ) : (
                   <Typography color="text.secondary">{t("noVersions")}</Typography>
                 )}

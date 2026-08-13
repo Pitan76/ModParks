@@ -171,6 +171,15 @@ export const projectDependencies = sqliteTable(
     id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
     projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
     targetProjectId: text("target_project_id").references(() => projects.id, { onDelete: "cascade" }),
+    /**
+     * 依存を適用するバージョン。null ならプロジェクト全体の依存として扱う。
+     *
+     * 前提モジュールは MC バージョンやローダーの更新で入れ替わるため、
+     * 「どのファイルに何が要るか」はバージョン単位でしか正確に書けない。
+     * 別テーブルにせず列を足しているのは、被依存（逆引き）を 1 本のクエリで
+     * 取れる形を保つため。
+     */
+    versionId: text("version_id").references(() => versions.id, { onDelete: "cascade" }),
     externalUrl: text("external_url"),
     externalName: text("external_name"),
     dependencyType: text("dependency_type").notNull().default("required"), // required, optional, incompatible, embedded
@@ -179,6 +188,7 @@ export const projectDependencies = sqliteTable(
   (t) => [
     index("project_deps_project_idx").on(t.projectId),
     index("project_deps_target_idx").on(t.targetProjectId),
+    index("project_deps_version_idx").on(t.versionId),
   ]
 );
 

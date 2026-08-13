@@ -18,6 +18,7 @@ import { getProjectDependencies } from "@/lib/actions/dependency";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { versions, posts, ideas, versionIdeas } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
+import { displayDownloadsSql } from "@/lib/queries/versionList";
 import { isAdminSession } from "@/lib/auth/roles";
 
 interface EditProjectPageProps {
@@ -63,7 +64,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       mcVersions: versions.mcVersions,
       loaders: versions.loaders,
       createdAt: versions.createdAt,
-      downloads: versions.downloads,
+      downloads: displayDownloadsSql,
       changelog: versions.changelog,
       releaseChannel: versions.releaseChannel,
       fileUrl: versions.fileUrl,

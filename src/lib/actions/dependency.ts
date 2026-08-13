@@ -2,8 +2,8 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projectDependencies, posts, projects, projectMembers } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { projectDependencies, posts, projects, projectMembers, versions } from "@/db/schema";
+import { eq, and, isNull, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
 import { findProjectPostById, findProjectPostBySlug } from "@/lib/queries/post";
@@ -19,36 +19,101 @@ export interface DependencyProjectSummary {
   iconUrl: string | null;
 }
 
+/** 依存関係 1 件の表示用の形。バージョン限定かどうかも持つ */
+export type DependencyEntry = {
+  id: string;
+  dependencyType: DependencyType;
+  project: DependencyProjectSummary;
+  externalUrl: string | null;
+  externalName: string | null;
+  /** バージョン限定の依存なら対象バージョンID。null ならプロジェクト全体 */
+  versionId: string | null;
+  /** バージョン限定の依存の表示用バージョン番号 */
+  versionNumber: string | null;
+};
+
+const DEPENDENCY_COLUMNS = {
+  id: projectDependencies.id,
+  dependencyType: projectDependencies.dependencyType,
+  targetPost: posts,
+  targetProject: projects,
+  externalUrl: projectDependencies.externalUrl,
+  externalName: projectDependencies.externalName,
+  versionId: projectDependencies.versionId,
+  versionNumber: versions.versionNumber,
+};
+
+type DependencyRow = {
+  id: string;
+  dependencyType: string;
+  targetPost: typeof posts.$inferSelect | null;
+  targetProject: typeof projects.$inferSelect | null;
+  externalUrl: string | null;
+  externalName: string | null;
+  versionId: string | null;
+  versionNumber: string | null;
+};
+
+const toDependencyEntry = (d: DependencyRow): DependencyEntry => ({
+  id: d.id,
+  dependencyType: d.dependencyType as DependencyType,
+  project: (d.targetPost
+    ? { id: d.targetPost.id, slug: d.targetPost.slug, title: d.targetPost.title, iconUrl: d.targetProject?.iconUrl ?? null }
+    : { id: d.id, slug: d.id, title: d.externalName || "Unknown External", iconUrl: null }) satisfies DependencyProjectSummary,
+  externalUrl: d.externalUrl,
+  externalName: d.externalName,
+  versionId: d.versionId,
+  versionNumber: d.versionNumber,
+});
+
 /**
- * プロジェクトの依存関係を取得する
+ * プロジェクトの依存関係を取得する。
+ *
+ * 既定ではプロジェクト全体の依存（バージョン限定でないもの）だけを返す。
+ * バージョン限定の依存はファイルごとに違うため、混ぜると「今どれが要るのか」が読めなくなる。
  */
-export async function getProjectDependencies(projectId: string) {
+export async function getProjectDependencies(projectId: string, includeVersionScoped = false): Promise<DependencyEntry[]> {
   const db = await getDatabase();
 
+  const scope = includeVersionScoped
+    ? eq(projectDependencies.projectId, projectId)
+    : and(eq(projectDependencies.projectId, projectId), isNull(projectDependencies.versionId));
+
   const deps = await db
-    .select({
-      id: projectDependencies.id,
-      dependencyType: projectDependencies.dependencyType,
-      targetPost: posts,
-      targetProject: projects,
-      externalUrl: projectDependencies.externalUrl,
-      externalName: projectDependencies.externalName,
-    })
+    .select(DEPENDENCY_COLUMNS)
     .from(projectDependencies)
     .leftJoin(projects, eq(projectDependencies.targetProjectId, projects.id))
     .leftJoin(posts, eq(posts.id, projects.id))
-    .where(eq(projectDependencies.projectId, projectId))
+    .leftJoin(versions, eq(projectDependencies.versionId, versions.id))
+    .where(scope)
     .all();
 
-  return deps.map((d) => ({
-    id: d.id,
-    dependencyType: d.dependencyType as DependencyType,
-    project: (d.targetPost
-      ? { id: d.targetPost.id, slug: d.targetPost.slug, title: d.targetPost.title, iconUrl: d.targetProject?.iconUrl ?? null }
-      : { id: d.id, slug: d.id, title: d.externalName || "Unknown External", iconUrl: null }) satisfies DependencyProjectSummary,
-    externalUrl: d.externalUrl,
-    externalName: d.externalName,
-  }));
+  return deps.map(toDependencyEntry);
+}
+
+/**
+ * バージョンに適用される依存関係を取得する。
+ *
+ * そのバージョン限定のものと、プロジェクト全体のものを両方返す。
+ * どちらなのかは versionId で見分けられる。
+ */
+export async function getVersionDependencies(projectId: string, versionId: string): Promise<DependencyEntry[]> {
+  const db = await getDatabase();
+
+  const deps = await db
+    .select(DEPENDENCY_COLUMNS)
+    .from(projectDependencies)
+    .leftJoin(projects, eq(projectDependencies.targetProjectId, projects.id))
+    .leftJoin(posts, eq(posts.id, projects.id))
+    .leftJoin(versions, eq(projectDependencies.versionId, versions.id))
+    .where(and(
+      eq(projectDependencies.projectId, projectId),
+      or(isNull(projectDependencies.versionId), eq(projectDependencies.versionId, versionId)),
+    ))
+    .all();
+
+  // バージョン限定のものを先に出す。実際に効く条件から読ませたい
+  return deps.map(toDependencyEntry).sort((a, b) => Number(!!b.versionId) - Number(!!a.versionId));
 }
 
 /**
@@ -83,13 +148,69 @@ export async function getProjectDependents(projectId: string) {
 }
 
 /**
- * プロジェクトに依存関係を追加する（Slugで指定）
+ * 依存関係を編集できるのは作者・メンバー・管理者だけ。追加系の入口で必ず通す。
+ *
+ * @returns 対象プロジェクト（revalidate 用に slug が要る）
  */
-export async function addProjectDependencyBySlug(projectId: string, targetSlug: string, dependencyType: DependencyType) {
-  const { db, session } = await getAuthenticatedDb();
-
+async function assertDependencyEditable(
+  db: Awaited<ReturnType<typeof getAuthenticatedDb>>["db"],
+  session: Awaited<ReturnType<typeof getAuthenticatedDb>>["session"],
+  projectId: string,
+) {
   const project = await findProjectPostById(db, projectId);
   if (!project) throw new Error("Project not found");
+
+  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
+  if (project.authorId !== session.user.id && !member && !isAdminSession(session)) {
+    throw new Error("Forbidden");
+  }
+
+  return project;
+}
+
+/**
+ * バージョン限定の依存で指定されたバージョンを検証する。
+ *
+ * 他プロジェクトのバージョンIDを渡して依存を紛れ込ませられないよう、所属を必ず確認する。
+ */
+async function resolveDependencyVersionId(
+  db: Awaited<ReturnType<typeof getAuthenticatedDb>>["db"],
+  projectId: string,
+  versionId?: string | null,
+): Promise<string | null> {
+  if (!versionId) return null;
+
+  const version = await db
+    .select({ id: versions.id })
+    .from(versions)
+    .where(and(eq(versions.id, versionId), eq(versions.projectId, projectId)))
+    .get();
+
+  if (!version) throw new Error("Version not found in this project");
+  return version.id;
+}
+
+/** 依存関係の追加・削除後に貼り替えが要るページ */
+function revalidateDependencyPaths(slug: string) {
+  revalidatePath(`/projects/${slug}`);
+  revalidatePath(`/projects/${slug}/dependencies`);
+  revalidatePath(`/projects/${slug}/edit`);
+}
+
+/**
+ * プロジェクトに依存関係を追加する（Slugで指定）。
+ *
+ * versionId を渡すとそのバージョン限定の依存になる。省略時はプロジェクト全体。
+ */
+export async function addProjectDependencyBySlug(
+  projectId: string,
+  targetSlug: string,
+  dependencyType: DependencyType,
+  versionId?: string | null,
+) {
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await assertDependencyEditable(db, session, projectId);
 
   const targetProject = await findProjectPostBySlug(db, targetSlug);
   if (!targetProject) throw new Error("Target project not found");
@@ -98,15 +219,17 @@ export async function addProjectDependencyBySlug(projectId: string, targetSlug: 
     throw new Error("Cannot depend on itself");
   }
 
-  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  if (project.authorId !== session.user.id && !member && !isAdminSession(session)) {
-    throw new Error("Forbidden");
-  }
+  const scopedVersionId = await resolveDependencyVersionId(db, projectId, versionId);
 
+  // 同じ相手でも、プロジェクト全体とバージョン限定は別物として持てる
   const existing = await db
-    .select()
+    .select({ id: projectDependencies.id })
     .from(projectDependencies)
-    .where(and(eq(projectDependencies.projectId, projectId), eq(projectDependencies.targetProjectId, targetProject.id)))
+    .where(and(
+      eq(projectDependencies.projectId, projectId),
+      eq(projectDependencies.targetProjectId, targetProject.id),
+      scopedVersionId ? eq(projectDependencies.versionId, scopedVersionId) : isNull(projectDependencies.versionId),
+    ))
     .get();
 
   if (existing) {
@@ -117,33 +240,34 @@ export async function addProjectDependencyBySlug(projectId: string, targetSlug: 
     projectId,
     targetProjectId: targetProject.id,
     dependencyType,
+    versionId: scopedVersionId,
   }).run();
 
-  revalidatePath(`/projects/${project.slug}/dependencies`);
-  revalidatePath(`/projects/${project.slug}/edit`);
+  revalidateDependencyPaths(project.slug);
   return { success: true };
 }
 
-export async function addExternalProjectDependency(projectId: string, externalName: string, externalUrl: string, dependencyType: DependencyType) {
+export async function addExternalProjectDependency(
+  projectId: string,
+  externalName: string,
+  externalUrl: string,
+  dependencyType: DependencyType,
+  versionId?: string | null,
+) {
   const { db, session } = await getAuthenticatedDb();
 
-  const project = await findProjectPostById(db, projectId);
-  if (!project) throw new Error("Project not found");
-
-  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  if (project.authorId !== session.user.id && !member && !isAdminSession(session)) {
-    throw new Error("Forbidden");
-  }
+  const project = await assertDependencyEditable(db, session, projectId);
+  const scopedVersionId = await resolveDependencyVersionId(db, projectId, versionId);
 
   await db.insert(projectDependencies).values({
     projectId,
     externalName,
     externalUrl,
     dependencyType,
+    versionId: scopedVersionId,
   }).run();
 
-  revalidatePath(`/projects/${project.slug}/dependencies`);
-  revalidatePath(`/projects/${project.slug}/edit`);
+  revalidateDependencyPaths(project.slug);
   return { success: true };
 }
 
@@ -158,18 +282,11 @@ export async function removeProjectDependency(dependencyId: string) {
   const dep = await db.select().from(projectDependencies).where(eq(projectDependencies.id, dependencyId)).get();
   if (!dep) throw new Error("Dependency not found");
 
-  const project = await findProjectPostById(db, dep.projectId);
-  if (!project) throw new Error("Project not found");
-
-  const member = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id))).get();
-  if (project.authorId !== session.user.id && !member && !isAdminSession(session)) {
-    throw new Error("Forbidden");
-  }
+  const project = await assertDependencyEditable(db, session, dep.projectId);
 
   await db.delete(projectDependencies).where(eq(projectDependencies.id, dependencyId)).run();
   await recordDeletion(db, "project_dependencies", dependencyId);
 
-  revalidatePath(`/projects/${project.slug}/dependencies`);
-  revalidatePath(`/projects/${project.slug}/edit/dependencies`);
+  revalidateDependencyPaths(project.slug);
   return { success: true };
 }
