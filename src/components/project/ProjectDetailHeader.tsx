@@ -126,15 +126,6 @@ const ProjectDetailHeader = ({
                 {p.title}
               </Typography>
               <ProjectTypeBadge type={p.type} size="small" />
-              {showAiLabel && p.aiGenerated && (
-                <Chip
-                  label="AI"
-                  color="info"
-                  size="small"
-                  variant="filled"
-                  sx={{ fontWeight: "bold" }}
-                />
-              )}
               {p.visibility !== "public" && (
                 <Chip
                   label={tCommon(`visibility.${p.visibility}`)}

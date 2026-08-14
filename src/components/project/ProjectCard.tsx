@@ -146,15 +146,6 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
                   </Typography>
                 </Tooltip>
                 <ProjectTypeBadge type={project.type} />
-                {showAiLabel && project.aiGenerated && (
-                  <Chip
-                    label="AI"
-                    color="info"
-                    size="small"
-                    variant="filled"
-                    sx={{ fontWeight: "bold", height: 20, fontSize: "0.75rem" }}
-                  />
-                )}
               </Box>
 
               <Typography

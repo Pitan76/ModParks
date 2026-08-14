@@ -342,13 +342,15 @@
       "syncError": "同期に失敗しました",
       "apiKeyMissing": "APIキーが設定されていません。"
     },
-    "sidebar": {
+    "infobox": {
       "license": "ライセンス",
       "sourceCode": "ソースコード",
       "tags": "タグ",
       "report": "通報",
       "platforms": "プラットフォーム",
-      "gameVersions": "ゲームバージョン"
+      "gameVersions": "ゲームバージョン",
+      "aiGenerated": "AI生成コンテンツ",
+      "aiGeneratedDesc": "このプロジェクトにはAIで生成されたコンテンツが含まれています。"
     },
     "header": {
       "publishedAt": "{date}",

@@ -66,9 +66,6 @@ const PlainProjectTable = ({ projects }: PlainProjectTableProps) => {
                 )}
                 {project.title}
               </Link>
-              {showAiLabel && project.aiGenerated && (
-                <span className={styles.dim} style={{ marginLeft: "0.25rem" }}>[AI]</span>
-              )}
               {project.tags?.length > 0 && (
                 <span className={styles.tags}>
                   {project.tags.slice(0, VISIBLE_TAG_COUNT).map((tag) => (

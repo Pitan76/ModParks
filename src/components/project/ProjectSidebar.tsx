@@ -14,6 +14,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import XIcon from "@mui/icons-material/X";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LanguageIcon from "@mui/icons-material/Language";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 import { useTranslations } from "next-intl";
 import ReportDialog from "@/components/project/ReportDialog";
 import { Link } from "@/lib/i18n/routing";
@@ -23,6 +24,7 @@ import { useColorMode } from "@/components/ThemeRegistry";
 import PlainProjectSidebar from "@/components/plain/project/PlainProjectSidebar";
 import { summarizeProjectVersions, type SummarizableVersion } from "@/lib/utils/projectVersionSummary";
 import { getLoaderInfo } from "@/lib/loaders";
+import { useState, useEffect } from "react";
 
 export type ProjectSidebarProps = {
   /** 対象プロジェクトの情報 */
@@ -33,6 +35,7 @@ export type ProjectSidebarProps = {
     links?: string | null;
     tags: string[];
     versions: SummarizableVersion[];
+    aiGenerated?: boolean;
   };
   /** ログイン済みか (通報ボタンの表示判定用) */
   isAuthenticated: boolean;
@@ -61,6 +64,18 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
   const { isPlainTheme } = useColorMode();
+  const [showAiLabel, setShowAiLabel] = useState(true);
+
+  useEffect(() => {
+    try {
+      const val = window.localStorage.getItem("show_ai_label");
+      if (val === "false") {
+        setShowAiLabel(false);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   if (isPlainTheme) return <PlainProjectSidebar project={p} isAuthenticated={isAuthenticated} />;
 
@@ -86,7 +101,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
       {loaders.length > 0 && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-            {t("sidebar.platforms")}
+            {t("infobox.platforms")}
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
             {loaders.map((loader) => {
@@ -101,7 +116,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
       {mcVersions.length > 0 && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-            {t("sidebar.gameVersions")}
+            {t("infobox.gameVersions")}
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
             {mcVersions.map((mc) => (
@@ -113,11 +128,27 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
 
       {(loaders.length > 0 || mcVersions.length > 0) && <Divider sx={{ mb: 2 }} />}
 
+      {/* AI生成コンテンツ */}
+      {showAiLabel && p.aiGenerated && (
+        <>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <SmartToyIcon fontSize="small" color="action" />
+              {t("infobox.aiGenerated")}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t("infobox.aiGeneratedDesc")}
+            </Typography>
+          </Box>
+          <Divider sx={{ mb: 2 }} />
+        </>
+      )}
+
       {/* ライセンス */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <GavelIcon fontSize="small" color="action" />
-          {t("sidebar.license")}
+          {t("infobox.license")}
         </Typography>
         <Typography variant="body2">
           {p.license}
@@ -131,7 +162,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <CodeIcon fontSize="small" color="action" />
-            {t("sidebar.sourceCode")}
+            {t("infobox.sourceCode")}
           </Typography>
           <Button
             id="source-code-btn"
@@ -186,7 +217,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
         <Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <LocalOfferIcon fontSize="small" color="action" />
-            {t("sidebar.tags")}
+            {t("infobox.tags")}
           </Typography>
           <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
             {p.tags.map((tag) => (

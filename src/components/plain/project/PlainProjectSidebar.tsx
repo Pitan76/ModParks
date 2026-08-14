@@ -8,6 +8,7 @@ import type { ProjectSidebarProps } from "@/components/project/ProjectSidebar";
 import { summarizeProjectVersions } from "@/lib/utils/projectVersionSummary";
 import { getLoaderName } from "@/lib/data/loaderIds";
 import styles from "../plain.module.css";
+import { useState, useEffect } from "react";
 
 /**
  * Plain Theme 用のプロジェクトサイドバー。
@@ -18,6 +19,18 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
   const tTags = useTranslations("Tags");
   const links = parseLinks(p.links);
   const { mcVersions, loaders } = summarizeProjectVersions(p.versions);
+  const [showAiLabel, setShowAiLabel] = useState(true);
+
+  useEffect(() => {
+    try {
+      const val = window.localStorage.getItem("show_ai_label");
+      if (val === "false") {
+        setShowAiLabel(false);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   const getTagLabel = (tag: string) => {
     const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, "_");
@@ -29,24 +42,31 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
       <dl className={styles.definitions}>
         {loaders.length > 0 && (
           <>
-            <dt>{t("sidebar.platforms")}</dt>
+            <dt>{t("infobox.platforms")}</dt>
             <dd>{loaders.map(getLoaderName).join(", ")}</dd>
           </>
         )}
 
         {mcVersions.length > 0 && (
           <>
-            <dt>{t("sidebar.gameVersions")}</dt>
+            <dt>{t("infobox.gameVersions")}</dt>
             <dd>{mcVersions.join(", ")}</dd>
           </>
         )}
 
-        <dt>{t("sidebar.license")}</dt>
+        {showAiLabel && p.aiGenerated && (
+          <>
+            <dt>{t("infobox.aiGenerated")}</dt>
+            <dd>{t("infobox.aiGeneratedDesc")}</dd>
+          </>
+        )}
+
+        <dt>{t("infobox.license")}</dt>
         <dd>{p.license}</dd>
 
         {p.sourceUrl && (
           <>
-            <dt>{t("sidebar.sourceCode")}</dt>
+            <dt>{t("infobox.sourceCode")}</dt>
             <dd>
               <a id="source-code-btn" href={p.sourceUrl} target="_blank" rel="noopener noreferrer">{p.sourceUrl}</a>
             </dd>
@@ -70,7 +90,7 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
 
         {p.tags.length > 0 && (
           <>
-            <dt>{t("sidebar.tags")}</dt>
+            <dt>{t("infobox.tags")}</dt>
             <dd>
               <ul className={styles.tags}>
                 {p.tags.map((tag) => (

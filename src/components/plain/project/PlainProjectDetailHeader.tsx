@@ -53,7 +53,6 @@ const PlainProjectDetailHeader = ({
         )}
         <h1>{p.title}</h1>
         <span className={styles.dim}>{t.has(`type.${p.type}`) ? t(`type.${p.type}`) : p.type}</span>
-        {showAiLabel && p.aiGenerated && <span className={styles.dim}>[AI]</span>}
         {p.visibility !== "public" && <span className={styles.dim}>{tCommon(`visibility.${p.visibility}`)}</span>}
       </div>
 
