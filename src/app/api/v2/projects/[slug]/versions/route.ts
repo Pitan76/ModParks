@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getDb, getD1, type Env } from "@/lib/db";
 import { posts, projects, projectDependencies, versions, projectMembers, versionLoaders, versionMcVersions } from "@/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
@@ -17,6 +17,7 @@ import { findProjectPostBySlug } from "@/lib/queries/post";
 import { canManagePost } from "@/lib/auth/postAccess";
 import { isAllowedUpload } from "@/lib/upload/fileTypes";
 import { getTrustState } from "@/lib/services/trust";
+import { scanVersionFile } from "@/lib/actions/versionScan";
 
 /**
  * バージョンには title/body 系のリネーム対象フィールドが無いため、
@@ -274,6 +275,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   if (parsed.data.mcVersions && parsed.data.mcVersions.length > 0) {
     await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId: id, mcVersion: mc }))).run();
   }
+
+  // UI 経由（lib/actions/version.ts）と同じ検査を必ず通す。
+  // ここを省くと scan_status が pending のまま配布され、
+  // /api/download の malicious 遮断をすり抜ける
+  after(async () => {
+    await scanVersionFile(db, id, fileUrl, fileName);
+  });
 
   revalidatePath(`/projects/${project.slug}`);
 
