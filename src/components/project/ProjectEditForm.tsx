@@ -15,6 +15,8 @@ import ActionRow from "@/components/ui/ActionRow";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 import TranslationEditor from "@/components/project/TranslationEditor";
+import ProjectDescriptionFields from "@/components/project/ProjectDescriptionFields";
+import ProjectFormTabs from "@/components/project/ProjectFormTabs";
 import SyncIcon from "@mui/icons-material/Sync";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
@@ -34,6 +36,8 @@ interface ProjectEditFormProps {
     commentsEnabled?: boolean;
     recipesEnabled?: boolean;
     aiGenerated?: boolean;
+    bodyFormat?: string;
+    sourceLocale?: string;
   };
   availableTags?: { slug: string; name: string }[];
 }
@@ -141,40 +145,61 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
         onChange={() => setDirty(true)}
         sx={{ display: "flex", flexDirection: "column", gap: 3, p: "2px" }}
       >
-          {/* ProjectFormFields のフォームフィールド名（name/description）は
-              Server Action (updateProject) の契約に合わせて変えていない。
-              project.title / project.body から詰め替えて渡す */}
-          <ProjectFormFields
-            error={error}
-            project={{ ...project, name: project.title, description: project.body } as any}
-            availableTags={availableTags}
-            onChange={() => setDirty(true)}
-          >
-            <FormControl fullWidth required>
-              <InputLabel id="project-status-label">{t("fields.status")}</InputLabel>
-              <Select
-                labelId="project-status-label"
-                id="project-status"
-                name="status"
-                label={t("fields.status")}
-                defaultValue={project.visibility}
-                onChange={() => setDirty(true)}
-              >
-                <MenuItem value="public">{tCommon("visibility.public")}</MenuItem>
-                <MenuItem value="unlisted">{tCommon("visibility.unlisted")}</MenuItem>
-                <MenuItem value="private">{tCommon("visibility.private")}</MenuItem>
-                <MenuItem value="draft">{tCommon("visibility.draft")}</MenuItem>
-              </Select>
-            </FormControl>
-          </ProjectFormFields>
+          <ProjectFormTabs
+            basicContent={
+              <>
+                {/* ProjectFormFields のフォームフィールド名（name/description）は
+                    Server Action (updateProject) の契約に合わせて変えていない。
+                    project.title / project.body から詰め替えて渡す */}
+                <ProjectFormFields
+                  error={error}
+                  project={{ ...project, name: project.title, description: project.body } as any}
+                  availableTags={availableTags}
+                  withDescription={false}
+                  onChange={() => setDirty(true)}
+                >
+                  <FormControl fullWidth required>
+                    <InputLabel id="project-status-label">{t("fields.status")}</InputLabel>
+                    <Select
+                      labelId="project-status-label"
+                      id="project-status"
+                      name="status"
+                      label={t("fields.status")}
+                      defaultValue={project.visibility}
+                      onChange={() => setDirty(true)}
+                    >
+                      <MenuItem value="public">{tCommon("visibility.public")}</MenuItem>
+                      <MenuItem value="unlisted">{tCommon("visibility.unlisted")}</MenuItem>
+                      <MenuItem value="private">{tCommon("visibility.private")}</MenuItem>
+                      <MenuItem value="draft">{tCommon("visibility.draft")}</MenuItem>
+                    </Select>
+                  </FormControl>
+                </ProjectFormFields>
 
-          <FormControlLabel
-            control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} onChange={() => setDirty(true)} />}
-            label={t("fields.commentsEnabled")}
-          />
-          <FormControlLabel
-            control={<Switch name="recipesEnabled" defaultChecked={!!project.recipesEnabled} onChange={() => setDirty(true)} />}
-            label={t("fields.recipesEnabled")}
+                <FormControlLabel
+                  control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} onChange={() => setDirty(true)} />}
+                  label={t("fields.commentsEnabled")}
+                />
+                <FormControlLabel
+                  control={<Switch name="recipesEnabled" defaultChecked={!!project.recipesEnabled} onChange={() => setDirty(true)} />}
+                  label={t("fields.recipesEnabled")}
+                />
+              </>
+            }
+            descriptionContent={
+              <>
+                <ProjectDescriptionFields
+                  description={project.body}
+                  descriptionFormat={project.bodyFormat}
+                  sourceLocale={project.sourceLocale}
+                  errorMessages={error?.description}
+                  withSourceLocale
+                  onChange={() => setDirty(true)}
+                />
+                {/* 訳文は原文フォームとは別の Server Action で保存する */}
+                <TranslationEditor projectId={project.id} />
+              </>
+            }
           />
 
           <ActionRow align="center" sx={{ mt: 2 }}>
@@ -188,11 +213,6 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
               {syncing ? tManage("syncing") : tManage("sync")}
             </Button>
           </ActionRow>
-      </Box>
-
-      {/* 訳文は原文フォームとは別の Server Action で保存するため、form の外に置く */}
-      <Box sx={{ mt: 3 }}>
-        <TranslationEditor projectId={project.id} />
       </Box>
 
       <StickySaveBar

@@ -12,6 +12,7 @@ import FormTextField from "@/components/ui/form/FormTextField";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import TagAutocomplete from "./TagAutocomplete";
+import ProjectDescriptionFields from "./ProjectDescriptionFields";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { useState, useEffect, useRef } from "react";
@@ -49,6 +50,8 @@ export type ProjectFormFieldsProps = {
   availableTags?: OptionItem[];
   defaultLicense?: string;
   defaultBodyFormat?: string;
+  /** 説明の入力欄を含めるか。タブに分ける画面では説明タブ側が持つので false にする */
+  withDescription?: boolean;
   children?: ReactNode;
   onChange?: () => void;
 };
@@ -56,7 +59,7 @@ export type ProjectFormFieldsProps = {
 /**
  * 新規作成や編集ページにおいて、プロジェクトの基本情報（名称、説明、タグ、ライセンス、リンク等）を編集するフォームフィールド群コンポーネント。
  */
-const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense, defaultBodyFormat, children, onChange }: ProjectFormFieldsProps) => {
+const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense, defaultBodyFormat, withDescription = true, children, onChange }: ProjectFormFieldsProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Project");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
@@ -120,40 +123,15 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
         {children}
       </Stack>
 
-      <Stack direction="column" spacing={1}>
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <FormSelect
-            id="project-description-format"
-            name="descriptionFormat"
-            size="small"
-            label={t("fields.descriptionFormat")}
-            defaultValue={project?.descriptionFormat || defaultBodyFormat || "markdown"}
-            options={[
-              { value: "markdown", label: "Markdown" },
-              { value: "plaintext", label: "Plain Text" },
-              { value: "pukiwiki", label: "PukiWiki" },
-            ]}
-            formControlProps={{ sx: { minWidth: 150 } }}
-            onChange={onChange}
-          />
-        </Box>
-        <FormTextField
-          id="project-description"
-          name="description"
-          label={t("fields.description")}
-          multiline
-          minRows={10}
-          fullWidth
-          required
-          defaultValue={project?.description}
+      {withDescription && (
+        <ProjectDescriptionFields
+          description={project?.description}
+          descriptionFormat={project?.descriptionFormat}
+          defaultBodyFormat={defaultBodyFormat}
           errorMessages={error?.description}
-          sx={{
-            "& textarea": {
-              resize: "vertical !important",
-            }
-          }}
+          onChange={onChange}
         />
-      </Stack>
+      )}
 
       <TagAutocomplete
         availableTags={availableTags}

@@ -202,7 +202,8 @@
       "members": "メンバー管理",
       "dependencies": "依存関係",
       "recipes": "レシピ",
-      "ownership": "権限移譲"
+      "ownership": "権限移譲",
+      "description": "説明"
     },
     "batchImportTitle": "外部からの一括インポート",
     "batchImportDesc": "連携済みの外部サービスからプロジェクトを一括インポートします。",
@@ -260,7 +261,8 @@
       "discordWebhookHelper": "新しいバージョンを公開したとき、このDiscord Webhookに告知を送信します",
       "commentsEnabled": "コメントを有効化",
       "recipesEnabled": "レシピタブを有効化 (試験的機能)",
-      "aiGenerated": "AI生成コンテンツを含む (任意)"
+      "aiGenerated": "AI生成コンテンツを含む (任意)",
+      "sourceLocale": "原文の言語"
     },
     "table": {
       "name": "プロジェクト",

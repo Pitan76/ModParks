@@ -2,9 +2,10 @@
  * 訳文の検証と復元。検証に落ちた訳文は決して保存しない（壊れた記法を DB に
  * 残さないため、原文表示へ戻すほうが常に安全）。
  */
-import { TOKEN_CLOSE, TOKEN_OPEN, type MaskedDocument } from "./masking";
+import { TOKEN_PATTERN, type MaskedDocument } from "./masking";
 
-const TOKEN_IN_TEXT = new RegExp(`${TOKEN_OPEN}T(\\d+)${TOKEN_CLOSE}`, "g");
+/** 状態を持つ g フラグ付き正規表現を使い回さないよう、都度作る */
+const tokenRegex = (): RegExp => new RegExp(TOKEN_PATTERN.source, "g");
 
 /**
  * 各行のトークンが過不足なく保たれているか検証する。
@@ -38,10 +39,10 @@ function sameTokenSequence(a: string, b: string): boolean {
 }
 
 function tokenSequence(text: string): number[] {
-  return [...text.matchAll(TOKEN_IN_TEXT)].map((m) => Number(m[1]));
+  return [...text.matchAll(tokenRegex())].map((m) => Number(m[1]));
 }
 
 /** 置換値に `$` を含みうるため、文字列ではなく関数で差し戻す */
 function expandTokens(text: string, tokens: string[]): string {
-  return text.replace(TOKEN_IN_TEXT, (_, index: string) => tokens[Number(index)] ?? "");
+  return text.replace(tokenRegex(), (_, index: string) => tokens[Number(index)] ?? "");
 }

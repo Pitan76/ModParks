@@ -2,7 +2,7 @@
  * 行内記法のマスキング。書式ごとのパターンを与えると、該当箇所をトークンに
  * 置き換えたテキストを返す。
  */
-import type { TokenBag } from "./types";
+import { TOKEN_PATTERN, type TokenBag } from "./types";
 
 /**
  * マスク対象パターン。`keep` を与えた場合、その捕捉グループだけを翻訳対象として
@@ -31,7 +31,9 @@ function applyPattern(text: string, { pattern, keep }: InlinePattern, bag: Token
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text)) !== null) {
-    result += text.slice(last, m.index) + replaceMatch(m, keep, bag);
+    // 置換済みのトークンを後続パターン（HTML タグなど）が二重にマスクしないよう素通しする
+    const replaced = isTokenRef(m[0]) ? m[0] : replaceMatch(m, keep, bag);
+    result += text.slice(last, m.index) + replaced;
     last = m.index + m[0].length;
     if (m[0].length === 0) re.lastIndex++; // 空マッチでの無限ループを防ぐ
   }
@@ -47,6 +49,9 @@ function replaceMatch(
   const { before, visible, after } = keep(m);
   return bag.add(before) + visible + bag.add(after);
 }
+
+const isTokenRef = (text: string): boolean =>
+  new RegExp(`^${TOKEN_PATTERN.source}$`).test(text);
 
 const ensureGlobal = (flags: string): string => (flags.includes("g") ? flags : `${flags}g`);
 

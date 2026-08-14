@@ -23,11 +23,17 @@ export interface FormatMasker {
   mask(text: string): MaskedDocument;
 }
 
-/** トークンの表記。翻訳対象テキストに出現しない字を選ぶ */
-export const TOKEN_OPEN  = "⟦";
-export const TOKEN_CLOSE = "⟧";
+/**
+ * トークンの表記。
+ *
+ * 記号は ASCII の自己終了タグ風にしている。⟦⟧ のような非 ASCII は小さいモデルが
+ * 全角化・削除しやすく、実運用で復元に失敗したため。タグ形は「訳してはいけない
+ * 記号」として扱われやすく、そのまま返ってくる率が高い。
+ */
+export const tokenRef = (index: number): string => `<x${index}/>`;
 
-export const tokenRef = (index: number): string => `${TOKEN_OPEN}T${index}${TOKEN_CLOSE}`;
+/** 訳文中のトークンを拾う。閉じ記号の揺れ（`< x0 />`）も許容する */
+export const TOKEN_PATTERN = /<\s*x(\d+)\s*\/?\s*>/g;
 
 /** 置換した原文断片を貯め、トークン参照を払い出す */
 export class TokenBag {

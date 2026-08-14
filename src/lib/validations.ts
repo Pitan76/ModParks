@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { locales } from "@/lib/i18n/routing";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { MC_VERSIONS, type McVersion } from "@/lib/data/minecraftVersions";
 import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
@@ -83,6 +84,8 @@ export const updateProjectSchema = createProjectSchema.partial().extend({
   slug: projectSlugSchema.optional(),
   issueTrackerUrl: z.string().url(vk("invalidUrl")).optional().or(z.literal("")).nullable(),
   status: z.enum(["draft", "public", "unlisted", "private"]).optional(),
+  // 原文の言語。多言語表示の起点なので、作者が後から直せるようにしている
+  sourceLocale: z.enum(locales as unknown as [string, ...string[]]).optional(),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;

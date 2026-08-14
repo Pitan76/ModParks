@@ -202,7 +202,8 @@
       "members": "Members",
       "dependencies": "Dependencies",
       "recipes": "Recipes",
-      "ownership": "Ownership"
+      "ownership": "Ownership",
+      "description": "Description"
     },
     "batchImportTitle": "Batch Import from External Platforms",
     "batchImportDesc": "Import projects in bulk from your connected external services.",
@@ -260,7 +261,8 @@
       "discordWebhookHelper": "Send a notification to this Discord webhook when a new version is published (optional).",
       "commentsEnabled": "Enable Comments",
       "recipesEnabled": "Enable Recipes Tab",
-      "aiGenerated": "Contains AI-generated content (optional)"
+      "aiGenerated": "Contains AI-generated content (optional)",
+      "sourceLocale": "Original language"
     },
     "table": {
       "name": "Project",

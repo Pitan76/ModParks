@@ -62,7 +62,7 @@ describe("pukiwiki マスキング", () => {
 
   it("表のセル数が変わる訳文は検証で弾かれること", () => {
     const doc = getMasker("pukiwiki").mask("|A|B|");
-    const parsed = parsePayload(toPayload(doc).replace(/⟦T\d+⟧/g, ""), doc);
+    const parsed = parsePayload(toPayload(doc).replace(/<x\d+\/>/g, ""), doc);
     expect(parsed).not.toBeNull();
     expect(validateTokens(doc, parsed!)).toBe(false);
   });
