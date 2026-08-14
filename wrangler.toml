@@ -77,6 +77,14 @@ CLOUDFLARE_ACCOUNT_ID = "70a9b16c9396a3ab84c4ce7719800373"
 # /api/r2 プロキシ（Worker 経由）を通らなくなる＝Worker の継続負荷が消える。
 # modparks-storage バケットに接続したカスタムドメイン（Cloudflare CDN キャッシュ対象）。
 R2_PUBLIC_URL = "https://files.modparks.pitan76.net"
+# 上と同じ値。クライアント側のサムネイルURL組み立て(lib/utils/imageUrl.ts)で参照する。
+# NEXT_PUBLIC_* はビルド時にバンドルへ焼き込まれるため、変更後は再ビルドが必要。
+NEXT_PUBLIC_R2_PUBLIC_URL = "https://files.modparks.pitan76.net"
+# Cloudflare Image Transformations(/cdn-cgi/image/)でサムネイルを配信するか: on / off
+# 課金は「その月に要求された(画像,幅)の種類数」で決まりアクセス数には比例しない。
+# 無料枠は月5,000変換。幅は lib/utils/imageUrl.ts の ALLOWED_WIDTHS に固定している。
+# 超過時は onerror=redirect により原寸配信へ落ちるので、画像が壊れることはない。
+NEXT_PUBLIC_IMAGE_TRANSFORM = "on"
 # 広告枠の表示モード: off / preview(位置のみ) / on(実配信)
 NEXT_PUBLIC_ADS_MODE = "on"
 # AdSense のパブリッシャーID。HTML に出る公開値なので秘匿不要。
