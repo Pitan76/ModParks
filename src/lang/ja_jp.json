@@ -2223,5 +2223,10 @@
     "downloads": "DL数",
     "ideasSection": "アイデア一覧",
     "noIdeas": "アイデアはありません。"
+  },
+  "NotFound": {
+    "title": "ページが見つかりません",
+    "description": "お探しのページは削除されたか、URLが変更された可能性があります。",
+    "goBack": "トップページに戻る"
   }
 }
