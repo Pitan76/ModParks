@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { setShowIdeasOnProfile } from "@/lib/actions/profilePins";
 
 /** 本人のみ表示。プロフィールへの投稿アイデア表示 ON/OFF を切り替える。 */

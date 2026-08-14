@@ -28,7 +28,7 @@ import ScanStatusBanner from "@/components/project/ScanStatusBanner";
 import { getLatestScanAppeal } from "@/lib/actions/scanAppealQuery";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
-import { canonicalUrl } from "@/lib/seo/canonical";
+import { canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
 import { formatBytes, toStringArray } from "@/lib/utils/format";
 import { isAdminSession } from "@/lib/auth/roles";
 
@@ -37,7 +37,7 @@ interface VersionDetailPageProps {
 }
 
 export async function generateMetadata({ params }: VersionDetailPageProps) {
-  const { slug, versionId } = await params;
+  const { locale, slug, versionId } = await params;
   const [project, version, session] = await Promise.all([
     getProjectBySlug(slug),
     getVersionById(versionId),
@@ -57,15 +57,14 @@ export async function generateMetadata({ params }: VersionDetailPageProps) {
 
   const title = `${project.title} v${version.versionNumber}`;
   const description = version.changelog || `Download ${project.title} version ${version.versionNumber}`;
-  const url = canonicalUrl(`/projects/${project.slug}/versions/${version.id}`);
+  const path = `/projects/${project.slug}/versions/${version.id}`;
+  const url = canonicalUrl(path, locale);
 
   return {
     title,
     description,
     robots: project.visibility === "public" ? undefined : { index: false, follow: true },
-    alternates: {
-      canonical: url,
-    },
+    alternates: seoAlternates(path, locale),
     openGraph: {
       title,
       description,

@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
-import Link from "next/link";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -20,6 +19,7 @@ import { useTranslations } from "next-intl";
 import type { TrustListRow } from "@/lib/queries/adminTrust";
 import { adjustTrustScores, recomputeTrustAction } from "@/lib/actions/adminTrust";
 import { TIER_COLORS } from "./trustTierColors";
+import { Link } from "@/lib/i18n/routing";
 
 export type TrustListTableProps = {
   rows: TrustListRow[];

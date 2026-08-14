@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import { resizeImageFile } from "@/lib/utils/image";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 import { updateProjectIcon } from "@/lib/actions/project";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 
 export type EditableProjectIconProps = {

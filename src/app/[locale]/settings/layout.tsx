@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Container from "@mui/material/Container";
-import { redirect } from "next/navigation";
 import { setRequestLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { pickSettingsMessages } from "@/lib/i18n/clientMessages";
 import { auth } from "@/lib/auth";
+import { redirect } from "@/lib/i18n/routing";
 
 /** ログイン必須の画面なので検索結果に出さない */
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default async function SettingsLayout({
   setRequestLocale(locale);
 
   const session = await auth();
-  if (!session?.user?.id) redirect(`/${locale}/login`);
+  if (!session?.user?.id) redirect({ href: `/login`, locale: locale });
 
   // ルートレイアウトは Settings をサイドバーの見出し分しか配っていないため、ここで全量に差し替える
   const messages = await getMessages();

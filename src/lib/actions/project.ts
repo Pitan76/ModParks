@@ -7,10 +7,11 @@ import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { isAdminSession } from "@/lib/auth/roles";
+import { redirect } from "@/lib/i18n/routing";
+import { getLocale } from "next-intl/server";
 import {
   normalizeExternalLinks,
   resolveSlugChange,
@@ -86,7 +87,7 @@ export async function createProject(formData: FormData) {
   }
 
   revalidatePath("/projects");
-  redirect(`/projects/${slug}`);
+  redirect({ href: `/projects/${slug}`, locale: await getLocale() });
 }
 
 // ---- プロジェクト更新 ----

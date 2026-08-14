@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 
 interface Props {
   collectionId: string;

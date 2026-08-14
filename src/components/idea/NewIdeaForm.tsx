@@ -14,7 +14,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { createIdea } from "@/lib/actions/idea";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LinkButton from "@/components/ui/LinkButton";

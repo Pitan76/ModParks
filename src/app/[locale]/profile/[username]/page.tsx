@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -14,12 +14,13 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { Link as RoutingLink } from "@/lib/i18n/routing";
 import { SITE_URL } from "@/lib/config";
-import { canonicalUrl } from "@/lib/seo/canonical";
+import { canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
 import IdeaCardList from "@/components/idea/IdeaCardList";
 import { getProfileMeta, resolveProfileUser, getProfileContent } from "./profileData";
 import ProfileHeader from "./ProfileHeader";
 import ProfilePinnedSection from "./ProfilePinnedSection";
 import IdeasVisibilityToggle from "./IdeasVisibilityToggle";
+import { redirect } from "@/lib/i18n/routing";
 
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
@@ -52,11 +53,9 @@ export async function generateMetadata({ params }: PublicProfileProps) {
   return {
     title,
     description,
-    openGraph: { title, description, type: "profile", url: canonicalUrl(`/profile/${user.username}`), images: [image] },
+    openGraph: { title, description, type: "profile", url: canonicalUrl(`/profile/${user.username}`, locale), images: [image] },
     twitter: { card: "summary", title, description, images: [image] },
-    alternates: {
-      canonical: canonicalUrl(`/profile/${user.username}`),
-    },
+    alternates: seoAlternates(`/profile/${user.username}`, locale),
   };
 }
 
@@ -76,7 +75,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
   const resolved = await resolveProfileUser(username);
   if (!resolved) notFound();
-  if ("redirectTo" in resolved) redirect(`/${locale}/profile/${resolved.redirectTo}`);
+  if ("redirectTo" in resolved) redirect({ href: `/profile/${resolved.redirectTo}`, locale: locale });
 
   const { user } = resolved;
   if (user.deletedAt) {

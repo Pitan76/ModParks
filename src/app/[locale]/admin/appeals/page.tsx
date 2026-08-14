@@ -2,11 +2,11 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getScanAppeals, getScanAppealCounts, type ScanAppealFilter } from "@/lib/actions/scanAppealQuery";
 import AppealCard from "@/components/admin/AppealCard";
 import StatusFilterTabs from "@/components/admin/StatusFilterTabs";
+import { redirect } from "@/lib/i18n/routing";
 
 const FILTERS: ScanAppealFilter[] = ["pending", "approved", "rejected", "all"];
 
@@ -27,7 +27,7 @@ export default async function AdminAppealsPage({ params, searchParams }: AdminAp
   try {
     await getAdminDb();
   } catch {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const tAdmin = await getTranslations("Admin");

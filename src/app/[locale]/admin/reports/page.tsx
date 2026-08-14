@@ -6,11 +6,11 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/routing";
 import { unpublishProject, updateReportStatus, getReports, getReportsCount, deleteCommentAction, suspendUserFromReport } from "@/lib/actions/report";
 import PaginationControls from "@/components/ui/PaginationControls";
+import { redirect } from "@/lib/i18n/routing";
 
 const ADMIN_REPORTS_PER_PAGE = 20;
 
@@ -27,7 +27,7 @@ export default async function AdminReportsPage({ params, searchParams }: AdminRe
   try {
     await getAdminDb();
   } catch (e) {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const tAdmin = await getTranslations("Admin");

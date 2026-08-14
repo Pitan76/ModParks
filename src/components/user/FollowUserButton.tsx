@@ -10,7 +10,6 @@ import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import Tooltip from "@mui/material/Tooltip";
 import { toggleDeveloperSubscription } from "@/lib/actions/notification";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -23,7 +22,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Avatar from "@mui/material/Avatar";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Link as RoutingLink } from "@/lib/i18n/routing";
+import { Link as RoutingLink, useRouter } from "@/lib/i18n/routing";
 import { getFollowList } from "@/lib/actions/profile";
 
 interface Props {

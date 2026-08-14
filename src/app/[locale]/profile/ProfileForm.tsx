@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import AvatarUploadBadge from "@/components/common/AvatarUploadBadge";
 import { updateProfile } from "@/lib/actions/profile";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { useSession } from "next-auth/react";
 import { useAvatarUpload } from "@/lib/hooks/useAvatarUpload";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";

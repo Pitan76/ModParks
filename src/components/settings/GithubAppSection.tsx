@@ -8,7 +8,8 @@
  * それを一度だけ表示して URL からは落とす。
  */
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";

@@ -17,7 +17,7 @@ import DateTimeTooltip from "@/components/ui/DateTimeTooltip";
 import { Link } from "@/lib/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SITE_URL } from "@/lib/config";
-import { canonicalUrl } from "@/lib/seo/canonical";
+import { canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
 import { getIdeaMeta, getIdeaDetail } from "./ideaDetailData";
 import ResolvedProjects from "./ResolvedProjects";
 import IdeaComments from "./IdeaComments";
@@ -40,7 +40,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   const title = idea.title;
   const description = idea.content.length > 150 ? idea.content.substring(0, 150) + "..." : idea.content;
-  const url = canonicalUrl(`/ideas/${id}`);
+  const path = `/ideas/${id}`;
+  const url = canonicalUrl(path, locale);
 
   return {
     title,
@@ -48,9 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     robots: idea.visibility === "public" ? undefined : { index: false, follow: true },
     openGraph: { title, description, type: "article", url },
     twitter: { card: "summary", title, description },
-    alternates: {
-      canonical: url,
-    },
+    alternates: seoAlternates(path, locale),
   };
 }
 

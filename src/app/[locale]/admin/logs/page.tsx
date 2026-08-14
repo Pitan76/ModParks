@@ -1,9 +1,9 @@
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getSettingsAudits, getBackupAudits, getDdosAudits } from "@/lib/actions/admin";
 import LogsClient from "@/components/admin/LogsClientLazy";
 import { isAdminSession } from "@/lib/auth/roles";
+import { redirect } from "@/lib/i18n/routing";
 
 interface LogsPageProps {
   params: Promise<{ locale: string }>;
@@ -15,7 +15,7 @@ export default async function AdminLogsPage({ params }: LogsPageProps) {
 
   const session = await auth();
   if (!isAdminSession(session)) {
-    redirect(`/${locale}`);
+    redirect({ href: "/", locale: locale });
   }
 
   // Fetch initial data (default limit = 10)

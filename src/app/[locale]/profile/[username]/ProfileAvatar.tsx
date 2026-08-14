@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
 import Snackbar from "@mui/material/Snackbar";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useAvatarUpload } from "@/lib/hooks/useAvatarUpload";

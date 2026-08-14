@@ -17,7 +17,7 @@ import PinProvider from "@/components/pin/PinProvider";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
 import { SITE_URL } from "@/lib/config";
-import { SITE_NAME, canonicalUrl } from "@/lib/seo/canonical";
+import { SITE_NAME, canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
 import { getAdsMode, getAdsenseClient } from "@/lib/config/ads";
 
 export const viewport: Viewport = {
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
     openGraph: {
       type: "website",
       locale: locale === "ja" ? "ja_JP" : "en_US",
-      url: canonicalUrl("/"),
+      url: canonicalUrl("/", locale),
       siteName: SITE_NAME,
       images: [
         {
@@ -83,9 +83,9 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
       apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
     },
     alternates: {
-      // localePrefix が "never" のため URL にロケール接頭辞は存在しない。
-      // `/ja` `/en` は 307 で `/` に戻るので canonical/hreflang には使えない。
-      canonical: canonicalUrl("/"),
+      // ページ側で alternates を返すとレイアウトの値は上書きされる。
+      // ここはトップページ用の既定値であり、下位ページは自身の seoAlternates() で置き換える。
+      ...seoAlternates("/", locale),
       types: {
         "application/rss+xml": SITE_URL + "/feed.xml",
       },

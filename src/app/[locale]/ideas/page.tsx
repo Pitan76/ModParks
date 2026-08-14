@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
-import { canonicalUrl } from "@/lib/seo/canonical";
+import { seoAlternates } from "@/lib/seo/canonical";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { listIdeaPosts, countIdeaPosts, toIdeaCardData } from "@/lib/queries/postList";
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   return {
     title: tNav("ideas"),
-    alternates: { canonical: canonicalUrl("/ideas") },
+    alternates: seoAlternates("/ideas", locale),
   };
 }
 

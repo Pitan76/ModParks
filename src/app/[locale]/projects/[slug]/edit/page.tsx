@@ -1,7 +1,7 @@
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Breadcrumb from "@/components/ui/Breadcrumb";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
@@ -20,6 +20,7 @@ import { versions, posts, ideas, versionIdeas } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";
 import { isAdminSession } from "@/lib/auth/roles";
+import { redirect } from "@/lib/i18n/routing";
 
 interface EditProjectPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -31,7 +32,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   const session = await auth();
   if (!session?.user) {
-    redirect("/login");
+    redirect({ href: "/login", locale: locale });
   }
 
   const project = await getProjectBySlug(slug);
@@ -41,7 +42,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   }
 
   if (project.redirectSlug) {
-    redirect(`/${locale}/projects/${project.redirectSlug}/edit`);
+    redirect({ href: `/projects/${project.redirectSlug}/edit`, locale: locale });
   }
 
   const members = await getProjectMembers(project.id);
@@ -50,7 +51,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   // 権限チェック (オーナー、メンバー、または管理者のみ編集可能)
   if (!isOwner && !isMember && !isAdminSession(session)) {
-    redirect(`/projects/${slug}`);
+    redirect({ href: `/projects/${slug}`, locale: locale });
   }
 
   const t = await getTranslations("Project");

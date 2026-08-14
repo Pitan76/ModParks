@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";

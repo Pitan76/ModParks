@@ -3,6 +3,7 @@ import { getDatabase } from "@/lib/db";
 import type { Database } from "@/lib/db";
 import type { Session } from "next-auth";
 import { isAdminUser } from "@/lib/auth/roles";
+import { redirect } from "@/lib/i18n/routing";
 
 /**
  * 認証済みセッションとDBインスタンスを一括で取得するヘルパー。
@@ -112,7 +113,6 @@ export async function assertProjectAccess(db: Database, project: { id: string; a
 export async function redirectIfAuthenticated(locale: string) {
   const session = await auth();
   if (session?.user?.id) {
-    const { redirect } = await import("next/navigation");
-    redirect(`/${locale}/projects`);
+    redirect({ href: "/projects", locale });
   }
 }

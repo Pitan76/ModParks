@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";

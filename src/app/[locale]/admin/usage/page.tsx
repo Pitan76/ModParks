@@ -5,7 +5,6 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { getUsageOverview, QUOTA_RECHECK_DAYS } from "@/lib/queries/usageOverview";
@@ -13,6 +12,7 @@ import UsageQuotaCard from "@/components/admin/UsageQuotaCard";
 import UsageHistoryTable from "@/components/admin/UsageHistoryTable";
 import UsageSettingsPanel from "@/components/admin/UsageSettingsPanel";
 import type { AnalyticsStatus } from "@/lib/usage/analyticsStatus";
+import { redirect } from "@/lib/i18n/routing";
 
 interface AdminUsagePageProps {
   params: Promise<{ locale: string }>;
@@ -25,7 +25,7 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
   try {
     await getAdminDb();
   } catch {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const t = await getTranslations("Admin.usage");

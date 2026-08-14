@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { localePath } from "@/lib/i18n/localePath";
 
 export default async function NewVersionLayout({
   children,
@@ -11,7 +12,7 @@ export default async function NewVersionLayout({
   const { locale, slug } = await params;
   const session = await auth();
   if (!session?.user) {
-    redirect(`/api/auth/signin?callbackUrl=/${locale}/projects/${slug}/versions/new`);
+    redirect(`/api/auth/signin?callbackUrl=${localePath(`/projects/${slug}/versions/new`, locale)}`);
   }
 
   return <>{children}</>;

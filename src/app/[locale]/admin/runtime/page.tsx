@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { getRuntimeConfig } from "@/lib/runtime/state";
@@ -11,6 +10,7 @@ import { effectiveMode, normalizeFeatures } from "@/lib/runtime/features";
 import FeatureSwitchList from "@/components/admin/FeatureSwitchList";
 import RuntimeModePanel from "@/components/admin/RuntimeModePanel";
 import SnapshotPanel from "@/components/admin/SnapshotPanel";
+import { redirect } from "@/lib/i18n/routing";
 
 interface AdminRuntimePageProps {
   params: Promise<{ locale: string }>;
@@ -23,7 +23,7 @@ export default async function AdminRuntimePage({ params }: AdminRuntimePageProps
   try {
     await getAdminDb();
   } catch {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const t = await getTranslations("Admin.runtime");

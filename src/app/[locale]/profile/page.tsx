@@ -10,6 +10,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles, accounts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import ProfileForm from "./ProfileFormLazy";
+import { localePath } from "@/lib/i18n/localePath";
 
 interface ProfilePageProps {
   params: Promise<{ locale: string }>;
@@ -20,7 +21,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   setRequestLocale(locale);
 
   const session = await auth();
-  if (!session?.user?.id) redirect(`/api/auth/signin?callbackUrl=/${locale}/profile`);
+  if (!session?.user?.id) redirect(`/api/auth/signin?callbackUrl=${localePath(`/profile`, locale)}`);
 
   const d1 = await getD1();
   const db = getDb(d1);

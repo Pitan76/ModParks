@@ -4,7 +4,7 @@ import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { getTrustDetail } from "@/lib/queries/adminTrust";
@@ -12,6 +12,7 @@ import { tierFromScore } from "@/lib/trust/score";
 import TrustEventTable from "@/components/admin/TrustEventTable";
 import TrustActionsPanel from "@/components/admin/TrustActionsPanel";
 import { TIER_COLORS } from "@/components/admin/trustTierColors";
+import { redirect } from "@/lib/i18n/routing";
 
 interface AdminTrustDetailPageProps {
   params: Promise<{ locale: string; userId: string }>;
@@ -24,7 +25,7 @@ export default async function AdminTrustDetailPage({ params }: AdminTrustDetailP
   try {
     await getAdminDb();
   } catch {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const t = await getTranslations("Admin");

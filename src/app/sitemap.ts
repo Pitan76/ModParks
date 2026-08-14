@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/config';
+import { canonicalUrl, languageAlternates } from '@/lib/seo/canonical';
 import { getDatabase } from '@/lib/db';
 import { posts, userProfiles, users } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
@@ -7,8 +7,7 @@ import { eq, and, sql } from 'drizzle-orm';
 // ビルド時は D1 バインディングが無くテーブルを引けないため、リクエスト時に生成する。
 export const dynamic = 'force-dynamic';
 
-// routing の localePrefix は "never" のため、URL にロケール接頭辞は付かない。
-// `/ja/...` を載せると全件 307 リダイレクトを指す sitemap になる。
+// URL は既定ロケール(日本語)の接頭辞なし版を載せ、他言語は alternates.languages で並記する。
 const STATIC_ROUTES = [
   { path: '', changeFrequency: 'daily', priority: 1 },
   { path: '/projects', changeFrequency: 'daily', priority: 0.8 },
@@ -39,18 +38,20 @@ const toEntries = <T>({
   priority,
 }: EntryOptions<T>): MetadataRoute.Sitemap =>
   items.map((item) => ({
-    url: `${SITE_URL}${pathOf(item)}`,
+    url: canonicalUrl(pathOf(item)),
     lastModified: lastModifiedOf(item),
     changeFrequency,
     priority,
+    alternates: { languages: languageAlternates(pathOf(item)) },
   }));
 
 const staticEntries = (): MetadataRoute.Sitemap =>
   STATIC_ROUTES.map((route) => ({
-    url: route.path ? `${SITE_URL}${route.path}` : SITE_URL,
+    url: canonicalUrl(route.path),
     lastModified: new Date(),
     changeFrequency: route.changeFrequency,
     priority: route.priority,
+    alternates: { languages: languageAlternates(route.path) },
   }));
 
 /** D1 から公開コンテンツを引いて sitemap エントリへ変換する */

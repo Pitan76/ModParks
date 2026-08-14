@@ -5,7 +5,6 @@ import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import LinkButton from "@/components/ui/LinkButton";
 import AssessmentIcon from "@mui/icons-material/Assessment";
@@ -14,7 +13,8 @@ import HistoryIcon from "@mui/icons-material/History";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { getAdminStats, type AdminStats } from "@/lib/queries/adminDashboard";
-import Link from "next/link";
+import { redirect } from "@/lib/i18n/routing";
+import { Link } from "@/lib/i18n/routing";
 
 interface AdminDashboardProps {
   params: Promise<{ locale: string }>;
@@ -27,7 +27,7 @@ export default async function AdminDashboardPage({ params }: AdminDashboardProps
   try {
     await getAdminDb();
   } catch (e) {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const tAdmin = await getTranslations("Admin");

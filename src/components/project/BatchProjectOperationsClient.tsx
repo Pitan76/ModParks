@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { MouseEvent } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -20,7 +19,7 @@ import MenuItem from "@mui/material/MenuItem";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { formatCompactNumber } from "@/lib/utils/format";
-import { Link } from "@/lib/i18n/routing";
+import { Link, useRouter } from "@/lib/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/projectBatch";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import ProjectVersionCell from "./ProjectVersionCell";

@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import Pagination from "@mui/material/Pagination";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";

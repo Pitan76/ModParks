@@ -7,7 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import { updateProject } from "@/lib/actions/project";
 import { syncExternalProjectData } from "@/lib/actions/projectSync";

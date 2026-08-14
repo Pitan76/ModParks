@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/lib/i18n/routing";
 
 /** 設定のトップは最初のセクションへ送る。セクションの選択はサイドバーが担う */
 export default async function SettingsPage({
@@ -7,5 +7,5 @@ export default async function SettingsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/settings/profile`);
+  redirect({ href: `/settings/profile`, locale: locale });
 }

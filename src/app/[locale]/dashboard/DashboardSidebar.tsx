@@ -8,8 +8,8 @@ import Typography from "@mui/material/Typography";
 import CommentIcon from "@mui/icons-material/Comment";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import Link from "next/link";
 import type { DashboardData } from "./dashboardData";
+import { Link } from "@/lib/i18n/routing";
 
 type Props = {
   locale: string;

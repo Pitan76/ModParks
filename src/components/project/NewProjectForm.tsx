@@ -8,7 +8,6 @@ import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
-import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
 import ActionRow from "@/components/ui/ActionRow";
@@ -24,7 +23,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { parseJarFile } from "@/lib/utils/jarParser";
 import type { ParsedModData } from "@/lib/utils/jarParser";
-import { Link } from "@/lib/i18n/routing";
+import { Link, useRouter } from "@/lib/i18n/routing";
 import LinkButton from "@/components/ui/LinkButton";
 import MuiLink from "@mui/material/Link";
 

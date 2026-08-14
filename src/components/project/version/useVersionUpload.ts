@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import { createVersion } from "@/lib/actions/version";
 import { parseModJar } from "@/lib/utils/modParser";

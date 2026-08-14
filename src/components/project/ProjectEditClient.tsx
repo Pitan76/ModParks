@@ -1,6 +1,7 @@
 "use client";
 
-import { useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { usePathname } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import TabbedPanel from "@/components/ui/TabbedPanel";
 import { type ReactNode, useState, useEffect } from "react";

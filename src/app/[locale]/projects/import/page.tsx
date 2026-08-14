@@ -6,7 +6,7 @@ import { getDatabase } from "@/lib/db";
 import { userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import BatchImportClient from "@/components/project/BatchImportClientLazy";
-import { redirect } from "next/navigation";
+import { redirect } from "@/lib/i18n/routing";
 
 export default async function ImportProjectsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -14,7 +14,7 @@ export default async function ImportProjectsPage({ params }: { params: Promise<{
 
   const session = await auth();
   if (!session?.user?.id) {
-    redirect("/login");
+    redirect({ href: "/login", locale: locale });
   }
 
   const db = await getDatabase();

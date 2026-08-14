@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import {
   createBackup,
   deleteBackup,

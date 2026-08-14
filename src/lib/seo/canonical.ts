@@ -1,17 +1,40 @@
 import { SITE_URL } from "@/lib/config";
+import { locales, routing } from "@/lib/i18n/routing";
+import { localePath } from "@/lib/i18n/localePath";
 
 /**
- * canonical URL を組み立てる。
+ * canonical URL を組み立てる。自己参照になるようロケールごとに別URLを返す。
  *
- * routing の localePrefix は "never" のため、URL にロケール接頭辞は付かない。
- * `/ja/...` `/en/...` は middleware が 307 で接頭辞なしへ戻すので、
- * canonical に使うとリダイレクト先を指すことになり Google が自己参照と認めない。
+ * @param path 先頭スラッシュ付きのロケール接頭辞なしパス（ルートは ""）
+ * @param locale 対象ロケール
+ */
+export function canonicalUrl(path: string = "", locale: string = routing.defaultLocale): string {
+  return SITE_URL + localePath(path, locale);
+}
+
+/**
+ * hreflang 用の言語別URL表。x-default は既定ロケール(日本語版)を指す。
  *
  * @param path 先頭スラッシュ付きのロケール接頭辞なしパス（ルートは ""）
  */
-export function canonicalUrl(path: string = ""): string {
-  if (!path || path === "/") return SITE_URL;
-  return SITE_URL + (path.startsWith("/") ? path : `/${path}`);
+export function languageAlternates(path: string = ""): Record<string, string> {
+  const languages: Record<string, string> = {};
+  for (const locale of locales) languages[locale] = canonicalUrl(path, locale);
+  languages["x-default"] = canonicalUrl(path, routing.defaultLocale);
+  return languages;
+}
+
+/**
+ * generateMetadata の `alternates` にそのまま渡せる canonical + hreflang の組。
+ *
+ * @param path 先頭スラッシュ付きのロケール接頭辞なしパス（ルートは ""）
+ * @param locale 現在のロケール
+ */
+export function seoAlternates(path: string = "", locale: string = routing.defaultLocale) {
+  return {
+    canonical: canonicalUrl(path, locale),
+    languages: languageAlternates(path),
+  };
 }
 
 /** サイト名。og:site_name と JSON-LD の name を必ず一致させる */

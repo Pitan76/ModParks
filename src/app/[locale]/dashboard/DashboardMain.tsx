@@ -14,11 +14,11 @@ import TableRow from "@mui/material/TableRow";
 import FolderIcon from "@mui/icons-material/Folder";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import Link from "next/link";
 import LinkButton from "@/components/ui/LinkButton";
 import type { DashboardData } from "./dashboardData";
 import { getProjectStatusColor, getIdeaStatusColor } from "./statusColors";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
+import { Link } from "@/lib/i18n/routing";
 
 function SectionHeader({
   icon,

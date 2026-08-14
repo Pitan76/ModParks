@@ -2,7 +2,6 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
-import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import {
@@ -15,6 +14,7 @@ import {
 import TrustListTable from "@/components/admin/TrustListTable";
 import StatusFilterTabs from "@/components/admin/StatusFilterTabs";
 import PaginationControls from "@/components/ui/PaginationControls";
+import { redirect } from "@/lib/i18n/routing";
 
 const FILTERS: TrustFilter[] = [
   "all", "restricted", "new", "member", "trusted", "veteran", "frozen", "overridden",
@@ -41,7 +41,7 @@ export default async function AdminTrustPage({ params, searchParams }: AdminTrus
   try {
     await getAdminDb();
   } catch {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const t = await getTranslations("Admin");

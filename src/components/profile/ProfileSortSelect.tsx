@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "@/lib/i18n/routing";
 import FormSelect from "@/components/ui/form/FormSelect";
 import { useTranslations } from "next-intl";
 

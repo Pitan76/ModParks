@@ -1,8 +1,8 @@
 import { getAdminDb } from "@/lib/auth-helpers";
-import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getBackups } from "@/lib/actions/adminBackupQuery";
 import BackupClient from "@/components/admin/BackupClientLazy";
+import { redirect } from "@/lib/i18n/routing";
 
 interface BackupPageProps {
   params: Promise<{ locale: string }>;
@@ -15,7 +15,7 @@ export default async function AdminBackupPage({ params }: BackupPageProps) {
   try {
     await getAdminDb();
   } catch (e) {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const initialBackups = await getBackups();

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { redirect as redirectToUrl } from "next/navigation";
 import { setRequestLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { pickAdminMessages } from "@/lib/i18n/clientMessages";
 import Box from "@mui/material/Box";
 import { isAdminSession } from "@/lib/auth/roles";
+import { redirect } from "@/lib/i18n/routing";
+import { localePath } from "@/lib/i18n/localePath";
 
 /** 管理者専用画面なので検索結果に出さない */
 export const metadata: Metadata = {
@@ -25,10 +27,10 @@ export default async function AdminLayout({
   const session = await auth();
   
   if (!session?.user) {
-    redirect(`/api/auth/signin?callbackUrl=/${locale}/admin`);
+    redirectToUrl(`/api/auth/signin?callbackUrl=${localePath(`/admin`, locale)}`);
   }
   if (!isAdminSession(session)) {
-    redirect(`/${locale}`);
+    redirect({ href: "/", locale: locale });
   }
 
   // Check if admin has set a password for security
@@ -38,7 +40,7 @@ export default async function AdminLayout({
   const db = await getDatabase();
   const currentUser = await db.select().from(users).where(eq(users.id, session.user.id)).get();
   if (currentUser && !currentUser.passwordHash) {
-    redirect(`/${locale}/settings?error=admin_password_required`);
+    redirect({ href: `/settings?error=admin_password_required`, locale: locale });
   }
 
   // ルートレイアウトは Admin をサイドバー分しか配っていないため、ここで全量に差し替える。

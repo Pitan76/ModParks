@@ -19,9 +19,9 @@ import GoogleIcon from "@mui/icons-material/Google";
 import PasskeyLoginButton from "@/components/auth/PasskeyLoginButton";
 import LastUsedBadge from "@/components/auth/LastUsedBadge";
 import { useLastLoginMethod, rememberLoginMethod } from "@/lib/hooks/useLastLoginMethod";
-import { Link } from "@/lib/i18n/routing";
+import { Link, useRouter } from "@/lib/i18n/routing";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
 export default function LoginPage() {

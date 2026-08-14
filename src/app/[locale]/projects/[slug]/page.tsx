@@ -30,9 +30,10 @@ import { toPlainDescription } from "@/lib/utils/plainText";
 import AdSlot from "@/components/ads/AdSlot";
 import AddIcon from "@mui/icons-material/Add";
 import { SITE_URL } from "@/lib/config";
-import { canonicalUrl } from "@/lib/seo/canonical";
+import { canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbSchema, projectSchema } from "@/lib/seo/schema";
+import { redirect } from "@/lib/i18n/routing";
 
 /** サイドバーを右カラムに回すのに必要なコンテンツ領域の幅(px) */
 const TWO_COLUMN_MIN_WIDTH = 700;
@@ -65,7 +66,8 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
 
   // 統合先がある場合は canonical を統合先に向け、重複ページとして扱わせない
   const canonicalSlug = project.redirectSlug || project.slug;
-  const url = canonicalUrl(`/projects/${canonicalSlug}`);
+  const path = `/projects/${canonicalSlug}`;
+  const url = canonicalUrl(path, locale);
 
   // unlisted / draft / private は URL を知る人だけのものなので検索結果に出さない
   const isIndexable = project.visibility === "public" && !project.redirectSlug;
@@ -99,9 +101,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
         },
       ],
     },
-    alternates: {
-      canonical: url,
-    },
+    alternates: seoAlternates(path, locale),
   };
 }
 
@@ -117,8 +117,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   if (!project) notFound();
   
   if (project.redirectSlug) {
-    const { redirect } = await import("next/navigation");
-    redirect(`/${locale}/projects/${project.redirectSlug}`);
+    redirect({ href: `/projects/${project.redirectSlug}`, locale: locale });
   }
 
   const isOwner = session?.user?.id === project.authorId;
@@ -185,11 +184,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           authorName: p.author?.displayName || p.author?.username,
           createdAt: p.createdAt,
           updatedAt: p.updatedAt,
-        }),
+        }, locale),
         breadcrumbSchema([
           { name: t("explore.title"), path: "/projects" },
           { name: p.title, path: `/projects/${p.slug}` },
-        ]),
+        ], locale),
       ]
     : null;
 

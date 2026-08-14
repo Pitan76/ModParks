@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
-import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import {
@@ -14,6 +13,7 @@ import {
 import ScanLogTable from "@/components/admin/ScanLogTable";
 import StatusFilterTabs from "@/components/admin/StatusFilterTabs";
 import PaginationControls from "@/components/ui/PaginationControls";
+import { redirect } from "@/lib/i18n/routing";
 
 const FILTERS: ScanLogFilter[] = ["all", "pending", "clean", "suspicious", "malicious", "skipped", "failed"];
 
@@ -38,7 +38,7 @@ export default async function AdminScansPage({ params, searchParams }: AdminScan
   try {
     await getAdminDb();
   } catch {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   const tAdmin = await getTranslations("Admin");

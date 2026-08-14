@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { redirect } from "next/navigation";
 import RecipeAdminClient from "./RecipeAdminClientLazy";
+import { redirect } from "@/lib/i18n/routing";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -14,7 +14,7 @@ export default async function AdminRecipePage({ params }: PageProps) {
   try {
     await getAdminDb();
   } catch (e) {
-    redirect("/");
+    redirect({ href: "/", locale: locale });
   }
 
   return <RecipeAdminClient />;

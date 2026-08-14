@@ -1,6 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -13,13 +12,14 @@ import StatsGrid from "./StatsGrid";
 import DashboardMain from "./DashboardMain";
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardCharts from "./DashboardCharts";
+import { redirect } from "@/lib/i18n/routing";
 
 export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const session = await auth();
-  if (!session?.user?.id) redirect(`/${locale}/login`);
+  if (!session?.user?.id) redirect({ href: `/login`, locale: locale });
 
   const t = await getTranslations("Dashboard");
   const tNav = await getTranslations("Nav");

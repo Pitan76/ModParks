@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-import { canonicalUrl } from "@/lib/seo/canonical";
+import { seoAlternates } from "@/lib/seo/canonical";
 import Typography from "@mui/material/Typography";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: ProjectsPageProps): Promise<M
   return {
     title: t("explore.title"),
     description: t("explore.description"),
-    alternates: { canonical: canonicalUrl("/projects") },
+    alternates: seoAlternates("/projects", locale),
   };
 }
 

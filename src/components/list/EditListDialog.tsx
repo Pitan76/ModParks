@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import Button from "@mui/material/Button";

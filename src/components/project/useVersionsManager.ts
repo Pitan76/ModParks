@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import { deleteVersion, setVersionArchived } from "@/lib/actions/version";
 import { isActionError } from "@/lib/actions/actionResult";

@@ -7,6 +7,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import { getAppTheme } from "@/lib/theme";
 import Cookies from "js-cookie";
 import { usePathname, useSearchParams } from "next/navigation";
+import { stripLocalePrefix } from "@/lib/i18n/localePath";
 import { DEFAULT_THEME_TYPE, resolveThemeType, storeThemeType, type ThemeType } from "@/lib/themeType";
 
 export const ColorModeContext = React.createContext({
@@ -44,7 +45,7 @@ export default function ThemeRegistry({ children, initialMode = "dark" }: ThemeR
   const pathname = usePathname();
   // 管理画面は作業効率を優先するため、Plain Theme の対象外とする
   const effectiveThemeType: ThemeType =
-    themeType === "plain" && /^\/[^/]+\/admin(\/|$)/.test(pathname ?? "") ? "new" : themeType;
+    themeType === "plain" && /^\/admin(\/|$)/.test(stripLocalePrefix(pathname ?? "")) ? "new" : themeType;
 
   // 初回マウント時にlocalStorageおよびURLを確認し、表示の切り替えラグを低減
   React.useEffect(() => {

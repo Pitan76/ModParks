@@ -1,5 +1,4 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -10,6 +9,7 @@ import { getProjects, getProjectCount } from "@/lib/actions/projectQuery";
 import LinkButton from "@/components/ui/LinkButton";
 import BatchProjectOperationsClient from "@/components/project/BatchProjectOperationsClientLazy";
 import PaginationControls from "@/components/ui/PaginationControls";
+import { redirect } from "@/lib/i18n/routing";
 
 const MANAGE_PROJECTS_PER_PAGE = 50;
 
@@ -25,7 +25,7 @@ export default async function ManageProjectsPage({ params, searchParams }: Manag
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect(`/${locale}/login`);
+    redirect({ href: `/login`, locale: locale });
   }
 
   const tProject = await getTranslations("Project");

@@ -67,8 +67,8 @@ function toIsoDate(date: Date | string | null | undefined): string | undefined {
  * プロジェクト詳細ページの SoftwareApplication 構造化データ。
  * Minecraft の MOD/プラグインなので applicationCategory は GameApplication とする。
  */
-export function projectSchema(project: ProjectSchemaInput): Record<string, unknown> {
-  const url = canonicalUrl(`/projects/${project.slug}`);
+export function projectSchema(project: ProjectSchemaInput, locale?: string): Record<string, unknown> {
+  const url = canonicalUrl(`/projects/${project.slug}`, locale);
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -95,8 +95,14 @@ export function projectSchema(project: ProjectSchemaInput): Record<string, unkno
   return schema;
 }
 
-/** @param trail ルートを除いた階層（[{ name, path }] の順に並べる） */
-export function breadcrumbSchema(trail: { name: string; path: string }[]): Record<string, unknown> {
+/**
+ * @param trail ルートを除いた階層（[{ name, path }] の順に並べる）
+ * @param locale ページのロケール。canonical と同じURLを指すために渡す
+ */
+export function breadcrumbSchema(
+  trail: { name: string; path: string }[],
+  locale?: string,
+): Record<string, unknown> {
   const items = [{ name: SITE_NAME, path: "" }, ...trail];
 
   return {
@@ -106,7 +112,7 @@ export function breadcrumbSchema(trail: { name: string; path: string }[]): Recor
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: canonicalUrl(item.path),
+      item: canonicalUrl(item.path, locale),
     })),
   };
 }

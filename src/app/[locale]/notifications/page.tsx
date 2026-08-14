@@ -1,6 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -8,13 +7,14 @@ import SettingsLink from "@/components/ui/SettingsLink";
 import { getNotifications } from "@/lib/queries/notifications";
 import NotificationList from "@/components/notification/NotificationListLazy";
 import MarkAllReadButton from "@/components/notification/MarkAllReadButton";
+import { redirect } from "@/lib/i18n/routing";
 
 export default async function NotificationsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const session = await auth();
-  if (!session?.user?.id) redirect(`/${locale}/login`);
+  if (!session?.user?.id) redirect({ href: `/login`, locale: locale });
 
   const t = await getTranslations("Notifications");
   const items = await getNotifications(session.user.id, 50);
