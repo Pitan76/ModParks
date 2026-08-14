@@ -34,7 +34,8 @@ export type TranslationError =
   | "cooling_down"
   | "invalid_output"
   | "provider_error"
-  | "budget_exceeded";
+  | "budget_exceeded"
+  | "translation_disabled";
 
 export type TranslationOutcome =
   | { ok: true; title: string; body: string; bodyFormat: BodyFormat; cached: boolean }
@@ -59,6 +60,8 @@ export async function requestTranslation(
   // 限定公開の本文を LLM や共有キャッシュに乗せない
   if (post.visibility !== "public") return { ok: false, error: "not_public" };
   if (post.sourceLocale === locale) return { ok: false, error: "invalid_locale" };
+  // 作者が機械翻訳を望まない場合。既訳の表示は妨げないので、生成のみを止める
+  if (!post.aiTranslationEnabled) return { ok: false, error: "translation_disabled" };
 
   const sourceHash = await computeSourceHash(post);
   if (options.regenerate) return runTranslation(db, { post, locale, userId, sourceHash, persist: false });

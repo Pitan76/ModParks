@@ -19,6 +19,7 @@ const STATUS: Record<TranslationError, number> = {
   invalid_output: 502,
   provider_error: 502,
   budget_exceeded: 429,
+  translation_disabled: 403,
 };
 
 /**

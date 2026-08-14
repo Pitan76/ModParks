@@ -32,7 +32,7 @@ export async function listProjectTranslations(projectId: string) {
   return {
     sourceLocale: post.sourceLocale,
     /** 公開プロジェクトでなければ LLM に本文を渡さないため、下書き生成も出さない */
-    canDraft:     post.visibility === "public",
+    canDraft:     post.visibility === "public" && post.aiTranslationEnabled,
     available:    locales.filter((l) => l !== post.sourceLocale),
     translations: rows.map((row: PostTranslation) => ({
       locale: row.locale,

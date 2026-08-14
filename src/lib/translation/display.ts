@@ -14,6 +14,7 @@ export interface DisplaySource {
   bodyFormat: BodyFormat;
   sourceLocale: string;
   visibility: string;
+  aiTranslationEnabled: boolean;
 }
 
 export interface DisplayContent {
@@ -41,8 +42,8 @@ export async function resolveDisplayContent(
   if (locale === post.sourceLocale) return original;
 
   const translation = await findTranslation(db, post.id, locale);
-  // 限定公開の本文は LLM に渡さないため、翻訳リンク自体を出さない
-  const isPublic = post.visibility === "public";
+  // 限定公開の本文は LLM に渡さない。作者が機械翻訳を断っている場合も同様に出さない
+  const isPublic = post.visibility === "public" && post.aiTranslationEnabled;
   if (!translation) return { ...original, canTranslate: isPublic };
 
   const stale = translation.sourceHash !== (await computeSourceHash(post));
