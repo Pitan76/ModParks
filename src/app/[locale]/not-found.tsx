@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { Link } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ErrorIcon from "@mui/icons-material/Error";
 
 /**
  * 404 Not Found ページ。
@@ -45,7 +45,7 @@ export default function NotFound() {
             },
           }}
         >
-          <ErrorOutlineIcon sx={{ fontSize: 64 }} />
+          <ErrorIcon sx={{ fontSize: 64 }} />
         </Box>
 
         <Typography variant="h1" sx={{ fontSize: { xs: "5rem", sm: "6rem" }, fontWeight: 900, color: "primary.main", lineHeight: 1, letterSpacing: -2 }}>
