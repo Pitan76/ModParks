@@ -70,7 +70,7 @@ export default async function IdeaDetailPage({ params, searchParams }: IdeaDetai
 
   const commentsLimit = Math.max(parseInt(commentsLimitStr as string) || COMMENTS_PAGE_SIZE, COMMENTS_PAGE_SIZE);
 
-  const detail = await getIdeaDetail(id, session?.user?.id, { commentsLimit });
+  const detail = await getIdeaDetail(id, session?.user?.id, { commentsLimit, locale });
   if (!detail) return notFound();
 
   const { ideaData, initialCount, initialLiked, comments, totalCommentThreads, resolvedProjects } = detail;

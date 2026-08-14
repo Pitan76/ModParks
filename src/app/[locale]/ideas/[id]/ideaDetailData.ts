@@ -87,6 +87,8 @@ function fetchSource(db: ReturnType<typeof getDb>, id: string) {
 export interface GetIdeaDetailOptions {
   /** コメントの親(スレッド)を何件取得するか。未指定なら全件 */
   commentsLimit?: number;
+  /** 表示ロケール。関連プロジェクトのカードを訳文で出すために使う */
+  locale?: string;
 }
 
 export async function getIdeaDetail(id: string, userId?: string, options: GetIdeaDetailOptions = {}) {
@@ -177,7 +179,7 @@ export async function getIdeaDetail(id: string, userId?: string, options: GetIde
 
   const merged = mergeResolvedProjects(linkedVersions, sourceIdeaProjects);
   const projectIds = merged.map((p) => p.projectId);
-  const projectDetails = await getProjectsByIds(projectIds, locale);
+  const projectDetails = await getProjectsByIds(projectIds, options.locale);
 
   const resolvedProjects = projectDetails.map((detail) => {
     const m = merged.find((p) => p.projectId === detail.id);
