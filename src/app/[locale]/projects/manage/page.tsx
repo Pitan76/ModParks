@@ -6,16 +6,21 @@ import Typography from "@mui/material/Typography";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import AddIcon from "@mui/icons-material/Add";
 import { auth } from "@/lib/auth";
-import { getProjects } from "@/lib/actions/projectQuery";
+import { getProjects, getProjectCount } from "@/lib/actions/projectQuery";
 import LinkButton from "@/components/ui/LinkButton";
 import BatchProjectOperationsClient from "@/components/project/BatchProjectOperationsClientLazy";
+import PaginationControls from "@/components/ui/PaginationControls";
+
+const MANAGE_PROJECTS_PER_PAGE = 50;
 
 interface ManageProjectsPageProps {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ page?: string; limit?: string }>;
 }
 
-export default async function ManageProjectsPage({ params }: ManageProjectsPageProps) {
+export default async function ManageProjectsPage({ params, searchParams }: ManageProjectsPageProps) {
   const { locale } = await params;
+  const { page: pageStr, limit: limitStr } = await searchParams;
   setRequestLocale(locale);
   const session = await auth();
 
@@ -26,12 +31,14 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
   const tProject = await getTranslations("Project");
   const tCommon = await getTranslations("Common");
 
-  // Fetch all user projects (no pagination limit, or high limit) for management
-  // For management, we usually want to fetch all or a very high limit.
-  const projects = await getProjects({
-    authorId: session.user.id,
-    limit: 1000
-  });
+  const page = Math.max(1, parseInt(pageStr as string) || 1);
+  const limit = Math.min(Math.max(parseInt(limitStr as string) || MANAGE_PROJECTS_PER_PAGE, 10), 200);
+  const offset = (page - 1) * limit;
+
+  const [projects, totalCount] = await Promise.all([
+    getProjects({ authorId: session.user.id, limit, offset }),
+    getProjectCount({ authorId: session.user.id }),
+  ]);
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
@@ -69,6 +76,9 @@ export default async function ManageProjectsPage({ params }: ManageProjectsPageP
       </Box>
 
       <BatchProjectOperationsClient projects={projects} />
+      {totalCount > 0 && (
+        <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} sx={{ mt: 3 }} />
+      )}
     </Container>
   );
 }

@@ -206,7 +206,7 @@ function ideaSelection() {
 export type AuthorIdea = Awaited<ReturnType<typeof getAuthorIdeas>>[number];
 
 /** プロフィール主が投稿したアイデア一覧。公開のみ（本人が見る場合は下書き等も含む）。 */
-async function getAuthorIdeas(userId: string, isOwner: boolean) {
+async function getAuthorIdeas(userId: string, isOwner: boolean, limit: number, offset: number) {
   const d1 = await getD1();
   const db = getDb(d1);
 
@@ -222,27 +222,49 @@ async function getAuthorIdeas(userId: string, isOwner: boolean) {
         : and(eq(posts.authorId, userId), eq(posts.visibility, "public"))
     )
     .orderBy(desc(posts.createdAt))
-    .limit(30)
+    .limit(limit)
+    .offset(offset)
     .all();
 }
 
-type ListArgs = { limit: number; offset: number; sort: string };
+/** getAuthorIdeas と同じ絞り込みで、該当件数のみを取得する */
+async function countAuthorIdeas(userId: string, isOwner: boolean): Promise<number> {
+  const d1 = await getD1();
+  const db = getDb(d1);
+
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(posts)
+    .innerJoin(ideas, eq(ideas.id, posts.id))
+    .where(
+      isOwner
+        ? eq(posts.authorId, userId)
+        : and(eq(posts.authorId, userId), eq(posts.visibility, "public"))
+    )
+    .get();
+
+  return result?.count ?? 0;
+}
+
+type ListArgs = { limit: number; offset: number; sort: string; ideasLimit: number; ideasOffset: number };
 
 /** プロフィール表示に必要なフォロー状態・プロジェクト・お気に入り・コレクション・統計を集約する。 */
-export async function getProfileContent(user: ProfileUser, viewerId: string | undefined, isOwner: boolean, { limit, offset, sort }: ListArgs) {
+export async function getProfileContent(user: ProfileUser, viewerId: string | undefined, isOwner: boolean, { limit, offset, sort, ideasLimit, ideasOffset }: ListArgs) {
   const followState = await getFollowState(user.id, viewerId, isOwner);
 
   // 投稿アイデア表示は既定 ON。custom.showIdeasOnProfile が false のときのみ非表示。
   const showIdeas = ((user.custom as Record<string, any>)?.showIdeasOnProfile ?? true) !== false;
+  const canSeeIdeas = showIdeas || isOwner;
 
-  const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, stats, pinnedItems, authorIdeas] = await Promise.all([
+  const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, stats, pinnedItems, authorIdeas, totalIdeaCount] = await Promise.all([
     getProjectsWithCount({ authorId: user.id, limit, offset, sort: sort as any }),
     getFavoriteProjects(user.id),
     getUserCollections(user.id, viewerId),
     getUserProjectStats(user.id),
     getPinnedItems(user.id, isOwner),
     // 非表示設定でも本人は編集用に一覧を見られるようにする
-    showIdeas || isOwner ? getAuthorIdeas(user.id, isOwner) : Promise.resolve([] as AuthorIdea[]),
+    canSeeIdeas ? getAuthorIdeas(user.id, isOwner, ideasLimit, ideasOffset) : Promise.resolve([] as AuthorIdea[]),
+    canSeeIdeas ? countAuthorIdeas(user.id, isOwner) : Promise.resolve(0),
   ]);
 
   const visibleProjects = allProjects.filter((p) => (isOwner ? true : p.visibility === "public"));
@@ -256,6 +278,7 @@ export async function getProfileContent(user: ProfileUser, viewerId: string | un
     visibleProjects,
     pinnedItems,
     authorIdeas,
+    totalIdeaCount,
     showIdeas,
     displayTotalProjects: isOwner ? totalCount : stats.totalProjects,
   };

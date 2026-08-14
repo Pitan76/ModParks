@@ -5,9 +5,8 @@ import { useTranslations } from "next-intl";
 
 /**
  * ユーザー管理画面のステートとイベントハンドラを管理するカスタムフック
- * @param users ユーザー一覧データ
  */
-export function useUsersState(users: User[]) {
+export function useUsersState() {
   const tAdmin = useTranslations("Admin.users");
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -16,7 +15,6 @@ export function useUsersState(users: User[]) {
   const [editUsername, setEditUsername] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
-  const [tabIndex, setTabIndex] = useState(0);
 
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [detailsUser, setDetailsUser] = useState<User | null>(null);
@@ -29,10 +27,6 @@ export function useUsersState(users: User[]) {
   // 空文字は無期限
   const [premiumDuration, setPremiumDuration] = useState("");
   const [isPremiumSaving, setIsPremiumSaving] = useState(false);
-
-  const activeUsers = users.filter((u) => !u.deletedAt);
-  const deletedUsers = users.filter((u) => u.deletedAt);
-  const displayedUsers = tabIndex === 0 ? activeUsers : deletedUsers;
 
   const showMessage = (type: "success" | "error", text: string) => {
     setMsg({ type, text });
@@ -160,8 +154,6 @@ export function useUsersState(users: User[]) {
     setEditUsername,
     isEditing,
     isPurging,
-    tabIndex,
-    setTabIndex,
     detailsDialogOpen,
     setDetailsDialogOpen,
     detailsUser,
@@ -169,9 +161,6 @@ export function useUsersState(users: User[]) {
     deleteUserTarget,
     setDeleteUserTarget,
     isDeleting,
-    activeUsers,
-    deletedUsers,
-    displayedUsers,
     handleRoleChange,
     handleDeleteUser,
     handleHardDeleteUser,

@@ -642,6 +642,7 @@
     "ideas": "投稿したアイデア",
     "showIdeas": "プロフィールにアイデアを表示",
     "noIdeasPosted": "まだアイデアを投稿していません",
+    "loadMoreIdeas": "もっと見る",
     "changeAvatar": "アイコンを変更"
   },
   "Idea": {

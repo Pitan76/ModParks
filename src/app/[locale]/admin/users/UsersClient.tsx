@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -53,11 +54,32 @@ export interface User {
   trustTier?: string | null;
 }
 
+interface UsersClientProps {
+  users: User[];
+  tabIndex: number;
+  activeCount: number;
+  deletedCount: number;
+}
+
 /**
  * システム管理画面のユーザー一覧コンポーネント
+ *
+ * 一覧はサーバー側でタブ(在籍/削除済み)・ページ単位に絞り込み済みのものを受け取る。
+ * タブ切り替えはページ1へ戻しつつ URL のクエリを書き換え、再取得はサーバー側に任せる。
  */
-export default function UsersClient({ users }: { users: User[] }) {
+export default function UsersClient({ users, tabIndex, activeCount, deletedCount }: UsersClientProps) {
   const tAdmin = useTranslations("Admin.users");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const handleTabChange = (newTab: number) => {
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
+    params.set("tab", String(newTab));
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   const {
     msg,
     editDialogOpen,
@@ -66,8 +88,6 @@ export default function UsersClient({ users }: { users: User[] }) {
     setEditUsername,
     isEditing,
     isPurging,
-    tabIndex,
-    setTabIndex,
     detailsDialogOpen,
     setDetailsDialogOpen,
     detailsUser,
@@ -75,9 +95,6 @@ export default function UsersClient({ users }: { users: User[] }) {
     deleteUserTarget,
     setDeleteUserTarget,
     isDeleting,
-    activeUsers,
-    deletedUsers,
-    displayedUsers,
     handleRoleChange,
     handleDeleteUser,
     handleHardDeleteUser,
@@ -94,22 +111,22 @@ export default function UsersClient({ users }: { users: User[] }) {
     handleOpenPremiumDialog,
     handleGrantPremium,
     handleRevokePremium,
-  } = useUsersState(users);
+  } = useUsersState();
   const { data: session } = useSession();
 
   return (
     <Box>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, justifyContent: "space-between", mb: 2, alignItems: { xs: "stretch", sm: "flex-end" } }}>
-        <Tabs value={tabIndex} onChange={(_, newVal) => setTabIndex(newVal)}>
-          <Tab label={tAdmin("activeUsers", { count: activeUsers.length })} />
-          <Tab label={tAdmin("ghostUsers", { count: deletedUsers.length })} />
+        <Tabs value={tabIndex} onChange={(_, newVal) => handleTabChange(newVal)}>
+          <Tab label={tAdmin("activeUsers", { count: activeCount })} />
+          <Tab label={tAdmin("ghostUsers", { count: deletedCount })} />
         </Tabs>
-        <Button 
-          variant="outlined" 
-          color="error" 
-          startIcon={<DeleteIcon />} 
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<DeleteIcon />}
           onClick={handlePurgeDeletedUsers}
-          disabled={isPurging || deletedUsers.length === 0}
+          disabled={isPurging || deletedCount === 0}
         >
           {tAdmin("btnPurgeAll")}
         </Button>
@@ -128,7 +145,7 @@ export default function UsersClient({ users }: { users: User[] }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {displayedUsers.map((user) => {
+            {users.map((user) => {
               const joinedDate = new Date(typeof user.createdAt === "number" ? user.createdAt * 1000 : user.createdAt);
               return (
                 <TableRow key={user.id} hover sx={{ opacity: user.deletedAt ? 0.5 : 1 }}>
@@ -208,7 +225,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                 </TableRow>
               );
             })}
-            {displayedUsers.length === 0 && (
+            {users.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
                   {tAdmin("noUsersFound")}

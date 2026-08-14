@@ -9,6 +9,7 @@ import ProjectCardList from "@/components/project/ProjectCardList";
 import ProfileSortSelect from "@/components/profile/ProfileSortSelect";
 import CollectionCard from "@/components/list/CollectionCard";
 import PaginationControls from "@/components/ui/PaginationControls";
+import LinkButton from "@/components/ui/LinkButton";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { Link as RoutingLink } from "@/lib/i18n/routing";
@@ -23,6 +24,16 @@ import IdeasVisibilityToggle from "./IdeasVisibilityToggle";
 interface PublicProfileProps {
   params: Promise<{ locale: string; username: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+/** 現在のクエリを保ったまま ideasPage だけ差し替える */
+function buildIdeasMoreQuery(sp: { [key: string]: string | string[] | undefined }, nextIdeasPage: number): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(sp)) {
+    if (typeof value === "string" && key !== "ideasPage") params.set(key, value);
+  }
+  params.set("ideasPage", String(nextIdeasPage));
+  return params.toString();
 }
 
 export async function generateMetadata({ params }: PublicProfileProps) {
@@ -57,6 +68,9 @@ export default async function PublicProfilePage({ params, searchParams }: Public
   const limit = Math.min(Math.max(parseInt(sp.limit as string) || 20, 10), 80);
   const offset = (page - 1) * limit;
   const sort = (sp.sort as string) || "updated";
+  const ideasPage = parseInt(sp.ideasPage as string) || 1;
+  const IDEAS_PER_PAGE = 20;
+  const ideasOffset = (ideasPage - 1) * IDEAS_PER_PAGE;
 
   const t = await getTranslations("Profile");
 
@@ -97,10 +111,10 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
   const session = await auth();
   const isOwner = session?.user?.id === user.id;
-  const content = await getProfileContent(user, session?.user?.id, isOwner, { limit, offset, sort });
-  const { totalCount, visibleProjects, favoritedProjects, userCollections, stats, displayTotalProjects, pinnedItems, authorIdeas, showIdeas } = content;
+  const content = await getProfileContent(user, session?.user?.id, isOwner, { limit, offset, sort, ideasLimit: IDEAS_PER_PAGE, ideasOffset });
+  const { totalCount, visibleProjects, favoritedProjects, userCollections, stats, displayTotalProjects, pinnedItems, authorIdeas, totalIdeaCount, showIdeas } = content;
 
-  const showIdeasSection = isOwner || (showIdeas && authorIdeas.length > 0);
+  const showIdeasSection = isOwner || (showIdeas && totalIdeaCount > 0);
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
@@ -184,7 +198,16 @@ export default async function PublicProfilePage({ params, searchParams }: Public
             {isOwner && <IdeasVisibilityToggle initial={showIdeas} />}
           </Box>
           {authorIdeas.length > 0 ? (
-            <IdeaCardList ideas={authorIdeas} />
+            <>
+              <IdeaCardList ideas={authorIdeas} />
+              {ideasOffset + authorIdeas.length < totalIdeaCount && (
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                  <LinkButton href={`?${buildIdeasMoreQuery(sp, ideasPage + 1)}`} variant="outlined">
+                    {t("loadMoreIdeas")}
+                  </LinkButton>
+                </Box>
+              )}
+            </>
           ) : (
             <Alert severity="info">{t("noIdeasPosted")}</Alert>
           )}
