@@ -14,6 +14,7 @@ import { syncExternalProjectData } from "@/lib/actions/projectSync";
 import ActionRow from "@/components/ui/ActionRow";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
+import TranslationEditor from "@/components/project/TranslationEditor";
 import SyncIcon from "@mui/icons-material/Sync";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
@@ -187,6 +188,11 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
               {syncing ? tManage("syncing") : tManage("sync")}
             </Button>
           </ActionRow>
+      </Box>
+
+      {/* 訳文は原文フォームとは別の Server Action で保存するため、form の外に置く */}
+      <Box sx={{ mt: 3 }}>
+        <TranslationEditor projectId={project.id} />
       </Box>
 
       <StickySaveBar

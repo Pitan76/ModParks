@@ -497,6 +497,47 @@
       "reply": "Reply",
       "replyPlaceholder": "Write a reply...",
       "cancel": "Cancel"
+    },
+    "translation": {
+      "sectionTitle": "Other languages",
+      "sectionHelp": "Draft a translation with AI, adjust it, then confirm. Confirmed translations are never overwritten automatically when you edit the original.",
+      "sectionHelpNonPublic": "AI translation is available for public projects only. You can still add translations manually here.",
+      "addLanguage": "Add a translation",
+      "draftButton": "Draft with AI",
+      "saveButton": "Confirm this translation",
+      "deleteButton": "Delete translation",
+      "staleChip": "Original updated",
+      "manualStaleHelp": "The original has been updated, but this translation is confirmed manually, so it will not be re-translated automatically. To bring it up to date, edit it here or run “Draft with AI”. Deleting it returns this language to visitor-triggered translation.",
+      "manualStaleNotice": "This translation predates the latest update to the original.",
+      "translateLink": "Read with AI translation",
+      "retranslate": "Re-translate from the latest original",
+      "loginRequired": "Sign in to use AI translation.",
+      "machineTranslated": "This description was machine-translated by AI.",
+      "state": {
+        "cached": "Machine",
+        "manual": "Confirmed"
+      },
+      "fields": {
+        "title": "Title",
+        "body": "Description"
+      },
+      "languages": {
+        "ja": "Japanese",
+        "en": "English"
+      },
+      "errors": {
+        "invalid_locale": "This language cannot be translated.",
+        "not_found": "Project not found.",
+        "not_public": "AI translation is available for public projects only.",
+        "rate_limited": "You have reached the translation limit. Please try again later.",
+        "too_long": "The description is too long for AI translation. Please translate it manually.",
+        "cooling_down": "The previous attempt failed. Please try again later.",
+        "invalid_output": "The translation came back with broken formatting and was discarded.",
+        "provider_error": "Translation failed. Please try again later.",
+        "unauthorized": "Sign in to use AI translation.",
+        "invalid_request": "Invalid request.",
+        "budget_exceeded": "Today's AI translation limit has been reached. Please try again tomorrow."
+      }
     }
   },
   "Version": {

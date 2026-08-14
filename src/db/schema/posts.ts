@@ -30,6 +30,11 @@ export const posts = sqliteTable("posts", {
   bodyFormat: text("body_format", { enum: ["markdown", "plaintext", "pukiwiki"] })
     .notNull()
     .default("markdown"),
+  /**
+   * title / body が書かれている言語。多言語表示の起点になる。
+   * 訳文は post_translations 側にのみ持ち、このロケールの行は作らない。
+   */
+  sourceLocale: text("source_locale").notNull().default("ja"),
   /** 公開範囲。旧 projects.status / ideas.visibility を統合したもの */
   visibility: text("visibility", { enum: ["draft", "public", "unlisted", "private"] })
     .notNull()

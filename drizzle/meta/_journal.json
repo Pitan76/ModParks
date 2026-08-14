@@ -575,6 +575,13 @@
       "when": 1786691144184,
       "tag": "0081_narrow_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "6",
+      "when": 1786710778033,
+      "tag": "0082_smiling_the_hunter",
+      "breakpoints": true
     }
   ]
 }

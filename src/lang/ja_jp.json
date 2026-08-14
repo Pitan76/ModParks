@@ -497,6 +497,47 @@
       "reply": "返信",
       "replyPlaceholder": "返信を入力...",
       "cancel": "キャンセル"
+    },
+    "translation": {
+      "sectionTitle": "他言語の説明",
+      "sectionHelp": "原文から AI 翻訳の下書きを作り、手直しして確定できます。確定した訳は原文を更新しても自動では書き換わりません。",
+      "sectionHelpNonPublic": "AI 翻訳は公開中のプロジェクトでのみ利用できます。ここでは手動で訳文を登録できます。",
+      "addLanguage": "翻訳を追加する",
+      "draftButton": "AI 翻訳で下書き",
+      "saveButton": "この翻訳を確定",
+      "deleteButton": "翻訳を削除",
+      "staleChip": "原文が更新済み",
+      "manualStaleHelp": "原文が更新されていますが、この翻訳は手動で確定されているため自動での訳し直しは行いません。原文に合わせるには、この欄を直接編集するか「AI 翻訳で下書き」を実行してください。翻訳を削除すると、以後は閲覧者による自動翻訳に戻ります。",
+      "manualStaleNotice": "この翻訳は原文の更新より前に作成されたものです。",
+      "translateLink": "AI 翻訳で読む",
+      "retranslate": "最新の原文で翻訳し直す",
+      "loginRequired": "AI 翻訳の利用にはログインが必要です。",
+      "machineTranslated": "この説明は AI による機械翻訳です。",
+      "state": {
+        "cached": "自動翻訳",
+        "manual": "確定済み"
+      },
+      "fields": {
+        "title": "タイトル",
+        "body": "説明"
+      },
+      "languages": {
+        "ja": "日本語",
+        "en": "英語"
+      },
+      "errors": {
+        "invalid_locale": "この言語には翻訳できません。",
+        "not_found": "プロジェクトが見つかりませんでした。",
+        "not_public": "AI 翻訳は公開中のプロジェクトでのみ利用できます。",
+        "rate_limited": "翻訳の実行回数が上限に達しました。時間をおいて再度お試しください。",
+        "too_long": "説明が長すぎるため AI 翻訳できません。手動での翻訳をご利用ください。",
+        "cooling_down": "直前の翻訳に失敗しました。時間をおいて再度お試しください。",
+        "invalid_output": "翻訳結果の書式が壊れていたため破棄しました。",
+        "provider_error": "翻訳に失敗しました。時間をおいて再度お試しください。",
+        "unauthorized": "AI 翻訳の利用にはログインが必要です。",
+        "invalid_request": "リクエストが不正です。",
+        "budget_exceeded": "本日分の AI 翻訳の上限に達しました。日付が変わってから再度お試しください。"
+      }
     }
   },
   "Version": {

@@ -110,7 +110,7 @@ export default async function PublicProfilePage({ params, searchParams }: Public
 
   const session = await auth();
   const isOwner = session?.user?.id === user.id;
-  const content = await getProfileContent(user, session?.user?.id, isOwner, { limit, offset, sort, ideasLimit: IDEAS_PER_PAGE, ideasOffset });
+  const content = await getProfileContent(user, session?.user?.id, isOwner, { limit, offset, sort, ideasLimit: IDEAS_PER_PAGE, ideasOffset, locale });
   const { totalCount, visibleProjects, favoritedProjects, userCollections, stats, displayTotalProjects, pinnedItems, authorIdeas, totalIdeaCount, showIdeas } = content;
 
   const showIdeasSection = isOwner || (showIdeas && totalIdeaCount > 0);

@@ -1,0 +1,57 @@
+/**
+ * 行内記法のマスキング。書式ごとのパターンを与えると、該当箇所をトークンに
+ * 置き換えたテキストを返す。
+ */
+import type { TokenBag } from "./types";
+
+/**
+ * マスク対象パターン。`keep` を与えた場合、その捕捉グループだけを翻訳対象として
+ * 残し、前後をトークン化する（例: `[[表示名>URL]]` の表示名）。
+ */
+export interface InlinePattern {
+  pattern: RegExp;
+  /** 表示テキストを残す場合の、前後を組み立てる関数 */
+  keep?: (match: RegExpExecArray) => { before: string; visible: string; after: string };
+}
+
+/** マッチ全体をトークン化する単純パターン */
+export const opaque = (pattern: RegExp): InlinePattern => ({ pattern });
+
+/**
+ * 与えられたパターン群で行内をマスクする。
+ * パターンは配列の順に適用されるため、包含関係のあるものは広い方を先に置く。
+ */
+export function maskInline(text: string, patterns: InlinePattern[], bag: TokenBag): string {
+  return patterns.reduce((acc, p) => applyPattern(acc, p, bag), text);
+}
+
+function applyPattern(text: string, { pattern, keep }: InlinePattern, bag: TokenBag): string {
+  const re = new RegExp(pattern.source, ensureGlobal(pattern.flags));
+  let result = "";
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    result += text.slice(last, m.index) + replaceMatch(m, keep, bag);
+    last = m.index + m[0].length;
+    if (m[0].length === 0) re.lastIndex++; // 空マッチでの無限ループを防ぐ
+  }
+  return result + text.slice(last);
+}
+
+function replaceMatch(
+  m: RegExpExecArray,
+  keep: InlinePattern["keep"],
+  bag: TokenBag,
+): string {
+  if (!keep) return bag.add(m[0]);
+  const { before, visible, after } = keep(m);
+  return bag.add(before) + visible + bag.add(after);
+}
+
+const ensureGlobal = (flags: string): string => (flags.includes("g") ? flags : `${flags}g`);
+
+/** 素の URL。どの書式でも翻訳されては困る */
+export const URL_PATTERN = /https?:\/\/[^\s)>\]|]+/;
+
+/** HTML タグ。本文に混ざりうるため常にマスクする */
+export const HTML_TAG_PATTERN = /<\/?[a-zA-Z][^<>]*>/;

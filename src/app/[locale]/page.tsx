@@ -27,8 +27,8 @@ const TopPage = async ({ params }: TopPageProps) => {
   const tm = await getTranslations("Metadata");
 
   const [newResult, updatedResult] = await Promise.all([
-    getProjects({ sort: "newest", limit: 6 }),
-    getProjects({ sort: "updated", limit: 6 }),
+    getProjects({ sort: "newest", limit: 6, locale }),
+    getProjects({ sort: "updated", limit: 6, locale }),
   ]);
 
   const newProjects = newResult;

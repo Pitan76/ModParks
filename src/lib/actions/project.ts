@@ -67,6 +67,8 @@ export async function createProject(formData: FormData) {
       title:      name,
       body:       description,
       bodyFormat: descriptionFormat || "markdown",
+      // 作成時の表示言語を原文の言語とみなす。多言語表示はこれを起点にする
+      sourceLocale: await getLocale(),
       visibility: "draft",
     }),
     db.insert(projects).values({

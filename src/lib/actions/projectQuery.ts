@@ -6,6 +6,7 @@ import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queri
 import { listPublicProjectVersions } from "@/lib/queries/versionList";
 import { mapProjectRow } from "@/lib/queries/projectRow";
 import { toProjectPost } from "@/lib/queries/postRow";
+import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 
 type GetProjectsParams = {
   q?: string;
@@ -24,6 +25,8 @@ type GetProjectsParams = {
   includeTags?: boolean;
   includeAuthor?: boolean;
   includeExtDl?: boolean;
+  /** 表示ロケール。指定すると一覧のタイトル・本文が訳文になる */
+  locale?: string;
 };
 
 /**
@@ -34,7 +37,7 @@ export const getProjects = async (params: GetProjectsParams) => {
   const db = await getDatabase();
   const {
     limit = 20, offset = 0, sort = "updated",
-    includeExtDl = false
+    includeExtDl = false, locale
   } = params;
 
   const conditions = buildProjectSearchConditions(params);
@@ -49,7 +52,8 @@ export const getProjects = async (params: GetProjectsParams) => {
           ...restPosts,
           // projects.id は posts.id と同じ値なので、後勝ちで上書きされても問題ない
           ...getTableColumns(projects),
-          body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
+          title: translatedTitle(locale),
+          body: translatedBodyPreview(locale),
           tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`,
           latestVersionNumber: sql<string | null>`(SELECT version_number FROM versions WHERE project_id = posts.id AND archived_at IS NULL ORDER BY created_at DESC LIMIT 1)`
         },
@@ -193,7 +197,7 @@ export const getUserProjectStats = async (authorId: string) => {
 /**
  * @param ids
  */
-export const getProjectsByIds = async (ids: string[]) => {
+export const getProjectsByIds = async (ids: string[], locale?: string) => {
   if (ids.length === 0) return [];
   const db = await getDatabase();
 
@@ -204,7 +208,8 @@ export const getProjectsByIds = async (ids: string[]) => {
         project: {
           ...restPosts,
           ...getTableColumns(projects),
-          body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
+          title: translatedTitle(locale),
+          body: translatedBodyPreview(locale),
           tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`,
           latestVersionNumber: sql<string | null>`(SELECT version_number FROM versions WHERE project_id = posts.id AND archived_at IS NULL ORDER BY created_at DESC LIMIT 1)`
         },

@@ -17,9 +17,12 @@ export function canonicalUrl(path: string = "", locale: string = routing.default
  *
  * @param path 先頭スラッシュ付きのロケール接頭辞なしパス（ルートは ""）
  */
-export function languageAlternates(path: string = ""): Record<string, string> {
+export function languageAlternates(path: string = "", available?: readonly string[]): Record<string, string> {
+  // 機械翻訳しかないロケールを載せると自動生成ページを各言語版として索引させることになる。
+  // 呼び出し側が「人手で確定した言語」を渡した場合はそれだけに絞る。
+  const targets = available ? locales.filter((l) => available.includes(l)) : locales;
   const languages: Record<string, string> = {};
-  for (const locale of locales) languages[locale] = canonicalUrl(path, locale);
+  for (const locale of targets) languages[locale] = canonicalUrl(path, locale);
   languages["x-default"] = canonicalUrl(path, routing.defaultLocale);
   return languages;
 }
@@ -30,10 +33,10 @@ export function languageAlternates(path: string = ""): Record<string, string> {
  * @param path 先頭スラッシュ付きのロケール接頭辞なしパス（ルートは ""）
  * @param locale 現在のロケール
  */
-export function seoAlternates(path: string = "", locale: string = routing.defaultLocale) {
+export function seoAlternates(path: string = "", locale: string = routing.defaultLocale, available?: readonly string[]) {
   return {
     canonical: canonicalUrl(path, locale),
-    languages: languageAlternates(path),
+    languages: languageAlternates(path, available),
   };
 }
 

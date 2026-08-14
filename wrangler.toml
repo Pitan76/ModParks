@@ -58,6 +58,11 @@ binding = "modparks_static"
 [images]
 binding = "IMAGES"
 
+# 説明文の AI 翻訳。外部 API キーを持たずに済むため Workers AI を使う。
+# プロバイダを変える場合は TRANSLATION_PROVIDER と providers/ の実装を差し替える。
+[ai]
+binding = "AI"
+
 # ─── 環境変数 ─────────────────────────────────────────────────────────────────
 [vars]
 NEXTAUTH_URL       = "https://modparks.pitan76.net"

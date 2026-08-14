@@ -73,6 +73,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
 
   // フィルタリング
   const { data: filtered, totalCount } = await getProjectsWithCount({
+    locale,
     q,
     types: typesArr,
     authorId,

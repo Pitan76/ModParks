@@ -246,10 +246,10 @@ async function countAuthorIdeas(userId: string, isOwner: boolean): Promise<numbe
   return result?.count ?? 0;
 }
 
-type ListArgs = { limit: number; offset: number; sort: string; ideasLimit: number; ideasOffset: number };
+type ListArgs = { limit: number; offset: number; sort: string; ideasLimit: number; ideasOffset: number; locale: string };
 
 /** プロフィール表示に必要なフォロー状態・プロジェクト・お気に入り・コレクション・統計を集約する。 */
-export async function getProfileContent(user: ProfileUser, viewerId: string | undefined, isOwner: boolean, { limit, offset, sort, ideasLimit, ideasOffset }: ListArgs) {
+export async function getProfileContent(user: ProfileUser, viewerId: string | undefined, isOwner: boolean, { limit, offset, sort, ideasLimit, ideasOffset, locale }: ListArgs) {
   const followState = await getFollowState(user.id, viewerId, isOwner);
 
   // 投稿アイデア表示は既定 ON。custom.showIdeasOnProfile が false のときのみ非表示。
@@ -257,7 +257,7 @@ export async function getProfileContent(user: ProfileUser, viewerId: string | un
   const canSeeIdeas = showIdeas || isOwner;
 
   const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, stats, pinnedItems, authorIdeas, totalIdeaCount] = await Promise.all([
-    getProjectsWithCount({ authorId: user.id, limit, offset, sort: sort as any }),
+    getProjectsWithCount({ authorId: user.id, limit, offset, sort: sort as any, locale }),
     getFavoriteProjects(user.id),
     getUserCollections(user.id, viewerId),
     getUserProjectStats(user.id),

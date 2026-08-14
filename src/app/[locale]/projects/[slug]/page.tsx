@@ -25,7 +25,9 @@ import ProjectRecipes from "@/components/project/ProjectRecipes";
 import LinkButton from "@/components/ui/LinkButton";
 import { recordProjectView } from "@/lib/services/rewardMetrics";
 import { resolveClientIp } from "@/lib/rate-limit";
-import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
+import TranslatedDescription from "@/components/project/TranslatedDescription";
+import { resolveDisplayContent } from "@/lib/translation/display";
+import { findMetadataTranslation, listIndexableLocales } from "@/lib/translation/metadata";
 import { toPlainDescription } from "@/lib/utils/plainText";
 import AdSlot from "@/components/ads/AdSlot";
 import AddIcon from "@mui/icons-material/Add";
@@ -56,8 +58,14 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
 
   if (!isViewable) return { title: "Not Found", robots: { index: false, follow: false } };
 
-  const title = `${project.title}`;
-  const plainDesc = toPlainDescription(project.body);
+  // 一覧・OGP・<title> は cached も含めて訳文を使う（表示の一貫性を優先）
+  const db = await getDatabase();
+  const translation = locale === project.sourceLocale
+    ? null
+    : await findMetadataTranslation(db, project.id, locale);
+
+  const title = translation?.title ?? project.title;
+  const plainDesc = toPlainDescription(translation?.body ?? project.body);
   const tMeta = await getTranslations({ locale, namespace: "Metadata" });
   const description = plainDesc.length > 150
     ? plainDesc.substring(0, 150) + "..."
@@ -101,7 +109,8 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
         },
       ],
     },
-    alternates: seoAlternates(path, locale),
+    // 機械翻訳しかない言語は hreflang に載せない
+    alternates: seoAlternates(path, locale, await listIndexableLocales(db, project.id, project.sourceLocale)),
   };
 }
 
@@ -164,9 +173,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   if (!project) notFound();
 
+  // 表示ロケールの訳文があれば差し替える。cached はここでは原文のまま返り、
+  // 閲覧者の操作でクライアント側に差し込まれる（§9 の索引方針）
+  const display = await resolveDisplayContent(db, project, locale);
+
   // getProjectBySlug は ProjectPost を平坦化した形を返す（title / body / visibility）。
   // as any を外して、フィールド名の取りこぼしが型で見つかるようにする。
-  const p = project;
+  const p = display.state === "manual"
+    ? { ...project, title: display.title, body: display.body, bodyFormat: display.bodyFormat }
+    : project;
   const t = await getTranslations("Project");
 
   const canEdit = isOwner;
@@ -240,7 +255,17 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             }
             descriptionContent={
               <Box sx={{ mt: 2 }}>
-                <DescriptionRenderer content={p.body} format={p.bodyFormat} />
+                <TranslatedDescription
+                  postId={p.id}
+                  locale={locale}
+                  body={p.body}
+                  bodyFormat={p.bodyFormat}
+                  translated={display.translated}
+                  state={display.state}
+                  stale={display.stale}
+                  canTranslate={display.canTranslate}
+                  isLoggedIn={!!session?.user?.id}
+                />
               </Box>
             }
             filesContent={
