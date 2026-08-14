@@ -4,7 +4,7 @@
  * マスクの範囲を広く取る。
  */
 import { TokenBag, type FormatMasker, type MaskedDocument, type MaskedLine } from "./types";
-import { maskInline, opaque, HTML_TAG_PATTERN, URL_PATTERN, type InlinePattern } from "./inline";
+import { maskInline, opaque, orderedOpaque, HTML_TAG_PATTERN, URL_PATTERN, type InlinePattern } from "./inline";
 
 /** 見出し `*` / リスト `-` `+` / 引用 `>` / 定義 `:` / 整形済み行頭の空白 */
 const LINE_MARKER = /^(\s*(?:\*{1,3}|-{1,3}|\+{1,3}|>{1,3}|:)?\s*)/;
@@ -13,8 +13,8 @@ const LINE_MARKER = /^(\s*(?:\*{1,3}|-{1,3}|\+{1,3}|>{1,3}|:)?\s*)/;
 const VERBATIM_LINE = /^\s*(?:#[a-zA-Z][\w]*(?:\(|$)|\/\/)/;
 
 const INLINE_PATTERNS: InlinePattern[] = [
-  // 表のセル区切り。トークン化することで訳文でもセル数が保たれる
-  opaque(/\|/),
+  // 表のセル区切り。位置が変わると列がずれるので順序も検証する
+  orderedOpaque(/\|/),
   opaque(/&[a-zA-Z][\w]*(?:\([^)]*\))?(?:\{[^}]*\})?;?/),
   opaque(/#[a-zA-Z][\w]*\([^)]*\)/),
   {

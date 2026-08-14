@@ -545,7 +545,8 @@
         "feature_disabled": "AI翻訳は現在停止しています。"
       },
       "showOriginal": "原文で表示",
-      "showTranslation": "AI翻訳で表示"
+      "showTranslation": "翻訳を表示",
+      "showMachineTranslation": "AI翻訳で表示"
     }
   },
   "Version": {

@@ -545,7 +545,8 @@
         "feature_disabled": "AI translation is currently disabled."
       },
       "showOriginal": "Show original",
-      "showTranslation": "Show AI translation"
+      "showTranslation": "Show translation",
+      "showMachineTranslation": "Show AI translation"
     }
   },
   "Version": {

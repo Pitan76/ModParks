@@ -13,10 +13,21 @@ export interface MaskedLine {
   translatable: boolean;
 }
 
+/** 置換した原文の断片 */
+export interface MaskedToken {
+  text: string;
+  /**
+   * 行内での位置が意味を持つか。
+   * 表のセル区切りのように、順序が変わると構造が壊れるものだけ true にする。
+   * 行内記法（リンク・コード・URL）は翻訳で語順が変わるため false。
+   */
+  ordered: boolean;
+}
+
 export interface MaskedDocument {
   lines: MaskedLine[];
-  /** ⟦T{i}⟧ の i 番目に対応する原文断片 */
-  tokens: string[];
+  /** <x{i}/> の i 番目に対応する原文断片 */
+  tokens: MaskedToken[];
 }
 
 export interface FormatMasker {
@@ -37,15 +48,18 @@ export const TOKEN_PATTERN = /<\s*x(\d+)\s*\/?\s*>/g;
 
 /** 置換した原文断片を貯め、トークン参照を払い出す */
 export class TokenBag {
-  private readonly items: string[] = [];
+  private readonly items: MaskedToken[] = [];
 
-  /** @returns 差し込むべきトークン参照 */
-  add(fragment: string): string {
-    this.items.push(fragment);
+  /**
+   * @param ordered 行内での位置が意味を持つ場合に true（表のセル区切りなど）
+   * @returns 差し込むべきトークン参照
+   */
+  add(fragment: string, ordered = false): string {
+    this.items.push({ text: fragment, ordered });
     return tokenRef(this.items.length - 1);
   }
 
-  toArray(): string[] {
+  toArray(): MaskedToken[] {
     return [...this.items];
   }
 }

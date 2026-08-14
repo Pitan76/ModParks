@@ -61,7 +61,9 @@ export default function TranslatedDescription(props: TranslatedDescriptionProps)
           <>
             <TranslateIcon fontSize="small" color="action" />
             <Link component="button" type="button" underline="hover" onClick={() => setShowOriginal(!showOriginal)}>
-              {showingTranslation ? t("showOriginal") : t("showTranslation")}
+              {showingTranslation
+                ? t("showOriginal")
+                : t(props.state === "manual" ? "showTranslation" : "showMachineTranslation")}
             </Link>
           </>
         )}

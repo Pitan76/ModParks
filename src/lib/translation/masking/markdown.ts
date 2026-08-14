@@ -22,6 +22,13 @@ const INLINE_PATTERNS: InlinePattern[] = [
   opaque(URL_PATTERN),
 ];
 
+/**
+ * コードブロック内のコメント行。
+ * 設定ファイルの例では、コメントが実質的な説明文になっていることが多いので
+ * ここだけは訳す。コード本体（キーや値）には触れない。
+ */
+const CODE_COMMENT = /^(\s*(?:#|\/\/|--)\s*)(.+)$/;
+
 export const markdownMasker: FormatMasker = {
   mask(text: string): MaskedDocument {
     const bag = new TokenBag();
@@ -31,12 +38,19 @@ export const markdownMasker: FormatMasker = {
         inFence = !inFence;
         return verbatim(raw);
       }
-      if (inFence) return verbatim(raw);
+      if (inFence) return maskCodeLine(raw, bag);
       return maskLine(raw, bag);
     });
     return { lines, tokens: bag.toArray() };
   },
 };
+
+/** コード行はコメントだけ訳し、それ以外はそのまま残す */
+function maskCodeLine(raw: string, bag: TokenBag): MaskedLine {
+  const comment = CODE_COMMENT.exec(raw);
+  if (!comment) return verbatim(raw);
+  return { marker: comment[1], text: maskInline(comment[2], INLINE_PATTERNS, bag), translatable: true };
+}
 
 const verbatim = (raw: string): MaskedLine => ({ marker: raw, text: "", translatable: false });
 
