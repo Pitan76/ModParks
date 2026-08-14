@@ -18,6 +18,7 @@ import { canManagePost } from "@/lib/auth/postAccess";
 import { isAllowedUpload } from "@/lib/upload/fileTypes";
 import { getTrustState } from "@/lib/services/trust";
 import { scanVersionFile } from "@/lib/actions/versionScan";
+import { notifyNewVersion } from "@/lib/notifications/notify";
 
 /**
  * バージョンには title/body 系のリネーム対象フィールドが無いため、
@@ -280,11 +281,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId: id, mcVersion: mc }))).run();
   }
 
-  // UI 経由（lib/actions/version.ts）と同じ検査を必ず通す。
-  // ここを省くと scan_status が pending のまま配布され、
+  // UI 経由（lib/actions/version.ts）と同じ検査・通知を必ず通す。
+  // 検査を省くと scan_status が pending のまま配布され、
   // /api/download の malicious 遮断をすり抜ける
   after(async () => {
     await scanVersionFile(db, id, fileUrl, fileName);
+    await notifyNewVersion(db, project, parsed.data.versionNumber);
   });
 
   revalidatePath(`/projects/${project.slug}`);
