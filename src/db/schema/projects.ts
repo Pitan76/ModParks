@@ -39,6 +39,8 @@ export const projects = sqliteTable("projects", {
   githubRepo: text("github_repo"),
   /** 新バージョン公開時に告知を送る Discord Webhook URL */
   discordWebhookUrl: text("discord_webhook_url"),
+  /** AIによって生成されたコンテンツが含まれるかどうか */
+  aiGenerated: integer("ai_generated", { mode: "boolean" }).notNull().default(false),
 }, (table) => [
   // author / status / created_at / updated_at による絞り込みと並び替えは posts 側の索引が担う
   index("projects_type_idx").on(table.type),

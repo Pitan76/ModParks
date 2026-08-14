@@ -76,6 +76,7 @@ export const createProjectSchema = z.object({
   githubRepo:  z.string().max(140).optional().nullable(),
   discordWebhookUrl: z.string().url(vk("invalidUrl")).max(255).optional().or(z.literal("")).nullable(),
   tags:        z.array(z.string().max(32)).max(10, vk("tagsMax")),
+  aiGenerated: z.boolean().default(false).optional(),
 });
 
 export const updateProjectSchema = createProjectSchema.partial().extend({

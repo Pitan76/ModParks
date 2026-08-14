@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
@@ -42,6 +43,7 @@ export type ProjectDetailHeaderProps = {
       displayName: string | null;
       avatarUrl?: string | null;
     } | null;
+    aiGenerated?: boolean;
   };
   /** ユーザーがこのプロジェクトの編集権限を持っているか */
   canEdit: boolean;
@@ -72,6 +74,18 @@ const ProjectDetailHeader = ({
   const tProject = useTranslations("Project");
   const tCommon = useTranslations("Common");
   const { isPlainTheme } = useColorMode();
+  const [showAiLabel, setShowAiLabel] = useState(true);
+
+  useEffect(() => {
+    try {
+      const val = window.localStorage.getItem("show_ai_label");
+      if (val === "false") {
+        setShowAiLabel(false);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   if (isPlainTheme) {
     return (
@@ -112,6 +126,15 @@ const ProjectDetailHeader = ({
                 {p.title}
               </Typography>
               <ProjectTypeBadge type={p.type} size="small" />
+              {showAiLabel && p.aiGenerated && (
+                <Chip
+                  label="AI"
+                  color="info"
+                  size="small"
+                  variant="filled"
+                  sx={{ fontWeight: "bold" }}
+                />
+              )}
               {p.visibility !== "public" && (
                 <Chip
                   label={tCommon(`visibility.${p.visibility}`)}

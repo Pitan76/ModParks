@@ -35,6 +35,7 @@ export default function ThemeTab() {
       colorMode: mode as "light" | "dark",
       useCustomContextMenu: true,
       useCart: cartEnabled,
+      showAiLabel: true,
     },
     (values) => {
       setThemeType(values.selectedTheme);
@@ -42,6 +43,7 @@ export default function ThemeTab() {
       try {
         window.localStorage.setItem("disable_custom_context_menu", values.useCustomContextMenu ? "false" : "true");
         setIsDisabled(!values.useCustomContextMenu);
+        window.localStorage.setItem("show_ai_label", values.showAiLabel ? "true" : "false");
       } catch (e) {
         // ignore
       }
@@ -50,18 +52,20 @@ export default function ThemeTab() {
       setTimeout(() => setSuccess(false), 3000);
     }
   );
-  const { selectedTheme, colorMode, useCustomContextMenu, useCart } = form.values;
+  const { selectedTheme, colorMode, useCustomContextMenu, useCart, showAiLabel } = form.values;
   const commit = form.commit;
 
   // ローカルストレージ / カートストアの現在値を保存済みの初期値として取り込む
   useEffect(() => {
     let disabled = false;
+    let showAi = true;
     try {
       disabled = window.localStorage.getItem("disable_custom_context_menu") === "true";
+      showAi = window.localStorage.getItem("show_ai_label") !== "false";
     } catch (e) {
       // ignore
     }
-    commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled, colorMode: mode, selectedTheme: themeType }));
+    commit((prev) => ({ ...prev, useCustomContextMenu: !disabled, useCart: cartEnabled, colorMode: mode, selectedTheme: themeType, showAiLabel: showAi }));
   }, [cartEnabled, commit, mode, themeType]);
 
   return (
@@ -145,6 +149,21 @@ export default function ThemeTab() {
             />
           }
           label={t("useCart")}
+        />
+      </FormControl>
+
+      <FormControl>
+        <FormLabel id="ai-label" sx={{ mb: 1, fontWeight: 600 }}>
+          {t("aiLabelTitle")}
+        </FormLabel>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showAiLabel}
+              onChange={(e) => form.setField("showAiLabel", e.target.checked)}
+            />
+          }
+          label={t("showAiLabel")}
         />
       </FormControl>
 

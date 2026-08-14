@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useState, useEffect } from "react";
 
 import { Link } from "@/lib/i18n/routing";
 import { formatCompactNumber } from "@/lib/utils/format";
@@ -24,6 +25,18 @@ const PlainProjectTable = ({ projects }: PlainProjectTableProps) => {
   const locale = useLocale();
   const format = useFormatter();
   const tProject = useTranslations("Project");
+  const [showAiLabel, setShowAiLabel] = useState(true);
+
+  useEffect(() => {
+    try {
+      const val = window.localStorage.getItem("show_ai_label");
+      if (val === "false") {
+        setShowAiLabel(false);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   return (
     <div className={styles.tableScroll}>
@@ -53,6 +66,9 @@ const PlainProjectTable = ({ projects }: PlainProjectTableProps) => {
                 )}
                 {project.title}
               </Link>
+              {showAiLabel && project.aiGenerated && (
+                <span className={styles.dim} style={{ marginLeft: "0.25rem" }}>[AI]</span>
+              )}
               {project.tags?.length > 0 && (
                 <span className={styles.tags}>
                   {project.tags.slice(0, VISIBLE_TAG_COUNT).map((tag) => (

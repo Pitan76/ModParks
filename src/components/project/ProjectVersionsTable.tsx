@@ -8,7 +8,7 @@ import ProjectVersionsMobileList from "./ProjectVersionsMobileList";
 import { useProjectVersions } from "./useProjectVersions";
 import { useVersionMenu } from "./useVersionMenu";
 import { useColorMode } from "@/components/ThemeRegistry";
-import PaginationControls from "@/components/ui/PaginationControls";
+import PaginatedContainer from "@/components/ui/PaginatedContainer";
 import PlainProjectVersionsTable from "@/components/plain/project/PlainProjectVersionsTable";
 
 export type ProjectVersionRow = {
@@ -66,13 +66,9 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
     [state.versions, page, limit],
   );
 
-  const pager = filteredCount > limit && (
-    <PaginationControls totalCount={filteredCount} currentPage={page} currentLimit={limit} sx={{ mt: 2 }} />
-  );
-
   if (isPlainTheme) {
     return (
-      <>
+      <PaginatedContainer totalCount={filteredCount} currentPage={page} currentLimit={limit}>
         <PlainProjectVersionsTable
           versions={pageRows}
           projectSlug={projectSlug}
@@ -85,13 +81,12 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
           loaderOptions={state.loaderOptions}
           mcOptions={state.mcOptions}
         />
-        {pager}
-      </>
+      </PaginatedContainer>
     );
   }
 
   return (
-    <>
+    <PaginatedContainer totalCount={filteredCount} currentPage={page} currentLimit={limit}>
       <ProjectVersionsFilters
         filterChannel={state.filterChannel}
         onChannelChange={state.setFilterChannel}
@@ -117,9 +112,7 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
         projectSlug={projectSlug}
         buildMenu={buildMenu}
       />
-
-      {pager}
-    </>
+    </PaginatedContainer>
   );
 };
 

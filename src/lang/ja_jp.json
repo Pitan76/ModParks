@@ -258,7 +258,8 @@
       "discordWebhook": "Discord Webhook URL",
       "discordWebhookHelper": "新しいバージョンを公開したとき、このDiscord Webhookに告知を送信します",
       "commentsEnabled": "コメントを有効化",
-      "recipesEnabled": "レシピタブを有効化 (試験的機能)"
+      "recipesEnabled": "レシピタブを有効化 (試験的機能)",
+      "aiGenerated": "AI生成コンテンツを含む (任意)"
     },
     "table": {
       "name": "プロジェクト",
@@ -1784,6 +1785,8 @@
       "useCustomContextMenu": "ModParksの右クリックメニューを使用する",
       "cartLabel": "カート",
       "useCart": "カート機能を使用する",
+      "aiLabelTitle": "AIラベル",
+      "showAiLabel": "AIラベルを表示する",
       "save": "保存する",
       "success": "テーマ設定を更新しました"
     },

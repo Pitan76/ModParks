@@ -12,6 +12,8 @@ import FormTextField from "@/components/ui/form/FormTextField";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import TagAutocomplete from "./TagAutocomplete";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
@@ -42,6 +44,7 @@ export type ProjectFormFieldsProps = {
     discordWebhookUrl?: string | null;
     tags?: string[];
     issueTrackerUrl?: string | null;
+    aiGenerated?: boolean;
   };
   availableTags?: OptionItem[];
   defaultLicense?: string;
@@ -275,6 +278,17 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
       <Box>
         <Chip label={t("fields.customLinks.addLink")} color="primary" variant="outlined" onClick={addLink} sx={{ cursor: "pointer" }} />
       </Box>
+      <FormControlLabel
+        control={
+          <Switch
+            name="aiGenerated"
+            defaultChecked={!!project?.aiGenerated}
+            onChange={onChange}
+          />
+        }
+        label={t("fields.aiGenerated")}
+        sx={{ mt: 2 }}
+      />
       <input type="hidden" name="links" value={JSON.stringify(links)} />
     </>
   );

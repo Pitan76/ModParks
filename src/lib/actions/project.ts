@@ -36,12 +36,13 @@ export async function createProject(formData: FormData) {
     sourceUrl:   formData.get("sourceUrl"),
     links:       formData.get("links"),
     tags:        formData.getAll("tags"),
+    aiGenerated: formData.get("aiGenerated") === "on",
   };
 
   const parsed = createProjectSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
-  const { name, slug, description, descriptionFormat, type, license, sourceUrl, links, tags } = parsed.data;
+  const { name, slug, description, descriptionFormat, type, license, sourceUrl, links, tags, aiGenerated } = parsed.data;
   const id = createId();
 
   const existingProject = await db
@@ -74,6 +75,7 @@ export async function createProject(formData: FormData) {
       sourceUrl:  sourceUrl || null,
       links:      links || null,
       iconUrl:    formData.get("iconUrl") as string | null,
+      aiGenerated: !!aiGenerated,
     }),
   ]);
 
@@ -117,6 +119,7 @@ export const updateProject = async (projectId: string, formData: FormData) => {
     discordWebhookUrl: formData.get("discordWebhookUrl") || null,
     issueTrackerUrl: formData.get("issueTrackerUrl") || null,
     tags:        formData.getAll("tags"),
+    aiGenerated: formData.get("aiGenerated") !== null ? formData.get("aiGenerated") === "on" : undefined,
   };
 
   const parsed = updateProjectSchema.safeParse(raw);
@@ -164,6 +167,7 @@ export const updateProject = async (projectId: string, formData: FormData) => {
         commentsEnabled: formData.get("commentsEnabled") === "on",
         recipesEnabled: formData.get("recipesEnabled") === "on",
         iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
+        aiGenerated: fields.aiGenerated !== undefined ? !!fields.aiGenerated : undefined,
       })
       .where(eq(projects.id, project.id)),
   ]);

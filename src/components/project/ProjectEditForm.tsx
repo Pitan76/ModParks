@@ -32,6 +32,7 @@ interface ProjectEditFormProps {
     visibility: string;
     commentsEnabled?: boolean;
     recipesEnabled?: boolean;
+    aiGenerated?: boolean;
   };
   availableTags?: { slug: string; name: string }[];
 }

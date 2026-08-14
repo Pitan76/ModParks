@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `ai_generated` integer DEFAULT false NOT NULL;

@@ -258,7 +258,8 @@
       "discordWebhook": "Discord Webhook URL",
       "discordWebhookHelper": "Send a notification to this Discord webhook when a new version is published (optional).",
       "commentsEnabled": "Enable Comments",
-      "recipesEnabled": "Enable Recipes Tab"
+      "recipesEnabled": "Enable Recipes Tab",
+      "aiGenerated": "Contains AI-generated content (optional)"
     },
     "table": {
       "name": "Project",
@@ -1782,6 +1783,8 @@
       "useCustomContextMenu": "Use custom context menu",
       "cartLabel": "Cart",
       "useCart": "Enable cart feature",
+      "aiLabelTitle": "AI Label",
+      "showAiLabel": "Show AI label",
       "save": "Save Changes",
       "success": "Theme settings updated"
     },

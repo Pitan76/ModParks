@@ -8,6 +8,7 @@ import type { ProjectDetailHeaderProps } from "@/components/project/ProjectDetai
 import ProjectFavoriteButton from "@/components/project/ProjectFavoriteButton";
 import AddToCollectionButton from "@/components/project/AddToCollectionButton";
 import styles from "../plain.module.css";
+import { useState, useEffect } from "react";
 
 /**
  * Plain Theme 用のプロジェクト詳細ヘッダー。
@@ -25,6 +26,18 @@ const PlainProjectDetailHeader = ({
   const format = useFormatter();
   const locale = useLocale();
   const authorName = p.author?.displayName || p.author?.username;
+  const [showAiLabel, setShowAiLabel] = useState(true);
+
+  useEffect(() => {
+    try {
+      const val = window.localStorage.getItem("show_ai_label");
+      if (val === "false") {
+        setShowAiLabel(false);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   return (
     <header className={styles.detailHeader}>
@@ -40,6 +53,7 @@ const PlainProjectDetailHeader = ({
         )}
         <h1>{p.title}</h1>
         <span className={styles.dim}>{t.has(`type.${p.type}`) ? t(`type.${p.type}`) : p.type}</span>
+        {showAiLabel && p.aiGenerated && <span className={styles.dim}>[AI]</span>}
         {p.visibility !== "public" && <span className={styles.dim}>{tCommon(`visibility.${p.visibility}`)}</span>}
       </div>
 

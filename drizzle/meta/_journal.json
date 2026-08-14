@@ -568,6 +568,13 @@
       "when": 1786606396509,
       "tag": "0080_dependency_loaders",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "6",
+      "when": 1786691144184,
+      "tag": "0081_narrow_energizer",
+      "breakpoints": true
     }
   ]
 }

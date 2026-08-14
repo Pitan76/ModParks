@@ -54,11 +54,9 @@ const DescriptionRenderer = ({ content, format = "markdown" }: DescriptionRender
 
   if (format === "plaintext") {
     return (
-      <Box sx={{ p: 2, bgcolor: "background.paper", borderRadius: 1 }}>
-        <Typography sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-          {content}
-        </Typography>
-      </Box>
+      <Typography sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+        {content}
+      </Typography>
     );
   }
 

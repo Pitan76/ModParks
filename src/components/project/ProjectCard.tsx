@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
+import Chip from "@mui/material/Chip";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { DateLabel } from "@/components/ui/ProjectInfoLabels";
@@ -16,6 +17,7 @@ import CartToggleButton from "./card/CartToggleButton";
 import { type ContentType } from "@/lib/data/projectTypes";
 import ProjectCardMeta from "./card/ProjectCardMeta";
 import { useProjectContextMenu } from "./card/useProjectContextMenu";
+import { useState, useEffect } from "react";
 
 export type ProjectCardProps = {
   project: {
@@ -36,6 +38,7 @@ export type ProjectCardProps = {
     authorDisplayName?: string | null;
     authorAvatarUrl?: string | null;
     updatedAt:   Date | number;
+    aiGenerated?: boolean;
   };
   layout?: "list" | "grid";
   /** カート追加/削除ボタンを表示するか（既定: true） */
@@ -50,6 +53,18 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
   const isGrid = layout === "grid";
   const onContextMenu = useProjectContextMenu(project);
   const cartEnabled = useCartEnabled();
+  const [showAiLabel, setShowAiLabel] = useState(true);
+
+  useEffect(() => {
+    try {
+      const val = window.localStorage.getItem("show_ai_label");
+      if (val === "false") {
+        setShowAiLabel(false);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   // 設定でカート機能自体をオフにしている場合はボタンを出さない
   const showCartButton = showCart && cartEnabled;
@@ -131,6 +146,15 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
                   </Typography>
                 </Tooltip>
                 <ProjectTypeBadge type={project.type} />
+                {showAiLabel && project.aiGenerated && (
+                  <Chip
+                    label="AI"
+                    color="info"
+                    size="small"
+                    variant="filled"
+                    sx={{ fontWeight: "bold", height: 20, fontSize: "0.75rem" }}
+                  />
+                )}
               </Box>
 
               <Typography
