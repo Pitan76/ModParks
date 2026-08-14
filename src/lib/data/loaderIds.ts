@@ -11,7 +11,7 @@ export type LoaderColor =
 export const LOADERS_DATA: { id: string; name: string; color: LoaderColor }[] = [
   { id: "fabric",    name: "Fabric",    color: "primary"   },
   { id: "forge",     name: "Forge",     color: "warning"   },
-  { id: "neoforge",  name: "NeoForge",  color: "warning"   },
+  { id: "neoforge",  name: "NeoForge",  color: "error"     },
   { id: "quilt",     name: "Quilt",     color: "secondary" },
   { id: "spigot",    name: "Spigot",    color: "default"   },
   { id: "paper",     name: "Paper",     color: "default"   },
