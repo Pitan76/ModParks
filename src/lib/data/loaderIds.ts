@@ -9,13 +9,13 @@ export type LoaderColor =
   | "default" | "primary" | "secondary" | "warning" | "error" | "info" | "success";
 
 export const LOADERS_DATA: { id: string; name: string; color: LoaderColor }[] = [
-  { id: "fabric",    name: "Fabric",    color: "primary"   },
-  { id: "forge",     name: "Forge",     color: "warning"   },
-  { id: "neoforge",  name: "NeoForge",  color: "error"     },
+  { id: "fabric",    name: "Fabric",    color: "success"   },
+  { id: "forge",     name: "Forge",     color: "info"      },
+  { id: "neoforge",  name: "NeoForge",  color: "warning"   },
   { id: "quilt",     name: "Quilt",     color: "secondary" },
-  { id: "spigot",    name: "Spigot",    color: "default"   },
-  { id: "paper",     name: "Paper",     color: "default"   },
-  { id: "purpur",    name: "Purpur",    color: "default"   },
+  { id: "spigot",    name: "Spigot",    color: "warning"   },
+  { id: "paper",     name: "Paper",     color: "success"   },
+  { id: "purpur",    name: "Purpur",    color: "secondary" },
   { id: "velocity",  name: "Velocity",  color: "info"      },
   { id: "waterfall", name: "Waterfall", color: "info"      },
   { id: "cleanroommc", name: "CleanroomMC", color: "success" },
