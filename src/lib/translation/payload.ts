@@ -65,6 +65,13 @@ export function parsePayload(raw: string, expected: readonly number[]): Map<numb
   return parsed;
 }
 
+/** 指定した行番号だけを詰めたペイロード。欠けた行の再要求に使う */
+export const toPayloadFor = (doc: MaskedDocument, indices: readonly number[]): string =>
+  numberedLines(doc)
+    .filter(({ index }) => indices.includes(index))
+    .map(({ text }) => text)
+    .join("\n");
+
 /** 翻訳対象の行番号 */
 export const translatableIndices = (doc: MaskedDocument): number[] =>
   numberedLines(doc).map(({ index }) => index);

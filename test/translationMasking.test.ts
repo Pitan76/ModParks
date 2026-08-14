@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getMasker, type BodyFormat } from "../src/lib/translation/masking";
-import { parsePayload, toPayload, toPayloadChunks, translatableIndices } from "../src/lib/translation/payload";
+import { parsePayload, toPayload, toPayloadChunks, toPayloadFor, translatableIndices } from "../src/lib/translation/payload";
 import { keepValidLines, restore } from "../src/lib/translation/restore";
 import { detectSourceLocale } from "../src/lib/translation/detectLocale";
 
@@ -121,5 +121,17 @@ describe("ペイロードの分割", () => {
   it("短い本文は 1 つの塊に収まること", () => {
     const doc = getMasker("markdown").mask("短い説明");
     expect(toPayloadChunks(doc, 800)).toHaveLength(1);
+  });
+});
+
+describe("欠けた行の再要求", () => {
+  it("指定した行だけを詰め直したペイロードになること", () => {
+    const doc = getMasker("markdown").mask("一行目\n二行目\n三行目");
+    expect(toPayloadFor(doc, [2])).toBe("L2: 三行目");
+  });
+
+  it("再要求の対象が無ければ空文字になること", () => {
+    const doc = getMasker("markdown").mask("一行目");
+    expect(toPayloadFor(doc, [])).toBe("");
   });
 });

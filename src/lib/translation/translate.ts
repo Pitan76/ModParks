@@ -3,7 +3,7 @@
  * DB 保存や権限判定はここでは行わない（呼び出し側の責務）。
  */
 import { getMasker, type BodyFormat, type MaskedDocument } from "./masking";
-import { parsePayload, payloadLength, toPayloadChunks, translatableIndices } from "./payload";
+import { parsePayload, payloadLength, toPayloadChunks, toPayloadFor, translatableIndices } from "./payload";
 import { keepValidLines, restore } from "./restore";
 import { getTranslationProvider } from "./providers";
 import type { TranslationSettings } from "./settings";
@@ -13,6 +13,9 @@ import type { TranslationSettings } from "./settings";
  * 数行だけ訳された中途半端な状態を「翻訳済み」として保存しないための下限。
  */
 const MIN_COVERAGE = 0.7;
+
+/** 1 つの塊に対する呼び出し回数の上限。欠けた行だけを詰め直して繰り返す */
+const MAX_ATTEMPTS = 3;
 
 export interface TranslateInput {
   body: string;
@@ -85,17 +88,26 @@ async function translateDocument(doc: MaskedDocument, input: TranslateInput): Pr
   return { text: restore(doc, translated), outputChars };
 }
 
-/** 採用できた行が 1 行も無ければ、書式の指示を強めて 1 度だけ訳し直す */
+/**
+ * 塊を訳す。応答から採用できなかった行は、その行だけを詰め直して訳し直す。
+ *
+ * 応答の打ち切りや 1 行の崩れで欠けた行を、原文のまま残さないため。
+ * 再要求は残った行だけなので、丸ごと訳し直すより短く済む。
+ */
 async function translateChunk(
   payload: string,
   indices: number[],
   doc: MaskedDocument,
   input: TranslateInput,
 ): Promise<{ lines: Map<number, string>; outputChars: number }> {
+  const lines = new Map<number, string>();
   let outputChars = 0;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  let pending = payload;
+  let pendingIndices = indices;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const raw = await getTranslationProvider().translate({
-      payload,
+      payload:      pending,
       sourceLocale: input.sourceLocale,
       targetLocale: input.targetLocale,
       strict:       attempt > 0,
@@ -103,10 +115,18 @@ async function translateChunk(
       maxTokens:    input.settings.maxTokens,
     });
     outputChars += raw.length;
-    const lines = keepValidLines(doc, parsePayload(raw, indices));
-    if (lines.size > 0) return { lines, outputChars };
+    for (const [index, text] of keepValidLines(doc, parsePayload(raw, pendingIndices))) {
+      lines.set(index, text);
+    }
+
+    pendingIndices = pendingIndices.filter((i) => !lines.has(i));
+    if (pendingIndices.length === 0) return { lines, outputChars };
     // 応答の形が原因なので、診断できるよう先頭だけ残す（本文全体はログに出さない）
-    console.warn(`translation chunk rejected (attempt ${attempt + 1}):`, raw.slice(0, 300));
+    console.warn(
+      `translation incomplete (attempt ${attempt + 1}, ${pendingIndices.length} lines left):`,
+      raw.slice(0, 200),
+    );
+    pending = toPayloadFor(doc, pendingIndices);
   }
-  return { lines: new Map(), outputChars };
+  return { lines, outputChars };
 }
