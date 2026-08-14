@@ -20,6 +20,10 @@ export const workersAiProvider: TranslationProvider = {
       ],
       // 訳文のぶれと記法崩れを抑えるため、生成はできるだけ決定的にする
       temperature: 0.1,
+      // 既定の出力上限では応答が途中で切れる。入力の塊は 800 文字までなので、
+      // 日本語のように 1 文字が複数トークンになる言語でも収まる幅にとどめる。
+      // 課金は生成した分だけだが、暴走生成で無料枠を溶かさないための上限でもある
+      max_tokens: 1024,
     });
     if (typeof result.response !== "string") throw new Error("Workers AI returned no response");
     return result.response;

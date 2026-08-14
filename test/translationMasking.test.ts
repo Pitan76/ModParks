@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getMasker, type BodyFormat } from "../src/lib/translation/masking";
-import { parsePayload, toPayload } from "../src/lib/translation/payload";
-import { restore, validateTokens } from "../src/lib/translation/restore";
+import { parsePayload, toPayload, toPayloadChunks, translatableIndices } from "../src/lib/translation/payload";
+import { keepValidLines, restore } from "../src/lib/translation/restore";
 import { detectSourceLocale } from "../src/lib/translation/detectLocale";
 
 /** 翻訳を通さず、返ってきた体で往復させる（記法が保たれることの確認） */
@@ -14,10 +14,9 @@ function roundTrip(text: string, format: BodyFormat, translate = (s: string) => 
       return m ? `L${m[1]}: ${translate(m[2])}` : line;
     })
     .join("\n");
-  const parsed = parsePayload(responded, doc);
-  expect(parsed).not.toBeNull();
-  expect(validateTokens(doc, parsed!)).toBe(true);
-  return restore(doc, parsed!);
+  const parsed = keepValidLines(doc, parsePayload(responded, translatableIndices(doc)));
+  expect(parsed.size).toBe(translatableIndices(doc).length);
+  return restore(doc, parsed);
 }
 
 describe("markdown マスキング", () => {
@@ -61,16 +60,17 @@ describe("pukiwiki マスキング", () => {
     expect(roundTrip(text, "pukiwiki")).toBe(text);
   });
 
-  it("表のセル数が変わる訳文は検証で弾かれること", () => {
+  it("表のセル数が変わる訳文は採用されないこと", () => {
     const doc = getMasker("pukiwiki").mask("|A|B|");
-    const parsed = parsePayload(toPayload(doc).replace(/<x\d+\/>/g, ""), doc);
-    expect(parsed).not.toBeNull();
-    expect(validateTokens(doc, parsed!)).toBe(false);
+    const broken = parsePayload(toPayload(doc).replace(/<x\d+\/>/g, ""), translatableIndices(doc));
+    expect(keepValidLines(doc, broken).size).toBe(0);
   });
 
-  it("行数が変わる応答は破棄されること", () => {
+  it("応答が途中で切れても、返った行だけ訳文になり残りは原文が保たれること", () => {
     const doc = getMasker("pukiwiki").mask("一行目\n二行目");
-    expect(parsePayload("L0: first", doc)).toBeNull();
+    const partial = keepValidLines(doc, parsePayload("L0: first", translatableIndices(doc)));
+    expect(partial.size).toBe(1);
+    expect(restore(doc, partial)).toBe("first\n二行目");
   });
 });
 
@@ -105,5 +105,21 @@ describe("原文言語の推定", () => {
 
   it("空の本文は既定ロケールになること", () => {
     expect(detectSourceLocale("   ")).toBe("ja");
+  });
+});
+
+describe("ペイロードの分割", () => {
+  it("長い本文が複数の塊に分かれ、全行が過不足なく含まれること", () => {
+    const body = Array.from({ length: 40 }, (_, i) => `これは${i}行目の説明文です。`.repeat(3)).join("\n");
+    const doc = getMasker("markdown").mask(body);
+    const chunks = toPayloadChunks(doc);
+
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.flatMap((c) => c.indices)).toEqual(translatableIndices(doc));
+  });
+
+  it("短い本文は 1 つの塊に収まること", () => {
+    const doc = getMasker("markdown").mask("短い説明");
+    expect(toPayloadChunks(doc)).toHaveLength(1);
   });
 });

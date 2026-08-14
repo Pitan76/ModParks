@@ -8,16 +8,19 @@ import { TOKEN_PATTERN, type MaskedDocument } from "./masking";
 const tokenRegex = (): RegExp => new RegExp(TOKEN_PATTERN.source, "g");
 
 /**
- * 各行のトークンが過不足なく保たれているか検証する。
+ * トークンが保たれている行だけを残す。
+ *
+ * 全体を一括で合否判定すると、1 行の崩れや応答の途中打ち切りで訳文をすべて
+ * 失う。行単位で落とせば、その行だけ原文のまま残して他は訳文にできる。
  * 表のセル区切りもトークンなので、これがセル数の一致検証を兼ねる。
  */
-export function validateTokens(doc: MaskedDocument, translated: Map<number, string>): boolean {
-  return doc.lines.every((line, i) => {
-    if (!line.translatable) return true;
-    const got = translated.get(i);
-    if (got === undefined) return false;
-    return sameTokenSequence(line.text, got);
-  });
+export function keepValidLines(doc: MaskedDocument, translated: Map<number, string>): Map<number, string> {
+  const valid = new Map<number, string>();
+  for (const [index, text] of translated) {
+    const line = doc.lines[index];
+    if (line?.translatable && sameTokenSequence(line.text, text)) valid.set(index, text);
+  }
+  return valid;
 }
 
 /** 訳文を原文の構造へ戻す。検証を通した Map のみを渡すこと */
