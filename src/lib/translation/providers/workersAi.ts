@@ -5,25 +5,24 @@ import { buildSystemPrompt, buildUserPrompt } from "../prompt";
 import type { AiBinding } from "@/lib/db";
 import type { TranslationProvider, TranslationRequest } from "./types";
 
-const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+const DEFAULT_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
 export const workersAiProvider: TranslationProvider = {
-  name:  "workers-ai",
-  model: MODEL,
+  name:         "workers-ai",
+  defaultModel: DEFAULT_MODEL,
 
   async translate(req: TranslationRequest): Promise<string> {
     const ai = await getAiBinding();
-    const result = await ai.run(MODEL, {
+    const result = await ai.run(req.model, {
       messages: [
         { role: "system", content: buildSystemPrompt(req.sourceLocale, req.targetLocale, req.strict) },
         { role: "user", content: buildUserPrompt(req) },
       ],
       // 訳文のぶれと記法崩れを抑えるため、生成はできるだけ決定的にする
       temperature: 0.1,
-      // 既定の出力上限では応答が途中で切れる。入力の塊は 800 文字までなので、
-      // 日本語のように 1 文字が複数トークンになる言語でも収まる幅にとどめる。
+      // 既定の出力上限では応答が途中で切れる。塊の文字数に見合う値にすること。
       // 課金は生成した分だけだが、暴走生成で無料枠を溶かさないための上限でもある
-      max_tokens: 1024,
+      max_tokens: req.maxTokens,
     });
     if (typeof result.response !== "string") throw new Error("Workers AI returned no response");
     return result.response;

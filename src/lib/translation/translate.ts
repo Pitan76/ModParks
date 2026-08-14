@@ -6,9 +6,7 @@ import { getMasker, type BodyFormat, type MaskedDocument } from "./masking";
 import { parsePayload, payloadLength, toPayloadChunks, translatableIndices } from "./payload";
 import { keepValidLines, restore } from "./restore";
 import { getTranslationProvider } from "./providers";
-
-/** マスク後の入力上限。超過分は手動翻訳へ誘導する */
-export const MAX_INPUT_CHARS = 10_000;
+import type { TranslationSettings } from "./settings";
 
 /**
  * 訳せた行の割合がこれを下回ったら失敗とみなす。
@@ -22,6 +20,8 @@ export interface TranslateInput {
   bodyFormat: BodyFormat;
   sourceLocale: string;
   targetLocale: string;
+  /** 実行パラメータ。管理画面から変更できる */
+  settings: TranslationSettings;
 }
 
 interface ResultMeta {
@@ -41,12 +41,15 @@ export type TranslateResult =
  */
 export async function translateContent(input: TranslateInput): Promise<TranslateResult> {
   const provider = getTranslationProvider();
+  const { settings } = input;
   const titleDoc = getMasker("plaintext").mask(input.title);
   const bodyDoc  = getMasker(input.bodyFormat).mask(input.body);
   const inputChars = payloadLength(titleDoc) + payloadLength(bodyDoc);
-  const meta = { provider: provider.name, model: provider.model, inputChars };
+  const meta = { provider: provider.name, model: settings.model, inputChars };
 
-  if (inputChars > MAX_INPUT_CHARS) return { ok: false, reason: "too_long", ...meta, outputChars: 0 };
+  if (inputChars > settings.maxInputChars) {
+    return { ok: false, reason: "too_long", ...meta, outputChars: 0 };
+  }
 
   const [titleOut, bodyOut] = await Promise.all([
     translateDocument(titleDoc, input),
@@ -70,7 +73,7 @@ interface DocumentResult {
  * 崩れた行は原文のまま残るので、一部が訳せなくても全体は失われない。
  */
 async function translateDocument(doc: MaskedDocument, input: TranslateInput): Promise<DocumentResult> {
-  const chunks = toPayloadChunks(doc);
+  const chunks = toPayloadChunks(doc, input.settings.chunkChars);
   if (chunks.length === 0) return { text: restore(doc, new Map()), outputChars: 0 };
 
   const translated = new Map<number, string>();
@@ -99,7 +102,9 @@ async function translateChunk(
       payload,
       sourceLocale: input.sourceLocale,
       targetLocale: input.targetLocale,
-      strict: attempt > 0,
+      strict:       attempt > 0,
+      model:        input.settings.model,
+      maxTokens:    input.settings.maxTokens,
     });
     outputChars += raw.length;
     const lines = keepValidLines(doc, parsePayload(raw, indices));

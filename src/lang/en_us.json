@@ -541,7 +541,8 @@
         "unauthorized": "Sign in to use AI translation.",
         "invalid_request": "Invalid request.",
         "budget_exceeded": "Today's AI translation limit has been reached. Please try again tomorrow.",
-        "translation_disabled": "AI translation is not allowed for this project."
+        "translation_disabled": "AI translation is not allowed for this project.",
+        "feature_disabled": "AI translation is currently disabled."
       }
     }
   },
@@ -1215,7 +1216,23 @@
       "payoutGiftcardEnabled": "Accept gift card payouts",
       "payoutGiftcardEnabledHelp": "Admins issue and deliver the codes manually",
       "payoutGiftcardRate": "Gift Card Exchange Rate",
-      "payoutGiftcardRateHelp": "Gift card face value per point, absorbing purchase fees (e.g. 0.9)"
+      "payoutGiftcardRateHelp": "Gift card face value per point, absorbing purchase fees (e.g. 0.9)",
+      "translationSettingsTitle": "AI translation",
+      "translationSettingsDesc": "Controls how descriptions are machine-translated. To stay inside the free tier, lower the daily run limit and the amount generated per call.",
+      "translationEnabled": "Enable AI translation",
+      "translationEnabledHelp": "When off, no translation entry points are shown and the LLM is never called. Saved translations are still displayed.",
+      "translationModel": "Model",
+      "translationModelHelp": "Workers AI model ID (e.g. @cf/meta/llama-3.3-70b-instruct-fp8-fast). Models that follow formatting instructions poorly cause more translations to be discarded.",
+      "translationMaxTokens": "Max output tokens per call",
+      "translationMaxTokensHelp": "Too low and the response is cut off, leaving that part untranslated. Match it to the input chunk size.",
+      "translationChunkChars": "Input characters per call",
+      "translationChunkCharsHelp": "The body is split into chunks of this size. Smaller chunks are more reliable and generate less per call, but require more calls.",
+      "translationMaxInputChars": "Maximum description length",
+      "translationMaxInputCharsHelp": "Descriptions longer than this are not machine-translated; authors are pointed to manual translation.",
+      "translationDailyRunLimit": "Daily run limit (site-wide)",
+      "translationDailyRunLimitHelp": "Keeps usage inside the free tier. Once exceeded, translation stops for the day and the original is shown. 0 disables it.",
+      "translationUserHourlyLimit": "Runs per user per hour",
+      "translationUserHourlyLimitHelp": "Serving an existing translation does not count; only calls that reach the LLM do."
     },
     "reports": {
       "title": "Report Management",

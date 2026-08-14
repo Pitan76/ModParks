@@ -10,13 +10,6 @@ const LINE_PREFIX = "L";
 /** 行頭の飾り（箇条書き・強調）と、全角コロンや空白の揺れを許容する */
 const RESPONSE_LINE = /^\s*(?:[-*]\s*)?\*{0,2}L\s*(\d+)\*{0,2}\s*[:：]\s?([\s\S]*)$/;
 
-/**
- * 1 回の呼び出しに載せる最大文字数。
- * 小さいほど書式は安定し、1 回あたりの生成量（＝消費ニューロン）も抑えられるが、
- * 呼び出し回数は増える。出力の上限トークンとセットで決めること。
- */
-const CHUNK_CHARS = 800;
-
 export interface PayloadChunk {
   /** この塊に含まれる行番号 */
   indices: number[];
@@ -31,13 +24,18 @@ export function toPayload(doc: MaskedDocument): string {
 /** マスク後の総文字数。入力上限の判定はこの値で行う */
 export const payloadLength = (doc: MaskedDocument): number => toPayload(doc).length;
 
-/** 塊に分けたペイロード。1 行が上限を超える場合はその行だけで 1 塊にする */
-export function toPayloadChunks(doc: MaskedDocument): PayloadChunk[] {
+/**
+ * 塊に分けたペイロード。1 行が上限を超える場合はその行だけで 1 塊にする。
+ *
+ * @param chunkChars 1 回の呼び出しに載せる最大文字数。小さいほど書式は安定し
+ *   1 回あたりの生成量も減るが、呼び出し回数は増える
+ */
+export function toPayloadChunks(doc: MaskedDocument, chunkChars: number): PayloadChunk[] {
   const chunks: PayloadChunk[] = [];
   let current: PayloadChunk = { indices: [], text: "" };
 
   for (const { index, text } of numberedLines(doc)) {
-    const wouldExceed = current.text.length + text.length > CHUNK_CHARS;
+    const wouldExceed = current.text.length + text.length > chunkChars;
     if (wouldExceed && current.indices.length > 0) {
       chunks.push(current);
       current = { indices: [], text: "" };

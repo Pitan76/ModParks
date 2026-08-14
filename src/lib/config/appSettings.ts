@@ -71,6 +71,28 @@ export const appSettingsSchema = z.object({
   /** 含有枠と単価を最後に確認した日 (epoch day)。古くなったら管理画面で促す */
   usageQuotaCheckedDay: z.number().int().min(0).default(0),
 
+  // ---- AI 翻訳 ----
+  /** 説明文の AI 翻訳を行うか。false の間は閲覧者にも作者にも翻訳の導線を出さない */
+  translationEnabled: z.boolean().default(true),
+  /** 使用するモデル。プロバイダを差し替えたときは合わせて変えること */
+  translationModel: z.string().min(1).default("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+  /**
+   * 1 回の呼び出しで生成させる上限トークン。
+   * 小さすぎると応答が途中で切れ、その塊が原文のまま残る。
+   */
+  translationMaxTokens: z.number().int().min(256).max(8192).default(1024),
+  /**
+   * 1 回の呼び出しに載せる本文の文字数。
+   * 小さいほど書式は安定し 1 回の生成量も減るが、呼び出し回数は増える。
+   */
+  translationChunkChars: z.number().int().min(200).max(4000).default(800),
+  /** 1 プロジェクトあたりの翻訳対象の上限文字数。超えると手動翻訳へ誘導する */
+  translationMaxInputChars: z.number().int().min(1000).max(100000).default(10000),
+  /** サイト全体の 1 日あたりの実行回数。無料枠に収めるための上限 */
+  translationDailyRunLimit: z.number().int().min(0).max(100000).default(50),
+  /** 1 ユーザーあたりの 1 時間の実行回数 */
+  translationUserHourlyLimit: z.number().int().min(1).max(1000).default(20),
+
   // ---- クリエイタ還元 ----
   /** 還元機能全体の有効化。false の間は計算も分配も出金も行わない */
   creatorRewardEnabled: z.boolean().default(false),
@@ -118,7 +140,7 @@ export type AppSettings = z.infer<typeof appSettingsSchema>;
 export const DEFAULT_APP_SETTINGS: AppSettings = appSettingsSchema.parse({});
 
 /** 管理画面のどのタブに出すか */
-export type AppSettingGroup = "general" | "ddos" | "reward";
+export type AppSettingGroup = "general" | "ddos" | "reward" | "translation";
 
 /** 管理画面のフォーム生成に使うメタ情報 */
 export type AppSettingField = {
@@ -146,6 +168,13 @@ export const APP_SETTING_FIELDS: AppSettingField[] = [
   { key: "ddosThresholdTopSlugRatio", type: "number", labelKey: "ddosThresholdTopSlugRatio", helpKey: "ddosThresholdTopSlugRatioHelp", group: "ddos" },
   { key: "ddosThresholdIpRepeatRate", type: "number", labelKey: "ddosThresholdIpRepeatRate", helpKey: "ddosThresholdIpRepeatRateHelp", group: "ddos" },
   { key: "ddosDefaultProtectionDuration", type: "number", labelKey: "ddosDefaultProtectionDuration", helpKey: "ddosDefaultProtectionDurationHelp", group: "ddos" },
+  { key: "translationEnabled", type: "boolean", labelKey: "translationEnabled", helpKey: "translationEnabledHelp", group: "translation" },
+  { key: "translationModel", type: "string", labelKey: "translationModel", helpKey: "translationModelHelp", group: "translation" },
+  { key: "translationMaxTokens", type: "number", labelKey: "translationMaxTokens", helpKey: "translationMaxTokensHelp", group: "translation" },
+  { key: "translationChunkChars", type: "number", labelKey: "translationChunkChars", helpKey: "translationChunkCharsHelp", group: "translation" },
+  { key: "translationMaxInputChars", type: "number", labelKey: "translationMaxInputChars", helpKey: "translationMaxInputCharsHelp", group: "translation" },
+  { key: "translationDailyRunLimit", type: "number", labelKey: "translationDailyRunLimit", helpKey: "translationDailyRunLimitHelp", group: "translation" },
+  { key: "translationUserHourlyLimit", type: "number", labelKey: "translationUserHourlyLimit", helpKey: "translationUserHourlyLimitHelp", group: "translation" },
   { key: "creatorRewardEnabled", type: "boolean", labelKey: "creatorRewardEnabled", helpKey: "creatorRewardEnabledHelp", group: "reward" },
   { key: "rewardOptInByDefault", type: "boolean", labelKey: "rewardOptInByDefault", helpKey: "rewardOptInByDefaultHelp", group: "reward" },
   { key: "rewardPayoutRatioAds", type: "number", labelKey: "rewardPayoutRatioAds", helpKey: "rewardPayoutRatioAdsHelp", group: "reward" },

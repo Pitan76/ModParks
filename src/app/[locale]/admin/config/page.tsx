@@ -70,6 +70,14 @@ export default async function AdminConfigPage({ params }: { params: Promise<{ lo
             descKey="rewardSettingsDesc"
           />
         }
+        translation={
+          <AppSettingsGroupPanel
+            initialSettings={appSettings}
+            group="translation"
+            titleKey="translationSettingsTitle"
+            descKey="translationSettingsDesc"
+          />
+        }
       />
     </Box>
   );

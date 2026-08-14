@@ -541,7 +541,8 @@
         "unauthorized": "AI 翻訳の利用にはログインが必要です。",
         "invalid_request": "リクエストが不正です。",
         "budget_exceeded": "本日分の AI 翻訳の上限に達しました。日付が変わってから再度お試しください。",
-        "translation_disabled": "このプロジェクトではAI翻訳が許可されていません。"
+        "translation_disabled": "このプロジェクトではAI翻訳が許可されていません。",
+        "feature_disabled": "AI翻訳は現在停止しています。"
       }
     }
   },
@@ -1195,7 +1196,23 @@
       "payoutGiftcardEnabled": "ギフトカードでの出金を受け付ける",
       "payoutGiftcardEnabledHelp": "管理者がコードを手動発行して受け渡す運用です",
       "payoutGiftcardRate": "ギフトカード交換レート",
-      "payoutGiftcardRateHelp": "1ポイントをギフトカード額面いくらに交換するか。券種の購入手数料を吸収します（例: 0.9）"
+      "payoutGiftcardRateHelp": "1ポイントをギフトカード額面いくらに交換するか。券種の購入手数料を吸収します（例: 0.9）",
+      "translationSettingsTitle": "AI翻訳",
+      "translationSettingsDesc": "説明文のAI翻訳の動作を設定します。無料枠に収めたい場合は1日の実行回数と1回あたりの生成量を絞ってください。",
+      "translationEnabled": "AI翻訳を有効にする",
+      "translationEnabledHelp": "切ると閲覧者にも作者にも翻訳の導線を出さず、LLMを一切呼びません。保存済みの翻訳の表示は続きます。",
+      "translationModel": "モデル",
+      "translationModelHelp": "Workers AI のモデルID（例: @cf/meta/llama-3.3-70b-instruct-fp8-fast）。書式の指示に従いにくいモデルでは翻訳が破棄されやすくなります。",
+      "translationMaxTokens": "1回あたりの最大出力トークン",
+      "translationMaxTokensHelp": "小さすぎると応答が途中で切れ、その部分は原文のまま残ります。分割する文字数に見合う値にしてください。",
+      "translationChunkChars": "1回あたりの入力文字数",
+      "translationChunkCharsHelp": "本文をこの文字数ごとに分けて送ります。小さいほど書式は安定し1回の生成量も減りますが、呼び出し回数は増えます。",
+      "translationMaxInputChars": "翻訳できる説明文の上限文字数",
+      "translationMaxInputCharsHelp": "これを超える説明文はAI翻訳せず、手動翻訳へ誘導します。",
+      "translationDailyRunLimit": "1日の実行回数の上限（サイト全体）",
+      "translationDailyRunLimitHelp": "無料枠に収めるための上限です。超えた日は翻訳を止め、原文表示のまま案内します。0にすると実行できません。",
+      "translationUserHourlyLimit": "1ユーザーの1時間あたりの実行回数",
+      "translationUserHourlyLimitHelp": "既訳の表示はこの制限に含まれません（LLMを呼ぶ場合のみ数えます）。"
     },
     "projects": {
       "title": "プロジェクト管理",

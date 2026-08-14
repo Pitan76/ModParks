@@ -9,12 +9,17 @@ export interface TranslationRequest {
   targetLocale: string;
   /** 再試行時。書式の指示をより強く出す */
   strict?: boolean;
+  /** 使用するモデル。管理画面から変更できる */
+  model: string;
+  /** 1 回の生成で出力させる上限トークン */
+  maxTokens: number;
 }
 
 export interface TranslationProvider {
   /** translation_runs に記録する識別子 */
   readonly name: string;
-  readonly model: string;
+  /** 管理画面で未設定の場合に使うモデル */
+  readonly defaultModel: string;
   /** @returns LLM の生の応答。整形・検証は呼び出し側で行う */
   translate(req: TranslationRequest): Promise<string>;
 }

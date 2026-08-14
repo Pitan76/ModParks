@@ -7,23 +7,16 @@ import { posts } from "@/db/schema";
 import type { Database } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { locales, type AppLocale } from "@/lib/i18n/locales";
-import { translateContent, MAX_INPUT_CHARS } from "./translate";
+import { translateContent } from "./translate";
 import { computeSourceHash } from "./sourceHash";
 import { countRunsSince, findTranslation, hasRecentFailure, recordRun, saveTranslation } from "./repository";
 import type { BodyFormat } from "./masking";
+import { getTranslationSettings, type TranslationSettings } from "./settings";
 
 /** 同一対象で失敗した直後の再実行を抑える時間 */
 const FAILURE_COOLDOWN_MS = 10 * 60 * 1000;
-const RATE_LIMIT = { action: "translate", limit: 20, windowMs: 60 * 60 * 1000 };
-
-/**
- * サイト全体の 1 日あたりの LLM 実行回数。
- *
- * 試験運用のあいだは Workers AI の無料枠（日次の Neurons 割当）に収める。
- * 1 実行で title / body の 2 回呼び出しが走るため、割当を使い切らない側に倒した値。
- * 超えた日は翻訳を止め、原文表示のまま案内する（課金へは踏み込まない）。
- */
-const DAILY_RUN_LIMIT = 50;
+const RATE_LIMIT_ACTION = "translate";
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 export type TranslationError =
   | "invalid_locale"
@@ -35,7 +28,8 @@ export type TranslationError =
   | "invalid_output"
   | "provider_error"
   | "budget_exceeded"
-  | "translation_disabled";
+  | "translation_disabled"
+  | "feature_disabled";
 
 export type TranslationOutcome =
   | { ok: true; title: string; body: string; bodyFormat: BodyFormat; cached: boolean }
@@ -55,6 +49,9 @@ export async function requestTranslation(
 ): Promise<TranslationOutcome> {
   if (!locales.includes(locale as AppLocale)) return { ok: false, error: "invalid_locale" };
 
+  const settings = await getTranslationSettings();
+  if (!settings.enabled) return { ok: false, error: "feature_disabled" };
+
   const post = await db.select().from(posts).where(and(eq(posts.id, postId), eq(posts.kind, "project"))).get();
   if (!post) return { ok: false, error: "not_found" };
   // 限定公開の本文を LLM や共有キャッシュに乗せない
@@ -64,7 +61,7 @@ export async function requestTranslation(
   if (!post.aiTranslationEnabled) return { ok: false, error: "translation_disabled" };
 
   const sourceHash = await computeSourceHash(post);
-  if (options.regenerate) return runTranslation(db, { post, locale, userId, sourceHash, persist: false });
+  if (options.regenerate) return runTranslation(db, { post, locale, userId, sourceHash, settings, persist: false });
 
   const existing = await findTranslation(db, postId, locale);
   if (existing && existing.sourceHash === sourceHash) {
@@ -74,7 +71,7 @@ export async function requestTranslation(
     // 手動確定は原文が更新されても自動では訳し直さない（作者の明示操作でのみ更新する）
     return { ok: true, title: existing.title, body: existing.body, bodyFormat: existing.bodyFormat, cached: true };
   }
-  return runTranslation(db, { post, locale, userId, sourceHash, persist: true });
+  return runTranslation(db, { post, locale, userId, sourceHash, settings, persist: true });
 }
 
 interface RunContext {
@@ -82,18 +79,20 @@ interface RunContext {
   locale: string;
   userId: string;
   sourceHash: string;
+  settings: TranslationSettings;
   /** false なら結果を保存しない（作者が編集画面で確定するまで反映させないため） */
   persist: boolean;
 }
 
 async function runTranslation(db: Database, ctx: RunContext): Promise<TranslationOutcome> {
-  const { post, locale, userId, sourceHash } = ctx;
+  const { post, locale, userId, sourceHash, settings } = ctx;
   if (await hasRecentFailure(db, post.id, locale, FAILURE_COOLDOWN_MS)) {
     return { ok: false, error: "cooling_down" };
   }
-  const limited = await checkRateLimit(RATE_LIMIT.action, RATE_LIMIT.limit, RATE_LIMIT.windowMs, userId);
+  const limited = await checkRateLimit(
+    RATE_LIMIT_ACTION, settings.userHourlyLimit, RATE_LIMIT_WINDOW_MS, userId);
   if (!limited.success) return { ok: false, error: "rate_limited" };
-  if (await countRunsSince(db, startOfToday()) >= DAILY_RUN_LIMIT) {
+  if (await countRunsSince(db, startOfToday()) >= settings.dailyRunLimit) {
     return { ok: false, error: "budget_exceeded" };
   }
 
@@ -130,6 +129,7 @@ async function translateWithLogging(db: Database, ctx: RunContext): Promise<Logg
       bodyFormat:   post.bodyFormat,
       sourceLocale: post.sourceLocale,
       targetLocale: locale,
+      settings:     ctx.settings,
     });
     await recordRun(db, {
       ...base,
@@ -158,4 +158,3 @@ function startOfToday(): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
-export { MAX_INPUT_CHARS, DAILY_RUN_LIMIT };

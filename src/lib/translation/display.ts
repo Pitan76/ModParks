@@ -48,20 +48,16 @@ export async function resolveDisplayContent(
 
   const stale = translation.sourceHash !== (await computeSourceHash(post));
 
-  // cached は SSR に載せない（自動生成文を各言語版として索引させないため）。
-  // 既訳があればリンクは即座に解決し、LLM は呼ばれない。
-  if (translation.state === "cached") {
-    return { ...original, state: "cached", stale, canTranslate: isPublic };
-  }
-
+  // 既訳があれば cached でも最初から訳文を出す。原文への切り替えは画面側で行う。
+  // hreflang は manual のみに絞っているので、索引方針とは分けて扱える。
   return {
     title:      translation.title,
     body:       translation.body,
     bodyFormat: translation.bodyFormat,
     translated: true,
-    state:      "manual",
+    state:      translation.state,
     stale,
-    // manual は作者の確定なので、閲覧者からは訳し直させない
-    canTranslate: false,
+    // 古い cached だけ訳し直せる。manual は作者の確定なので閲覧者からは再生成させない
+    canTranslate: isPublic && stale && translation.state === "cached",
   };
 }

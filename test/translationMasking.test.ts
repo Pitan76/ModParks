@@ -112,7 +112,7 @@ describe("ペイロードの分割", () => {
   it("長い本文が複数の塊に分かれ、全行が過不足なく含まれること", () => {
     const body = Array.from({ length: 40 }, (_, i) => `これは${i}行目の説明文です。`.repeat(3)).join("\n");
     const doc = getMasker("markdown").mask(body);
-    const chunks = toPayloadChunks(doc);
+    const chunks = toPayloadChunks(doc, 800);
 
     expect(chunks.length).toBeGreaterThan(1);
     expect(chunks.flatMap((c) => c.indices)).toEqual(translatableIndices(doc));
@@ -120,6 +120,6 @@ describe("ペイロードの分割", () => {
 
   it("短い本文は 1 つの塊に収まること", () => {
     const doc = getMasker("markdown").mask("短い説明");
-    expect(toPayloadChunks(doc)).toHaveLength(1);
+    expect(toPayloadChunks(doc, 800)).toHaveLength(1);
   });
 });
