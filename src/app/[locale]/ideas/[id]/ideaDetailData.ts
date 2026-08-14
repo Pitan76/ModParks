@@ -177,7 +177,7 @@ export async function getIdeaDetail(id: string, userId?: string, options: GetIde
 
   const merged = mergeResolvedProjects(linkedVersions, sourceIdeaProjects);
   const projectIds = merged.map((p) => p.projectId);
-  const projectDetails = await getProjectsByIds(projectIds);
+  const projectDetails = await getProjectsByIds(projectIds, locale);
 
   const resolvedProjects = projectDetails.map((detail) => {
     const m = merged.find((p) => p.projectId === detail.id);

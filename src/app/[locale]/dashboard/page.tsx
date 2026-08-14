@@ -23,7 +23,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
 
   const t = await getTranslations("Dashboard");
   const tNav = await getTranslations("Nav");
-  const data = await getDashboardData(session.user.id);
+  const data = await getDashboardData(session.user.id, locale);
 
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>

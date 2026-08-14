@@ -6,11 +6,11 @@ import { toProjectPost, toIdeaPost } from "@/lib/queries/postRow";
 import { eq, and, desc, count } from "drizzle-orm";
 
 /** ダッシュボード表示に必要なユーザー固有データを一括取得する。 */
-export async function getDashboardData(userId: string) {
+export async function getDashboardData(userId: string, locale: string) {
   const db = await getDatabase();
 
   const stats = await getUserProjectStats(userId);
-  const favorites = await getFavoriteProjects(userId);
+  const favorites = await getFavoriteProjects(userId, locale);
 
   const [commentsCountResult] = await db
     .select({ value: count() })

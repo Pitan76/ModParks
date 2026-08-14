@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { mapProjectRow } from "@/lib/queries/projectRow";
+import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 
 // ---- お気に入りのトグル ----
 
@@ -63,7 +64,7 @@ export async function togglePostFavorite(postId: string) {
 
 // ---- お気に入り一覧取得 ----
 
-export async function getFavoriteProjects(userId: string) {
+export async function getFavoriteProjects(userId: string, locale?: string) {
   const db = await getDatabase();
   const { body, ...restPosts } = getTableColumns(posts);
 
@@ -73,7 +74,8 @@ export async function getFavoriteProjects(userId: string) {
       project: {
         ...restPosts,
         ...getTableColumns(projects),
-        body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
+        title: translatedTitle(locale),
+        body: translatedBodyPreview(locale),
         tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`
       },
       author: {

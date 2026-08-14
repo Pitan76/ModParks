@@ -3,6 +3,7 @@ import { users, userProfiles, userSettings, userFollows, developerSubscriptions,
 import { eq, and, sql, inArray, desc, getTableColumns } from "drizzle-orm";
 import { getProjectsWithCount, getUserProjectStats } from "@/lib/actions/projectQuery";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
+import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 import { getUserCollections } from "@/lib/actions/collection";
 import { mapProjectRow } from "@/lib/queries/projectRow";
 
@@ -111,7 +112,7 @@ export type PinnedItem =
   | { kind: "idea"; idea: AuthorIdea };
 
 /** プロフィールにピン留めされたプロジェクト/アイデアを、ピンの並び順で解決する。 */
-async function getPinnedItems(userId: string, isOwner: boolean): Promise<PinnedItem[]> {
+async function getPinnedItems(userId: string, isOwner: boolean, locale: string): Promise<PinnedItem[]> {
   const d1 = await getD1();
   const db = getDb(d1);
 
@@ -136,7 +137,8 @@ async function getPinnedItems(userId: string, isOwner: boolean): Promise<PinnedI
             project: {
               ...restPosts,
               ...getTableColumns(projects),
-              body: sql<string>`SUBSTR(${posts.body}, 1, 1200) || CASE WHEN LENGTH(${posts.body}) > 1200 THEN '...' ELSE '' END`,
+              title: translatedTitle(locale),
+              body: translatedBodyPreview(locale),
               tagsJson: sql<string>`(SELECT json_group_array(tag) FROM project_tags WHERE project_id = posts.id)`,
               latestVersionNumber: sql<string | null>`(SELECT version_number FROM versions WHERE project_id = posts.id AND archived_at IS NULL ORDER BY created_at DESC LIMIT 1)`
             },
@@ -258,10 +260,10 @@ export async function getProfileContent(user: ProfileUser, viewerId: string | un
 
   const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, stats, pinnedItems, authorIdeas, totalIdeaCount] = await Promise.all([
     getProjectsWithCount({ authorId: user.id, limit, offset, sort: sort as any, locale }),
-    getFavoriteProjects(user.id),
+    getFavoriteProjects(user.id, locale),
     getUserCollections(user.id, viewerId),
     getUserProjectStats(user.id),
-    getPinnedItems(user.id, isOwner),
+    getPinnedItems(user.id, isOwner, locale),
     // 非表示設定でも本人は編集用に一覧を見られるようにする
     canSeeIdeas ? getAuthorIdeas(user.id, isOwner, ideasLimit, ideasOffset) : Promise.resolve([] as AuthorIdea[]),
     canSeeIdeas ? countAuthorIdeas(user.id, isOwner) : Promise.resolve(0),
