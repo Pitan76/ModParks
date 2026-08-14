@@ -2,6 +2,7 @@ import { eq, and, or, sql, desc, inArray, like, type SQL } from "drizzle-orm";
 import { posts, projects, ideas, users, userProfiles, favorites, comments, projectTags } from "@/db/schema";
 import type { IdeaPostView, ProjectPostView } from "@/types/post";
 import type { ContentType } from "@/lib/data/projectTypes";
+import { keywordVariants } from "@/lib/search/kana";
 
 /**
  * 投稿一覧の取得。表示に必要な形（PostView）まで組み立てて返す。
@@ -226,7 +227,8 @@ export async function listProjectPosts(
   if (visibility) conditions.push(visibility);
   if (authorId) conditions.push(eq(posts.authorId, authorId));
   if (type) conditions.push(eq(projects.type, type));
-  if (q) conditions.push(like(posts.title, `%${q}%`));
+  // 表記ゆらぎ（ひらがな/カタカナ・全角/半角）を吸収するためバリアントへ展開する
+  if (q) conditions.push(or(...keywordVariants(q).map((v) => like(posts.title, `%${v}%`)))!);
   if (postIds) {
     if (postIds.length === 0) return [];
     conditions.push(inArray(posts.id, postIds));

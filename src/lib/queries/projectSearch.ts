@@ -1,6 +1,7 @@
 import { posts, projects, userProfiles } from "@/db/schema";
 import { eq, desc, and, or, like, sql, inArray, type SQL } from "drizzle-orm";
 import type { ContentType } from "@/lib/data/projectTypes";
+import { keywordVariants } from "@/lib/search/kana";
 
 
 
@@ -49,17 +50,21 @@ export function buildProjectSearchConditions(params: ProjectSearchParams): SQL[]
   if (q) {
     const keywords = q.trim().split(/\s+/).filter(Boolean);
     if (keywords.length > 0) {
+      // 1語をひらがな/カタカナ・全角/半角のバリアントへ展開し、いずれかに当たれば一致とする
       const keywordConditions = keywords.map((kw) => {
-        const kwConds: SQL[] = [like(posts.title, `%${kw}%`)];
-        if (includeDesc) {
-          kwConds.push(like(posts.body, `%${kw}%`));
-        }
-        if (includeAuthor) {
-          kwConds.push(like(userProfiles.username, `%${kw}%`));
-          kwConds.push(like(userProfiles.displayName, `%${kw}%`));
-        }
-        if (includeTags) {
-          kwConds.push(sql`${projects.id} IN (SELECT project_id FROM project_tags WHERE tag LIKE ${`%${kw}%`})`);
+        const kwConds: SQL[] = [];
+        for (const variant of keywordVariants(kw)) {
+          kwConds.push(like(posts.title, `%${variant}%`));
+          if (includeDesc) {
+            kwConds.push(like(posts.body, `%${variant}%`));
+          }
+          if (includeAuthor) {
+            kwConds.push(like(userProfiles.username, `%${variant}%`));
+            kwConds.push(like(userProfiles.displayName, `%${variant}%`));
+          }
+          if (includeTags) {
+            kwConds.push(sql`${projects.id} IN (SELECT project_id FROM project_tags WHERE tag LIKE ${`%${variant}%`})`);
+          }
         }
         return or(...kwConds)!;
       });
