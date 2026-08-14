@@ -2,6 +2,9 @@
 
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormHelperText from "@mui/material/FormHelperText";
 import { useTranslations } from "next-intl";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormTextField from "@/components/ui/form/FormTextField";
@@ -14,8 +17,10 @@ export interface ProjectDescriptionFieldsProps {
   sourceLocale?: string;
   defaultBodyFormat?: string;
   errorMessages?: string[];
-  /** 原文の言語を選ばせるか。新規作成では作成時のロケールを使うので出さない */
+  /** 原文の言語を選ばせるか。新規作成では本文から推定するので出さない */
   withSourceLocale?: boolean;
+  /** AI 翻訳の可否。既定は許可 */
+  aiTranslationEnabled?: boolean;
   onChange?: () => void;
 }
 
@@ -30,6 +35,7 @@ const ProjectDescriptionFields = ({
   defaultBodyFormat,
   errorMessages,
   withSourceLocale = false,
+  aiTranslationEnabled = true,
   onChange,
 }: ProjectDescriptionFieldsProps) => {
   const t = useTranslations("Project");
@@ -77,6 +83,22 @@ const ProjectDescriptionFields = ({
         errorMessages={errorMessages}
         sx={{ "& textarea": { resize: "vertical !important" } }}
       />
+
+      {withSourceLocale && (
+        <Box sx={{ mt: 1 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                name="aiTranslationEnabled"
+                defaultChecked={aiTranslationEnabled}
+                onChange={onChange}
+              />
+            }
+            label={t("fields.aiTranslationEnabled")}
+          />
+          <FormHelperText>{t("fields.aiTranslationEnabledHelper")}</FormHelperText>
+        </Box>
+      )}
     </Stack>
   );
 };

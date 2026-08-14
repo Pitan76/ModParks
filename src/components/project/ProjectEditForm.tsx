@@ -38,6 +38,7 @@ interface ProjectEditFormProps {
     aiGenerated?: boolean;
     bodyFormat?: string;
     sourceLocale?: string;
+    aiTranslationEnabled?: boolean;
   };
   availableTags?: { slug: string; name: string }[];
 }
@@ -192,6 +193,7 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
                   description={project.body}
                   descriptionFormat={project.bodyFormat}
                   sourceLocale={project.sourceLocale}
+                  aiTranslationEnabled={project.aiTranslationEnabled ?? true}
                   errorMessages={error?.description}
                   withSourceLocale
                   onChange={() => setDirty(true)}

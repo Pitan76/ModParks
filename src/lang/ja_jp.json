@@ -262,7 +262,9 @@
       "commentsEnabled": "コメントを有効化",
       "recipesEnabled": "レシピタブを有効化 (試験的機能)",
       "aiGenerated": "AI生成コンテンツを含む (任意)",
-      "sourceLocale": "原文の言語"
+      "sourceLocale": "原文の言語",
+      "aiTranslationEnabled": "AI翻訳を許可する",
+      "aiTranslationEnabledHelper": "閲覧者が他言語で読むときにAI翻訳を実行できるようにします。切ると、手動で登録した翻訳のみが表示されます。"
     },
     "table": {
       "name": "プロジェクト",
@@ -538,7 +540,8 @@
         "provider_error": "翻訳に失敗しました。時間をおいて再度お試しください。",
         "unauthorized": "AI 翻訳の利用にはログインが必要です。",
         "invalid_request": "リクエストが不正です。",
-        "budget_exceeded": "本日分の AI 翻訳の上限に達しました。日付が変わってから再度お試しください。"
+        "budget_exceeded": "本日分の AI 翻訳の上限に達しました。日付が変わってから再度お試しください。",
+        "translation_disabled": "このプロジェクトではAI翻訳が許可されていません。"
       }
     }
   },

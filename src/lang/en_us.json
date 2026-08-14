@@ -262,7 +262,9 @@
       "commentsEnabled": "Enable Comments",
       "recipesEnabled": "Enable Recipes Tab",
       "aiGenerated": "Contains AI-generated content (optional)",
-      "sourceLocale": "Original language"
+      "sourceLocale": "Original language",
+      "aiTranslationEnabled": "Allow AI translation",
+      "aiTranslationEnabledHelper": "Lets visitors run AI translation when reading in another language. When off, only translations you added manually are shown."
     },
     "table": {
       "name": "Project",
@@ -538,7 +540,8 @@
         "provider_error": "Translation failed. Please try again later.",
         "unauthorized": "Sign in to use AI translation.",
         "invalid_request": "Invalid request.",
-        "budget_exceeded": "Today's AI translation limit has been reached. Please try again tomorrow."
+        "budget_exceeded": "Today's AI translation limit has been reached. Please try again tomorrow.",
+        "translation_disabled": "AI translation is not allowed for this project."
       }
     }
   },
