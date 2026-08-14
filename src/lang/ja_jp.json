@@ -513,7 +513,7 @@
       "staleChip": "原文が更新済み",
       "manualStaleHelp": "原文が更新されていますが、この翻訳は手動で確定されているため自動での訳し直しは行いません。原文に合わせるには、この欄を直接編集するか「AI翻訳で下書き」を実行してください。翻訳を削除すると、以後は閲覧者による自動翻訳に戻ります。",
       "manualStaleNotice": "この翻訳は原文の更新より前に作成されたものです。",
-      "translateLink": "AI翻訳で読む",
+      "translateLink": "AI翻訳で表示",
       "retranslate": "最新の原文で翻訳し直す",
       "loginRequired": "AI翻訳の利用にはログインが必要です。",
       "machineTranslated": "この説明はAIによる翻訳です。",
