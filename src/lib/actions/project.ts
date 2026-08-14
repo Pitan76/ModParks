@@ -153,7 +153,6 @@ export const updateProject = async (projectId: string, formData: FormData) => {
         ...(fields.slug !== undefined ? { slug: fields.slug } : {}),
         ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {}),
         ...(isLeavingDraft ? { createdAt: new Date() } : {}),
-        updatedAt: new Date(),
       })
       .where(eq(posts.id, project.id)),
     db
@@ -196,11 +195,8 @@ export const updateProjectIcon = async (projectId: string, iconUrl: string) => {
 
   await assertProjectAccess(db, project, session);
 
-  // iconUrl は projects、updatedAt は posts と、更新先が分かれる
-  await db.batch([
-    db.update(projects).set({ iconUrl }).where(eq(projects.id, projectId)),
-    db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, projectId)),
-  ]);
+  // iconUrl を更新
+  await db.update(projects).set({ iconUrl }).where(eq(projects.id, projectId));
   revalidatePath(`/[locale]/projects/[slug]`, "page");
   return { success: true };
 };
@@ -223,7 +219,7 @@ export const transferOwnership = async (projectId: string, newOwnerId: string) =
   const targetUser = await db.select().from(users).where(eq(users.id, newOwnerId)).get();
   if (!targetUser) throw new Error("User not found");
 
-  await db.update(posts).set({ authorId: newOwnerId, updatedAt: new Date() }).where(eq(posts.id, projectId));
+  await db.update(posts).set({ authorId: newOwnerId }).where(eq(posts.id, projectId));
 
   await db.delete(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, newOwnerId)));
   await recordDeletion(db, "project_members", buildRecordKey(projectId, newOwnerId));

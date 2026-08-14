@@ -323,7 +323,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
     revalidatePath(`/ideas/${ideaId}`);
   }
 
-  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
+
 
   revalidatePath(`/projects/${projectSlug}`);
   revalidatePath(`/ideas`);
@@ -363,7 +363,7 @@ export const deleteVersion = async (versionId: string, projectSlug: string): Pro
   await db.delete(versions).where(eq(versions.id, versionId)).run();
   await recordDeletion(db, "versions", versionId);
 
-  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
+
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
@@ -387,7 +387,7 @@ export const setVersionArchived = async (
     .where(eq(versions.id, versionId))
     .run();
 
-  await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
+
 
   revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
