@@ -54,15 +54,6 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
           </>
         )}
 
-        {showAiLabel && p.aiGenerated && (
-          <>
-            <dt title={t("infobox.aiGeneratedDesc")} style={{ cursor: "help" }}>
-              {t("infobox.aiGenerated")}
-            </dt>
-            <dd>{t("infobox.aiGeneratedYes")}</dd>
-          </>
-        )}
-
         <dt>{t("infobox.license")}</dt>
         <dd>{p.license}</dd>
 
@@ -103,6 +94,17 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
                   </li>
                 ))}
               </ul>
+            </dd>
+          </>
+        )}
+
+        {showAiLabel && p.aiGenerated && (
+          <>
+            <dt>{t("infobox.other")}</dt>
+            <dd>
+              <span title={t("infobox.aiGeneratedDesc")} style={{ cursor: "help", borderBottom: "1px dashed" }}>
+                {t("infobox.aiGenerated")}
+              </span>
             </dd>
           </>
         )}

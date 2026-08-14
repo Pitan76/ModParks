@@ -14,7 +14,6 @@ import LinkIcon from "@mui/icons-material/Link";
 import XIcon from "@mui/icons-material/X";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LanguageIcon from "@mui/icons-material/Language";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
 import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "next-intl";
 import ReportDialog from "@/components/project/ReportDialog";
@@ -129,21 +128,6 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
 
       {(loaders.length > 0 || mcVersions.length > 0) && <Divider sx={{ mb: 2 }} />}
 
-      {/* AI生成コンテンツ */}
-      {showAiLabel && p.aiGenerated && (
-        <>
-          <Box sx={{ mb: 2 }}>
-            <Tooltip title={t("infobox.aiGeneratedDesc")} arrow>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 1, cursor: "help" }}>
-                <SmartToyIcon fontSize="small" color="action" />
-                {t("infobox.aiGenerated")}
-              </Typography>
-            </Tooltip>
-          </Box>
-          <Divider sx={{ mb: 2 }} />
-        </>
-      )}
-
       {/* ライセンス */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
@@ -214,7 +198,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
 
       {/* タグ */}
       {p.tags.length > 0 && (
-        <Box>
+        <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <LocalOfferIcon fontSize="small" color="action" />
             {t("infobox.tags")}
@@ -232,6 +216,23 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
               </Link>
             ))}
           </Stack>
+        </Box>
+      )}
+
+      {/* その他 */}
+      {showAiLabel && p.aiGenerated && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {t("infobox.other")}
+          </Typography>
+          <Tooltip title={t("infobox.aiGeneratedDesc")} arrow>
+            <Chip
+              label={t("infobox.aiGenerated")}
+              size="small"
+              variant="outlined"
+              sx={{ borderColor: "divider", color: "text.secondary", cursor: "help" }}
+            />
+          </Tooltip>
         </Box>
       )}
 
