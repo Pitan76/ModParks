@@ -7,6 +7,8 @@ export interface TranslationRequest {
   payload: string;
   sourceLocale: string;
   targetLocale: string;
+  /** 再試行時。書式の指示をより強く出す */
+  strict?: boolean;
 }
 
 export interface TranslationProvider {

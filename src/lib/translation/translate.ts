@@ -49,17 +49,28 @@ export async function translateContent(input: TranslateInput): Promise<Translate
 type DocumentResult = { text: string | null; raw: string | null };
 type MaskedDoc = ReturnType<ReturnType<typeof getMasker>["mask"]>;
 
-/** 検証に落ちた場合は text=null を返し、呼び出し側で破棄させる */
+/**
+ * 検証に落ちた場合は 1 度だけ訳し直す。小さいモデルは行番号やトークンを
+ * 落とすことがあり、単純な再試行で通ることが多いため。
+ * それでも落ちたら text=null を返し、呼び出し側で破棄させる。
+ */
 async function translateDocument(doc: MaskedDoc, input: TranslateInput): Promise<DocumentResult> {
   const payload = toPayload(doc);
   if (payload.trim() === "") return { text: restore(doc, new Map()), raw: "" };
 
-  const raw = await getTranslationProvider().translate({
-    payload,
-    sourceLocale: input.sourceLocale,
-    targetLocale: input.targetLocale,
-  });
-  const parsed = parsePayload(raw, doc);
-  if (!parsed || !validateTokens(doc, parsed)) return { text: null, raw };
-  return { text: restore(doc, parsed), raw };
+  let raw = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const response = await getTranslationProvider().translate({
+      payload,
+      sourceLocale: input.sourceLocale,
+      targetLocale: input.targetLocale,
+      strict: attempt > 0,
+    });
+    raw += response;
+    const parsed = parsePayload(response, doc);
+    if (parsed && validateTokens(doc, parsed)) return { text: restore(doc, parsed), raw };
+    // 応答の形が原因なので、診断できるよう先頭だけ残す（本文全体はログに出さない）
+    console.warn(`translation output rejected (attempt ${attempt + 1}):`, response.slice(0, 300));
+  }
+  return { text: null, raw };
 }

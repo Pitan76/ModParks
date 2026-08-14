@@ -15,7 +15,7 @@ export const workersAiProvider: TranslationProvider = {
     const ai = await getAiBinding();
     const result = await ai.run(MODEL, {
       messages: [
-        { role: "system", content: buildSystemPrompt(req.sourceLocale, req.targetLocale) },
+        { role: "system", content: buildSystemPrompt(req.sourceLocale, req.targetLocale, req.strict) },
         { role: "user", content: buildUserPrompt(req) },
       ],
       // 訳文のぶれと記法崩れを抑えるため、生成はできるだけ決定的にする

@@ -5,7 +5,8 @@
 import type { MaskedDocument } from "./masking";
 
 const LINE_PREFIX = "L";
-const RESPONSE_LINE = /^\s*L(\d+):\s?([\s\S]*)$/;
+/** 行頭の飾り（箇条書き・強調）と、全角コロンや空白の揺れを許容する */
+const RESPONSE_LINE = /^\s*(?:[-*]\s*)?\*{0,2}L\s*(\d+)\*{0,2}\s*[:：]\s?([\s\S]*)$/;
 
 /** LLM に渡す本文。翻訳対象の行だけを行番号付きで並べる */
 export function toPayload(doc: MaskedDocument): string {
