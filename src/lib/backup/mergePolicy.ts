@@ -121,6 +121,12 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
       "親の posts が採用された場合のみ子も上書きする",
     review: "posts と projects が別々に採用されると、投稿の共通部分と固有部分がちぐはぐな状態になりうる",
   },
+  post_translations: {
+    strategy: "last_write_wins",
+    reason:
+      "updatedAt を持つ。手動確定した訳文は作者の労力そのものなので、" +
+      "新しい側を採る（AI キャッシュは失われても再生成できる）",
+  },
   collections: {
     strategy: "last_write_wins",
     reason: "updatedAt を持つ",

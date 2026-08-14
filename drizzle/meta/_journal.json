@@ -582,6 +582,13 @@
       "when": 1786710778033,
       "tag": "0082_smiling_the_hunter",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "6",
+      "when": 1786716376630,
+      "tag": "0083_clear_silhouette",
+      "breakpoints": true
     }
   ]
 }

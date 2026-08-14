@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getMasker, type BodyFormat } from "../src/lib/translation/masking";
 import { parsePayload, toPayload } from "../src/lib/translation/payload";
 import { restore, validateTokens } from "../src/lib/translation/restore";
+import { detectSourceLocale } from "../src/lib/translation/detectLocale";
 
 /** 翻訳を通さず、返ってきた体で往復させる（記法が保たれることの確認） */
 function roundTrip(text: string, format: BodyFormat, translate = (s: string) => s): string {
@@ -79,5 +80,30 @@ describe("plaintext マスキング", () => {
     expect(toPayload(doc)).not.toContain("example.com");
     expect(roundTrip("詳細は https://example.com を参照", "plaintext"))
       .toBe("詳細は https://example.com を参照");
+  });
+});
+
+describe("原文言語の推定", () => {
+  it("かなを含む本文は日本語と判定されること", () => {
+    expect(detectSourceLocale("このModはカメラを追加します。")).toBe("ja");
+  });
+
+  it("英語のみの本文は英語と判定されること", () => {
+    expect(detectSourceLocale("A camera mod that adds ambient shots to your world.")).toBe("en");
+  });
+
+  it("英語本文に日本語の作者名が混ざっても英語と判定されること", () => {
+    expect(detectSourceLocale(
+      "Ambient Camera lets you record cinematic shots. Compatible with Fabric and NeoForge. " +
+      "Report issues on GitHub. Licensed under MIT."
+    )).toBe("en");
+  });
+
+  it("対応していない言語と判定された場合は既定ロケールに落ちること", () => {
+    expect(detectSourceLocale("这是一个相机模组")).toBe("ja");
+  });
+
+  it("空の本文は既定ロケールになること", () => {
+    expect(detectSourceLocale("   ")).toBe("ja");
   });
 });

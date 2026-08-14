@@ -35,6 +35,13 @@ export const posts = sqliteTable("posts", {
    * 訳文は post_translations 側にのみ持ち、このロケールの行は作らない。
    */
   sourceLocale: text("source_locale").notNull().default("ja"),
+  /**
+   * 閲覧者主導の AI 翻訳を許可するか。既定は許可。
+   * 訳文の品質を作者が管理したい場合や、機械翻訳を望まない場合に落とす。
+   */
+  aiTranslationEnabled: integer("ai_translation_enabled", { mode: "boolean" })
+    .notNull()
+    .default(true),
   /** 公開範囲。旧 projects.status / ideas.visibility を統合したもの */
   visibility: text("visibility", { enum: ["draft", "public", "unlisted", "private"] })
     .notNull()

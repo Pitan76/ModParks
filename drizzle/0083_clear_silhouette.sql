@@ -1,0 +1,1 @@
+ALTER TABLE `posts` ADD `ai_translation_enabled` integer DEFAULT true NOT NULL;

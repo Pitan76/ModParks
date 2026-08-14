@@ -12,6 +12,7 @@ import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { isAdminSession } from "@/lib/auth/roles";
 import { redirect } from "@/lib/i18n/routing";
 import { getLocale } from "next-intl/server";
+import { detectSourceLocale } from "@/lib/translation/detectLocale";
 import {
   normalizeExternalLinks,
   resolveSlugChange,
@@ -67,8 +68,9 @@ export async function createProject(formData: FormData) {
       title:      name,
       body:       description,
       bodyFormat: descriptionFormat || "markdown",
-      // 作成時の表示言語を原文の言語とみなす。多言語表示はこれを起点にする
-      sourceLocale: await getLocale(),
+      // UI のロケールではなく本文から推定する。日本語UIの作者が英語で書くこともあるため
+      sourceLocale: detectSourceLocale(`${name}
+${description}`),
       visibility: "draft",
     }),
     db.insert(projects).values({

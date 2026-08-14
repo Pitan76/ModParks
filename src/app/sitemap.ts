@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { canonicalUrl, languageAlternates } from '@/lib/seo/canonical';
 import { getDatabase } from '@/lib/db';
-import { posts, userProfiles, users } from '@/db/schema';
+import { posts, postTranslations, userProfiles, users } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 
 // ビルド時は D1 バインディングが無くテーブルを引けないため、リクエスト時に生成する。
@@ -27,6 +27,8 @@ type EntryOptions<T> = {
   lastModifiedOf: (item: T) => Date;
   changeFrequency: NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>;
   priority: number;
+  /** hreflang に載せる言語。省略時は全ロケール */
+  localesOf?: (item: T) => readonly string[];
 };
 
 /** 各アイテムを sitemap エントリへ変換する */
@@ -36,13 +38,14 @@ const toEntries = <T>({
   lastModifiedOf,
   changeFrequency,
   priority,
+  localesOf,
 }: EntryOptions<T>): MetadataRoute.Sitemap =>
   items.map((item) => ({
     url: canonicalUrl(pathOf(item)),
     lastModified: lastModifiedOf(item),
     changeFrequency,
     priority,
-    alternates: { languages: languageAlternates(pathOf(item)) },
+    alternates: { languages: languageAlternates(pathOf(item), localesOf?.(item)) },
   }));
 
 const staticEntries = (): MetadataRoute.Sitemap =>
@@ -54,13 +57,28 @@ const staticEntries = (): MetadataRoute.Sitemap =>
     alternates: { languages: languageAlternates(route.path) },
   }));
 
+/** 投稿ID → 手動確定済みの訳文がある言語。索引対象を絞るために使う */
+const manualTranslationLocales = async (
+  db: Awaited<ReturnType<typeof getDatabase>>,
+): Promise<Map<string, string[]>> => {
+  const rows = await db
+    .select({ postId: postTranslations.postId, locale: postTranslations.locale })
+    .from(postTranslations)
+    .where(eq(postTranslations.state, 'manual'))
+    .all();
+
+  const byPost = new Map<string, string[]>();
+  for (const row of rows) byPost.set(row.postId, [...(byPost.get(row.postId) ?? []), row.locale]);
+  return byPost;
+};
+
 /** D1 から公開コンテンツを引いて sitemap エントリへ変換する */
 const dynamicEntries = async (): Promise<MetadataRoute.Sitemap> => {
   const db = await getDatabase();
 
   const [dbProjects, dbIdeas, dbUsers] = await Promise.all([
     db
-      .select({ slug: posts.slug, updatedAt: posts.updatedAt })
+      .select({ id: posts.id, slug: posts.slug, updatedAt: posts.updatedAt, sourceLocale: posts.sourceLocale })
       .from(posts)
       .where(and(eq(posts.kind, 'project'), eq(posts.visibility, 'public')))
       .all(),
@@ -77,6 +95,9 @@ const dynamicEntries = async (): Promise<MetadataRoute.Sitemap> => {
       .all(),
   ]);
 
+  // 機械翻訳しか無い言語は各ページの hreflang にも載せていないので、sitemap でも載せない
+  const manualLocales = await manualTranslationLocales(db);
+
   return [
     ...toEntries({
       items: dbProjects,
@@ -84,6 +105,7 @@ const dynamicEntries = async (): Promise<MetadataRoute.Sitemap> => {
       lastModifiedOf: (p) => p.updatedAt,
       changeFrequency: 'daily',
       priority: 0.7,
+      localesOf: (p) => [p.sourceLocale, ...(manualLocales.get(p.id) ?? [])],
     }),
     ...toEntries({
       items: dbIdeas,
