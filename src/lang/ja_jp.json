@@ -349,8 +349,9 @@
       "report": "通報",
       "platforms": "プラットフォーム",
       "gameVersions": "ゲームバージョン",
-      "aiGenerated": "AI生成コンテンツ",
-      "aiGeneratedDesc": "このプロジェクトにはAIで生成されたコンテンツが含まれています。"
+      "aiGenerated": "AI生成",
+      "aiGeneratedDesc": "このプロジェクトにはAIで生成されたコンテンツが含まれています。",
+      "aiGeneratedYes": "使用"
     },
     "header": {
       "publishedAt": "{date}",

@@ -56,8 +56,10 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
 
         {showAiLabel && p.aiGenerated && (
           <>
-            <dt>{t("infobox.aiGenerated")}</dt>
-            <dd>{t("infobox.aiGeneratedDesc")}</dd>
+            <dt title={t("infobox.aiGeneratedDesc")} style={{ cursor: "help" }}>
+              {t("infobox.aiGenerated")}
+            </dt>
+            <dd>{t("infobox.aiGeneratedYes")}</dd>
           </>
         )}
 

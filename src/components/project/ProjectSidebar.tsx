@@ -15,6 +15,7 @@ import XIcon from "@mui/icons-material/X";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LanguageIcon from "@mui/icons-material/Language";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
+import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "next-intl";
 import ReportDialog from "@/components/project/ReportDialog";
 import { Link } from "@/lib/i18n/routing";
@@ -132,13 +133,12 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
       {showAiLabel && p.aiGenerated && (
         <>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-              <SmartToyIcon fontSize="small" color="action" />
-              {t("infobox.aiGenerated")}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t("infobox.aiGeneratedDesc")}
-            </Typography>
+            <Tooltip title={t("infobox.aiGeneratedDesc")} arrow>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 1, cursor: "help" }}>
+                <SmartToyIcon fontSize="small" color="action" />
+                {t("infobox.aiGenerated")}
+              </Typography>
+            </Tooltip>
           </Box>
           <Divider sx={{ mb: 2 }} />
         </>
