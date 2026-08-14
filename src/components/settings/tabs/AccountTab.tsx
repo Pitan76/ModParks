@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { changeUsername, changeEmail, changePassword, deleteAccount, deactivateAccount } from "@/lib/actions/settingsSecurity";
 import { updateLocale } from "@/lib/actions/settings";
 import { useRouter, usePathname } from "@/lib/i18n/routing";
@@ -34,6 +34,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
   const { message, flash } = useFlashMessage(4000);
   const router = useRouter();
   const pathname = usePathname();
+  const { update: updateSession } = useSession();
 
   const [emailPassword, setEmailPassword] = useState("");
   const [oldPass, setOldPass] = useState("");
@@ -80,7 +81,9 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
 
       if (values.locale !== form.baseline.locale) {
         await updateLocale(values.locale);
-        // localePrefix が "never" のため、言語の切り替えは next-intl のルーターに任せる
+        // セッションの locale は JWT に 5分キャッシュされる。先に更新しておかないと
+        // LocaleSyncer が古い設定言語のURLへ引き戻してしまう
+        await updateSession();
         router.replace(pathname, { locale: values.locale });
         router.refresh();
         return;
