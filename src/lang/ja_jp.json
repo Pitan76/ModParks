@@ -513,7 +513,7 @@
       "staleChip": "原文が更新済み",
       "manualStaleHelp": "原文が更新されていますが、この翻訳は手動で確定されているため自動での訳し直しは行いません。原文に合わせるには、この欄を直接編集するか「AI翻訳で下書き」を実行してください。翻訳を削除すると、以後は閲覧者による自動翻訳に戻ります。",
       "manualStaleNotice": "この翻訳は原文の更新より前に作成されたものです。",
-      "translateLink": "AI翻訳で表示",
+      "translateLink": "AI翻訳で読む",
       "retranslate": "最新の原文で翻訳し直す",
       "loginRequired": "AI翻訳の利用にはログインが必要です。",
       "machineTranslated": "この説明はAIによる翻訳です。",
@@ -543,7 +543,9 @@
         "budget_exceeded": "本日分の AI 翻訳の上限に達しました。日付が変わってから再度お試しください。",
         "translation_disabled": "このプロジェクトではAI翻訳が許可されていません。",
         "feature_disabled": "AI翻訳は現在停止しています。"
-      }
+      },
+      "showOriginal": "原文で表示",
+      "showTranslation": "AI翻訳で表示"
     }
   },
   "Version": {

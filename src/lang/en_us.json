@@ -543,7 +543,9 @@
         "budget_exceeded": "Today's AI translation limit has been reached. Please try again tomorrow.",
         "translation_disabled": "AI translation is not allowed for this project.",
         "feature_disabled": "AI translation is currently disabled."
-      }
+      },
+      "showOriginal": "Show original",
+      "showTranslation": "Show AI translation"
     }
   },
   "Version": {

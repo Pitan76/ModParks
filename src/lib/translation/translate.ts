@@ -15,7 +15,6 @@ import type { TranslationSettings } from "./settings";
 const MIN_COVERAGE = 0.7;
 
 export interface TranslateInput {
-  title: string;
   body: string;
   bodyFormat: BodyFormat;
   sourceLocale: string;
@@ -32,34 +31,31 @@ interface ResultMeta {
 }
 
 export type TranslateResult =
-  | ({ ok: true; title: string; body: string } & ResultMeta)
+  | ({ ok: true; body: string } & ResultMeta)
   | ({ ok: false; reason: "too_long" | "invalid_output" } & ResultMeta);
 
 /**
- * title と body をまとめて訳す。
+ * 説明本文を訳す。
+ *
+ * タイトルは訳さない。Mod 名は固有名詞であり、訳すとかえって通じなくなるため
+ * （"Ambient Camera" を訳して探せなくなる方が損失が大きい）。
  * 本文は塊に分けて渡す（一度に投げると応答が出力上限で切れるため）。
  */
 export async function translateContent(input: TranslateInput): Promise<TranslateResult> {
   const provider = getTranslationProvider();
   const { settings } = input;
-  const titleDoc = getMasker("plaintext").mask(input.title);
-  const bodyDoc  = getMasker(input.bodyFormat).mask(input.body);
-  const inputChars = payloadLength(titleDoc) + payloadLength(bodyDoc);
+  const bodyDoc = getMasker(input.bodyFormat).mask(input.body);
+  const inputChars = payloadLength(bodyDoc);
   const meta = { provider: provider.name, model: settings.model, inputChars };
 
   if (inputChars > settings.maxInputChars) {
     return { ok: false, reason: "too_long", ...meta, outputChars: 0 };
   }
 
-  const [titleOut, bodyOut] = await Promise.all([
-    translateDocument(titleDoc, input),
-    translateDocument(bodyDoc, input),
-  ]);
-  const outputChars = titleOut.outputChars + bodyOut.outputChars;
-  if (titleOut.text === null || bodyOut.text === null) {
-    return { ok: false, reason: "invalid_output", ...meta, outputChars };
-  }
-  return { ok: true, title: titleOut.text, body: bodyOut.text, ...meta, outputChars };
+  const bodyOut = await translateDocument(bodyDoc, input);
+  const outputChars = bodyOut.outputChars;
+  if (bodyOut.text === null) return { ok: false, reason: "invalid_output", ...meta, outputChars };
+  return { ok: true, body: bodyOut.text, ...meta, outputChars };
 }
 
 interface DocumentResult {

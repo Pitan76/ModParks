@@ -64,7 +64,8 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
     ? null
     : await findMetadataTranslation(db, project.id, locale);
 
-  const title = translation?.title ?? project.title;
+  // Mod 名は固有名詞なので訳さない。説明文だけ訳文を使う
+  const title = project.title;
   const plainDesc = toPlainDescription(translation?.body ?? project.body);
   const tMeta = await getTranslations({ locale, namespace: "Metadata" });
   const description = plainDesc.length > 150
@@ -179,9 +180,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   // getProjectBySlug は ProjectPost を平坦化した形を返す（title / body / visibility）。
   // as any を外して、フィールド名の取りこぼしが型で見つかるようにする。
-  const p = display.state === "manual"
-    ? { ...project, title: display.title, body: display.body, bodyFormat: display.bodyFormat }
-    : project;
+  // タイトルは訳さないので原文のまま。本文だけ表示側で切り替える
+  const p = project;
   const t = await getTranslations("Project");
 
   const canEdit = isOwner;
@@ -258,9 +258,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 <TranslatedDescription
                   postId={p.id}
                   locale={locale}
-                  body={p.body}
-                  bodyFormat={p.bodyFormat}
-                  translated={display.translated}
+                  original={{ body: p.body, format: p.bodyFormat }}
+                  translation={display.translated
+                    ? { body: display.body, format: display.bodyFormat }
+                    : null}
                   state={display.state}
                   stale={display.stale}
                   canTranslate={display.canTranslate}

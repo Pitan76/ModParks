@@ -98,24 +98,25 @@ async function runTranslation(db: Database, ctx: RunContext): Promise<Translatio
 
   const result = await translateWithLogging(db, ctx);
   if (!result.ok) return { ok: false, error: result.reason };
+  // タイトルは訳さないので原文をそのまま持つ
   if (!ctx.persist) {
-    return { ok: true, title: result.title, body: result.body, bodyFormat: post.bodyFormat, cached: false };
+    return { ok: true, title: post.title, body: result.body, bodyFormat: post.bodyFormat, cached: false };
   }
 
   await saveTranslation(db, {
     postId: post.id,
     locale,
-    title: result.title,
+    title: post.title,
     body: result.body,
     bodyFormat: post.bodyFormat,
     state: "cached",
     sourceHash,
   });
-  return { ok: true, title: result.title, body: result.body, bodyFormat: post.bodyFormat, cached: false };
+  return { ok: true, title: post.title, body: result.body, bodyFormat: post.bodyFormat, cached: false };
 }
 
 type LoggedResult =
-  | { ok: true; title: string; body: string }
+  | { ok: true; body: string }
   | { ok: false; reason: "too_long" | "invalid_output" | "provider_error" };
 
 /** LLM 呼び出しの結果は成否によらず translation_runs に残す */
@@ -124,7 +125,6 @@ async function translateWithLogging(db: Database, ctx: RunContext): Promise<Logg
   const base = { postId: post.id, locale, userId };
   try {
     const result = await translateContent({
-      title:        post.title,
       body:         post.body,
       bodyFormat:   post.bodyFormat,
       sourceLocale: post.sourceLocale,
@@ -140,7 +140,7 @@ async function translateWithLogging(db: Database, ctx: RunContext): Promise<Logg
       status:      result.ok ? "ok" : result.reason === "too_long" ? "error" : "invalid_output",
     });
     if (!result.ok) return { ok: false, reason: result.reason };
-    return { ok: true, title: result.title, body: result.body };
+    return { ok: true, body: result.body };
   } catch (e) {
     // 外部 I/O 境界。プロバイダ側の障害はここで記録し、閲覧者には原文を出す
     console.error("translation provider failed:", e);

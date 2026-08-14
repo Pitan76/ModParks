@@ -10,52 +10,72 @@ import { useTranslations } from "next-intl";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
 import { useTranslateRequest } from "./useTranslateRequest";
 
+interface Content {
+  body: string;
+  format: string;
+}
+
 interface TranslatedDescriptionProps {
   postId: string;
   locale: string;
-  body: string;
-  bodyFormat: string;
-  /** 表示中の本文が訳文か */
-  translated: boolean;
+  /** 原文。訳文を表示していても切り替えで戻せるよう常に持つ */
+  original: Content;
+  /** 保存済みの訳文。無ければ null */
+  translation: Content | null;
   state: "cached" | "manual" | null;
   stale: boolean;
+  /** 訳文が無い、または古い場合に AI 翻訳を実行できるか */
   canTranslate: boolean;
   isLoggedIn: boolean;
 }
 
 /**
- * 説明文の表示と、閲覧者主導の AI 翻訳。
- * 訳文は取得後にこの場で差し替える（cached を SSR に載せないため）。
+ * 説明文の表示と、原文 / 訳文の切り替え。
+ * 訳文が既にあれば最初からそちらを出し、リンクで原文に戻せるようにする。
  */
 export default function TranslatedDescription(props: TranslatedDescriptionProps) {
   const t = useTranslations("Project.translation");
-  const [content, setContent] = useState({ body: props.body, format: props.bodyFormat });
-  // 訳文を出しているのは manual のときだけ。cached はこの画面での取得後に差し替わる
-  const [done, setDone] = useState(props.translated);
+  const [translation, setTranslation] = useState<Content | null>(props.translation);
+  const [showOriginal, setShowOriginal] = useState(false);
   const { run, loading, error } = useTranslateRequest();
 
   const onTranslate = async () => {
     const result = await run(props.postId, props.locale);
     if (!result) return;
-    setContent({ body: result.body, format: result.bodyFormat });
-    setDone(true);
+    setTranslation({ body: result.body, format: result.bodyFormat });
+    setShowOriginal(false);
   };
+
+  const showingTranslation = translation !== null && !showOriginal;
+  const content = showingTranslation ? translation : props.original;
 
   return (
     <Box>
-      {props.canTranslate && !done && (
-        <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-          <TranslateIcon fontSize="small" color="action" />
-          {props.isLoggedIn ? (
-            <Link component="button" type="button" onClick={onTranslate} disabled={loading} underline="hover">
-              {props.stale ? t("retranslate") : t("translateLink")}
+      <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        {translation !== null && (
+          <>
+            <TranslateIcon fontSize="small" color="action" />
+            <Link component="button" type="button" underline="hover" onClick={() => setShowOriginal(!showOriginal)}>
+              {showingTranslation ? t("showOriginal") : t("showTranslation")}
             </Link>
-          ) : (
-            <Typography variant="body2" color="text.secondary">{t("loginRequired")}</Typography>
-          )}
-          {loading && <CircularProgress size={16} />}
-        </Box>
-      )}
+          </>
+        )}
+
+        {props.canTranslate && (
+          <>
+            {translation === null && <TranslateIcon fontSize="small" color="action" />}
+            {props.isLoggedIn ? (
+              <Link component="button" type="button" underline="hover" onClick={onTranslate} disabled={loading}>
+                {translation === null ? t("translateLink") : t("retranslate")}
+              </Link>
+            ) : (
+              <Typography variant="body2" color="text.secondary">{t("loginRequired")}</Typography>
+            )}
+          </>
+        )}
+
+        {loading && <CircularProgress size={16} />}
+      </Box>
 
       {props.stale && props.state === "manual" && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -69,7 +89,7 @@ export default function TranslatedDescription(props: TranslatedDescriptionProps)
 
       <DescriptionRenderer content={content.body} format={content.format} />
 
-      {done && props.state !== "manual" && (
+      {showingTranslation && props.state !== "manual" && (
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
           {t("machineTranslated")}
         </Typography>
