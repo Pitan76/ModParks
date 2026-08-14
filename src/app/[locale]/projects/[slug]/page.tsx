@@ -15,7 +15,7 @@ import { getProjectDependencies, getProjectDependents } from "@/lib/actions/depe
 import ProjectDetailHeader from "@/components/project/ProjectDetailHeader";
 import ProjectMediaCarousel from "@/components/project/ProjectMediaCarousel";
 import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
-import ProjectSidebar from "@/components/project/ProjectSidebar";
+import ProjectInfoBox from "@/components/project/ProjectInfoBox";
 import ProjectVersionsTable from "@/components/project/ProjectVersionsTable";
 import ProjectTabsManager from "@/components/project/ProjectTabsManager";
 import ProjectMediaTab from "@/components/project/ProjectMediaTab";
@@ -296,7 +296,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               },
             }}
           >
-            <ProjectSidebar project={p} isAuthenticated={!!session?.user} />
+            <ProjectInfoBox project={p} isAuthenticated={!!session?.user} />
             {/* 作者本人には自分のページの広告を出さない（自己クリックによる
                 無効トラフィック扱いを避けるため） */}
             {!isOwner && (

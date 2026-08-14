@@ -21,13 +21,13 @@ import { REPORT_REASONS } from "@/lib/validations";
 export type ReportDialogProps = {
   targetType: "project" | "idea" | "comment" | "user";
   targetId: string;
-  variant?: "sidebar" | "comment" | "profile";
+  variant?: "infobox" | "comment" | "profile";
 };
 
 /**
  * コンテンツ違反などの問題を通報するダイアログコンポーネント。
  */
-const ReportDialog = ({ targetType, targetId, variant = "sidebar" }: ReportDialogProps) => {
+const ReportDialog = ({ targetType, targetId, variant = "infobox" }: ReportDialogProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Report");
   const [open, setOpen] = useState(false);

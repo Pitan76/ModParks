@@ -21,12 +21,12 @@ import { Link } from "@/lib/i18n/routing";
 import { parseLinks } from "@/lib/utils/links";
 import { toProxiedImageUrl } from "@/lib/utils/imageProxy";
 import { useColorMode } from "@/components/ThemeRegistry";
-import PlainProjectSidebar from "@/components/plain/project/PlainProjectSidebar";
+import PlainProjectInfoBox from "@/components/plain/project/PlainProjectInfoBox";
 import { summarizeProjectVersions, type SummarizableVersion } from "@/lib/utils/projectVersionSummary";
 import { getLoaderInfo } from "@/lib/loaders";
 import { useState, useEffect } from "react";
 
-export type ProjectSidebarProps = {
+export type ProjectInfoBoxProps = {
   /** 対象プロジェクトの情報 */
   project: {
     id: string;
@@ -57,10 +57,10 @@ const getLinkIcon = (url: string) => {
 };
 
 /**
- * プロジェクト詳細ページのサイドバーコンポーネント。
+ * プロジェクト詳細ページのインフォボックスコンポーネント。
  * ライセンス、ソースコード、カスタム外部リンク、関連タグ、及び通報ダイアログへの導線を表示します。
  */
-const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) => {
+const ProjectInfoBox = ({ project: p, isAuthenticated }: ProjectInfoBoxProps) => {
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
   const { isPlainTheme } = useColorMode();
@@ -77,7 +77,7 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
     }
   }, []);
 
-  if (isPlainTheme) return <PlainProjectSidebar project={p} isAuthenticated={isAuthenticated} />;
+  if (isPlainTheme) return <PlainProjectInfoBox project={p} isAuthenticated={isAuthenticated} />;
 
   const getTagLabel = (tag: string) => {
     const key = tag.toLowerCase().replace(/[^a-z0-9_]/g, '_');
@@ -246,4 +246,4 @@ const ProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) =>
   );
 };
 
-export default ProjectSidebar;
+export default ProjectInfoBox;

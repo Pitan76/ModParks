@@ -4,17 +4,17 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/routing";
 import { parseLinks } from "@/lib/utils/links";
 import ReportDialog from "@/components/project/ReportDialog";
-import type { ProjectSidebarProps } from "@/components/project/ProjectSidebar";
+import type { ProjectInfoBoxProps } from "@/components/project/ProjectInfoBox";
 import { summarizeProjectVersions } from "@/lib/utils/projectVersionSummary";
 import { getLoaderName } from "@/lib/data/loaderIds";
 import styles from "../plain.module.css";
 import { useState, useEffect } from "react";
 
 /**
- * Plain Theme 用のプロジェクトサイドバー。
+ * Plain Theme 用のプロジェクトインフォボックス。
  * 定義リストと素のリンクで構成し、アイコンやボタン装飾は持たない。
  */
-const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProps) => {
+const PlainProjectInfoBox = ({ project: p, isAuthenticated }: ProjectInfoBoxProps) => {
   const t = useTranslations("Project");
   const tTags = useTranslations("Tags");
   const links = parseLinks(p.links);
@@ -115,4 +115,4 @@ const PlainProjectSidebar = ({ project: p, isAuthenticated }: ProjectSidebarProp
   );
 };
 
-export default PlainProjectSidebar;
+export default PlainProjectInfoBox;
