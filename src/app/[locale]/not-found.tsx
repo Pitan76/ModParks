@@ -16,9 +16,14 @@ export default function NotFound() {
   const t = useTranslations("NotFound");
 
   return (
-    <Container maxWidth="sm" sx={{ py: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+    <Container maxWidth="xs" sx={{ py: 8 }}>
       <Box
         sx={{
+          bgcolor: "background.paper",
+          p: 4,
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: "divider",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -31,32 +36,25 @@ export default function NotFound() {
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 120,
-            height: 120,
+            width: 80,
+            height: 80,
             borderRadius: "50%",
             bgcolor: "rgba(37, 99, 235, 0.1)",
             color: "primary.main",
-            mb: 2,
-            animation: "pulse 2s infinite ease-in-out",
-            "@keyframes pulse": {
-              "0%": { transform: "scale(0.95)", boxShadow: "0 0 0 0 rgba(37, 99, 235, 0.4)" },
-              "70%": { transform: "scale(1)", boxShadow: "0 0 0 15px rgba(37, 99, 235, 0)" },
-              "100%": { transform: "scale(0.95)", boxShadow: "0 0 0 0 rgba(37, 99, 235, 0)" },
-            },
           }}
         >
-          <ErrorIcon sx={{ fontSize: 64 }} />
+          <ErrorIcon sx={{ fontSize: 48 }} />
         </Box>
 
-        <Typography variant="h1" sx={{ fontSize: { xs: "5rem", sm: "6rem" }, fontWeight: 900, color: "primary.main", lineHeight: 1, letterSpacing: -2 }}>
+        <Typography variant="h1" sx={{ fontSize: "3rem", fontWeight: 800, color: "primary.main", m: 0 }}>
           404
         </Typography>
 
-        <Typography variant="h4" component="h2" sx={{ fontWeight: 700 }}>
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 700, m: 0 }}>
           {t("title")}
         </Typography>
 
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400, mx: "auto" }}>
+        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 280, mx: "auto" }}>
           {t("description")}
         </Typography>
 
@@ -65,18 +63,13 @@ export default function NotFound() {
           href="/"
           variant="contained"
           color="primary"
+          fullWidth
           size="large"
           sx={{
-            mt: 2,
-            px: 4,
-            py: 1.5,
-            borderRadius: 8,
-            fontWeight: "bold",
+            mt: 1,
+            py: 1.2,
+            fontSize: "1rem",
             textTransform: "none",
-            boxShadow: "0 4px 14px 0 rgba(37, 99, 235, 0.4)",
-            "&:hover": {
-              boxShadow: "0 6px 20px 0 rgba(37, 99, 235, 0.6)",
-            },
           }}
         >
           {t("goBack")}
