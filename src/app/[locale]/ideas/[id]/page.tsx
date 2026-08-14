@@ -54,17 +54,27 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function IdeaDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
+const COMMENTS_PAGE_SIZE = 20;
+
+interface IdeaDetailPageProps {
+  params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ commentsLimit?: string }>;
+}
+
+export default async function IdeaDetailPage({ params, searchParams }: IdeaDetailPageProps) {
   const { id, locale } = await params;
+  const { commentsLimit: commentsLimitStr } = await searchParams;
   setRequestLocale(locale);
   const tIdea = await getTranslations("Idea");
   const tNav = await getTranslations("Nav");
   const session = await auth();
 
-  const detail = await getIdeaDetail(id, session?.user?.id);
+  const commentsLimit = Math.max(parseInt(commentsLimitStr as string) || COMMENTS_PAGE_SIZE, COMMENTS_PAGE_SIZE);
+
+  const detail = await getIdeaDetail(id, session?.user?.id, { commentsLimit });
   if (!detail) return notFound();
 
-  const { ideaData, initialCount, initialLiked, comments, resolvedProjects } = detail;
+  const { ideaData, initialCount, initialLiked, comments, totalCommentThreads, resolvedProjects } = detail;
   const canManage =
     !!session?.user && (session.user.id === ideaData.authorId || isAdminSession(session));
 
@@ -169,6 +179,8 @@ export default async function IdeaDetailPage({ params }: { params: Promise<{ loc
       <IdeaComments
         ideaId={id}
         comments={comments}
+        totalCommentThreads={totalCommentThreads}
+        commentsLimit={commentsLimit}
         currentUserId={session?.user?.id}
         isLoggedIn={!!session?.user}
         canManage={canManage}

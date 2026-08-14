@@ -40,6 +40,7 @@ export interface ListIdeaPostsParams {
   /** 非公開・下書きも含める。本人・管理者向け */
   includeHidden?: boolean;
   limit?: number;
+  offset?: number;
 }
 
 /**
@@ -48,11 +49,11 @@ export interface ListIdeaPostsParams {
  * 公開範囲の絞り込みはここ（行レベル）で行う。取得してから捨てる形にすると
  * 漏れの原因になるため、非公開の投稿はそもそも結果に含めない。
  */
-export async function listIdeaPosts(
-  db: Db,
-  params: ListIdeaPostsParams = {},
-): Promise<IdeaPostView[]> {
-  const { viewerId = null, authorId, postIds, includeHidden = false, limit = 50 } = params;
+/** listIdeaPosts / countIdeaPosts で共通の絞り込み条件を組み立てる */
+function ideaConditions(
+  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden">,
+): SQL[] | null {
+  const { viewerId = null, authorId, postIds, includeHidden = false } = params;
 
   const conditions: SQL[] = [eq(posts.kind, "idea")];
 
@@ -66,9 +67,21 @@ export async function listIdeaPosts(
   }
   if (authorId) conditions.push(eq(posts.authorId, authorId));
   if (postIds) {
-    if (postIds.length === 0) return [];
+    if (postIds.length === 0) return null;
     conditions.push(inArray(posts.id, postIds));
   }
+
+  return conditions;
+}
+
+export async function listIdeaPosts(
+  db: Db,
+  params: ListIdeaPostsParams = {},
+): Promise<IdeaPostView[]> {
+  const { viewerId = null, limit = 50, offset = 0 } = params;
+
+  const conditions = ideaConditions(params);
+  if (!conditions) return [];
 
   const rows = await db
     .select({
@@ -83,6 +96,7 @@ export async function listIdeaPosts(
     .where(and(...conditions))
     .orderBy(desc(posts.createdAt))
     .limit(limit)
+    .offset(offset)
     .all();
 
   return rows.map((row: any) => ({
@@ -99,6 +113,24 @@ export async function listIdeaPosts(
     commentCount: Number(row.commentCount ?? 0),
     isFavorited: Boolean(row.isFavorited),
   }));
+}
+
+/** listIdeaPosts と同じ絞り込み条件で、該当件数のみを取得する */
+export async function countIdeaPosts(
+  db: Db,
+  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden"> = {},
+): Promise<number> {
+  const conditions = ideaConditions(params);
+  if (!conditions) return 0;
+
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(posts)
+    .innerJoin(ideas, eq(ideas.id, posts.id))
+    .where(and(...conditions))
+    .get();
+
+  return result?.count ?? 0;
 }
 
 /**

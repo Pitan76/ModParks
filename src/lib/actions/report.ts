@@ -205,11 +205,22 @@ export async function suspendUserFromReport(targetUserId: string, _formData?: Fo
 // ---- 管理者: 通報一覧取得 ----
 
 /**
- * 管理者向け: すべての通報一覧を取得する Server Action
+ * 管理者向け: 通報の総件数を取得する Server Action
+ * @throws Forbidden 管理者権限がない場合
+ */
+export async function getReportsCount(): Promise<number> {
+  const { db } = await getAdminDb();
+  const result = await db.select({ count: count() }).from(reports).get();
+  return result?.count ?? 0;
+}
+
+/**
+ * 管理者向け: 通報一覧を取得する Server Action
  * @returns 通報データ(report)と、対象プロジェクト(project)、通報者(reporter)の結合配列
  * @throws Forbidden 管理者権限がない場合
  */
-export async function getReports() {
+export async function getReports(params: { limit?: number; offset?: number } = {}) {
+  const { limit = 50, offset = 0 } = params;
   const { db } = await getAdminDb();
 
   const reportedUser = alias(users, "reported_user");
@@ -258,5 +269,7 @@ export async function getReports() {
     .innerJoin(reporter, eq(reports.reporterId, reporter.id))
     .leftJoin(reporterProfile, eq(reporter.id, reporterProfile.userId))
     .orderBy(desc(reports.createdAt))
+    .limit(limit)
+    .offset(offset)
     .all();
 }

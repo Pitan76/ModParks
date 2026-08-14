@@ -2,19 +2,28 @@ import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { findIdeaPostBySlug } from "@/lib/queries/post";
-import { listPostComments, createPostComment } from "@/lib/api/postComments";
+import { listPostComments, countPostRootComments, createPostComment } from "@/lib/api/postComments";
 import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import type { PaginatedResponse, ApiComment } from "@/types/api";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const db = await getDatabase();
 
   const idea = await findIdeaPostBySlug(db, slug);
   if (!idea) return NextResponse.json({ error: "Idea not found" }, { status: 404 });
 
-  const data = await listPostComments(db, idea.id);
-  const response: PaginatedResponse<ApiComment> = { data, meta: { limit: data.length, offset: 0, count: data.length } };
+  const { searchParams } = new URL(request.url);
+  const limitParam = parseInt(searchParams.get("limit") || "");
+  const limit = isNaN(limitParam) ? undefined : Math.min(Math.max(limitParam, 1), 100);
+  const offsetParam = parseInt(searchParams.get("offset") || "0");
+  const offset = isNaN(offsetParam) ? 0 : Math.max(0, offsetParam);
+
+  const [data, count] = await Promise.all([
+    listPostComments(db, idea.id, { limit, offset }),
+    countPostRootComments(db, idea.id),
+  ]);
+  const response: PaginatedResponse<ApiComment> = { data, meta: { limit: limit ?? count, offset, count } };
   return NextResponse.json(response);
 }
 

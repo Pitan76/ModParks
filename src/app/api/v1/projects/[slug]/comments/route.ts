@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { findProjectPostBySlug } from "@/lib/queries/post";
-import { listPostComments, createPostComment } from "@/lib/api/postComments";
+import { listPostComments, countPostRootComments, createPostComment } from "@/lib/api/postComments";
 import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
 
 /**
@@ -13,7 +13,11 @@ import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
  * 形が異なるため、ここで詰め替える。実装（コメントの取得・作成）は lib/api/postComments に一本化済み。
  * 詳細は docs-md/DESIGN.md の「15. 外部ツールへの影響」を参照。
  */
-export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
+/**
+ * limit/offset は親コメント(スレッド)単位でのページングに使う。
+ * 未指定の場合は従来どおり全件返す（互換性維持）。件数は X-Comments-Total ヘッダで返す。
+ */
+export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await params;
     const db = await getDatabase();
@@ -22,7 +26,16 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
     if (!project.commentsEnabled) return NextResponse.json({ error: "Comments are disabled" }, { status: 403 });
 
-    const apiComments = await listPostComments(db, project.id);
+    const { searchParams } = new URL(request.url);
+    const limitParam = parseInt(searchParams.get("limit") || "");
+    const limit = isNaN(limitParam) ? undefined : Math.min(Math.max(limitParam, 1), 100);
+    const offsetParam = parseInt(searchParams.get("offset") || "0");
+    const offset = isNaN(offsetParam) ? 0 : Math.max(0, offsetParam);
+
+    const [apiComments, total] = await Promise.all([
+      listPostComments(db, project.id, { limit, offset }),
+      countPostRootComments(db, project.id),
+    ]);
     const data = apiComments.map(c => ({
       id: c.id,
       content: c.content,
@@ -33,7 +46,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
       authorAvatar: c.author.avatarUrl,
     }));
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, { headers: { "X-Comments-Total": String(total) } });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -4,13 +4,16 @@ import { setRequestLocale } from "next-intl/server";
 import { canonicalUrl } from "@/lib/seo/canonical";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { listIdeaPosts, toIdeaCardData } from "@/lib/queries/postList";
+import { listIdeaPosts, countIdeaPosts, toIdeaCardData } from "@/lib/queries/postList";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import LinkButton from "@/components/ui/LinkButton";
 import IdeaCardList from "@/components/idea/IdeaCardList";
+import PaginationControls from "@/components/ui/PaginationControls";
+
+const IDEAS_PER_PAGE = 20;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -22,15 +25,30 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function IdeasPage({ params }: { params: Promise<{ locale: string }> }) {
+interface IdeasPageProps {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ page?: string; limit?: string }>;
+}
+
+export default async function IdeasPage({ params, searchParams }: IdeasPageProps) {
   const { locale } = await params;
+  const { page: pageStr, limit: limitStr } = await searchParams;
   setRequestLocale(locale);
   const tIdea = await getTranslations("Idea");
 
   const db = await getDatabase();
   const session = await auth();
+  const viewerId = session?.user?.id ?? null;
 
-  const allIdeas = (await listIdeaPosts(db, { viewerId: session?.user?.id ?? null })).map(toIdeaCardData);
+  const page = Math.max(1, parseInt(pageStr as string) || 1);
+  const limit = Math.min(Math.max(parseInt(limitStr as string) || IDEAS_PER_PAGE, 10), 80);
+  const offset = (page - 1) * limit;
+
+  const [ideaRows, totalCount] = await Promise.all([
+    listIdeaPosts(db, { viewerId, limit, offset }),
+    countIdeaPosts(db, { viewerId }),
+  ]);
+  const allIdeas = ideaRows.map(toIdeaCardData);
 
   return (
     <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
@@ -54,6 +72,10 @@ export default async function IdeasPage({ params }: { params: Promise<{ locale: 
       </Box>
 
       <IdeaCardList ideas={allIdeas} />
+
+      {totalCount > 0 && (
+        <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} sx={{ mt: 4 }} />
+      )}
     </Container>
   );
 }

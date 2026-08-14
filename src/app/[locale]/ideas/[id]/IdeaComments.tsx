@@ -7,16 +7,19 @@ import type { IdeaDetail } from "./ideaDetailData";
 import { getDatabase } from "@/lib/db";
 import { userSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import LinkButton from "@/components/ui/LinkButton";
 
 type Props = {
   ideaId: string;
   comments: IdeaDetail["comments"];
+  totalCommentThreads: number;
+  commentsLimit: number;
   currentUserId?: string;
   isLoggedIn: boolean;
   canManage: boolean;
 };
 
-export default async function IdeaComments({ ideaId, comments, currentUserId, isLoggedIn, canManage }: Props) {
+export default async function IdeaComments({ ideaId, comments, totalCommentThreads, commentsLimit, currentUserId, isLoggedIn, canManage }: Props) {
   const tComment = await getTranslations("Comment");
   let defaultCommentBodyFormat = "markdown";
 
@@ -36,12 +39,12 @@ export default async function IdeaComments({ ideaId, comments, currentUserId, is
     <Box>
       {isLoggedIn ? (
         <Box sx={{ mb: 4 }}>
-          <IdeaCommentForm ideaId={ideaId} commentsCount={comments.length} defaultCommentBodyFormat={defaultCommentBodyFormat} />
+          <IdeaCommentForm ideaId={ideaId} commentsCount={totalCommentThreads} defaultCommentBodyFormat={defaultCommentBodyFormat} />
         </Box>
       ) : (
         <>
           <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>
-            {tComment("titleWithCount", { count: comments.length })}
+            {tComment("titleWithCount", { count: totalCommentThreads })}
           </Typography>
           <Box sx={{ p: 3, textAlign: "center", bgcolor: "background.paper", borderRadius: 2, border: "1px dashed", borderColor: "divider", mb: 4 }}>
             <Typography color="text.secondary">{tComment("loginPrompt")}</Typography>
@@ -88,6 +91,14 @@ export default async function IdeaComments({ ideaId, comments, currentUserId, is
           })}
         {comments.length === 0 && <Typography color="text.secondary">{tComment("empty")}</Typography>}
       </Box>
+
+      {commentsLimit < totalCommentThreads && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+          <LinkButton href={`/ideas/${ideaId}?commentsLimit=${commentsLimit + 20}`} variant="outlined">
+            {tComment("loadMore")}
+          </LinkButton>
+        </Box>
+      )}
     </Box>
   );
 }

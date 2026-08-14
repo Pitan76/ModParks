@@ -9,14 +9,19 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/routing";
-import { unpublishProject, updateReportStatus, getReports, deleteCommentAction, suspendUserFromReport } from "@/lib/actions/report";
+import { unpublishProject, updateReportStatus, getReports, getReportsCount, deleteCommentAction, suspendUserFromReport } from "@/lib/actions/report";
+import PaginationControls from "@/components/ui/PaginationControls";
+
+const ADMIN_REPORTS_PER_PAGE = 20;
 
 interface AdminReportsPageProps {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ page?: string; limit?: string }>;
 }
 
-export default async function AdminReportsPage({ params }: AdminReportsPageProps) {
+export default async function AdminReportsPage({ params, searchParams }: AdminReportsPageProps) {
   const { locale } = await params;
+  const { page: pageStr, limit: limitStr } = await searchParams;
   setRequestLocale(locale);
 
   try {
@@ -26,7 +31,15 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
   }
 
   const tAdmin = await getTranslations("Admin");
-  const reports = await getReports();
+
+  const page = Math.max(1, parseInt(pageStr as string) || 1);
+  const limit = Math.min(Math.max(parseInt(limitStr as string) || ADMIN_REPORTS_PER_PAGE, 10), 100);
+  const offset = (page - 1) * limit;
+
+  const [reports, totalCount] = await Promise.all([
+    getReports({ limit, offset }),
+    getReportsCount(),
+  ]);
 
   const reasonLabels: Record<string, string> = {
     copyright:  tAdmin("reports.reasons.copyright"),
@@ -257,6 +270,10 @@ export default async function AdminReportsPage({ params }: AdminReportsPageProps
           );
         })}
       </Stack>
+
+      {totalCount > 0 && (
+        <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} sx={{ mt: 4 }} />
+      )}
     </Box>
   );
 }

@@ -7,34 +7,27 @@
  * 詳細は docs-md/DESIGN.md の「URLはpostsに寄せない」を参照。
  */
 import { comments, users, userProfiles } from "@/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, isNull, inArray, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import type { ApiComment } from "@/types/api";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Db = any;
 
-export async function listPostComments(db: Db, postId: string): Promise<ApiComment[]> {
-  const rows = await db
-    .select({
-      id: comments.id,
-      content: comments.content,
-      contentFormat: comments.contentFormat,
-      parentId: comments.parentId,
-      createdAt: comments.createdAt,
-      updatedAt: comments.updatedAt,
-      authorUsername: userProfiles.username,
-      authorDisplayName: userProfiles.displayName,
-      authorAvatarUrl: userProfiles.avatarUrl,
-    })
-    .from(comments)
-    .innerJoin(users, eq(comments.authorId, users.id))
-    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(comments.postId, postId))
-    .orderBy(desc(comments.createdAt))
-    .all();
+const commentSelection = {
+  id: comments.id,
+  content: comments.content,
+  contentFormat: comments.contentFormat,
+  parentId: comments.parentId,
+  createdAt: comments.createdAt,
+  updatedAt: comments.updatedAt,
+  authorUsername: userProfiles.username,
+  authorDisplayName: userProfiles.displayName,
+  authorAvatarUrl: userProfiles.avatarUrl,
+};
 
-  return rows.map((r: any) => ({
+function toApiComment(r: any): ApiComment {
+  return {
     id: r.id,
     content: r.content,
     contentFormat: r.contentFormat,
@@ -42,7 +35,63 @@ export async function listPostComments(db: Db, postId: string): Promise<ApiComme
     author: { username: r.authorUsername, displayName: r.authorDisplayName, avatarUrl: r.authorAvatarUrl },
     createdAt: r.createdAt ? new Date(r.createdAt).getTime() : 0,
     updatedAt: r.updatedAt ? new Date(r.updatedAt).getTime() : 0,
-  }));
+  };
+}
+
+export interface ListPostCommentsParams {
+  /** 親コメント(スレッドの起点)を何件取得するか */
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * 投稿へのコメントを取得する。
+ *
+ * 返信は親コメントに従属して表示されるため、ページングは親コメント単位で行う。
+ * 指定した offset/limit で親コメントを絞り込み、その返信は全件まとめて返す
+ * （1スレッドの返信数は現実的な範囲に収まる想定のため）。
+ */
+export async function listPostComments(
+  db: Db,
+  postId: string,
+  params: ListPostCommentsParams = {},
+): Promise<ApiComment[]> {
+  const { limit, offset = 0 } = params;
+
+  let rootQuery = db
+    .select(commentSelection)
+    .from(comments)
+    .innerJoin(users, eq(comments.authorId, users.id))
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .where(and(eq(comments.postId, postId), isNull(comments.parentId)))
+    .orderBy(desc(comments.createdAt))
+    .offset(offset);
+  if (limit !== undefined) rootQuery = rootQuery.limit(limit);
+
+  const roots = await rootQuery.all();
+  if (roots.length === 0) return [];
+
+  const rootIds = roots.map((r: any) => r.id);
+  const replies = await db
+    .select(commentSelection)
+    .from(comments)
+    .innerJoin(users, eq(comments.authorId, users.id))
+    .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .where(inArray(comments.parentId, rootIds))
+    .orderBy(desc(comments.createdAt))
+    .all();
+
+  return [...roots, ...replies].map(toApiComment);
+}
+
+/** 投稿の親コメント(スレッド)の総数を取得する */
+export async function countPostRootComments(db: Db, postId: string): Promise<number> {
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(comments)
+    .where(and(eq(comments.postId, postId), isNull(comments.parentId)))
+    .get();
+  return result?.count ?? 0;
 }
 
 export interface CreatePostCommentResult {

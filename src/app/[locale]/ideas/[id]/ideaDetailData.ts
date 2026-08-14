@@ -1,6 +1,6 @@
 import { getDb, getD1 } from "@/lib/db";
 import { posts, ideas, favorites, comments as commentsTable, users, userProfiles, versions, versionIdeas, projects } from "@/db/schema";
-import { eq, and, or, sql, desc } from "drizzle-orm";
+import { eq, and, or, sql, desc, isNull, inArray } from "drizzle-orm";
 import { getProjectsByIds } from "@/lib/actions/projectQuery";
 
 export async function getIdeaMeta(id: string) {
@@ -84,7 +84,12 @@ function fetchSource(db: ReturnType<typeof getDb>, id: string) {
     .all();
 }
 
-export async function getIdeaDetail(id: string, userId?: string) {
+export interface GetIdeaDetailOptions {
+  /** コメントの親(スレッド)を何件取得するか。未指定なら全件 */
+  commentsLimit?: number;
+}
+
+export async function getIdeaDetail(id: string, userId?: string, options: GetIdeaDetailOptions = {}) {
   const d1 = await getD1();
   const db = getDb(d1);
 
@@ -122,25 +127,48 @@ export async function getIdeaDetail(id: string, userId?: string) {
       : null,
   ]);
 
-  const comments = await db
-    .select({
-      id: commentsTable.id,
-      content: commentsTable.content,
-      contentFormat: commentsTable.contentFormat,
-      createdAt: commentsTable.createdAt,
-      updatedAt: commentsTable.updatedAt,
-      parentId: commentsTable.parentId,
-      authorId: commentsTable.authorId,
-      authorName: userProfiles.displayName,
-      authorAvatar: userProfiles.avatarUrl,
-      authorUsername: userProfiles.username,
-    })
+  const commentSelection = {
+    id: commentsTable.id,
+    content: commentsTable.content,
+    contentFormat: commentsTable.contentFormat,
+    createdAt: commentsTable.createdAt,
+    updatedAt: commentsTable.updatedAt,
+    parentId: commentsTable.parentId,
+    authorId: commentsTable.authorId,
+    authorName: userProfiles.displayName,
+    authorAvatar: userProfiles.avatarUrl,
+    authorUsername: userProfiles.username,
+  };
+
+  const [totalCommentThreadsResult, commentRoots] = await Promise.all([
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(commentsTable)
+      .where(and(eq(commentsTable.postId, postId), isNull(commentsTable.parentId)))
+      .get(),
+    db
+      .select(commentSelection)
+      .from(commentsTable)
+      .innerJoin(users, eq(commentsTable.authorId, users.id))
+      .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(and(eq(commentsTable.postId, postId), isNull(commentsTable.parentId)))
+      .orderBy(desc(commentsTable.createdAt))
+      .limit(options.commentsLimit ?? 20)
+      .all(),
+  ]);
+
+  const totalCommentThreads = totalCommentThreadsResult?.count ?? 0;
+  const rootIds = commentRoots.map((r) => r.id);
+  const commentReplies = rootIds.length === 0 ? [] : await db
+    .select(commentSelection)
     .from(commentsTable)
     .innerJoin(users, eq(commentsTable.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(commentsTable.postId, postId))
+    .where(inArray(commentsTable.parentId, rootIds))
     .orderBy(desc(commentsTable.createdAt))
     .all();
+
+  const comments = [...commentRoots, ...commentReplies];
 
   const [linkedVersions, sourceIdeaProjects] = await Promise.all([
     fetchLinked(db, postId),
@@ -164,6 +192,7 @@ export async function getIdeaDetail(id: string, userId?: string) {
     initialCount: likesData?.count || 0,
     initialLiked: !!userLike,
     comments,
+    totalCommentThreads,
     resolvedProjects,
   };
 }

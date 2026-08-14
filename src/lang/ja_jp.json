@@ -76,6 +76,7 @@
     "submit": "投稿する",
     "loginPrompt": "コメントするにはログインが必要です。",
     "empty": "まだコメントはありません。",
+    "loadMore": "もっと見る",
     "deleteConfirm": "このコメントを削除しますか？",
     "reply": "返信",
     "replyPlaceholder": "返信を入力...",
