@@ -86,7 +86,6 @@ export const updateProjectSchema = createProjectSchema.partial().extend({
   status: z.enum(["draft", "public", "unlisted", "private"]).optional(),
   // 原文の言語。多言語表示の起点なので、作者が後から直せるようにしている
   sourceLocale: z.enum(locales as unknown as [string, ...string[]]).optional(),
-  aiTranslationEnabled: z.boolean().optional(),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;

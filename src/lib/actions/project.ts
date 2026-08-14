@@ -141,7 +141,7 @@ export const updateProject = async (projectId: string, formData: FormData) => {
 
   // 共通カラムは posts、Project 固有のカラムは projects へ。
   // 2 つの UPDATE がちぐはぐな状態で残らないよう batch でまとめる。
-  const { name, description, descriptionFormat, status, sourceLocale, aiTranslationEnabled, ...projectFields } = fields;
+  const { name, description, descriptionFormat, status, sourceLocale, ...projectFields } = fields;
 
   // 下書きの間は「作成しただけ」の状態なので、他のステータスへ移した時点を作成日時とみなす
   const isLeavingDraft = project.visibility === "draft" && status !== undefined && status !== "draft";
@@ -154,7 +154,8 @@ export const updateProject = async (projectId: string, formData: FormData) => {
         ...(description !== undefined ? { body: description } : {}),
         ...(descriptionFormat !== undefined ? { bodyFormat: descriptionFormat } : {}),
         ...(sourceLocale !== undefined ? { sourceLocale } : {}),
-        ...(aiTranslationEnabled !== undefined ? { aiTranslationEnabled } : {}),
+        // 未チェックのスイッチは送られてこないため、commentsEnabled と同じく直接読む
+        aiTranslationEnabled: formData.get("aiTranslationEnabled") === "on",
         ...(status !== undefined ? { visibility: status } : {}),
         ...(fields.slug !== undefined ? { slug: fields.slug } : {}),
         ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {}),
