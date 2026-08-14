@@ -262,6 +262,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     fileSize,
     fileSha256: formData.get("fileSha256") as string | null,
     projectId: project.id,
+    // 信頼スコアの加点・減点は実行者本人に効かせる必要がある。
+    // 省くと trustProjection / trustModeration が投稿者へフォールバックし、
+    // メンバーが API から上げたファイルの責任がオーナーに乗る
+    uploaderId: auth.userId,
     createdAt: new Date(),
   }).run();
 
