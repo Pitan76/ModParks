@@ -48,6 +48,55 @@ function isPrivateAddress(hostname: string): boolean {
   return false;
 }
 
+/**
+ * 取得先として許可してよい URL かを判定する。
+ * リダイレクト先にも同じ検査を掛ける必要があるため関数に切り出している。
+ */
+function isAllowedTarget(target: URL): boolean {
+  if (target.protocol !== "https:") return false;
+  return !isPrivateAddress(target.hostname);
+}
+
+/** リダイレクトを追う上限。正当な画像ホストで数ホップを超えることはない */
+const MAX_REDIRECTS = 3;
+
+/**
+ * リダイレクトを自前で追う。
+ *
+ * `redirect: "follow"` に任せると、初回のホスト検査を通した後で
+ * `302 → http://169.254.169.254/...` のような内部アドレスへ飛ばされても
+ * 検査が効かない。1ホップごとにプロトコルとアドレスを検査し直す。
+ */
+async function fetchImageFollowingRedirects(target: URL): Promise<Response | null> {
+  let current = target;
+
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    const res = await fetch(current.toString(), {
+      // 閲覧者の情報を一切渡さない。Referer も送らない
+      headers: { Accept: "image/*" },
+      referrerPolicy: "no-referrer",
+      redirect: "manual",
+      signal: AbortSignal.timeout(10_000),
+    });
+
+    if (res.status < 300 || res.status >= 400) return res;
+
+    const location = res.headers.get("location");
+    if (!location) return res;
+
+    let next: URL;
+    try {
+      next = new URL(location, current);
+    } catch {
+      return null;
+    }
+    if (!isAllowedTarget(next)) return null;
+    current = next;
+  }
+
+  return null;
+}
+
 /** 転送してよいレスポンスか（画像であること）を確認する */
 function isImageContentType(contentType: string | null): boolean {
   if (!contentType) return false;
@@ -79,7 +128,7 @@ export async function GET(request: Request) {
   if (target.protocol !== "https:") {
     return NextResponse.json({ error: "Only https is allowed" }, { status: 400 });
   }
-  if (isPrivateAddress(target.hostname)) {
+  if (!isAllowedTarget(target)) {
     return NextResponse.json({ error: "Forbidden host" }, { status: 400 });
   }
 
@@ -90,17 +139,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  let upstream: Response;
+  let upstream: Response | null;
   try {
-    upstream = await fetch(target.toString(), {
-      // 閲覧者の情報を一切渡さない。Referer も送らない
-      headers: { Accept: "image/*" },
-      referrerPolicy: "no-referrer",
-      redirect: "follow",
-      signal: AbortSignal.timeout(10_000),
-    });
+    upstream = await fetchImageFollowingRedirects(target);
   } catch {
     return NextResponse.json({ error: "Failed to fetch image" }, { status: 502 });
+  }
+
+  if (!upstream) {
+    return NextResponse.json({ error: "Forbidden host" }, { status: 400 });
   }
 
   if (!upstream.ok) {
