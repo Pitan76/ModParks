@@ -9,23 +9,28 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { LogEntry } from "./useRecipeAdmin";
 
+/**
+ * SVG を描画用の data URI に変換する。
+ *
+ * 素材はユーザーがアップロードした jar 由来のモデル/テクスチャなので、
+ * SVG 本文をそのまま DOM へ挿入すると管理者セッション上での XSS になりうる。
+ * `<img>` 経由なら SVG 内のスクリプトも外部参照も実行されない。
+ */
+function svgDataUri(svg: string): string {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
 function PreviewBox({ image }: { image: { format: "png" | "svg"; data: string } }) {
   const t = useTranslations("Admin.recipe");
+  const src = image.format === "svg" ? svgDataUri(image.data) : image.data;
   return (
     <Box sx={{ mb: 3, p: 2, border: "1px dashed", borderColor: "divider", borderRadius: 1 }}>
       <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
         {t("render3d.preview")}
       </Typography>
       <Box sx={{ display: "flex", justifyContent: "center", p: 2, bgcolor: "rgba(0,0,0,0.02)" }}>
-        {image.format === "svg" ? (
-          <Box
-            dangerouslySetInnerHTML={{ __html: image.data }}
-            sx={{ width: 128, height: 128, "& svg": { width: "100%", height: "100%" } }}
-          />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={image.data} alt="Preview" style={{ width: 128, height: 128, objectFit: "contain" }} />
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt="Preview" style={{ width: 128, height: 128, objectFit: "contain" }} />
       </Box>
     </Box>
   );
