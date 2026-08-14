@@ -11,6 +11,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { usePathname, useRouter } from "@/lib/i18n/routing";
 import { LOCALE_OPTIONS } from "@/lib/i18n/localeLabels";
+import { storeLocaleCookie } from "@/lib/i18n/localeCookie";
 import { useLocale } from "next-intl";
 import { useColorMode } from "@/components/ThemeRegistry";
 
@@ -27,6 +28,8 @@ const SidebarBottomControls = () => {
   const { mode, toggleColorMode } = useColorMode();
 
   const handleLocaleChange = (newLocale: string) => {
+    // 接頭辞なしルート（設定など）はCookieが言語の手がかりになるため、遷移前に更新する
+    storeLocaleCookie(newLocale);
     router.replace(pathname, { locale: newLocale });
   };
 

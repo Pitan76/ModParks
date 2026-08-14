@@ -7,6 +7,7 @@ import { changeUsername, changeEmail, changePassword, deleteAccount, deactivateA
 import { updateLocale } from "@/lib/actions/settings";
 import { useRouter, usePathname } from "@/lib/i18n/routing";
 import { LOCALE_OPTIONS } from "@/lib/i18n/localeLabels";
+import { storeLocaleCookie } from "@/lib/i18n/localeCookie";
 import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import Box from "@mui/material/Box";
@@ -84,6 +85,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
         // セッションの locale は JWT に 5分キャッシュされる。先に更新しておかないと
         // LocaleSyncer が古い設定言語のURLへ引き戻してしまう
         await updateSession();
+        storeLocaleCookie(values.locale);
         router.replace(pathname, { locale: values.locale });
         router.refresh();
         return;

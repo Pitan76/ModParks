@@ -9,6 +9,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/lib/i18n/routing";
 import { LOCALE_OPTIONS } from "@/lib/i18n/localeLabels";
+import { storeLocaleCookie } from "@/lib/i18n/localeCookie";
 import type { AppLocale } from "@/lib/i18n/routing";
 
 /** ヘッダーの言語切替。ログイン時は設定画面から変更するため、未ログイン時のみ表示される */
@@ -17,12 +18,18 @@ const LocaleSelect = () => {
   const pathname = usePathname();
   const router = useRouter();
 
+  /** 接頭辞なしルート（設定など）はCookieが言語の手がかりになるため、遷移前に更新する */
+  const handleLocaleChange = (next: AppLocale) => {
+    storeLocaleCookie(next);
+    router.replace(pathname, { locale: next });
+  };
+
   return (
     <Tooltip title="Language">
       <Select
         id="locale-select"
         value={locale}
-        onChange={(e) => router.replace(pathname, { locale: e.target.value as AppLocale })}
+        onChange={(e) => handleLocaleChange(e.target.value as AppLocale)}
         size="small"
         variant="outlined"
         renderValue={(v) => (
