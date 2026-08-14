@@ -19,12 +19,18 @@ if (process.env.NODE_ENV === "development") {
  */
 export type Database = DrizzleD1Database<typeof schema>;
 
+/** Workers AI。説明文の翻訳に使う。@cloudflare/workers-types には Ai の型が無い */
+export interface AiBinding {
+  run(model: string, input: unknown): Promise<{ response?: string }>;
+}
+
 /** Cloudflare Workers バインディングの型 */
 export type Env = {
   DB: D1Database;
   R2: R2Bucket;
   modparks_storage: R2Bucket;
   SETTINGS_KV: KVNamespace;
+  AI: AiBinding;
   AUTH_SECRET: string;
   AUTH_GITHUB_ID: string;
   AUTH_GITHUB_SECRET: string;

@@ -2,13 +2,10 @@
  * Workers AI を使う翻訳プロバイダ。外部 API キーを持たずに済むため初期実装に採用する。
  */
 import { buildSystemPrompt, buildUserPrompt } from "../prompt";
+import type { AiBinding } from "@/lib/db";
 import type { TranslationProvider, TranslationRequest } from "./types";
 
 const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
-
-interface AiBinding {
-  run(model: string, input: unknown): Promise<{ response?: string }>;
-}
 
 export const workersAiProvider: TranslationProvider = {
   name:  "workers-ai",
