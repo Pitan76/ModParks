@@ -37,6 +37,9 @@ export default function TranslatedDescription(props: TranslatedDescriptionProps)
   const t = useTranslations("Project.translation");
   const [translation, setTranslation] = useState<Content | null>(props.translation);
   const [showOriginal, setShowOriginal] = useState(false);
+  // 実行後は最新の原文から訳し直した状態になるので、再翻訳の導線は消す
+  const [canTranslate, setCanTranslate] = useState(props.canTranslate);
+  const [stale, setStale] = useState(props.stale);
   const { run, loading, error } = useTranslateRequest();
 
   const onTranslate = async () => {
@@ -44,6 +47,8 @@ export default function TranslatedDescription(props: TranslatedDescriptionProps)
     if (!result) return;
     setTranslation({ body: result.body, format: result.bodyFormat });
     setShowOriginal(false);
+    setCanTranslate(false);
+    setStale(false);
   };
 
   const showingTranslation = translation !== null && !showOriginal;
@@ -61,7 +66,7 @@ export default function TranslatedDescription(props: TranslatedDescriptionProps)
           </>
         )}
 
-        {props.canTranslate && (
+        {canTranslate && (
           <>
             {translation === null && <TranslateIcon fontSize="small" color="action" />}
             {props.isLoggedIn ? (
@@ -77,7 +82,7 @@ export default function TranslatedDescription(props: TranslatedDescriptionProps)
         {loading && <CircularProgress size={16} />}
       </Box>
 
-      {props.stale && props.state === "manual" && (
+      {stale && props.state === "manual" && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {t("manualStaleNotice")}
         </Typography>
