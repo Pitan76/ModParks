@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { locales } from "@/lib/i18n/routing";
+import { locales } from "@/lib/i18n/locales";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
 import { MC_VERSIONS, type McVersion } from "@/lib/data/minecraftVersions";
 import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";

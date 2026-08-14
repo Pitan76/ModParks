@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { posts, postTranslations } from "@/db/schema";
-import { locales, type AppLocale } from "@/lib/i18n/routing";
+import { locales, type AppLocale } from "@/lib/i18n/locales";
 import { computeSourceHash } from "@/lib/translation/sourceHash";
 import { deleteTranslation, saveTranslation } from "@/lib/translation/repository";
 import { requestTranslation } from "@/lib/translation/service";

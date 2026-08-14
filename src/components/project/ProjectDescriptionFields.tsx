@@ -5,7 +5,7 @@ import Stack from "@mui/material/Stack";
 import { useTranslations } from "next-intl";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormTextField from "@/components/ui/form/FormTextField";
-import { locales } from "@/lib/i18n/routing";
+import { locales } from "@/lib/i18n/locales";
 
 export interface ProjectDescriptionFieldsProps {
   description?: string;

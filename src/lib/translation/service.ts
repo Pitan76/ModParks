@@ -6,7 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { posts } from "@/db/schema";
 import type { Database } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { locales, type AppLocale } from "@/lib/i18n/routing";
+import { locales, type AppLocale } from "@/lib/i18n/locales";
 import { translateContent, MAX_INPUT_CHARS } from "./translate";
 import { computeSourceHash } from "./sourceHash";
 import { countRunsSince, findTranslation, hasRecentFailure, recordRun, saveTranslation } from "./repository";
