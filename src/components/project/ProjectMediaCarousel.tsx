@@ -9,6 +9,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useTranslations } from "next-intl";
 import ZoomableImage from "@/components/ui/ZoomableImage";
 import { useCarouselSwipe } from "./useCarouselSwipe";
+import { imageUrl } from "@/lib/utils/imageUrl";
 
 export type MediaItem = {
   id: string;
@@ -49,7 +50,7 @@ const Slide = ({ item }: { item: MediaItem }) => {
 
   return (
     <ZoomableImage
-      src={item.url}
+      src={imageUrl(item.url, { w: 800 })!}
       alt={item.caption ?? ""}
       loading="lazy"
       style={{ display: "block", width: "100%", maxHeight: 480, objectFit: "contain" }}

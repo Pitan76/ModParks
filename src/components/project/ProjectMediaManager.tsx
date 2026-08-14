@@ -16,6 +16,7 @@ import { uploadFileToR2 } from "@/lib/utils/upload";
 import { resizeImageFile } from "@/lib/utils/image";
 import { addProjectMedia, deleteProjectMedia, toggleMediaFeatured } from "@/lib/actions/projectMedia";
 import type { ProjectMedia } from "@/db/schema";
+import { imageUrl } from "@/lib/utils/imageUrl";
 
 export type ProjectMediaManagerProps = {
   projectId: string;
@@ -167,7 +168,7 @@ const ProjectMediaManager = ({ projectId, projectSlug, media }: ProjectMediaMana
                 {displayUrl ? (
                   <Box
                     component="img"
-                    src={displayUrl}
+                    src={imageUrl(displayUrl, { w: 200 })}
                     alt={m.caption ?? ""}
                     sx={{ width: 120, height: 68, objectFit: "cover", borderRadius: 1, flexShrink: 0 }}
                   />

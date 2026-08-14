@@ -12,6 +12,7 @@ import { uploadFileToR2 } from "@/lib/utils/upload";
 import { updateProjectIcon } from "@/lib/actions/project";
 import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
+import { imageUrl } from "@/lib/utils/imageUrl";
 
 export type EditableProjectIconProps = {
   projectId: string;
@@ -79,7 +80,7 @@ const EditableProjectIcon = ({ projectId, projectSlug, projectName, initialIconU
         }}
       >
         <Avatar
-          src={iconUrl || undefined}
+          src={imageUrl(iconUrl, { w: 200 })}
           alt={projectName}
           variant="rounded"
           sx={{

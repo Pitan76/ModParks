@@ -18,6 +18,7 @@ import { type ContentType } from "@/lib/data/projectTypes";
 import ProjectCardMeta from "./card/ProjectCardMeta";
 import { useProjectContextMenu } from "./card/useProjectContextMenu";
 import { useState, useEffect } from "react";
+import { imageUrl } from "@/lib/utils/imageUrl";
 
 export type ProjectCardProps = {
   project: {
@@ -118,7 +119,7 @@ const ProjectCard = ({ project, layout = "list", showCart = true }: ProjectCardP
             }}
           >
             <Avatar
-              src={project.iconUrl ?? undefined}
+              src={imageUrl(project.iconUrl, { w: 96 })}
               alt={project.title}
               variant="rounded"
               slotProps={{ img: { loading: "lazy", decoding: "async" } }}

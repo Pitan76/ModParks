@@ -8,6 +8,7 @@ import { Link as RoutingLink } from "@/lib/i18n/routing";
 import { useContextMenu, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
 import { toPlainDescription } from "@/lib/utils/plainText";
+import { imageUrl } from "@/lib/utils/imageUrl";
 
 interface CollectionCardProps {
   collection: {
@@ -57,7 +58,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
         }}
       >
         {collection.iconUrl ? (
-          <Avatar src={collection.iconUrl} variant="rounded" sx={{ width: 56, height: 56 }} />
+          <Avatar src={imageUrl(collection.iconUrl, { w: 128 })} variant="rounded" sx={{ width: 56, height: 56 }} />
         ) : (
           <Avatar variant="rounded" sx={{ width: 56, height: 56, bgcolor: "action.hover", color: "text.secondary" }}>
             {collection.name[0]?.toUpperCase()}

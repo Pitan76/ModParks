@@ -9,6 +9,7 @@ import ProjectFavoriteButton from "@/components/project/ProjectFavoriteButton";
 import AddToCollectionButton from "@/components/project/AddToCollectionButton";
 import styles from "../plain.module.css";
 import { useState, useEffect } from "react";
+import { imageUrl } from "@/lib/utils/imageUrl";
 
 /**
  * Plain Theme 用のプロジェクト詳細ヘッダー。
@@ -49,7 +50,7 @@ const PlainProjectDetailHeader = ({
         {p.iconUrl && (
           // next/image は最適化のための追加処理を伴うため、軽量化を優先して素の img を使う
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={p.iconUrl} alt="" className={styles.detailIcon} decoding="async" />
+          <img src={imageUrl(p.iconUrl, { w: 200 })} alt="" className={styles.detailIcon} decoding="async" />
         )}
         <h1>{p.title}</h1>
         <span className={styles.dim}>{t.has(`type.${p.type}`) ? t(`type.${p.type}`) : p.type}</span>
