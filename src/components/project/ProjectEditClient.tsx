@@ -14,6 +14,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 export type ProjectEditClientProps = {
   isOwner: boolean;
   basicInfoForm: ReactNode;
+  descriptionForm: ReactNode;
   versionsManager: ReactNode;
   mediaManager: ReactNode;
   membersManager: ReactNode;
@@ -41,6 +42,7 @@ const ProjectRecipesManager = dynamic(() => import("@/components/project/Project
 const ProjectEditClient = ({
   isOwner,
   basicInfoForm,
+  descriptionForm,
   versionsManager,
   mediaManager,
   membersManager,
@@ -60,6 +62,7 @@ const ProjectEditClient = ({
 
   const tabs = [
     { id: "info", label: tProject("editTabs.info"), content: basicInfoForm },
+    { id: "description", label: tProject("editTabs.description"), content: descriptionForm },
     { id: "files", label: tProject("editTabs.files"), content: versionsManager },
     { id: "media", label: tProject("editTabs.media"), content: mediaManager },
     { id: "members", label: tProject("editTabs.members"), content: membersManager },

@@ -6,6 +6,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import ProjectEditForm from "@/components/project/ProjectEditForm";
+import ProjectDescriptionForm from "@/components/project/ProjectDescriptionForm";
 import ProjectMembersManager from "@/components/project/ProjectMembersManager";
 import ProjectOwnershipTransfer from "@/components/project/ProjectOwnershipTransfer";
 import ProjectVersionsManager from "@/components/project/ProjectVersionsManager";
@@ -124,6 +125,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       <ProjectEditClient
         isOwner={isOwner}
         basicInfoForm={<ProjectEditForm project={project} availableTags={availableTags} />}
+        descriptionForm={<ProjectDescriptionForm project={project} />}
         versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} githubRepo={project.githubRepo} />}
         mediaManager={<ProjectMediaManager projectId={project.id} projectSlug={project.slug} media={media} />}
         membersManager={

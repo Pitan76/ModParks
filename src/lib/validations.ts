@@ -88,6 +88,13 @@ export const updateProjectSchema = createProjectSchema.partial().extend({
   sourceLocale: z.enum(locales as unknown as [string, ...string[]]).optional(),
 });
 
+/** 説明タブのフォーム。基本情報とは別に保存する */
+export const updateDescriptionSchema = z.object({
+  description: z.string().min(1),
+  descriptionFormat: z.enum(["markdown", "plaintext", "pukiwiki"]),
+  sourceLocale: z.enum(locales as unknown as [string, ...string[]]),
+});
+
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 

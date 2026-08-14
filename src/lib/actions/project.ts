@@ -3,7 +3,7 @@
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { posts, projects, projectTags, projectMembers, users } from "@/db/schema";
 import { findProjectPostById } from "@/lib/queries/post";
-import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
+import { createProjectSchema, updateProjectSchema, updateDescriptionSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -186,6 +186,43 @@ export const updateProject = async (projectId: string, formData: FormData) => {
   revalidatePath(`/projects/${fields.slug ?? project.slug}`);
   revalidatePath(`/projects/${fields.slug ?? project.slug}/edit`);
   revalidatePath("/projects");
+  return { success: true };
+};
+
+// ---- 説明の更新 ----
+
+/**
+ * 説明タブの内容（原文・書式・原文の言語・AI 翻訳の可否）を更新する Server Action。
+ *
+ * 基本情報とは別のフォームなので、更新するカラムもここで完結させる。
+ */
+export const updateProjectDescription = async (projectId: string, formData: FormData) => {
+  const { db, session } = await getAuthenticatedDb();
+
+  const project = await findProjectPostById(db, projectId);
+  if (!project) throw new Error("Project not found");
+  await assertProjectAccess(db, project, session);
+
+  const parsed = updateDescriptionSchema.safeParse({
+    description:       formData.get("description"),
+    descriptionFormat: formData.get("descriptionFormat"),
+    sourceLocale:      formData.get("sourceLocale"),
+  });
+  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
+
+  await db
+    .update(posts)
+    .set({
+      body:         parsed.data.description,
+      bodyFormat:   parsed.data.descriptionFormat,
+      sourceLocale: parsed.data.sourceLocale,
+      // 未チェックのスイッチは送られてこないため、値の有無で判定する
+      aiTranslationEnabled: formData.get("aiTranslationEnabled") === "on",
+    })
+    .where(eq(posts.id, projectId));
+
+  revalidatePath(`/projects/${project.slug}`);
+  revalidatePath(`/projects/${project.slug}/edit`);
   return { success: true };
 };
 
