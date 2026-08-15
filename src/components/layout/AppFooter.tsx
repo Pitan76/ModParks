@@ -14,7 +14,9 @@ import { useTranslations } from "next-intl";
 /**
  * アプリケーションの共通フッターコンポーネント。
  * コピーライト表記、ドキュメントWikiへのリンク、RSSフィード、GitHubリポジトリへのリンク、
- * 利用規約およびプライバシーポリシーへのリンクを表示します。
+ * 法的情報（利用規約・プライバシーポリシー・外部送信ポリシー・権利侵害の申出窓口）への
+ * リンクを表示します。外部送信ポリシーと非公式である旨の表示は、全ページから
+ * 到達できる必要があるためここに置いています。
  */
 const AppFooter = () => {
   const year = new Date().getFullYear();
@@ -121,6 +123,24 @@ const AppFooter = () => {
               >
                 {t("privacy")}
               </Link>
+              {/* 外部送信規律は「容易に知り得る状態」に置くことが要件のため、
+                  全ページ共通のフッターから1クリックで到達できるようにする */}
+              <Link
+                component={NextLink}
+                href="/external-transmission"
+                prefetch={false}
+                sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+              >
+                {t("externalTransmission")}
+              </Link>
+              {/* 権利侵害の申出は、アカウントを持たない権利者からも届く必要がある。
+                  サイト内の通報機能はログイン利用者向けなので、ここにも導線を置く */}
+              <Link
+                href="mailto:admin@pitan76.net?subject=Rights%20infringement%20report"
+                sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+              >
+                {t("reportAbuse")}
+              </Link>
             </Stack>
           </Stack>
         </Stack>
@@ -136,6 +156,16 @@ const AppFooter = () => {
           sx={{ display: "block", maxWidth: 720, mx: "auto", mb: 1.5, lineHeight: 1.8 }}
         >
           {t("dataNotice")}
+        </Typography>
+
+        {/* Minecraft のブランド利用ガイドライン上、非公式である旨を明示しておく */}
+        <Typography
+          variant="caption"
+          color="text.disabled"
+          align="center"
+          sx={{ display: "block", maxWidth: 720, mx: "auto", mb: 1, lineHeight: 1.8 }}
+        >
+          {t("notAffiliated")}
         </Typography>
 
         <Typography variant="caption" color="text.disabled" align="center" sx={{ display: "block" }}>
