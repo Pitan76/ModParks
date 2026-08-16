@@ -67,13 +67,16 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
   const { links, addLink, removeLink, changeLink, moveLink } = useLinksEditor(project?.links);
 
   const isFirstRender = useRef(true);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
-    onChange?.();
-  }, [links, onChange]);
+    onChangeRef.current?.();
+  }, [links]);
 
   return (
     <>
