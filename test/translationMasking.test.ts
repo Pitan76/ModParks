@@ -45,6 +45,42 @@ describe("markdown マスキング", () => {
     expect(toPayload(doc)).not.toContain("https://example.com/dl");
     expect(toPayload(doc)).toContain("ダウンロード");
   });
+
+  it("コードブロック内の多様なコメント（行コメント、複数行コメント）が翻訳対象に含まれ、正しく復元されること", () => {
+    const text = [
+      "```javascript",
+      "// JS行コメント",
+      "/* JS複数行コメント 1行目",
+      "   JS複数行コメント 2行目 */",
+      "let x = 1;",
+      "```",
+      "```python",
+      "# Python行コメント",
+      '""" Python Docstring 1行目',
+      '    Python Docstring 2行目 """',
+      "```",
+      "```html",
+      "<!-- HTMLコメント -->",
+      "```",
+      "```ini",
+      "; INIコメント",
+      "```",
+    ].join("\n");
+    const doc = getMasker("markdown").mask(text);
+    const payload = toPayload(doc);
+    
+    expect(payload).toContain("JS行コメント");
+    expect(payload).toContain("JS複数行コメント 1行目");
+    expect(payload).toContain("JS複数行コメント 2行目");
+    expect(payload).toContain("Python行コメント");
+    expect(payload).toContain("Python Docstring 1行目");
+    expect(payload).toContain("Python Docstring 2行目");
+    expect(payload).toContain("HTMLコメント");
+    expect(payload).toContain("INIコメント");
+    expect(payload).not.toContain("let x = 1");
+    
+    expect(roundTrip(text, "markdown")).toBe(text);
+  });
 });
 
 describe("pukiwiki マスキング", () => {
