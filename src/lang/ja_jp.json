@@ -246,6 +246,11 @@
       "issueTrackerUrl": "Issue Tracker URL",
       "githubRepo": "GitHubリポジトリ",
       "githubRepoHelper": "Releaseから自動でバージョンを取り込めます（例: Pitan76/item-alchemy）",
+      "githubReleaseImportMode": "GitHub Release 取り込み方法",
+      "githubReleaseImportModeOptions": {
+        "link": "外部リンクとして取り込む（容量を節約）",
+        "file": "ファイルとして取り込む"
+      },
       "linksSection": "リンク",
       "externalConnectionsTitle": "外部連携",
       "customLinks": {

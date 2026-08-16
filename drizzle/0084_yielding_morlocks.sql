@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `github_release_import_mode` text DEFAULT 'link' NOT NULL;

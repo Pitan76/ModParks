@@ -37,6 +37,8 @@ export const projects = sqliteTable("projects", {
   sourceIdeaId: text("source_idea_id"),
   /** 連携する GitHub リポジトリ ("owner/repo" 形式)。Release 自動取り込みに使用 */
   githubRepo: text("github_repo"),
+  /** GitHub Release インポート時の取り込みモード (file: ファイル保存, link: 外部リンク) */
+  githubReleaseImportMode: text("github_release_import_mode", { enum: ["file", "link"] }).notNull().default("link"),
   /** 新バージョン公開時に告知を送る Discord Webhook URL */
   discordWebhookUrl: text("discord_webhook_url"),
   /** AIによって生成されたコンテンツが含まれるかどうか */

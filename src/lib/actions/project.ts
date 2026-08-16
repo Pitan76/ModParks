@@ -38,13 +38,14 @@ export async function createProject(formData: FormData) {
     sourceUrl:   formData.get("sourceUrl"),
     links:       formData.get("links"),
     tags:        formData.getAll("tags"),
+    githubReleaseImportMode: formData.get("githubReleaseImportMode") || "link",
     aiGenerated: formData.get("aiGenerated") === "on",
   };
 
   const parsed = createProjectSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
-  const { name, slug, description, descriptionFormat, type, license, sourceUrl, links, tags, aiGenerated } = parsed.data;
+  const { name, slug, description, descriptionFormat, type, license, sourceUrl, links, tags, githubReleaseImportMode, aiGenerated } = parsed.data;
   const id = createId();
 
   const existingProject = await db
@@ -80,6 +81,7 @@ ${description}`),
       sourceUrl:  sourceUrl || null,
       links:      links || null,
       iconUrl:    formData.get("iconUrl") as string | null,
+      githubReleaseImportMode: githubReleaseImportMode || "link",
       aiGenerated: !!aiGenerated,
     }),
   ]);
@@ -123,6 +125,7 @@ export const updateProject = async (projectId: string, formData: FormData) => {
     githubRepo:  formData.get("githubRepo") || null,
     discordWebhookUrl: formData.get("discordWebhookUrl") || null,
     issueTrackerUrl: formData.get("issueTrackerUrl") || null,
+    githubReleaseImportMode: formData.get("githubReleaseImportMode") || "link",
     tags:        formData.getAll("tags"),
     aiGenerated: formData.get("aiGenerated") !== null ? formData.get("aiGenerated") === "on" : undefined,
   };

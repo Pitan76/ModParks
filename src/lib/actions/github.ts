@@ -141,13 +141,14 @@ function linkToAsset(asset: GithubReleaseAsset): ImportedFile | { error: string 
 export async function importGithubReleaseSystem(
   db: Database,
   /** authorId は Webhook 経由の自動取り込みで、アップロード実行者として記録する */
-  project: { id: string; slug: string; githubRepo: string | null; authorId: string },
+  project: { id: string; slug: string; githubRepo: string | null; authorId: string; githubReleaseImportMode?: string | null },
   releaseId?: number,
   prefetchedRelease?: GithubRelease | null,
   /** 非公開リポジトリを扱う場合に必要な GitHub App の installation token */
   repoToken?: string,
-  mode: GithubImportMode = "file"
+  mode?: GithubImportMode
 ): Promise<ImportResult> {
+  const effectiveMode = mode ?? (project.githubReleaseImportMode as GithubImportMode) ?? "link";
   const t = await getServerErrors();
   const repo = project.githubRepo ? normalizeGithubRepo(project.githubRepo) : null;
   if (!repo) return { error: t("github.invalidRepo") };
@@ -171,7 +172,7 @@ export async function importGithubReleaseSystem(
     // R2 へのアップロードを解析より先に行うのは、非公開リポジトリのアセット URL を
     // jar Worker 側から取得できない（トークンを持たない）ため。
     // R2 キー経由なら公開/非公開を問わず解析できる。
-    const stored = mode === "link" ? linkToAsset(asset) : await storeAssetToR2(project.slug, asset, repoToken);
+    const stored = effectiveMode === "link" ? linkToAsset(asset) : await storeAssetToR2(project.slug, asset, repoToken);
     if ("error" in stored) {
       lastError = stored.error;
       continue;
@@ -289,7 +290,7 @@ export async function importGithubReleaseSystem(
 export async function importGithubRelease(
   projectSlug: string,
   releaseId?: number,
-  mode: GithubImportMode = "file"
+  mode?: GithubImportMode
 ): Promise<ImportResult> {
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();

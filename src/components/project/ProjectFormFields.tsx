@@ -42,6 +42,7 @@ export type ProjectFormFieldsProps = {
     modrinthId?: string | null;
     curseforgeId?: string | null;
     githubRepo?: string | null;
+    githubReleaseImportMode?: string | null;
     discordWebhookUrl?: string | null;
     tags?: string[];
     issueTrackerUrl?: string | null;
@@ -211,6 +212,18 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
         defaultValue={project?.githubRepo || ""}
         errorMessages={error?.githubRepo}
         helperText={t("fields.githubRepoHelper")}
+      />
+      <FormSelect
+        id="project-github-import-mode"
+        name="githubReleaseImportMode"
+        label={t("fields.githubReleaseImportMode")}
+        defaultValue={project?.githubReleaseImportMode || "link"}
+        errorMessages={error?.githubReleaseImportMode}
+        options={[
+          { value: "link", label: t("fields.githubReleaseImportModeOptions.link") },
+          { value: "file", label: t("fields.githubReleaseImportModeOptions.file") },
+        ]}
+        onChange={onChange}
       />
       <FormTextField
         id="project-discord-webhook"

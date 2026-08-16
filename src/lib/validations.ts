@@ -75,6 +75,7 @@ export const createProjectSchema = z.object({
   modrinthId:  z.string().optional().nullable(),
   curseforgeId: z.string().optional().nullable(),
   githubRepo:  z.string().max(140).optional().nullable(),
+  githubReleaseImportMode: z.enum(["file", "link"]).default("link").optional(),
   discordWebhookUrl: z.string().url(vk("invalidUrl")).max(255).optional().or(z.literal("")).nullable(),
   tags:        z.array(z.string().max(32)).max(10, vk("tagsMax")),
   aiGenerated: z.boolean().default(false).optional(),

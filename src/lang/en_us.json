@@ -246,6 +246,11 @@
       "issueTrackerUrl": "Issue Tracker URL",
       "githubRepo": "GitHub Repository",
       "githubRepoHelper": "Versions can be imported automatically from Releases (e.g. Pitan76/item-alchemy)",
+      "githubReleaseImportMode": "GitHub Release Import Mode",
+      "githubReleaseImportModeOptions": {
+        "link": "Import as external links (save storage)",
+        "file": "Import as files"
+      },
       "linksSection": "Links",
       "externalConnectionsTitle": "External Connections (Used for syncing download counts, etc.)",
       "customLinks": {
