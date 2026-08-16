@@ -160,8 +160,6 @@ export const updateProject = async (projectId: string, formData: FormData) => {
         ...(description !== undefined ? { body: description } : {}),
         ...(descriptionFormat !== undefined ? { bodyFormat: descriptionFormat } : {}),
         ...(resolvedSourceLocale !== undefined ? { sourceLocale: resolvedSourceLocale } : {}),
-        // 未チェックのスイッチは送られてこないため、commentsEnabled と同じく直接読む
-        aiTranslationEnabled: formData.get("aiTranslationEnabled") === "on",
         ...(status !== undefined ? { visibility: status } : {}),
         ...(fields.slug !== undefined ? { slug: fields.slug } : {}),
         ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {}),
