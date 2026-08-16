@@ -121,7 +121,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
   const dateStr = new Date(typeof version.createdAt === "number" ? version.createdAt * 1000 : version.createdAt).toLocaleDateString(locale);
 
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 4 } }}>
+    <Container maxWidth="md" sx={{ pt: 1, pb: 3 }}>
       <Breadcrumb
         items={[
           { label: tCommon("projects"), href: "/projects" },

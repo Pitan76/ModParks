@@ -38,9 +38,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   const project = await getProjectBySlug(slug);
 
-  if (!project) {
-    notFound();
-  }
+  if (!project) notFound();
 
   if (project.redirectSlug) {
     redirect({ href: `/projects/${project.redirectSlug}/edit`, locale: locale });
@@ -109,7 +107,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   ]);
 
   return (
-    <Container maxWidth="md" sx={{ py: 5 }}>
+    <Container maxWidth="md" sx={{ pt: 1, pb: 3 }}>
       <Breadcrumb
         items={[
           { label: tCommon("projects"), href: "/projects" },
@@ -118,7 +116,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         ]}
       />
 
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 4 }}>
+      <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
         {t("managePage.title", { name: project.title })}
       </Typography>
 

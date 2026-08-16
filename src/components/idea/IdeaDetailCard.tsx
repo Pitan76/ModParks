@@ -29,7 +29,9 @@ export default function IdeaDetailCard({ children }: IdeaDetailCardProps) {
     >
       <CardContent 
         sx={{ 
-          p: isNewTheme ? { xs: 2, md: 3 } : { xs: 3, md: 5 },
+          px: { xs: 2, md: 3 },
+          pt: 1,
+          pb: { xs: 2, md: 3 },
           "&:last-child": { pb: isNewTheme ? { xs: 2, md: 3 } : undefined }
         }}
       >

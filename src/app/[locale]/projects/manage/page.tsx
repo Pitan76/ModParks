@@ -41,7 +41,7 @@ export default async function ManageProjectsPage({ params, searchParams }: Manag
   ]);
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
+    <Container maxWidth="lg" sx={{ pt: 1, pb: 3, px: { xs: 2, sm: 3 } }}>
       <Breadcrumb
         items={[
           { label: tCommon("projects"), href: "/projects" },

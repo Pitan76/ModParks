@@ -78,7 +78,7 @@ export default async function IdeaDetailPage({ params, searchParams }: IdeaDetai
     !!session?.user && (session.user.id === ideaData.authorId || isAdminSession(session));
 
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
+    <Container maxWidth="md" sx={{ pt: 1, pb: 3, px: { xs: 2, sm: 3 } }}>
       <Breadcrumb items={[{ label: tNav("ideas"), href: "/ideas" }, { label: ideaData.title }]} />
 
       <IdeaDetailCard>

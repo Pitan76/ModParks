@@ -208,14 +208,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     : null;
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 }, containerType: "inline-size" }}>
+    <Container maxWidth="lg" sx={{ pt: 1, pb: 3, px: { xs: 2, sm: 3 }, containerType: "inline-size" }}>
       {structuredData && <JsonLd data={structuredData} />}
       {/* 左のナビゲーションサイドバーの開閉で使える幅が変わるため、
           ビューポート幅ではなくコンテナクエリで段組みを切り替える */}
       <Box
         sx={{
-          display:             "grid",
-          gap:                 { xs: 3, md: 4 },
+          display: "grid",
+          gap: 3,
           gridTemplateColumns: "minmax(0, 1fr)",
           [`@container (min-width: ${TWO_COLUMN_MIN_WIDTH}px)`]: {
             gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
@@ -249,12 +249,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               ) : undefined
             }
             recipesContent={
-              <Box sx={{ mt: 2 }}>
+              <Box>
                 <ProjectRecipes projectId={p.id} projectSlug={p.slug} namespaces={p.recipeNamespaces} settings={p.recipeSettings} />
               </Box>
             }
             descriptionContent={
-              <Box sx={{ mt: 2 }}>
+              <Box>
                 <TranslatedDescription
                   postId={p.id}
                   locale={locale}

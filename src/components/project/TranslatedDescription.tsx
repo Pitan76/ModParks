@@ -56,33 +56,35 @@ export default function TranslatedDescription(props: TranslatedDescriptionProps)
 
   return (
     <Box>
-      <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-        {translation !== null && (
-          <>
-            <TranslateIcon fontSize="small" color="action" />
-            <Link component="button" type="button" underline="hover" onClick={() => setShowOriginal(!showOriginal)}>
-              {showingTranslation
-                ? t("showOriginal")
-                : t(props.state === "manual" ? "showTranslation" : "showMachineTranslation")}
-            </Link>
-          </>
-        )}
-
-        {canTranslate && (
-          <>
-            {translation === null && <TranslateIcon fontSize="small" color="action" />}
-            {props.isLoggedIn ? (
-              <Link component="button" type="button" underline="hover" onClick={onTranslate} disabled={loading}>
-                {translation === null ? t("translateLink") : t("retranslate")}
+      {(translation !== null || canTranslate) && (
+        <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+          {translation !== null && (
+            <>
+              <TranslateIcon fontSize="small" color="action" />
+              <Link component="button" type="button" underline="hover" onClick={() => setShowOriginal(!showOriginal)}>
+                {showingTranslation
+                  ? t("showOriginal")
+                  : t(props.state === "manual" ? "showTranslation" : "showMachineTranslation")}
               </Link>
-            ) : (
-              <Typography variant="body2" color="text.secondary">{t("loginRequired")}</Typography>
-            )}
-          </>
-        )}
+            </>
+          )}
 
-        {loading && <CircularProgress size={16} />}
-      </Box>
+          {canTranslate && (
+            <>
+              {translation === null && <TranslateIcon fontSize="small" color="action" />}
+              {props.isLoggedIn ? (
+                <Link component="button" type="button" underline="hover" onClick={onTranslate} disabled={loading}>
+                  {translation === null ? t("translateLink") : t("retranslate")}
+                </Link>
+              ) : (
+                <Typography variant="body2" color="text.secondary">{t("loginRequired")}</Typography>
+              )}
+            </>
+          )}
+
+          {loading && <CircularProgress size={16} />}
+        </Box>
+      )}
 
       {stale && props.state === "manual" && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

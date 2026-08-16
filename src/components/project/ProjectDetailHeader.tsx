@@ -110,7 +110,7 @@ const ProjectDetailHeader = ({
         ]}
       />
 
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5, justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5, justifyContent: "space-between", mb: 1 }}>
         <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", flex: "1 1 300px", minWidth: 0 }}>
           <EditableProjectIcon 
             projectId={p.id}
@@ -121,7 +121,7 @@ const ProjectDetailHeader = ({
           />
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
+            <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
               <Typography variant="h4" component="h1" sx={{ fontWeight: 800, wordBreak: "break-word", overflowWrap: "anywhere", fontSize: { xs: "1.5rem", sm: "2.125rem" } }}>
                 {p.title}
               </Typography>

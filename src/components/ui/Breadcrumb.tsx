@@ -34,7 +34,7 @@ const Separator = () => <span>/</span>;
  */
 const Breadcrumb = ({ items, showHome = true }: BreadcrumbProps) => {
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 1 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, typography: "body2", color: "text.secondary", flexWrap: "wrap", minWidth: 0 }}>
         {showHome && (
           <>
