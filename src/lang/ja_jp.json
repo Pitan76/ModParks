@@ -527,7 +527,9 @@
       },
       "languages": {
         "ja": "日本語",
-        "en": "英語"
+        "en": "英語",
+        "auto": "自動検出",
+        "other": "その他"
       },
       "errors": {
         "invalid_locale": "この言語には翻訳できません。",

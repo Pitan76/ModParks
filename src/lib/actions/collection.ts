@@ -4,10 +4,11 @@ import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
 import { collections, collectionItems, posts, projects, users, userProfiles, projectTags } from "@/db/schema";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { toProjectPost } from "@/lib/queries/postRow";
+import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 
 export async function createCollection(name: string, description: string | null, visibility: "public" | "unlisted" | "private") {
   const { db, userId } = await getAuthenticatedDb();
@@ -191,7 +192,7 @@ export async function getUserCollectionsWithProjectStatus(userId: string, projec
   }));
 }
 
-export async function getCollectionById(id: string, viewerId?: string) {
+export async function getCollectionById(id: string, viewerId?: string, locale?: string) {
   const db = await getDatabase();
 
   const collectionRow = await db.select({
@@ -211,7 +212,7 @@ export async function getCollectionById(id: string, viewerId?: string) {
 
   // Fetch the basic project info for items in this collection
   const items = await db.select({
-    posts: posts,
+    posts: { ...getTableColumns(posts), title: translatedTitle(locale), body: translatedBodyPreview(locale) },
     projects: projects,
     author: {
       username: userProfiles.username,

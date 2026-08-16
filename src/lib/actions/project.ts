@@ -143,6 +143,12 @@ export const updateProject = async (projectId: string, formData: FormData) => {
   // 2 つの UPDATE がちぐはぐな状態で残らないよう batch でまとめる。
   const { name, description, descriptionFormat, status, sourceLocale, ...projectFields } = fields;
 
+  let resolvedSourceLocale = sourceLocale;
+  if (sourceLocale === "auto") {
+    const bodyText = description !== undefined ? description : project.body;
+    resolvedSourceLocale = detectSourceLocale(`${name ?? project.title}\n${bodyText}`);
+  }
+
   // 下書きの間は「作成しただけ」の状態なので、他のステータスへ移した時点を作成日時とみなす
   const isLeavingDraft = project.visibility === "draft" && status !== undefined && status !== "draft";
 
@@ -153,7 +159,7 @@ export const updateProject = async (projectId: string, formData: FormData) => {
         ...(name !== undefined ? { title: name } : {}),
         ...(description !== undefined ? { body: description } : {}),
         ...(descriptionFormat !== undefined ? { bodyFormat: descriptionFormat } : {}),
-        ...(sourceLocale !== undefined ? { sourceLocale } : {}),
+        ...(resolvedSourceLocale !== undefined ? { sourceLocale: resolvedSourceLocale } : {}),
         // 未チェックのスイッチは送られてこないため、commentsEnabled と同じく直接読む
         aiTranslationEnabled: formData.get("aiTranslationEnabled") === "on",
         ...(status !== undefined ? { visibility: status } : {}),
@@ -210,12 +216,17 @@ export const updateProjectDescription = async (projectId: string, formData: Form
   });
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
+  let resolvedSourceLocale = parsed.data.sourceLocale;
+  if (resolvedSourceLocale === "auto") {
+    resolvedSourceLocale = detectSourceLocale(`${project.title}\n${parsed.data.description}`);
+  }
+
   await db
     .update(posts)
     .set({
       body:         parsed.data.description,
       bodyFormat:   parsed.data.descriptionFormat,
-      sourceLocale: parsed.data.sourceLocale,
+      sourceLocale: resolvedSourceLocale,
       // 未チェックのスイッチは送られてこないため、値の有無で判定する
       aiTranslationEnabled: formData.get("aiTranslationEnabled") === "on",
     })

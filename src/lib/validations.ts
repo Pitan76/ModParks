@@ -85,14 +85,14 @@ export const updateProjectSchema = createProjectSchema.partial().extend({
   issueTrackerUrl: z.string().url(vk("invalidUrl")).optional().or(z.literal("")).nullable(),
   status: z.enum(["draft", "public", "unlisted", "private"]).optional(),
   // 原文の言語。多言語表示の起点なので、作者が後から直せるようにしている
-  sourceLocale: z.enum(locales as unknown as [string, ...string[]]).optional(),
+  sourceLocale: z.enum([...locales, "auto", "other"] as unknown as [string, ...string[]]).optional(),
 });
 
 /** 説明タブのフォーム。基本情報とは別に保存する */
 export const updateDescriptionSchema = z.object({
   description: z.string().min(1),
   descriptionFormat: z.enum(["markdown", "plaintext", "pukiwiki"]),
-  sourceLocale: z.enum(locales as unknown as [string, ...string[]]),
+  sourceLocale: z.enum([...locales, "auto", "other"] as unknown as [string, ...string[]]),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;

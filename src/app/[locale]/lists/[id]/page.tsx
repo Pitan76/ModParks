@@ -26,7 +26,7 @@ export default async function ListDetailPage({ params }: ListDetailPageProps) {
   setRequestLocale(locale);
 
   const [collection, session, tCommon, tList] = await Promise.all([
-    getCollectionById(id),
+    getCollectionById(id, undefined, locale),
     auth(),
     getTranslations("Common"),
     getTranslations("List"),

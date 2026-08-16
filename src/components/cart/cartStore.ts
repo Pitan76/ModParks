@@ -9,14 +9,18 @@ export interface CartItem {
 }
 
 let cartItems: CartItem[] = [];
-if (typeof window !== "undefined") {
-  try {
-    const stored = window.localStorage.getItem("modparks_cart");
-    if (stored) cartItems = JSON.parse(stored);
-  } catch (e) {
-    console.error(e);
+
+function reloadFromStorage() {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = window.localStorage.getItem("modparks_cart");
+      cartItems = stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
+reloadFromStorage();
 
 const listeners = new Set<() => void>();
 
@@ -25,6 +29,7 @@ const EMPTY_ARRAY: CartItem[] = [];
 export const cartStore = {
   getSnapshot: () => cartItems,
   add: (item: CartItem) => {
+    reloadFromStorage();
     if (cartItems.some((i) => i.id === item.id)) return;
     cartItems = [...cartItems, item];
     cartStore._notify();
@@ -35,6 +40,7 @@ export const cartStore = {
    * @returns 実際に追加された件数
    */
   addMany: (items: CartItem[]) => {
+    reloadFromStorage();
     const seen = new Set(cartItems.map((i) => i.id));
     const fresh: CartItem[] = [];
     for (const item of items) {
@@ -49,10 +55,12 @@ export const cartStore = {
     return fresh.length;
   },
   remove: (id: string) => {
+    reloadFromStorage();
     cartItems = cartItems.filter((i) => i.id !== id);
     cartStore._notify();
   },
   clear: () => {
+    reloadFromStorage();
     cartItems = [];
     cartStore._notify();
   },
@@ -133,4 +141,20 @@ export function useCart() {
     clear: cartStore.clear,
     has: (id: string) => items.some((i) => i.id === id),
   };
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === "modparks_cart") {
+      try {
+        cartItems = e.newValue ? JSON.parse(e.newValue) : [];
+        listeners.forEach((l) => l());
+      } catch (err) {
+        console.error(err);
+      }
+    } else if (e.key === CART_DISABLED_KEY) {
+      cartEnabled = e.newValue !== "true";
+      enabledListeners.forEach((l) => l());
+    }
+  });
 }

@@ -102,6 +102,15 @@ export default function MultiChipAutocomplete({
         setInputValue(next);
       }}
       onChange={(_, newValue) => commit(newValue as string[])}
+      onBlur={() => {
+        if (expandInput && inputValue) {
+          const expanded = expandInput(inputValue);
+          if (expanded.length > 0) {
+            commit([...value, ...expanded]);
+            setInputValue("");
+          }
+        }
+      }}
       renderOption={(props, option) => {
         const item = option as string;
         const decoration = getDecoration?.(item);

@@ -50,8 +50,12 @@ const ProjectDescriptionFields = ({
             name="sourceLocale"
             size="small"
             label={t("fields.sourceLocale")}
-            defaultValue={sourceLocale || locales[0]}
-            options={locales.map((locale) => ({ value: locale, label: tLang(locale) }))}
+            defaultValue={sourceLocale || "auto"}
+            options={[
+              { value: "auto", label: tLang("auto") },
+              ...locales.map((locale) => ({ value: locale, label: tLang(locale) })),
+              { value: "other", label: tLang("other") },
+            ]}
             formControlProps={{ sx: { minWidth: 150 } }}
             onChange={onChange}
           />
