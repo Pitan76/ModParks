@@ -7,8 +7,9 @@ import ProjectVersionsDesktopTable from "./ProjectVersionsDesktopTable";
 import ProjectVersionsMobileList from "./ProjectVersionsMobileList";
 import { useProjectVersions } from "./useProjectVersions";
 import { useVersionMenu } from "./useVersionMenu";
+import Box from "@mui/material/Box";
 import { useColorMode } from "@/components/ThemeRegistry";
-import PaginatedContainer from "@/components/ui/PaginatedContainer";
+import PaginationControls from "@/components/ui/PaginationControls";
 import PlainProjectVersionsTable from "@/components/plain/project/PlainProjectVersionsTable";
 
 export type ProjectVersionRow = {
@@ -66,27 +67,35 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
     [state.versions, page, limit],
   );
 
+  const showPager = filteredCount > limit;
+  const pager = showPager && (
+    <PaginationControls
+      totalCount={filteredCount}
+      currentPage={page}
+      currentLimit={limit}
+    />
+  );
+
   if (isPlainTheme) {
     return (
-      <PaginatedContainer totalCount={filteredCount} currentPage={page} currentLimit={limit}>
-        <PlainProjectVersionsTable
-          versions={pageRows}
-          projectSlug={projectSlug}
-          filterChannel={state.filterChannel}
-          onChannelChange={state.setFilterChannel}
-          filterLoader={state.filterLoader}
-          onLoaderChange={state.setFilterLoader}
-          filterMc={state.filterMc}
-          onMcChange={state.setFilterMc}
-          loaderOptions={state.loaderOptions}
-          mcOptions={state.mcOptions}
-        />
-      </PaginatedContainer>
+      <PlainProjectVersionsTable
+        versions={pageRows}
+        projectSlug={projectSlug}
+        filterChannel={state.filterChannel}
+        onChannelChange={state.setFilterChannel}
+        filterLoader={state.filterLoader}
+        onLoaderChange={state.setFilterLoader}
+        filterMc={state.filterMc}
+        onMcChange={state.setFilterMc}
+        loaderOptions={state.loaderOptions}
+        mcOptions={state.mcOptions}
+        pagination={pager}
+      />
     );
   }
 
   return (
-    <PaginatedContainer totalCount={filteredCount} currentPage={page} currentLimit={limit}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <ProjectVersionsFilters
         filterChannel={state.filterChannel}
         onChannelChange={state.setFilterChannel}
@@ -97,6 +106,8 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
         loaderOptions={state.loaderOptions}
         mcOptions={state.mcOptions}
       />
+
+      {pager}
 
       <ProjectVersionsDesktopTable
         versions={pageRows}
@@ -112,7 +123,9 @@ const ProjectVersionsTable = ({ versions, projectSlug }: ProjectVersionsTablePro
         projectSlug={projectSlug}
         buildMenu={buildMenu}
       />
-    </PaginatedContainer>
+
+      {pager}
+    </Box>
   );
 };
 

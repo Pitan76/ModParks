@@ -1,5 +1,6 @@
 "use client";
 
+import { ReactNode } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/routing";
 import { formatBytes } from "@/lib/utils/format";
@@ -18,6 +19,7 @@ export type PlainProjectVersionsTableProps = {
   onMcChange: (value: string) => void;
   loaderOptions: string[];
   mcOptions: string[];
+  pagination?: ReactNode;
 };
 
 const CHANNELS = ["release", "beta", "alpha"] as const;
@@ -37,6 +39,7 @@ const PlainProjectVersionsTable = ({
   onMcChange,
   loaderOptions,
   mcOptions,
+  pagination,
 }: PlainProjectVersionsTableProps) => {
   const t = useTranslations("Project");
   const tVersion = useTranslations("Version");
@@ -73,6 +76,8 @@ const PlainProjectVersionsTable = ({
           </select>
         </label>
       </p>
+
+      {pagination}
 
       {versions.length === 0 ? (
         <p className={styles.dim}>{t("table.noVersionsInChannel")}</p>
