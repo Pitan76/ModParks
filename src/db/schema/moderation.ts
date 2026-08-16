@@ -167,6 +167,9 @@ export const moderationAudit = sqliteTable("moderation_audit", {
       "scan_appeal_reject",
       // 異議申請を経ずに管理者がスキャン判定を直接覆した場合
       "scan_override",
+      // 管理者が非公開・アーカイブ済み・危険判定のファイルを取得した場合。
+      // 技術上アクセスできてしまう領域なので、誰がいつ何を見たかを必ず残す
+      "restricted_access",
       "suspend_user",
       "unsuspend_user",
       "premium_grant",

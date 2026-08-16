@@ -15,6 +15,7 @@ import { validateApiKey } from "@/lib/api-auth";
 import { toStringArray } from "@/lib/utils/format";
 import { parseCsvParam, type DownloadPreference } from "@/lib/utils/downloadUrl";
 import { recordProjectDownload } from "@/lib/services/rewardMetrics";
+import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 
 /** 未公開扱いのステータス（直リンクでも認可が必要） */
 const RESTRICTED_STATUSES = new Set(["draft", "private"]);
@@ -71,6 +72,21 @@ async function resolveRelation(
   if (member) return { canAccessRestricted: true, excludedFromCount: true, isAdmin };
 
   return { canAccessRestricted: isAdmin, excludedFromCount: false, isAdmin };
+}
+
+/**
+ * 公開されていない（＝当事者しか触れないはずの）ファイルか。
+ *
+ * 下書き・非公開プロジェクト、アーカイブ済みバージョン、危険と判定されたファイルが該当する。
+ * 監査ログを残す範囲の判定に使う。
+ */
+function isRestrictedContent(
+  project: { visibility: string },
+  version: { archivedAt: Date | null; scanStatus: string }
+): boolean {
+  return RESTRICTED_STATUSES.has(project.visibility)
+    || !!version.archivedAt
+    || version.scanStatus === "malicious";
 }
 
 /** バージョンが絞り込み条件（ローダー / MCバージョン）に合致するか */
@@ -207,6 +223,20 @@ export async function GET(req: NextRequest) {
     // 管理画面からの「サイレントダウンロード」。審査・検証目的で統計を汚さずに取得する。
     // 一般利用者が silent=1 を付けてカウントを回避できないよう、管理者のみ有効。
     const silent = req.nextUrl.searchParams.get("silent") === "1" && relation.isAdmin;
+
+    // 公開されていないファイルを、当事者でない管理者が取得した記録を残す。
+    // 管理者は運用上あらゆるファイルを取得できてしまうため、「取得できること」と
+    // 「取得したこと」を切り離し、後から誰がいつ何を見たか説明できるようにする。
+    if (isRestrictedContent(project, version) && relation.isAdmin && !relation.excludedFromCount && requesterId) {
+      await recordModerationAudit(db, "restricted_access", versionId, requesterId, {
+        projectId:   project.id,
+        projectSlug: project.slug,
+        visibility:  project.visibility,
+        archived:    !!version.archivedAt,
+        scanStatus:  version.scanStatus,
+        silent,
+      });
+    }
 
     await countDownload(req, versionId, project.id, {
       excludedFromCount: relation.excludedFromCount,
