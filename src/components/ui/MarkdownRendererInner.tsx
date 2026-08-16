@@ -142,6 +142,18 @@ const MarkdownRendererInner = ({ content }: MarkdownRendererInnerProps) => {
         },
         "& ul, & ol": {
           pl: 3,
+          mb: 2,
+        },
+        "& li": {
+          mb: 0.3,
+        },
+        "& li p": {
+          mb: 0,
+          display: "inline",
+        },
+        "& li > ul, & li > ol": {
+          mt: 0.5,
+          mb: 0.5,
         },
       }}
     >
