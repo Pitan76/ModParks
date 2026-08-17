@@ -12,9 +12,27 @@ export const ideas = sqliteTable("ideas", {
     .primaryKey()
     .references(() => posts.id, { onDelete: "cascade" }),
   status:      text("status", { enum: ["open", "in_progress", "fulfilled"] }).notNull().default("open"),
+  /** JSON: string[] - 対応 MC バージョン */
+  mcVersions:  text("mc_versions"),
+  /** JSON: string[] - 対応ローダー */
+  loaders:     text("loaders"),
 }, (table) => ({
   statusIdx: index("ideas_status_idx").on(table.status),
 }));
+
+export const ideaTags = sqliteTable(
+  "idea_tags",
+  {
+    ideaId: text("idea_id")
+      .notNull()
+      .references(() => ideas.id, { onDelete: "cascade" }),
+    tag: text("tag").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.ideaId, t.tag] }),
+    index("idea_tags_idea_idx").on(t.ideaId),
+  ]
+);
 
 /** バージョンがどの Idea を実現したかの紐付け */
 export const versionIdeas = sqliteTable(
@@ -36,3 +54,4 @@ export const versionIdeas = sqliteTable(
 
 /** ideas の行。ProjectFields と同じ理由で、単体で Idea を表さない */
 export type IdeaFields = typeof ideas.$inferSelect;
+export type IdeaTag = typeof ideaTags.$inferSelect;

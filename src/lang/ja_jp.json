@@ -670,7 +670,12 @@
       "extracting": "レシピを抽出中...",
       "reusePrevious": "前回のバージョン ({version}) の設定を引き継げます",
       "reuseApply": "引き継ぐ",
-      "reuseApplied": "引き継ぎました"
+      "reuseApplied": "引き継ぎました",
+      "crosspostTitle": "他プラットフォームへの同時アップロード",
+      "crosspostModrinth": "Modrinthにも同時アップロードする",
+      "crosspostCurseforge": "CurseForgeにも同時アップロードする",
+      "crosspostModrinthFailed": "Modrinthへのアップロードに失敗しました: {error}",
+      "crosspostCurseforgeFailed": "CurseForgeへのアップロードに失敗しました: {error}"
     },
     "loaders": {
       "fabric": "Fabric",

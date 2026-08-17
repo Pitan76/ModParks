@@ -189,6 +189,8 @@ const ProjectVersionsManager = ({
             openIdeas={openIdeas}
             availablePlatforms={availablePlatforms}
             previousSettings={m.previousSettings}
+            modrinthSyncAvailable={modrinthSyncAvailable}
+            curseforgeSyncAvailable={curseforgeSyncAvailable}
           />
         </Box>
       </AbstractDialog>

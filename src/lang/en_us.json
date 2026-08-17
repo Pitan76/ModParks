@@ -670,7 +670,12 @@
       "extracting": "Extracting recipes...",
       "reusePrevious": "You can reuse the settings from the previous version ({version})",
       "reuseApply": "Apply",
-      "reuseApplied": "Applied"
+      "reuseApplied": "Applied",
+      "crosspostTitle": "Cross-post to other platforms",
+      "crosspostModrinth": "Also upload to Modrinth",
+      "crosspostCurseforge": "Also upload to CurseForge",
+      "crosspostModrinthFailed": "Failed to upload to Modrinth: {error}",
+      "crosspostCurseforgeFailed": "Failed to upload to CurseForge: {error}"
     },
     "loaders": {
       "fabric": "Fabric",

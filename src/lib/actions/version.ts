@@ -1,8 +1,10 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, comments, projectDependencies } from "@/db/schema";
+import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, comments, projectDependencies, userSettings } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
+import { createModrinthVersion } from "@/lib/modrinthUpload";
+import { fetchCfGameVersionMap, resolveCfGameVersionIds, uploadCfFile } from "@/lib/curseforgeUpload";
 import { notifyNewVersion, notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import { scanVersionFile } from "@/lib/actions/versionScan";
 import { createVersionSchema, dependencyDraftsSchema, updateVersionSchema } from "@/lib/validations";
@@ -125,6 +127,102 @@ function parseDependencyDraftsField(
   return { success: true, data: parsed.data };
 }
 
+type ExternalUploadResult = { ok: true } | { ok: false; error: string };
+export type ExternalUploadSummary = {
+  modrinth?: ExternalUploadResult;
+  curseforge?: ExternalUploadResult;
+};
+
+/**
+ * アップロード済みのファイル（fileUrl）を取得し直し、Modrinth / CurseForge へも
+ * 新規バージョンとして同時アップロードする。
+ *
+ * modparksの `versions` は正規化のためJSON文字列で mcVersions/loaders を持つが、
+ * 外部APIはどちらも配列を要求するため、ここでパース済みの配列を受け取る。
+ * 失敗しても modparks 側の登録自体は既に完了しているため、例外は投げずに結果を返す。
+ */
+async function pushVersionToExternalPlatforms(params: {
+  db: Database;
+  userId: string;
+  project: ProjectPost;
+  versionNumber: string;
+  changelog: string;
+  releaseChannel: string;
+  mcVersions: string[];
+  loaders: string[];
+  fileUrl: string;
+  fileName: string;
+  uploadToModrinth: boolean;
+  uploadToCurseforge: boolean;
+}): Promise<ExternalUploadSummary> {
+  const { db, userId, project, uploadToModrinth, uploadToCurseforge } = params;
+  const summary: ExternalUploadSummary = {};
+  if (!uploadToModrinth && !uploadToCurseforge) return summary;
+
+  const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
+
+  const fileRes = await fetch(params.fileUrl);
+  if (!fileRes.ok) {
+    const error = `Failed to fetch uploaded file for external sync. Status: ${fileRes.status}`;
+    if (uploadToModrinth) summary.modrinth = { ok: false, error };
+    if (uploadToCurseforge) summary.curseforge = { ok: false, error };
+    return summary;
+  }
+  const fileBlob = await fileRes.blob();
+
+  if (uploadToModrinth) {
+    if (!project.modrinthId || !settings?.modrinthApiKey) {
+      summary.modrinth = { ok: false, error: "Modrinth is not linked or the API key is not configured." };
+    } else {
+      try {
+        await createModrinthVersion(settings.modrinthApiKey.trim(), {
+          modrinthProjectId: project.modrinthId,
+          versionNumber: params.versionNumber,
+          changelog: params.changelog,
+          gameVersions: params.mcVersions,
+          loaders: params.loaders,
+          releaseChannel: params.releaseChannel,
+          file: fileBlob,
+          fileName: params.fileName,
+        });
+        summary.modrinth = { ok: true };
+      } catch (err) {
+        summary.modrinth = { ok: false, error: err instanceof Error ? err.message : String(err) };
+      }
+    }
+  }
+
+  if (uploadToCurseforge) {
+    if (!project.curseforgeId || !settings?.curseforgeUploadApiToken) {
+      summary.curseforge = { ok: false, error: "CurseForge is not linked or the upload API token is not configured." };
+    } else {
+      try {
+        const token = settings.curseforgeUploadApiToken.trim();
+        const versionMap = await fetchCfGameVersionMap(token);
+        const { ids } = resolveCfGameVersionIds([...params.mcVersions, ...params.loaders], versionMap);
+        await uploadCfFile(
+          project.curseforgeId,
+          token,
+          {
+            changelog: params.changelog,
+            changelogType: "markdown",
+            displayName: params.versionNumber,
+            gameVersions: ids,
+            releaseType: (["alpha", "beta", "release"].includes(params.releaseChannel) ? params.releaseChannel : "release") as "alpha" | "beta" | "release",
+          },
+          fileBlob,
+          params.fileName,
+        );
+        summary.curseforge = { ok: true };
+      } catch (err) {
+        summary.curseforge = { ok: false, error: err instanceof Error ? err.message : String(err) };
+      }
+    }
+  }
+
+  return summary;
+}
+
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
  */
@@ -209,7 +307,24 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
   revalidatePath(`/ideas`);
   if (ideaId) revalidatePath(`/ideas/${ideaId}`);
 
-  return { success: true, versionId: id };
+  const uploadToModrinth = formData.get("uploadToModrinth") === "true";
+  const uploadToCurseforge = formData.get("uploadToCurseforge") === "true";
+  const external = await pushVersionToExternalPlatforms({
+    db,
+    userId: session.user.id,
+    project,
+    versionNumber: parsed.data.versionNumber,
+    changelog: parsed.data.changelog || "",
+    releaseChannel: parsed.data.releaseChannel,
+    mcVersions: parsed.data.mcVersions,
+    loaders: parsed.data.loaders,
+    fileUrl,
+    fileName,
+    uploadToModrinth,
+    uploadToCurseforge,
+  });
+
+  return { success: true, versionId: id, external };
 };
 
 /**

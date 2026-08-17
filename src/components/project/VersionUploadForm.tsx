@@ -5,6 +5,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import ToggleButton from "@mui/material/ToggleButton";
@@ -29,6 +32,10 @@ export type VersionUploadFormProps = {
   availablePlatforms?: OptionItem[];
   /** 直前のバージョンの設定。渡された場合のみ流用ボタンを表示する */
   previousSettings?: PreviousVersionSettings | null;
+  /** プロジェクトが Modrinth と連携済み、かつ閲覧者に Modrinth API キーが設定されているか */
+  modrinthSyncAvailable?: boolean;
+  /** プロジェクトが CurseForge と連携済み、かつ閲覧者に CurseForge Upload API トークンが設定されているか */
+  curseforgeSyncAvailable?: boolean;
 };
 
 /**
@@ -40,6 +47,8 @@ const VersionUploadForm = ({
   openIdeas,
   availablePlatforms = [],
   previousSettings = null,
+  modrinthSyncAvailable = false,
+  curseforgeSyncAvailable = false,
 }: VersionUploadFormProps) => {
   const tVersion = useTranslations("Version");
   const tCommon = useTranslations("Common");
@@ -156,6 +165,44 @@ const VersionUploadForm = ({
         error={!!error?.changelog}
         helperText={error?.changelog?.[0]}
       />
+
+      {(modrinthSyncAvailable || curseforgeSyncAvailable) && (
+        <Box>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+            {tVersion("uploadForm.crosspostTitle")}
+          </Typography>
+          {modrinthSyncAvailable && (
+            <FormControlLabel
+              control={<Checkbox checked={form.uploadToModrinth} onChange={(e) => form.setUploadToModrinth(e.target.checked)} />}
+              label={tVersion("uploadForm.crosspostModrinth")}
+            />
+          )}
+          {curseforgeSyncAvailable && (
+            <FormControlLabel
+              control={<Checkbox checked={form.uploadToCurseforge} onChange={(e) => form.setUploadToCurseforge(e.target.checked)} />}
+              label={tVersion("uploadForm.crosspostCurseforge")}
+            />
+          )}
+        </Box>
+      )}
+
+      {form.externalResult && (
+        <Alert
+          severity="warning"
+          action={
+            <Button color="inherit" size="small" onClick={() => form.router.push(`/projects/${slug}`)}>
+              {tCommon("close")}
+            </Button>
+          }
+        >
+          {form.externalResult.modrinth && !form.externalResult.modrinth.ok && (
+            <div>{tVersion("uploadForm.crosspostModrinthFailed", { error: form.externalResult.modrinth.error })}</div>
+          )}
+          {form.externalResult.curseforge && !form.externalResult.curseforge.ok && (
+            <div>{tVersion("uploadForm.crosspostCurseforgeFailed", { error: form.externalResult.curseforge.error })}</div>
+          )}
+        </Alert>
+      )}
 
       <Box>
         <DependencyDraftEditor

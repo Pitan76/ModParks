@@ -22,9 +22,11 @@ import { formatCompactNumber } from "@/lib/utils/format";
 import { Link, useRouter } from "@/lib/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/projectBatch";
 import { batchModifyProjectMcVersions } from "@/lib/actions/projectBatchMcVersion";
+import { batchUpdateProjectSettings, type BatchProjectSettingsUpdates } from "@/lib/actions/projectBatchSettings";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import ProjectVersionCell from "./ProjectVersionCell";
 import BatchProjectMcVersionDialog from "./BatchProjectMcVersionDialog";
+import BatchProjectSettingsDialog from "./BatchProjectSettingsDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 import SortableTableCell from "@/components/ui/SortableTableCell";
 import { useTableSort } from "@/lib/hooks/useTableSort";
@@ -57,6 +59,7 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [mcVersionDialogOpen, setMcVersionDialogOpen] = useState(false);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -154,6 +157,28 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
     }
   };
 
+  const handleBatchSettings = async (updates: BatchProjectSettingsUpdates) => {
+    if (selected.size === 0) return false;
+    setLoading(true);
+    setError(null);
+    try {
+      const ids = Array.from(selected);
+      const res = await batchUpdateProjectSettings(ids, updates);
+      if (res && "error" in res) {
+        setError(res.error || t("statusUpdateError"));
+        return false;
+      }
+      setSelected(new Set());
+      router.refresh();
+      return true;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("statusUpdateError"));
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusLabel = (status: string) => {
     if (tCommon.has(`visibility.${status}` as any)) return tCommon(`visibility.${status}` as any);
     return status;
@@ -180,6 +205,15 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
           disabled={selected.size === 0 || loading}
         >
           {t("editMcVersions")}
+        </Button>
+        <Button
+          variant="contained"
+          color="info"
+          startIcon={<EditIcon />}
+          onClick={() => setSettingsDialogOpen(true)}
+          disabled={selected.size === 0 || loading}
+        >
+          {t("editSettings")}
         </Button>
         <Menu
           anchorEl={anchorEl}
@@ -291,6 +325,14 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
         selectedCount={selected.size}
         pending={loading}
         onSubmit={handleBatchMcVersions}
+      />
+
+      <BatchProjectSettingsDialog
+        open={settingsDialogOpen}
+        onClose={() => setSettingsDialogOpen(false)}
+        selectedCount={selected.size}
+        pending={loading}
+        onSubmit={handleBatchSettings}
       />
     </Box>
   );

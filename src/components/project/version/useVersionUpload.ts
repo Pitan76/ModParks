@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
-import { createVersion } from "@/lib/actions/version";
+import { createVersion, type ExternalUploadSummary } from "@/lib/actions/version";
 import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 import { DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
@@ -40,6 +40,9 @@ export function useVersionUpload(slug: string, previousSettings: PreviousVersion
   const [extracting, setExtracting] = useState(false);
   const [reuseApplied, setReuseApplied] = useState(false);
   const [dependencies, setDependencies] = useState<DependencyDraft[]>([]);
+  const [uploadToModrinth, setUploadToModrinth] = useState(false);
+  const [uploadToCurseforge, setUploadToCurseforge] = useState(false);
+  const [externalResult, setExternalResult] = useState<ExternalUploadSummary | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const failWithFileError = (messageKey: string) => {
@@ -122,6 +125,8 @@ export function useVersionUpload(slug: string, previousSettings: PreviousVersion
       if (dependencies.length > 0) {
         formData.set("dependencies", JSON.stringify(dependencies));
       }
+      formData.set("uploadToModrinth", uploadToModrinth ? "true" : "false");
+      formData.set("uploadToCurseforge", uploadToCurseforge ? "true" : "false");
 
       if (!(await attachFile(formData))) {
         setPending(false);
@@ -149,6 +154,15 @@ export function useVersionUpload(slug: string, previousSettings: PreviousVersion
           setPending(false);
           return;
         }
+      }
+
+      const external = result && "external" in result ? result.external : undefined;
+      const hasExternalFailure = !!(external && ((external.modrinth && !external.modrinth.ok) || (external.curseforge && !external.curseforge.ok)));
+      if (hasExternalFailure) {
+        // 外部連携が一部失敗した場合は、内容を確認できるようこのページに留まる
+        setExternalResult(external ?? null);
+        setPending(false);
+        return;
       }
 
       router.push(`/projects/${slug}`);
@@ -185,6 +199,11 @@ export function useVersionUpload(slug: string, previousSettings: PreviousVersion
     reuseApplied,
     dependencies,
     setDependencies,
+    uploadToModrinth,
+    setUploadToModrinth,
+    uploadToCurseforge,
+    setUploadToCurseforge,
+    externalResult,
     fileInputRef,
     handleReusePrevious,
     handleFileChange,
