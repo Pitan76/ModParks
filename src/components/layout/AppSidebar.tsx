@@ -40,6 +40,7 @@ const AppSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleCol
     navItems.push({ id: "notifications", label: t("notifications"), path: "/notifications", icon: <NotificationsIcon /> });
     navItems.push({ id: "dashboard", label: t("dashboard"), path: "/dashboard", icon: <DashboardIcon /> });
     navItems.push({ id: "myProjects", label: t("myProjects"), path: "/projects/manage", icon: <FolderIcon /> });
+    navItems.push({ id: "myIdeas", label: t("myIdeas"), path: "/ideas/manage", icon: <LightbulbIcon /> });
     navItems.push({ id: "profile", label: t("profile"), path: `/profile/${session.user.username}`, icon: <AccountCircleIcon /> });
   }
 

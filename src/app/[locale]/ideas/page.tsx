@@ -61,14 +61,25 @@ export default async function IdeasPage({ params, searchParams }: IdeasPageProps
             {tIdea("description")}
           </Typography>
         </Box>
-        <LinkButton
-          href="/ideas/new"
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{ flexShrink: 0, width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
-        >
-          {tIdea("postIdea")}
-        </LinkButton>
+        <Box sx={{ display: "flex", gap: { xs: 1, sm: 2 }, flexShrink: 0, flexWrap: "wrap", width: { xs: "100%", sm: "auto" } }}>
+          {session && (
+            <LinkButton
+              href="/ideas/manage"
+              variant="outlined"
+              sx={{ flex: { xs: 1, sm: "none" }, whiteSpace: "nowrap" }}
+            >
+              {tIdea("goToManage")}
+            </LinkButton>
+          )}
+          <LinkButton
+            href="/ideas/new"
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ flex: { xs: 1, sm: "none" }, whiteSpace: "nowrap" }}
+          >
+            {tIdea("postIdea")}
+          </LinkButton>
+        </Box>
       </Box>
 
       <IdeaCardList ideas={allIdeas} />

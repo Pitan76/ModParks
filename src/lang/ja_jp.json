@@ -166,6 +166,7 @@
     "projects": "探す",
     "ideas": "アイデア",
     "myProjects": "プロジェクト",
+    "myIdeas": "マイアイデア",
     "newProject": "新規プロジェクト",
     "profile": "プロフィール",
     "rewards": "クリエイタ還元",
@@ -768,6 +769,7 @@
     "backToList": "アイデア一覧に戻る",
     "postIdeaTitle": "アイデアを投稿",
     "manageTitle": "アイデア管理",
+    "goToManage": "アイデア管理",
     "batch": {
       "changeStatus": "公開範囲変更",
       "changeResolution": "ステータス変更",

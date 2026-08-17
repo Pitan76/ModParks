@@ -166,6 +166,7 @@
     "projects": "Discover",
     "ideas": "Ideas",
     "myProjects": "Projects",
+    "myIdeas": "My Ideas",
     "newProject": "New Project",
     "profile": "Profile",
     "rewards": "Creator Reward",
@@ -771,6 +772,7 @@
     "backToList": "Back to Ideas",
     "postIdeaTitle": "Post an Idea",
     "manageTitle": "Manage Ideas",
+    "goToManage": "Manage Ideas",
     "batch": {
       "changeStatus": "Change Visibility",
       "changeResolution": "Change Status",

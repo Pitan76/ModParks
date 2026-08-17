@@ -5,31 +5,16 @@ import type { MouseEvent } from "react";
 import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { formatCompactNumber } from "@/lib/utils/format";
-import { Link, useRouter } from "@/lib/i18n/routing";
-import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/projectBatch";
-import { batchModifyProjectMcVersions } from "@/lib/actions/projectBatchMcVersion";
-import { batchUpdateProjectSettings, type BatchProjectSettingsUpdates } from "@/lib/actions/projectBatchSettings";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
-import ProjectVersionCell from "./ProjectVersionCell";
 import BatchProjectMcVersionDialog from "./BatchProjectMcVersionDialog";
 import BatchProjectSettingsDialog from "./BatchProjectSettingsDialog";
-import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
-import SortableTableCell from "@/components/ui/SortableTableCell";
-import { useTableSort } from "@/lib/hooks/useTableSort";
+import BatchProjectOperationsTable from "./BatchProjectOperationsTable";
+import { useBatchProjectOperations } from "./useBatchProjectOperations";
 
 type ProjectForManagement = {
   id: string;
@@ -51,149 +36,28 @@ export type BatchProjectOperationsClientProps = {
  * 管理画面で複数プロジェクトの一括公開ステータス変更、または一括削除操作を提供するクライアントコンポーネント。
  */
 const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClientProps) => {
-  const router = useRouter();
   const t = useTranslations("Project.batch");
-  const tCommon = useTranslations("Common");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [mcVersionDialogOpen, setMcVersionDialogOpen] = useState(false);
-  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
-  
+  const m = useBatchProjectOperations(projects);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const { sorted, order, orderBy, handleSort } = useTableSort(projects, {
-    name: (p) => p.title,
-    slug: (p) => p.slug,
-    type: (p) => p.type,
-    status: (p) => p.visibility,
-    downloads: (p) => p.totalDownloads || 0,
-  });
+  const handleStatusClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+  const handleStatusClose = () => setAnchorEl(null);
 
-  const handleToggle = (id: string) => {
-    const next = new Set(selected);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelected(next);
-  };
-
-  const handleToggleAll = () => {
-    if (selected.size === projects.length) {
-      setSelected(new Set());
-    } else {
-      setSelected(new Set(projects.map(p => p.id)));
-    }
-  };
-
-  const handleStatusClick = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleStatusClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleBatchStatus = async (status: "public" | "unlisted" | "private" | "draft") => {
+  const handleStatusSelect = (status: "public" | "unlisted" | "private" | "draft") => {
     handleStatusClose();
-    if (selected.size === 0) return;
-    
-    setLoading(true);
-    setError(null);
-    try {
-      const ids = Array.from(selected);
-      await batchUpdateProjectStatus(ids, status);
-      setSelected(new Set());
-      router.refresh();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("statusUpdateError"));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBatchDelete = async () => {
-    if (selected.size === 0) return;
-    
-    setLoading(true);
-    setError(null);
-    try {
-      const ids = Array.from(selected);
-      await batchDeleteProjects(ids);
-      setSelected(new Set());
-      setDeleteDialogOpen(false);
-      router.refresh();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("deleteError"));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBatchMcVersions = async (
-    operation: "add" | "remove" | "set",
-    mcVersions: string[],
-    targetVersions: "all" | "latest",
-    platforms: { modparks: boolean; modrinth: boolean }
-  ) => {
-    if (selected.size === 0) return false;
-    setLoading(true);
-    setError(null);
-    try {
-      const ids = Array.from(selected);
-      const res = await batchModifyProjectMcVersions(ids, operation, mcVersions, targetVersions, platforms);
-      if (res && "error" in res) {
-        setError(res.error || t("statusUpdateError"));
-        return false;
-      }
-      setSelected(new Set());
-      router.refresh();
-      return true;
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("statusUpdateError"));
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBatchSettings = async (updates: BatchProjectSettingsUpdates) => {
-    if (selected.size === 0) return false;
-    setLoading(true);
-    setError(null);
-    try {
-      const ids = Array.from(selected);
-      const res = await batchUpdateProjectSettings(ids, updates);
-      if (res && "error" in res) {
-        setError(res.error || t("statusUpdateError"));
-        return false;
-      }
-      setSelected(new Set());
-      router.refresh();
-      return true;
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t("statusUpdateError"));
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    if (tCommon.has(`visibility.${status}` as any)) return tCommon(`visibility.${status}` as any);
-    return status;
+    m.handleBatchStatus(status);
   };
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+      {m.error && <Alert severity="error" sx={{ mb: 3 }}>{m.error}</Alert>}
 
       <Box sx={{ mb: 2, display: "flex", gap: { xs: 1, sm: 2 }, alignItems: "center", flexWrap: "wrap" }}>
         <Button
           variant="contained"
           startIcon={<EditIcon />}
           onClick={handleStatusClick}
-          disabled={selected.size === 0 || loading}
+          disabled={m.selected.size === 0 || m.loading}
         >
           {t("changeStatus")}
         </Button>
@@ -201,8 +65,8 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
           variant="contained"
           color="secondary"
           startIcon={<EditIcon />}
-          onClick={() => setMcVersionDialogOpen(true)}
-          disabled={selected.size === 0 || loading}
+          onClick={() => m.setMcVersionDialogOpen(true)}
+          disabled={m.selected.size === 0 || m.loading}
         >
           {t("editMcVersions")}
         </Button>
@@ -210,129 +74,69 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
           variant="contained"
           color="info"
           startIcon={<EditIcon />}
-          onClick={() => setSettingsDialogOpen(true)}
-          disabled={selected.size === 0 || loading}
+          onClick={() => m.setSettingsDialogOpen(true)}
+          disabled={m.selected.size === 0 || m.loading}
         >
           {t("editSettings")}
         </Button>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleStatusClose}
-        >
-          <MenuItem onClick={() => handleBatchStatus("public")}>{t("makePublic")}</MenuItem>
-          <MenuItem onClick={() => handleBatchStatus("unlisted")}>{t("makeUnlisted")}</MenuItem>
-          <MenuItem onClick={() => handleBatchStatus("private")}>{t("makePrivate")}</MenuItem>
-          <MenuItem onClick={() => handleBatchStatus("draft")}>{t("makeDraft")}</MenuItem>
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleStatusClose}>
+          <MenuItem onClick={() => handleStatusSelect("public")}>{t("makePublic")}</MenuItem>
+          <MenuItem onClick={() => handleStatusSelect("unlisted")}>{t("makeUnlisted")}</MenuItem>
+          <MenuItem onClick={() => handleStatusSelect("private")}>{t("makePrivate")}</MenuItem>
+          <MenuItem onClick={() => handleStatusSelect("draft")}>{t("makeDraft")}</MenuItem>
         </Menu>
 
         <Button
           variant="outlined"
           color="error"
           startIcon={<DeleteIcon />}
-          onClick={() => setDeleteDialogOpen(true)}
-          disabled={selected.size === 0 || loading}
+          onClick={() => m.setDeleteDialogOpen(true)}
+          disabled={m.selected.size === 0 || m.loading}
         >
           {t("delete")}
         </Button>
 
         <Box sx={{ flexGrow: 1 }} />
-        {selected.size > 0 && (
+        {m.selected.size > 0 && (
           <Box sx={{ typography: "body2", color: "text.secondary" }}>
-            {t("selectedCount", { count: selected.size })}
+            {t("selectedCount", { count: m.selected.size })}
           </Box>
         )}
       </Box>
 
-      <TableContainer component={Paper} sx={tableContainerSx}>
-        <Table sx={[tableRootSx, { minWidth: 640 }]}>
-          <TableHead sx={tableHeadSx}>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={selected.size > 0 && selected.size < projects.length}
-                  checked={projects.length > 0 && selected.size === projects.length}
-                  onChange={handleToggleAll}
-                />
-              </TableCell>
-              <SortableTableCell columnKey="name" activeKey={orderBy} order={order} onSort={handleSort}>{t("colName")}</SortableTableCell>
-              <SortableTableCell columnKey="slug" activeKey={orderBy} order={order} onSort={handleSort}>{t("colSlug")}</SortableTableCell>
-              <SortableTableCell columnKey="type" activeKey={orderBy} order={order} onSort={handleSort}>{t("colType")}</SortableTableCell>
-              <SortableTableCell columnKey="status" activeKey={orderBy} order={order} onSort={handleSort}>{t("colStatus")}</SortableTableCell>
-              <SortableTableCell columnKey="downloads" activeKey={orderBy} order={order} onSort={handleSort} align="right">{t("colDownloads")}</SortableTableCell>
-              <TableCell align="center">{t("colVersion")}</TableCell>
-              <TableCell align="center">{t("colActions")}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {projects.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
-                  {t("empty")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              sorted.map((p) => {
-                const totalDl = p.totalDownloads || 0;
-                return (
-                  <TableRow key={p.id} hover>
-                    <TableCell padding="checkbox">
-                      <Checkbox 
-                        checked={selected.has(p.id)} 
-                        onChange={() => handleToggle(p.id)}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>{p.title}</TableCell>
-                    <TableCell>{p.slug}</TableCell>
-                    <TableCell>{p.type}</TableCell>
-                    <TableCell>{getStatusLabel(p.visibility)}</TableCell>
-                    <TableCell align="right">{formatCompactNumber(totalDl, "ja")}</TableCell>
-                    <TableCell align="center">
-                      <ProjectVersionCell
-                        projectId={p.id}
-                        projectSlug={p.slug}
-                        githubRepo={p.githubRepo || null}
-                        latestVersionNumber={p.latestVersionNumber || null}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button component={Link} href={`/projects/${p.slug}/edit`} size="small">
-                        {t("edit")}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <BatchProjectOperationsTable
+        projects={projects}
+        selected={m.selected}
+        onToggle={m.handleToggle}
+        onToggleAll={m.handleToggleAll}
+        getStatusLabel={m.getStatusLabel}
+      />
 
       <TypedConfirmDialog
-        open={deleteDialogOpen}
-        onClose={() => !loading && setDeleteDialogOpen(false)}
-        onConfirm={handleBatchDelete}
+        open={m.deleteDialogOpen}
+        onClose={() => !m.loading && m.setDeleteDialogOpen(false)}
+        onConfirm={m.handleBatchDelete}
         title={t("deleteTitle")}
-        description={t.rich("deleteDescription", { count: selected.size, b: (chunks) => <strong>{chunks}</strong> })}
+        description={t.rich("deleteDescription", { count: m.selected.size, b: (chunks) => <strong>{chunks}</strong> })}
         expectedValue="DELETE"
         expectedValueLabel={t("deleteConfirmLabel")}
-        pending={loading}
+        pending={m.loading}
       />
 
       <BatchProjectMcVersionDialog
-        open={mcVersionDialogOpen}
-        onClose={() => setMcVersionDialogOpen(false)}
-        selectedCount={selected.size}
-        pending={loading}
-        onSubmit={handleBatchMcVersions}
+        open={m.mcVersionDialogOpen}
+        onClose={() => m.setMcVersionDialogOpen(false)}
+        selectedCount={m.selected.size}
+        pending={m.loading}
+        onSubmit={m.handleBatchMcVersions}
       />
 
       <BatchProjectSettingsDialog
-        open={settingsDialogOpen}
-        onClose={() => setSettingsDialogOpen(false)}
-        selectedCount={selected.size}
-        pending={loading}
-        onSubmit={handleBatchSettings}
+        open={m.settingsDialogOpen}
+        onClose={() => m.setSettingsDialogOpen(false)}
+        selectedCount={m.selected.size}
+        pending={m.loading}
+        onSubmit={m.handleBatchSettings}
       />
     </Box>
   );

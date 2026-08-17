@@ -57,6 +57,9 @@ const UserMenu = ({ user }: UserMenuProps) => {
         <LinkMenuItem href="/projects?author=me" onClick={handleMenuClose} id="user-menu-my-projects">
           {t("myProjects")}
         </LinkMenuItem>
+        {/* <LinkMenuItem href="/ideas/manage" onClick={handleMenuClose} id="user-menu-my-ideas">
+          {t("myIdeas")}
+        </LinkMenuItem> */}
         <LinkMenuItem href="/dashboard" onClick={handleMenuClose} id="user-menu-dashboard">
           {t("dashboard")}
         </LinkMenuItem>
