@@ -21,8 +21,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import { formatCompactNumber } from "@/lib/utils/format";
 import { Link, useRouter } from "@/lib/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/projectBatch";
+import { batchModifyProjectMcVersions } from "@/lib/actions/projectBatchMcVersion";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import ProjectVersionCell from "./ProjectVersionCell";
+import BatchProjectMcVersionDialog from "./BatchProjectMcVersionDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 import SortableTableCell from "@/components/ui/SortableTableCell";
 import { useTableSort } from "@/lib/hooks/useTableSort";
@@ -54,6 +56,7 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [mcVersionDialogOpen, setMcVersionDialogOpen] = useState(false);
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -124,6 +127,33 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
     }
   };
 
+  const handleBatchMcVersions = async (
+    operation: "add" | "remove" | "set",
+    mcVersions: string[],
+    targetVersions: "all" | "latest",
+    platforms: { modparks: boolean; modrinth: boolean }
+  ) => {
+    if (selected.size === 0) return false;
+    setLoading(true);
+    setError(null);
+    try {
+      const ids = Array.from(selected);
+      const res = await batchModifyProjectMcVersions(ids, operation, mcVersions, targetVersions, platforms);
+      if (res && "error" in res) {
+        setError(res.error || t("statusUpdateError"));
+        return false;
+      }
+      setSelected(new Set());
+      router.refresh();
+      return true;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("statusUpdateError"));
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusLabel = (status: string) => {
     if (tCommon.has(`visibility.${status}` as any)) return tCommon(`visibility.${status}` as any);
     return status;
@@ -141,6 +171,15 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
           disabled={selected.size === 0 || loading}
         >
           {t("changeStatus")}
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<EditIcon />}
+          onClick={() => setMcVersionDialogOpen(true)}
+          disabled={selected.size === 0 || loading}
+        >
+          {t("editMcVersions")}
         </Button>
         <Menu
           anchorEl={anchorEl}
@@ -244,6 +283,14 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
         expectedValue="DELETE"
         expectedValueLabel={t("deleteConfirmLabel")}
         pending={loading}
+      />
+
+      <BatchProjectMcVersionDialog
+        open={mcVersionDialogOpen}
+        onClose={() => setMcVersionDialogOpen(false)}
+        selectedCount={selected.size}
+        pending={loading}
+        onSubmit={handleBatchMcVersions}
       />
     </Box>
   );

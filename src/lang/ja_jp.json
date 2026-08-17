@@ -494,7 +494,21 @@
       "deleteDescription": "本当に選択した <b>{count}</b> 件のプロジェクトを削除しますか？この操作は元に戻せません。",
       "deleteConfirmLabel": "確認のため、半角大文字で DELETE と入力してください:",
       "statusUpdateError": "ステータス更新に失敗しました",
-      "deleteError": "削除に失敗しました"
+      "deleteError": "削除に失敗しました",
+      "editMcVersions": "MCバージョン一括編集",
+      "editMcVersionsTitle": "MCバージョン一括編集",
+      "editMcVersionsDesc": "選択した {count} 件のプロジェクトに対して、対応MCバージョンを一括で編集します。",
+      "opType": "操作タイプ",
+      "opAdd": "追加する",
+      "opRemove": "削除する",
+      "opSet": "上書きする（既存の設定をすべて削除して置き換え）",
+      "targetVersions": "対象バージョン",
+      "targetAll": "すべてのバージョン",
+      "targetLatest": "最新のバージョンのみ",
+      "targetPlatforms": "対象プラットフォーム",
+      "platformModParks": "ModParks (このサイト)",
+      "platformModrinth": "Modrinth",
+      "successMcVersions": "{count} 件のプロジェクトでMCバージョンを編集しました"
     },
     "comments": {
       "title": "コメント",

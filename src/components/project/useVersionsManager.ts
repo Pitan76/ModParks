@@ -181,13 +181,13 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
     setSelected((prev) => (prev.size === localVersions.length ? new Set() : new Set(localVersions.map((v) => v.id))));
   };
 
-  const handleBatchAddMcVersion = async (mcVersions: string[], syncModrinth: boolean) => {
+  const handleBatchAddMcVersion = async (mcVersions: string[], syncModrinth: boolean, syncCurseforge: boolean) => {
     setBatchPending(true);
     setErrorMsg("");
     setImportMsg(null);
     try {
       const ids = Array.from(selected);
-      const res = await batchAddMcVersion(projectSlug, ids, mcVersions, syncModrinth);
+      const res = await batchAddMcVersion(projectSlug, ids, mcVersions, syncModrinth, syncCurseforge);
       if (isActionError(res)) {
         setErrorMsg(res.error || tError("version.deleteFailed"));
         return false;
@@ -203,11 +203,13 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
           return { ...v, mcVersions: JSON.stringify(merged) };
         })
       );
-      const summary = res.data.modrinth
-        ? " " + t("manager.batch.modrinthSummary", res.data.modrinth)
-        : "";
+      const summaries = [
+        res.data.modrinth ? t("manager.batch.modrinthSummary", res.data.modrinth) : null,
+        res.data.curseforge ? t("manager.batch.curseforgeSummary", res.data.curseforge) : null,
+      ].filter(Boolean);
+      const summaryText = summaries.length > 0 ? " " + summaries.join(" / ") : "";
       setImportMsg({
-        text: t("manager.batch.success", { count: res.data.updatedCount, mcVersion: mcVersions.join(", ") }) + summary,
+        text: t("manager.batch.success", { count: res.data.updatedCount, mcVersion: mcVersions.join(", ") }) + summaryText,
         severity: "success",
       });
       setSelected(new Set());
