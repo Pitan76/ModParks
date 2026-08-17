@@ -12,18 +12,23 @@ import Checkbox from "@mui/material/Checkbox";
 import FormGroup from "@mui/material/FormGroup";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import McVersionAutocomplete from "./McVersionAutocomplete";
+import LoaderAutocomplete from "./LoaderAutocomplete";
 import { useTranslations } from "next-intl";
+
+type OptionItem = { slug: string; name: string };
 
 export type BatchProjectMcVersionDialogProps = {
   open: boolean;
   onClose: () => void;
   selectedCount: number;
+  availablePlatforms?: OptionItem[];
   pending: boolean;
   onSubmit: (
     operation: "add" | "remove" | "set",
     mcVersions: string[],
     targetVersions: "all" | "latest",
-    platforms: { modparks: boolean; modrinth: boolean }
+    platforms: { modparks: boolean; modrinth: boolean },
+    targetLoaders: string[]
   ) => Promise<boolean>;
 };
 
@@ -31,6 +36,7 @@ export default function BatchProjectMcVersionDialog({
   open,
   onClose,
   selectedCount,
+  availablePlatforms = [],
   pending,
   onSubmit,
 }: BatchProjectMcVersionDialogProps) {
@@ -42,18 +48,21 @@ export default function BatchProjectMcVersionDialog({
   const [mcVersions, setMcVersions] = useState<string[]>([]);
   const [targetVersions, setTargetVersions] = useState<"all" | "latest">("latest");
   const [platforms, setPlatforms] = useState({ modparks: true, modrinth: true });
+  const [targetLoaders, setTargetLoaders] = useState<string[]>([]);
 
   const handleClose = () => {
     if (pending) return;
     setMcVersions([]);
+    setTargetLoaders([]);
     onClose();
   };
 
   const handleConfirm = async () => {
     if (mcVersions.length === 0) return;
-    const ok = await onSubmit(operation, mcVersions, targetVersions, platforms);
+    const ok = await onSubmit(operation, mcVersions, targetVersions, platforms, targetLoaders);
     if (ok) {
       setMcVersions([]);
+      setTargetLoaders([]);
       onClose();
     }
   };
@@ -97,12 +106,33 @@ export default function BatchProjectMcVersionDialog({
           required
         />
 
+        <Box>
+          <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1, color: "text.primary", display: "block" }}>
+            {t("filterLoaders")}
+          </FormLabel>
+          <LoaderAutocomplete
+            availablePlatforms={availablePlatforms}
+            loaders={targetLoaders}
+            onChange={setTargetLoaders}
+            label={tProject("fields.loaders")}
+            size="small"
+            required={false}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+            {t("filterLoadersHint")}
+          </Typography>
+        </Box>
+
         <FormControl component="fieldset">
           <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1, color: "text.primary" }}>
             {t("targetVersions")}
           </FormLabel>
           <RadioGroup value={targetVersions} onChange={(e) => setTargetVersions(e.target.value as "all" | "latest")}>
-            <FormControlLabel value="latest" control={<Radio size="small" />} label={t("targetLatest")} />
+            <FormControlLabel
+              value="latest"
+              control={<Radio size="small" />}
+              label={targetLoaders.length > 0 ? t("targetLatestPerLoader") : t("targetLatest")}
+            />
             <FormControlLabel value="all" control={<Radio size="small" />} label={t("targetAll")} />
           </RadioGroup>
         </FormControl>

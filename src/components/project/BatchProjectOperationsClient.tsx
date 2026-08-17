@@ -30,12 +30,14 @@ type ProjectForManagement = {
 
 export type BatchProjectOperationsClientProps = {
   projects: ProjectForManagement[];
+  /** MCバージョン一括編集の対象をローダーで絞り込むための選択肢 */
+  availablePlatforms?: { slug: string; name: string }[];
 };
 
 /**
  * 管理画面で複数プロジェクトの一括公開ステータス変更、または一括削除操作を提供するクライアントコンポーネント。
  */
-const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClientProps) => {
+const BatchProjectOperationsClient = ({ projects, availablePlatforms = [] }: BatchProjectOperationsClientProps) => {
   const t = useTranslations("Project.batch");
   const m = useBatchProjectOperations(projects);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -139,6 +141,7 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
         open={m.mcVersionDialogOpen}
         onClose={() => m.setMcVersionDialogOpen(false)}
         selectedCount={m.selected.size}
+        availablePlatforms={availablePlatforms}
         pending={m.loading}
         onSubmit={m.handleBatchMcVersions}
       />

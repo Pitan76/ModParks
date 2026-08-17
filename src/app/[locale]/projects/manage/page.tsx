@@ -9,6 +9,7 @@ import { getProjects, getProjectCount } from "@/lib/actions/projectQuery";
 import LinkButton from "@/components/ui/LinkButton";
 import BatchProjectOperationsClient from "@/components/project/BatchProjectOperationsClientLazy";
 import PaginationControls from "@/components/ui/PaginationControls";
+import { getAvailablePlatforms } from "@/lib/queries/masterData";
 import { redirect } from "@/lib/i18n/routing";
 
 const MANAGE_PROJECTS_PER_PAGE = 50;
@@ -35,9 +36,10 @@ export default async function ManageProjectsPage({ params, searchParams }: Manag
   const limit = Math.min(Math.max(parseInt(limitStr as string) || MANAGE_PROJECTS_PER_PAGE, 10), 200);
   const offset = (page - 1) * limit;
 
-  const [projects, totalCount] = await Promise.all([
+  const [projects, totalCount, availablePlatforms] = await Promise.all([
     getProjects({ authorId: session.user.id, limit, offset }),
     getProjectCount({ authorId: session.user.id }),
+    getAvailablePlatforms(),
   ]);
 
   return (
@@ -75,7 +77,7 @@ export default async function ManageProjectsPage({ params, searchParams }: Manag
         </Box>
       </Box>
 
-      <BatchProjectOperationsClient projects={projects} />
+      <BatchProjectOperationsClient projects={projects} availablePlatforms={availablePlatforms} />
       {totalCount > 0 && (
         <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} sx={{ mt: 3 }} />
       )}

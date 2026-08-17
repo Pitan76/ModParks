@@ -2,13 +2,14 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { posts, projects, versions, versionMcVersions, userSettings } from "@/db/schema";
-import { eq, and, inArray, desc } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import type { ActionResult } from "@/lib/actions/actionResult";
 import type { Database } from "@/lib/db";
 import type { Session } from "next-auth";
 import { applyMcVersionOperation } from "@/lib/externalSync/mcVersionOps";
+import { selectVersionTargets } from "@/lib/externalSync/versionTargets";
 
 const MODRINTH_API_BASE = "https://api.modrinth.com/v2";
 const UA = "ModParks/1.0 (modparks.pitan76.net)";
@@ -20,31 +21,42 @@ export type BatchMcVersionResult = {
   modrinthSkipped: number;
 };
 
+const parseJsonArray = (raw: string | null): string[] => {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === "string") : [];
+  } catch {
+    return [];
+  }
+};
+
 /**
- * ModParks側の特定プロジェクトのバージョン情報を操作する
+ * ModParks側の特定プロジェクトのバージョン情報を操作する。
+ *
+ * 対象は {@link selectVersionTargets} で選ぶ（ローダー絞り込みと、ローダーごとの最新の解釈）。
  */
 async function modifyModParksVersions(
   db: Database,
   projectId: string,
   operation: "add" | "remove" | "set",
   mcs: string[],
-  targetVersions: "all" | "latest"
+  targetVersions: "all" | "latest",
+  targetLoaders: string[]
 ) {
-  const baseQuery = db.select().from(versions).where(eq(versions.projectId, projectId));
-  const targetRecs = targetVersions === "latest"
-    ? await baseQuery.orderBy(desc(versions.createdAt)).limit(1).all()
-    : await baseQuery.all();
+  const allVersions = await db.select().from(versions).where(eq(versions.projectId, projectId)).all();
+  const targetRecs = selectVersionTargets(allVersions, {
+    loadersOf: (v) => parseJsonArray(v.loaders),
+    publishedAtOf: (v) => new Date(v.createdAt).getTime(),
+    platforms: targetLoaders,
+    targetVersions,
+  });
   if (targetRecs.length === 0) return [];
 
   const updatedVersionNumbers: string[] = [];
 
   for (const v of targetRecs) {
-    let mcArr: string[] = [];
-    try {
-      mcArr = JSON.parse(v.mcVersions) as string[];
-    } catch {}
-
-    const nextMcArr = applyMcVersionOperation(mcArr, operation, mcs);
+    const nextMcArr = applyMcVersionOperation(parseJsonArray(v.mcVersions), operation, mcs);
 
     await db
       .update(versions)
@@ -85,20 +97,13 @@ async function updateModrinthVersionRemote(
   return res.ok;
 }
 
-type ModrinthRemoteVersion = { id: string; version_number: string; game_versions: string[]; date_published: string };
-
-/**
- * modparks側のバージョン番号と突き合わせられないときに、Modrinthの一覧そのものから
- * 対象を選ぶ。"latest" は公開日時が最も新しいものを1件、"all" は全件。
- */
-function selectRemoteVersionsWithoutLocalMatch(
-  remoteVersions: ModrinthRemoteVersion[],
-  targetVersions: "all" | "latest",
-): ModrinthRemoteVersion[] {
-  if (targetVersions === "all") return remoteVersions;
-  if (remoteVersions.length === 0) return [];
-  return [[...remoteVersions].sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime())[0]];
-}
+type ModrinthRemoteVersion = {
+  id: string;
+  version_number: string;
+  game_versions: string[];
+  loaders: string[];
+  date_published: string;
+};
 
 /**
  * Modrinth側の特定プロジェクトのバージョン情報を操作する。
@@ -106,8 +111,8 @@ function selectRemoteVersionsWithoutLocalMatch(
  * 対応関係は versionNumber の文字列一致でしか特定できないが、Modrinth 側で別名が
  * 付いている（例: modparks が "1.0.3-fix.1" で Modrinth が "1.0.3"）ことや、
  * modparks に未登録であることは珍しくない。1 件も一致しない場合に何もしないと
- * 「実行したのに反映されない」ため、その時は対象バージョンの指定（最新/すべて）に
- * 従って Modrinth の一覧から選び直す。
+ * 「実行したのに反映されない」ため、その時は Modrinth の一覧から
+ * ローダー絞り込みと対象指定（最新/すべて）に従って選び直す。
  */
 async function modifyModrinthVersions(
   modrinthProjectId: string,
@@ -116,6 +121,7 @@ async function modifyModrinthVersions(
   mcs: string[],
   updatedVersionNumbers: string[],
   targetVersions: "all" | "latest",
+  targetLoaders: string[],
 ) {
   const stats = { updated: 0, failed: 0, skipped: 0 };
   const res = await fetch(`${MODRINTH_API_BASE}/project/${modrinthProjectId}/version`, {
@@ -134,7 +140,12 @@ async function modifyModrinthVersions(
 
   const targets = matched.length > 0
     ? matched
-    : selectRemoteVersionsWithoutLocalMatch(remoteVersions, targetVersions);
+    : selectVersionTargets(remoteVersions, {
+        loadersOf: (v) => v.loaders ?? [],
+        publishedAtOf: (v) => new Date(v.date_published).getTime(),
+        platforms: targetLoaders,
+        targetVersions,
+      });
 
   // 一部だけ一致したときの未一致分は対象外として数える。
   // 全く一致しなかった場合は上で選び直しているので対象外は無い
@@ -171,13 +182,18 @@ async function getManageableProjects(db: Database, session: Session, projectIds:
 
 /**
  * 選択した複数プロジェクトのMCバージョンを一括で追加・削除・設定する Server Action
+ *
+ * @param platforms 反映先（modparks 本体 / Modrinth）
+ * @param targetLoaders 対象を絞り込むローダー。空なら全ローダー。
+ *                      指定時の targetVersions="latest" はローダーごとの最新を意味する
  */
 export async function batchModifyProjectMcVersions(
   projectIds: string[],
   operation: "add" | "remove" | "set",
   mcVersions: string[],
   targetVersions: "all" | "latest",
-  platforms: { modparks: boolean; modrinth: boolean }
+  platforms: { modparks: boolean; modrinth: boolean },
+  targetLoaders: string[] = []
 ): Promise<ActionResult<BatchMcVersionResult>> {
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
@@ -200,20 +216,21 @@ export async function batchModifyProjectMcVersions(
   for (const proj of targets) {
     let updatedVersionNumbers: string[] = [];
     if (platforms.modparks) {
-      updatedVersionNumbers = await modifyModParksVersions(db, proj.id, operation, mcs, targetVersions);
+      updatedVersionNumbers = await modifyModParksVersions(db, proj.id, operation, mcs, targetVersions, targetLoaders);
       if (updatedVersionNumbers.length > 0) successCount++;
     } else {
-      // Modrinthのみ処理する場合でも、対象のバージョン番号をModParksのDBから取得する必要がある
+      // Modrinthのみ反映する場合も、突き合わせ用にModParks側の対象バージョン番号を出しておく
       const localRecs = await db.select().from(versions).where(eq(versions.projectId, proj.id)).all();
-      updatedVersionNumbers = localRecs.map((v) => v.versionNumber);
-      if (targetVersions === "latest" && localRecs.length > 0) {
-        const latest = localRecs.reduce((a, b) => (new Date(b.createdAt) > new Date(a.createdAt) ? b : a));
-        updatedVersionNumbers = [latest.versionNumber];
-      }
+      updatedVersionNumbers = selectVersionTargets(localRecs, {
+        loadersOf: (v) => parseJsonArray(v.loaders),
+        publishedAtOf: (v) => new Date(v.createdAt).getTime(),
+        platforms: targetLoaders,
+        targetVersions,
+      }).map((v) => v.versionNumber);
     }
 
     if (platforms.modrinth && proj.modrinthId && modrinthApiKey) {
-      const stats = await modifyModrinthVersions(proj.modrinthId, modrinthApiKey, operation, mcs, updatedVersionNumbers, targetVersions);
+      const stats = await modifyModrinthVersions(proj.modrinthId, modrinthApiKey, operation, mcs, updatedVersionNumbers, targetVersions, targetLoaders);
       modrinthUpdated += stats.updated;
       modrinthFailed += stats.failed;
       modrinthSkipped += stats.skipped;

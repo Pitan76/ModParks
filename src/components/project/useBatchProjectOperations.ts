@@ -84,14 +84,15 @@ export function useBatchProjectOperations(projects: ProjectForManagement[]) {
     operation: "add" | "remove" | "set",
     mcVersions: string[],
     targetVersions: "all" | "latest",
-    platforms: { modparks: boolean; modrinth: boolean }
+    platforms: { modparks: boolean; modrinth: boolean },
+    targetLoaders: string[]
   ) => {
     if (selected.size === 0) return false;
     setLoading(true);
     setError(null);
     setMcVersionResult(null);
     try {
-      const res = await batchModifyProjectMcVersions(Array.from(selected), operation, mcVersions, targetVersions, platforms);
+      const res = await batchModifyProjectMcVersions(Array.from(selected), operation, mcVersions, targetVersions, platforms, targetLoaders);
       if (res && "error" in res) {
         setError(res.error || t("statusUpdateError"));
         return false;
