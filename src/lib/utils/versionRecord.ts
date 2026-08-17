@@ -1,5 +1,6 @@
 import { versions, versionLoaders, versionMcVersions } from "@/db/schema";
 import type { Database } from "@/lib/db";
+import { chunkRows } from "@/lib/db/chunkRows";
 
 /** バージョン本体＋関連テーブル（ローダー / MCバージョン）への挿入に必要な入力 */
 export interface VersionRecordInput {
@@ -53,14 +54,16 @@ export async function insertVersionRecord(db: Database, input: VersionRecordInpu
     createdAt: new Date(),
   });
 
-  // 検索最適化テーブルは対象が無ければ挿入しない
+  // 検索最適化テーブルは 2 列 = 1 行あたり 2 パラメータ。
+  // 自動解析は対応 MC バージョンを数十件返すことがあり、1 文に収めると
+  // D1 のパラメータ上限を超えて batch ごと失敗する（対象が無ければ挿入しない）
   const indexInserts = [
-    ...(loaders.length > 0
-      ? [db.insert(versionLoaders).values(loaders.map((loader) => ({ versionId: input.id, loader })))]
-      : []),
-    ...(mcVersions.length > 0
-      ? [db.insert(versionMcVersions).values(mcVersions.map((mcVersion) => ({ versionId: input.id, mcVersion })))]
-      : []),
+    ...chunkRows(loaders, 2).map((chunk) =>
+      db.insert(versionLoaders).values(chunk.map((loader) => ({ versionId: input.id, loader })))
+    ),
+    ...chunkRows(mcVersions, 2).map((chunk) =>
+      db.insert(versionMcVersions).values(chunk.map((mcVersion) => ({ versionId: input.id, mcVersion })))
+    ),
   ];
 
   // D1 の batch は失敗しても原因が本番ログに出ず digest だけになるため、文脈を付けて再送出する

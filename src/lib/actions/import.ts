@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { fetchCfAuthorProjects } from "@/lib/curseforge";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { type ContentType } from "@/lib/data/projectTypes";
+import { chunkRows } from "@/lib/db/chunkRows";
 
 export interface ImportedProject {
   id: string;
@@ -197,6 +198,10 @@ export async function importProjects(selectedProjects: ImportedProject[], source
     project: typeof projects.$inferInsert;
   }[] = [];
 
+  // 下で組み立てる 1 行あたりの列数。分割幅の算出に使う
+  const POST_INSERT_COLUMNS = 8;
+  const PROJECT_INSERT_COLUMNS = 9;
+
   for (const p of selectedProjects) {
     const existing = await findProjectPostBySlug(db, p.slug);
     if (existing) continue;
@@ -244,10 +249,13 @@ export async function importProjects(selectedProjects: ImportedProject[], source
   if (newProjects.length > 0) {
     // posts を先に全件入れてから projects を入れる。
     // 逆順だと外部キー（projects.id -> posts.id）に違反する。
+    // 1 文に詰め込むと D1 のバインドパラメータ上限を超えるため列数で分割する。
+    const postRows = newProjects.map((n) => n.post);
+    const projectRows = newProjects.map((n) => n.project);
     await db.batch([
-      db.insert(posts).values(newProjects.map((n) => n.post)),
-      db.insert(projects).values(newProjects.map((n) => n.project)),
-    ]);
+      ...chunkRows(postRows, POST_INSERT_COLUMNS).map((chunk) => db.insert(posts).values(chunk)),
+      ...chunkRows(projectRows, PROJECT_INSERT_COLUMNS).map((chunk) => db.insert(projects).values(chunk)),
+    ] as [any, ...any[]]);
     importedCount = newProjects.length;
   }
 
