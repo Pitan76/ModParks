@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/routing";
 import { batchUpdateProjectStatus, batchDeleteProjects } from "@/lib/actions/projectBatch";
-import { batchModifyProjectMcVersions } from "@/lib/actions/projectBatchMcVersion";
+import { batchModifyProjectMcVersions, type BatchMcVersionResult } from "@/lib/actions/projectBatchMcVersion";
 import { batchUpdateProjectSettings, type BatchProjectSettingsUpdates } from "@/lib/actions/projectBatchSettings";
 
 type ProjectForManagement = {
@@ -33,6 +33,7 @@ export function useBatchProjectOperations(projects: ProjectForManagement[]) {
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [mcVersionDialogOpen, setMcVersionDialogOpen] = useState(false);
+  const [mcVersionResult, setMcVersionResult] = useState<BatchMcVersionResult | null>(null);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
 
   const handleToggle = (id: string) => {
@@ -88,12 +89,14 @@ export function useBatchProjectOperations(projects: ProjectForManagement[]) {
     if (selected.size === 0) return false;
     setLoading(true);
     setError(null);
+    setMcVersionResult(null);
     try {
       const res = await batchModifyProjectMcVersions(Array.from(selected), operation, mcVersions, targetVersions, platforms);
       if (res && "error" in res) {
         setError(res.error || t("statusUpdateError"));
         return false;
       }
+      setMcVersionResult(res.data);
       setSelected(new Set());
       router.refresh();
       return true;
@@ -139,6 +142,8 @@ export function useBatchProjectOperations(projects: ProjectForManagement[]) {
     setDeleteDialogOpen,
     mcVersionDialogOpen,
     setMcVersionDialogOpen,
+    mcVersionResult,
+    setMcVersionResult,
     settingsDialogOpen,
     setSettingsDialogOpen,
     handleToggle,

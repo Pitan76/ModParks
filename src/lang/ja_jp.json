@@ -510,6 +510,7 @@
       "platformModParks": "ModParks (このサイト)",
       "platformModrinth": "Modrinth",
       "successMcVersions": "{count} 件のプロジェクトでMCバージョンを編集しました",
+      "mcVersionsModrinthSummary": "Modrinth: {updated}件反映 / {skipped}件対象外 / {failed}件失敗",
       "editSettings": "設定一括編集",
       "editSettingsTitle": "プロジェクト設定一括編集",
       "editSettingsDesc": "選択した {count} 件のプロジェクトに対して、各種設定を一括で上書き編集します。変更を適用したい項目にチェックを入れてください。",

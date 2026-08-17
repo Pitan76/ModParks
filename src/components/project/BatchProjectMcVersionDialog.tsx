@@ -36,6 +36,7 @@ export default function BatchProjectMcVersionDialog({
 }: BatchProjectMcVersionDialogProps) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Project.batch");
+  const tProject = useTranslations("Project");
 
   const [operation, setOperation] = useState<"add" | "remove" | "set">("add");
   const [mcVersions, setMcVersions] = useState<string[]>([]);
@@ -92,7 +93,7 @@ export default function BatchProjectMcVersionDialog({
         <McVersionAutocomplete
           value={mcVersions}
           onChange={setMcVersions}
-          label={tCommon("version") || "MC Version"}
+          label={tProject("fields.mcVersions")}
           required
         />
 

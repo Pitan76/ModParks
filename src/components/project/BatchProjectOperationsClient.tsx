@@ -51,6 +51,18 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
   return (
     <Box>
       {m.error && <Alert severity="error" sx={{ mb: 3 }}>{m.error}</Alert>}
+      {m.mcVersionResult && (
+        <Alert severity="success" sx={{ mb: 3 }} onClose={() => m.setMcVersionResult(null)}>
+          {t("successMcVersions", { count: m.mcVersionResult.successCount })}
+          {(m.mcVersionResult.modrinthUpdated > 0 || m.mcVersionResult.modrinthFailed > 0 || m.mcVersionResult.modrinthSkipped > 0) && (
+            <> {t("mcVersionsModrinthSummary", {
+              updated: m.mcVersionResult.modrinthUpdated,
+              failed: m.mcVersionResult.modrinthFailed,
+              skipped: m.mcVersionResult.modrinthSkipped,
+            })}</>
+          )}
+        </Alert>
+      )}
 
       <Box sx={{ mb: 2, display: "flex", gap: { xs: 1, sm: 2 }, alignItems: "center", flexWrap: "wrap" }}>
         <Button
@@ -65,7 +77,7 @@ const BatchProjectOperationsClient = ({ projects }: BatchProjectOperationsClient
           variant="contained"
           color="secondary"
           startIcon={<EditIcon />}
-          onClick={() => m.setMcVersionDialogOpen(true)}
+          onClick={() => { m.setMcVersionResult(null); m.setMcVersionDialogOpen(true); }}
           disabled={m.selected.size === 0 || m.loading}
         >
           {t("editMcVersions")}

@@ -510,6 +510,7 @@
       "platformModParks": "ModParks (This site)",
       "platformModrinth": "Modrinth",
       "successMcVersions": "Successfully edited MC versions for {count} projects",
+      "mcVersionsModrinthSummary": "Modrinth: {updated} updated / {skipped} skipped / {failed} failed",
       "editSettings": "Bulk Edit Settings",
       "editSettingsTitle": "Bulk Edit Project Settings",
       "editSettingsDesc": "Batch overwrite various settings for the selected {count} projects. Check the box next to settings you want to apply.",
