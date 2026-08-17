@@ -13,8 +13,7 @@ import FormSelect from "@/components/ui/form/FormSelect";
 import FormAutocomplete from "@/components/ui/form/FormAutocomplete";
 import TagAutocomplete from "./TagAutocomplete";
 import ProjectDescriptionFields from "./ProjectDescriptionFields";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
+import SwitchField from "@/components/ui/SwitchField";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
@@ -272,17 +271,14 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
       <Box>
         <Chip label={t("fields.customLinks.addLink")} color="primary" variant="outlined" onClick={addLink} sx={{ cursor: "pointer" }} />
       </Box>
-      <FormControlLabel
-        control={
-          <Switch
-            name="aiGenerated"
-            defaultChecked={!!project?.aiGenerated}
-            onChange={onChange}
-          />
-        }
-        label={t("fields.aiGenerated")}
-        sx={{ mt: 2 }}
-      />
+      <Box sx={{ mt: 2 }}>
+        <SwitchField
+          name="aiGenerated"
+          label={t("fields.aiGenerated")}
+          defaultChecked={!!project?.aiGenerated}
+          onChange={onChange}
+        />
+      </Box>
       <input type="hidden" name="links" value={JSON.stringify(links)} />
     </>
   );

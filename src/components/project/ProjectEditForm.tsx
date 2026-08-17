@@ -14,11 +14,10 @@ import { syncExternalProjectData } from "@/lib/actions/projectSync";
 import ActionRow from "@/components/ui/ActionRow";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
+import SwitchField from "@/components/ui/SwitchField";
 import SyncIcon from "@mui/icons-material/Sync";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
 
 interface ProjectEditFormProps {
   project: {
@@ -175,13 +174,17 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
             </FormControl>
           </ProjectFormFields>
 
-          <FormControlLabel
-            control={<Switch name="commentsEnabled" defaultChecked={!!project.commentsEnabled} onChange={() => setDirty(true)} />}
+          <SwitchField
+            name="commentsEnabled"
             label={t("fields.commentsEnabled")}
+            defaultChecked={!!project.commentsEnabled}
+            onChange={() => setDirty(true)}
           />
-          <FormControlLabel
-            control={<Switch name="recipesEnabled" defaultChecked={!!project.recipesEnabled} onChange={() => setDirty(true)} />}
+          <SwitchField
+            name="recipesEnabled"
             label={t("fields.recipesEnabled")}
+            defaultChecked={!!project.recipesEnabled}
+            onChange={() => setDirty(true)}
           />
 
           <ActionRow align="center" sx={{ mt: 2 }}>

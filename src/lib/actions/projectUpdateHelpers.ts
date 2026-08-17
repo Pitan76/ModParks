@@ -24,12 +24,15 @@ export type PublishProject = {
 type FieldError = { error: Record<string, string[]> };
 
 export type NormalizedLinks = {
-  githubRepo: string | null;
-  discordWebhookUrl: string | null;
+  githubRepo: string | null | undefined;
+  discordWebhookUrl: string | null | undefined;
 };
 
 /**
  * 外部連携先の URL を検証し、保存する形に正規化する。
+ *
+ * 未送信（undefined）はそのまま undefined を返す。null に潰すと、
+ * その項目を持たない画面から保存しただけで既存値が消えてしまうため。
  * @returns 不正な場合は該当フィールドのエラー、正常なら正規化済みの値
  */
 export async function normalizeExternalLinks(
@@ -45,7 +48,7 @@ export async function normalizeExternalLinks(
     }
   }
 
-  let normalizedGithubRepo: string | null = null;
+  let normalizedGithubRepo: string | null | undefined = githubRepo === undefined ? undefined : null;
   if (githubRepo) {
     const { normalizeGithubRepo } = await import("@/lib/utils/github");
     normalizedGithubRepo = normalizeGithubRepo(githubRepo);
@@ -56,7 +59,7 @@ export async function normalizeExternalLinks(
 
   return {
     githubRepo: normalizedGithubRepo,
-    discordWebhookUrl: discordWebhookUrl || null,
+    discordWebhookUrl: discordWebhookUrl === undefined ? undefined : discordWebhookUrl || null,
   };
 }
 

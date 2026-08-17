@@ -13,6 +13,7 @@ import { isAdminSession } from "@/lib/auth/roles";
 import { redirect } from "@/lib/i18n/routing";
 import { getLocale } from "next-intl/server";
 import { detectSourceLocale } from "@/lib/translation/detectLocale";
+import { FormReader } from "@/lib/forms/formReader";
 import {
   normalizeExternalLinks,
   resolveSlugChange,
@@ -28,18 +29,20 @@ import {
 export async function createProject(formData: FormData) {
   const { db, session } = await getAuthenticatedDb();
 
+  const form = new FormReader(formData);
+
   const raw = {
-    name:        formData.get("name"),
-    slug:        formData.get("slug"),
-    description: formData.get("description"),
-    descriptionFormat: formData.get("descriptionFormat"),
-    type:        formData.get("type"),
-    license:     formData.get("license"),
-    sourceUrl:   formData.get("sourceUrl"),
-    links:       formData.get("links"),
-    tags:        formData.getAll("tags"),
-    githubReleaseImportMode: formData.get("githubReleaseImportMode") || "link",
-    aiGenerated: formData.get("aiGenerated") === "on",
+    name:        form.text("name"),
+    slug:        form.text("slug"),
+    description: form.text("description"),
+    descriptionFormat: form.text("descriptionFormat"),
+    type:        form.text("type"),
+    license:     form.text("license"),
+    sourceUrl:   form.text("sourceUrl"),
+    links:       form.text("links"),
+    tags:        form.list("tags") ?? [],
+    githubReleaseImportMode: form.text("githubReleaseImportMode"),
+    aiGenerated: form.checkbox("aiGenerated") ?? false,
   };
 
   const parsed = createProjectSchema.safeParse(raw);
@@ -80,7 +83,7 @@ ${description}`),
       license,
       sourceUrl:  sourceUrl || null,
       links:      links || null,
-      iconUrl:    formData.get("iconUrl") as string | null,
+      iconUrl:    form.text("iconUrl") ?? null,
       githubReleaseImportMode: githubReleaseImportMode || "link",
       aiGenerated: !!aiGenerated,
     }),
@@ -110,28 +113,28 @@ export const updateProject = async (projectId: string, formData: FormData) => {
 
   await assertProjectAccess(db, project, session);
 
-  // 部分更新なので、フォームに存在しない項目は null ではなく undefined で渡す。
-  // （基本情報タブは説明を持たないなど、画面ごとに送る項目が異なる）
-  const optional = (key: string) => formData.get(key) ?? undefined;
+  // 部分更新。画面ごとに送る項目が違う（基本情報タブは説明を持たない等）ため、
+  // 未送信は undefined のまま通し、送られた項目だけを更新対象にする。
+  const form = new FormReader(formData);
 
   const raw = {
-    name:        optional("name"),
-    slug:        optional("slug"),
-    description: optional("description"),
-    descriptionFormat: optional("descriptionFormat"),
-    type:        optional("type"),
-    license:     optional("license"),
-    sourceUrl:   optional("sourceUrl"),
-    links:       optional("links"),
-    status:      optional("status"),
-    modrinthId:  formData.get("modrinthId") || null,
-    curseforgeId: formData.get("curseforgeId") || null,
-    githubRepo:  formData.get("githubRepo") || null,
-    discordWebhookUrl: formData.get("discordWebhookUrl") || null,
-    issueTrackerUrl: formData.get("issueTrackerUrl") || null,
-    githubReleaseImportMode: formData.get("githubReleaseImportMode") || "link",
-    tags:        formData.getAll("tags"),
-    aiGenerated: formData.get("aiGenerated") !== null ? formData.get("aiGenerated") === "on" : undefined,
+    name:        form.text("name"),
+    slug:        form.text("slug"),
+    description: form.text("description"),
+    descriptionFormat: form.text("descriptionFormat"),
+    type:        form.text("type"),
+    license:     form.text("license"),
+    sourceUrl:   form.text("sourceUrl"),
+    links:       form.text("links"),
+    status:      form.text("status"),
+    modrinthId:  form.nullableText("modrinthId"),
+    curseforgeId: form.nullableText("curseforgeId"),
+    githubRepo:  form.nullableText("githubRepo"),
+    discordWebhookUrl: form.nullableText("discordWebhookUrl"),
+    issueTrackerUrl: form.nullableText("issueTrackerUrl"),
+    githubReleaseImportMode: form.text("githubReleaseImportMode"),
+    tags:        form.list("tags"),
+    aiGenerated: form.checkbox("aiGenerated"),
   };
 
   const parsed = updateProjectSchema.safeParse(raw);
@@ -177,15 +180,16 @@ export const updateProject = async (projectId: string, formData: FormData) => {
       .update(projects)
       .set({
         ...projectFields,
-        issueTrackerUrl: fields.issueTrackerUrl !== undefined ? fields.issueTrackerUrl : project.issueTrackerUrl,
-        sourceUrl: fields.sourceUrl || null,
-        links: fields.links || null,
+        // 送られてこなかった項目は undefined のままにして、既存値を保つ
+        issueTrackerUrl: fields.issueTrackerUrl,
+        sourceUrl: fields.sourceUrl === undefined ? undefined : fields.sourceUrl || null,
+        links: fields.links === undefined ? undefined : fields.links || null,
         githubRepo: links.githubRepo,
         discordWebhookUrl: links.discordWebhookUrl,
-        commentsEnabled: formData.get("commentsEnabled") === "on",
-        recipesEnabled: formData.get("recipesEnabled") === "on",
-        iconUrl:   (formData.get("iconUrl") as string) || project.iconUrl,
-        aiGenerated: fields.aiGenerated !== undefined ? !!fields.aiGenerated : undefined,
+        commentsEnabled: form.checkbox("commentsEnabled"),
+        recipesEnabled: form.checkbox("recipesEnabled"),
+        iconUrl: form.text("iconUrl") || undefined,
+        aiGenerated: fields.aiGenerated,
       })
       .where(eq(projects.id, project.id)),
   ]);
