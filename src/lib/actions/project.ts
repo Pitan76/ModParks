@@ -110,16 +110,20 @@ export const updateProject = async (projectId: string, formData: FormData) => {
 
   await assertProjectAccess(db, project, session);
 
+  // 部分更新なので、フォームに存在しない項目は null ではなく undefined で渡す。
+  // （基本情報タブは説明を持たないなど、画面ごとに送る項目が異なる）
+  const optional = (key: string) => formData.get(key) ?? undefined;
+
   const raw = {
-    name:        formData.get("name"),
-    slug:        formData.get("slug"),
-    description: formData.get("description"),
-    descriptionFormat: formData.get("descriptionFormat"),
-    type:        formData.get("type"),
-    license:     formData.get("license"),
-    sourceUrl:   formData.get("sourceUrl"),
-    links:       formData.get("links"),
-    status:      formData.get("status"),
+    name:        optional("name"),
+    slug:        optional("slug"),
+    description: optional("description"),
+    descriptionFormat: optional("descriptionFormat"),
+    type:        optional("type"),
+    license:     optional("license"),
+    sourceUrl:   optional("sourceUrl"),
+    links:       optional("links"),
+    status:      optional("status"),
     modrinthId:  formData.get("modrinthId") || null,
     curseforgeId: formData.get("curseforgeId") || null,
     githubRepo:  formData.get("githubRepo") || null,

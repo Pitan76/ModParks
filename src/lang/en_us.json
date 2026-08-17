@@ -2145,6 +2145,7 @@
       "serverError": "A server-side error occurred. Try again later, and contact the operators if it persists.",
       "reloading": "A new version has been deployed. Reloading the page...",
       "networkRetryFailed": "A network error occurred ({count} retries failed). Please wait a moment and try again.",
+      "validationFailed": "Could not save because some inputs are invalid ({fields}).",
       "settingsNotFound": "Settings not found"
     },
     "project": {

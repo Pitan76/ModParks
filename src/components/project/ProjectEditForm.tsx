@@ -92,8 +92,11 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
         const result = await updateProject(project.id, formData);
         
         if (result && result.error) {
-          setError(result.error as { [key: string]: string[] });
+          const fieldErrors = result.error as { [key: string]: string[] };
+          setError(fieldErrors);
           setPending(false);
+          // 画面に出ていない項目のエラーだと、そのままでは無反応に見えてしまう
+          setToast({ message: tError("common.validationFailed", { fields: Object.keys(fieldErrors).join(", ") }), severity: "error" });
           return; // バリデーションエラー時はリトライ不要
         } else {
           setDirty(false);
