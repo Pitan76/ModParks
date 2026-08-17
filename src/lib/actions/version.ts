@@ -159,7 +159,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
   const parsed = updateVersionSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
-  const updateData: any = {
+  const updateData: Partial<typeof versions.$inferInsert> = {
     versionNumber: parsed.data.versionNumber,
     mcVersions:    parsed.data.mcVersions ? JSON.stringify(parsed.data.mcVersions) : undefined,
     loaders:       parsed.data.loaders ? JSON.stringify(parsed.data.loaders) : undefined,

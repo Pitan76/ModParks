@@ -10,13 +10,37 @@ import { isAdminSession } from "@/lib/auth/roles";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import type { ActionResult } from "@/lib/actions/actionResult";
 import type { DependencyType } from "@/lib/dependencies/types";
-import type { DependencyScope } from "@/lib/dependencies/entryTypes";
+import type { DependencyScope, DependencyEntry } from "@/lib/dependencies/entryTypes";
+import {
+  getProjectDependencies as queryProjectDependencies,
+  getVersionDependencies as queryVersionDependencies,
+  getProjectDependents as queryProjectDependents,
+} from "@/lib/queries/dependency";
 
-// 型は "use server" ファイルからも再公開できる（値の再エクスポートは不可）ため、
-// 既存の import パスを壊さないようここに残す。
-// 取得系（getProjectDependencies など）は @/lib/queries/dependency から直接 import する。
 export type { DependencyType } from "@/lib/dependencies/types";
 export type { DependencyScope, DependencyProjectSummary, DependencyEntry } from "@/lib/dependencies/entryTypes";
+
+/**
+ * 取得系はクエリ本体（@/lib/queries/dependency）へ委譲する薄いラッパ。
+ *
+ * クライアントコンポーネントから直接クエリを import すると、`@/lib/db` 以下の
+ * サーバー専用モジュール（node:dns 等）がクライアントバンドルに引き込まれて
+ * ビルドが壊れる。ここを通せば Server Action として RPC 化される。
+ * "use server" ファイルは再エクスポートを許さないため、関数として書き下している。
+ *
+ * サーバーコンポーネントやルートハンドラからは、RPC を経由せずクエリ本体を直接使う。
+ */
+export async function getProjectDependencies(projectId: string, includeVersionScoped = false): Promise<DependencyEntry[]> {
+  return queryProjectDependencies(projectId, includeVersionScoped);
+}
+
+export async function getVersionDependencies(projectId: string, versionId: string): Promise<DependencyEntry[]> {
+  return queryVersionDependencies(projectId, versionId);
+}
+
+export async function getProjectDependents(projectId: string) {
+  return queryProjectDependents(projectId);
+}
 
 /**
  * 想定内の拒否（入力ミス・重複・権限）に使う内部例外。

@@ -18,13 +18,15 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import CircularProgress from "@mui/material/CircularProgress";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslations } from "next-intl";
+// クライアントからは Server Action 経由で呼ぶ。クエリ本体を直接 import すると
+// サーバー専用モジュールがクライアントバンドルに混入してビルドが壊れる
 import {
   addExternalProjectDependency,
   addProjectDependencyBySlug,
+  getVersionDependencies,
   removeProjectDependency,
   type DependencyEntry,
 } from "@/lib/actions/dependency";
-import { getVersionDependencies } from "@/lib/queries/dependency";
 import { isActionError, type ActionResult } from "@/lib/actions/actionResult";
 import { isStaleServerActionError } from "@/lib/errors/staleAction";
 import { DEPENDENCY_TYPES, type DependencyType } from "@/lib/dependencies/types";
