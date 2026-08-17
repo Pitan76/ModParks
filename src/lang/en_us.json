@@ -248,7 +248,7 @@
       "githubRepoHelper": "Versions can be imported automatically from Releases (e.g. Pitan76/item-alchemy)",
       "githubReleaseImportMode": "GitHub Release Import Mode",
       "githubReleaseImportModeOptions": {
-        "link": "Import as external links (save storage)",
+        "link": "Import as external links",
         "file": "Import as files"
       },
       "linksSection": "Links",

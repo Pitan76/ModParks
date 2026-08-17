@@ -14,6 +14,7 @@ import { redirect } from "@/lib/i18n/routing";
 import { getLocale } from "next-intl/server";
 import { detectSourceLocale } from "@/lib/translation/detectLocale";
 import { FormReader } from "@/lib/forms/formReader";
+import { buildProjectCreateInput, buildProjectUpdateInput } from "@/lib/forms/projectFormInput";
 import {
   normalizeExternalLinks,
   resolveSlugChange,
@@ -30,22 +31,7 @@ export async function createProject(formData: FormData) {
   const { db, session } = await getAuthenticatedDb();
 
   const form = new FormReader(formData);
-
-  const raw = {
-    name:        form.text("name"),
-    slug:        form.text("slug"),
-    description: form.text("description"),
-    descriptionFormat: form.text("descriptionFormat"),
-    type:        form.text("type"),
-    license:     form.text("license"),
-    sourceUrl:   form.text("sourceUrl"),
-    links:       form.text("links"),
-    tags:        form.list("tags") ?? [],
-    githubReleaseImportMode: form.text("githubReleaseImportMode"),
-    aiGenerated: form.checkbox("aiGenerated") ?? false,
-  };
-
-  const parsed = createProjectSchema.safeParse(raw);
+  const parsed = createProjectSchema.safeParse(buildProjectCreateInput(formData));
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
   const { name, slug, description, descriptionFormat, type, license, sourceUrl, links, tags, githubReleaseImportMode, aiGenerated } = parsed.data;
@@ -113,31 +99,8 @@ export const updateProject = async (projectId: string, formData: FormData) => {
 
   await assertProjectAccess(db, project, session);
 
-  // 部分更新。画面ごとに送る項目が違う（基本情報タブは説明を持たない等）ため、
-  // 未送信は undefined のまま通し、送られた項目だけを更新対象にする。
   const form = new FormReader(formData);
-
-  const raw = {
-    name:        form.text("name"),
-    slug:        form.text("slug"),
-    description: form.text("description"),
-    descriptionFormat: form.text("descriptionFormat"),
-    type:        form.text("type"),
-    license:     form.text("license"),
-    sourceUrl:   form.text("sourceUrl"),
-    links:       form.text("links"),
-    status:      form.text("status"),
-    modrinthId:  form.nullableText("modrinthId"),
-    curseforgeId: form.nullableText("curseforgeId"),
-    githubRepo:  form.nullableText("githubRepo"),
-    discordWebhookUrl: form.nullableText("discordWebhookUrl"),
-    issueTrackerUrl: form.nullableText("issueTrackerUrl"),
-    githubReleaseImportMode: form.text("githubReleaseImportMode"),
-    tags:        form.list("tags"),
-    aiGenerated: form.checkbox("aiGenerated"),
-  };
-
-  const parsed = updateProjectSchema.safeParse(raw);
+  const parsed = updateProjectSchema.safeParse(buildProjectUpdateInput(formData));
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
   const { tags, githubRepo, discordWebhookUrl, ...fields } = parsed.data;

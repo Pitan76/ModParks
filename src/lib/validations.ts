@@ -83,6 +83,10 @@ export const createProjectSchema = z.object({
 
 export const updateProjectSchema = createProjectSchema.partial().extend({
   slug: projectSlugSchema.optional(),
+  // 部分更新では default を効かせてはいけない。送っていない項目に既定値が入り、
+  // 別タブで保存しただけで書式や取り込み方法が初期値へ戻ってしまうため
+  descriptionFormat: z.enum(["markdown", "plaintext", "pukiwiki"]).optional(),
+  githubReleaseImportMode: z.enum(["file", "link"]).optional(),
   issueTrackerUrl: z.string().url(vk("invalidUrl")).optional().or(z.literal("")).nullable(),
   status: z.enum(["draft", "public", "unlisted", "private"]).optional(),
   // 原文の言語。多言語表示の起点なので、作者が後から直せるようにしている
