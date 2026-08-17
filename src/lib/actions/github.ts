@@ -6,44 +6,31 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2, deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2, getR2Bucket } from "@/lib/r2";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { channelFromGithubPrerelease } from "@/lib/releaseChannels";
 import { parseModJar } from "@/lib/services/jar";
 import { scanVersionFile } from "@/lib/actions/versionScan";
-import { isAllowedExternalUrl } from "@/lib/validations";
 import {
   fetchGithubReleases,
-  fetchLatestGithubRelease,
   pickPrimaryAssets,
-  downloadGithubAsset,
   normalizeGithubRepo,
   type GithubRelease,
-  type GithubReleaseAsset,
   type GithubImportMode,
 } from "@/lib/utils/github";
+import {
+  stripVPrefix,
+  resolveRelease,
+  storeAssetToR2,
+  linkToAsset,
+} from "@/lib/utils/githubReleaseAsset";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { getRepoAccessToken } from "@/lib/utils/githubRepoAccess";
 import type { Database } from "@/lib/db";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 
-/** Worker のメモリ制約を踏まえたダウンロード/解析の上限 */
-const MAX_ASSET_SIZE = 50 * 1024 * 1024; // 50MB
-
 type ImportResult = { success: true; versionId: string; versionNumber: string } | { error: string };
-
-/** 取り込んだファイルの所在。R2 に置いた場合のみ key を持つ */
-type ImportedFile = { fileUrl: string; fileSize: number | null; fileSha256: string | null; r2Key?: string };
-
-function stripVPrefix(tag: string): string {
-  return tag.replace(/^v/i, "").trim();
-}
-
-async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", buffer);
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 /**
  * 連携リポジトリの Release 一覧を取得する（UI プレビュー用）。
@@ -72,67 +59,9 @@ export async function listGithubReleases(projectSlug: string): Promise<
         published_at: r.published_at,
       })),
     };
-  } catch (e: any) {
-    return { error: e?.message || "Failed to list releases." };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to list releases." };
   }
-}
-
-/** 取り込み対象の Release を決定する。prefetch 済みならそれを優先する */
-async function resolveRelease(
-  repo: string,
-  releaseId?: number,
-  prefetchedRelease?: GithubRelease | null,
-  repoToken?: string
-): Promise<GithubRelease | null> {
-  if (prefetchedRelease !== undefined) return prefetchedRelease;
-  if (releaseId != null) {
-    const all = await fetchGithubReleases(repo, repoToken);
-    return all.find((r) => r.id === releaseId) ?? null;
-  }
-  return fetchLatestGithubRelease(repo, repoToken);
-}
-
-/** アセットをダウンロードして R2 へ格納する */
-async function storeAssetToR2(
-  projectSlug: string,
-  asset: GithubReleaseAsset,
-  repoToken?: string
-): Promise<ImportedFile | { error: string }> {
-  if (asset.size > MAX_ASSET_SIZE) {
-    return { error: `Asset is too large to import (max ${MAX_ASSET_SIZE / 1024 / 1024}MB).` };
-  }
-
-  let arrayBuffer: ArrayBuffer;
-  try {
-    arrayBuffer = await downloadGithubAsset(asset, repoToken);
-  } catch (e: any) {
-    return { error: e?.message || "Failed to download release asset." };
-  }
-
-  const safeFileName = asset.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const key = buildR2Key("mod", projectSlug, `${createId()}/${safeFileName}`);
-  const contentType = asset.name.toLowerCase().endsWith(".zip")
-    ? "application/zip"
-    : "application/java-archive";
-
-  try {
-    const fileSha256 = await sha256Hex(arrayBuffer);
-    const bucket = await getR2Bucket();
-    await uploadToR2(bucket, key, arrayBuffer, contentType);
-    return { fileUrl: getR2PublicUrl(key), fileSize: asset.size, fileSha256, r2Key: key };
-  } catch (e: any) {
-    return { error: e?.message || "Failed to store the release file." };
-  }
-}
-
-/**
- * アセットを取り込まず、GitHub の配布 URL をそのまま外部リンクとして使う。
- * 非公開リポジトリの URL は誰も辿れないため、この方式は公開リポジトリ限定。
- */
-function linkToAsset(asset: GithubReleaseAsset): ImportedFile | { error: string } {
-  const url = asset.browser_download_url;
-  if (!url || !isAllowedExternalUrl(url)) return { error: "The release asset URL is not an allowed external URL." };
-  return { fileUrl: url, fileSize: asset.size, fileSha256: null };
 }
 
 /**
@@ -156,8 +85,8 @@ export async function importGithubReleaseSystem(
   let release: GithubRelease | null = null;
   try {
     release = await resolveRelease(repo, releaseId, prefetchedRelease, repoToken);
-  } catch (e: any) {
-    return { error: e?.message || "Failed to fetch GitHub release." };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to fetch GitHub release." };
   }
   if (!release) return { error: t("github.releaseNotFound") };
 
@@ -183,7 +112,7 @@ export async function importGithubReleaseSystem(
     let parseFailed = false;
     try {
       parsed = await parseModJar(stored.r2Key ? { kind: "r2", key: stored.r2Key } : { kind: "url", url: stored.fileUrl });
-    } catch (e: unknown) {
+    } catch {
       parseFailed = true;
       // 解析失敗時はタグ名などのフォールバックで続行
     }

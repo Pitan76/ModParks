@@ -1,6 +1,6 @@
 "use client";
 
-import { createIdeaComment } from "@/lib/actions/idea";
+import { createIdeaComment } from "@/lib/actions/ideaComment";
 import { useTranslations } from "next-intl";
 import CommentForm from "@/components/ui/CommentForm";
 

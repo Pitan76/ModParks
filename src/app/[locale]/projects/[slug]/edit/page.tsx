@@ -15,7 +15,7 @@ import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import ProjectEditClient from "@/components/project/ProjectEditClient";
 import ProjectDependenciesManager from "@/components/project/ProjectDependenciesManager";
 import { getProjectMembers } from "@/lib/actions/member";
-import { getProjectDependencies } from "@/lib/actions/dependency";
+import { getProjectDependencies } from "@/lib/queries/dependency";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { versions, posts, ideas, versionIdeas, userSettings } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";

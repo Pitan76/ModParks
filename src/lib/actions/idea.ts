@@ -1,23 +1,15 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { posts, ideas, comments, ideaTags } from "@/db/schema";
+import { posts, ideas, ideaTags } from "@/db/schema";
 import { togglePostFavorite } from "./favorite";
-import { createIdeaSchema, createIdeaCommentSchema } from "@/lib/validations";
+import { createIdeaSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
-import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import {
-  getIdeaTarget,
-  revalidateIdea,
-  canManageIdea,
-  loadManageableIdea,
-  resolveCommentParent,
-} from "./ideaShared";
-import { assertFeatureEnabled } from "@/lib/runtime/guard";
+import { revalidateIdea, loadManageableIdea } from "./ideaShared";
 
 // ---- アイデア作成 ----
 
@@ -47,10 +39,16 @@ export async function createIdea(formData: FormData) {
     const { userSettings } = await import("@/db/schema");
     const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
     const defaultVisibility = settingsRecord?.defaultIdeaStatus || "public";
-    const defaultFormat = (settingsRecord?.defaultIdeaBodyFormat as any) || "markdown";
+    const defaultFormat = settingsRecord?.defaultIdeaBodyFormat || "markdown";
+
+    // タグは任意なので、あるときだけ文を足す。
+    // batch の第1要素が必ず埋まる形にして、タプル型のまま渡せるようにする
+    const tagInserts = tags.length > 0
+      ? [db.insert(ideaTags).values(tags.map((tag) => ({ ideaId: id, tag })))]
+      : [];
 
     // Idea の slug は作成時点では id と同じランダム値。作者が後から変更できる。
-    const batchOps: any[] = [
+    await db.batch([
       db.insert(posts).values({
         id,
         authorId:   userId,
@@ -67,19 +65,12 @@ export async function createIdea(formData: FormData) {
         loaders: loaders.length > 0 ? JSON.stringify(loaders) : null,
         mcVersions: mcVersions.length > 0 ? JSON.stringify(mcVersions) : null,
       }),
-    ];
-
-    if (tags.length > 0) {
-      batchOps.push(
-        db.insert(ideaTags).values(tags.map((tag) => ({ ideaId: id, tag })))
-      );
-    }
-
-    await db.batch(batchOps as [any, ...any[]]);
+      ...tagInserts,
+    ]);
 
     revalidatePath("/ideas");
     return { success: true, id };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Failed to create idea:", error);
     return { error: { server: [(await getServerErrors())("idea.createFailed")] } };
   }

@@ -7,7 +7,7 @@ import { findProjectPostBySlug } from "@/lib/queries/post";
 import { listProjectPosts } from "@/lib/queries/postList";
 import { toApiProject } from "@/lib/api/toApi";
 import { canViewPost } from "@/lib/auth/postAccess";
-import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
+import { getProjectDependencies, getProjectDependents } from "@/lib/queries/dependency";
 import type { ApiProjectDetail, ApiProjectPrivateDetail, ApiDependency } from "@/types/api";
 import { withPublicCache } from "@/lib/http/cache";
 

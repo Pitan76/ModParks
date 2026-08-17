@@ -22,8 +22,9 @@ import { findProjectPostBySlug } from "@/lib/queries/post";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";
 import { chunkRows } from "@/lib/db/chunkRows";
 
+// 型のみ再公開する。値の再エクスポートは "use server" ファイルでは許されないため、
+// deleteVersion / setVersionArchived は @/lib/actions/versionLifecycle から直接 import する。
 export type { ExternalUploadSummary } from "@/lib/actions/versionExternalSync";
-export { deleteVersion, setVersionArchived } from "@/lib/actions/versionLifecycle";
 
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。

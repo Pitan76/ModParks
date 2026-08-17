@@ -4,7 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { getVersionById } from "@/lib/actions/versionQuery";
-import { getVersionDependencies } from "@/lib/actions/dependency";
+import { getVersionDependencies } from "@/lib/queries/dependency";
 import VersionDependencies from "@/components/project/VersionDependencies";
 import { getProjectMembers } from "@/lib/actions/member";
 import { auth } from "@/lib/auth";

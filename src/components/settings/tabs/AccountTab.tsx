@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
-import { changeUsername, changeEmail, changePassword, deleteAccount, deactivateAccount } from "@/lib/actions/settingsSecurity";
+import { changeUsername, changeEmail, deleteAccount, deactivateAccount } from "@/lib/actions/settingsSecurity";
 import { updateLocale } from "@/lib/actions/settings";
 import { useRouter, usePathname } from "@/lib/i18n/routing";
 import { LOCALE_OPTIONS } from "@/lib/i18n/localeLabels";
@@ -17,8 +17,8 @@ import FormSelect from "@/components/ui/form/FormSelect";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
-import AbstractDialog from "@/components/ui/AbstractDialog";
-import DialogContentText from "@mui/material/DialogContentText";
+import AccountConfirmDialog from "./account/AccountConfirmDialog";
+import AccountPasswordSection from "./account/AccountPasswordSection";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 
 interface AccountTabProps {
@@ -30,18 +30,12 @@ interface AccountTabProps {
 
 export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: AccountTabProps) {
   const t = useTranslations("Settings");
-  const tCommon = useTranslations("Common");
-  const tAuth = useTranslations("Auth");
   const { message, flash } = useFlashMessage(4000);
   const router = useRouter();
   const pathname = usePathname();
   const { update: updateSession } = useSession();
 
   const [emailPassword, setEmailPassword] = useState("");
-  const [oldPass, setOldPass] = useState("");
-  const [newPass, setNewPass] = useState("");
-  const [confirmPass, setConfirmPass] = useState("");
-  const [passwordTotpToken, setPasswordTotpToken] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [deletePasswordOrToken, setDeletePasswordOrToken] = useState("");
@@ -97,47 +91,19 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
   const { locale: localeValue, username, email } = form.values;
   const emailChanged = email !== form.baseline.email;
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPass !== confirmPass) {
-      showAccMsg("error", "passwordMismatch");
-      return;
-    }
-    const res = await changePassword(oldPass, newPass, passwordTotpToken);
-    if (res.error) showAccMsg("error", res.error);
-    else {
-      showAccMsg("success", hasPassword ? "successPassword" : "successSetPassword");
-      setOldPass("");
-      setNewPass("");
-      setConfirmPass("");
-      setPasswordTotpToken("");
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    setIsDeletingAccount(true);
-    const res = await deleteAccount(deletePasswordOrToken);
-    if (res.success) {
-      setDeleteOpen(false);
-      signOut({ callbackUrl: "/" });
-    } else {
-      showAccMsg("error", res.error || "errorWrongPassword");
-      setDeleteOpen(false);
-    }
-    setIsDeletingAccount(false);
-  };
-
-  const handleDeactivateAccount = async () => {
-    setIsDeactivatingAccount(true);
-    const res = await deactivateAccount(deactivatePasswordOrToken);
-    if (res.success) {
-      setDeactivateOpen(false);
-      signOut({ callbackUrl: "/" });
-    } else {
-      showAccMsg("error", res.error || "errorWrongPassword");
-      setDeactivateOpen(false);
-    }
-    setIsDeactivatingAccount(false);
+  /** 退会・一時無効化はどちらも成功したらサインアウトしてトップへ戻す */
+  const runAccountClosure = async (
+    action: (secret: string) => Promise<{ success?: boolean; error?: string }>,
+    secret: string,
+    setSubmitting: (v: boolean) => void,
+    close: () => void,
+  ) => {
+    setSubmitting(true);
+    const res = await action(secret);
+    close();
+    if (res.success) signOut({ callbackUrl: "/" });
+    else showAccMsg("error", res.error || "errorWrongPassword");
+    setSubmitting(false);
   };
 
   const handleExportData = () => {
@@ -180,16 +146,7 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
 
       <Divider sx={{ my: 4 }} />
 
-      <Box component="form" onSubmit={handlePasswordChange} sx={{ mb: 4, p: "2px" }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>{hasPassword ? t("account.changePassword") : t("account.setPassword")}</Typography>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 300 }}>
-          {hasPassword && <FormTextField label={t("account.currentPassword")} type="password" size="small" value={oldPass} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOldPass(e.target.value)} required />}
-          <FormTextField label={t("account.newPassword")} type="password" size="small" value={newPass} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPass(e.target.value)} required />
-          <FormTextField label={t("account.confirmPassword")} type="password" size="small" value={confirmPass} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPass(e.target.value)} required />
-          {is2FAEnabled && <FormTextField label={t("security.verificationCode")} type="text" size="small" value={passwordTotpToken} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPasswordTotpToken(e.target.value)} required />}
-          <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", height: 40 }}>{hasPassword ? t("account.updateBtn") : t("account.setBtn")}</Button>
-        </Box>
-      </Box>
+      <AccountPasswordSection hasPassword={hasPassword} is2FAEnabled={is2FAEnabled} onResult={showAccMsg} />
 
       <Divider sx={{ my: 4 }} />
 
@@ -229,69 +186,33 @@ export default function AccountTab({ user, hasPassword, is2FAEnabled, locale }: 
         <Button variant="outlined" color="error" onClick={() => setDeleteOpen(true)}>{t("account.deleteBtn")}</Button>
       </Box>
 
-      <AbstractDialog 
-        open={deleteOpen} 
-        onClose={() => !isDeletingAccount && setDeleteOpen(false)} 
-        maxWidth="sm" 
-        fullWidth
+      <AccountConfirmDialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={() => runAccountClosure(deleteAccount, deletePasswordOrToken, setIsDeletingAccount, () => setDeleteOpen(false))}
         title={t("account.deleteAccount")}
-        titleProps={{ sx: { color: "error.main", fontWeight: "bold" } }}
-        onCancel={() => setDeleteOpen(false)}
-        onConfirm={handleDeleteAccount}
+        description={t("account.deleteAccountConfirm")}
+        prompt={t("account.deletePasswordPrompt")}
         confirmText={t("account.deleteBtn")}
-        confirmColor="error"
-        isSubmitting={isDeletingAccount}
-        confirmDisabled={!deletePasswordOrToken}
-        cancelText={tCommon("cancel")}
-      >
-        <DialogContentText sx={{ mb: 2 }}>{t("account.deleteAccountConfirm")}</DialogContentText>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          {t("account.deletePasswordPrompt")}
-        </Typography>
-        <FormTextField
-          autoFocus
-          fullWidth
-          variant="outlined"
-          type="password"
-          value={deletePasswordOrToken}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeletePasswordOrToken(e.target.value)}
-          placeholder={tAuth("fields.passwordOrToken")}
-          disabled={isDeletingAccount}
-          autoComplete="off"
-        />
-      </AbstractDialog>
+        color="error"
+        submitting={isDeletingAccount}
+        value={deletePasswordOrToken}
+        onChangeValue={setDeletePasswordOrToken}
+      />
 
-      <AbstractDialog 
-        open={deactivateOpen} 
-        onClose={() => !isDeactivatingAccount && setDeactivateOpen(false)} 
-        maxWidth="sm" 
-        fullWidth
+      <AccountConfirmDialog
+        open={deactivateOpen}
+        onClose={() => setDeactivateOpen(false)}
+        onConfirm={() => runAccountClosure(deactivateAccount, deactivatePasswordOrToken, setIsDeactivatingAccount, () => setDeactivateOpen(false))}
         title={t("account.deactivateAccount")}
-        titleProps={{ sx: { color: "warning.main", fontWeight: "bold" } }}
-        onCancel={() => setDeactivateOpen(false)}
-        onConfirm={handleDeactivateAccount}
+        description={t("account.deactivateAccountConfirm")}
+        prompt={t("account.deactivatePasswordPrompt")}
         confirmText={t("account.deactivateBtn")}
-        confirmColor="warning"
-        isSubmitting={isDeactivatingAccount}
-        confirmDisabled={!deactivatePasswordOrToken}
-        cancelText={tCommon("cancel")}
-      >
-        <DialogContentText sx={{ mb: 2 }}>{t("account.deactivateAccountConfirm")}</DialogContentText>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          {t("account.deactivatePasswordPrompt")}
-        </Typography>
-        <FormTextField
-          autoFocus
-          fullWidth
-          variant="outlined"
-          type="password"
-          value={deactivatePasswordOrToken}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeactivatePasswordOrToken(e.target.value)}
-          placeholder={tAuth("fields.passwordOrToken")}
-          disabled={isDeactivatingAccount}
-          autoComplete="off"
-        />
-      </AbstractDialog>
+        color="warning"
+        submitting={isDeactivatingAccount}
+        value={deactivatePasswordOrToken}
+        onChangeValue={setDeactivatePasswordOrToken}
+      />
 
       <StickySaveBar
         open={form.dirty}

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter, usePathname } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
-import { deleteVersion, setVersionArchived } from "@/lib/actions/version";
+import { deleteVersion, setVersionArchived } from "@/lib/actions/versionLifecycle";
 import { batchAddMcVersion } from "@/lib/actions/versionBatch";
 import { isActionError } from "@/lib/actions/actionResult";
 import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";

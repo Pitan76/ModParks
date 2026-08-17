@@ -6,7 +6,7 @@ import { eq, and } from "drizzle-orm";
 import type { ApiProjectDetail } from "@/types/api-v1";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { listProjectPosts } from "@/lib/queries/postList";
-import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
+import { getProjectDependencies, getProjectDependents } from "@/lib/queries/dependency";
 import { canViewPost } from "@/lib/auth/postAccess";
 import { isAdminUser } from "@/lib/auth/roles";
 import { withPublicCache } from "@/lib/http/cache";
