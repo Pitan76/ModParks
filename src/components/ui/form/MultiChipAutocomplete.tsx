@@ -149,7 +149,9 @@ export default function MultiChipAutocomplete({
           placeholder={placeholder}
           error={error}
           helperText={helperText}
-          required={required ?? value.length === 0}
+          // 未選択かどうかで必須を切り替えてはいけない。任意項目（アイデアのタグ・
+          // プラットフォーム・MCバージョン等）が空の間だけ必須扱いになり、送信を塞いでしまう
+          required={required ?? false}
         />
       )}
     />
