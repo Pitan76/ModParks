@@ -137,10 +137,24 @@ export default async function IdeaDetailPage({ params, searchParams }: IdeaDetai
         <Typography
           variant="h4"
           component="h1"
-          sx={{ fontWeight: 800, mb: 3, fontSize: { xs: "1.6rem", sm: "2.125rem" }, wordBreak: "break-word", overflowWrap: "anywhere" }}
+          sx={{ fontWeight: 800, mb: 2, fontSize: { xs: "1.6rem", sm: "2.125rem" }, wordBreak: "break-word", overflowWrap: "anywhere" }}
         >
           {ideaData.title}
         </Typography>
+
+        {(ideaData.tags.length > 0 || parsedMcVersions.length > 0 || parsedLoaders.length > 0) && (
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 3 }}>
+            {parsedLoaders.map((loader) => (
+              <Chip key={loader} label={loader} size="small" variant="outlined" color="primary" />
+            ))}
+            {parsedMcVersions.map((mc) => (
+              <Chip key={mc} label={mc} size="small" variant="outlined" />
+            ))}
+            {ideaData.tags.map((tag) => (
+              <Chip key={tag} label={`#${tag}`} size="small" variant="filled" sx={{ bgcolor: "action.selected" }} />
+            ))}
+          </Box>
+        )}
 
         <Box sx={{ mb: 4 }}>
           <DescriptionRenderer content={ideaData.content} format={ideaData.contentFormat} />

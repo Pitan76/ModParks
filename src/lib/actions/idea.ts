@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { posts, ideas, comments } from "@/db/schema";
+import { posts, ideas, comments, ideaTags } from "@/db/schema";
 import { togglePostFavorite } from "./favorite";
 import { createIdeaSchema, createIdeaCommentSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -39,6 +39,10 @@ export async function createIdea(formData: FormData) {
   const { title, content, contentFormat, visibility } = parsed.data;
   const id = createId();
 
+  const tags = (formData.getAll("tags") as string[]).map((t) => t.trim()).filter(Boolean);
+  const loaders = (formData.getAll("loaders") as string[]).map((t) => t.trim()).filter(Boolean);
+  const mcVersions = (formData.getAll("mcVersions") as string[]).map((t) => t.trim()).filter(Boolean);
+
   try {
     const { userSettings } = await import("@/db/schema");
     const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
@@ -46,7 +50,7 @@ export async function createIdea(formData: FormData) {
     const defaultFormat = (settingsRecord?.defaultIdeaBodyFormat as any) || "markdown";
 
     // Idea の slug は作成時点では id と同じランダム値。作者が後から変更できる。
-    await db.batch([
+    const batchOps: any[] = [
       db.insert(posts).values({
         id,
         authorId:   userId,
@@ -57,8 +61,21 @@ export async function createIdea(formData: FormData) {
         bodyFormat: contentFormat || defaultFormat,
         visibility: visibility || defaultVisibility,
       }),
-      db.insert(ideas).values({ id, status: "open" }),
-    ]);
+      db.insert(ideas).values({
+        id,
+        status: "open",
+        loaders: loaders.length > 0 ? JSON.stringify(loaders) : null,
+        mcVersions: mcVersions.length > 0 ? JSON.stringify(mcVersions) : null,
+      }),
+    ];
+
+    if (tags.length > 0) {
+      batchOps.push(
+        db.insert(ideaTags).values(tags.map((tag) => ({ ideaId: id, tag })))
+      );
+    }
+
+    await db.batch(batchOps);
 
     revalidatePath("/ideas");
     return { success: true, id };
@@ -93,6 +110,10 @@ export async function updateIdea(ideaId: string, formData: FormData) {
 
   const { title, content, contentFormat, visibility } = parsed.data;
 
+  const tags = (formData.getAll("tags") as string[]).map((t) => t.trim()).filter(Boolean);
+  const loaders = (formData.getAll("loaders") as string[]).map((t) => t.trim()).filter(Boolean);
+  const mcVersions = (formData.getAll("mcVersions") as string[]).map((t) => t.trim()).filter(Boolean);
+
   // タイトル・本文・公開範囲はすべて posts 側にある
   await db.update(posts)
     .set({
@@ -104,6 +125,19 @@ export async function updateIdea(ideaId: string, formData: FormData) {
     })
     .where(eq(posts.id, ideaId))
     .run();
+
+  await db.update(ideas)
+    .set({
+      loaders: loaders.length > 0 ? JSON.stringify(loaders) : null,
+      mcVersions: mcVersions.length > 0 ? JSON.stringify(mcVersions) : null,
+    })
+    .where(eq(ideas.id, ideaId))
+    .run();
+
+  await db.delete(ideaTags).where(eq(ideaTags.ideaId, ideaId)).run();
+  if (tags.length > 0) {
+    await db.insert(ideaTags).values(tags.map((tag) => ({ ideaId, tag }))).run();
+  }
 
   revalidateIdea(ideaId);
   return { success: true };
