@@ -79,6 +79,7 @@
     "empty": "まだコメントはありません。",
     "loadMore": "もっと見る",
     "deleteConfirm": "このコメントを削除しますか？",
+    "delete": "削除",
     "reply": "返信",
     "replyPlaceholder": "返信を入力...",
     "cancel": "キャンセル"
@@ -1346,6 +1347,7 @@
         "copyright": "著作権侵害",
         "malware": "マルウェア疑い",
         "spam": "スパム",
+        "harassment": "嫌がらせ",
         "other": "その他"
       },
       "status": {
