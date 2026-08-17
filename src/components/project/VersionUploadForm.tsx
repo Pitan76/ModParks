@@ -17,25 +17,18 @@ import { useTranslations } from "next-intl";
 import LoaderAutocomplete from "./LoaderAutocomplete";
 import McVersionAutocomplete from "./McVersionAutocomplete";
 import PreviousVersionSettingsBanner, { type PreviousVersionSettings } from "./PreviousVersionSettings";
+import type { VersionUploadContext } from "@/lib/queries/versionUploadContext";
 import DependencyDraftEditor from "./DependencyDraftEditor";
 import VersionFileInput from "./version/VersionFileInput";
 import { useVersionUpload } from "./version/useVersionUpload";
 
-type OptionItem = {
-  slug: string;
-  name: string;
-};
-
-export type VersionUploadFormProps = {
-  slug: string;
-  openIdeas: { id: string; title: string }[];
-  availablePlatforms?: OptionItem[];
+/**
+ * 前提データは {@link VersionUploadContext} に束ねて必須で受け取る。
+ * 任意 props にすると入口が増えたときに渡し漏れても気づけない（実際に取りこぼした）。
+ */
+export type VersionUploadFormProps = VersionUploadContext & {
   /** 直前のバージョンの設定。渡された場合のみ流用ボタンを表示する */
   previousSettings?: PreviousVersionSettings | null;
-  /** プロジェクトが Modrinth と連携済み、かつ閲覧者に Modrinth API キーが設定されているか */
-  modrinthSyncAvailable?: boolean;
-  /** プロジェクトが CurseForge と連携済み、かつ閲覧者に CurseForge Upload API トークンが設定されているか */
-  curseforgeSyncAvailable?: boolean;
 };
 
 /**
@@ -45,10 +38,10 @@ export type VersionUploadFormProps = {
 const VersionUploadForm = ({
   slug,
   openIdeas,
-  availablePlatforms = [],
+  availablePlatforms,
   previousSettings = null,
-  modrinthSyncAvailable = false,
-  curseforgeSyncAvailable = false,
+  modrinthSyncAvailable,
+  curseforgeSyncAvailable,
 }: VersionUploadFormProps) => {
   const tVersion = useTranslations("Version");
   const tCommon = useTranslations("Common");

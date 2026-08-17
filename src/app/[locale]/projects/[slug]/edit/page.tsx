@@ -16,9 +16,10 @@ import ProjectEditClient from "@/components/project/ProjectEditClient";
 import ProjectDependenciesManager from "@/components/project/ProjectDependenciesManager";
 import { getProjectMembers } from "@/lib/actions/member";
 import { getProjectDependencies } from "@/lib/queries/dependency";
+import { loadVersionUploadContext } from "@/lib/queries/versionUploadContext";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { versions, posts, ideas, versionIdeas, userSettings } from "@/db/schema";
-import { eq, desc, inArray } from "drizzle-orm";
+import { versions, posts, versionIdeas } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";
 import { isAdminSession } from "@/lib/auth/roles";
 import { redirect } from "@/lib/i18n/routing";
@@ -90,31 +91,14 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     canExtractRecipes: !!v.fileUrl,
   }));
 
-  const openIdeas = await db
-    .select({ id: posts.id, title: posts.title })
-    .from(ideas)
-    .innerJoin(posts, eq(posts.id, ideas.id))
-    .where(inArray(ideas.status, ["open", "in_progress"]))
-    .all();
-
   const dependencies = await getProjectDependencies(project.id);
   const media = await getPublicProjectMedia(project.id);
 
-  // Modrinth/CurseForge への一括バージョン反映は、連携済みプロジェクトかつ閲覧者本人が
-  // それぞれのAPIキー/トークンを設定している場合のみ提供する
-  const viewerSettings = await db
-    .select({ modrinthApiKey: userSettings.modrinthApiKey, curseforgeUploadApiToken: userSettings.curseforgeUploadApiToken })
-    .from(userSettings)
-    .where(eq(userSettings.userId, session.user.id))
-    .get();
-  const modrinthSyncAvailable = !!project.modrinthId && !!viewerSettings?.modrinthApiKey;
-  const curseforgeSyncAvailable = !!project.curseforgeId && !!viewerSettings?.curseforgeUploadApiToken;
+  // バージョン追加フォームの前提はページ側と同じローダーから取る（渡し漏れを防ぐため）
+  const uploadContext = await loadVersionUploadContext(db, project, session.user.id);
 
-  const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
-  const [availableTags, availablePlatforms] = await Promise.all([
-    getAvailableTags(),
-    getAvailablePlatforms(),
-  ]);
+  const { getAvailableTags } = await import("@/lib/queries/masterData");
+  const availableTags = await getAvailableTags();
 
   return (
     <Container maxWidth="md" sx={{ pt: 1, pb: 3 }}>
@@ -134,7 +118,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         isOwner={isOwner}
         basicInfoForm={<ProjectEditForm project={project} availableTags={availableTags} />}
         descriptionForm={<ProjectDescriptionForm project={project} />}
-        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} githubRepo={project.githubRepo} modrinthSyncAvailable={modrinthSyncAvailable} curseforgeSyncAvailable={curseforgeSyncAvailable} />}
+        versionsManager={<ProjectVersionsManager versions={projectVersions} githubRepo={project.githubRepo} uploadContext={uploadContext} />}
         mediaManager={<ProjectMediaManager projectId={project.id} projectSlug={project.slug} media={media} />}
         membersManager={
           <ProjectMembersManager 
@@ -145,7 +129,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
           />
         }
         dependenciesManager={
-          <ProjectDependenciesManager projectId={project.id} dependencies={dependencies} availablePlatforms={availablePlatforms} />
+          <ProjectDependenciesManager projectId={project.id} dependencies={dependencies} availablePlatforms={uploadContext.availablePlatforms} />
         }
         projectId={project.id}
         projectSlug={project.slug}

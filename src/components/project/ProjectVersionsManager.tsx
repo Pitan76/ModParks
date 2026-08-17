@@ -24,21 +24,18 @@ import EditVersionDialog from "./EditVersionDialog";
 import VersionsManagerTable from "./VersionsManagerTable";
 import BatchAddMcVersionDialog from "./BatchAddMcVersionDialog";
 import { useVersionsManager, type ProjectVersion } from "./useVersionsManager";
+import type { VersionUploadContext } from "@/lib/queries/versionUploadContext";
 
 export type { ProjectVersion } from "./useVersionsManager";
 
-type OptionItem = { slug: string; name: string };
-
 export type ProjectVersionsManagerProps = {
-  projectSlug: string;
   versions: ProjectVersion[];
-  openIdeas: { id: string; title: string }[];
-  availablePlatforms?: OptionItem[];
   githubRepo?: string | null;
-  /** プロジェクトが Modrinth と連携済み、かつ閲覧者に Modrinth API キーが設定されているか */
-  modrinthSyncAvailable?: boolean;
-  /** プロジェクトが CurseForge と連携済み、かつ閲覧者に CurseForge Upload API トークンが設定されているか */
-  curseforgeSyncAvailable?: boolean;
+  /**
+   * バージョン追加フォームの前提データ。スラッグ・アイデア一覧・プラットフォーム・
+   * 外部連携の可否はここから取り出し、バージョン追加ページと同じ内容を使う。
+   */
+  uploadContext: VersionUploadContext;
 };
 
 /**
@@ -46,16 +43,13 @@ export type ProjectVersionsManagerProps = {
  * （アーカイブ、削除、編集、レシピ抽出、Githubインポート）を提供する。
  */
 const ProjectVersionsManager = ({
-  projectSlug,
   versions: initialVersions,
-  openIdeas,
-  availablePlatforms = [],
   githubRepo,
-  modrinthSyncAvailable = false,
-  curseforgeSyncAvailable = false,
+  uploadContext,
 }: ProjectVersionsManagerProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Version");
+  const { slug: projectSlug, openIdeas, availablePlatforms, modrinthSyncAvailable, curseforgeSyncAvailable } = uploadContext;
   const m = useVersionsManager(projectSlug, initialVersions);
   const [importAnchor, setImportAnchor] = useState<HTMLElement | null>(null);
 
@@ -184,14 +178,7 @@ const ProjectVersionsManager = ({
         cancelText={tCommon("close")}
       >
         <Box sx={{ mt: 2 }}>
-          <VersionUploadForm
-            slug={projectSlug}
-            openIdeas={openIdeas}
-            availablePlatforms={availablePlatforms}
-            previousSettings={m.previousSettings}
-            modrinthSyncAvailable={modrinthSyncAvailable}
-            curseforgeSyncAvailable={curseforgeSyncAvailable}
-          />
+          <VersionUploadForm {...uploadContext} previousSettings={m.previousSettings} />
         </Box>
       </AbstractDialog>
     </Box>

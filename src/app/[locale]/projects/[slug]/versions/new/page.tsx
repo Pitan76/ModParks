@@ -1,12 +1,13 @@
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import { notFound } from "next/navigation";
 import { getDb, getD1 } from "@/lib/db";
-import { posts, ideas } from "@/db/schema";
-import { inArray, eq } from "drizzle-orm";
+import { auth } from "@/lib/auth";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import { getTranslations } from "next-intl/server";
-import { getAvailablePlatforms } from "@/lib/queries/masterData";
 import { getPreviousVersionSettings } from "@/lib/queries/previousVersionSettings";
+import { findProjectPostBySlug } from "@/lib/queries/post";
+import { loadVersionUploadContext } from "@/lib/queries/versionUploadContext";
 
 interface NewVersionPageProps {
   params: Promise<{ slug: string }>;
@@ -18,15 +19,17 @@ export default async function NewVersionPage({ params }: NewVersionPageProps) {
 
   const d1 = await getD1();
   const db = getDb(d1);
-  const openIdeas = await db
-    .select({ id: posts.id, title: posts.title })
-    .from(ideas)
-    .innerJoin(posts, eq(posts.id, ideas.id))
-    .where(inArray(ideas.status, ["open", "in_progress"]))
-    .all();
 
-  const availablePlatforms = await getAvailablePlatforms();
-  const previousSettings = await getPreviousVersionSettings(slug);
+  const [project, session] = await Promise.all([
+    findProjectPostBySlug(db, slug),
+    auth(),
+  ]);
+  if (!project) notFound();
+
+  const [uploadContext, previousSettings] = await Promise.all([
+    loadVersionUploadContext(db, project, session?.user?.id),
+    getPreviousVersionSettings(slug),
+  ]);
 
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
@@ -34,12 +37,7 @@ export default async function NewVersionPage({ params }: NewVersionPageProps) {
         {t("uploadNewVersion")}
       </Typography>
 
-      <VersionUploadForm
-        slug={slug}
-        openIdeas={openIdeas}
-        availablePlatforms={availablePlatforms}
-        previousSettings={previousSettings}
-      />
+      <VersionUploadForm {...uploadContext} previousSettings={previousSettings} />
     </Container>
   );
 }
