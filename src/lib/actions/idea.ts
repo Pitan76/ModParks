@@ -75,7 +75,7 @@ export async function createIdea(formData: FormData) {
       );
     }
 
-    await db.batch(batchOps);
+    await db.batch(batchOps as [any, ...any[]]);
 
     revalidatePath("/ideas");
     return { success: true, id };

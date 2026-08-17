@@ -1,227 +1,29 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, comments, projectDependencies, userSettings } from "@/db/schema";
+import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, projectDependencies } from "@/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
-import { createModrinthVersion } from "@/lib/modrinthUpload";
-import { fetchCfGameVersionMap, resolveCfGameVersionIds, uploadCfFile } from "@/lib/curseforgeUpload";
-import { notifyNewVersion, notifyToUser, resolveActor } from "@/lib/notifications/notify";
+import { notifyNewVersion } from "@/lib/notifications/notify";
+import { createSystemCommentForResolvedIdea } from "@/lib/actions/versionIdeaLink";
+import { pushVersionToExternalPlatforms } from "@/lib/actions/versionExternalSync";
 import { scanVersionFile } from "@/lib/actions/versionScan";
-import { createVersionSchema, dependencyDraftsSchema, updateVersionSchema } from "@/lib/validations";
+import { createVersionSchema, updateVersionSchema } from "@/lib/validations";
 import { resolveDependencyDrafts } from "@/lib/dependencies/create";
-import type { DependencyDraft } from "@/lib/dependencies/types";
+import { parseDependencyDraftsField } from "@/lib/dependencies/parseDrafts";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
+import { getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";
-import type { ActionResult } from "@/lib/actions/actionResult";
-import type { Database } from "@/lib/db";
 import { chunkRows } from "@/lib/db/chunkRows";
-import type { ProjectPost } from "@/types/post";
 
-/**
- * バージョン単体を操作する Server Action の共通前処理。
- *
- * プロジェクト解決 → 編集権限 → バージョン解決 → 所属確認 を 1 つにまとめる。
- * 個別に書くと所属確認の抜けが他プロジェクトのバージョンへの操作を許してしまうため、
- * ここに集約して同じ順序で必ず通す。
- *
- * @returns 失敗時は表示用エラー、成功時は接続・プロジェクト・バージョン
- */
-type ManageableVersion =
-  | { error: string }
-  | { error?: undefined; db: Database; project: ProjectPost; version: typeof versions.$inferSelect };
-
-async function loadManageableVersion(versionId: string, projectSlug: string): Promise<ManageableVersion> {
-  const t = await getServerErrors();
-  const { db, session } = await getAuthenticatedDb();
-
-  const project = await findProjectPostBySlug(db, projectSlug);
-  if (!project) return { error: t("project.notFound") };
-
-  try {
-    await assertProjectAccess(db, project, session);
-  } catch {
-    return { error: t("common.forbidden") };
-  }
-
-  const version = await db.select().from(versions).where(eq(versions.id, versionId)).get();
-  if (!version) return { error: t("version.notFound") };
-  if (version.projectId !== project.id) return { error: t("version.notInProject") };
-
-  return { db, project, version };
-}
-
-/**
- * アイデアが解決された際に自動でシステムコメントを追加し、起票者へ通知を送るヘルパー関数。
- */
-async function createSystemCommentForResolvedIdea(
-  db: Database,
-  ideaId: string,
-  versionId: string,
-  versionNumber: string,
-  projectSlug: string,
-  userId: string
-) {
-  const commentId = createId();
-  const content = `このアイデアはバージョン [${versionNumber}](/projects/${projectSlug}) で解決されました。`;
-
-  await db.insert(comments).values({
-    id: commentId,
-    postId: ideaId,
-    content,
-    contentFormat: "markdown",
-    authorId: userId,
-  }).run();
-
-  const idea = await db
-    .select({
-      id: posts.id,
-      title: posts.title,
-      slug: posts.slug,
-      authorId: posts.authorId,
-    })
-    .from(ideas)
-    .innerJoin(posts, eq(posts.id, ideas.id))
-    .where(eq(ideas.id, ideaId))
-    .get();
-
-  if (idea) {
-    const actor = await resolveActor(db, userId);
-    await notifyToUser(db, idea.authorId, userId, "comment", {
-      kind: "idea",
-      slug: idea.slug,
-      title: idea.title,
-      ...actor,
-    });
-  }
-}
-
-/**
- * フォームから来た依存関係の下書き（JSON文字列）を検証して取り出す。
- *
- * 依存が無いのが普通なので、未指定は空配列として扱い、
- * 壊れた JSON だけをエラーにする。
- */
-function parseDependencyDraftsField(
-  raw: FormDataEntryValue | null,
-): { success: true; data: DependencyDraft[] } | { success: false; error: string } {
-  if (typeof raw !== "string" || raw.trim() === "") return { success: true, data: [] };
-
-  let json: unknown;
-  try {
-    json = JSON.parse(raw);
-  } catch {
-    return { success: false, error: "Invalid dependencies payload" };
-  }
-
-  const parsed = dependencyDraftsSchema.safeParse(json);
-  if (!parsed.success) return { success: false, error: "Invalid dependencies payload" };
-
-  return { success: true, data: parsed.data };
-}
-
-type ExternalUploadResult = { ok: true } | { ok: false; error: string };
-export type ExternalUploadSummary = {
-  modrinth?: ExternalUploadResult;
-  curseforge?: ExternalUploadResult;
-};
-
-/**
- * アップロード済みのファイル（fileUrl）を取得し直し、Modrinth / CurseForge へも
- * 新規バージョンとして同時アップロードする。
- *
- * modparksの `versions` は正規化のためJSON文字列で mcVersions/loaders を持つが、
- * 外部APIはどちらも配列を要求するため、ここでパース済みの配列を受け取る。
- * 失敗しても modparks 側の登録自体は既に完了しているため、例外は投げずに結果を返す。
- */
-async function pushVersionToExternalPlatforms(params: {
-  db: Database;
-  userId: string;
-  project: ProjectPost;
-  versionNumber: string;
-  changelog: string;
-  releaseChannel: string;
-  mcVersions: string[];
-  loaders: string[];
-  fileUrl: string;
-  fileName: string;
-  uploadToModrinth: boolean;
-  uploadToCurseforge: boolean;
-}): Promise<ExternalUploadSummary> {
-  const { db, userId, project, uploadToModrinth, uploadToCurseforge } = params;
-  const summary: ExternalUploadSummary = {};
-  if (!uploadToModrinth && !uploadToCurseforge) return summary;
-
-  const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
-
-  const fileRes = await fetch(params.fileUrl);
-  if (!fileRes.ok) {
-    const error = `Failed to fetch uploaded file for external sync. Status: ${fileRes.status}`;
-    if (uploadToModrinth) summary.modrinth = { ok: false, error };
-    if (uploadToCurseforge) summary.curseforge = { ok: false, error };
-    return summary;
-  }
-  const fileBlob = await fileRes.blob();
-
-  if (uploadToModrinth) {
-    if (!project.modrinthId || !settings?.modrinthApiKey) {
-      summary.modrinth = { ok: false, error: "Modrinth is not linked or the API key is not configured." };
-    } else {
-      try {
-        await createModrinthVersion(settings.modrinthApiKey.trim(), {
-          modrinthProjectId: project.modrinthId,
-          versionNumber: params.versionNumber,
-          changelog: params.changelog,
-          gameVersions: params.mcVersions,
-          loaders: params.loaders,
-          releaseChannel: params.releaseChannel,
-          file: fileBlob,
-          fileName: params.fileName,
-        });
-        summary.modrinth = { ok: true };
-      } catch (err) {
-        summary.modrinth = { ok: false, error: err instanceof Error ? err.message : String(err) };
-      }
-    }
-  }
-
-  if (uploadToCurseforge) {
-    if (!project.curseforgeId || !settings?.curseforgeUploadApiToken) {
-      summary.curseforge = { ok: false, error: "CurseForge is not linked or the upload API token is not configured." };
-    } else {
-      try {
-        const token = settings.curseforgeUploadApiToken.trim();
-        const versionMap = await fetchCfGameVersionMap(token);
-        const { ids } = resolveCfGameVersionIds([...params.mcVersions, ...params.loaders], versionMap);
-        await uploadCfFile(
-          project.curseforgeId,
-          token,
-          {
-            changelog: params.changelog,
-            changelogType: "markdown",
-            displayName: params.versionNumber,
-            gameVersions: ids,
-            releaseType: (["alpha", "beta", "release"].includes(params.releaseChannel) ? params.releaseChannel : "release") as "alpha" | "beta" | "release",
-          },
-          fileBlob,
-          params.fileName,
-        );
-        summary.curseforge = { ok: true };
-      } catch (err) {
-        summary.curseforge = { ok: false, error: err instanceof Error ? err.message : String(err) };
-      }
-    }
-  }
-
-  return summary;
-}
+export type { ExternalUploadSummary } from "@/lib/actions/versionExternalSync";
+export { deleteVersion, setVersionArchived } from "@/lib/actions/versionLifecycle";
 
 /**
  * プロジェクトに対する新しいバージョン（ファイル）を登録する Server Action。
@@ -443,68 +245,5 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
 
   revalidatePath(`/projects/${projectSlug}`);
   revalidatePath(`/ideas`);
-  return { success: true };
-};
-
-/**
- * プロジェクトのバージョン（ファイル）を削除する Server Action。
- */
-export const deleteVersion = async (versionId: string, projectSlug: string): Promise<ActionResult> => {
-  const loaded = await loadManageableVersion(versionId, projectSlug);
-  if (loaded.error !== undefined) return { error: loaded.error };
-  const { db, project, version } = loaded;
-
-  const r2Key = getR2KeyFromUrl(version.fileUrl);
-  if (r2Key) {
-    try {
-      const bucket = await getR2Bucket();
-      await deleteFromR2(bucket, r2Key);
-    } catch (e) {
-      console.error(`[deleteVersion] Failed to delete R2 object: ${r2Key}`, e);
-    }
-  }
-
-  // バージョン限定の依存は外部キーで消えるが、バックアップ側は墓標が無いと残り続ける
-  const scopedDeps = await db
-    .select({ id: projectDependencies.id })
-    .from(projectDependencies)
-    .where(eq(projectDependencies.versionId, versionId))
-    .all();
-
-  if (scopedDeps.length > 0) {
-    await db.delete(projectDependencies).where(eq(projectDependencies.versionId, versionId)).run();
-    await recordDeletion(db, "project_dependencies", scopedDeps.map((d: { id: string }) => d.id));
-  }
-
-  await db.delete(versions).where(eq(versions.id, versionId)).run();
-  await recordDeletion(db, "versions", versionId);
-
-
-
-  revalidatePath(`/projects/${projectSlug}`);
-  return { success: true };
-};
-
-/**
- * バージョンのアーカイブ状態を切り替える Server Action。
- */
-export const setVersionArchived = async (
-  versionId: string,
-  projectSlug: string,
-  archived: boolean,
-): Promise<ActionResult> => {
-  const loaded = await loadManageableVersion(versionId, projectSlug);
-  if (loaded.error !== undefined) return { error: loaded.error };
-  const { db, project } = loaded;
-
-  await db
-    .update(versions)
-    .set({ archivedAt: archived ? new Date() : null })
-    .where(eq(versions.id, versionId))
-    .run();
-
-
-
-  revalidatePath(`/projects/${projectSlug}`);
   return { success: true };
 };
