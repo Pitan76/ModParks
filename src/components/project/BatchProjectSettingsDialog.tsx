@@ -30,6 +30,7 @@ export default function BatchProjectSettingsDialog({
 }: BatchProjectSettingsDialogProps) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Project.batch");
+  const tFields = useTranslations("Project.fields");
 
   // 各項目を更新対象にするかどうかの状態
   const [applyLicense, setApplyLicense] = useState(false);
@@ -100,7 +101,7 @@ export default function BatchProjectSettingsDialog({
               value={license}
               onChange={(_, newValue) => setLicense(newValue || "MIT")}
               onInputChange={(_, newInputValue) => setLicense(newInputValue)}
-              renderInput={(params) => <TextField {...params} label={tCommon("license") || "License"} size="small" fullWidth />}
+              renderInput={(params) => <TextField {...params} label={tFields("license")} size="small" fullWidth />}
             />
           )}
         </Box>

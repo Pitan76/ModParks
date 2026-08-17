@@ -47,6 +47,7 @@ export default function BatchIdeaMetadataDialog({
 }: BatchIdeaMetadataDialogProps) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Idea.batch");
+  const tFields = useTranslations("Idea.fields");
 
   const [operation, setOperation] = useState<"add" | "remove" | "set">("add");
   const [mcVersions, setMcVersions] = useState<string[]>([]);
@@ -125,7 +126,7 @@ export default function BatchIdeaMetadataDialog({
             <McVersionAutocomplete
               value={mcVersions}
               onChange={setMcVersions}
-              label={tCommon("version") || "MC Versions"}
+              label={tFields("mcVersions")}
               size="small"
             />
           )}
@@ -142,7 +143,7 @@ export default function BatchIdeaMetadataDialog({
               availablePlatforms={availablePlatforms}
               loaders={loaders}
               onChange={setLoaders}
-              label={tCommon("format") || "Loaders"}
+              label={tFields("loaders")}
               size="small"
             />
           )}
@@ -159,7 +160,7 @@ export default function BatchIdeaMetadataDialog({
               availableTags={availableTags}
               tags={tags}
               onChange={setTags}
-              label={tCommon("tags") || "Tags"}
+              label={tFields("tags")}
               size="small"
             />
           )}
