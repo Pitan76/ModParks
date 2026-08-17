@@ -63,11 +63,19 @@ export async function insertVersionRecord(db: Database, input: VersionRecordInpu
       : []),
   ];
 
-  // ローカル開発の SQLite ドライバは batch を持たないため、その場合は逐次実行する
-  if (typeof db.batch !== "function") {
-    for (const stmt of [insertVersion, ...indexInserts]) await stmt.run();
-    return;
+  // D1 の batch は失敗しても原因が本番ログに出ず digest だけになるため、文脈を付けて再送出する
+  try {
+    // ローカル開発の SQLite ドライバは batch を持たないため、その場合は逐次実行する
+    if (typeof db.batch !== "function") {
+      for (const stmt of [insertVersion, ...indexInserts]) await stmt.run();
+      return;
+    }
+    await db.batch([insertVersion, ...indexInserts]);
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : String(e);
+    throw new Error(
+      `Failed to insert version ${input.versionNumber} (project=${input.projectId}, loaders=[${loaders}], mcVersions=[${mcVersions}]): ${detail}`,
+      { cause: e },
+    );
   }
-
-  await db.batch([insertVersion, ...indexInserts]);
 }
