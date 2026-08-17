@@ -5,6 +5,7 @@ import { projects, projectHiddenRecipes, projectRecipeNames } from "@/db/schema"
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
+import { D1_MAX_BOUND_PARAMS } from "@/lib/db/chunkRows";
 import { getCustomRecipeNames } from "@/lib/queries/recipeNames";
 import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 import { findProjectPostBySlug } from "@/lib/queries/post";
@@ -16,7 +17,6 @@ import { normalizeRecipeSettings, type RecipeSettings } from "@/lib/recipe/setti
  * INSERT は 1行につき project_id / recipe_id / hidden_by の 3 個、
  * DELETE は project_id の 1 個に加えて IN (...) の中身が 1 件 1 個。
  */
-const D1_MAX_BOUND_PARAMS = 100;
 const INSERT_CHUNK_SIZE = Math.floor(D1_MAX_BOUND_PARAMS / 3); // 33行 = 99個
 const DELETE_CHUNK_SIZE = D1_MAX_BOUND_PARAMS - 1; // 99件 + project_id = 100個
 

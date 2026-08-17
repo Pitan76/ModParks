@@ -13,6 +13,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { extractRecipes } from "@/lib/services/jar";
 import { revalidatePath } from "next/cache";
 import { withPublicCache } from "@/lib/http/cache";
+import { chunkRows } from "@/lib/db/chunkRows";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { canManagePost } from "@/lib/auth/postAccess";
 import { isAllowedUpload } from "@/lib/upload/fileTypes";
@@ -273,12 +274,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   // バージョン追加はプロジェクトの更新とみなす
   await db.update(posts).set({ updatedAt: new Date() }).where(eq(posts.id, project.id)).run();
 
-  if (parsed.data.loaders && parsed.data.loaders.length > 0) {
-    await db.insert(versionLoaders).values(parsed.data.loaders.map(loader => ({ versionId: id, loader }))).run();
+  for (const chunk of chunkRows(parsed.data.loaders ?? [], 2)) {
+    await db.insert(versionLoaders).values(chunk.map(loader => ({ versionId: id, loader }))).run();
   }
 
-  if (parsed.data.mcVersions && parsed.data.mcVersions.length > 0) {
-    await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId: id, mcVersion: mc }))).run();
+  for (const chunk of chunkRows(parsed.data.mcVersions ?? [], 2)) {
+    await db.insert(versionMcVersions).values(chunk.map(mc => ({ versionId: id, mcVersion: mc }))).run();
   }
 
   // UI 経由（lib/actions/version.ts）と同じ検査・通知を必ず通す。

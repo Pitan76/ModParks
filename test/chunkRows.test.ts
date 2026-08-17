@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chunkRows, D1_MAX_BOUND_PARAMS } from "@/lib/db/chunkRows";
+import { chunkRows, chunkObjectRows, D1_MAX_BOUND_PARAMS } from "@/lib/db/chunkRows";
 
 /** 分割後のどの文もパラメータ上限を超えないこと */
 const withinLimit = (chunks: unknown[][], columnsPerRow: number) =>
@@ -41,5 +41,23 @@ describe("chunkRows", () => {
 
   it("列数が不正なら例外", () => {
     expect(() => chunkRows([1], 0)).toThrow();
+  });
+});
+
+describe("chunkObjectRows", () => {
+  it("先頭行の列数から分割幅を決める", () => {
+    const rows = Array.from({ length: 30 }, (_, i) => ({ a: i, b: i, c: i, d: i, e: i }));
+    const chunks = chunkObjectRows(rows);
+    expect(chunks[0]).toHaveLength(20);
+    expect(chunks.every((c) => c.length * 5 <= D1_MAX_BOUND_PARAMS)).toBe(true);
+  });
+
+  it("空配列は空（rows[0] を触らない）", () => {
+    expect(chunkObjectRows([])).toEqual([]);
+  });
+
+  it("全要素を順序どおり保つ", () => {
+    const rows = Array.from({ length: 77 }, (_, i) => ({ a: i, b: i }));
+    expect(chunkObjectRows(rows).flat()).toEqual(rows);
   });
 });

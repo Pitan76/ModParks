@@ -1,9 +1,9 @@
 import { getTableColumns, eq } from "drizzle-orm";
 import { SCHEMA_TABLES, TABLE_RESTORE_ORDER } from "./schemaConfig";
 import type { Database } from "@/lib/db";
+import { chunkObjectRows } from "@/lib/db/chunkRows";
 
 export const SUPPORTED_BACKUP_VERSIONS = ["1.0"];
-const D1_MAX_BOUND_PARAMS = 100;
 
 export type RestoreOptions = {
   mode?: "all" | "downloads_only" | "selected_tables";
@@ -79,20 +79,6 @@ export const reviveRows = (tableObj: any, rows: Record<string, any>[]): Record<s
 };
 
 /**
- * 行データを、D1 のバインドパラメータ上限を超えないチャンクに分割します。
- */
-const chunkRows = (rows: any[]): any[][] => {
-  const columnCount = Math.max(1, Object.keys(rows[0]).length);
-  const chunkSize = Math.max(1, Math.floor(D1_MAX_BOUND_PARAMS / columnCount));
-
-  const chunks: any[][] = [];
-  for (let i = 0; i < rows.length; i += chunkSize) {
-    chunks.push(rows.slice(i, i + chunkSize));
-  }
-  return chunks;
-};
-
-/**
  * 指定されたテーブルデータを用いてデータベースをリストアします。
  */
 export const importBackupData = async (
@@ -149,7 +135,7 @@ export const importBackupData = async (
         const tableObj = SCHEMA_TABLES[tableName];
         const rows = tablesData[tableName];
         if (tableObj && rows && rows.length > 0) {
-          for (const chunk of chunkRows(reviveRows(tableObj, rows))) {
+          for (const chunk of chunkObjectRows(reviveRows(tableObj, rows))) {
             statements.push(db.insert(tableObj).values(chunk));
           }
         }
@@ -166,7 +152,7 @@ export const importBackupData = async (
       const tableObj = SCHEMA_TABLES[tableName];
       const rows = tablesData[tableName];
       if (tableObj && rows && rows.length > 0) {
-        for (const chunk of chunkRows(reviveRows(tableObj, rows))) {
+        for (const chunk of chunkObjectRows(reviveRows(tableObj, rows))) {
           statements.push(db.insert(tableObj).values(chunk));
         }
       }

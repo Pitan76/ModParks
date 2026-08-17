@@ -20,6 +20,7 @@ import { findProjectPostBySlug } from "@/lib/queries/post";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";
 import type { ActionResult } from "@/lib/actions/actionResult";
 import type { Database } from "@/lib/db";
+import { chunkRows } from "@/lib/db/chunkRows";
 import type { ProjectPost } from "@/types/post";
 
 /**
@@ -271,8 +272,8 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
     previousLoaders.map((l: { loader: string }) => buildRecordKey(versionId, l.loader))
   );
 
-  if (parsed.data.loaders && parsed.data.loaders.length > 0) {
-    await db.insert(versionLoaders).values(parsed.data.loaders.map(loader => ({ versionId, loader }))).run();
+  for (const chunk of chunkRows(parsed.data.loaders ?? [], 2)) {
+    await db.insert(versionLoaders).values(chunk.map(loader => ({ versionId, loader }))).run();
   }
 
   const previousMcVersions = await db
@@ -288,8 +289,8 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
     previousMcVersions.map((m: { mcVersion: string }) => buildRecordKey(versionId, m.mcVersion))
   );
 
-  if (parsed.data.mcVersions && parsed.data.mcVersions.length > 0) {
-    await db.insert(versionMcVersions).values(parsed.data.mcVersions.map(mc => ({ versionId, mcVersion: mc }))).run();
+  for (const chunk of chunkRows(parsed.data.mcVersions ?? [], 2)) {
+    await db.insert(versionMcVersions).values(chunk.map(mc => ({ versionId, mcVersion: mc }))).run();
   }
 
   const ideaId = formData.get("ideaId") as string | null;

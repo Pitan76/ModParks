@@ -18,6 +18,7 @@ import {
 import { MERGE_POLICIES } from "@/lib/backup/mergePolicy";
 import { getTombstonedKeys, recordKeyFromRow } from "@/lib/backup/tombstone";
 import type { Database } from "@/lib/db";
+import { chunkObjectRows } from "@/lib/db/chunkRows";
 
 /** テーブル1つ分のマージ結果の内訳 */
 export interface TableMergeSummary {
@@ -225,7 +226,7 @@ export async function applyMerge(db: Database, payload: unknown): Promise<MergeP
   // 挿入は親テーブルから。computeMerge が TABLE_RESTORE_ORDER 順に積んでいる。
   for (const { table, rows } of operations.inserts) {
     const tableObj = SCHEMA_TABLES[table];
-    for (const chunk of chunkForD1(rows)) {
+    for (const chunk of chunkObjectRows(rows)) {
       statements.push(db.insert(tableObj).values(chunk));
     }
   }
@@ -252,17 +253,6 @@ export async function applyMerge(db: Database, payload: unknown): Promise<MergeP
 
 /** D1 の 1 バッチあたりのステートメント数の上限（安全側の値） */
 const BATCH_STATEMENT_LIMIT = 50;
-
-const D1_MAX_BOUND_PARAMS = 100;
-
-/** バインドパラメータ上限を超えないよう、列数から挿入チャンクを決めます。 */
-function chunkForD1(rows: Record<string, any>[]): Record<string, any>[][] {
-  const columnCount = Math.max(1, Object.keys(rows[0]).length);
-  const size = Math.max(1, Math.floor(D1_MAX_BOUND_PARAMS / columnCount));
-  const chunks: Record<string, any>[][] = [];
-  for (let i = 0; i < rows.length; i += size) chunks.push(rows.slice(i, i + size));
-  return chunks;
-}
 
 function chunkStatements<T>(items: T[], size: number): T[][] {
   const chunks: T[][] = [];

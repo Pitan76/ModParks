@@ -153,6 +153,8 @@ export const updateVersionSchema = createVersionSchema.partial().extend({
   mcVersions: z.array(z.enum(MC_VERSIONS)).optional(),
   loaders: z.array(z.string()).optional(),
   fileUrl: z.string().url(vk("invalidUrl")).optional(),
+  // 部分更新では default を効かせない（送っていない項目が既定値へ戻るのを防ぐ）
+  releaseChannel: z.enum(RELEASE_CHANNELS).optional(),
 });
 
 export type UpdateVersionInput = z.infer<typeof updateVersionSchema>;

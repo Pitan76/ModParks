@@ -21,3 +21,12 @@ export function chunkRows<T>(rows: T[], columnsPerRow: number): T[][] {
   for (let i = 0; i < rows.length; i += maxRows) chunks.push(rows.slice(i, i + maxRows));
   return chunks;
 }
+
+/**
+ * 列数を先頭行から推定して分割する。列構成が実行時にしか分からない
+ * バックアップ復元・マージ向け。
+ */
+export function chunkObjectRows<T extends Record<string, unknown>>(rows: T[]): T[][] {
+  if (rows.length === 0) return [];
+  return chunkRows(rows, Math.max(1, Object.keys(rows[0]).length));
+}

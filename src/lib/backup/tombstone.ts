@@ -9,6 +9,7 @@
 import { deletedRecords } from "@/db/schema";
 import { TABLE_PRIMARY_KEYS } from "@/lib/backup/core";
 import type { Database } from "@/lib/db";
+import { chunkRows } from "@/lib/db/chunkRows";
 
 /**
  * 墓標を意図的に記録していない削除箇所。
@@ -58,14 +59,17 @@ export async function recordDeletion(
   if (keys.length === 0) return;
 
   try {
-    await db
-      .insert(deletedRecords)
-      .values(keys.map((recordKey) => ({ tableName, recordKey, deletedAt: new Date() })))
-      // 同じ行が再作成されてまた削除された場合に備え、重複はスキップせず日時を更新する
-      .onConflictDoUpdate({
-        target: [deletedRecords.tableName, deletedRecords.recordKey],
-        set: { deletedAt: new Date() },
-      });
+    // 1 行 3 列。削除対象がまとまって来ると D1 のパラメータ上限を超えるため分割する
+    for (const chunk of chunkRows(keys, 3)) {
+      await db
+        .insert(deletedRecords)
+        .values(chunk.map((recordKey) => ({ tableName, recordKey, deletedAt: new Date() })))
+        // 同じ行が再作成されてまた削除された場合に備え、重複はスキップせず日時を更新する
+        .onConflictDoUpdate({
+          target: [deletedRecords.tableName, deletedRecords.recordKey],
+          set: { deletedAt: new Date() },
+        });
+    }
   } catch (e) {
     console.error(`[tombstone] Failed to record deletion for ${tableName}:`, e);
   }

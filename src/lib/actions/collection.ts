@@ -7,6 +7,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { chunkRows } from "@/lib/db/chunkRows";
 import { toProjectPost } from "@/lib/queries/postRow";
 import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 
@@ -130,7 +131,9 @@ export async function addProjectsToCollection(collectionId: string, projectIds: 
   const fresh = uniqueIds.filter(id => !existingSet.has(id));
   if (fresh.length === 0) return { success: true, added: 0 };
 
-  await db.insert(collectionItems).values(fresh.map(projectId => ({ collectionId, projectId })));
+  for (const chunk of chunkRows(fresh, 2)) {
+    await db.insert(collectionItems).values(chunk.map(projectId => ({ collectionId, projectId })));
+  }
 
   // 追加されたプロジェクトの作者へ通知する（トグル時と同じ扱い）
   const addedProjects = await db
