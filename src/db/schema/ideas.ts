@@ -1,7 +1,7 @@
 /** Idea 固有のテーブル。共通部分は posts が持つ */
 import { sqliteTable, text, primaryKey, index } from "drizzle-orm/sqlite-core";
 import { posts } from "./posts";
-import { versions } from "./projects";
+import { versions } from "./versions";
 
 /**
  * Idea 固有の情報。共通部分は posts が持つ。

@@ -4,11 +4,10 @@ import { eq, and, sql } from "drizzle-orm";
 import { getProjectDependencies, getProjectDependents } from "@/lib/actions/dependency";
 import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
-import { auth } from "@/lib/auth";
 import type { Database } from "@/lib/db";
+import type { Session } from "next-auth";
 
 type ProjectDetail = NonNullable<Awaited<ReturnType<typeof getProjectBySlug>>>;
-type Session = Awaited<ReturnType<typeof auth>>;
 
 /**
  * プロジェクト詳細ページの本文が必要とする周辺データ（お気に入り・依存関係・
@@ -17,7 +16,7 @@ type Session = Awaited<ReturnType<typeof auth>>;
  * 個別クエリのままページ側に置くと、どれが表示に要るデータなのかが
  * JSXの合間に埋もれてしまうため、ここに集約している。
  */
-export async function loadProjectDetailPageData(db: Database, project: ProjectDetail, session: Session) {
+export async function loadProjectDetailPageData(db: Database, project: ProjectDetail, session: Session | null) {
   const userId = session?.user?.id;
 
   const [favoritesData, userFavoriteData, dependencies, dependents, userSubscription, media, membership, settingsRecord] = await Promise.all([

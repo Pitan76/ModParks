@@ -789,6 +789,8 @@
       "colName": "タイトル",
       "colStatus": "公開範囲",
       "colResolution": "ステータス",
+      "colCreated": "作成日",
+      "view": "表示",
       "colActions": "操作",
       "empty": "アイデアがありません",
       "edit": "編集",

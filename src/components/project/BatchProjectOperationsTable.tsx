@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -11,7 +10,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { formatCompactNumber } from "@/lib/utils/format";
-import { Link } from "@/lib/i18n/routing";
+import LinkButton from "@/components/ui/LinkButton";
 import ProjectVersionCell from "./ProjectVersionCell";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 import SortableTableCell from "@/components/ui/SortableTableCell";
@@ -99,9 +98,9 @@ export default function BatchProjectOperationsTable({ projects, selected, onTogg
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <Button component={Link} href={`/projects/${p.slug}/edit`} size="small">
+                    <LinkButton href={`/projects/${p.slug}/edit`} size="small">
                       {t("edit")}
-                    </Button>
+                    </LinkButton>
                   </TableCell>
                 </TableRow>
               );

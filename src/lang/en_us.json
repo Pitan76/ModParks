@@ -792,6 +792,8 @@
       "colName": "Title",
       "colStatus": "Visibility",
       "colResolution": "Status",
+      "colCreated": "Created",
+      "view": "View",
       "colActions": "Actions",
       "empty": "No ideas",
       "edit": "Edit",

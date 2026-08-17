@@ -8,7 +8,8 @@
 import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
-import { projects, versions } from "./projects";
+import { projects } from "./projects";
+import { versions } from "./versions";
 import { ideas } from "./ideas";
 import { comments } from "./posts";
 

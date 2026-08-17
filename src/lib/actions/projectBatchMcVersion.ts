@@ -8,6 +8,7 @@ import { getServerErrors } from "@/lib/i18n/serverErrors";
 import type { ActionResult } from "@/lib/actions/actionResult";
 import type { Database } from "@/lib/db";
 import type { Session } from "next-auth";
+import { applyMcVersionOperation } from "@/lib/externalSync/mcVersionOps";
 
 const MODRINTH_API_BASE = "https://api.modrinth.com/v2";
 const UA = "ModParks/1.0 (modparks.pitan76.net)";
@@ -29,12 +30,10 @@ async function modifyModParksVersions(
   mcs: string[],
   targetVersions: "all" | "latest"
 ) {
-  let query = db.select().from(versions).where(eq(versions.projectId, projectId));
-  if (targetVersions === "latest") {
-    // @ts-ignore
-    query = query.orderBy(desc(versions.createdAt)).limit(1);
-  }
-  const targetRecs = await query.all();
+  const baseQuery = db.select().from(versions).where(eq(versions.projectId, projectId));
+  const targetRecs = targetVersions === "latest"
+    ? await baseQuery.orderBy(desc(versions.createdAt)).limit(1).all()
+    : await baseQuery.all();
   if (targetRecs.length === 0) return [];
 
   const updatedVersionNumbers: string[] = [];
@@ -45,14 +44,7 @@ async function modifyModParksVersions(
       mcArr = JSON.parse(v.mcVersions) as string[];
     } catch {}
 
-    let nextMcArr: string[];
-    if (operation === "add") {
-      nextMcArr = [...new Set([...mcArr, ...mcs])];
-    } else if (operation === "remove") {
-      nextMcArr = mcArr.filter((mc) => !mcs.includes(mc));
-    } else {
-      nextMcArr = [...mcs];
-    }
+    const nextMcArr = applyMcVersionOperation(mcArr, operation, mcs);
 
     await db
       .update(versions)
@@ -83,14 +75,7 @@ async function updateModrinthVersionRemote(
   operation: "add" | "remove" | "set",
   mcs: string[]
 ): Promise<boolean> {
-  let nextGameVersions: string[];
-  if (operation === "add") {
-    nextGameVersions = [...new Set([...remoteGameVersions, ...mcs])];
-  } else if (operation === "remove") {
-    nextGameVersions = remoteGameVersions.filter((mc) => !mcs.includes(mc));
-  } else {
-    nextGameVersions = [...mcs];
-  }
+  const nextGameVersions = applyMcVersionOperation(remoteGameVersions, operation, mcs);
 
   const res = await fetch(`${MODRINTH_API_BASE}/version/${versionId}`, {
     method: "PATCH",
@@ -100,34 +85,54 @@ async function updateModrinthVersionRemote(
   return res.ok;
 }
 
+type ModrinthRemoteVersion = { id: string; version_number: string; game_versions: string[]; date_published: string };
+
 /**
- * Modrinth側の特定プロジェクトのバージョン情報を操作する
+ * modparks側に一致するバージョンが無いプロジェクト（＝Modrinthにしかファイルが
+ * 無い場合）向けに、Modrinthの一覧そのものから対象を選ぶ。
+ * "latest" は公開日時が最も新しいものを1件、"all" は全件を対象にする。
+ */
+function selectRemoteVersionsWithoutLocalMatch(
+  remoteVersions: ModrinthRemoteVersion[],
+  targetVersions: "all" | "latest",
+): ModrinthRemoteVersion[] {
+  if (targetVersions === "all") return remoteVersions;
+  if (remoteVersions.length === 0) return [];
+  return [[...remoteVersions].sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime())[0]];
+}
+
+/**
+ * Modrinth側の特定プロジェクトのバージョン情報を操作する。
+ *
+ * modparks側にバージョンが1件も無いプロジェクト（Modrinthのみで配布している場合）でも
+ * 更新が丸ごと無視されないよう、updatedVersionNumbers が空なら Modrinth の一覧から直接選ぶ。
  */
 async function modifyModrinthVersions(
   modrinthProjectId: string,
   apiKey: string,
   operation: "add" | "remove" | "set",
   mcs: string[],
-  updatedVersionNumbers: string[]
+  updatedVersionNumbers: string[],
+  targetVersions: "all" | "latest",
 ) {
   const stats = { updated: 0, failed: 0, skipped: 0 };
   const res = await fetch(`${MODRINTH_API_BASE}/project/${modrinthProjectId}/version`, {
     headers: { Authorization: apiKey, "User-Agent": UA },
   });
   if (!res.ok) {
-    stats.failed = updatedVersionNumbers.length;
+    stats.failed = Math.max(updatedVersionNumbers.length, 1);
     return stats;
   }
 
-  const remoteVersions = (await res.json()) as { id: string; version_number: string; game_versions: string[] }[];
-  const byVersionNumber = new Map(remoteVersions.map((v) => [v.version_number, v]));
+  const remoteVersions = (await res.json()) as ModrinthRemoteVersion[];
 
-  for (const vNum of updatedVersionNumbers) {
-    const remote = byVersionNumber.get(vNum);
-    if (!remote) {
-      stats.skipped++;
-      continue;
-    }
+  const targets = updatedVersionNumbers.length > 0
+    ? updatedVersionNumbers.map((vNum) => remoteVersions.find((v) => v.version_number === vNum)).filter((v): v is ModrinthRemoteVersion => !!v)
+    : selectRemoteVersionsWithoutLocalMatch(remoteVersions, targetVersions);
+
+  stats.skipped = updatedVersionNumbers.length > 0 ? updatedVersionNumbers.length - targets.length : 0;
+
+  for (const remote of targets) {
     const success = await updateModrinthVersionRemote(apiKey, remote.id, remote.game_versions, operation, mcs);
     if (success) stats.updated++;
     else stats.failed++;
@@ -140,20 +145,20 @@ async function modifyModrinthVersions(
  * ログインユーザーが管理可能なプロジェクトIDのみを抽出する
  */
 async function getManageableProjects(db: Database, session: Session, projectIds: string[]) {
-  let query = db
+  const isAdmin = session.user.role === "admin";
+
+  // 選択したIDの絞り込みと作者の絞り込みは and() で合成する。
+  // .where() を2回繋ぐと先の条件が捨てられ、選択外のプロジェクトまで対象になってしまう
+  const scope = isAdmin
+    ? inArray(posts.id, projectIds)
+    : and(inArray(posts.id, projectIds), eq(posts.authorId, session.user.id));
+
+  return await db
     .select({ id: posts.id, modrinthId: projects.modrinthId, slug: posts.slug })
     .from(posts)
     .innerJoin(projects, eq(posts.id, projects.id))
-    .where(inArray(posts.id, projectIds));
-
-  // 管理者でない場合は自分が作成者であるもののみ
-  const isAdmin = session.user.role === "admin";
-  if (!isAdmin) {
-    // @ts-ignore
-    query = query.where(eq(posts.authorId, session.user.id));
-  }
-
-  return await query.all();
+    .where(scope)
+    .all();
 }
 
 /**
@@ -199,8 +204,8 @@ export async function batchModifyProjectMcVersions(
       }
     }
 
-    if (platforms.modrinth && proj.modrinthId && modrinthApiKey && updatedVersionNumbers.length > 0) {
-      const stats = await modifyModrinthVersions(proj.modrinthId, modrinthApiKey, operation, mcs, updatedVersionNumbers);
+    if (platforms.modrinth && proj.modrinthId && modrinthApiKey) {
+      const stats = await modifyModrinthVersions(proj.modrinthId, modrinthApiKey, operation, mcs, updatedVersionNumbers, targetVersions);
       modrinthUpdated += stats.updated;
       modrinthFailed += stats.failed;
       modrinthSkipped += stats.skipped;

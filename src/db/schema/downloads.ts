@@ -6,7 +6,8 @@
  * ここへ日単位で積み、Cron が差分だけを累積カウンタへ反映する。
  */
 import { sqliteTable, text, integer, primaryKey, index } from "drizzle-orm/sqlite-core";
-import { projects, versions } from "./projects";
+import { projects } from "./projects";
+import { versions } from "./versions";
 
 export const versionDownloadDaily = sqliteTable("version_download_daily", {
   versionId: text("version_id")
