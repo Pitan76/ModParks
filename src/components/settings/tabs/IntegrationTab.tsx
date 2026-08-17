@@ -23,6 +23,7 @@ interface IntegrationTabProps {
   curseforgeProjectId: string;
   curseforgeVerified: boolean;
   curseforgeVerifyCode: string;
+  curseforgeUploadApiToken: string;
   isGitHubConnected: boolean;
   isGoogleConnected: boolean;
   showGithubLinkInitial: boolean;
@@ -32,16 +33,17 @@ interface IntegrationTabProps {
   githubAppInstallUrl: string | null;
 }
 
-export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, isGitHubConnected, isGoogleConnected, showGithubLinkInitial, githubAppAccounts, githubAppInstallUrl }: IntegrationTabProps) {
+export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, curseforgeUploadApiToken, isGitHubConnected, isGoogleConnected, showGithubLinkInitial, githubAppAccounts, githubAppInstallUrl }: IntegrationTabProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const { message, flash } = useFlashMessage();
 
-  const form = useDirtyForm({ modrinthKey: modrinthApiKey || "" }, async (values) => {
-    await updateIntegrations(values.modrinthKey);
+  const form = useDirtyForm({ modrinthKey: modrinthApiKey || "", curseforgeUploadToken: curseforgeUploadApiToken || "" }, async (values) => {
+    await updateIntegrations(values.modrinthKey, values.curseforgeUploadToken);
     flash("success", tCommon("saved"));
   });
   const modrinthKey = form.values.modrinthKey;
+  const curseforgeUploadToken = form.values.curseforgeUploadToken;
 
   const [githubMsg, setGithubMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [googleMsg, setGoogleMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -95,6 +97,12 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
       <Typography variant="h6" sx={{ mb: 1 }}>{t("integration.curseforge")}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t("integration.curseforgeDesc")}</Typography>
       <CurseForgeVerify projectId={curseforgeProjectId} verified={curseforgeVerified} pendingCode={curseforgeVerifyCode} />
+
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1, mt: 3 }}>{t("integration.curseforgeUploadTokenDesc")}</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <a href="https://authors-old.curseforge.com/account/api-tokens" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "underline" }}>{t("integration.curseforgeUploadTokenLink")}</a>
+      </Typography>
+      <TextField fullWidth label={t("integration.curseforgeUploadTokenLabel")} size="small" type="password" value={curseforgeUploadToken} onChange={(e) => form.setField("curseforgeUploadToken", e.target.value)} sx={{ mb: 3, maxWidth: 400 }} />
 
       <Divider sx={{ my: 4 }} />
 

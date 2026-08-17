@@ -508,7 +508,16 @@
       "targetPlatforms": "対象プラットフォーム",
       "platformModParks": "ModParks (このサイト)",
       "platformModrinth": "Modrinth",
-      "successMcVersions": "{count} 件のプロジェクトでMCバージョンを編集しました"
+      "successMcVersions": "{count} 件のプロジェクトでMCバージョンを編集しました",
+      "editSettings": "設定一括編集",
+      "editSettingsTitle": "プロジェクト設定一括編集",
+      "editSettingsDesc": "選択した {count} 件のプロジェクトに対して、各種設定を一括で上書き編集します。変更を適用したい項目にチェックを入れてください。",
+      "applyLicense": "ライセンスを変更する",
+      "applyDiscordWebhook": "Discord Webhookを変更する",
+      "applyAiGenerated": "AI生成コンテンツ表示を変更する",
+      "applyCommentsEnabled": "コメントの有効/無効を変更する",
+      "applyRecipesEnabled": "レシピ表示の有効/無効を変更する",
+      "successSettings": "{count} 件のプロジェクト設定を一括更新しました"
     },
     "comments": {
       "title": "コメント",
@@ -609,9 +618,13 @@
         "syncModrinth": "Modrinthのバージョンにも反映する",
         "syncModrinthHint": "設定画面でModrinthのAPIキーを登録している場合のみ利用できます。CurseForgeは公式APIが対応バージョンの事後編集をサポートしていないため対象外です。",
         "syncModrinthUnavailable": "このプロジェクトはModrinthと連携していないか、Modrinth APIキーが未設定のため反映できません。",
+        "syncCurseforge": "CurseForgeのファイルにも反映する",
+        "syncCurseforgeHint": "設定画面でCurseForgeのアップロードAPIトークンを登録している場合のみ利用できます。",
+        "syncCurseforgeUnavailable": "このプロジェクトはCurseForgeと連携していないか、アップロードAPIトークンが未設定のため反映できません。",
         "apply": "追加する",
         "success": "{count} 件のバージョンに {mcVersion} を追加しました",
         "modrinthSummary": "Modrinth: {updated}件反映 / {skipped}件対象外 / {failed}件失敗",
+        "curseforgeSummary": "CurseForge: {updated}件反映 / {skipped}件対象外 / {failed}件失敗",
         "failed": "一括更新に失敗しました"
       }
     },
@@ -1903,7 +1916,10 @@
       "modrinth": "Modrinth連携",
       "modrinthDesc": "ModrinthのAPIキーを設定することで、プロジェクトのインポートや同期が可能になります。",
       "curseforge": "CurseForge連携",
-      "curseforgeDesc": "所有確認を行うと、その作者のプロジェクトをまとめてインポートできるようになります。"
+      "curseforgeDesc": "所有確認を行うと、その作者のプロジェクトをまとめてインポートできるようになります。",
+      "curseforgeUploadTokenLabel": "CurseForge Upload APIトークン",
+      "curseforgeUploadTokenDesc": "バージョンの一括アップロード・一括反映にCurseForgeを含めるには、ご自身のCurseForgeアカウントで発行したUpload APIトークンを設定してください。",
+      "curseforgeUploadTokenLink": "CurseForge API Tokens ページでトークンを発行"
     },
     "cfVerify": {
       "title": "所有者確認",

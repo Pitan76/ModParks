@@ -37,6 +37,8 @@ export type ProjectVersionsManagerProps = {
   githubRepo?: string | null;
   /** プロジェクトが Modrinth と連携済み、かつ閲覧者に Modrinth API キーが設定されているか */
   modrinthSyncAvailable?: boolean;
+  /** プロジェクトが CurseForge と連携済み、かつ閲覧者に CurseForge Upload API トークンが設定されているか */
+  curseforgeSyncAvailable?: boolean;
 };
 
 /**
@@ -50,6 +52,7 @@ const ProjectVersionsManager = ({
   availablePlatforms = [],
   githubRepo,
   modrinthSyncAvailable = false,
+  curseforgeSyncAvailable = false,
 }: ProjectVersionsManagerProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Version");
@@ -145,6 +148,7 @@ const ProjectVersionsManager = ({
         onClose={() => m.setBatchOpen(false)}
         selectedCount={m.selected.size}
         modrinthAvailable={modrinthSyncAvailable}
+        curseforgeAvailable={curseforgeSyncAvailable}
         pending={m.batchPending}
         onSubmit={m.handleBatchAddMcVersion}
       />

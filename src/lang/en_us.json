@@ -494,7 +494,30 @@
       "deleteDescription": "Are you sure you want to delete the selected <b>{count}</b> projects? This action cannot be undone.",
       "deleteConfirmLabel": "Enter DELETE in uppercase to confirm:",
       "statusUpdateError": "Failed to update status",
-      "deleteError": "Failed to delete"
+      "deleteError": "Failed to delete",
+      "editMcVersions": "Bulk Edit MC Versions",
+      "editMcVersionsTitle": "Bulk Edit MC Versions",
+      "editMcVersionsDesc": "Edit compatible MC versions for the selected {count} projects.",
+      "opType": "Operation Type",
+      "opAdd": "Add",
+      "opRemove": "Remove",
+      "opSet": "Overwrite (replace existing versions)",
+      "targetVersions": "Target Versions",
+      "targetAll": "All Versions",
+      "targetLatest": "Latest Version Only",
+      "targetPlatforms": "Target Platforms",
+      "platformModParks": "ModParks (This site)",
+      "platformModrinth": "Modrinth",
+      "successMcVersions": "Successfully edited MC versions for {count} projects",
+      "editSettings": "Bulk Edit Settings",
+      "editSettingsTitle": "Bulk Edit Project Settings",
+      "editSettingsDesc": "Batch overwrite various settings for the selected {count} projects. Check the box next to settings you want to apply.",
+      "applyLicense": "Change License",
+      "applyDiscordWebhook": "Change Discord Webhook",
+      "applyAiGenerated": "Change AI-Generated content tag",
+      "applyCommentsEnabled": "Change Comment settings",
+      "applyRecipesEnabled": "Change Recipe settings",
+      "successSettings": "Successfully updated settings for {count} projects"
     },
     "comments": {
       "title": "Comments",
@@ -595,9 +618,13 @@
         "syncModrinth": "Also update the matching Modrinth versions",
         "syncModrinthHint": "Only available if a Modrinth API key is set in Settings. CurseForge is excluded because its official API does not support editing a file's supported versions after the fact.",
         "syncModrinthUnavailable": "This project isn't linked to Modrinth, or no Modrinth API key is configured, so it can't be synced.",
+        "syncCurseforge": "Also update the matching CurseForge file(s)",
+        "syncCurseforgeHint": "Only available if a CurseForge upload API token is set in Settings.",
+        "syncCurseforgeUnavailable": "This project isn't linked to CurseForge, or no upload API token is configured, so it can't be synced.",
         "apply": "Add",
         "success": "Added {mcVersion} to {count} version(s)",
         "modrinthSummary": "Modrinth: {updated} updated / {skipped} skipped / {failed} failed",
+        "curseforgeSummary": "CurseForge: {updated} updated / {skipped} skipped / {failed} failed",
         "failed": "Failed to apply the bulk update"
       }
     },
@@ -1887,7 +1914,10 @@
       "modrinth": "Modrinth Integration",
       "modrinthDesc": "Setting a Modrinth API key allows you to import and sync projects.",
       "curseforge": "CurseForge Integration",
-      "curseforgeDesc": "Once you verify ownership, you can bulk-import that author's projects."
+      "curseforgeDesc": "Once you verify ownership, you can bulk-import that author's projects.",
+      "curseforgeUploadTokenLabel": "CurseForge Upload API Token",
+      "curseforgeUploadTokenDesc": "To include CurseForge in bulk uploads and bulk version updates, set an Upload API token issued from your own CurseForge account.",
+      "curseforgeUploadTokenLink": "Generate a token on the CurseForge API Tokens page"
     },
     "cfVerify": {
       "title": "Ownership Verification",

@@ -29,6 +29,7 @@ export default async function IntegrationSettingsPage() {
         curseforgeProjectId={prefs.curseforgeProjectId}
         curseforgeVerified={prefs.curseforgeVerified}
         curseforgeVerifyCode={prefs.curseforgeVerifyCode}
+        curseforgeUploadApiToken={prefs.curseforgeUploadApiToken}
         isGitHubConnected={prefs.isGitHubConnected}
         isGoogleConnected={prefs.isGoogleConnected}
         showGithubLinkInitial={user.showGithubLink}

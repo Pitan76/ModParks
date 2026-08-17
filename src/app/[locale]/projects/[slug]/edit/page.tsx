@@ -100,9 +100,15 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   const dependencies = await getProjectDependencies(project.id);
   const media = await getPublicProjectMedia(project.id);
 
-  // Modrinth への一括バージョン反映は、連携済みプロジェクトかつ閲覧者本人が API キーを設定している場合のみ提供する
-  const viewerSettings = await db.select({ modrinthApiKey: userSettings.modrinthApiKey }).from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
+  // Modrinth/CurseForge への一括バージョン反映は、連携済みプロジェクトかつ閲覧者本人が
+  // それぞれのAPIキー/トークンを設定している場合のみ提供する
+  const viewerSettings = await db
+    .select({ modrinthApiKey: userSettings.modrinthApiKey, curseforgeUploadApiToken: userSettings.curseforgeUploadApiToken })
+    .from(userSettings)
+    .where(eq(userSettings.userId, session.user.id))
+    .get();
   const modrinthSyncAvailable = !!project.modrinthId && !!viewerSettings?.modrinthApiKey;
+  const curseforgeSyncAvailable = !!project.curseforgeId && !!viewerSettings?.curseforgeUploadApiToken;
 
   const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
   const [availableTags, availablePlatforms] = await Promise.all([
@@ -128,7 +134,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         isOwner={isOwner}
         basicInfoForm={<ProjectEditForm project={project} availableTags={availableTags} />}
         descriptionForm={<ProjectDescriptionForm project={project} />}
-        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} githubRepo={project.githubRepo} modrinthSyncAvailable={modrinthSyncAvailable} />}
+        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} githubRepo={project.githubRepo} modrinthSyncAvailable={modrinthSyncAvailable} curseforgeSyncAvailable={curseforgeSyncAvailable} />}
         mediaManager={<ProjectMediaManager projectId={project.id} projectSlug={project.slug} media={media} />}
         membersManager={
           <ProjectMembersManager 

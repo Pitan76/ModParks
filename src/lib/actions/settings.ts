@@ -190,11 +190,12 @@ export const updatePostingSettings = async (
 /**
  * Modrinth等の外部インテグレーションAPIキーを更新する Server Action。
  */
-export const updateIntegrations = async (modrinthKey: string) => {
+export const updateIntegrations = async (modrinthKey: string, curseforgeUploadApiToken?: string) => {
   const { db, userId } = await getAuthenticatedDb();
 
   await db.update(userSettings).set({
     modrinthApiKey: modrinthKey?.trim() || null,
+    ...(curseforgeUploadApiToken !== undefined ? { curseforgeUploadApiToken: curseforgeUploadApiToken.trim() || null } : {}),
   }).where(eq(userSettings.userId, userId));
 
   revalidatePath("/settings");
