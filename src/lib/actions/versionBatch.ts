@@ -3,6 +3,8 @@
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { versions, versionMcVersions, userSettings } from "@/db/schema";
 import { findProjectPostBySlug } from "@/lib/queries/post";
+import { fetchCfModFiles } from "@/lib/curseforge";
+import { fetchCfGameVersionMap, resolveCfGameVersionIds, updateCfFileGameVersions } from "@/lib/curseforgeUpload";
 import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
@@ -13,11 +15,12 @@ import type { Database } from "@/lib/db";
 const MODRINTH_API_BASE = "https://api.modrinth.com/v2";
 const UA = "ModParks/1.0 (modparks.pitan76.net)";
 
-type ModrinthSyncSummary = { updated: number; skipped: number; failed: number };
+type SyncSummary = { updated: number; skipped: number; failed: number };
 
 export type BatchAddMcVersionData = {
   updatedCount: number;
-  modrinth?: ModrinthSyncSummary;
+  modrinth?: SyncSummary;
+  curseforge?: SyncSummary;
 };
 
 /**
@@ -32,8 +35,8 @@ async function syncMcVersionToModrinth(
   apiKey: string,
   targets: { versionNumber: string }[],
   mcVersions: string[],
-): Promise<ModrinthSyncSummary> {
-  const summary: ModrinthSyncSummary = { updated: 0, skipped: 0, failed: 0 };
+): Promise<SyncSummary> {
+  const summary: SyncSummary = { updated: 0, skipped: 0, failed: 0 };
 
   const listRes = await fetch(`${MODRINTH_API_BASE}/project/${modrinthProjectId}/version`, {
     headers: { Authorization: apiKey, "User-Agent": UA },
@@ -68,6 +71,62 @@ async function syncMcVersionToModrinth(
   return summary;
 }
 
+/**
+ * CurseForge に登録済みのファイル一覧を取得し、fileName が一致するものへ
+ * gameVersions を追記する。
+ *
+ * update-file は gameVersions を丸ごと置き換える仕様のため、既存の対応バージョン名も
+ * IDへ解決した上で新規分とマージした完全な配列を送る。名前解決に失敗したものは
+ * 送信対象から静かに除外される（CurseForge側で廃止されたバージョン名など）。
+ */
+async function syncMcVersionToCurseforge(
+  curseforgeProjectId: string,
+  apiToken: string,
+  targets: { fileName: string }[],
+  mcVersions: string[],
+): Promise<SyncSummary> {
+  const summary: SyncSummary = { updated: 0, skipped: 0, failed: 0 };
+
+  const [files, versionMap] = await Promise.all([
+    fetchCfModFiles(curseforgeProjectId).catch(() => null),
+    fetchCfGameVersionMap(apiToken).catch(() => null),
+  ]);
+  if (!files || !versionMap) {
+    summary.failed = targets.length;
+    return summary;
+  }
+
+  const { ids: newIds } = resolveCfGameVersionIds(mcVersions, versionMap);
+  if (newIds.length === 0) {
+    summary.failed = targets.length;
+    return summary;
+  }
+
+  const byFileName = new Map(files.map((f) => [f.fileName, f]));
+
+  for (const target of targets) {
+    const remote = byFileName.get(target.fileName);
+    if (!remote) {
+      summary.skipped++;
+      continue;
+    }
+    const { ids: existingIds } = resolveCfGameVersionIds(remote.gameVersions, versionMap);
+    const mergedIds = [...new Set([...existingIds, ...newIds])];
+    if (mergedIds.length === existingIds.length) {
+      summary.skipped++;
+      continue;
+    }
+    try {
+      await updateCfFileGameVersions(curseforgeProjectId, remote.id, mergedIds, apiToken);
+      summary.updated++;
+    } catch {
+      summary.failed++;
+    }
+  }
+
+  return summary;
+}
+
 /** projectSlug の所有権・アクセス権を確認し、対象バージョン群を検証する */
 async function loadBatchTargets(db: Database, project: ProjectPost, versionIds: string[]) {
   const targets = await db.select().from(versions).where(inArray(versions.id, versionIds)).all();
@@ -79,14 +138,14 @@ async function loadBatchTargets(db: Database, project: ProjectPost, versionIds: 
  * 選択した複数バージョンへ、対応MCバージョンを一括で追加する Server Action。
  *
  * 「1.21.1向けに配布したが1.21.2にも対応していた」といったケースで、
- * modparks内のバージョンと Modrinth 上のバージョンへ同時に反映する。
- * CurseForge には既存ファイルの対応バージョンを事後追加する公式APIが存在しないため対象外。
+ * modparks内のバージョンと Modrinth / CurseForge 上のバージョンへ同時に反映する。
  */
 export async function batchAddMcVersion(
   projectSlug: string,
   versionIds: string[],
   mcVersions: string[],
   syncModrinth: boolean,
+  syncCurseforge: boolean,
 ): Promise<ActionResult<BatchAddMcVersionData>> {
   const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
@@ -121,21 +180,32 @@ export async function batchAddMcVersion(
     updatedCount++;
   }
 
-  let modrinth: ModrinthSyncSummary | undefined;
-  if (syncModrinth && project.modrinthId) {
-    const settings = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
-    if (settings?.modrinthApiKey) {
-      modrinth = await syncMcVersionToModrinth(
-        project.modrinthId,
-        settings.modrinthApiKey.trim(),
-        targets.map((v) => ({ versionNumber: v.versionNumber })),
-        mcs,
-      );
-    }
+  const settings = (syncModrinth || syncCurseforge)
+    ? await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get()
+    : undefined;
+
+  let modrinth: SyncSummary | undefined;
+  if (syncModrinth && project.modrinthId && settings?.modrinthApiKey) {
+    modrinth = await syncMcVersionToModrinth(
+      project.modrinthId,
+      settings.modrinthApiKey.trim(),
+      targets.map((v) => ({ versionNumber: v.versionNumber })),
+      mcs,
+    );
+  }
+
+  let curseforge: SyncSummary | undefined;
+  if (syncCurseforge && project.curseforgeId && settings?.curseforgeUploadApiToken) {
+    curseforge = await syncMcVersionToCurseforge(
+      project.curseforgeId,
+      settings.curseforgeUploadApiToken.trim(),
+      targets.map((v) => ({ fileName: v.fileName })),
+      mcs,
+    );
   }
 
   revalidatePath(`/projects/${projectSlug}`);
   revalidatePath(`/projects/${projectSlug}/edit`);
 
-  return { success: true, data: { updatedCount, modrinth } };
+  return { success: true, data: { updatedCount, modrinth, curseforge } };
 }

@@ -81,6 +81,8 @@ export const userSettings = sqliteTable("user_settings", {
   curseforgeVerifyCode: text("curseforge_verify_code"),
   /** 所有確認が完了した日時。未確認なら null */
   curseforgeVerifiedAt: integer("curseforge_verified_at", { mode: "timestamp" }),
+  /** CurseForge Upload API 用の個人アカウントトークン（authors-old.curseforge.com/account/api-tokens で発行）。ファイルのアップロード・編集に使う */
+  curseforgeUploadApiToken: text("curseforge_upload_api_token"),
   defaultCommentsEnabled: integer("default_comments_enabled", { mode: "boolean" }).notNull().default(false),
   defaultRecipesEnabled: integer("default_recipes_enabled", { mode: "boolean" }).notNull().default(false),
   /** 通知種別ごとの受信ON/OFF。未設定の種別はデフォルトON扱い */

@@ -14,8 +14,9 @@ export type BatchAddMcVersionDialogProps = {
   onClose: () => void;
   selectedCount: number;
   modrinthAvailable: boolean;
+  curseforgeAvailable: boolean;
   pending: boolean;
-  onSubmit: (mcVersions: string[], syncModrinth: boolean) => Promise<boolean>;
+  onSubmit: (mcVersions: string[], syncModrinth: boolean, syncCurseforge: boolean) => Promise<boolean>;
 };
 
 /**
@@ -27,6 +28,7 @@ export default function BatchAddMcVersionDialog({
   onClose,
   selectedCount,
   modrinthAvailable,
+  curseforgeAvailable,
   pending,
   onSubmit,
 }: BatchAddMcVersionDialogProps) {
@@ -35,20 +37,23 @@ export default function BatchAddMcVersionDialog({
 
   const [mcVersions, setMcVersions] = useState<string[]>([]);
   const [syncModrinth, setSyncModrinth] = useState(false);
+  const [syncCurseforge, setSyncCurseforge] = useState(false);
 
   const handleClose = () => {
     if (pending) return;
     setMcVersions([]);
     setSyncModrinth(false);
+    setSyncCurseforge(false);
     onClose();
   };
 
   const handleConfirm = async () => {
     if (mcVersions.length === 0) return;
-    const ok = await onSubmit(mcVersions, syncModrinth && modrinthAvailable);
+    const ok = await onSubmit(mcVersions, syncModrinth && modrinthAvailable, syncCurseforge && curseforgeAvailable);
     if (ok) {
       setMcVersions([]);
       setSyncModrinth(false);
+      setSyncCurseforge(false);
     }
   };
 
@@ -91,6 +96,22 @@ export default function BatchAddMcVersionDialog({
           />
           <Typography variant="caption" color="text.secondary" component="p">
             {modrinthAvailable ? t("manager.batch.syncModrinthHint") : t("manager.batch.syncModrinthUnavailable")}
+          </Typography>
+        </Box>
+
+        <Box>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={syncCurseforge && curseforgeAvailable}
+                disabled={!curseforgeAvailable}
+                onChange={(e) => setSyncCurseforge(e.target.checked)}
+              />
+            }
+            label={t("manager.batch.syncCurseforge")}
+          />
+          <Typography variant="caption" color="text.secondary" component="p">
+            {curseforgeAvailable ? t("manager.batch.syncCurseforgeHint") : t("manager.batch.syncCurseforgeUnavailable")}
           </Typography>
         </Box>
       </Box>

@@ -119,3 +119,27 @@ export function projectContainsCode(project: CfProjectSummary, code: string): bo
   ].join("\n");
   return haystack.includes(needle);
 }
+
+/** コンソールAPIが返すMod単体のファイル情報（一括反映時のファイル特定に使う項目のみ） */
+export interface CfModFile {
+  id: number;
+  fileName: string;
+  displayName: string;
+  gameVersions: string[];
+}
+
+/**
+ * 指定Modの公開ファイル一覧をコンソールAPIで取得する。
+ * Upload API の update-file は fileID が必須のため、modparks側のバージョンとの
+ * 対応関係を fileName で突き合わせて特定するのに使う。
+ * @param modId 数値のCurseForge Mod ID
+ */
+export async function fetchCfModFiles(modId: string): Promise<CfModFile[]> {
+  const res = await fetch(`${CF_API_BASE}/v1/mods/${modId}/files`, { headers: consoleHeaders() });
+  if (!res.ok) {
+    console.warn(`[curseforge] fetch files failed: modId=${modId} status=${res.status}`);
+    throw new Error(`Failed to fetch CurseForge files. Status: ${res.status}`);
+  }
+  const json = (await res.json()) as { data?: CfModFile[] };
+  return json.data ?? [];
+}

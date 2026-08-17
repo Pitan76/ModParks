@@ -1,0 +1,1 @@
+ALTER TABLE `user_settings` ADD `curseforge_upload_api_token` text;
