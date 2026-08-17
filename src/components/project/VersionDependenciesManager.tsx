@@ -21,10 +21,10 @@ import { useTranslations } from "next-intl";
 import {
   addExternalProjectDependency,
   addProjectDependencyBySlug,
-  getVersionDependencies,
   removeProjectDependency,
   type DependencyEntry,
 } from "@/lib/actions/dependency";
+import { getVersionDependencies } from "@/lib/queries/dependency";
 import { isActionError, type ActionResult } from "@/lib/actions/actionResult";
 import { isStaleServerActionError } from "@/lib/errors/staleAction";
 import { DEPENDENCY_TYPES, type DependencyType } from "@/lib/dependencies/types";

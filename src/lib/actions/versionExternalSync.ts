@@ -4,12 +4,7 @@ import { fetchCfGameVersionMap, resolveCfGameVersionIds, uploadCfFile } from "@/
 import { eq } from "drizzle-orm";
 import type { ProjectPost } from "@/types/post";
 import type { Database } from "@/lib/db";
-
-type ExternalUploadResult = { ok: true } | { ok: false; error: string };
-export type ExternalUploadSummary = {
-  modrinth?: ExternalUploadResult;
-  curseforge?: ExternalUploadResult;
-};
+import type { ExternalUploadResult, ExternalUploadSummary } from "@/lib/externalSync/uploadSummary";
 
 type PushVersionParams = {
   db: Database;
