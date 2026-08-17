@@ -23,7 +23,8 @@ import { toProxiedImageUrl } from "@/lib/utils/imageProxy";
 import { useColorMode } from "@/components/ThemeRegistry";
 import PlainProjectInfoBox from "@/components/plain/project/PlainProjectInfoBox";
 import { summarizeProjectVersions, type SummarizableVersion } from "@/lib/utils/projectVersionSummary";
-import { getLoaderInfo } from "@/lib/loaders";
+import LoaderBadgeList from "./LoaderBadgeList";
+import McVersionBadgeList from "./McVersionBadgeList";
 import { useState, useEffect } from "react";
 
 export type ProjectInfoBoxProps = {
@@ -103,26 +104,17 @@ const ProjectInfoBox = ({ project: p, isAuthenticated }: ProjectInfoBoxProps) =>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
             {t("infobox.platforms")}
           </Typography>
-          <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
-            {loaders.map((loader) => {
-              const info = getLoaderInfo(loader);
-              return <Chip key={loader} label={info.name} size="small" color={info.color} icon={info.icon} />;
-            })}
-          </Stack>
+          <LoaderBadgeList loaders={loaders} />
         </Box>
       )}
 
-      {/* 対応MCバージョン */}
+      {/* 対応MCバージョン。サイドバーは縦に伸ばせるので畳まず全件出す */}
       {mcVersions.length > 0 && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
             {t("infobox.gameVersions")}
           </Typography>
-          <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: "wrap" }}>
-            {mcVersions.map((mc) => (
-              <Chip key={mc} label={mc} size="small" variant="outlined" sx={{ borderColor: "divider", color: "text.secondary" }} />
-            ))}
-          </Stack>
+          <McVersionBadgeList mcVersions={mcVersions} />
         </Box>
       )}
 

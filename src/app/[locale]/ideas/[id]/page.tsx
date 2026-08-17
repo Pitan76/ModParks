@@ -4,7 +4,6 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
-import Chip from "@mui/material/Chip";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import LinkButton from "@/components/ui/LinkButton";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
@@ -23,7 +22,13 @@ import { getIdeaMeta, getIdeaDetail } from "./ideaDetailData";
 import ResolvedProjects from "./ResolvedProjects";
 import IdeaComments from "./IdeaComments";
 import ReportDialog from "@/components/project/ReportDialog";
+import ProjectTagBadge from "@/components/project/ProjectTagBadge";
+import LoaderBadgeList from "@/components/project/LoaderBadgeList";
+import McVersionBadgeList from "@/components/project/McVersionBadgeList";
 import { isAdminSession } from "@/lib/auth/roles";
+
+/** 見出し下のバッジ列で展開するMCバージョン数。超過分は「+N」に畳む */
+const MC_VERSION_VISIBLE_COUNT = 5;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { id, locale } = await params;
@@ -143,15 +148,11 @@ export default async function IdeaDetailPage({ params, searchParams }: IdeaDetai
         </Typography>
 
         {(ideaData.tags.length > 0 || parsedMcVersions.length > 0 || parsedLoaders.length > 0) && (
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 3 }}>
-            {parsedLoaders.map((loader) => (
-              <Chip key={loader} label={loader} size="small" variant="outlined" color="primary" />
-            ))}
-            {parsedMcVersions.map((mc) => (
-              <Chip key={mc} label={mc} size="small" variant="outlined" />
-            ))}
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", mb: 3 }}>
+            <LoaderBadgeList loaders={parsedLoaders} />
+            <McVersionBadgeList mcVersions={parsedMcVersions} visibleCount={MC_VERSION_VISIBLE_COUNT} />
             {ideaData.tags.map((tag) => (
-              <Chip key={tag} label={`#${tag}`} size="small" variant="filled" sx={{ bgcolor: "action.selected" }} />
+              <ProjectTagBadge key={tag} tag={tag} />
             ))}
           </Box>
         )}
