@@ -187,8 +187,5 @@ export async function toggleIdeaFavorite(ideaId: string) {
   return togglePostFavorite(ideaId);
 }
 
-export {
-  createIdeaComment,
-  updateIdeaComment,
-  deleteIdeaComment,
-} from "./ideaComment";
+// コメント系のアクションは ./ideaComment に分けている。
+// "use server" ファイルは値の再エクスポートができないため、呼び出し側はそちらを直接 import する。
