@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import NewIdeaForm from "@/components/idea/NewIdeaForm";
 import { getTranslations } from "next-intl/server";
+import { getAvailableTags, getAvailablePlatforms } from "@/lib/queries/masterData";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -16,6 +17,11 @@ export default async function NewIdeaPage() {
   const db = await getDatabase();
   let defaultVisibility = "public";
   let defaultBodyFormat = "markdown";
+
+  const [availableTags, availablePlatforms] = await Promise.all([
+    getAvailableTags(),
+    getAvailablePlatforms(),
+  ]);
 
   if (session?.user?.id) {
     const settingsRecord = await db
@@ -35,5 +41,12 @@ export default async function NewIdeaPage() {
     }
   }
 
-  return <NewIdeaForm defaultVisibility={defaultVisibility} defaultBodyFormat={defaultBodyFormat} />;
+  return (
+    <NewIdeaForm
+      defaultVisibility={defaultVisibility}
+      defaultBodyFormat={defaultBodyFormat}
+      availableTags={availableTags}
+      availablePlatforms={availablePlatforms}
+    />
+  );
 }

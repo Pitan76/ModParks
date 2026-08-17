@@ -95,7 +95,7 @@ export async function getIdeaDetail(id: string, userId?: string, options: GetIde
   const d1 = await getD1();
   const db = getDb(d1);
 
-  const ideaData = await db
+  const ideaDataResult = await db
     .select({
       id: posts.id,
       slug: posts.slug,
@@ -109,6 +109,8 @@ export async function getIdeaDetail(id: string, userId?: string, options: GetIde
       authorName: userProfiles.displayName,
       authorAvatar: userProfiles.avatarUrl,
       authorUsername: userProfiles.username,
+      mcVersions: ideas.mcVersions,
+      loaders: ideas.loaders,
     })
     .from(posts)
     .innerJoin(ideas, eq(ideas.id, posts.id))
@@ -117,17 +119,23 @@ export async function getIdeaDetail(id: string, userId?: string, options: GetIde
     .where(and(eq(posts.kind, "idea"), or(eq(posts.slug, id), eq(posts.previousSlug, id))))
     .get();
 
-  if (!ideaData) return null;
+  if (!ideaDataResult) return null;
 
   // 以降は slug ではなく実体の id で引く
-  const postId = ideaData.id;
+  const postId = ideaDataResult.id;
 
-  const [likesData, userLike] = await Promise.all([
+  const [likesData, userLike, ideaTagsResult] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(favorites).where(eq(favorites.postId, postId)).get(),
     userId
       ? db.select().from(favorites).where(and(eq(favorites.postId, postId), eq(favorites.userId, userId))).get()
       : null,
+    db.select({ tag: sql<string>`tag` }).from(sql`idea_tags`).where(sql`idea_id = ${postId}`).all(),
   ]);
+
+  const ideaData = {
+    ...ideaDataResult,
+    tags: (ideaTagsResult || []).map((t) => t.tag),
+  };
 
   const commentSelection = {
     id: commentsTable.id,

@@ -20,19 +20,38 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LinkButton from "@/components/ui/LinkButton";
 import SettingsLink from "@/components/ui/SettingsLink";
 import { useTranslations } from "next-intl";
+import TagAutocomplete from "@/components/project/TagAutocomplete";
+import McVersionAutocomplete from "@/components/project/McVersionAutocomplete";
+import LoaderAutocomplete from "@/components/project/LoaderAutocomplete";
+
+interface OptionItem {
+  slug: string;
+  name: string;
+}
 
 interface NewIdeaFormProps {
   defaultVisibility?: string;
   defaultBodyFormat?: string;
+  availableTags?: OptionItem[];
+  availablePlatforms?: OptionItem[];
 }
 
-export default function NewIdeaForm({ defaultVisibility = "public", defaultBodyFormat = "markdown" }: NewIdeaFormProps) {
+export default function NewIdeaForm({
+  defaultVisibility = "public",
+  defaultBodyFormat = "markdown",
+  availableTags = [],
+  availablePlatforms = [],
+}: NewIdeaFormProps) {
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const tIdea = useTranslations("Idea");
   const tSettings = useTranslations("Settings");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ [key: string]: string[] } | null>(null);
+
+  const [tags, setTags] = useState<string[]>([]);
+  const [mcVersions, setMcVersions] = useState<string[]>([]);
+  const [loaders, setLoaders] = useState<string[]>([]);
 
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -111,6 +130,44 @@ export default function NewIdeaForm({ defaultVisibility = "public", defaultBodyF
                 helperText={error?.content?.[0] || tIdea("fields.contentPlaceholder")}
                 disabled={pending}
               />
+
+              <TagAutocomplete
+                availableTags={availableTags}
+                tags={tags}
+                onChange={setTags}
+                label={tIdea("fields.tags")}
+                placeholder={tIdea("fields.tags")}
+                size="small"
+              />
+              {tags.map((tag) => (
+                <input type="hidden" name="tags" value={tag} key={`hidden-tag-${tag}`} />
+              ))}
+
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
+                <Box sx={{ flex: 1 }}>
+                  <LoaderAutocomplete
+                    availablePlatforms={availablePlatforms}
+                    loaders={loaders}
+                    onChange={setLoaders}
+                    label={tIdea("fields.loaders")}
+                    size="small"
+                  />
+                  {loaders.map((loader) => (
+                    <input type="hidden" name="loaders" value={loader} key={`hidden-loader-${loader}`} />
+                  ))}
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <McVersionAutocomplete
+                    value={mcVersions}
+                    onChange={setMcVersions}
+                    label={tIdea("fields.mcVersions")}
+                    size="small"
+                  />
+                  {mcVersions.map((mc) => (
+                    <input type="hidden" name="mcVersions" value={mc} key={`hidden-mc-${mc}`} />
+                  ))}
+                </Box>
+              </Stack>
 
               <FormControl fullWidth size="small">
                 <InputLabel>{tIdea("fields.visibility")}</InputLabel>

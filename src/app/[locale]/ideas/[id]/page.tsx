@@ -4,6 +4,7 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
+import Chip from "@mui/material/Chip";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import LinkButton from "@/components/ui/LinkButton";
 import IdeaLikeButton from "@/components/idea/IdeaLikeButton";
@@ -70,12 +71,27 @@ export default async function IdeaDetailPage({ params, searchParams }: IdeaDetai
 
   const commentsLimit = Math.max(parseInt(commentsLimitStr as string) || COMMENTS_PAGE_SIZE, COMMENTS_PAGE_SIZE);
 
-  const detail = await getIdeaDetail(id, session?.user?.id, { commentsLimit, locale });
+  const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
+  const [detail, availableTags, availablePlatforms] = await Promise.all([
+    getIdeaDetail(id, session?.user?.id, { commentsLimit, locale }),
+    getAvailableTags(),
+    getAvailablePlatforms(),
+  ]);
   if (!detail) return notFound();
 
   const { ideaData, initialCount, initialLiked, comments, totalCommentThreads, resolvedProjects } = detail;
   const canManage =
     !!session?.user && (session.user.id === ideaData.authorId || isAdminSession(session));
+
+  let parsedMcVersions: string[] = [];
+  try {
+    if (ideaData.mcVersions) parsedMcVersions = JSON.parse(ideaData.mcVersions);
+  } catch {}
+
+  let parsedLoaders: string[] = [];
+  try {
+    if (ideaData.loaders) parsedLoaders = JSON.parse(ideaData.loaders);
+  } catch {}
 
   return (
     <Container maxWidth="md" sx={{ pt: 1, pb: 3, px: { xs: 2, sm: 3 } }}>
@@ -109,6 +125,11 @@ export default async function IdeaDetailPage({ params, searchParams }: IdeaDetai
               initialContent={ideaData.content}
               initialContentFormat={ideaData.contentFormat}
               initialVisibility={ideaData.visibility ?? "public"}
+              initialTags={ideaData.tags}
+              initialMcVersions={parsedMcVersions}
+              initialLoaders={parsedLoaders}
+              availableTags={availableTags}
+              availablePlatforms={availablePlatforms}
             />
           )}
         </Box>

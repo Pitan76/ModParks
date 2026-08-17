@@ -22,12 +22,26 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslations } from "next-intl";
 import { updateIdea, deleteIdea } from "@/lib/actions/idea";
 
+import TagAutocomplete from "@/components/project/TagAutocomplete";
+import LoaderAutocomplete from "@/components/project/LoaderAutocomplete";
+import McVersionAutocomplete from "@/components/project/McVersionAutocomplete";
+
+interface OptionItem {
+  slug: string;
+  name: string;
+}
+
 interface IdeaOwnerActionsProps {
   ideaId: string;
   initialTitle: string;
   initialContent: string;
   initialContentFormat: string;
   initialVisibility: string;
+  initialTags?: string[];
+  initialMcVersions?: string[];
+  initialLoaders?: string[];
+  availableTags?: OptionItem[];
+  availablePlatforms?: OptionItem[];
 }
 
 /** アイデア投稿者・管理者向けの編集/削除操作 */
@@ -37,6 +51,11 @@ export default function IdeaOwnerActions({
   initialContent,
   initialContentFormat,
   initialVisibility,
+  initialTags = [],
+  initialMcVersions = [],
+  initialLoaders = [],
+  availableTags = [],
+  availablePlatforms = [],
 }: IdeaOwnerActionsProps) {
   const router = useRouter();
   const tCommon = useTranslations("Common");
@@ -45,6 +64,10 @@ export default function IdeaOwnerActions({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<Record<string, string[]> | null>(null);
+
+  const [tags, setTags] = useState<string[]>(initialTags);
+  const [mcVersions, setMcVersions] = useState<string[]>(initialMcVersions);
+  const [loaders, setLoaders] = useState<string[]>(initialLoaders);
 
   const handleEdit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -122,6 +145,45 @@ export default function IdeaOwnerActions({
                   <MenuItem value="pukiwiki">{tCommon("formatOptions.pukiwiki")}</MenuItem>
                 </Select>
               </FormControl>
+
+              <TagAutocomplete
+                availableTags={availableTags}
+                tags={tags}
+                onChange={setTags}
+                label={tIdea("fields.tags")}
+                placeholder={tIdea("fields.tags")}
+                size="small"
+              />
+              {tags.map((tag) => (
+                <input type="hidden" name="tags" value={tag} key={`hidden-tag-${tag}`} />
+              ))}
+
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
+                <Box sx={{ flex: 1 }}>
+                  <LoaderAutocomplete
+                    availablePlatforms={availablePlatforms}
+                    loaders={loaders}
+                    onChange={setLoaders}
+                    label={tIdea("fields.loaders")}
+                    size="small"
+                  />
+                  {loaders.map((loader) => (
+                    <input type="hidden" name="loaders" value={loader} key={`hidden-loader-${loader}`} />
+                  ))}
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <McVersionAutocomplete
+                    value={mcVersions}
+                    onChange={setMcVersions}
+                    label={tIdea("fields.mcVersions")}
+                    size="small"
+                  />
+                  {mcVersions.map((mc) => (
+                    <input type="hidden" name="mcVersions" value={mc} key={`hidden-mc-${mc}`} />
+                  ))}
+                </Box>
+              </Stack>
+
               <FormControl fullWidth size="small">
                 <InputLabel>{tIdea("fields.visibility")}</InputLabel>
                 <Select name="visibility" label={tIdea("fields.visibility")} defaultValue={initialVisibility} disabled={pending}>
