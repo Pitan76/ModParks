@@ -83,7 +83,7 @@ export default function BatchProjectMcVersionDialog({
           <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1, color: "text.primary" }}>
             {t("opType")}
           </FormLabel>
-          <RadioGroup value={operation} onChange={(e) => setOperation(e.target.value as any)}>
+          <RadioGroup value={operation} onChange={(e) => setOperation(e.target.value as "add" | "remove" | "set")}>
             <FormControlLabel value="add" control={<Radio size="small" />} label={t("opAdd")} />
             <FormControlLabel value="remove" control={<Radio size="small" />} label={t("opRemove")} />
             <FormControlLabel value="set" control={<Radio size="small" />} label={t("opSet")} />
@@ -101,7 +101,7 @@ export default function BatchProjectMcVersionDialog({
           <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1, color: "text.primary" }}>
             {t("targetVersions")}
           </FormLabel>
-          <RadioGroup value={targetVersions} onChange={(e) => setTargetVersions(e.target.value as any)}>
+          <RadioGroup value={targetVersions} onChange={(e) => setTargetVersions(e.target.value as "all" | "latest")}>
             <FormControlLabel value="latest" control={<Radio size="small" />} label={t("targetLatest")} />
             <FormControlLabel value="all" control={<Radio size="small" />} label={t("targetAll")} />
           </RadioGroup>

@@ -88,9 +88,8 @@ async function updateModrinthVersionRemote(
 type ModrinthRemoteVersion = { id: string; version_number: string; game_versions: string[]; date_published: string };
 
 /**
- * modparks側に一致するバージョンが無いプロジェクト（＝Modrinthにしかファイルが
- * 無い場合）向けに、Modrinthの一覧そのものから対象を選ぶ。
- * "latest" は公開日時が最も新しいものを1件、"all" は全件を対象にする。
+ * modparks側のバージョン番号と突き合わせられないときに、Modrinthの一覧そのものから
+ * 対象を選ぶ。"latest" は公開日時が最も新しいものを1件、"all" は全件。
  */
 function selectRemoteVersionsWithoutLocalMatch(
   remoteVersions: ModrinthRemoteVersion[],
@@ -104,8 +103,11 @@ function selectRemoteVersionsWithoutLocalMatch(
 /**
  * Modrinth側の特定プロジェクトのバージョン情報を操作する。
  *
- * modparks側にバージョンが1件も無いプロジェクト（Modrinthのみで配布している場合）でも
- * 更新が丸ごと無視されないよう、updatedVersionNumbers が空なら Modrinth の一覧から直接選ぶ。
+ * 対応関係は versionNumber の文字列一致でしか特定できないが、Modrinth 側で別名が
+ * 付いている（例: modparks が "1.0.3-fix.1" で Modrinth が "1.0.3"）ことや、
+ * modparks に未登録であることは珍しくない。1 件も一致しない場合に何もしないと
+ * 「実行したのに反映されない」ため、その時は対象バージョンの指定（最新/すべて）に
+ * 従って Modrinth の一覧から選び直す。
  */
 async function modifyModrinthVersions(
   modrinthProjectId: string,
@@ -126,11 +128,17 @@ async function modifyModrinthVersions(
 
   const remoteVersions = (await res.json()) as ModrinthRemoteVersion[];
 
-  const targets = updatedVersionNumbers.length > 0
-    ? updatedVersionNumbers.map((vNum) => remoteVersions.find((v) => v.version_number === vNum)).filter((v): v is ModrinthRemoteVersion => !!v)
+  const matched = updatedVersionNumbers
+    .map((vNum) => remoteVersions.find((v) => v.version_number === vNum))
+    .filter((v): v is ModrinthRemoteVersion => !!v);
+
+  const targets = matched.length > 0
+    ? matched
     : selectRemoteVersionsWithoutLocalMatch(remoteVersions, targetVersions);
 
-  stats.skipped = updatedVersionNumbers.length > 0 ? updatedVersionNumbers.length - targets.length : 0;
+  // 一部だけ一致したときの未一致分は対象外として数える。
+  // 全く一致しなかった場合は上で選び直しているので対象外は無い
+  stats.skipped = matched.length > 0 ? updatedVersionNumbers.length - matched.length : 0;
 
   for (const remote of targets) {
     const success = await updateModrinthVersionRemote(apiKey, remote.id, remote.game_versions, operation, mcs);

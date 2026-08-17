@@ -109,7 +109,7 @@ export default function BatchIdeaMetadataDialog({
           <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1, color: "text.primary" }}>
             {t("opType")}
           </FormLabel>
-          <RadioGroup value={operation} onChange={(e) => setOperation(e.target.value as any)}>
+          <RadioGroup value={operation} onChange={(e) => setOperation(e.target.value as "add" | "remove" | "set")}>
             <FormControlLabel value="add" control={<Radio size="small" />} label={t("opAdd")} />
             <FormControlLabel value="remove" control={<Radio size="small" />} label={t("opRemove")} />
             <FormControlLabel value="set" control={<Radio size="small" />} label={t("opSet")} />
