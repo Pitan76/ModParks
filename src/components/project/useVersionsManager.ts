@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter, usePathname } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import { deleteVersion, setVersionArchived } from "@/lib/actions/version";
+import { batchAddMcVersion } from "@/lib/actions/versionBatch";
 import { isActionError } from "@/lib/actions/actionResult";
 import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
 import { importGithubRelease } from "@/lib/actions/github";
@@ -49,6 +50,9 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
   const [importMsg, setImportMsg] = useState<ImportMsg>(null);
   const [extractingId, setExtractingId] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchPending, setBatchPending] = useState(false);
 
   const parsedVersions = useMemo(() => {
     return localVersions.map((v) => {
@@ -164,6 +168,59 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
     setLocalVersions((prev) => prev.map((v) => (v.id === updated.id ? updated : v)));
   };
 
+  const handleToggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleToggleSelectAll = () => {
+    setSelected((prev) => (prev.size === localVersions.length ? new Set() : new Set(localVersions.map((v) => v.id))));
+  };
+
+  const handleBatchAddMcVersion = async (mcVersions: string[], syncModrinth: boolean) => {
+    setBatchPending(true);
+    setErrorMsg("");
+    setImportMsg(null);
+    try {
+      const ids = Array.from(selected);
+      const res = await batchAddMcVersion(projectSlug, ids, mcVersions, syncModrinth);
+      if (isActionError(res)) {
+        setErrorMsg(res.error || tError("version.deleteFailed"));
+        return false;
+      }
+      setLocalVersions((prev) =>
+        prev.map((v) => {
+          if (!selected.has(v.id)) return v;
+          let mcVersionsArr: string[] = [];
+          try {
+            mcVersionsArr = JSON.parse(v.mcVersions) as string[];
+          } catch {}
+          const merged = [...new Set([...mcVersionsArr, ...mcVersions])];
+          return { ...v, mcVersions: JSON.stringify(merged) };
+        })
+      );
+      const summary = res.data.modrinth
+        ? " " + t("manager.batch.modrinthSummary", res.data.modrinth)
+        : "";
+      setImportMsg({
+        text: t("manager.batch.success", { count: res.data.updatedCount, mcVersion: mcVersions.join(", ") }) + summary,
+        severity: "success",
+      });
+      setSelected(new Set());
+      setBatchOpen(false);
+      return true;
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : t("manager.batch.failed"));
+      return false;
+    } finally {
+      setBatchPending(false);
+    }
+  };
+
   return {
     localVersions,
     parsedVersions,
@@ -181,11 +238,18 @@ export function useVersionsManager(projectSlug: string, initialVersions: Project
     setImportMsg,
     extractingId,
     archivingId,
+    selected,
+    batchOpen,
+    setBatchOpen,
+    batchPending,
     handleImportGithub,
     handleDelete,
     handleExtractRecipes,
     handleToggleArchive,
     handleEditSuccess,
+    handleToggleSelect,
+    handleToggleSelectAll,
+    handleBatchAddMcVersion,
   };
 }
 

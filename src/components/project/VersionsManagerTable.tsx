@@ -7,6 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -29,6 +30,9 @@ type Props = {
   isEmpty: boolean;
   extractingId: string | null;
   archivingId: string | null;
+  selected: Set<string>;
+  onToggleSelect: (id: string) => void;
+  onToggleSelectAll: () => void;
   onExtract: (versionId: string) => void;
   onToggleArchive: (v: ProjectVersion) => void;
   onEdit: (v: ProjectVersion) => void;
@@ -40,6 +44,9 @@ export default function VersionsManagerTable({
   isEmpty,
   extractingId,
   archivingId,
+  selected,
+  onToggleSelect,
+  onToggleSelectAll,
   onExtract,
   onToggleArchive,
   onEdit,
@@ -59,6 +66,13 @@ export default function VersionsManagerTable({
       <Table size="small" sx={[tableRootSx, { minWidth: 650 }]}>
         <TableHead sx={tableHeadSx}>
           <TableRow>
+            <TableCell padding="checkbox">
+              <Checkbox
+                indeterminate={selected.size > 0 && selected.size < parsedVersions.length}
+                checked={parsedVersions.length > 0 && selected.size === parsedVersions.length}
+                onChange={onToggleSelectAll}
+              />
+            </TableCell>
             <SortableTableCell columnKey="version" activeKey={orderBy} order={order} onSort={handleSort}>
               {t("manager.columns.version")}
             </SortableTableCell>
@@ -77,6 +91,9 @@ export default function VersionsManagerTable({
             const isArchived = !!v.archivedAt;
             return (
               <TableRow key={v.id} sx={isArchived ? { opacity: 0.6, bgcolor: "action.hover" } : undefined}>
+                <TableCell padding="checkbox">
+                  <Checkbox checked={selected.has(v.id)} onChange={() => onToggleSelect(v.id)} />
+                </TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>
                   <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
                     <span>{v.versionNumber}</span>
@@ -114,7 +131,7 @@ export default function VersionsManagerTable({
           })}
           {isEmpty && (
             <TableRow>
-              <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
+              <TableCell colSpan={6} align="center" sx={{ py: 3, color: "text.secondary" }}>
                 {t("manager.noVersions")}
               </TableCell>
             </TableRow>

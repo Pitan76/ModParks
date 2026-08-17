@@ -584,7 +584,22 @@
       "extractSuccess": "Extraction complete ({count} items)",
       "archive": "Archive",
       "unarchive": "Unarchive",
-      "archivedLabel": "Archived"
+      "archivedLabel": "Archived",
+      "batch": {
+        "selectHint": "Select versions to bulk-add a supported version to",
+        "selectedCount": "{count} selected",
+        "addMcVersion": "Bulk add supported version",
+        "dialogTitle": "Bulk add supported version",
+        "dialogDescription": "Add a supported Minecraft version to all {count} selected versions at once.",
+        "mcVersionLabel": "Minecraft version to add",
+        "syncModrinth": "Also update the matching Modrinth versions",
+        "syncModrinthHint": "Only available if a Modrinth API key is set in Settings. CurseForge is excluded because its official API does not support editing a file's supported versions after the fact.",
+        "syncModrinthUnavailable": "This project isn't linked to Modrinth, or no Modrinth API key is configured, so it can't be synced.",
+        "apply": "Add",
+        "success": "Added {mcVersion} to {count} version(s)",
+        "modrinthSummary": "Modrinth: {updated} updated / {skipped} skipped / {failed} failed",
+        "failed": "Failed to apply the bulk update"
+      }
     },
     "fields": {
       "versionNumber": "Version Number",
@@ -2164,7 +2179,11 @@
       "notInProject": "This version does not belong to the specified project",
       "noFileUrl": "This version has no file URL",
       "recipeDomainNotAllowed": "Recipes cannot be extracted from this external URL domain",
-      "deleteFailed": "Failed to delete the version"
+      "deleteFailed": "Failed to delete the version",
+      "batch": {
+        "mcVersionRequired": "Enter the Minecraft version to add",
+        "noSelection": "Select at least one version"
+      }
     },
     "member": {
       "userNotFound": "User not found",

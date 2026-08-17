@@ -13,6 +13,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LinkIcon from "@mui/icons-material/Link";
+import LayersIcon from "@mui/icons-material/Layers";
 import { useState } from "react";
 import type { GithubImportMode } from "@/lib/utils/github";
 import AbstractDialog from "@/components/ui/AbstractDialog";
@@ -21,6 +22,7 @@ import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import EditVersionDialog from "./EditVersionDialog";
 import VersionsManagerTable from "./VersionsManagerTable";
+import BatchAddMcVersionDialog from "./BatchAddMcVersionDialog";
 import { useVersionsManager, type ProjectVersion } from "./useVersionsManager";
 
 export type { ProjectVersion } from "./useVersionsManager";
@@ -33,6 +35,8 @@ export type ProjectVersionsManagerProps = {
   openIdeas: { id: string; title: string }[];
   availablePlatforms?: OptionItem[];
   githubRepo?: string | null;
+  /** プロジェクトが Modrinth と連携済み、かつ閲覧者に Modrinth API キーが設定されているか */
+  modrinthSyncAvailable?: boolean;
 };
 
 /**
@@ -45,6 +49,7 @@ const ProjectVersionsManager = ({
   openIdeas,
   availablePlatforms = [],
   githubRepo,
+  modrinthSyncAvailable = false,
 }: ProjectVersionsManagerProps) => {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Version");
@@ -103,6 +108,17 @@ const ProjectVersionsManager = ({
         </Stack>
       </Box>
 
+      {m.selected.size > 0 && (
+        <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+          <Button variant="outlined" startIcon={<LayersIcon />} onClick={() => m.setBatchOpen(true)}>
+            {t("manager.batch.addMcVersion")}
+          </Button>
+          <Box sx={{ typography: "body2", color: "text.secondary" }}>
+            {t("manager.batch.selectedCount", { count: m.selected.size })}
+          </Box>
+        </Box>
+      )}
+
       {m.importMsg && (
         <Alert severity={m.importMsg.severity} sx={{ mb: 3 }} onClose={() => m.setImportMsg(null)}>
           {m.importMsg.text}
@@ -115,10 +131,22 @@ const ProjectVersionsManager = ({
         isEmpty={m.localVersions.length === 0}
         extractingId={m.extractingId}
         archivingId={m.archivingId}
+        selected={m.selected}
+        onToggleSelect={m.handleToggleSelect}
+        onToggleSelectAll={m.handleToggleSelectAll}
         onExtract={m.handleExtractRecipes}
         onToggleArchive={m.handleToggleArchive}
         onEdit={m.setEditTarget}
         onDelete={m.setDeleteId}
+      />
+
+      <BatchAddMcVersionDialog
+        open={m.batchOpen}
+        onClose={() => m.setBatchOpen(false)}
+        selectedCount={m.selected.size}
+        modrinthAvailable={modrinthSyncAvailable}
+        pending={m.batchPending}
+        onSubmit={m.handleBatchAddMcVersion}
       />
 
       <TypedConfirmDialog

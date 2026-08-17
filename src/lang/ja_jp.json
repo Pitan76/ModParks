@@ -584,7 +584,22 @@
       "extractSuccess": "抽出が完了しました（{count}件）",
       "archive": "アーカイブする",
       "unarchive": "アーカイブを解除する",
-      "archivedLabel": "アーカイブ済み"
+      "archivedLabel": "アーカイブ済み",
+      "batch": {
+        "selectHint": "対応バージョンを一括で追加するバージョンを選択してください",
+        "selectedCount": "{count}件選択中",
+        "addMcVersion": "対応バージョンを一括追加",
+        "dialogTitle": "対応バージョンを一括追加",
+        "dialogDescription": "選択した {count} 件のバージョンに、対応するMinecraftバージョンをまとめて追加します。",
+        "mcVersionLabel": "追加するMCバージョン",
+        "syncModrinth": "Modrinthのバージョンにも反映する",
+        "syncModrinthHint": "設定画面でModrinthのAPIキーを登録している場合のみ利用できます。CurseForgeは公式APIが対応バージョンの事後編集をサポートしていないため対象外です。",
+        "syncModrinthUnavailable": "このプロジェクトはModrinthと連携していないか、Modrinth APIキーが未設定のため反映できません。",
+        "apply": "追加する",
+        "success": "{count} 件のバージョンに {mcVersion} を追加しました",
+        "modrinthSummary": "Modrinth: {updated}件反映 / {skipped}件対象外 / {failed}件失敗",
+        "failed": "一括更新に失敗しました"
+      }
     },
     "fields": {
       "versionNumber": "バージョン番号",
@@ -2166,7 +2181,11 @@
       "notInProject": "このバージョンは対象のプロジェクトに属していません",
       "noFileUrl": "このバージョンにはファイルURLがありません",
       "recipeDomainNotAllowed": "この外部URLのドメインからはレシピを抽出できません",
-      "deleteFailed": "バージョンの削除に失敗しました"
+      "deleteFailed": "バージョンの削除に失敗しました",
+      "batch": {
+        "mcVersionRequired": "追加するMCバージョンを入力してください",
+        "noSelection": "バージョンを1件以上選択してください"
+      }
     },
     "member": {
       "userNotFound": "ユーザーが見つかりません",

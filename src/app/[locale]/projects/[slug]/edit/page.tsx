@@ -17,7 +17,7 @@ import ProjectDependenciesManager from "@/components/project/ProjectDependencies
 import { getProjectMembers } from "@/lib/actions/member";
 import { getProjectDependencies } from "@/lib/actions/dependency";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { versions, posts, ideas, versionIdeas } from "@/db/schema";
+import { versions, posts, ideas, versionIdeas, userSettings } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";
 import { isAdminSession } from "@/lib/auth/roles";
@@ -100,6 +100,10 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   const dependencies = await getProjectDependencies(project.id);
   const media = await getPublicProjectMedia(project.id);
 
+  // Modrinth への一括バージョン反映は、連携済みプロジェクトかつ閲覧者本人が API キーを設定している場合のみ提供する
+  const viewerSettings = await db.select({ modrinthApiKey: userSettings.modrinthApiKey }).from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
+  const modrinthSyncAvailable = !!project.modrinthId && !!viewerSettings?.modrinthApiKey;
+
   const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
   const [availableTags, availablePlatforms] = await Promise.all([
     getAvailableTags(),
@@ -124,7 +128,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         isOwner={isOwner}
         basicInfoForm={<ProjectEditForm project={project} availableTags={availableTags} />}
         descriptionForm={<ProjectDescriptionForm project={project} />}
-        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} githubRepo={project.githubRepo} />}
+        versionsManager={<ProjectVersionsManager projectSlug={project.slug} versions={projectVersions} openIdeas={openIdeas} availablePlatforms={availablePlatforms} githubRepo={project.githubRepo} modrinthSyncAvailable={modrinthSyncAvailable} />}
         mediaManager={<ProjectMediaManager projectId={project.id} projectSlug={project.slug} media={media} />}
         membersManager={
           <ProjectMembersManager 
