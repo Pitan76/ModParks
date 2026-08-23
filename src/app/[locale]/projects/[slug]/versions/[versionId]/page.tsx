@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { getVersionById } from "@/lib/actions/versionQuery";
 import { getVersionDependencies } from "@/lib/queries/dependency";
+import { mergeDependencyEntries } from "@/lib/dependencies/merge";
 import VersionDependencies from "@/components/project/VersionDependencies";
 import { getProjectMembers } from "@/lib/actions/member";
 import { auth } from "@/lib/auth";
@@ -93,7 +94,7 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
   if (!project || !version) notFound();
 
   // このバージョンに効く依存（バージョン限定 + プロジェクト全体）
-  const dependencies = await getVersionDependencies(project.id, version.id);
+  const dependencies = mergeDependencyEntries(await getVersionDependencies(project.id, version.id));
 
   let canEdit = false;
   if (session?.user) {

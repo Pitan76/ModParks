@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { favorites, projectSubscriptions, projectMembers, userSettings } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { getProjectDependencies, getProjectDependents } from "@/lib/queries/dependency";
+import { mergeDependencyEntries, mergeDependentEntries } from "@/lib/dependencies/merge";
 import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import type { Database } from "@/lib/db";
@@ -43,8 +44,8 @@ export async function loadProjectDetailPageData(db: Database, project: ProjectDe
   return {
     favoritesCount: favoritesData?.count || 0,
     isFavorited,
-    dependencies,
-    dependents,
+    dependencies: mergeDependencyEntries(dependencies),
+    dependents: mergeDependentEntries(dependents),
     isSubscribed: !!userSubscription,
     media,
     featuredMedia: media.filter((m) => m.featured),
