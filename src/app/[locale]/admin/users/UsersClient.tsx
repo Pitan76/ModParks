@@ -139,7 +139,6 @@ export default function UsersClient({ users, tabIndex, activeCount, deletedCount
           <TableHead sx={tableHeadSx}>
             <TableRow>
               <TableCell>{tAdmin("user")}</TableCell>
-              <TableCell>{tAdmin("email")}</TableCell>
               <TableCell>{tAdmin("joined")}</TableCell>
               <TableCell>{tAdmin("role")}</TableCell>
               <TableCell>{tAdmin("actions")}</TableCell>
@@ -174,7 +173,6 @@ export default function UsersClient({ users, tabIndex, activeCount, deletedCount
                       </Box>
                     </Box>
                   </TableCell>
-                  <TableCell>{user.email || "N/A"}</TableCell>
                   <TableCell>{joinedDate.toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Select
@@ -228,7 +226,7 @@ export default function UsersClient({ users, tabIndex, activeCount, deletedCount
             })}
             {users.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3, color: "text.secondary" }}>
+                <TableCell colSpan={4} align="center" sx={{ py: 3, color: "text.secondary" }}>
                   {tAdmin("noUsersFound")}
                 </TableCell>
               </TableRow>

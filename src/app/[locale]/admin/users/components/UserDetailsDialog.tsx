@@ -58,7 +58,7 @@ export default function UserDetailsDialog({ open, onClose, user }: UserDetailsDi
               <TableCell variant="head" sx={{ fontWeight: "bold" }}>
                 {tAdmin("detailsEmail")}
               </TableCell>
-              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.email || "-"}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell variant="head" sx={{ fontWeight: "bold" }}>
