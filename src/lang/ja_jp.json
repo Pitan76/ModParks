@@ -2343,7 +2343,8 @@
     "allInCollection": "すべてリストに保存済みです",
     "history": "ダウンロード履歴",
     "historyEmpty": "ダウンロード履歴はありません",
-    "clearHistory": "履歴を消去"
+    "clearHistory": "履歴を消去",
+    "disableFeature": "カート機能を無効にする"
   },
   "OAuth": {
     "consent": {

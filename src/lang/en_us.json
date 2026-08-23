@@ -2342,7 +2342,8 @@
     "allInCollection": "All items are already in that list",
     "history": "Download history",
     "historyEmpty": "No download history",
-    "clearHistory": "Clear history"
+    "clearHistory": "Clear history",
+    "disableFeature": "Disable cart feature"
   },
   "OAuth": {
     "consent": {
