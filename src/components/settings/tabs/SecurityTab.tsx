@@ -14,6 +14,7 @@ import Divider from "@mui/material/Divider";
 import DialogContentText from "@mui/material/DialogContentText";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 import PasskeyManager from "@/components/settings/passkey/PasskeyManager";
+import TrustedDeviceManager from "@/components/settings/security/TrustedDeviceManager";
 import type { PasskeyInfo } from "@/lib/actions/passkey";
 
 interface SecurityTabProps {
@@ -110,6 +111,13 @@ export default function SecurityTab({ is2FAEnabled, setIs2FAEnabled, passkeys }:
           </Box>
         )}
       </Box>
+
+      {is2FAEnabled && (
+        <>
+          <Divider sx={{ my: 4 }} />
+          <TrustedDeviceManager />
+        </>
+      )}
 
       <Divider sx={{ my: 4 }} />
 

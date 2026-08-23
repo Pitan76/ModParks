@@ -887,7 +887,8 @@
       },
       "twoFactorDesc": "認証アプリで生成された6桁のコードを入力してください。",
       "verify": "認証する",
-      "twoFactorRequired": "2段階認証"
+      "twoFactorRequired": "2段階認証",
+      "rememberBrowser": "このブラウザを30日間記憶して、次回から2段階認証を省略する"
     },
     "register": {
       "title": "新規登録",
@@ -2013,7 +2014,16 @@
       "passkeyDeleted": "パスキーを削除しました",
       "passkeyNameTitle": "パスキーの名前を入力",
       "passkeyName": "パスキー名",
-      "passkeyNamePlaceholder": "例: 自分のノートPC"
+      "passkeyNamePlaceholder": "例: 自分のノートPC",
+      "trustedDevices": "記憶したブラウザ",
+      "trustedDevicesDesc": "2段階認証を省略できるブラウザです。心当たりのないものは取り消してください。",
+      "noTrustedDevices": "記憶したブラウザはありません。",
+      "trustedDeviceCurrent": "このブラウザ",
+      "trustedDeviceUnknown": "不明なブラウザ",
+      "trustedDeviceExpires": "有効期限: {date}",
+      "trustedDeviceRevoked": "記憶を取り消しました。",
+      "trustedDevicesLoadError": "記憶したブラウザを取得できませんでした。",
+      "revokeAllTrustedDevices": "すべての記憶を取り消す"
     },
     "account": {
       "title": "アカウント",

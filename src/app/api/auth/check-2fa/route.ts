@@ -3,6 +3,7 @@ import { getDatabase } from "@/lib/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { isTrustedBrowserRequest } from "@/lib/auth/trustedDevice";
 
 const RATE_LIMIT = 20;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
@@ -27,9 +28,12 @@ export async function POST(req: NextRequest) {
     }
 
     const db = await getDatabase();
-    const user = await db.select({ twoFactorEnabled: users.twoFactorEnabled }).from(users).where(eq(users.email, email)).get();
+    const user = await db.select({ id: users.id, twoFactorEnabled: users.twoFactorEnabled }).from(users).where(eq(users.email, email)).get();
+    if (!user?.twoFactorEnabled) return NextResponse.json({ twoFactorEnabled: false });
 
-    return NextResponse.json({ twoFactorEnabled: !!user?.twoFactorEnabled });
+    // 記憶済みのブラウザには入力欄自体を出さない（実際の省略判定はログイン側でも行う）
+    const trusted = await isTrustedBrowserRequest(db, user.id);
+    return NextResponse.json({ twoFactorEnabled: !trusted });
   } catch (error) {
     console.error("check-2fa error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

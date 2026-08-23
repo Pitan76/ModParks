@@ -886,7 +886,8 @@
       },
       "twoFactorDesc": "Enter the 6-digit code from your authenticator app.",
       "verify": "Verify",
-      "twoFactorRequired": "Two-Factor Authentication"
+      "twoFactorRequired": "Two-Factor Authentication",
+      "rememberBrowser": "Remember this browser for 30 days and skip two-factor authentication"
     },
     "register": {
       "title": "Register",
@@ -2012,7 +2013,16 @@
       "passkeyDeleted": "Passkey deleted",
       "passkeyNameTitle": "Name this passkey",
       "passkeyName": "Passkey name",
-      "passkeyNamePlaceholder": "e.g. My laptop"
+      "passkeyNamePlaceholder": "e.g. My laptop",
+      "trustedDevices": "Remembered browsers",
+      "trustedDevicesDesc": "Browsers that can skip two-factor authentication. Revoke any you do not recognize.",
+      "noTrustedDevices": "No remembered browsers.",
+      "trustedDeviceCurrent": "This browser",
+      "trustedDeviceUnknown": "Unknown browser",
+      "trustedDeviceExpires": "Expires: {date}",
+      "trustedDeviceRevoked": "Revoked.",
+      "trustedDevicesLoadError": "Could not load remembered browsers.",
+      "revokeAllTrustedDevices": "Revoke all"
     },
     "account": {
       "title": "Account",

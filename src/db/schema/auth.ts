@@ -227,7 +227,34 @@ export const passwordResetTokens = sqliteTable("password_reset_tokens", {
   userIdx: index("password_reset_tokens_user_idx").on(table.userId),
 }));
 
+/**
+ * 2FA を省略してよいブラウザ（信頼済みデバイス）。
+ *
+ * Cookie に生トークンを置き、DB にはハッシュだけを持つ。DB が漏れても
+ * そのまま 2FA を迂回できないようにするため。
+ */
+export const trustedDevices = sqliteTable("trusted_devices", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  /** 一覧で本人が見分けるための手掛かり。User-Agent をそのまま保存する */
+  userAgent: text("user_agent"),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  lastUsedAt: integer("last_used_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (table) => ({
+  userIdx: index("trusted_devices_user_idx").on(table.userId),
+  tokenIdx: index("trusted_devices_token_idx").on(table.tokenHash),
+}));
+
 export type User         = typeof users.$inferSelect;
 export type UserProfile  = typeof userProfiles.$inferSelect;
 export type UserSettings = typeof userSettings.$inferSelect;
 export type ApiKey       = typeof apiKeys.$inferSelect;
+export type TrustedDevice = typeof trustedDevices.$inferSelect;

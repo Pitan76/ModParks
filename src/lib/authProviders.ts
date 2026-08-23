@@ -132,7 +132,9 @@ export const authProviders = [
           return null;
         }
 
-        if (user.twoFactorEnabled) {
+        const { isTrustedBrowserRequest } = await import("@/lib/auth/trustedDevice");
+        // 記憶済みのブラウザなら 2FA を省く
+        if (user.twoFactorEnabled && !(await isTrustedBrowserRequest(db, user.id))) {
           if (!credentials.token || credentials.token === "undefined") {
             const { CredentialsSignin } = await import("next-auth");
             class TwoFactorRequiredError extends CredentialsSignin {

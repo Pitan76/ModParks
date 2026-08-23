@@ -233,6 +233,10 @@ export const disableTotp = async (passwordOrToken: string) => {
     twoFactorSecret: null,
   }).where(eq(users.id, userId));
 
+  // 2FA を切った以上、記憶済みブラウザの登録も残す意味がない
+  const { trustedDevices } = await import("@/db/schema");
+  await db.delete(trustedDevices).where(eq(trustedDevices.userId, userId)).run();
+
   revalidatePath("/settings");
   return { success: true };
 };

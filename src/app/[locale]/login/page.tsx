@@ -8,6 +8,8 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Tooltip from "@mui/material/Tooltip";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -38,6 +40,7 @@ export default function LoginPage() {
 
   const [token, setToken] = useState("");
   const [showTwoFactor, setShowTwoFactor] = useState(false);
+  const [rememberBrowser, setRememberBrowser] = useState(false);
 
   const registered = searchParams?.get("registered") === "true";
 
@@ -96,6 +99,11 @@ export default function LoginPage() {
       setLoading(false);
     } else {
       rememberLoginMethod("credentials");
+      // 2FA を通した直後にだけ登録できる。ログイン済みでないと本人確認ができないため
+      if (showTwoFactor && rememberBrowser) {
+        const { rememberCurrentBrowser } = await import("@/lib/actions/trustedDevices");
+        await rememberCurrentBrowser();
+      }
       router.push(callbackUrl);
       router.refresh();
     }
@@ -249,6 +257,17 @@ export default function LoginPage() {
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 disabled={loading}
+              />
+              <FormControlLabel
+                sx={{ mt: 1 }}
+                control={
+                  <Checkbox
+                    checked={rememberBrowser}
+                    onChange={(e) => setRememberBrowser(e.target.checked)}
+                    disabled={loading}
+                  />
+                }
+                label={tAuth("login.rememberBrowser")}
               />
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 3 }}>
