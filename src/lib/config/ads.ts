@@ -32,6 +32,8 @@ export function getAdsenseClient(): string {
 const AD_SLOT_IDS = {
   "home-mid": "",
   "projects-top": "3376322277",
+  // ユニット未発行。枠だけ用意しておき、発行時にIDを入れる
+  "ideas-top": "",
   "project-sidebar": "9291538212",
 } as const;
 

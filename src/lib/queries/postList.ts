@@ -1,4 +1,4 @@
-import { eq, and, or, sql, desc, inArray, like, type SQL } from "drizzle-orm";
+import { eq, and, or, sql, asc, desc, inArray, like, type SQL } from "drizzle-orm";
 import { posts, projects, ideas, users, userProfiles, favorites, comments, projectTags } from "@/db/schema";
 import type { IdeaPostView, ProjectPostView } from "@/types/post";
 import type { ContentType } from "@/lib/data/projectTypes";
@@ -31,6 +31,12 @@ function postViewSelection(viewerId: string | null) {
   };
 }
 
+/** アイデア一覧の並び順 */
+export type IdeaListSort = "newest" | "oldest" | "popular" | "comments";
+
+/** アイデアの進捗状態。ideas.status と同じ値 */
+export type IdeaStatus = "open" | "in_progress" | "fulfilled";
+
 export interface ListIdeaPostsParams {
   /** 閲覧者。自分の非公開投稿を含めるかの判定と isFavorited に使う */
   viewerId?: string | null;
@@ -40,8 +46,25 @@ export interface ListIdeaPostsParams {
   postIds?: string[];
   /** 非公開・下書きも含める。本人・管理者向け */
   includeHidden?: boolean;
+  /** タイトルの部分一致で絞る */
+  q?: string;
+  /** 進捗状態で絞る。空・未指定なら全件 */
+  statuses?: IdeaStatus[];
+  sort?: IdeaListSort;
   limit?: number;
   offset?: number;
+}
+
+/** 集計値での並び替えに使う相関副問い合わせ。postViewSelection と同じ数え方に揃える */
+const favoriteCountSql = sql<number>`(SELECT count(*) FROM ${favorites} WHERE ${favorites.postId} = ${posts.id})`;
+const commentCountSql = sql<number>`(SELECT count(*) FROM ${comments} WHERE ${comments.postId} = ${posts.id})`;
+
+/** sort 値から ORDER BY を決める */
+function ideaOrderBy(sort: IdeaListSort) {
+  if (sort === "oldest") return asc(posts.createdAt);
+  if (sort === "popular") return desc(favoriteCountSql);
+  if (sort === "comments") return desc(commentCountSql);
+  return desc(posts.createdAt);
 }
 
 /**
@@ -52,9 +75,9 @@ export interface ListIdeaPostsParams {
  */
 /** listIdeaPosts / countIdeaPosts で共通の絞り込み条件を組み立てる */
 function ideaConditions(
-  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden">,
+  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden" | "q" | "statuses">,
 ): SQL[] | null {
-  const { viewerId = null, authorId, postIds, includeHidden = false } = params;
+  const { viewerId = null, authorId, postIds, includeHidden = false, q, statuses } = params;
 
   const conditions: SQL[] = [eq(posts.kind, "idea")];
 
@@ -67,6 +90,9 @@ function ideaConditions(
     );
   }
   if (authorId) conditions.push(eq(posts.authorId, authorId));
+  // 表記ゆらぎ（ひらがな/カタカナ・全角/半角）を吸収するためバリアントへ展開する
+  if (q) conditions.push(or(...keywordVariants(q).map((v) => like(posts.title, `%${v}%`)))!);
+  if (statuses && statuses.length > 0) conditions.push(inArray(ideas.status, statuses));
   if (postIds) {
     if (postIds.length === 0) return null;
     conditions.push(inArray(posts.id, postIds));
@@ -79,7 +105,7 @@ export async function listIdeaPosts(
   db: Db,
   params: ListIdeaPostsParams = {},
 ): Promise<IdeaPostView[]> {
-  const { viewerId = null, limit = 50, offset = 0 } = params;
+  const { viewerId = null, sort = "newest", limit = 50, offset = 0 } = params;
 
   const conditions = ideaConditions(params);
   if (!conditions) return [];
@@ -95,7 +121,7 @@ export async function listIdeaPosts(
     .innerJoin(users, eq(posts.authorId, users.id))
     .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
     .where(and(...conditions))
-    .orderBy(desc(posts.createdAt))
+    .orderBy(ideaOrderBy(sort))
     .limit(limit)
     .offset(offset)
     .all();
@@ -119,7 +145,7 @@ export async function listIdeaPosts(
 /** listIdeaPosts と同じ絞り込み条件で、該当件数のみを取得する */
 export async function countIdeaPosts(
   db: Db,
-  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden"> = {},
+  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden" | "q" | "statuses"> = {},
 ): Promise<number> {
   const conditions = ideaConditions(params);
   if (!conditions) return 0;

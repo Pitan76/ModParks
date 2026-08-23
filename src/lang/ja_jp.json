@@ -838,7 +838,18 @@
       "likeFailed": "お気に入りの操作に失敗しました",
       "commentFailed": "コメントの投稿に失敗しました"
     },
-    "createProject": "プロジェクトを作成"
+    "createProject": "プロジェクトを作成",
+    "searchPlaceholder": "アイデアを検索...",
+    "results": "{count}件のアイデア",
+    "filters": {
+      "status": "ステータス"
+    },
+    "sort": {
+      "newest": "新着順",
+      "oldest": "古い順",
+      "popular": "お気に入りが多い順",
+      "comments": "コメントが多い順"
+    }
   },
   "Auth": {
     "login": {

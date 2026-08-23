@@ -837,7 +837,18 @@
       "deleteTitle": "Delete Idea?",
       "deleteConfirmDesc": "This action cannot be undone. All related comments and likes will also be deleted."
     },
-    "createProject": "Create Project"
+    "createProject": "Create Project",
+    "searchPlaceholder": "Search ideas...",
+    "results": "{count} ideas found",
+    "filters": {
+      "status": "Status"
+    },
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "popular": "Most Favorited",
+      "comments": "Most Commented"
+    }
   },
   "Auth": {
     "login": {
