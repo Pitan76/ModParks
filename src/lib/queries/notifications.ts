@@ -4,8 +4,8 @@ import { eq, and, or, desc, count, inArray } from "drizzle-orm";
 import type { Notification } from "@/db/schema";
 import type { Database } from "@/lib/db";
 
-/** ベルのドロップダウン等で使う最近の通知一覧 */
-export async function getNotifications(userId: string, limit = 20): Promise<Notification[]> {
+/** ベルのドロップダウンや通知ページで使う通知一覧 */
+export async function getNotifications(userId: string, limit = 20, offset = 0): Promise<Notification[]> {
   const db = await getDatabase();
   const rows = await db
     .select()
@@ -13,9 +13,21 @@ export async function getNotifications(userId: string, limit = 20): Promise<Noti
     .where(eq(notifications.userId, userId))
     .orderBy(desc(notifications.createdAt))
     .limit(limit)
+    .offset(offset)
     .all();
 
   return withActorAvatars(db, rows);
+}
+
+/** 通知の総件数（ページネーションのページ数算出に使用） */
+export async function countNotifications(userId: string): Promise<number> {
+  const db = await getDatabase();
+  const row = await db
+    .select({ value: count() })
+    .from(notifications)
+    .where(eq(notifications.userId, userId))
+    .get();
+  return row?.value ?? 0;
 }
 
 /**
