@@ -14,6 +14,7 @@ const TYPE_COLOR: Record<string, "primary" | "secondary" | "success" | "warning"
   datapack:     "warning",
   shader:       "info",
   modpack:      "error",
+  skill:        "info",
   other:        "default",
 };
 

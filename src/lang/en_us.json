@@ -227,6 +227,7 @@
       "datapack": "Data Pack",
       "shader": "Shader",
       "modpack": "Modpack",
+      "skill": "Skill (mod dev)",
       "other": "Other"
     },
     "fields": {
@@ -1726,6 +1727,7 @@
       "datapack": "Data Pack",
       "shader": "Shader",
       "modpack": "Modpack",
+      "skill": "Skill (mod dev)",
       "other": "Other"
     },
     "sort": {

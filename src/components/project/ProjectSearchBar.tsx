@@ -197,15 +197,7 @@ const ProjectSearchBar = ({
               const newTypes = typeof val === "string" ? val.split(",") : (val as string[]);
               setTypes(newTypes);
             }}
-            options={[
-              { value: "mod", label: t("filters.mod") },
-              { value: "plugin", label: t("filters.plugin") },
-              { value: "resourcepack", label: t("filters.resourcepack") },
-              { value: "datapack", label: t("filters.datapack") },
-              { value: "shader", label: t("filters.shader") },
-              { value: "modpack", label: t("filters.modpack") },
-              { value: "other", label: t("filters.other") },
-            ]}
+            options={CONTENT_TYPES.map((type) => ({ value: type, label: t(`filters.${type}`) }))}
             renderSelected={(selected) => {
               if (selected.length === 0 || selected.length === CONTENT_TYPES.length) return t("filters.all");
               if (selected.length >= 4) return selected.slice(0, 3).map((v) => t(`filters.${v}`)).join(", ") + "...";

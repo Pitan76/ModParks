@@ -18,6 +18,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
+import { CONTENT_TYPES } from "@/lib/data/projectTypes";
 import { useLinksEditor } from "@/lib/hooks/useLinksEditor";
 
 type OptionItem = {
@@ -111,15 +112,7 @@ const ProjectFormFields = ({ error, project, availableTags = [], defaultLicense,
           label={t("fields.type")}
           defaultValue={project?.type || "mod"}
           errorMessages={error?.type}
-          options={[
-            { value: "mod", label: t("type.mod") },
-            { value: "plugin", label: t("type.plugin") },
-            { value: "resourcepack", label: t("type.resourcepack") },
-            { value: "datapack", label: t("type.datapack") },
-            { value: "shader", label: t("type.shader") },
-            { value: "modpack", label: t("type.modpack") },
-            { value: "other", label: t("type.other") },
-          ]}
+          options={CONTENT_TYPES.map((type) => ({ value: type, label: t(`type.${type}`) }))}
           formControlProps={{ required: true }}
           onChange={onChange}
         />
