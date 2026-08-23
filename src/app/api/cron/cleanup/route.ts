@@ -1,0 +1,25 @@
+import { NextResponse } from "next/server";
+import { checkCronAuth } from "@/lib/cron/auth";
+import { cleanupOldNotifications } from "@/lib/services/notificationCleanup";
+import { describeError } from "@/lib/errors/describe";
+
+export const dynamic = "force-dynamic";
+
+/**
+ * 日次の掃除バッチ。今のところ古い通知の削除だけを行う。
+ *
+ * 1回の実行量には上限があり、消しきれない分は翌日に持ち越す。
+ */
+export async function GET(request: Request) {
+  const unauthorized = checkCronAuth(request);
+  if (unauthorized) return unauthorized;
+
+  try {
+    const notifications = await cleanupOldNotifications();
+    return NextResponse.json({ success: true, notifications });
+  } catch (error) {
+    const reason = describeError(error);
+    console.error("[CRON] Cleanup error:", reason);
+    return NextResponse.json({ success: false, error: reason }, { status: 500 });
+  }
+}

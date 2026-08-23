@@ -12,6 +12,7 @@ const CRON_ROUTES = {
   // ddos_slices は 30 分で削除されるため、それより短い間隔で取り込む必要がある
   "*/10 * * * *": "/api/cron/usage",
   "30 3 * * *": "/api/cron/trust",
+  "45 3 * * *": "/api/cron/cleanup",
 };
 
 /** Cron から Next.js 側のルートを内部的に叩く */
