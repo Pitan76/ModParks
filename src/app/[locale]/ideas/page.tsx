@@ -20,7 +20,11 @@ const IDEAS_PER_PAGE = 20;
 
 interface IdeasPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; status?: string; sort?: string; author?: string; page?: string; limit?: string }>;
+  searchParams: Promise<{
+    q?: string; status?: string; sort?: string; author?: string;
+    loaders?: string; mcVersions?: string; tags?: string;
+    page?: string; limit?: string;
+  }>;
 }
 
 /**
@@ -40,7 +44,7 @@ export async function generateMetadata({ params }: IdeasPageProps): Promise<Meta
 
 export default async function IdeasPage({ params, searchParams }: IdeasPageProps) {
   const { locale } = await params;
-  const { q, status, sort, author, page: pageStr, limit: limitStr } = await searchParams;
+  const { q, status, sort, author, loaders, mcVersions, tags, page: pageStr, limit: limitStr } = await searchParams;
   setRequestLocale(locale);
 
   const tIdea = await getTranslations("Idea");
@@ -57,12 +61,24 @@ export default async function IdeasPage({ params, searchParams }: IdeasPageProps
   const page = Math.max(1, parseInt(pageStr ?? "") || 1);
   const limit = Math.min(Math.max(parseInt(limitStr ?? "") || IDEAS_PER_PAGE, 10), 80);
 
-  const filters = { viewerId, authorId, q, statuses };
+  const loadersArr = loaders ? loaders.split(",") : [];
+  const mcVersionsArr = mcVersions ? mcVersions.split(",") : [];
+  const tagsArr = tags ? tags.split(",") : [];
+
+  const filters = { viewerId, authorId, q, statuses, loaders: loadersArr, mcVersions: mcVersionsArr, tags: tagsArr };
   const [ideaRows, totalCount] = await Promise.all([
     listIdeaPosts(db, { ...filters, sort: ideaSort, limit, offset: (page - 1) * limit }),
     countIdeaPosts(db, filters),
   ]);
   const ideas = ideaRows.map(toIdeaCardData);
+
+  const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
+  const [availableTags, availablePlatforms] = await Promise.all([
+    getAvailableTags(),
+    getAvailablePlatforms(),
+  ]);
+
+  const hasFilters = !!q || statuses.length > 0 || loadersArr.length > 0 || mcVersionsArr.length > 0 || tagsArr.length > 0;
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 }, px: { xs: 2, sm: 3 } }}>
@@ -92,7 +108,16 @@ export default async function IdeasPage({ params, searchParams }: IdeasPageProps
         <AdSlot slot="ideas-top" format="horizontal" maxHeight={100} />
       </Box>
 
-      <IdeaSearchBar initialQ={q} initialStatuses={statuses} initialSort={ideaSort} />
+      <IdeaSearchBar
+        initialQ={q}
+        initialStatuses={statuses}
+        initialSort={ideaSort}
+        initialLoaders={loadersArr}
+        initialMcVersions={mcVersionsArr}
+        initialTags={tagsArr}
+        availableTags={availableTags}
+        availablePlatforms={availablePlatforms}
+      />
 
       {ideas.length > 0 && (
         <PaginationControls totalCount={totalCount} currentPage={page} currentLimit={limit} sx={{ mt: 2, mb: 1 }} />
@@ -108,7 +133,7 @@ export default async function IdeasPage({ params, searchParams }: IdeasPageProps
         emptyContent={
           <Box sx={{ textAlign: "center", py: 10 }}>
             <Typography variant="h6" color="text.secondary" gutterBottom>
-              {q || statuses.length > 0 ? tSearch("noResults") : tIdea("noIdeas")}
+              {hasFilters ? tSearch("noResults") : tIdea("noIdeas")}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {tIdea("postFirstIdea")}

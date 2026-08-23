@@ -1,5 +1,6 @@
 import { eq, and, or, sql, asc, desc, inArray, like, type SQL } from "drizzle-orm";
-import { posts, projects, ideas, users, userProfiles, favorites, comments, projectTags } from "@/db/schema";
+import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
+import { posts, projects, ideas, ideaTags, users, userProfiles, favorites, comments, projectTags } from "@/db/schema";
 import type { IdeaPostView, ProjectPostView } from "@/types/post";
 import type { ContentType } from "@/lib/data/projectTypes";
 import { keywordVariants } from "@/lib/search/kana";
@@ -50,9 +51,29 @@ export interface ListIdeaPostsParams {
   q?: string;
   /** 進捗状態で絞る。空・未指定なら全件 */
   statuses?: IdeaStatus[];
+  /** 対応プラットフォーム（ローダー）で絞る。1つでも合えば該当 */
+  loaders?: string[];
+  /** 対応 MC バージョンで絞る。1つでも合えば該当 */
+  mcVersions?: string[];
+  /** タグで絞る。1つでも合えば該当 */
+  tags?: string[];
   sort?: IdeaListSort;
   limit?: number;
   offset?: number;
+}
+
+/**
+ * JSON 配列の列に、指定した値のどれかが入っているかの条件。
+ *
+ * ideas.mc_versions / ideas.loaders は JSON 文字列で持っているため、
+ * 列同士の比較ではなく json_each で開いて突き合わせる。
+ * json_valid を挟むのは、1行でも壊れた値があると json_each が
+ * "malformed JSON" でクエリ全体を落とすため（その行だけ外れるのが正しい）。
+ */
+function jsonArrayHasAny(column: AnySQLiteColumn, values: string[]): SQL {
+  return sql`(${column} IS NOT NULL AND json_valid(${column}) AND EXISTS (
+    SELECT 1 FROM json_each(${column}) WHERE value IN ${values}
+  ))`;
 }
 
 /** 集計値での並び替えに使う相関副問い合わせ。postViewSelection と同じ数え方に揃える */
@@ -75,9 +96,9 @@ function ideaOrderBy(sort: IdeaListSort) {
  */
 /** listIdeaPosts / countIdeaPosts で共通の絞り込み条件を組み立てる */
 function ideaConditions(
-  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden" | "q" | "statuses">,
+  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden" | "q" | "statuses" | "loaders" | "mcVersions" | "tags">,
 ): SQL[] | null {
-  const { viewerId = null, authorId, postIds, includeHidden = false, q, statuses } = params;
+  const { viewerId = null, authorId, postIds, includeHidden = false, q, statuses, loaders, mcVersions, tags } = params;
 
   const conditions: SQL[] = [eq(posts.kind, "idea")];
 
@@ -93,6 +114,11 @@ function ideaConditions(
   // 表記ゆらぎ（ひらがな/カタカナ・全角/半角）を吸収するためバリアントへ展開する
   if (q) conditions.push(or(...keywordVariants(q).map((v) => like(posts.title, `%${v}%`)))!);
   if (statuses && statuses.length > 0) conditions.push(inArray(ideas.status, statuses));
+  if (loaders && loaders.length > 0) conditions.push(jsonArrayHasAny(ideas.loaders, loaders));
+  if (mcVersions && mcVersions.length > 0) conditions.push(jsonArrayHasAny(ideas.mcVersions, mcVersions));
+  if (tags && tags.length > 0) {
+    conditions.push(sql`EXISTS (SELECT 1 FROM ${ideaTags} WHERE ${ideaTags.ideaId} = ${posts.id} AND ${ideaTags.tag} IN ${tags})`);
+  }
   if (postIds) {
     if (postIds.length === 0) return null;
     conditions.push(inArray(posts.id, postIds));
@@ -145,7 +171,7 @@ export async function listIdeaPosts(
 /** listIdeaPosts と同じ絞り込み条件で、該当件数のみを取得する */
 export async function countIdeaPosts(
   db: Db,
-  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden" | "q" | "statuses"> = {},
+  params: Pick<ListIdeaPostsParams, "viewerId" | "authorId" | "postIds" | "includeHidden" | "q" | "statuses" | "loaders" | "mcVersions" | "tags"> = {},
 ): Promise<number> {
   const conditions = ideaConditions(params);
   if (!conditions) return 0;
