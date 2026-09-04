@@ -17,6 +17,8 @@ export const localeToFileMap = {
   // "cn-zh": "cn_zh",
 } as const;
 
+// 言語を追加したら i18n/request.ts の MESSAGE_LOADERS にも入口を足すこと。
+// バンドラに解決させるため、あちらは静的なパスで書く必要がある。
 export type AppLocale = keyof typeof localeToFileMap;
 export const locales = Object.keys(localeToFileMap) as AppLocale[];
 
