@@ -13,6 +13,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/seo/schema";
 
 import { getProjects } from "@/lib/actions/projectQuery";
+import { toProjectCardData } from "@/lib/queries/projectCardData";
 
 type TopPageProps = {
   params: Promise<{ locale: string }>;
@@ -31,8 +32,9 @@ const TopPage = async ({ params }: TopPageProps) => {
     getProjects({ sort: "updated", limit: 6, locale }),
   ]);
 
-  const newProjects = newResult;
-  const updatedProjects = updatedResult;
+  // クエリは全列を返すため、カードが読む列だけに絞ってから渡す
+  const newProjects = newResult.map(toProjectCardData);
+  const updatedProjects = updatedResult.map(toProjectCardData);
 
   return (
     <Box>

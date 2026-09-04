@@ -1,9 +1,22 @@
-import openNextWorker from "./.open-next/worker.js";
 import { getDdosState } from "./worker/ddos-state.js";
 import { trackRequest } from "./worker/ddos-stats.js";
 import { handleDdosCron } from "./worker/ddos-cron.js";
 import { isBotRequest } from "./worker/bot-detect.js";
 import { getRuntimeMode, handleRestrictedMode } from "./worker/runtime-mode.js";
+import { isCacheableRequest, matchHtml, storeHtml } from "./worker/html-cache.js";
+
+/**
+ * OpenNext の本体は遅延読み込みにする。
+ *
+ * 静的な import だと Isolate の起動時に Next.js のバンドル全体が評価され、
+ * その CPU をキャッシュヒットの要求まで負担することになる。
+ */
+let openNextWorkerPromise = null;
+function loadOpenNextWorker() {
+  if (!openNextWorkerPromise) openNextWorkerPromise = import("./.open-next/worker.js").then((m) => m.default);
+
+  return openNextWorkerPromise;
+}
 
 // 式は wrangler.toml の [triggers] crons と一致させること
 const CRON_ROUTES = {
@@ -24,7 +37,8 @@ async function invokeCronRoute(path, env, ctx) {
 
   // Cron の1本が落ちても他の処理を続けたいので、ここで結果に畳み込む
   try {
-    const res = await openNextWorker.fetch(req, env, ctx);
+    const worker = await loadOpenNextWorker();
+    const res = await worker.fetch(req, env, ctx);
     if (res.ok) {
       console.log(`Cron ${path} processed successfully:`, await res.json());
       return;
@@ -91,7 +105,16 @@ export default {
       console.error("[DDOS-GUARD] Intercept error:", e);
     }
 
-    return openNextWorker.fetch(forwarded, env, ctx);
+    const cacheable = isCacheableRequest(req, url);
+    if (cacheable) {
+      const hit = await matchHtml(req, url);
+      if (hit) return hit;
+    }
+
+    const worker = await loadOpenNextWorker();
+    const res = await worker.fetch(forwarded, env, ctx);
+
+    return cacheable ? storeHtml(ctx, req, url, res) : res;
   },
 
   /** Cloudflare Cron Triggers 用のハンドラ */

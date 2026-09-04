@@ -9,6 +9,7 @@ import ProjectCardList from "@/components/project/ProjectCardList";
 import LinkButton from "@/components/ui/LinkButton";
 import ProjectSearchBar from "@/components/project/ProjectSearchBar";
 import { getProjectsWithCount } from "@/lib/actions/projectQuery";
+import { toProjectCardData } from "@/lib/queries/projectCardData";
 import { auth } from "@/lib/auth";
 import PaginationControls from "@/components/ui/PaginationControls";
 import AdSlot from "@/components/ads/AdSlot";
@@ -72,7 +73,7 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
   const offset = (page - 1) * limit;
 
   // フィルタリング
-  const { data: filtered, totalCount } = await getProjectsWithCount({
+  const { data: rows, totalCount } = await getProjectsWithCount({
     locale,
     q,
     types: typesArr,
@@ -91,6 +92,9 @@ export default async function ProjectsPage({ params, searchParams }: ProjectsPag
     limit,
     offset,
   });
+
+  // クエリは全列を返すため、カードが読む列だけに絞ってから渡す
+  const filtered = rows.map(toProjectCardData);
 
   const { getAvailableTags, getAvailablePlatforms } = await import("@/lib/queries/masterData");
   const [availableTags, availablePlatforms] = await Promise.all([

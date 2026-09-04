@@ -2,6 +2,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles, userSettings, userFollows, developerSubscriptions, profilePins, posts, projects, ideas, favorites, comments } from "@/db/schema";
 import { eq, and, sql, inArray, desc, getTableColumns } from "drizzle-orm";
 import { getProjectsWithCount, getUserProjectStats } from "@/lib/actions/projectQuery";
+import { toProjectCardData } from "@/lib/queries/projectCardData";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
 import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 import { getUserCollections } from "@/lib/actions/collection";
@@ -269,7 +270,10 @@ export async function getProfileContent(user: ProfileUser, viewerId: string | un
     canSeeIdeas ? countAuthorIdeas(user.id, isOwner) : Promise.resolve(0),
   ]);
 
-  const visibleProjects = allProjects.filter((p) => (isOwner ? true : p.visibility === "public"));
+  // 絞り込みに visibility が要るため、判定を終えてからカード用の列だけに落とす
+  const visibleProjects = allProjects
+    .filter((p) => (isOwner ? true : p.visibility === "public"))
+    .map(toProjectCardData);
 
   return {
     ...followState,
