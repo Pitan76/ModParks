@@ -3,7 +3,7 @@ import { trackRequest } from "./worker/ddos-stats.js";
 import { handleDdosCron } from "./worker/ddos-cron.js";
 import { isBotRequest } from "./worker/bot-detect.js";
 import { getRuntimeMode, handleRestrictedMode } from "./worker/runtime-mode.js";
-import { isCacheableRequest, matchHtml, storeHtml } from "./worker/html-cache.js";
+import { isCacheableRequest, matchHtml, storeHtml, warmHtmlCache } from "./worker/html-cache.js";
 
 /**
  * OpenNext の本体は遅延読み込みにする。
@@ -46,6 +46,24 @@ async function invokeCronRoute(path, env, ctx) {
     console.error(`Cron ${path} failed with status:`, res.status, await res.text());
   } catch (e) {
     console.error(`Cron ${path} fetch error:`, e);
+  }
+}
+
+/** 温めを行う Cron。CRON_ROUTES と同じ枠に相乗りする */
+const WARM_CRON = "*/10 * * * *";
+
+/**
+ * 公開ページのキャッシュを Cron の枠で埋め直す。
+ *
+ * 失敗しても閲覧者には影響しないため、ここで畳み込んで他の Cron を止めない。
+ */
+async function warmPublicPages(env, ctx) {
+  try {
+    const worker = await loadOpenNextWorker();
+    const warmed = await warmHtmlCache(env.NEXT_PUBLIC_APP_URL, (req) => worker.fetch(req, env, ctx));
+    console.log(`[HTML-CACHE] Warmed ${warmed} pages`);
+  } catch (e) {
+    console.error("[HTML-CACHE] Warm failed:", e);
   }
 }
 
@@ -122,9 +140,11 @@ export default {
     await handleDdosCron(env);
 
     const path = CRON_ROUTES[controller.cron];
-    if (!path) return;
+    if (path) {
+      console.log(`Cron triggered (${controller.cron}): invoking ${path}`);
+      await invokeCronRoute(path, env, ctx);
+    }
 
-    console.log(`Cron triggered (${controller.cron}): invoking ${path}`);
-    await invokeCronRoute(path, env, ctx);
+    if (controller.cron === WARM_CRON) await warmPublicPages(env, ctx);
   },
 };

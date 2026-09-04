@@ -7,8 +7,13 @@ import { LOCALE_COOKIE, LOCALES, readCookie, readLocaleCookie } from "./locale.j
  * 描画そのものを速くしても桁が合わないため、ヒット時は SSR を丸ごと飛ばす。
  */
 
-/** キャッシュの保持時間(秒)。新着の反映遅れと CPU 削減の折り合い */
-const HTML_TTL_SEC = 60;
+/**
+ * キャッシュの保持時間(秒)。
+ *
+ * Cron の温め間隔(10分)より長くしないと、次の温めが来る前に期限切れになり
+ * 閲覧者のリクエストで SSR が走ってしまう。内容の鮮度は温めの間隔で決まる。
+ */
+const HTML_TTL_SEC = 1800;
 
 /** Auth.js のセッション Cookie 名の共通部分。接頭辞は環境で変わる */
 const SESSION_COOKIE_HINT = "session-token";
@@ -21,6 +26,9 @@ const SESSION_COOKIE_HINT = "session-token";
  */
 const THEME_COOKIE = "theme_mode";
 const FAVORITES_COOKIE = "favorites";
+
+/** SSR 結果が分かれるテーマ。キャッシュはこの数だけ枝分かれする */
+const THEMES = ["dark", "light"];
 
 /** ログイン状態でヘッダーの中身が変わるため、匿名の要求だけを共有する */
 const CACHEABLE_PATHS = [
@@ -114,23 +122,52 @@ function isStorable(res) {
 }
 
 /**
- * 応答を保存し、閲覧者へ返す複製を作る。
+ * 共有キャッシュへ保存する。
  *
  * Set-Cookie を持つ応答は Cache API が保存を拒むため、保存用からは取り除く。
  * 落とせるのは言語 Cookie だけであり、それは matchHtml 側で付け直している。
  */
-export async function storeHtml(ctx, req, url, res) {
-  if (!isStorable(res)) return res;
-
+function putHtml(req, url, res) {
   const locale = readLocaleCookie(req, url);
   const headers = new Headers(res.headers);
   headers.delete("Set-Cookie");
   headers.set("Cache-Control", `public, max-age=${HTML_TTL_SEC}`);
 
+  return caches.default.put(cacheKey(req, url, locale), new Response(res.body, { status: res.status, headers }));
+}
+
+/** 応答を保存しつつ、閲覧者へ返す複製を作る */
+export function storeHtml(ctx, req, url, res) {
+  if (!isStorable(res)) return res;
+
   const [toStore, toReturn] = res.body.tee();
-  ctx.waitUntil(
-    caches.default.put(cacheKey(req, url, locale), new Response(toStore, { status: res.status, headers })),
-  );
+  ctx.waitUntil(putHtml(req, url, new Response(toStore, { status: res.status, headers: res.headers })));
 
   return new Response(toReturn, { status: res.status, headers: res.headers });
+}
+
+/** Cron で先に描いておく入口ページ。ロケール接頭辞ごとに実体が違う */
+const WARM_PATHS = ["/", "/projects", "/ideas", "/en", "/en/projects", "/en/ideas"];
+
+/**
+ * Cron から公開ページを描画してキャッシュを埋める。
+ *
+ * 閲覧者のリクエストで SSR を走らせると 1 リクエストの CPU 上限に当たるため、
+ * 上限の緩い Cron の枠で先に描いておき、閲覧者には常にヒットさせる。
+ * テーマは SSR 結果を変えるので、キャッシュキーと同じだけの組み合わせを埋める。
+ */
+export async function warmHtmlCache(origin, fetchPage) {
+  let warmed = 0;
+  for (const path of WARM_PATHS) {
+    for (const theme of THEMES) {
+      const req = new Request(`${origin}${path}`, { headers: { cookie: `${THEME_COOKIE}=${theme}` } });
+      const res = await fetchPage(req);
+      if (!isStorable(res)) continue;
+
+      await putHtml(req, new URL(req.url), res);
+      warmed++;
+    }
+  }
+
+  return warmed;
 }
