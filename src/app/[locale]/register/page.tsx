@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -14,7 +14,7 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { Link } from "@/lib/i18n/routing";
 import { sendRegistrationEmail } from "@/lib/actions/auth";
 import { rememberLoginMethod } from "@/lib/hooks/useLastLoginMethod";
-import { signIn } from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
 import { useTranslations, useLocale } from "next-intl";
 
 const RegisterPage = () => {
@@ -22,6 +22,13 @@ const RegisterPage = () => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
+
+  // 実際に NextAuth へ載っているときだけ出す (login 画面と同じ理由)
+  const [hasChreeId, setHasChreeId] = useState(false);
+
+  useEffect(() => {
+    void getProviders().then((providers) => setHasChreeId(Boolean(providers?.chreeid)));
+  }, []);
   const tAuth = useTranslations("Auth");
   const locale = useLocale();
 
@@ -33,6 +40,11 @@ const RegisterPage = () => {
   const handleGoogleLogin = () => {
     rememberLoginMethod("google");
     signIn("google", { callbackUrl: `/${locale}/projects` });
+  };
+
+  const handleChreeIdLogin = () => {
+    rememberLoginMethod("chreeid");
+    signIn("chreeid", { callbackUrl: `/${locale}/projects` });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -143,6 +155,20 @@ const RegisterPage = () => {
               <GoogleIcon />
             </Button>
           </Tooltip>
+
+          {/* 設定が揃っていないと NextAuth 側にプロバイダが無いので、その時は出さない */}
+          {hasChreeId && (
+            <Tooltip title={tAuth("register.registerWithChreeId")}>
+              <Button
+                variant="outlined"
+                aria-label={tAuth("register.registerWithChreeId")}
+                onClick={handleChreeIdLogin}
+                sx={{ flex: "1 1 0", minWidth: 0, py: 1.2, fontWeight: 700 }}
+              >
+                ChreeID
+              </Button>
+            </Tooltip>
+          )}
         </Box>
 
         <Box sx={{ mt: 4, textAlign: "center" }}>

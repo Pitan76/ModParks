@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -22,7 +22,7 @@ import PasskeyLoginButton from "@/components/auth/PasskeyLoginButton";
 import LastUsedBadge from "@/components/auth/LastUsedBadge";
 import { useLastLoginMethod, rememberLoginMethod } from "@/lib/hooks/useLastLoginMethod";
 import { Link, useRouter } from "@/lib/i18n/routing";
-import { signIn } from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -40,6 +40,15 @@ export default function LoginPage() {
 
   const [token, setToken] = useState("");
   const [showTwoFactor, setShowTwoFactor] = useState(false);
+
+  // ChreeID は設定が揃っているときだけ NextAuth に載る。
+  // 環境変数をもう1つ足して見た目だけ切り替えると、設定と食い違ったときに
+  // 押せるのに何も起きないボタンが残る。実際に載っているかを聞く
+  const [hasChreeId, setHasChreeId] = useState(false);
+
+  useEffect(() => {
+    void getProviders().then((providers) => setHasChreeId(Boolean(providers?.chreeid)));
+  }, []);
   const [rememberBrowser, setRememberBrowser] = useState(false);
 
   const registered = searchParams?.get("registered") === "true";
@@ -117,6 +126,11 @@ export default function LoginPage() {
   const handleGoogleLogin = () => {
     rememberLoginMethod("google");
     signIn("google", { callbackUrl });
+  };
+
+  const handleChreeIdLogin = () => {
+    rememberLoginMethod("chreeid");
+    signIn("chreeid", { callbackUrl });
   };
 
   return (
@@ -216,6 +230,22 @@ export default function LoginPage() {
               </Button>
             </Tooltip>
           </LastUsedBadge>
+
+          {/* 設定が揃っていないと NextAuth 側にプロバイダが無いので、その時は出さない */}
+          {hasChreeId && (
+            <LastUsedBadge active={lastLoginMethod === "chreeid"} sx={{ flex: "1 1 0" }}>
+              <Tooltip title={tAuth("login.loginWithChreeId")}>
+                <Button
+                  variant="outlined"
+                  aria-label={tAuth("login.loginWithChreeId")}
+                  onClick={handleChreeIdLogin}
+                  sx={{ flex: "1 1 0", minWidth: 0, py: 1.2, fontWeight: 700 }}
+                >
+                  ChreeID
+                </Button>
+              </Tooltip>
+            </LastUsedBadge>
+          )}
 
           <PasskeyLoginButton onError={setError} lastUsed={lastLoginMethod === "passkey"} />
         </Box>

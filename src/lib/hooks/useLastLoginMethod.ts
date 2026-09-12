@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 /** ログイン画面で選択できる認証手段の識別子 */
-export type LoginMethod = "credentials" | "github" | "google" | "passkey" | "resend";
+export type LoginMethod = "credentials" | "github" | "google" | "chreeid" | "passkey" | "resend";
 
 const STORAGE_KEY = "modparks:lastLoginMethod";
 

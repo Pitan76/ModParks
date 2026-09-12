@@ -7,10 +7,44 @@ import { DEFAULT_APP_SETTINGS } from "@/lib/config/appSettings";
 import { eq } from "drizzle-orm";
 
 /**
- * NextAuthで使用する認証プロバイダー（Resend, GitHub, Google, Credentials）の設定配列。
+ * ChreeID (自前の OpenID Connect プロバイダ) を並べるか。
+ *
+ * **設定が揃っているときだけ出す。** 押しても何も起きないボタンを出さないため。
+ * エンドポイントは issuer の .well-known から引くので、こちらには書かない。
+ */
+const chreeIdProviders =
+  process.env.AUTH_CHREEID_ISSUER && process.env.AUTH_CHREEID_ID && process.env.AUTH_CHREEID_SECRET
+    ? [
+        {
+          id: "chreeid",
+          name: "ChreeID",
+          type: "oidc" as const,
+          issuer: process.env.AUTH_CHREEID_ISSUER,
+          clientId: process.env.AUTH_CHREEID_ID,
+          clientSecret: process.env.AUTH_CHREEID_SECRET,
+          // 同じメールの既存アカウントに寄せる。ChreeID 側で検証済みのアドレスしか渡ってこない
+          allowDangerousEmailAccountLinking: true,
+          profile(profile: { sub: string; name?: string; email?: string; picture?: string }) {
+            return {
+              id: profile.sub,
+              name: profile.name ?? profile.email ?? profile.sub,
+              email: profile.email,
+              image: profile.picture,
+              displayName: profile.name ?? profile.email ?? profile.sub,
+              avatarUrl: profile.picture,
+              role: "user",
+            };
+          },
+        },
+      ]
+    : [];
+
+/**
+ * NextAuthで使用する認証プロバイダー（Resend, GitHub, Google, ChreeID, Credentials）の設定配列。
  * 2FA (TOTP) やレートリミットなどのカスタム認可ロジックが含まれています。
  */
 export const authProviders = [
+  ...chreeIdProviders,
   Resend({
     from: DEFAULT_APP_SETTINGS.mailFromAddress,
     async sendVerificationRequest({ identifier: to, provider, url }) {
