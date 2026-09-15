@@ -3,7 +3,7 @@ import { trackRequest } from "./worker/ddos-stats.js";
 import { handleDdosCron } from "./worker/ddos-cron.js";
 import { isBotRequest } from "./worker/bot-detect.js";
 import { getRuntimeMode, handleRestrictedMode } from "./worker/runtime-mode.js";
-import { isCacheableRequest, matchHtml, storeHtml, warmHtmlCache } from "./worker/html-cache.js";
+import { isCacheableRequest, serveCachedHtml, cacheRenderedHtml, warmHtmlStore } from "./worker/html-serve.js";
 
 /**
  * OpenNext の本体は遅延読み込みにする。
@@ -52,15 +52,25 @@ async function invokeCronRoute(path, env, ctx) {
 /** 温めを行う Cron。CRON_ROUTES と同じ枠に相乗りする */
 const WARM_CRON = "*/10 * * * *";
 
+/** KV は 1 日あたりの書き込み回数に上限があるため、温めはこの間隔まで間引く(分) */
+const WARM_INTERVAL_MIN = 30;
+
+/** 相乗りしている Cron のうち、温めを行う回かどうか */
+function isWarmTick(controller) {
+  if (controller.cron !== WARM_CRON) return false;
+
+  return new Date(controller.scheduledTime).getUTCMinutes() % WARM_INTERVAL_MIN === 0;
+}
+
 /**
- * 公開ページのキャッシュを Cron の枠で埋め直す。
+ * 公開ページを描画して KV へ入れ直す。
  *
  * 失敗しても閲覧者には影響しないため、ここで畳み込んで他の Cron を止めない。
  */
 async function warmPublicPages(env, ctx) {
   try {
     const worker = await loadOpenNextWorker();
-    const warmed = await warmHtmlCache(env.NEXT_PUBLIC_APP_URL, (req) => worker.fetch(req, env, ctx));
+    const warmed = await warmHtmlStore(env.NEXT_PUBLIC_APP_URL, env.SETTINGS_KV, (req) => worker.fetch(req, env, ctx));
     console.log(`[HTML-CACHE] Warmed ${warmed} pages`);
   } catch (e) {
     console.error("[HTML-CACHE] Warm failed:", e);
@@ -125,14 +135,14 @@ export default {
 
     const cacheable = isCacheableRequest(req, url);
     if (cacheable) {
-      const hit = await matchHtml(req, url);
-      if (hit) return hit;
+      const cached = await serveCachedHtml(req, url, env, ctx);
+      if (cached) return cached;
     }
 
     const worker = await loadOpenNextWorker();
     const res = await worker.fetch(forwarded, env, ctx);
 
-    return cacheable ? storeHtml(ctx, req, url, res) : res;
+    return cacheable ? cacheRenderedHtml(ctx, req, url, res) : res;
   },
 
   /** Cloudflare Cron Triggers 用のハンドラ */
@@ -145,6 +155,6 @@ export default {
       await invokeCronRoute(path, env, ctx);
     }
 
-    if (controller.cron === WARM_CRON) await warmPublicPages(env, ctx);
+    if (isWarmTick(controller)) await warmPublicPages(env, ctx);
   },
 };
