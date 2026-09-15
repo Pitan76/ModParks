@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -19,10 +21,8 @@ import HeaderCartButton from "./header/HeaderCartButton";
 import LocaleSelect from "./header/LocaleSelect";
 import UserMenu from "./header/UserMenu";
 import AuthButtons from "./header/AuthButtons";
-import type { Session } from "next-auth";
 
 export type AppHeaderProps = {
-  session: Session | null;
   onMenuClick?: () => void;
   collapsed?: boolean;
 };
@@ -32,11 +32,13 @@ export type AppHeaderProps = {
  * ロゴ、新規プロジェクト作成ボタン、通知ベル、カート、テーマ切り替え、言語切り替え、
  * およびユーザーのアバター（ログインメニュー）を配置する。
  */
-const AppHeader = ({ session, onMenuClick, collapsed = false }: AppHeaderProps) => {
+const AppHeader = ({ onMenuClick, collapsed = false }: AppHeaderProps) => {
   const { mode, toggleColorMode } = useColorMode();
   const borderColor = useBorderColor();
   const cartEnabled = useCartEnabled();
 
+  // HTML をセッション非依存に保つため、ログイン状態はクライアントで解決する
+  const { data: session } = useSession();
   const user = session?.user ?? null;
 
   return (

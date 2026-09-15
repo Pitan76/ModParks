@@ -15,11 +15,9 @@ const AdminSidebar = dynamic(() => import("./AdminSidebar"), { ssr: false });
 const SettingsSidebar = dynamic(() => import("./SettingsSidebar"), { ssr: false });
 const OnboardingTour = dynamic(() => import("./OnboardingTour"), { ssr: false });
 import { ContextMenuProvider } from "@/components/ui/ContextMenu";
-import type { Session } from "next-auth";
 
 export type AppLayoutProps = {
   children: ReactNode;
-  session: Session | null;
 };
 
 /**
@@ -29,7 +27,7 @@ export type AppLayoutProps = {
  */
 const COLLAPSE_STORAGE_KEY = "sidebarCollapsed";
 
-const AppLayout = ({ children, session }: AppLayoutProps) => {
+const AppLayout = ({ children }: AppLayoutProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname() || "";
@@ -60,12 +58,11 @@ const AppLayout = ({ children, session }: AppLayoutProps) => {
   return (
     <ContextMenuProvider>
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <AppHeader session={session} onMenuClick={handleDrawerToggle} collapsed={collapsed} />
+        <AppHeader onMenuClick={handleDrawerToggle} collapsed={collapsed} />
         <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0 }}>
           <SidebarComponent
             mobileOpen={mobileOpen}
             onMobileClose={() => setMobileOpen(false)}
-            session={session}
             collapsed={collapsed}
             onToggleCollapse={handleToggleCollapse}
           />

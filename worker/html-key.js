@@ -22,18 +22,35 @@ const FAVORITES_COOKIE = "favorites";
 /** SSR 結果が分かれるテーマ。キャッシュはこの数だけ枝分かれする */
 export const THEMES = ["dark", "light"];
 
-/** 匿名の閲覧者に共有してよいページ */
-const CACHEABLE_PATHS = [
+/**
+ * ログイン中の閲覧者とも共有してよいページ。
+ *
+ * サーバ描画がセッションを一切見ないものだけを入れること。
+ * オーナー判定で内容が変わるページをここへ移すと、非公開の内容が
+ * そのまま他の閲覧者へ配信される。追加する前に、そのページとレイアウトが
+ * auth() を呼んでいないことを必ず確かめること。
+ */
+const SHARED_PATHS = [
   /^\/$/,
   /^\/projects$/,
-  /^\/projects\/[^/]+$/,
-  /^\/ideas$/,
-  /^\/ideas\/[^/]+$/,
-  /^\/profile\/[^/]+$/,
   /^\/terms$/,
   /^\/privacy$/,
   /^\/robots\.txt$/,
   /^\/sitemap\.xml$/,
+];
+
+/**
+ * 匿名の閲覧者どうしでのみ共有してよいページ。
+ *
+ * いずれも isOwner / viewerId で表示が変わる。
+ * 例えばプロジェクト詳細は非公開・下書きをオーナーにだけ見せているため、
+ * ログイン中の描画結果を共有すると他人へ漏れる。
+ */
+const ANONYMOUS_ONLY_PATHS = [
+  /^\/projects\/[^/]+$/,
+  /^\/ideas$/,
+  /^\/ideas\/[^/]+$/,
+  /^\/profile\/[^/]+$/,
 ];
 
 /** 言語もテーマも影響しないため、1 つだけ持てばよいパス */
@@ -67,13 +84,16 @@ export function isCacheableRequest(req, url) {
   if (req.method !== "GET") return false;
   if (url.search) return false;
   if (req.headers.get("rsc")) return false;
-  if (hasSessionCookie(req)) return false;
-  if (readCookie(req, FAVORITES_COOKIE)) return false;
 
   const path = stripLocale(url.pathname);
   if (EXCLUDED_SEGMENTS.includes(path.split("/").pop())) return false;
+  if (SHARED_PATHS.some((pattern) => pattern.test(path))) return true;
 
-  return CACHEABLE_PATHS.some((pattern) => pattern.test(path));
+  // ここから先はログイン状態で内容が変わる。お気に入りも詳細ページの描画に出る
+  if (hasSessionCookie(req)) return false;
+  if (readCookie(req, FAVORITES_COOKIE)) return false;
+
+  return ANONYMOUS_ONLY_PATHS.some((pattern) => pattern.test(path));
 }
 
 /**

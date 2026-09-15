@@ -10,15 +10,14 @@ import { routing, AppLocale } from "@/lib/i18n/routing";
 import { pickRootMessages } from "@/lib/i18n/clientMessages";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import { cookies } from "next/headers";
-import { auth } from "@/lib/auth";
-import { SessionProvider } from "@/components/SessionProvider";
+import SessionBootstrap from "@/components/auth/SessionBootstrap";
 import AppLayout from "@/components/layout/AppLayout";
 import PinProvider from "@/components/pin/PinProvider";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
 import { SITE_URL } from "@/lib/config";
 import { SITE_NAME, canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
-import { getAdsMode, getAdsenseClient } from "@/lib/config/ads";
+import AdSenseLoader from "@/components/ads/AdSenseLoader";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -122,22 +121,12 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   // 未対応言語であれば404を返す
   if (!routing.locales.includes(locale as AppLocale)) notFound();
 
-  const [messages, session] = await Promise.all([getMessages(), auth()]);
-
-  let userLocale = null;
-  if (session?.user?.id) {
-    // 最新情報は auth.ts の jwt コールバックで 5分TTL キャッシュされているものを利用
-    userLocale = (session.user as any).locale;
-  }
+  // ここで auth() を呼ぶと配下の全ルートが動的描画になり、共有キャッシュにも載せられない。
+  // ログイン状態の反映は SessionBootstrap がクライアント側で行う。
+  const messages = await getMessages();
 
   const cookieStore = await cookies();
   const themeMode = (cookieStore.get("theme_mode")?.value as "light" | "dark") || "dark";
-
-  // 実配信モードのときだけ AdSense を読み込む（枠ごとではなくページで一度だけ）
-  // プレミアムは広告非表示のため、スクリプト自体も読み込まない
-  const adsenseClient = getAdsMode() === "on" && !session?.user?.isPremium
-    ? getAdsenseClient()
-    : "";
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -175,29 +164,22 @@ const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
           `}
         </Script>
 
-        {/* Google AdSense */}
-        {adsenseClient && (
-          <Script
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-        )}
       </head>
       <body>
         <PwaRegister />
         <ThemeRegistry initialMode={themeMode}>
-          <SessionProvider session={session} refetchOnWindowFocus={false}>
+          <SessionBootstrap>
             <NextIntlClientProvider messages={pickRootMessages(messages)}>
-              {userLocale && <LocaleSyncer userLocale={userLocale} />}
+              <AdSenseLoader />
+              <LocaleSyncer />
               <PinProvider>
-                <AppLayout session={session}>
+                <AppLayout>
                   {children}
                   <AppFooter />
                 </AppLayout>
               </PinProvider>
             </NextIntlClientProvider>
-          </SessionProvider>
+          </SessionBootstrap>
         </ThemeRegistry>
       </body>
     </html>

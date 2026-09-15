@@ -1,15 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useLocale } from "next-intl";
 import { locales, usePathname, useRouter } from "@/lib/i18n/routing";
 import type { AppLocale } from "@/lib/i18n/routing";
 import { isUnprefixedRoute } from "@/lib/i18n/unprefixedRoutes";
 import { storeLocaleCookie } from "@/lib/i18n/localeCookie";
-
-interface LocaleSyncerProps {
-  userLocale: string;
-}
 
 /**
  * ログインユーザーの設定言語を、現在の表示言語に反映させる。
@@ -17,7 +14,9 @@ interface LocaleSyncerProps {
  * 公開ページはURLが言語の正なので設定言語のURLへ移動し、
  * 接頭辞なしルート（設定・管理画面など）はCookieが正なので更新して再取得する。
  */
-export default function LocaleSyncer({ userLocale }: LocaleSyncerProps) {
+export default function LocaleSyncer() {
+  const { data: session } = useSession();
+  const userLocale = session?.user?.locale ?? "";
   const currentLocale = useLocale();
   const pathname = usePathname();
   const router = useRouter();

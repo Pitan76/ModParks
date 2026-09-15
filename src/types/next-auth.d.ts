@@ -20,6 +20,8 @@ declare module "next-auth" {
       role:        string;
       /** プレミアムが現在有効か（期限切れは false）。付与は管理画面から */
       isPremium:   boolean;
+      /** 設定画面で選んだ表示言語。未設定なら null。auth.ts の session コールバックが入れる */
+      locale:      string | null;
       onboardingCompleted: boolean;
       name?:       string | null;
       email?:      string | null;
