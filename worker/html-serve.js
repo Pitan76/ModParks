@@ -82,11 +82,17 @@ const WARM_TARGETS = [
   { path: "/sitemap.xml",  themed: false },
 ];
 
-/** 温める 1 件ぶんの要求を組み立てる */
-function warmRequest(origin, path, theme) {
+/**
+ * 温める 1 件ぶんの要求を組み立てる。
+ *
+ * 宛先は公開ホスト名ではなく localhost にする。公開ホスト宛てにすると
+ * Worker が自分の外側へ出ていく形になり、跳ね返って 522 になる
+ * （worker-wrapper.js の invokeCronRoute と同じ理由）。
+ */
+function warmRequest(path, theme) {
   const headers = theme ? { cookie: `${THEME_COOKIE}=${theme}` } : {};
 
-  return new Request(`${origin}${path}`, { headers });
+  return new Request(`http://localhost${path}`, { headers });
 }
 
 /**
@@ -95,8 +101,8 @@ function warmRequest(origin, path, theme) {
  * 保存できなかった場合は理由を残す。どの組み合わせが落ちたか分からないと、
  * 温めた件数が合わないときに追えないため。
  */
-async function warmOne(kv, origin, path, theme, fetchPage) {
-  const req = warmRequest(origin, path, theme);
+async function warmOne(kv, path, theme, fetchPage) {
+  const req = warmRequest(path, theme);
   const res = await fetchPage(req);
   if (!isStorable(res)) {
     console.error(`[HTML-CACHE] skip ${path} theme=${theme || "any"} status=${res.status} type=${res.headers.get("content-type")}`);
@@ -109,18 +115,31 @@ async function warmOne(kv, origin, path, theme, fetchPage) {
   return true;
 }
 
+/** 温める組み合わせを平坦に展開したもの */
+const WARM_UNITS = WARM_TARGETS.flatMap(({ path, themed }) =>
+  (themed ? THEMES : [null]).map((theme) => ({ path, theme })));
+
+/**
+ * 1 ティックで温める件数。
+ *
+ * 全件を 1 回で描くと Cron 自体が CPU 上限で打ち切られ、1 件も保存されずに終わる。
+ * 少しずつ順繰りに回して、数ティックかけて一周させる。
+ */
+const WARM_BATCH = 3;
+
 /**
  * 公開ページを描画して KV を埋める。
  *
- * KV は書き込み回数に上限があるため、呼び出し側で間隔を絞ること。
+ * @param tick 10 分ごとに 1 増える連番。どこから温めるかを決めるのに使う
  */
-export async function warmHtmlStore(origin, kv, fetchPage) {
+export async function warmHtmlStore(kv, fetchPage, tick) {
+  const start = (tick * WARM_BATCH) % WARM_UNITS.length;
   let warmed = 0;
-  for (const { path, themed } of WARM_TARGETS) {
-    for (const theme of themed ? THEMES : [null]) {
-      if (await warmOne(kv, origin, path, theme, fetchPage)) warmed++;
-    }
+
+  for (let i = 0; i < WARM_BATCH; i++) {
+    const { path, theme } = WARM_UNITS[(start + i) % WARM_UNITS.length];
+    if (await warmOne(kv, path, theme, fetchPage)) warmed++;
   }
 
-  return warmed;
+  return `${warmed}/${WARM_BATCH}`;
 }

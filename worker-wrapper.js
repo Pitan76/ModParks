@@ -52,14 +52,9 @@ async function invokeCronRoute(path, env, ctx) {
 /** 温めを行う Cron。CRON_ROUTES と同じ枠に相乗りする */
 const WARM_CRON = "*/10 * * * *";
 
-/** KV は 1 日あたりの書き込み回数に上限があるため、温めはこの間隔まで間引く(分) */
-const WARM_INTERVAL_MIN = 30;
-
-/** 相乗りしている Cron のうち、温めを行う回かどうか */
-function isWarmTick(controller) {
-  if (controller.cron !== WARM_CRON) return false;
-
-  return new Date(controller.scheduledTime).getUTCMinutes() % WARM_INTERVAL_MIN === 0;
+/** 温めの順番を決める連番。10 分ごとに 1 増える */
+function warmTick(controller) {
+  return Math.floor(controller.scheduledTime / 600000);
 }
 
 /**
@@ -67,10 +62,10 @@ function isWarmTick(controller) {
  *
  * 失敗しても閲覧者には影響しないため、ここで畳み込んで他の Cron を止めない。
  */
-async function warmPublicPages(env, ctx) {
+async function warmPublicPages(env, ctx, tick) {
   try {
     const worker = await loadOpenNextWorker();
-    const warmed = await warmHtmlStore(env.NEXT_PUBLIC_APP_URL, env.SETTINGS_KV, (req) => worker.fetch(req, env, ctx));
+    const warmed = await warmHtmlStore(env.SETTINGS_KV, (req) => worker.fetch(req, env, ctx), tick);
     console.log(`[HTML-CACHE] Warmed ${warmed} pages`);
   } catch (e) {
     console.error("[HTML-CACHE] Warm failed:", e);
@@ -155,6 +150,6 @@ export default {
       await invokeCronRoute(path, env, ctx);
     }
 
-    if (isWarmTick(controller)) await warmPublicPages(env, ctx);
+    if (controller.cron === WARM_CRON) await warmPublicPages(env, ctx, warmTick(controller));
   },
 };
