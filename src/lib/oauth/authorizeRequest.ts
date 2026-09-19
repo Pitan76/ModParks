@@ -3,6 +3,7 @@
  * 同意画面はユーザーの操作を挟むぶんパラメータを持ち回すため、検証をここに集約する。
  */
 import { findClient, isAllowedRedirectUri } from "./clients";
+import type { Database } from "@modparks/core/db/client";
 import { resolveRequestedScope } from "./scopes";
 import type { OAuthClient } from "@modparks/core/db/schema";
 import type { OAuthErrorCode } from "./errors";
@@ -49,11 +50,12 @@ export function readAuthorizeParams(searchParams: URLSearchParams): AuthorizePar
  * 攻撃者が指定した URL へ飛ばさないようにする。
  */
 export async function validateAuthorizeRequest(
+  db: Database,
   searchParams: URLSearchParams
 ): Promise<{ ok: true; value: ValidatedAuthorizeRequest } | { ok: false; failure: AuthorizeFailure }> {
   const params = readAuthorizeParams(searchParams);
 
-  const client = await findClient(params.clientId);
+  const client = await findClient(db, params.clientId);
   if (!client) return fatal("invalid_client", "Unknown or disabled client_id");
   if (!params.redirectUri) return fatal("invalid_request", "redirect_uri is required");
   if (!isAllowedRedirectUri(client, params.redirectUri)) return fatal("invalid_request", "redirect_uri is not registered");

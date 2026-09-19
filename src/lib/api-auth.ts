@@ -19,7 +19,7 @@ export async function validateApiKey(request: Request) {
   // OAuth のアクセストークンも同じ Authorization ヘッダで来るため、
   // API キーとして照合する前にこちらへ振り分ける。
   if (isOAuthAccessToken(key)) {
-    const token = await verifyAccessToken(key);
+    const token = await verifyAccessToken(db, key);
     if (!token) return { valid: false, userId: null, scopes: null, error: "Invalid or expired access token" };
     return { valid: true, userId: token.userId, scopes: token.scopes, error: null };
   }

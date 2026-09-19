@@ -2,8 +2,8 @@
  * id_token / userinfo に載せるユーザー情報。
  * どちらも同じ集合を返さないと、クライアント側で突き合わせたときに食い違う。
  */
-import { getDatabase } from "@/lib/db";
 import { users, userProfiles } from "@modparks/core/db/schema";
+import type { Database } from "@modparks/core/db/client";
 import { eq } from "drizzle-orm";
 
 export type UserClaims = {
@@ -18,8 +18,7 @@ export type UserClaims = {
 /**
  * スコープに応じたクレームを組み立てる。email は email スコープがあるときだけ載せる。
  */
-export async function buildUserClaims(userId: string, scopes: readonly string[]): Promise<UserClaims | null> {
-  const db = await getDatabase();
+export async function buildUserClaims(db: Database, userId: string, scopes: readonly string[]): Promise<UserClaims | null> {
   const row = await db
     .select({
       id: users.id,

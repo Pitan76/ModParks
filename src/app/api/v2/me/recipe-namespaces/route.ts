@@ -11,10 +11,10 @@ import { posts, projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {
-  const auth = await requireBearerScope(request, "projects:read");
+  const db = await getDatabase();
+  const auth = await requireBearerScope(db, request, "projects:read");
   if (!auth.ok) return auth.response;
 
-  const db = await getDatabase();
   const rows = await db
     .select({ namespaces: projects.recipeNamespaces })
     .from(projects)

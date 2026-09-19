@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { getDatabase } from "@/lib/db";
 import { validateAuthorizeRequest } from "@/lib/oauth/authorizeRequest";
 import { saveGrant } from "@/lib/oauth/grants";
 import { issueAuthCode } from "@/lib/oauth/tokens";
@@ -15,13 +16,14 @@ export async function approveAuthorization(rawQuery: string): Promise<ConsentRes
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: "unauthenticated" };
 
-  const validated = await validateAuthorizeRequest(new URLSearchParams(rawQuery));
+  const db = await getDatabase();
+  const validated = await validateAuthorizeRequest(db, new URLSearchParams(rawQuery));
   if (!validated.ok) return { success: false, error: validated.failure.error };
 
   const { client, params, scopes } = validated.value;
-  await saveGrant(session.user.id, client.id, scopes);
+  await saveGrant(db, session.user.id, client.id, scopes);
 
-  const code = await issueAuthCode({
+  const code = await issueAuthCode(db, {
     clientId: client.id,
     userId: session.user.id,
     scopes,
@@ -43,7 +45,8 @@ export async function approveAuthorization(rawQuery: string): Promise<ConsentRes
  * 同意画面の「拒否する」。access_denied を付けてクライアントへ戻す。
  */
 export async function denyAuthorization(rawQuery: string): Promise<ConsentResult> {
-  const validated = await validateAuthorizeRequest(new URLSearchParams(rawQuery));
+  const db = await getDatabase();
+  const validated = await validateAuthorizeRequest(db, new URLSearchParams(rawQuery));
   if (!validated.ok) return { success: false, error: validated.failure.error };
 
   const { params } = validated.value;

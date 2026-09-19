@@ -1,8 +1,8 @@
 /**
  * OAuth クライアントの参照と認証。
  */
-import { getDatabase } from "@/lib/db";
 import { oauthClients } from "@modparks/core/db/schema";
+import type { Database } from "@modparks/core/db/client";
 import { eq } from "drizzle-orm";
 import { generateSecret, sha256Hex } from "./crypto";
 import type { OAuthClient } from "@modparks/core/db/schema";
@@ -19,9 +19,8 @@ export function generateClientSecret(): string {
   return generateSecret(CLIENT_SECRET_PREFIX);
 }
 
-export async function findClient(clientId: string): Promise<OAuthClient | null> {
+export async function findClient(db: Database, clientId: string): Promise<OAuthClient | null> {
   if (!clientId) return null;
-  const db = await getDatabase();
   const client = await db.select().from(oauthClients).where(eq(oauthClients.id, clientId)).get();
   if (!client || client.disabledAt) return null;
   return client;

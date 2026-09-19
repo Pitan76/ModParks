@@ -5,6 +5,7 @@
  */
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getDatabase } from "@/lib/db";
 import { validateAuthorizeRequest } from "@/lib/oauth/authorizeRequest";
 import { findCoveringGrant } from "@/lib/oauth/grants";
 import { issueAuthCode } from "@/lib/oauth/tokens";
@@ -12,8 +13,9 @@ import { redirectError, tokenError } from "@/lib/oauth/errors";
 import { formatScope } from "@/lib/oauth/scopes";
 
 export async function GET(request: Request) {
+  const db = await getDatabase();
   const url = new URL(request.url);
-  const validated = await validateAuthorizeRequest(url.searchParams);
+  const validated = await validateAuthorizeRequest(db, url.searchParams);
 
   if (!validated.ok) {
     const { failure } = validated;
@@ -32,7 +34,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(callback)}`, url.origin));
   }
 
-  const grant = params.prompt === "consent" ? null : await findCoveringGrant(session.user.id, client.id, scopes);
+  const grant = params.prompt === "consent" ? null : await findCoveringGrant(db, session.user.id, client.id, scopes);
 
   if (!grant) {
     if (params.prompt === "none") {
@@ -41,7 +43,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(`/oauth/consent${url.search}`, url.origin));
   }
 
-  const code = await issueAuthCode({
+  const code = await issueAuthCode(db, {
     clientId: client.id,
     userId: session.user.id,
     scopes,

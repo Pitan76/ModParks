@@ -2,8 +2,8 @@
  * 認可コードとアクセス／リフレッシュトークンの発行・検証。
  * 保存はすべてハッシュで、平文は発行時の戻り値でしか流通させない。
  */
-import { getDatabase } from "@/lib/db";
 import { oauthAccessTokens, oauthAuthCodes, oauthRefreshTokens } from "@modparks/core/db/schema";
+import type { Database } from "@modparks/core/db/client";
 import { and, eq } from "drizzle-orm";
 import { generateSecret, sha256Hex } from "./crypto";
 import { formatScope } from "./scopes";
@@ -26,13 +26,12 @@ type GrantContext = {
 };
 
 /** 認可コードを発行して平文を返す */
-export async function issueAuthCode(params: GrantContext & {
+export async function issueAuthCode(db: Database, params: GrantContext & {
   redirectUri: string;
   nonce: string | null;
   codeChallenge: string | null;
   codeChallengeMethod: "S256" | null;
 }): Promise<string> {
-  const db = await getDatabase();
   const code = generateSecret("mpac");
 
   await db.insert(oauthAuthCodes).values({
@@ -54,14 +53,13 @@ export async function issueAuthCode(params: GrantContext & {
  * 認可コードを取り出して使用済みにする。
  * 既に使用済みだった場合は、そのコードから出たトークンを巻き添えで失効させたうえで null を返す。
  */
-export async function consumeAuthCode(code: string) {
-  const db = await getDatabase();
+export async function consumeAuthCode(db: Database, code: string) {
   const codeHash = await sha256Hex(code);
   const record = await db.select().from(oauthAuthCodes).where(eq(oauthAuthCodes.codeHash, codeHash)).get();
   if (!record) return null;
 
   if (record.usedAt) {
-    await revokeClientTokens(record.userId, record.clientId);
+    await revokeClientTokens(db, record.userId, record.clientId);
     return null;
   }
   if (record.expiresAt.getTime() < Date.now()) return null;
@@ -71,8 +69,7 @@ export async function consumeAuthCode(code: string) {
 }
 
 /** アクセストークンとリフレッシュトークンを対で発行する */
-export async function issueTokens(ctx: GrantContext): Promise<IssuedTokens> {
-  const db = await getDatabase();
+export async function issueTokens(db: Database, ctx: GrantContext): Promise<IssuedTokens> {
   const accessToken = generateSecret("mpat");
   const refreshToken = generateSecret("mprt");
   const scope = formatScope(ctx.scopes);
@@ -101,19 +98,18 @@ export async function issueTokens(ctx: GrantContext): Promise<IssuedTokens> {
  * 使用済みトークンの再提示は盗用の可能性が高いため、その利用者×クライアントの
  * トークンを全部落として最初からやり直させる。
  */
-export async function rotateRefreshToken(refreshToken: string, clientId: string) {
-  const db = await getDatabase();
+export async function rotateRefreshToken(db: Database, refreshToken: string, clientId: string) {
   const tokenHash = await sha256Hex(refreshToken);
   const record = await db.select().from(oauthRefreshTokens).where(eq(oauthRefreshTokens.tokenHash, tokenHash)).get();
 
   if (!record || record.clientId !== clientId) return null;
   if (record.revokedAt || record.replacedBy) {
-    await revokeClientTokens(record.userId, record.clientId);
+    await revokeClientTokens(db, record.userId, record.clientId);
     return null;
   }
   if (record.expiresAt.getTime() < Date.now()) return null;
 
-  const issued = await issueTokens({
+  const issued = await issueTokens(db, {
     clientId: record.clientId,
     userId: record.userId,
     scopes: record.scope.split(" "),
@@ -127,8 +123,7 @@ export async function rotateRefreshToken(refreshToken: string, clientId: string)
 }
 
 /** アクセストークンを検証し、有効なら所有者とスコープを返す */
-export async function verifyAccessToken(token: string) {
-  const db = await getDatabase();
+export async function verifyAccessToken(db: Database, token: string) {
   const tokenHash = await sha256Hex(token);
   const record = await db.select().from(oauthAccessTokens).where(eq(oauthAccessTokens.tokenHash, tokenHash)).get();
 
@@ -145,8 +140,7 @@ export async function verifyAccessToken(token: string) {
 }
 
 /** ユーザー×クライアントのトークンを一括失効させる（連携解除・盗用検知） */
-export async function revokeClientTokens(userId: string, clientId: string) {
-  const db = await getDatabase();
+export async function revokeClientTokens(db: Database, userId: string, clientId: string) {
   const now = new Date();
   await db.update(oauthAccessTokens).set({ revokedAt: now })
     .where(and(eq(oauthAccessTokens.userId, userId), eq(oauthAccessTokens.clientId, clientId)));
@@ -158,8 +152,7 @@ export async function revokeClientTokens(userId: string, clientId: string) {
  * RFC 7009 の revoke。トークン種別が不明でも動くよう両方のテーブルを当たる。
  * 該当が無くても呼び出し側には成功を返す仕様なので、ここでは黙って終わる。
  */
-export async function revokeToken(token: string, clientId: string) {
-  const db = await getDatabase();
+export async function revokeToken(db: Database, token: string, clientId: string) {
   const tokenHash = await sha256Hex(token);
   const now = new Date();
 

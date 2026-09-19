@@ -137,10 +137,10 @@ export async function deleteOAuthApp(clientId: string) {
  * 連携中アプリの解除。同意を消すだけでは発行済みトークンが生き残るため、合わせて失効させる。
  */
 export async function revokeOAuthConnection(clientId: string) {
-  const { userId } = await getAuthenticatedDb();
+  const { db, userId } = await getAuthenticatedDb();
 
-  await revokeClientTokens(userId, clientId);
-  await deleteGrant(userId, clientId);
+  await revokeClientTokens(db, userId, clientId);
+  await deleteGrant(db, userId, clientId);
 
   revalidatePath(SETTINGS_PATH);
   return { success: true as const };

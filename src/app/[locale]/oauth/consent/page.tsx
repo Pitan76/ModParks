@@ -4,6 +4,7 @@ import Container from "@mui/material/Container";
 import { getTranslations, setRequestLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { auth } from "@/lib/auth";
+import { getDatabase } from "@/lib/db";
 import { validateAuthorizeRequest } from "@/lib/oauth/authorizeRequest";
 import { ConsentFormLazy } from "@/components/oauth/ConsentLazy";
 import ConsentError from "@/components/oauth/ConsentError";
@@ -41,7 +42,8 @@ export default async function OAuthConsentPage({
   if (!session?.user?.id) redirect(`/login?callbackUrl=${encodeURIComponent(`/api/oauth/authorize?${rawQuery}`)}`);
 
   const t = await getTranslations("OAuth");
-  const validated = await validateAuthorizeRequest(new URLSearchParams(rawQuery));
+  const db = await getDatabase();
+  const validated = await validateAuthorizeRequest(db, new URLSearchParams(rawQuery));
 
   if (!validated.ok) {
     return (
