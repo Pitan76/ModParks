@@ -6,7 +6,7 @@
  * v2 に合わせて改名してはならない。共通部分は types/apiShared.ts を参照。
  */
 
-import type { ContentType } from "@/lib/data/projectTypes";
+import type { ContentType } from "@modparks/core/data/projectTypes";
 import type { ApiUser } from "@/types/apiShared";
 
 export type { ApiUser, ApiVersion, PaginatedResponse } from "@/types/apiShared";

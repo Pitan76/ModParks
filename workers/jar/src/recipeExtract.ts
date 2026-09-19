@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { assertEntryCount, ExtractBudget, uncompressedSize } from "./limits";
-import { isSharedNamespace } from "../../../src/lib/data/sharedNamespaces";
+import { isSharedNamespace } from "@modparks/core/data/sharedNamespaces";
 
 /** ネームスペース単位でまとめた抽出結果 */
 export interface NsBucket {

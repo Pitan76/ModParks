@@ -6,7 +6,7 @@ import { parseLinks } from "@/lib/utils/links";
 import ReportDialog from "@/components/project/ReportDialog";
 import type { ProjectInfoBoxProps } from "@/components/project/ProjectInfoBox";
 import { summarizeProjectVersions } from "@/lib/utils/projectVersionSummary";
-import { getLoaderName } from "@/lib/data/loaderIds";
+import { getLoaderName } from "@modparks/core/data/loaderIds";
 import styles from "../plain.module.css";
 import { useState, useEffect } from "react";
 

@@ -18,7 +18,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import ProjectIconUpload from "./ProjectIconUpload";
 import { LICENSE_OPTIONS } from "@/lib/licenses";
-import { CONTENT_TYPES } from "@/lib/data/projectTypes";
+import { CONTENT_TYPES } from "@modparks/core/data/projectTypes";
 import { useLinksEditor } from "@/lib/hooks/useLinksEditor";
 
 type OptionItem = {

@@ -7,7 +7,7 @@ import type { ApiProject, PaginatedResponse } from "@/types/api-v1";
 import { createId } from "@paralleldrive/cuid2";
 import { withPublicCache } from "@/lib/http/cache";
 import { posts, projects, userProfiles } from "@/db/schema";
-import { CONTENT_TYPES, type ContentType } from "@/lib/data/projectTypes";
+import { CONTENT_TYPES, type ContentType } from "@modparks/core/data/projectTypes";
 import { listProjectPosts, type ProjectListSort } from "@/lib/queries/postList";
 import { toApiProjectV1 } from "@/lib/api/toApiV1";
 

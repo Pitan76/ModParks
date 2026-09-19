@@ -1,0 +1,21 @@
+{
+  "comment": "workers/* の型検査。ルートの tsconfig は workers を exclude しており、dom lib と jsx を前提にしているため分けている。npm run typecheck が両方を流す。",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["@cloudflare/workers-types"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@modparks/core/*": ["./packages/core/src/*"]
+    }
+  },
+  "include": ["workers/*/src/**/*.ts", "packages/core/src/**/*.ts"]
+}

@@ -13,7 +13,7 @@ import FormMultiSelect from "@/components/ui/form/FormMultiSelect";
 import LoaderAutocomplete from "@/components/project/LoaderAutocomplete";
 import McVersionAutocomplete from "@/components/project/McVersionAutocomplete";
 import TagAutocomplete from "@/components/project/TagAutocomplete";
-import { IDEA_STATUSES, IDEA_SORTS, ideaStatusLabelKey } from "@/lib/data/ideaFilters";
+import { IDEA_STATUSES, IDEA_SORTS, ideaStatusLabelKey } from "@modparks/core/data/ideaFilters";
 
 /** URL へ書き出す絞り込みの一式。項目が増えても呼び出し側の引数が増えないようまとめる */
 type IdeaFilterState = {

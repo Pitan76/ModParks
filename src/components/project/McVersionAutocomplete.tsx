@@ -1,6 +1,6 @@
 import MultiChipAutocomplete from "@/components/ui/form/MultiChipAutocomplete";
-import { MC_VERSIONS } from "@/lib/data/minecraftVersions";
-import { expandMcVersionInput } from "@/lib/data/mcVersionQuery";
+import { MC_VERSIONS } from "@modparks/core/data/minecraftVersions";
+import { expandMcVersionInput } from "@modparks/core/data/mcVersionQuery";
 
 const OPTIONS = MC_VERSIONS as unknown as string[];
 

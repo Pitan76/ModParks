@@ -1,4 +1,4 @@
-import { MC_VERSIONS } from "../data/minecraftVersions";
+import { MC_VERSIONS } from "@modparks/core/data/minecraftVersions";
 
 const KB = 1024;
 const MB = KB * KB;

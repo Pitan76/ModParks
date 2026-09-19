@@ -9,7 +9,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import { isSharedNamespace } from "@/lib/data/sharedNamespaces";
+import { isSharedNamespace } from "@modparks/core/data/sharedNamespaces";
 
 /**
  * JARファイル内のクラフティングレシピを抽出し、CDN/R2にアップロードして

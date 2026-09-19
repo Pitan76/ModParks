@@ -1,0 +1,11 @@
+{
+  "name": "@modparks/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Next.js と Workers の両方から使う、フレームワーク非依存のドメインロジック",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  }
+}

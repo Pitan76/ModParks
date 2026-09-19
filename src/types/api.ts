@@ -6,7 +6,7 @@
  * 詳細は docs-md/DESIGN.md の「公開APIも同じ名前に揃える」を参照。
  */
 
-import type { ContentType } from "@/lib/data/projectTypes";
+import type { ContentType } from "@modparks/core/data/projectTypes";
 import type { ApiUser } from "@/types/apiShared";
 
 export type { ApiUser, ApiVersion, ApiVersionDependency, PaginatedResponse } from "@/types/apiShared";

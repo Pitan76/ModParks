@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { locales } from "@/lib/i18n/locales";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
-import { MC_VERSIONS, type McVersion } from "@/lib/data/minecraftVersions";
+import { MC_VERSIONS, type McVersion } from "@modparks/core/data/minecraftVersions";
 import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
-import { CONTENT_TYPES } from "@/lib/data/projectTypes";
+import { CONTENT_TYPES } from "@modparks/core/data/projectTypes";
 import { vk } from "@/lib/validationKeys";
 import { DEPENDENCY_TYPES, MAX_DEPENDENCY_DRAFTS } from "@/lib/dependencies/types";
 

@@ -2,7 +2,7 @@
 
 Mod の JAR を解析するサイドカー Worker。メインアプリ（`modparks`）から **Service Binding 経由でのみ**呼ばれ、公開 URL を持たない。
 
-`jszip` を含む重い依存はこの Worker にのみ存在する。メイン Worker の 3 MiB 制限を超えないようにするための分離であり、メイン側は [`src/types.ts`](src/types.ts) を `import type` するだけで実装を参照しない。
+`jszip` を含む重い依存はこの Worker にのみ存在する。メイン Worker の isolate 起動時に jszip の評価 CPU を負担させないための分離であり（Free は 1 リクエスト 10 ms）、メイン側は [`src/types.ts`](src/types.ts) を `import type` するだけで実装を参照しない。
 
 ## エンドポイント
 

@@ -4,8 +4,8 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import { useTranslations } from "next-intl";
-import { LOADERS_DATA } from "@/lib/data/loaderIds";
-import { MC_VERSIONS } from "@/lib/data/minecraftVersions";
+import { LOADERS_DATA } from "@modparks/core/data/loaderIds";
+import { MC_VERSIONS } from "@modparks/core/data/minecraftVersions";
 
 export interface CartDownloadFilterProps {
   loader: string;

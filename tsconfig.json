@@ -26,6 +26,9 @@
       }
     ],
     "paths": {
+      "@modparks/core/*": [
+        "./packages/core/src/*"
+      ],
       "@/workers/*": [
         "./workers/*"
       ],

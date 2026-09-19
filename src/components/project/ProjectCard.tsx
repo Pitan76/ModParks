@@ -14,7 +14,7 @@ import { toPlainDescription } from "@/lib/utils/plainText";
 import { useCartEnabled } from "@/components/cart/cartStore";
 import ProjectTypeBadge from "./ProjectTypeBadge";
 import CartToggleButton from "./card/CartToggleButton";
-import { type ContentType } from "@/lib/data/projectTypes";
+import { type ContentType } from "@modparks/core/data/projectTypes";
 import ProjectCardMeta from "./card/ProjectCardMeta";
 import { useProjectContextMenu } from "./card/useProjectContextMenu";
 import { useState, useEffect } from "react";

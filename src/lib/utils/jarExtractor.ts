@@ -1,5 +1,5 @@
 import type JSZip from "jszip";
-import { isSharedNamespace } from "@/lib/data/sharedNamespaces";
+import { isSharedNamespace } from "@modparks/core/data/sharedNamespaces";
 
 const RECIPE_PATH = /^data\/([^/]+)\/recipes?\/(.+)\.json$/;
 const TAG_PATH = /^data\/([^/]+)\/tags?\/(.+)\.json$/;

@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
     config.resolve.symlinks = false;
     if (isServer) {
       // サーバー(Worker)バンドルにインライン source map を焼き込ませない。
-      // Cloudflare Workers の 3 MiB 制限に対する肥大要因になるため明示的に無効化する。
+      // isolate 起動時に評価されるコード量をいたずらに増やさないため明示的に無効化する。
       config.devtool = false;
       // サーバーサイド（Worker）ビルド時には、重量級マークダウンレンダラーを空のダミーコンポーネントに置換
       config.resolve.alias = {

@@ -10,9 +10,16 @@
 
 import type { PushSubscriptionJSON, VapidKeys } from "./types";
 
+/**
+ * Web Crypto の BufferSource は ArrayBuffer 裏付けのビューしか受け付けない。
+ * 素の Uint8Array は SharedArrayBuffer も含む型に広がり代入できないため、
+ * この実装が扱うバイト列はすべてこの別名で固定する。
+ */
+type Bytes = Uint8Array<ArrayBuffer>;
+
 // ---- base64url ----
 
-export function b64urlToBytes(s: string): Uint8Array {
+export function b64urlToBytes(s: string): Bytes {
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4);
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
@@ -20,13 +27,13 @@ export function b64urlToBytes(s: string): Uint8Array {
   return out;
 }
 
-export function bytesToB64url(bytes: Uint8Array): string {
+export function bytesToB64url(bytes: Bytes): string {
   let bin = "";
   for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
   return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function concat(...arrs: Uint8Array[]): Uint8Array {
+function concat(...arrs: Bytes[]): Bytes {
   const total = arrs.reduce((n, a) => n + a.length, 0);
   const out = new Uint8Array(total);
   let off = 0;
@@ -38,13 +45,13 @@ const utf8 = (s: string) => new TextEncoder().encode(s);
 
 // ---- HKDF (RFC 5869) ----
 
-async function hmacSha256(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
+async function hmacSha256(key: Bytes, data: Bytes): Promise<Bytes> {
   const k = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return new Uint8Array(await crypto.subtle.sign("HMAC", k, data));
 }
 
 /** HKDF-Extract then Expand で length バイト導出（length <= 32 前提） */
-async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length: number): Promise<Uint8Array> {
+async function hkdf(salt: Bytes, ikm: Bytes, info: Bytes, length: number): Promise<Bytes> {
   const prk = await hmacSha256(salt, ikm);
   const t = await hmacSha256(prk, concat(info, Uint8Array.of(1)));
   return t.slice(0, length);
@@ -88,7 +95,7 @@ async function buildVapidAuth(endpoint: string, vapid: VapidKeys): Promise<strin
 
 // ---- 本文暗号化 (RFC 8291 + RFC 8188 aes128gcm) ----
 
-async function encryptPayload(sub: PushSubscriptionJSON, payload: Uint8Array): Promise<Uint8Array> {
+async function encryptPayload(sub: PushSubscriptionJSON, payload: Bytes): Promise<Bytes> {
   const uaPublic = b64urlToBytes(sub.keys.p256dh); // 65byte uncompressed point
   const authSecret = b64urlToBytes(sub.keys.auth); // 16byte
 

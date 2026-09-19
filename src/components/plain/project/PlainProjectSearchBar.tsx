@@ -2,7 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { CONTENT_TYPES } from "@/lib/data/projectTypes";
+import { CONTENT_TYPES } from "@modparks/core/data/projectTypes";
 import type { AdvancedSearchFilters } from "@/components/project/AdvancedSearchDialog";
 import styles from "../plain.module.css";
 

@@ -1,8 +1,8 @@
 import JSZip from "jszip";
 import { parse as parseToml } from "smol-toml";
 import semver from "semver";
-import { MC_VERSIONS } from "../../../src/lib/data/minecraftVersions";
-import { AVAILABLE_LOADERS } from "../../../src/lib/data/loaderIds";
+import { MC_VERSIONS } from "@modparks/core/data/minecraftVersions";
+import { AVAILABLE_LOADERS } from "@modparks/core/data/loaderIds";
 import type { ParsedModInfo } from "./types";
 
 /** ローダー検出器1つ分の結果。version は見つかった場合のみ。 */

@@ -9,7 +9,7 @@ import { sqliteTable, text, integer, primaryKey, index } from "drizzle-orm/sqlit
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
 import { posts } from "./posts";
-import { CONTENT_TYPES } from "../../lib/data/projectTypes";
+import { CONTENT_TYPES } from "@modparks/core/data/projectTypes";
 import type { RecipeSettings } from "../../lib/recipe/settings";
 
 /**

@@ -28,13 +28,16 @@ migrations_dir = "drizzle"
 binding = "SETTINGS_KV"
 id = "75c45e724c144cc18b629dd2dca50a7e"
 
-# JAR 解析サイドカー。jszip はこちらにのみ存在する（本体の 3 MiB 制限対策）
+# JAR 解析サイドカー。jszip はこちらにのみ存在する。
+# 分離の理由はバンドルサイズではなく本体の isolate 起動 CPU。Free は 1 リクエスト
+# 10 ms しかないため、JAR 解析を使わない要求に jszip の評価を負担させない。
+# （圧縮後 3 MiB の上限は 2026-09-04 に撤廃され、現在は非圧縮 64 MiB で Free/Paid 共通）
 [[services]]
 binding = "JAR"
 service = "modparks-jar"
 
-# WebAuthn 検証サイドカー。@simplewebauthn/server(gzip ~125 KiB)はこちらにのみ
-# 存在する（本体の 3 MiB 制限対策）
+# WebAuthn 検証サイドカー。@simplewebauthn/server はこちらにのみ存在する。
+# 上の JAR と同じ理由で、サイズではなく isolate 起動 CPU のために分離している。
 [[services]]
 binding = "AUTH"
 service = "modparks-auth"

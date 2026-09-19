@@ -8,7 +8,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { revalidatePath } from "next/cache";
 import { fetchCfAuthorProjects } from "@/lib/curseforge";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import { type ContentType } from "@/lib/data/projectTypes";
+import { type ContentType } from "@modparks/core/data/projectTypes";
 import { chunkRows } from "@/lib/db/chunkRows";
 
 export interface ImportedProject {

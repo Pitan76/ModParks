@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition, useEffect, useRef } from "react";
 import type { ChangeEvent } from "react";
 import dynamic from "next/dynamic";
-import { CONTENT_TYPES } from "@/lib/data/projectTypes";
+import { CONTENT_TYPES } from "@modparks/core/data/projectTypes";
 import type { AdvancedSearchFilters } from "./AdvancedSearchDialog";
 import { useColorMode } from "@/components/ThemeRegistry";
 import PlainProjectSearchBar from "@/components/plain/project/PlainProjectSearchBar";

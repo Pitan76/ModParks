@@ -1,7 +1,7 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Image from "next/image";
-import { LOADERS_DATA, AVAILABLE_LOADERS, type LoaderColor } from "@/lib/data/loaderIds";
+import { LOADERS_DATA, AVAILABLE_LOADERS, type LoaderColor } from "@modparks/core/data/loaderIds";
 
 /** ローダーアイコンの共通スタイル */
 const LOADER_ICON_STYLE = { objectFit: "contain" as const, borderRadius: "2px" };

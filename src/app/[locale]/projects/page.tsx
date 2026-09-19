@@ -13,7 +13,7 @@ import { toProjectCardData } from "@/lib/queries/projectCardData";
 import { auth } from "@/lib/auth";
 import PaginationControls from "@/components/ui/PaginationControls";
 import AdSlot from "@/components/ads/AdSlot";
-import { CONTENT_TYPES } from "@/lib/data/projectTypes";
+import { CONTENT_TYPES } from "@modparks/core/data/projectTypes";
 
 interface ProjectsPageProps {
   params:      Promise<{ locale: string }>;
