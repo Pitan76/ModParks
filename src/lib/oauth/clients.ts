@@ -2,10 +2,10 @@
  * OAuth クライアントの参照と認証。
  */
 import { getDatabase } from "@/lib/db";
-import { oauthClients } from "@/db/schema";
+import { oauthClients } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { generateSecret, sha256Hex } from "./crypto";
-import type { OAuthClient } from "@/db/schema";
+import type { OAuthClient } from "@modparks/core/db/schema";
 
 /** client_id の接頭辞。ログや設定ファイルで一目で判別できるようにする */
 const CLIENT_ID_PREFIX = "mpc";

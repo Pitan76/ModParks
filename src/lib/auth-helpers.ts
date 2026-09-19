@@ -25,7 +25,7 @@ export async function getAuthenticatedDb() {
  */
 export async function getAuditEmail(db: Database, userId: string): Promise<string | undefined> {
   try {
-    const { users } = await import("@/db/schema");
+    const { users } = await import("@modparks/core/db/schema");
     const { eq } = await import("drizzle-orm");
     const user = await db
       .select({ email: users.email })
@@ -56,7 +56,7 @@ export async function getAdminDb() {
  */
 export async function getReauthenticatedAdminDb(totpToken: string) {
   const { db, session, userId } = await getAdminDb();
-  const { users } = await import("@/db/schema");
+  const { users } = await import("@modparks/core/db/schema");
   const { eq } = await import("drizzle-orm");
 
   const user = await db
@@ -87,7 +87,7 @@ export async function assertProjectAccess(db: Database, project: { id: string; a
     return true; // Author
   }
 
-  const { projectMembers } = await import("@/db/schema");
+  const { projectMembers } = await import("@modparks/core/db/schema");
   const { eq, and } = await import("drizzle-orm");
 
   if (await isAdminUser(db, session.user.id)) {

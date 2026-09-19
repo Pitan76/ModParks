@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { users, userProfiles, userSettings, rateLimits } from "@/db/schema";
+import { users, userProfiles, userSettings, rateLimits } from "@modparks/core/db/schema";
 import { eq, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { hashPassword, comparePassword, validateTotpToken, provisionTotp } from "@/lib/services/auth";
@@ -234,7 +234,7 @@ export const disableTotp = async (passwordOrToken: string) => {
   }).where(eq(users.id, userId));
 
   // 2FA を切った以上、記憶済みブラウザの登録も残す意味がない
-  const { trustedDevices } = await import("@/db/schema");
+  const { trustedDevices } = await import("@modparks/core/db/schema");
   await db.delete(trustedDevices).where(eq(trustedDevices.userId, userId)).run();
 
   revalidatePath("/settings");

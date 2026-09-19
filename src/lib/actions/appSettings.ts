@@ -2,7 +2,7 @@
 
 import { getAdminDb, getAuditEmail } from "@/lib/auth-helpers";
 import { getSettingsKV } from "@/lib/kv";
-import { settingsAudit } from "@/db/schema";
+import { settingsAudit } from "@modparks/core/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import {

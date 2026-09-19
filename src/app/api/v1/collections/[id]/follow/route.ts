@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { collectionFollows, collections } from "@/db/schema";
+import { collectionFollows, collections } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 

@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { favorites, projectSubscriptions, projectMembers, userSettings } from "@/db/schema";
+import { favorites, projectSubscriptions, projectMembers, userSettings } from "@modparks/core/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { getProjectDependencies, getProjectDependents } from "@/lib/queries/dependency";
 import { mergeDependencyEntries, mergeDependentEntries } from "@/lib/dependencies/merge";

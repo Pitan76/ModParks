@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { eq } from "drizzle-orm";
-import { users, userProfiles, userSettings, collections, comments } from "@/db/schema";
+import { users, userProfiles, userSettings, collections, comments } from "@modparks/core/db/schema";
 import { listProjectPosts, listIdeaPosts } from "@/lib/queries/postList";
 import { getTranslations } from "next-intl/server";
 import type { AppLocale } from "@/lib/i18n/routing";

@@ -14,7 +14,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/routing";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
-import type { Notification } from "@/db/schema";
+import type { Notification } from "@modparks/core/db/schema";
 import { renderNotification } from "./renderNotification";
 import NotificationAvatar from "./NotificationAvatar";
 import { markAllNotificationsRead } from "@/lib/actions/notification";

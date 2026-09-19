@@ -6,7 +6,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
-import type { UsageDaily } from "@/db/schema";
+import type { UsageDaily } from "@modparks/core/db/schema";
 
 interface UsageHistoryTableProps {
   /** 古い順の日次行 */

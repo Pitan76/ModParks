@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { projectDependencies, posts, projects, versions } from "@/db/schema";
+import { projectDependencies, posts, projects, versions } from "@modparks/core/db/schema";
 import { eq, and, isNull, or } from "drizzle-orm";
 import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@/lib/dependencies/scope";
 import { toStringArray } from "@/lib/utils/format";

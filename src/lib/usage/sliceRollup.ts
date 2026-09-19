@@ -6,7 +6,7 @@
  */
 import { and, eq, gt, lte, sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { ddosSlices, usageDaily, usageRollupState } from "@/db/schema";
+import { ddosSlices, usageDaily, usageRollupState } from "@modparks/core/db/schema";
 
 type Db = Awaited<ReturnType<typeof getDatabase>>;
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { userSettings } from "@/db/schema";
+import { userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { createId } from "@paralleldrive/cuid2";

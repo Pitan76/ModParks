@@ -1,4 +1,4 @@
-import { users } from "@/db/schema";
+import { users } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import type { Session } from "next-auth";
 import type { Database } from "@/lib/db";

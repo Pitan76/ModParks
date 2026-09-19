@@ -1,4 +1,4 @@
-import { notifications, projectSubscriptions, developerSubscriptions, userSettings, users, userProfiles } from "@/db/schema";
+import { notifications, projectSubscriptions, developerSubscriptions, userSettings, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { ProjectPost } from "@/types/post";
 import { sendDiscordVersionNotification } from "@/lib/notifications/discord";

@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { generateRegistrationOptions, verifyRegistration } from "@/lib/services/auth";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { authenticators } from "@/db/schema";
+import { authenticators } from "@modparks/core/db/schema";
 import { getRpContext } from "@/lib/webauthn/config";
 import { setChallenge, getChallenge, clearChallenge } from "@/lib/webauthn/challenge";
 

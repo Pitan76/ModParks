@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { projectHiddenRecipes } from "@/db/schema";
+import { projectHiddenRecipes } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 
 /** 公開ページ・編集画面の双方で使う: プロジェクトで非表示にされているレシピIDを取得する */

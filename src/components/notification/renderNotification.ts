@@ -1,4 +1,4 @@
-import type { Notification } from "@/db/schema";
+import type { Notification } from "@modparks/core/db/schema";
 
 type Translate = (key: string, values?: Record<string, string>) => string;
 

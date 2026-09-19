@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { versions, versionMcVersions, userSettings } from "@/db/schema";
+import { versions, versionMcVersions, userSettings } from "@modparks/core/db/schema";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { fetchCfModFiles } from "@/lib/curseforge";
 import { fetchCfGameVersionMap, resolveCfGameVersionIds, updateCfFileGameVersions } from "@/lib/curseforgeUpload";

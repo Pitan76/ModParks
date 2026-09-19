@@ -17,7 +17,7 @@ import { useTranslations } from "next-intl";
 import { toggleManualUnderAttack } from "@/lib/actions/admin";
 import { updateAppSettings } from "@/lib/actions/appSettings";
 import type { AppSettings } from "@/lib/config/appSettings";
-import type { DdosStateModel } from "@/db/schema";
+import type { DdosStateModel } from "@modparks/core/db/schema";
 
 export default function DdosPanel({
   initialState,

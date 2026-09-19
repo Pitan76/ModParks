@@ -2,7 +2,7 @@
  * ユーザーの同意（grant）の記録と参照。
  */
 import { getDatabase } from "@/lib/db";
-import { oauthGrants } from "@/db/schema";
+import { oauthGrants } from "@modparks/core/db/schema";
 import { and, eq } from "drizzle-orm";
 import { formatScope, isSubsetOf } from "./scopes";
 

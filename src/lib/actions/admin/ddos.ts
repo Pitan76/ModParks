@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { ddosState } from "@/db/schema";
+import { ddosState } from "@modparks/core/db/schema";
 import { recordDdosAudit } from "@/lib/actions/ddosAudit";
 
 /** 既定の防護継続時間(ms)。手動解除しなかった場合はこの時間で自動的に戻す */

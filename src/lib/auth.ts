@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import type { NextAuthConfig } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import * as schema from "@/db/schema";
+import * as schema from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { authProviders } from "./authProviders";
 
@@ -14,7 +14,7 @@ export const authConfig = {
   events: {
     async createUser({ user }: { user: any }) {
       const { getDatabase } = await import("@/lib/db");
-      const { userProfiles, userSettings } = await import("@/db/schema");
+      const { userProfiles, userSettings } = await import("@modparks/core/db/schema");
       const { generateUniqueUsername } = await import("@/lib/utils/username");
       const db = await getDatabase();
 
@@ -47,7 +47,7 @@ export const authConfig = {
         if (isBlockedEmailDomain(user.email as string, appSettings.blockedEmailDomains)) return false;
 
         const { getDatabase } = await import("@/lib/db");
-        const { users, userProfiles } = await import("@/db/schema");
+        const { users, userProfiles } = await import("@modparks/core/db/schema");
         const { eq: drizzleEq } = await import("drizzle-orm");
         const db = await getDatabase();
         const dbUser = await db.select().from(users).where(drizzleEq(users.email, user.email as string)).get();
@@ -101,7 +101,7 @@ export const authConfig = {
           const { getDatabase } = await import("@/lib/db");
           const db = await getDatabase();
           if (db) {
-            const { users, userProfiles, userSettings: schemaSettings } = await import("@/db/schema");
+            const { users, userProfiles, userSettings: schemaSettings } = await import("@modparks/core/db/schema");
             const { eq: drizzleEq } = await import("drizzle-orm");
             const dbUser = await db.select({
               role: users.role,

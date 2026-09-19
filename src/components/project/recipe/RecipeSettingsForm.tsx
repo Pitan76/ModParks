@@ -15,7 +15,7 @@ import {
   parseNamespaceList,
   toNamespaceInput,
   type RecipeSettings,
-} from "@/lib/recipe/settings";
+} from "@modparks/core/recipe/settings";
 
 /** 選べるクリップ量（ネイティブpx）。 */
 const CROP_CHOICES = Array.from({ length: MAX_CROP + 1 }, (_, n) => n);

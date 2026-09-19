@@ -1,4 +1,4 @@
-import * as schema from "@/db/schema";
+import * as schema from "@modparks/core/db/schema";
 
 export const SCHEMA_TABLES: Record<string, any> = {
   users: schema.users,

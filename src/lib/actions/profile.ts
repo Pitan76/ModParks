@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { users, userProfiles } from "@/db/schema";
+import { users, userProfiles } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -34,7 +34,7 @@ export async function updateProfile(formData: FormData) {
 
 export async function getFollowList(targetUsername: string, type: "followers" | "following") {
   const { getDb, getD1 } = await import("@/lib/db");
-  const { users, userProfiles, userFollows } = await import("@/db/schema");
+  const { users, userProfiles, userFollows } = await import("@modparks/core/db/schema");
   const { eq, and, isNull } = await import("drizzle-orm");
 
   const d1 = await getD1();

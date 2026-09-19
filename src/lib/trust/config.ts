@@ -5,7 +5,7 @@
  * 再デプロイなしで調整する。値そのものは秘密ではないので、リポジトリに残してよい
  * （公開されても壊れないことを設計要件にしている）。
  */
-import type { TrustEventKind, TrustTier } from "@/db/schema";
+import type { TrustEventKind, TrustTier } from "@modparks/core/db/schema";
 
 /** 全ユーザ共通の出発点。ソーシャル連携は social_linked の加点で表す */
 export const TRUST_BASE_SCORE = 50;

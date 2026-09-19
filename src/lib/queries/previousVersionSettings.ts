@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { posts, versions } from "@/db/schema";
+import { posts, versions } from "@modparks/core/db/schema";
 import { normalizeReleaseChannel } from "@/lib/releaseChannels";
 import type { PreviousVersionSettings } from "@/components/project/PreviousVersionSettings";
 

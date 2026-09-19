@@ -2,7 +2,7 @@
 
 import { desc, sql } from "drizzle-orm";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { settingsAudit, backupAudit, ddosAudit } from "@/db/schema";
+import { settingsAudit, backupAudit, ddosAudit } from "@modparks/core/db/schema";
 
 type AuditTable = typeof settingsAudit | typeof backupAudit | typeof ddosAudit;
 

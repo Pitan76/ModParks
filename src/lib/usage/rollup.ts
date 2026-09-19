@@ -7,7 +7,7 @@
  */
 import { sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { usageDaily, versionDownloadDaily } from "@/db/schema";
+import { usageDaily, versionDownloadDaily } from "@modparks/core/db/schema";
 import { fetchDailyRequests, type DayRequests } from "@/lib/usage/analytics";
 import { writeAnalyticsStatus } from "@/lib/usage/analyticsStatus";
 

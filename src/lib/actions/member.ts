@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projects, projectMembers, users, userProfiles } from "@/db/schema";
+import { projects, projectMembers, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";

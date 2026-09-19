@@ -13,7 +13,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import SecurityIcon from "@mui/icons-material/Security";
 import GavelIcon from "@mui/icons-material/Gavel";
 import type { SvgIconComponent } from "@mui/icons-material";
-import type { Notification } from "@/db/schema";
+import type { Notification } from "@modparks/core/db/schema";
 
 /**
  * 通知の発信元を表すアバター。

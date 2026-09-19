@@ -1,4 +1,4 @@
-import * as schema from "@/db/schema";
+import * as schema from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 
 export { SCHEMA_TABLES, TABLE_RESTORE_ORDER, TABLE_PRIMARY_KEYS } from "./schemaConfig";

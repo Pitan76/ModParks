@@ -1,5 +1,5 @@
 import { getDatabase } from "./db";
-import { rateLimits } from "@/db/schema";
+import { rateLimits } from "@modparks/core/db/schema";
 import { eq, lt } from "drizzle-orm";
 import { headers } from "next/headers";
 

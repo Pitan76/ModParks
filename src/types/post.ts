@@ -1,4 +1,4 @@
-import type { Post, ProjectFields, IdeaFields, Comment } from "@/db/schema";
+import type { Post, ProjectFields, IdeaFields, Comment } from "@modparks/core/db/schema";
 
 /**
  * Project / Idea のドメイン型。

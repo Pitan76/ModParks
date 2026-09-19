@@ -3,7 +3,7 @@
  * 保存はすべてハッシュで、平文は発行時の戻り値でしか流通させない。
  */
 import { getDatabase } from "@/lib/db";
-import { oauthAccessTokens, oauthAuthCodes, oauthRefreshTokens } from "@/db/schema";
+import { oauthAccessTokens, oauthAuthCodes, oauthRefreshTokens } from "@modparks/core/db/schema";
 import { and, eq } from "drizzle-orm";
 import { generateSecret, sha256Hex } from "./crypto";
 import { formatScope } from "./scopes";

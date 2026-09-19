@@ -16,7 +16,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useTranslations } from "next-intl";
 import { createTag, updateTag, deleteTag, createPlatform, updatePlatform, deletePlatform } from "@/lib/actions/config";
 
-import type { Tag, Platform } from "@/db/schema";
+import type { Tag, Platform } from "@modparks/core/db/schema";
 
 export default function ConfigClient({ initialTags, initialPlatforms }: { initialTags: Tag[], initialPlatforms: Platform[] }) {
   const tAdmin = useTranslations("Admin.config");

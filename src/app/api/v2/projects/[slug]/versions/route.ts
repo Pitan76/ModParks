@@ -1,6 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { getDb, getD1, type Env } from "@/lib/db";
-import { posts, projects, projectDependencies, versions, projectMembers, versionLoaders, versionMcVersions } from "@/db/schema";
+import { posts, projects, projectDependencies, versions, projectMembers, versionLoaders, versionMcVersions } from "@modparks/core/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, desc, and, getTableColumns, isNull } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";

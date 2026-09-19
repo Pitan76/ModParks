@@ -9,7 +9,7 @@ import { consumeAuthCode, issueTokens, rotateRefreshToken, type IssuedTokens } f
 import { verifyPkceS256 } from "@/lib/oauth/crypto";
 import { issueIdToken } from "@/lib/oauth/idToken";
 import { buildUserClaims } from "@/lib/oauth/userClaims";
-import type { OAuthClient } from "@/db/schema";
+import type { OAuthClient } from "@modparks/core/db/schema";
 
 export async function POST(request: Request) {
   const form = new URLSearchParams(await request.text());

@@ -1,4 +1,4 @@
-import { posts, ideas, comments } from "@/db/schema";
+import { posts, ideas, comments } from "@modparks/core/db/schema";
 import { isAdminUser } from "@/lib/auth/roles";
 import { findIdeaPostById } from "@/lib/queries/post";
 import { eq, and } from "drizzle-orm";

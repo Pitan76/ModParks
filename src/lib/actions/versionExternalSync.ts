@@ -1,4 +1,4 @@
-import { userSettings } from "@/db/schema";
+import { userSettings } from "@modparks/core/db/schema";
 import { createModrinthVersion } from "@/lib/modrinthUpload";
 import { fetchCfGameVersionMap, resolveCfGameVersionIds, uploadCfFile } from "@/lib/curseforgeUpload";
 import { eq } from "drizzle-orm";

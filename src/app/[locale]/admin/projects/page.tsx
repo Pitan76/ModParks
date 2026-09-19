@@ -1,5 +1,5 @@
 import { getAdminDb } from "@/lib/auth-helpers";
-import { posts, projects, users, userProfiles } from "@/db/schema";
+import { posts, projects, users, userProfiles } from "@modparks/core/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";

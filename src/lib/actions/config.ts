@@ -1,7 +1,7 @@
 "use server";
 
 import { getAdminDb } from "@/lib/auth-helpers";
-import { tags, platforms } from "@/db/schema";
+import { tags, platforms } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";

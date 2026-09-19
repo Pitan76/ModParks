@@ -6,7 +6,7 @@
  * 表示はこれで訳文になるが、索引対象にするかは別問題として seo 側で判断する。
  */
 import { sql, type SQL } from "drizzle-orm";
-import { posts } from "@/db/schema";
+import { posts } from "@modparks/core/db/schema";
 
 /** 本文プレビューの最大長。一覧に全文を運ばないための打ち切り幅 */
 const PREVIEW_LENGTH = 1200;

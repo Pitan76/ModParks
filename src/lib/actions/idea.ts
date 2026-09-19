@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { posts, ideas, ideaTags } from "@/db/schema";
+import { posts, ideas, ideaTags } from "@modparks/core/db/schema";
 import { togglePostFavorite } from "./favorite";
 import { createIdeaSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -36,7 +36,7 @@ export async function createIdea(formData: FormData) {
   const mcVersions = (formData.getAll("mcVersions") as string[]).map((t) => t.trim()).filter(Boolean);
 
   try {
-    const { userSettings } = await import("@/db/schema");
+    const { userSettings } = await import("@modparks/core/db/schema");
     const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).get();
     const defaultVisibility = settingsRecord?.defaultIdeaStatus || "public";
     const defaultFormat = settingsRecord?.defaultIdeaBodyFormat || "markdown";

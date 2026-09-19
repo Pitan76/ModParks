@@ -2,7 +2,7 @@
  * 設定画面「OAuthアプリ」が使う一覧取得。
  */
 import { getDatabase } from "@/lib/db";
-import { oauthClients, oauthGrants } from "@/db/schema";
+import { oauthClients, oauthGrants } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 
 export type OwnedOAuthApp = {

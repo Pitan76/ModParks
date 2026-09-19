@@ -6,7 +6,7 @@
  */
 import { and, eq, gt, sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { projects, versionDownloadDaily, versions } from "@/db/schema";
+import { projects, versionDownloadDaily, versions } from "@modparks/core/db/schema";
 
 /** UTC 基準の epoch day */
 function toEpochDay(at: Date = new Date()): number {

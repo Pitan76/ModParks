@@ -5,7 +5,7 @@
  */
 import { desc, gte } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { usageDaily, type UsageDaily } from "@/db/schema";
+import { usageDaily, type UsageDaily } from "@modparks/core/db/schema";
 import { getAppSettings } from "@/lib/config/readSettings";
 import {
   evaluateQuota,

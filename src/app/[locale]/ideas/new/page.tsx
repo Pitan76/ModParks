@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { userSettings } from "@/db/schema";
+import { userSettings } from "@modparks/core/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import NewIdeaForm from "@/components/idea/NewIdeaForm";

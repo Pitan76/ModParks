@@ -5,7 +5,7 @@
  * 「何がスキャンされ、どう判定されたか」を後から追えなかった。ここで横断的に引く。
  */
 import { getDatabase } from "@/lib/db";
-import { versions, projects, posts, scanAppeals } from "@/db/schema";
+import { versions, projects, posts, scanAppeals } from "@modparks/core/db/schema";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 
 /** 一覧のフィルタ。"all" は未スキャンや対象外も含めた全件 */

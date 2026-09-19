@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { users } from "@/db/schema";
+import { users } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { isTrustedBrowserRequest } from "@/lib/auth/trustedDevice";

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { posts, projects } from "@/db/schema";
+import { posts, projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { importGithubReleaseSystem } from "@/lib/actions/github";
 import { toProjectPost } from "@/lib/queries/postRow";

@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { projects, ideas } from "@/db/schema";
+import { projects, ideas } from "@modparks/core/db/schema";
 import { recordDeletion } from "@/lib/backup/tombstone";
 
 /** 管理者がプロジェクトを削除する */

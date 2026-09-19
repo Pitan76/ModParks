@@ -6,7 +6,7 @@
  * 「公開範囲」と「項目」の二重の絞り込みを必ず通す。
  */
 import { and, eq, isNull } from "drizzle-orm";
-import { posts, projects, userProfiles, users, versions } from "@/db/schema";
+import { posts, projects, userProfiles, users, versions } from "@modparks/core/db/schema";
 import { getR2PublicUrl } from "@/lib/r2";
 import { toPlainDescription } from "@/lib/utils/plainText";
 import {

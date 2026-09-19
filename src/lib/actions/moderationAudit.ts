@@ -1,6 +1,6 @@
-import { moderationAudit } from "@/db/schema";
+import { moderationAudit } from "@modparks/core/db/schema";
 import { getAuditEmail } from "@/lib/auth-helpers";
-import type { ModerationAudit } from "@/db/schema";
+import type { ModerationAudit } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 
 type ModerationAction = ModerationAudit["action"];

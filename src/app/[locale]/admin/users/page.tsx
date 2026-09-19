@@ -1,5 +1,5 @@
 import { getAdminDb } from "@/lib/auth-helpers";
-import { users, userProfiles, userTrust } from "@/db/schema";
+import { users, userProfiles, userTrust } from "@modparks/core/db/schema";
 import { desc, eq, isNull, isNotNull, inArray, sql } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import UsersClient from "./UsersClientLazy";
@@ -28,7 +28,7 @@ export default async function AdminUsersPage({ params, searchParams }: AdminUser
   const limit = Math.min(Math.max(parseInt(limitStr as string) || ADMIN_USERS_PER_PAGE, 10), 200);
   const offset = (page - 1) * limit;
 
-  const { accounts } = await import("@/db/schema");
+  const { accounts } = await import("@modparks/core/db/schema");
 
   const [pageUsers, activeCountResult, deletedCountResult] = await Promise.all([
     db.select({

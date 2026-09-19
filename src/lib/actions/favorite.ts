@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { favorites, posts, projects, users, userProfiles } from "@/db/schema";
+import { favorites, posts, projects, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, and, desc, sql, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";

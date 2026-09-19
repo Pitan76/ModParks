@@ -3,7 +3,7 @@
 import { auth } from "@/lib/auth";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { profilePins, userSettings, userProfiles } from "@/db/schema";
+import { profilePins, userSettings, userProfiles } from "@modparks/core/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";

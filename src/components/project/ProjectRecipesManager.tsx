@@ -11,7 +11,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useTranslations } from "next-intl";
 import RecipeCard from "./recipe/RecipeCard";
 import RecipeSettingsForm from "./recipe/RecipeSettingsForm";
-import type { RecipeSettings } from "@/lib/recipe/settings";
+import type { RecipeSettings } from "@modparks/core/recipe/settings";
 import { useRecipeVisibility } from "./recipe/useRecipeVisibility";
 
 export type { ManagedRecipe } from "./recipe/RecipeCard";

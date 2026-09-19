@@ -1,7 +1,7 @@
 "use server";
 
 import { getDatabase } from "@/lib/db";
-import { users, userProfiles, userSettings, verificationTokens, passwordResetTokens } from "@/db/schema";
+import { users, userProfiles, userSettings, verificationTokens, passwordResetTokens } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 
 import { createId } from "@paralleldrive/cuid2";

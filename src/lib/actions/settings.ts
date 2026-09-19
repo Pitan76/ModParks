@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { users, userProfiles, userSettings, apiKeys, accounts, authenticators } from "@/db/schema";
+import { users, userProfiles, userSettings, apiKeys, accounts, authenticators } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";

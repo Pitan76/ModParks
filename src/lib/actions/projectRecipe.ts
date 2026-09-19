@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { projects, projectHiddenRecipes, projectRecipeNames } from "@/db/schema";
+import { projects, projectHiddenRecipes, projectRecipeNames } from "@modparks/core/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
@@ -9,7 +9,7 @@ import { D1_MAX_BOUND_PARAMS } from "@/lib/db/chunkRows";
 import { getCustomRecipeNames } from "@/lib/queries/recipeNames";
 import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 import { findProjectPostBySlug } from "@/lib/queries/post";
-import { normalizeRecipeSettings, type RecipeSettings } from "@/lib/recipe/settings";
+import { normalizeRecipeSettings, type RecipeSettings } from "@modparks/core/recipe/settings";
 
 /**
  * 1文に載せるレシピIDの数。D1 は 1クエリあたりのバインド変数が 100 個までなので、

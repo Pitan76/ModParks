@@ -3,7 +3,7 @@
 import { eq, isNotNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { users, userProfiles, userSettings } from "@/db/schema";
+import { users, userProfiles, userSettings } from "@modparks/core/db/schema";
 import { recordDeletion } from "@/lib/backup/tombstone";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 

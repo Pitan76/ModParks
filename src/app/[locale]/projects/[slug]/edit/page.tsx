@@ -18,7 +18,7 @@ import { getProjectMembers } from "@/lib/actions/member";
 import { getProjectDependencies } from "@/lib/queries/dependency";
 import { loadVersionUploadContext } from "@/lib/queries/versionUploadContext";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { versions, posts, versionIdeas } from "@/db/schema";
+import { versions, posts, versionIdeas } from "@modparks/core/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";
 import { isAdminSession } from "@/lib/auth/roles";

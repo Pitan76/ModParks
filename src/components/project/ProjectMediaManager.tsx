@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import { uploadFileToR2 } from "@/lib/utils/upload";
 import { resizeImageFile } from "@/lib/utils/image";
 import { addProjectMedia, deleteProjectMedia, toggleMediaFeatured } from "@/lib/actions/projectMedia";
-import type { ProjectMedia } from "@/db/schema";
+import type { ProjectMedia } from "@modparks/core/db/schema";
 import { imageUrl } from "@/lib/utils/imageUrl";
 
 export type ProjectMediaManagerProps = {

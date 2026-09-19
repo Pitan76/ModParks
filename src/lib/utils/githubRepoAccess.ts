@@ -5,7 +5,7 @@
  * 「App が入っているリポジトリ」＝「このユーザーが読んでよいリポジトリ」ではない。
  * インストール操作を行った本人であることを github_installations で照合してから発行する。
  */
-import { githubInstallations } from "@/db/schema";
+import { githubInstallations } from "@modparks/core/db/schema";
 import { and, eq } from "drizzle-orm";
 import { normalizeGithubRepo } from "@/lib/utils/github";
 import type { Database } from "@/lib/db";

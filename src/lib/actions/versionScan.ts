@@ -1,6 +1,6 @@
 "use server";
 
-import { versions, projects, posts } from "@/db/schema";
+import { versions, projects, posts } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { getR2KeyFromUrl } from "@/lib/r2";
 import { scanJar, type JarSource } from "@/lib/services/jar";

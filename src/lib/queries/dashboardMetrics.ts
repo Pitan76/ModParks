@@ -6,7 +6,7 @@
  */
 import { and, eq, gte, sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { posts, projectMetricDaily, pointTransactions } from "@/db/schema";
+import { posts, projectMetricDaily, pointTransactions } from "@modparks/core/db/schema";
 
 const SECONDS_PER_DAY = 86_400;
 

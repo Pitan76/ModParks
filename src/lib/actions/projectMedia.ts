@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { projectMedia, projects } from "@/db/schema";
+import { projectMedia, projects } from "@modparks/core/db/schema";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { recordDeletion } from "@/lib/backup/tombstone";
 import { createId } from "@paralleldrive/cuid2";

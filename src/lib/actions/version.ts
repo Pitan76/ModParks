@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, projectDependencies } from "@/db/schema";
+import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, projectDependencies } from "@modparks/core/db/schema";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { createSystemCommentForResolvedIdea } from "@/lib/actions/versionIdeaLink";

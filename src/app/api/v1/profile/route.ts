@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { userProfiles } from "@/db/schema";
+import { userProfiles } from "@modparks/core/db/schema";
 import { validateApiKey } from "@/lib/api-auth";
 import { eq } from "drizzle-orm";
 

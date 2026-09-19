@@ -16,7 +16,7 @@ import {
   type TrustSubjectType,
   type TrustTier,
   type UserTrust,
-} from "@/db/schema";
+} from "@modparks/core/db/schema";
 import { TRUST_BASE_SCORE, TRUST_EVENT_DELTAS, TRUST_NON_DECAYING_KINDS } from "@/lib/trust/config";
 import { computeScore, resolveTier, tierFromScore } from "@/lib/trust/score";
 

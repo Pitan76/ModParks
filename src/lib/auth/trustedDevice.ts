@@ -5,7 +5,7 @@
  * DB が漏れても、その値だけでは 2FA を迂回できないようにするため。
  */
 import { and, eq, gt } from "drizzle-orm";
-import { trustedDevices } from "@/db/schema";
+import { trustedDevices } from "@modparks/core/db/schema";
 import { sha256Hex } from "@/lib/oauth/crypto";
 import type { Database } from "@/lib/db";
 

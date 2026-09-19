@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
-import { reports, posts, projects, users, userProfiles, comments, ideas } from "@/db/schema";
+import { reports, posts, projects, users, userProfiles, comments, ideas } from "@modparks/core/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { count, eq, desc, or } from "drizzle-orm";

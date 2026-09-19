@@ -2,7 +2,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { tags, platforms } from "@/db/schema";
+import { tags, platforms } from "@modparks/core/db/schema";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { listWorkerVars } from "@/lib/actions/workerVars";
 import { listSecrets } from "@/lib/actions/workerSecrets";

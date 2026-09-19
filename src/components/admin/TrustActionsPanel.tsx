@@ -10,7 +10,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
-import { TRUST_TIERS, type TrustTier } from "@/db/schema";
+import { TRUST_TIERS, type TrustTier } from "@modparks/core/db/schema";
 import {
   adjustTrustScore,
   recomputeTrustAction,

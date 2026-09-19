@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { getDb, getD1 } from "@/lib/db";
-import { users, userProfiles, accounts } from "@/db/schema";
+import { users, userProfiles, accounts } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import ProfileForm from "./ProfileFormLazy";
 import { localePath } from "@/lib/i18n/localePath";

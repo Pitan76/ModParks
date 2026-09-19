@@ -12,7 +12,7 @@ import {
   users,
   userProfiles,
   type TrustTier,
-} from "@/db/schema";
+} from "@modparks/core/db/schema";
 import { effectiveDelta, resolveTier, tierFromScore } from "@/lib/trust/score";
 import { TRUST_BASE_SCORE, TRUST_TIER_FLOORS } from "@/lib/trust/config";
 

@@ -1,4 +1,4 @@
-import { pushSubscriptions, userSettings } from "@/db/schema";
+import { pushSubscriptions, userSettings } from "@modparks/core/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { NotificationType, NotificationPayload } from "@/lib/notifications/types";
 import { sendPush } from "@/lib/services/push";

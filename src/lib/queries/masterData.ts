@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { getDatabase } from "@/lib/db";
-import { tags as tagsTable, platforms as platformsTable } from "@/db/schema";
+import { tags as tagsTable, platforms as platformsTable } from "@modparks/core/db/schema";
 
 // マスタ(タグ/プラットフォーム)は滅多に変わらないため1時間キャッシュする。
 // 管理画面での変更は最大この秒数だけ公開フィルタへの反映が遅れる

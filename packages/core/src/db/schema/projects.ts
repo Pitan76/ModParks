@@ -10,7 +10,7 @@ import { sql } from "drizzle-orm";
 import { users } from "./auth";
 import { posts } from "./posts";
 import { CONTENT_TYPES } from "@modparks/core/data/projectTypes";
-import type { RecipeSettings } from "../../lib/recipe/settings";
+import type { RecipeSettings } from "@modparks/core/recipe/settings";
 
 /**
  * Project 固有の情報。共通部分（title / body / slug / visibility / author / 日時）は

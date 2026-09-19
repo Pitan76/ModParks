@@ -132,7 +132,7 @@ export const authProviders = [
 
         const { getDatabase } = await import("@/lib/db");
         const db = await getDatabase();
-        const { users, userProfiles } = await import("@/db/schema");
+        const { users, userProfiles } = await import("@modparks/core/db/schema");
         const record = await db.select()
           .from(users)
           .leftJoin(userProfiles, eq(users.id, userProfiles.userId))

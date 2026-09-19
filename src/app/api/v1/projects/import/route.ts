@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { userSettings } from "@/db/schema";
+import { userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { getConsoleApiKey } from "@/lib/curseforge";
 

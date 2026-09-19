@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { userSettings } from "@/db/schema";
+import { userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import BatchImportClient from "@/components/project/BatchImportClientLazy";
 import { redirect } from "@/lib/i18n/routing";

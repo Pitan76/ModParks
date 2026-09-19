@@ -6,7 +6,7 @@ import { listProjectPosts } from "@/lib/queries/postList";
 import { toApiProject } from "@/lib/api/toApi";
 import type { ApiProject, ApiProjectPrivate, PaginatedResponse } from "@/types/api";
 import { withPublicCache } from "@/lib/http/cache";
-import { userProfiles } from "@/db/schema";
+import { userProfiles } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {

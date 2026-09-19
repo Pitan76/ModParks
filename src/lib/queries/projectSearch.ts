@@ -1,4 +1,4 @@
-import { posts, projects, userProfiles } from "@/db/schema";
+import { posts, projects, userProfiles } from "@modparks/core/db/schema";
 import { eq, desc, and, or, like, sql, inArray, type SQL } from "drizzle-orm";
 import type { ContentType } from "@modparks/core/data/projectTypes";
 import { keywordVariants } from "@/lib/search/kana";

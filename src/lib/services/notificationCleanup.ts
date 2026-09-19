@@ -6,7 +6,7 @@
  * 既読を先に、未読はかなり長く置いてから消す。
  */
 import { and, asc, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
-import { notifications } from "@/db/schema";
+import { notifications } from "@modparks/core/db/schema";
 import { getDatabase } from "@/lib/db";
 import type { Database } from "@/lib/db";
 

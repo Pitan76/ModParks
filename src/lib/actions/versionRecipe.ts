@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { versions, projects } from "@/db/schema";
+import { versions, projects } from "@modparks/core/db/schema";
 import { getR2KeyFromUrl } from "@/lib/r2";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import { extractRecipes, type JarSource } from "@/lib/services/jar";

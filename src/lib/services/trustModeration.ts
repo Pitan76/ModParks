@@ -6,7 +6,7 @@
  */
 import { and, eq } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { comments, posts, projects, trustEvents, users, userProfiles, versions, type Report } from "@/db/schema";
+import { comments, posts, projects, trustEvents, users, userProfiles, versions, type Report } from "@modparks/core/db/schema";
 import { getTrustState, recordMalwareDetected, recordTrustEvent, reverseTrustEvent } from "./trust";
 
 /** 通報対象の持ち主を引く。持ち主が特定できない通報は減点の対象にしない */

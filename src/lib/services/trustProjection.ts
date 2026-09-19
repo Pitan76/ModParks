@@ -5,7 +5,7 @@
  * 本番と同じ computeScore に通す。dry-run の結果が本実行とずれないようにするため、
  * 判定ロジックはここに複製せず必ず score.ts を経由させる。
  */
-import type { TrustEvent, TrustEventKind, User } from "@/db/schema";
+import type { TrustEvent, TrustEventKind, User } from "@modparks/core/db/schema";
 import { computeScore } from "@/lib/trust/score";
 import {
   TRUST_ACCOUNT_AGE_STEPS,

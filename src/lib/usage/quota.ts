@@ -4,7 +4,7 @@
  * 金額ではなく消費率で持つことで、単価が改定されても閾値を直さずに済む。
  * free と paid は超過時の結果が正反対（停止 / 課金）なので、判定期間も変える。
  */
-import type { UsageDaily } from "@/db/schema";
+import type { UsageDaily } from "@modparks/core/db/schema";
 
 /** free は日次リセット、paid は月次リセット */
 export type UsagePlan = "free" | "paid";

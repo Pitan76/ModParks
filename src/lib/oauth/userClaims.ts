@@ -3,7 +3,7 @@
  * どちらも同じ集合を返さないと、クライアント側で突き合わせたときに食い違う。
  */
 import { getDatabase } from "@/lib/db";
-import { users, userProfiles } from "@/db/schema";
+import { users, userProfiles } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 
 export type UserClaims = {

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getDatabase, type Database } from "@/lib/db";
-import { versions, projectMembers } from "@/db/schema";
+import { versions, projectMembers } from "@modparks/core/db/schema";
 import { isAdminUser } from "@/lib/auth/roles";
 import { eq, and, desc, isNull } from "drizzle-orm";
 import { findProjectPostBySlug, findProjectPostById } from "@/lib/queries/post";

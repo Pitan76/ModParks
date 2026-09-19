@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { projectRecipeNames } from "@/db/schema";
+import { projectRecipeNames } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 
 /**

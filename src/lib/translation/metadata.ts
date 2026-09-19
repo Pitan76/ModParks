@@ -5,7 +5,7 @@
  * 「見た目を訳す」ことと「その言語版として索引させる」ことを分けるため。
  */
 import { and, eq } from "drizzle-orm";
-import { postTranslations } from "@/db/schema";
+import { postTranslations } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 
 export interface MetadataTranslation {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { posts, projects, projectTags } from "@/db/schema";
+import { posts, projects, projectTags } from "@modparks/core/db/schema";
 import { createProjectSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: { slug: [vk("slugTaken")] } }, { status: 400 });
     }
 
-    const { userSettings, ideas } = await import("@/db/schema");
+    const { userSettings, ideas } = await import("@modparks/core/db/schema");
     const settingsRecord = await db.select().from(userSettings).where(eq(userSettings.userId, session.user.id)).get();
     const visibility = (settingsRecord?.defaultProjectStatus as any) || "draft";
     const commentsEnabled = settingsRecord?.defaultCommentsEnabled ?? false;

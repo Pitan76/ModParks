@@ -2,7 +2,7 @@
 
 import { cookies, headers } from "next/headers";
 import { eq, and, desc } from "drizzle-orm";
-import { trustedDevices } from "@/db/schema";
+import { trustedDevices } from "@modparks/core/db/schema";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import {
   TRUSTED_DEVICE_COOKIE,

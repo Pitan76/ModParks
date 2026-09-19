@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { githubInstallations } from "@/db/schema";
+import { githubInstallations } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 import { createInstallationToken } from "@/lib/utils/githubApp";
 

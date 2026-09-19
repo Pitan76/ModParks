@@ -7,7 +7,7 @@
 import { NextResponse } from "next/server";
 import { requireBearerScope } from "@/lib/oauth/bearer";
 import { getDatabase } from "@/lib/db";
-import { posts, projects } from "@/db/schema";
+import { posts, projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {

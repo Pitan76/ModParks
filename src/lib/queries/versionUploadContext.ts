@@ -1,4 +1,4 @@
-import { posts, ideas } from "@/db/schema";
+import { posts, ideas } from "@modparks/core/db/schema";
 import { inArray, eq } from "drizzle-orm";
 import { getAvailablePlatforms } from "@/lib/queries/masterData";
 import { getExternalSyncAvailability } from "@/lib/queries/externalSyncAvailability";

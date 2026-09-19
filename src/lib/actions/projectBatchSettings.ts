@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { posts, projects } from "@/db/schema";
+import { posts, projects } from "@modparks/core/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getServerErrors } from "@/lib/i18n/serverErrors";

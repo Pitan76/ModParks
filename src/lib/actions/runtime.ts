@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminDb, getAuditEmail } from "@/lib/auth-helpers";
-import { settingsAudit } from "@/db/schema";
+import { settingsAudit } from "@modparks/core/db/schema";
 import { getRuntimeConfig, putRuntimeConfig } from "@/lib/runtime/state";
 import {
   RUNTIME_FEATURES,

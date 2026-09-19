@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { resolveViewer } from "@/lib/api-auth";
-import { posts, projectMembers } from "@/db/schema";
+import { posts, projectMembers } from "@modparks/core/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { listProjectPosts } from "@/lib/queries/postList";

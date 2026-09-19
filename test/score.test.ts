@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { TrustEvent, TrustEventKind } from "@/db/schema";
+import type { TrustEvent, TrustEventKind } from "@modparks/core/db/schema";
 import { computeScore, effectiveDelta, resolveTier, tierFromScore } from "../src/lib/trust/score";
 import { TRUST_BASE_SCORE } from "../src/lib/trust/config";
 

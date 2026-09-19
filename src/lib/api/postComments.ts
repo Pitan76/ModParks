@@ -6,7 +6,7 @@
  * 実装はここに1本化する。ProjectとIdeaで別々のコメント処理を持たない。
  * 詳細は docs-md/DESIGN.md の「URLはpostsに寄せない」を参照。
  */
-import { comments, users, userProfiles } from "@/db/schema";
+import { comments, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, desc, and, isNull, inArray, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import type { ApiComment } from "@/types/api";
@@ -125,7 +125,7 @@ export async function createPostComment(
     }
   }
 
-  const { userSettings } = await import("@/db/schema");
+  const { userSettings } = await import("@modparks/core/db/schema");
   const settingsRecord = await db.select({ defaultCommentBodyFormat: userSettings.defaultCommentBodyFormat }).from(userSettings).where(eq(userSettings.userId, authorId)).get();
   const defaultFormat = settingsRecord?.defaultCommentBodyFormat || "markdown";
 

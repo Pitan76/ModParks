@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { projects } from "@/db/schema";
+import { projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { findProjectPostById } from "@/lib/queries/post";
@@ -147,7 +147,7 @@ export const syncExternalProjectData = async (projectId: string) => {
   const { assertProjectAccess } = await import("@/lib/auth-helpers");
   await assertProjectAccess(db, project, session);
 
-  const { userSettings } = await import("@/db/schema");
+  const { userSettings } = await import("@modparks/core/db/schema");
   const settings = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, session.user.id) });
   
   const newExtDl = await syncExternalProjectDataSystem(db, project, settings);

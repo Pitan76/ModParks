@@ -6,7 +6,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { getTranslations, getFormatter } from "next-intl/server";
-import type { PointTransaction } from "@/db/schema";
+import type { PointTransaction } from "@modparks/core/db/schema";
 
 /** ポイント取引の履歴。台帳は追記専用なので、行の編集・削除は用意しない */
 export default async function PointHistoryTable({

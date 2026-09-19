@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { versions } from "@/db/schema";
+import { versions } from "@modparks/core/db/schema";
 import { eq, getTableColumns } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";
 

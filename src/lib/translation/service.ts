@@ -3,7 +3,7 @@
  * 経由せずに返す。API ルートと Server Action の共通入口。
  */
 import { and, eq } from "drizzle-orm";
-import { posts } from "@/db/schema";
+import { posts } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { locales, type AppLocale } from "@/lib/i18n/locales";

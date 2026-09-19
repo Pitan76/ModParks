@@ -1,6 +1,6 @@
 /** GitHub App のインストール状況を読むクエリ */
 import { getDatabase } from "@/lib/db";
-import { githubInstallations } from "@/db/schema";
+import { githubInstallations } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 
 /**

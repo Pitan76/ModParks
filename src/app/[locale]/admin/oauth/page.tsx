@@ -1,5 +1,5 @@
 import { getAdminDb } from "@/lib/auth-helpers";
-import { oauthClients, users, userProfiles } from "@/db/schema";
+import { oauthClients, users, userProfiles } from "@modparks/core/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Typography from "@mui/material/Typography";
 import OauthClient from "./OauthClient";

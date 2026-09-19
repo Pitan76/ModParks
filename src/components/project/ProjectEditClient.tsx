@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import TabbedPanel from "@/components/ui/TabbedPanel";
 import { type ReactNode, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
-import type { RecipeSettings } from "@/lib/recipe/settings";
+import type { RecipeSettings } from "@modparks/core/recipe/settings";
 
 import dynamic from "next/dynamic";
 import CircularProgress from "@mui/material/CircularProgress";

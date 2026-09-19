@@ -1,7 +1,7 @@
 import { getDatabase } from "@/lib/db";
-import { notifications, users, userProfiles } from "@/db/schema";
+import { notifications, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, and, or, desc, count, inArray } from "drizzle-orm";
-import type { Notification } from "@/db/schema";
+import type { Notification } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 
 /** ベルのドロップダウンや通知ページで使う通知一覧 */

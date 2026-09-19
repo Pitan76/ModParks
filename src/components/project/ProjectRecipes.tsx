@@ -5,7 +5,7 @@ import ProjectRecipesGrid from "./ProjectRecipesGrid";
 import { fetchRecipeLists, toRecipeItems } from "@/lib/services/recipeList";
 import { getHiddenRecipeIds } from "@/lib/queries/hiddenRecipes";
 import { getCustomRecipeNames } from "@/lib/queries/recipeNames";
-import { normalizeCrop, type RecipeSettings } from "@/lib/recipe/settings";
+import { normalizeCrop, type RecipeSettings } from "@modparks/core/recipe/settings";
 
 type ProjectRecipesProps = {
   projectId: string;

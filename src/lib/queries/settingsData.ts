@@ -12,7 +12,7 @@ import {
   apiKeys,
   accounts,
   authenticators,
-} from "@/db/schema";
+} from "@modparks/core/db/schema";
 
 /** プロフィールタブ・アカウントタブが共通で使う表示用ユーザー情報 */
 export type SettingsUser = {

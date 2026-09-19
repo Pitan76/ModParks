@@ -8,7 +8,7 @@
  */
 import { eq, desc, sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { pointAccounts, pointTransactions, type PointTransaction } from "@/db/schema";
+import { pointAccounts, pointTransactions, type PointTransaction } from "@modparks/core/db/schema";
 
 export type PointTransactionType = PointTransaction["type"];
 

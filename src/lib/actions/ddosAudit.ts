@@ -1,6 +1,6 @@
-import { ddosAudit } from "@/db/schema";
+import { ddosAudit } from "@modparks/core/db/schema";
 import { getAuditEmail } from "@/lib/auth-helpers";
-import type { DdosAudit } from "@/db/schema";
+import type { DdosAudit } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 
 type DdosAction = DdosAudit["action"];

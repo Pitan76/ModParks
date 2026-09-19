@@ -30,7 +30,7 @@ export const verifyPasskeyLogin = async (response: AuthenticationResponseJSON): 
 
   const { getDatabase } = await import("@/lib/db");
   const db = await getDatabase();
-  const { authenticators, users, userProfiles } = await import("@/db/schema");
+  const { authenticators, users, userProfiles } = await import("@modparks/core/db/schema");
 
   const auth = await db.select().from(authenticators).where(eq(authenticators.credentialID, response.id)).get();
   if (!auth) return null;

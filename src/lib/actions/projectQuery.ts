@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { posts, projects, projectTags, users, userProfiles } from "@/db/schema";
+import { posts, projects, projectTags, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, and, or, sql, getTableColumns, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";

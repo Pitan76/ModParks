@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { canonicalUrl, languageAlternates } from '@/lib/seo/canonical';
 import { getDatabase } from '@/lib/db';
-import { posts, postTranslations, userProfiles, users } from '@/db/schema';
+import { posts, postTranslations, userProfiles, users } from '@modparks/core/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 
 // ビルド時は D1 バインディングが無くテーブルを引けないため、リクエスト時に生成する。

@@ -1,4 +1,4 @@
-import { versions, posts, projects } from "@/db/schema";
+import { versions, posts, projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { notifyToUser } from "@/lib/notifications/notify";
 import type { Database } from "@/lib/db";

@@ -2,7 +2,7 @@
  * 台帳からスコアと段階を導出する純粋計算。
  * DB に触れないので、この層だけでロジックのテストが完結する。
  */
-import type { TrustEvent, TrustEventKind, TrustTier } from "@/db/schema";
+import type { TrustEvent, TrustEventKind, TrustTier } from "@modparks/core/db/schema";
 import {
   TRUST_BASE_SCORE,
   TRUST_DECAY_DAYS,

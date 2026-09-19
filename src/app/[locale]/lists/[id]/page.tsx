@@ -14,7 +14,7 @@ import FollowListButton from "@/components/list/FollowListButton";
 import AddListToCartButton from "@/components/list/AddListToCartButton";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getDatabase } from "@/lib/db";
-import { collectionFollows } from "@/db/schema";
+import { collectionFollows } from "@modparks/core/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 interface ListDetailPageProps {

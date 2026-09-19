@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { userSettings } from "@/db/schema";
+import { userSettings } from "@modparks/core/db/schema";
 
 /**
  * クリエイタ還元への参加/辞退を切り替える。

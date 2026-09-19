@@ -9,7 +9,7 @@
  */
 import { sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { projectMetricDaily } from "@/db/schema";
+import { projectMetricDaily } from "@modparks/core/db/schema";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 /** 同一IPからの閲覧を 1日 1回だけ数えるための窓 */

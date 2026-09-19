@@ -35,7 +35,7 @@ export default async function AdminLayout({
 
   // Check if admin has set a password for security
   const { getDatabase } = await import("@/lib/db");
-  const { users } = await import("@/db/schema");
+  const { users } = await import("@modparks/core/db/schema");
   const { eq } = await import("drizzle-orm");
   const db = await getDatabase();
   const currentUser = await db.select().from(users).where(eq(users.id, session.user.id)).get();

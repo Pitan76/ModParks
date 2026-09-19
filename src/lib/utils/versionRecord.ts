@@ -1,4 +1,4 @@
-import { versions, versionLoaders, versionMcVersions } from "@/db/schema";
+import { versions, versionLoaders, versionMcVersions } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 import { chunkRows } from "@/lib/db/chunkRows";
 

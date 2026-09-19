@@ -3,12 +3,12 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { posts, postTranslations } from "@/db/schema";
+import { posts, postTranslations } from "@modparks/core/db/schema";
 import { locales, type AppLocale } from "@/lib/i18n/locales";
 import { computeSourceHash } from "@/lib/translation/sourceHash";
 import { deleteTranslation, saveTranslation } from "@/lib/translation/repository";
 import { requestTranslation } from "@/lib/translation/service";
-import type { PostTranslation } from "@/db/schema";
+import type { PostTranslation } from "@modparks/core/db/schema";
 
 /**
  * 作者による訳文の管理。閲覧者向けの自動翻訳と違い、ここで保存したものは

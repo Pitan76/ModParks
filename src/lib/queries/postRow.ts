@@ -1,4 +1,4 @@
-import type { Post, ProjectFields, IdeaFields } from "@/db/schema";
+import type { Post, ProjectFields, IdeaFields } from "@modparks/core/db/schema";
 import type { ProjectPost, IdeaPost, PostAuthor } from "@/types/post";
 
 /**

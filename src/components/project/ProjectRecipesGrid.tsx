@@ -11,7 +11,7 @@ import Button from "@mui/material/Button";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useColorMode } from "@/components/ThemeRegistry";
 import ZoomableImage from "@/components/ui/ZoomableImage";
-import { cropGeometry } from "@/lib/recipe/settings";
+import { cropGeometry } from "@modparks/core/recipe/settings";
 
 export type RecipeItem = {
   id: string;

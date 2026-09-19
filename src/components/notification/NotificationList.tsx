@@ -8,7 +8,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import { Link } from "@/lib/i18n/routing";
-import type { Notification } from "@/db/schema";
+import type { Notification } from "@modparks/core/db/schema";
 import { renderNotification } from "./renderNotification";
 import NotificationAvatar from "./NotificationAvatar";
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { posts, projects, userSettings } from "@/db/schema";
+import { posts, projects, userSettings } from "@modparks/core/db/schema";
 import { eq, isNotNull, or } from "drizzle-orm";
 import { toProjectPost } from "@/lib/queries/postRow";
 import { syncExternalProjectDataSystem } from "@/lib/actions/projectSync";

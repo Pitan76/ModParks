@@ -7,7 +7,7 @@
  */
 import { eq, isNull, and } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { users, userProfiles, accounts, type User } from "@/db/schema";
+import { users, userProfiles, accounts, type User } from "@modparks/core/db/schema";
 import { TRUST_ACCOUNT_AGE_STEPS, TRUST_DORMANT_DAYS } from "@/lib/trust/config";
 import { recordTrustEvent } from "./trust";
 

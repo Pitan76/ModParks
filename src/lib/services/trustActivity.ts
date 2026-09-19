@@ -6,7 +6,7 @@
  */
 import { and, eq, isNull, lt, notInArray, sql } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { versions, projects, posts, reports } from "@/db/schema";
+import { versions, projects, posts, reports } from "@modparks/core/db/schema";
 import { recordTrustEvent } from "./trust";
 
 const DAY_MS = 86_400_000;

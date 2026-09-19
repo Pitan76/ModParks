@@ -3,9 +3,9 @@
  */
 import { and, eq, gt, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
-import { postTranslations, translationRuns } from "@/db/schema";
+import { postTranslations, translationRuns } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
-import type { PostTranslation } from "@/db/schema";
+import type { PostTranslation } from "@modparks/core/db/schema";
 import type { BodyFormat } from "./masking";
 
 export async function findTranslation(

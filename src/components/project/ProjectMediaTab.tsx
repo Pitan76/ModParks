@@ -12,7 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
-import type { ProjectMedia } from "@/db/schema";
+import type { ProjectMedia } from "@modparks/core/db/schema";
 import ZoomableImage from "@/components/ui/ZoomableImage";
 
 interface ProjectMediaTabProps {

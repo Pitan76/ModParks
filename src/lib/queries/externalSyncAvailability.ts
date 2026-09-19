@@ -1,4 +1,4 @@
-import { userSettings } from "@/db/schema";
+import { userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import type { Database } from "@/lib/db";
 

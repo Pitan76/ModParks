@@ -1,5 +1,5 @@
 import { localeToFileMap, type AppLocale } from "@/lib/i18n/routing";
-import { tagNsQuery, type RecipeSettings } from "@/lib/recipe/settings";
+import { tagNsQuery, type RecipeSettings } from "@modparks/core/recipe/settings";
 
 /**
  * レシピCDN（mp-recipe）からネームスペース単位のレシピ索引を取得するモジュール。

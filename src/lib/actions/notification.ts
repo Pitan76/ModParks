@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { notifications, projectSubscriptions, developerSubscriptions, userSettings } from "@/db/schema";
+import { notifications, projectSubscriptions, developerSubscriptions, userSettings } from "@modparks/core/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { NOTIFICATION_TYPES, type NotificationType } from "@/lib/notifications/types";

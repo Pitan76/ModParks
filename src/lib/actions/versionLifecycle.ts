@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { versions, projectDependencies } from "@/db/schema";
+import { versions, projectDependencies } from "@modparks/core/db/schema";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";

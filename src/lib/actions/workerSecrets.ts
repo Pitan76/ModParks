@@ -1,7 +1,7 @@
 "use server";
 
 import { getAdminDb, getReauthenticatedAdminDb, getAuditEmail } from "@/lib/auth-helpers";
-import { settingsAudit } from "@/db/schema";
+import { settingsAudit } from "@modparks/core/db/schema";
 import { revalidatePath } from "next/cache";
 import {
   getCloudflareApiConfig,

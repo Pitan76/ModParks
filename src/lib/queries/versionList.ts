@@ -5,7 +5,7 @@
  * 列の定義をここに集約する。
  */
 import { and, desc, eq, getTableName, isNull, sql } from "drizzle-orm";
-import { versionDownloadDaily, versions } from "@/db/schema";
+import { versionDownloadDaily, versions } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 
 /**

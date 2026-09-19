@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { apiKeys } from "@/db/schema";
+import { apiKeys } from "@modparks/core/db/schema";
 import { isAdminUser } from "@/lib/auth/roles";
 import { eq } from "drizzle-orm";
 import type { Viewer } from "@/lib/auth/postAccess";

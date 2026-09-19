@@ -1,4 +1,4 @@
-import { posts, ideas, comments } from "@/db/schema";
+import { posts, ideas, comments } from "@modparks/core/db/schema";
 import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";

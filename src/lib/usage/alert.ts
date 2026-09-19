@@ -6,7 +6,7 @@
  */
 import { eq } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { usageAlertState } from "@/db/schema";
+import { usageAlertState } from "@modparks/core/db/schema";
 import { getUsageOverview } from "@/lib/queries/usageOverview";
 import { sendUsageAlert } from "@/lib/usage/alertNotify";
 import type { UsageLevel, UsagePlan } from "@/lib/usage/quota";

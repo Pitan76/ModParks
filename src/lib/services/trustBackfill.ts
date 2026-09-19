@@ -10,7 +10,7 @@
  */
 import { and, isNull, lt } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { users, userTrust, type User } from "@/db/schema";
+import { users, userTrust, type User } from "@modparks/core/db/schema";
 import { TRUST_TIER_FLOORS } from "@/lib/trust/config";
 import { syncTrustAttributes, syncAccountAge, hasSocialAccount } from "./trustAttributes";
 import { syncVersionCleanCredits, listCleanVersions } from "./trustActivity";

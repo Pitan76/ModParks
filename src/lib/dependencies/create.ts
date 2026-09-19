@@ -6,7 +6,7 @@
  * 状態を作らずに済む（スラッグの打ち間違いはバージョン作成前に弾ける）。
  */
 import { eq, and, inArray } from "drizzle-orm";
-import { posts, projectDependencies } from "@/db/schema";
+import { posts, projectDependencies } from "@modparks/core/db/schema";
 import { isAllowedExternalUrl } from "@/lib/validations";
 import type { Database } from "@/lib/db";
 import { MAX_DEPENDENCY_DRAFTS, type DependencyDraft } from "./types";

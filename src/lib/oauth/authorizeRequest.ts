@@ -4,7 +4,7 @@
  */
 import { findClient, isAllowedRedirectUri } from "./clients";
 import { resolveRequestedScope } from "./scopes";
-import type { OAuthClient } from "@/db/schema";
+import type { OAuthClient } from "@modparks/core/db/schema";
 import type { OAuthErrorCode } from "./errors";
 
 export type AuthorizeParams = {

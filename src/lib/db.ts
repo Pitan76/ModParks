@@ -1,7 +1,5 @@
-import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { drizzle } from "drizzle-orm/d1";
-import * as schema from "@/db/schema";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { getDb, type Database, type Env } from "@modparks/core/db/client";
 import dns from "node:dns";
 
 // Windows環境などの localhost 名前解決遅延 (IPv6 優先によるタイムアウト) 対策
@@ -14,34 +12,13 @@ if (process.env.NODE_ENV === "development") {
 }
 
 /**
- * schema を紐付けた Drizzle インスタンスの型。
- * ヘルパーへ db を引き回す際は any ではなくこれを使う。
+ * core の定義をそのまま再公開する。
+ *
+ * Next 側の既存の import（`@/lib/db` から Database や getDb を取る）を
+ * 壊さないため。新しいコードは core から直接取ること。
  */
-export type Database = DrizzleD1Database<typeof schema>;
-
-/** Workers AI。説明文の翻訳に使う。@cloudflare/workers-types には Ai の型が無い */
-export interface AiBinding {
-  run(model: string, input: unknown): Promise<{ response?: string }>;
-}
-
-/** Cloudflare Workers バインディングの型 */
-export type Env = {
-  DB: D1Database;
-  R2: R2Bucket;
-  modparks_storage: R2Bucket;
-  SETTINGS_KV: KVNamespace;
-  AI: AiBinding;
-  AUTH_SECRET: string;
-  AUTH_GITHUB_ID: string;
-  AUTH_GITHUB_SECRET: string;
-};
-
-/**
- * 取得したD1バインディングから、Drizzle ORM のインスタンスを生成します。
- * @param d1 Cloudflare D1データベースのバインディング
- * @returns schemaを設定済みの Drizzle D1 Database インスタンス
- */
-export const getDb = (d1: D1Database): Database => drizzle(d1, { schema });
+export { getDb };
+export type { Database, Env, AiBinding } from "@modparks/core/db/client";
 
 // HMRで localD1Proxy が消失しないよう、globalThisにキャッシュする
 const globalForD1 = globalThis as unknown as {

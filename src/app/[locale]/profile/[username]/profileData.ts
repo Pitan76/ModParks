@@ -1,5 +1,5 @@
 import { getDb, getD1 } from "@/lib/db";
-import { users, userProfiles, userSettings, userFollows, developerSubscriptions, profilePins, posts, projects, ideas, favorites, comments } from "@/db/schema";
+import { users, userProfiles, userSettings, userFollows, developerSubscriptions, profilePins, posts, projects, ideas, favorites, comments } from "@modparks/core/db/schema";
 import { eq, and, sql, inArray, desc, getTableColumns } from "drizzle-orm";
 import { getProjectsWithCount, getUserProjectStats } from "@/lib/actions/projectQuery";
 import { toProjectCardData } from "@/lib/queries/projectCardData";

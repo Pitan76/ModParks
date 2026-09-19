@@ -1,7 +1,7 @@
 "use server";
 
 import { getAdminDb } from "@/lib/auth-helpers";
-import { oauthClients } from "@/db/schema";
+import { oauthClients } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 

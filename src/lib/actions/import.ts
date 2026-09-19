@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { posts, projects, userSettings } from "@/db/schema";
+import { posts, projects, userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { findProjectPostBySlug } from "@/lib/queries/post";
 import { createId } from "@paralleldrive/cuid2";

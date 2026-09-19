@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { posts, comments } from "@/db/schema";
+import { posts, comments } from "@modparks/core/db/schema";
 import { createIdeaCommentSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";

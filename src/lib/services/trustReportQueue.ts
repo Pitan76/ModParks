@@ -11,7 +11,7 @@
  */
 import { and, count, eq, lt } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { reports } from "@/db/schema";
+import { reports } from "@modparks/core/db/schema";
 import { buildReportQueueEmbed, sendTrustAlert } from "./trustAlert";
 
 const HOUR_MS = 3_600_000;

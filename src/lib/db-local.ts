@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/sqlite-proxy";
-import * as schema from "@/db/schema";
+import * as schema from "@modparks/core/db/schema";
 
 /**
  * 開発環境で .wrangler 配下の miniflare SQLite ファイルを探索します。

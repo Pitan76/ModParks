@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { tags as tagsSchema, userSettings } from "@/db/schema";
+import { tags as tagsSchema, userSettings } from "@modparks/core/db/schema";
 import NewProjectForm from "@/components/project/NewProjectForm";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";

@@ -1,4 +1,4 @@
-import { posts, projectTags, users, userProfiles } from "@/db/schema";
+import { posts, projectTags, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 import { notifyNewProject } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";

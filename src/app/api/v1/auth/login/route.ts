@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
-import { users, userProfiles, apiKeys } from "@/db/schema";
+import { users, userProfiles, apiKeys } from "@modparks/core/db/schema";
 import { eq, or } from "drizzle-orm";
 import { comparePassword, validateTotpToken } from "@/lib/services/auth";
 import { checkRateLimit } from "@/lib/rate-limit";

@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
-import { posts, projects, projectTags, projectMembers, users } from "@/db/schema";
+import { posts, projects, projectTags, projectMembers, users } from "@modparks/core/db/schema";
 import { findProjectPostById } from "@/lib/queries/post";
 import { createProjectSchema, updateProjectSchema, updateDescriptionSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";

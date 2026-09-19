@@ -5,7 +5,7 @@ import IdeaCommentForm from "@/components/idea/IdeaCommentForm";
 import IdeaCommentItem from "@/components/idea/IdeaCommentItem";
 import type { IdeaDetail } from "./ideaDetailData";
 import { getDatabase } from "@/lib/db";
-import { userSettings } from "@/db/schema";
+import { userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import LinkButton from "@/components/ui/LinkButton";
 

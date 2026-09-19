@@ -2,7 +2,7 @@
 
 import { getAdminDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { scanAppeals, versions, posts, projects, userProfiles, users } from "@/db/schema";
+import { scanAppeals, versions, posts, projects, userProfiles, users } from "@modparks/core/db/schema";
 import { eq, desc, count } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 

@@ -1,7 +1,7 @@
 import { getDatabase } from "@/lib/db";
 import { getUserProjectStats } from "@/lib/actions/projectQuery";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
-import { posts, projects, comments, users, userProfiles, ideas } from "@/db/schema";
+import { posts, projects, comments, users, userProfiles, ideas } from "@modparks/core/db/schema";
 import { toProjectPost, toIdeaPost } from "@/lib/queries/postRow";
 import { eq, and, desc, count } from "drizzle-orm";
 

@@ -1,8 +1,8 @@
 import { count, eq } from "drizzle-orm";
 import { getAdminDb } from "@/lib/auth-helpers";
-import { reports, scanAppeals } from "@/db/schema/moderation";
-import { users } from "@/db/schema/auth";
-import { projects } from "@/db/schema/projects";
+import { reports, scanAppeals } from "@modparks/core/db/schema/moderation";
+import { users } from "@modparks/core/db/schema/auth";
+import { projects } from "@modparks/core/db/schema/projects";
 
 export interface AdminStats {
   pendingReports: number;
