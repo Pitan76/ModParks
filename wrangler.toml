@@ -104,8 +104,14 @@ NEXT_PUBLIC_ADS_MODE = "on"
 NEXT_PUBLIC_ADSENSE_CLIENT = "ca-pub-3977024448605477"
 GITHUB_APP_SLUG = "modparks"
 
+# API を Worker へ切り出した効果を測るために有効化している。
+# invocation_logs に CPU 時間と Wall 時間が載るので、Query Builder で
+# パスごとの p90 CPU を出して modparks-api と比較する。
+# Free は 1 日 20 万イベント・3 日保持まで追加費用なし。使い切ると
+# その日のログが落ちるだけで課金はされないが、朝の分だけが残って
+# 標本が偏るため、足りなければ head_sampling_rate を下げること。
 [observability]
-enabled = false
+enabled = true
 head_sampling_rate = 1
 
 [observability.logs]
