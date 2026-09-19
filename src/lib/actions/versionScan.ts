@@ -50,7 +50,7 @@ export async function scanVersionFile(db: Database, versionId: string, fileUrl: 
 
     if (result.level === "malicious") {
       const { applyScanMalicious } = await import("@/lib/services/trustModeration");
-      await applyScanMalicious(versionId, `scan: ${fileName}`);
+      await applyScanMalicious(db, versionId, `scan: ${fileName}`);
     }
 
     if (result.level === "suspicious" || result.level === "malicious") {

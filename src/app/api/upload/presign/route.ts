@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { buildR2Key, getR2PublicUrl } from "@/lib/r2";
@@ -112,6 +113,7 @@ export async function POST(req: NextRequest) {
 
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const db = await getDatabase();
 
   const parsed = parseRequest(await req.json());
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: parsed.status });
@@ -119,7 +121,7 @@ export async function POST(req: NextRequest) {
   const access = await authorize(parsed.value, session.user);
   if (!access.ok) return NextResponse.json({ error: access.error }, { status: access.status });
 
-  const trustState = await getTrustState(session.user.id);
+  const trustState = await getTrustState(db, session.user.id);
   const userTier = trustState.tier;
 
   if (!isAllowedUpload(parsed.value.type, parsed.value.contentType, parsed.value.fileName, access.projectType, userTier)) {

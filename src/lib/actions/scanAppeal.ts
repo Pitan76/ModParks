@@ -86,7 +86,7 @@ export async function reviewScanAppeal(
 
     // 誤検知だったので、確定検知で積んだ減点も取り消す
     const { applyScanCleared } = await import("@/lib/services/trustModeration");
-    await applyScanCleared(appeal.versionId, "scan appeal approved");
+    await applyScanCleared(db, appeal.versionId, "scan appeal approved");
   }
 
   await notifyAppealResult(db, appeal.versionId, appeal.appellantId, decision, note);
@@ -164,9 +164,9 @@ export async function overrideScanStatus(
 
   const trust = await import("@/lib/services/trustModeration");
   if (status === "malicious") {
-    await trust.applyScanMalicious(versionId, reviewNote ?? "manual override");
+    await trust.applyScanMalicious(db, versionId, reviewNote ?? "manual override");
   } else if (version.scanStatus === "malicious") {
-    await trust.applyScanCleared(versionId, reviewNote ?? "manual override");
+    await trust.applyScanCleared(db, versionId, reviewNote ?? "manual override");
   }
 
   const closedAppealId = await closePendingAppeal(db, versionId, status, reviewNote, userId);

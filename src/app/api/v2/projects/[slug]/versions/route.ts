@@ -180,7 +180,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 413 });
     }
 
-    const trustState = await getTrustState(auth.userId);
+    const trustState = await getTrustState(db, auth.userId);
     const userTier = trustState.tier;
 
     if (!isAllowedUpload("mod", file.type || "", file.name, project.type, userTier)) {

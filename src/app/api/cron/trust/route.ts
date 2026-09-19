@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getDatabase } from "@/lib/db";
 import { checkCronAuth } from "@/lib/cron/auth";
 import { syncTrustForActiveUsers } from "@/lib/services/trustAttributes";
 import { syncVersionCleanCredits } from "@/lib/services/trustActivity";
@@ -22,15 +23,17 @@ export async function GET(request: Request) {
   const unauthorized = checkCronAuth(request);
   if (unauthorized) return unauthorized;
 
+  const db = await getDatabase();
+
   try {
-    const users = await syncTrustForActiveUsers();
-    const versionsCredited = await syncVersionCleanCredits();
+    const users = await syncTrustForActiveUsers(db);
+    const versionsCredited = await syncVersionCleanCredits(db);
 
     const staleBefore = new Date(Date.now() - STALE_HOURS * 3600_000);
-    const recomputed = await recomputeStaleTrust(staleBefore);
+    const recomputed = await recomputeStaleTrust(db, staleBefore);
 
     // 判断は人間に残すため、キューが放置されていないかをここで見る
-    const stalledReports = await notifyStalledReports(await getAdminWebhookUrl());
+    const stalledReports = await notifyStalledReports(db, await getAdminWebhookUrl());
 
     return NextResponse.json({ success: true, users, versionsCredited, recomputed, stalledReports });
   } catch (error) {

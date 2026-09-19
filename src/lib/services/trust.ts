@@ -6,7 +6,7 @@
  * user_trust は台帳から再構築できるキャッシュなので、記録と同じ batch で更新する。
  */
 import { and, eq, desc, inArray, lt } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import {
   trustEvents,
   userTrust,
@@ -50,8 +50,7 @@ const DEFAULT_STATE: TrustState = {
 };
 
 /** 判定パス用。台帳を集計せず user_trust だけを読む */
-export async function getTrustState(userId: string): Promise<TrustState> {
-  const db = await getDatabase();
+export async function getTrustState(db: Database, userId: string): Promise<TrustState> {
   const row = await db
     .select()
     .from(userTrust)
@@ -73,8 +72,7 @@ function toState(row: UserTrust, now: Date = new Date()): TrustState {
 }
 
 /** 管理画面用。減衰後の寄与は呼び出し側で effectiveDelta を使って併記する */
-export async function listTrustEvents(userId: string, limit = 200): Promise<TrustEvent[]> {
-  const db = await getDatabase();
+export async function listTrustEvents(db: Database, userId: string, limit = 200): Promise<TrustEvent[]> {
   return db
     .select()
     .from(trustEvents)
@@ -114,9 +112,8 @@ function resolveSubjectId(input: RecordTrustEventInput): string {
  * 同一 (userId, kind, subjectId) が既にある場合は何もせず false を返すため、
  * バッチの再実行やリトライで二重加点にならない。
  */
-export async function recordTrustEvent(input: RecordTrustEventInput): Promise<boolean> {
+export async function recordTrustEvent(db: Database, input: RecordTrustEventInput): Promise<boolean> {
   const subjectId = resolveSubjectId(input);
-  const db = await getDatabase();
 
   const existing = await db
     .select({ id: trustEvents.id })
@@ -144,7 +141,7 @@ export async function recordTrustEvent(input: RecordTrustEventInput): Promise<bo
     occurredAt: input.occurredAt ?? new Date(),
   });
 
-  await recomputeTrust(input.userId);
+  await recomputeTrust(db, input.userId);
   return true;
 }
 
@@ -155,12 +152,13 @@ export async function recordTrustEvent(input: RecordTrustEventInput): Promise<bo
  * 記録時点のスコアを 0 にする値を算出して積む。以後この値は動かさない。
  */
 export async function recordMalwareDetected(
+  db: Database,
   userId: string,
   subjectId: string,
   reason: string,
 ): Promise<boolean> {
-  const { score } = await getTrustState(userId);
-  return recordTrustEvent({
+  const { score } = await getTrustState(db, userId);
+  return recordTrustEvent(db, {
     userId,
     kind: "malware_detected",
     delta: -score,
@@ -174,12 +172,11 @@ export async function recordMalwareDetected(
  * 既存イベントを打ち消す。誤判定の取り消しはすべてここを通す。
  * 元の行は消さず、打ち消した事実も履歴に残す。
  */
-export async function reverseTrustEvent(
+export async function reverseTrustEvent(db: Database,
   eventId: string,
   reason: string,
   actorEmail: string,
 ): Promise<boolean> {
-  const db = await getDatabase();
   const target = await db
     .select()
     .from(trustEvents)
@@ -210,13 +207,12 @@ export async function reverseTrustEvent(
     occurredAt: new Date(),
   });
 
-  await recomputeTrust(target.userId);
+  await recomputeTrust(db, target.userId);
   return true;
 }
 
 /** 台帳から user_trust を作り直す。係数を変えた後はこれを回す */
-export async function recomputeTrust(userId: string): Promise<TrustState> {
-  const db = await getDatabase();
+export async function recomputeTrust(db: Database, userId: string): Promise<TrustState> {
   const [events, current] = await Promise.all([
     db.select().from(trustEvents).where(eq(trustEvents.userId, userId)).all(),
     db.select().from(userTrust).where(eq(userTrust.userId, userId)).get(),
@@ -254,8 +250,7 @@ function DEFAULT_ROW(userId: string): UserTrust {
  * 減衰があるため、イベントがなくてもスコアは動く。
  * computedAt が古い行だけを対象にし、全ユーザを舐めない。
  */
-export async function recomputeStaleTrust(staleBefore: Date, limit = 500): Promise<number> {
-  const db = await getDatabase();
+export async function recomputeStaleTrust(db: Database, staleBefore: Date, limit = 500): Promise<number> {
   const stale = await db
     .select({ userId: userTrust.userId })
     .from(userTrust)
@@ -263,15 +258,14 @@ export async function recomputeStaleTrust(staleBefore: Date, limit = 500): Promi
     .limit(limit)
     .all();
 
-  for (const { userId } of stale) await recomputeTrust(userId);
+  for (const { userId } of stale) await recomputeTrust(db, userId);
   return stale.length;
 }
 
 /** 複数ユーザ分の段階をまとめて引く。一覧表示で N+1 を避けるため */
-export async function getTrustStates(userIds: readonly string[]): Promise<Map<string, TrustState>> {
+export async function getTrustStates(db: Database, userIds: readonly string[]): Promise<Map<string, TrustState>> {
   if (userIds.length === 0) return new Map();
 
-  const db = await getDatabase();
   const rows = await db
     .select()
     .from(userTrust)

@@ -9,7 +9,7 @@
  * 3 の下限補填だけは 1 度きりの操作として扱う（→ applyMigrationFloor）。
  */
 import { and, isNull, lt } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { users, userTrust, type User } from "@modparks/core/db/schema";
 import { TRUST_TIER_FLOORS } from "@/lib/trust/config";
 import { syncTrustAttributes, syncAccountAge, hasSocialAccount } from "./trustAttributes";
@@ -45,8 +45,7 @@ export type BackfillReport = {
 };
 
 /** 導入前から存在するユーザ。移行の対象はこれだけ */
-async function findExistingUsers(cutoff: Date, limit: number): Promise<User[]> {
-  const db = await getDatabase();
+async function findExistingUsers(db: Database, cutoff: Date, limit: number): Promise<User[]> {
   return db
     .select()
     .from(users)
@@ -65,11 +64,11 @@ async function findExistingUsers(cutoff: Date, limit: number): Promise<User[]> {
  * スコアを直接書き換えず `manual_grant` で不足分を積むので、
  * 「制度導入時に特別扱いした」事実が台帳に残る。
  */
-async function applyMigrationFloor(user: User): Promise<boolean> {
-  const { score } = await getTrustState(user.id);
+async function applyMigrationFloor(db: Database, user: User): Promise<boolean> {
+  const { score } = await getTrustState(db, user.id);
   if (score >= MIGRATION_FLOOR_SCORE) return false;
 
-  return recordTrustEvent({
+  return recordTrustEvent(db, {
     userId: user.id,
     kind: "manual_grant",
     delta: MIGRATION_FLOOR_SCORE - score,
@@ -81,8 +80,7 @@ async function applyMigrationFloor(user: User): Promise<boolean> {
 }
 
 /** 段階ごとの人数。係数が妥当かはこの分布を見て判断する */
-export async function getTierDistribution(): Promise<TierDistribution> {
-  const db = await getDatabase();
+export async function getTierDistribution(db: Database): Promise<TierDistribution> {
   const rows = await db.select({ tier: userTrust.tier }).from(userTrust).all();
 
   const distribution: TierDistribution = {};
@@ -97,17 +95,17 @@ export async function getTierDistribution(): Promise<TierDistribution> {
  * **dryRun が既定。**本実行の前に必ず分布を出し、目視で確認する。
  * 係数がおかしいまま流すと、全員が同じ段階に張り付いた台帳が出来上がる。
  */
-export async function backfillTrust(options: {
+export async function backfillTrust(db: Database, options: {
   dryRun?: boolean;
   cutoff?: Date;
   limit?: number;
 } = {}): Promise<BackfillReport> {
   const dryRun = options.dryRun ?? true;
   const cutoff = options.cutoff ?? new Date();
-  const targets = await findExistingUsers(cutoff, options.limit ?? 1000);
+  const targets = await findExistingUsers(db, cutoff, options.limit ?? 1000);
 
   if (dryRun) {
-    const simulated = await simulate(targets, cutoff);
+    const simulated = await simulate(db, targets, cutoff);
     return {
       dryRun: true,
       users: targets.length,
@@ -118,14 +116,14 @@ export async function backfillTrust(options: {
     };
   }
 
-  const versionCredits = await syncVersionCleanCredits();
+  const versionCredits = await syncVersionCleanCredits(db);
 
   const now = new Date();
   let floored = 0;
   for (const user of targets) {
-    await syncTrustAttributes(user);
-    await syncAccountAge(user, now);
-    if (await applyMigrationFloor(user)) floored += 1;
+    await syncTrustAttributes(db, user);
+    await syncAccountAge(db, user, now);
+    if (await applyMigrationFloor(db, user)) floored += 1;
   }
 
   return {
@@ -133,7 +131,7 @@ export async function backfillTrust(options: {
     users: targets.length,
     versionCredits,
     floored,
-    distribution: await getTierDistribution(),
+    distribution: await getTierDistribution(db),
   };
 }
 
@@ -143,8 +141,8 @@ export async function backfillTrust(options: {
  * **下限補填を適用する前の分布も返す。**補填で全員 `member` に揃った表を見ても
  * 係数が妥当かは判断できず、dry-run の意味がなくなるため。
  */
-async function simulate(targets: readonly User[], now: Date): Promise<SimulationResult> {
-  const grouped = groupCleanVersionsByUser(await listCleanVersions(now, VERSION_SCAN_LIMIT));
+async function simulate(db: Database, targets: readonly User[], now: Date): Promise<SimulationResult> {
+  const grouped = groupCleanVersionsByUser(await listCleanVersions(db, now, VERSION_SCAN_LIMIT));
 
   const raw = emptyDistribution();
   const withFloor = emptyDistribution();
@@ -153,7 +151,7 @@ async function simulate(targets: readonly User[], now: Date): Promise<Simulation
   for (const user of targets) {
     const score = projectScore({
       user,
-      hasSocial: await hasSocialAccount(user.id),
+      hasSocial: await hasSocialAccount(db, user.id),
       cleanVersions: grouped.get(user.id) ?? [],
     }, now);
 
@@ -183,10 +181,9 @@ function tierOf(score: number): string {
 }
 
 /** 移行後にキャッシュを作り直す。係数を変えた場合もこれを回す */
-export async function recomputeAll(limit = 1000): Promise<number> {
-  const db = await getDatabase();
+export async function recomputeAll(db: Database, limit = 1000): Promise<number> {
   const rows = await db.select({ userId: users.id }).from(users).limit(limit).all();
 
-  for (const row of rows) await recomputeTrust(row.userId);
+  for (const row of rows) await recomputeTrust(db, row.userId);
   return rows.length;
 }

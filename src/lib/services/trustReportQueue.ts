@@ -10,7 +10,7 @@
  *   3. 以降は日次サマリ … 個別には鳴らさず「未処理 N 件」としてまとめる
  */
 import { and, count, eq, lt } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { reports } from "@modparks/core/db/schema";
 import { buildReportQueueEmbed, sendTrustAlert } from "./trustAlert";
 
@@ -20,8 +20,7 @@ const HOUR_MS = 3_600_000;
 export const REPORT_REMINDER_HOURS = 24;
 
 /** 未処理の通報件数。滞留している分だけを数える */
-async function countPendingReports(before: Date): Promise<number> {
-  const db = await getDatabase();
+async function countPendingReports(db: Database, before: Date): Promise<number> {
   const row = await db
     .select({ total: count() })
     .from(reports)
@@ -38,9 +37,9 @@ async function countPendingReports(before: Date): Promise<number> {
  * （入った直後の通報は即時通知の担当）。
  * @returns 通知した件数。滞留がなければ 0
  */
-export async function notifyStalledReports(webhookUrl: string | undefined, now = new Date()): Promise<number> {
+export async function notifyStalledReports(db: Database, webhookUrl: string | undefined, now = new Date()): Promise<number> {
   const threshold = new Date(now.getTime() - REPORT_REMINDER_HOURS * HOUR_MS);
-  const pending = await countPendingReports(threshold);
+  const pending = await countPendingReports(db, threshold);
   if (pending === 0) return 0;
 
   await sendTrustAlert(webhookUrl, buildReportQueueEmbed({ pending, reminder: true }));

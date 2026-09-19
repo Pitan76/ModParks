@@ -23,13 +23,12 @@ export async function POST(request: Request) {
     const body = (await request.json().catch(() => ({}))) as BackfillBody;
     const dryRun = body.dryRun !== false;
 
-    if (dryRun) {
-      await getAdminDb();
-    } else {
-      await getReauthenticatedAdminDb(body.totpToken ?? "");
-    }
+    // どちらの経路でも認可のうえで db を返すため、ここで受け取って引き回す
+    const { db } = dryRun
+      ? await getAdminDb()
+      : await getReauthenticatedAdminDb(body.totpToken ?? "");
 
-    const report = await backfillTrust({ dryRun });
+    const report = await backfillTrust(db, { dryRun });
     return NextResponse.json({ success: true, ...report });
   } catch (error) {
     const reason = describeError(error);

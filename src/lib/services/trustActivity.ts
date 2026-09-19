@@ -5,7 +5,7 @@
  * 公開から一定期間を無事に過ごしたバージョンだけを対象にする。
  */
 import { and, eq, isNull, lt, notInArray, sql } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { versions, projects, posts, reports } from "@modparks/core/db/schema";
 import { recordTrustEvent } from "./trust";
 
@@ -28,8 +28,7 @@ export type CleanVersion = {
  * 条件は「公開済みプロジェクトに属し」「スキャンで無警告」「アーカイブされておらず」
  * 「14 日が経過」「そのプロジェクトへの通報がない」こと。
  */
-export async function listCleanVersions(now: Date, limit: number): Promise<CleanVersion[]> {
-  const db = await getDatabase();
+export async function listCleanVersions(db: Database, now: Date, limit: number): Promise<CleanVersion[]> {
   const threshold = new Date(now.getTime() - VERSION_CLEAN_DAYS * DAY_MS);
 
   const reported = db.select({ projectId: reports.projectId }).from(reports)
@@ -64,12 +63,12 @@ export async function listCleanVersions(now: Date, limit: number): Promise<Clean
  * 記録は (userId, kind, subjectId) で冪等なので、
  * 既に加点済みのバージョンが対象に含まれていても二重には積まれない。
  */
-export async function syncVersionCleanCredits(now: Date = new Date(), limit = 500): Promise<number> {
-  const candidates = await listCleanVersions(now, limit);
+export async function syncVersionCleanCredits(db: Database, now: Date = new Date(), limit = 500): Promise<number> {
+  const candidates = await listCleanVersions(db, now, limit);
 
   let recorded = 0;
   for (const candidate of candidates) {
-    const inserted = await recordTrustEvent({
+    const inserted = await recordTrustEvent(db, {
       // 加点は実行者本人に入れる。uploaderId 導入前の行だけ投稿者にフォールバックする
       userId: candidate.uploaderId ?? candidate.authorId,
       kind: "version_clean",

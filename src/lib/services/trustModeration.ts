@@ -5,13 +5,12 @@
  * 通報の却下で通報者を減点するかどうかは管理者の判断なので、既定では何もしない。
  */
 import { and, eq } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { comments, posts, projects, trustEvents, users, userProfiles, versions, type Report } from "@modparks/core/db/schema";
 import { getTrustState, recordMalwareDetected, recordTrustEvent, reverseTrustEvent } from "./trust";
 
 /** 通報対象の持ち主を引く。持ち主が特定できない通報は減点の対象にしない */
-async function findReportedOwnerId(report: Report): Promise<string | null> {
-  const db = await getDatabase();
+async function findReportedOwnerId(db: Database, report: Report): Promise<string | null> {
 
   if (report.commentId) {
     const comment = await db
@@ -45,8 +44,8 @@ export type ReportResolution = {
  * 通報の承認を反映する。
  * 通報者に加点し、通報された側に減点を積む。
  */
-export async function applyReportUpheld(report: Report, actorEmail?: string): Promise<void> {
-  await recordTrustEvent({
+export async function applyReportUpheld(db: Database, report: Report, actorEmail?: string): Promise<void> {
+  await recordTrustEvent(db, {
     userId: report.reporterId,
     kind: "report_upheld",
     subjectType: "report",
@@ -54,10 +53,10 @@ export async function applyReportUpheld(report: Report, actorEmail?: string): Pr
     actorEmail,
   });
 
-  const ownerId = await findReportedOwnerId(report);
+  const ownerId = await findReportedOwnerId(db, report);
   if (!ownerId) return;
 
-  await recordTrustEvent({
+  await recordTrustEvent(db, {
     userId: ownerId,
     kind: "report_upheld_against",
     subjectType: "report",
@@ -74,12 +73,13 @@ export async function applyReportUpheld(report: Report, actorEmail?: string): Pr
  * 明確に悪質な場合だけ、管理者が明示的に減点を選ぶ。
  */
 export async function applyReportRejected(
+  db: Database,
   report: Report,
   options: ReportResolution = {},
 ): Promise<void> {
   if (!options.penalizeReporter) return;
 
-  await recordTrustEvent({
+  await recordTrustEvent(db, {
     userId: report.reporterId,
     kind: "report_rejected",
     subjectType: "report",
@@ -92,8 +92,7 @@ export async function applyReportRejected(
  * 減点を入れる相手。**アップロードを実行した本人**であって、プロジェクトの持ち主ではない。
  * uploaderId 導入前に作られた行だけ、投稿者にフォールバックする。
  */
-async function findVersionUploaderId(versionId: string): Promise<string | null> {
-  const db = await getDatabase();
+async function findVersionUploaderId(db: Database, versionId: string): Promise<string | null> {
   const row = await db
     .select({ uploaderId: versions.uploaderId, authorId: posts.authorId })
     .from(versions)
@@ -112,13 +111,13 @@ async function findVersionUploaderId(versionId: string): Promise<string | null> 
  * 「審査に回す理由」であって減点の理由ではない。
  * 誤検知はありうるので、管理者が判定を覆したときは打ち消しイベントで戻す。
  */
-export async function applyScanMalicious(versionId: string, reason: string): Promise<boolean> {
-  const uploaderId = await findVersionUploaderId(versionId);
+export async function applyScanMalicious(db: Database, versionId: string, reason: string): Promise<boolean> {
+  const uploaderId = await findVersionUploaderId(db, versionId);
   if (!uploaderId) return false;
 
-  const { score } = await getTrustState(uploaderId);
-  const recorded = await recordMalwareDetected(uploaderId, versionId, reason);
-  if (recorded) await notifyMalware(uploaderId, versionId, score);
+  const { score } = await getTrustState(db, uploaderId);
+  const recorded = await recordMalwareDetected(db, uploaderId, versionId, reason);
+  if (recorded) await notifyMalware(db, uploaderId, versionId, score);
   return recorded;
 }
 
@@ -126,8 +125,7 @@ export async function applyScanMalicious(versionId: string, reason: string): Pro
  * 確定検知を管理者へ知らせる。
  * 誤検知でも重い処分になるため、人の目に入らないまま放置されないようにする。
  */
-async function notifyMalware(userId: string, versionId: string, previousScore: number): Promise<void> {
-  const db = await getDatabase();
+async function notifyMalware(db: Database, userId: string, versionId: string, previousScore: number): Promise<void> {
   const target = await db
     .select({ projectName: posts.title, username: userProfiles.username, email: users.email })
     .from(versions)
@@ -156,12 +154,11 @@ async function notifyMalware(userId: string, versionId: string, previousScore: n
  * スコアを直接戻さず打ち消しイベントを積むので、
  * 「検知されたが誤りだった」経緯が台帳に残る。
  */
-export async function applyScanCleared(
+export async function applyScanCleared(db: Database,
   versionId: string,
   reason: string,
   actorEmail?: string,
 ): Promise<boolean> {
-  const db = await getDatabase();
   const detected = await db
     .select({ id: trustEvents.id, userId: trustEvents.userId })
     .from(trustEvents)
@@ -173,10 +170,10 @@ export async function applyScanCleared(
 
   if (!detected) return false;
 
-  const reversed = await reverseTrustEvent(detected.id, reason, actorEmail ?? "system");
+  const reversed = await reverseTrustEvent(db, detected.id, reason, actorEmail ?? "system");
   if (!reversed) return false;
 
-  await recordTrustEvent({
+  await recordTrustEvent(db, {
     userId: detected.userId,
     kind: "appeal_upheld",
     subjectType: "version",

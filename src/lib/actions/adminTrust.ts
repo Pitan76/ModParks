@@ -1,6 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import type { Database } from "@modparks/core/db/client";
 import { revalidatePath } from "next/cache";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { userTrust, users, TRUST_TIERS, type TrustTier } from "@modparks/core/db/schema";
@@ -26,8 +27,8 @@ function normalizeReason(reason: string): string | null {
  * UPDATE を投げても無言で 0 件になる。凍結や段階の上書きは
  * 「まだ何もしていないユーザ」にこそ使いたいので、先に行を作る。
  */
-async function ensureTrustRow(userId: string): Promise<void> {
-  await recomputeTrust(userId);
+async function ensureTrustRow(db: Database, userId: string): Promise<void> {
+  await recomputeTrust(db, userId);
 }
 
 function revalidateTrust(userId: string) {
@@ -53,7 +54,7 @@ export async function adjustTrustScore(
   const normalized = normalizeReason(reason);
   if (!normalized) return { error: "reasonRequired" };
 
-  await recordTrustEvent({
+  await recordTrustEvent(db, {
     userId,
     kind: delta > 0 ? "manual_grant" : "manual_penalty",
     delta,
@@ -87,7 +88,7 @@ export async function setTrustTierOverride(
   const normalized = normalizeReason(reason);
   if (!normalized) return { error: "reasonRequired" };
 
-  await ensureTrustRow(userId);
+  await ensureTrustRow(db, userId);
   await db
     .update(userTrust)
     .set({ tierOverride: tier, tierOverrideUntil: tier ? until ?? null : null })
@@ -114,10 +115,10 @@ export async function setTrustFrozen(
   const normalized = normalizeReason(reason);
   if (!normalized) return { error: "reasonRequired" };
 
-  await ensureTrustRow(userId);
+  await ensureTrustRow(db, userId);
   await db.update(userTrust).set({ frozen }).where(eq(userTrust.userId, userId)).run();
   // 凍結の切り替えは加点の扱いを変えるため、スコアを作り直す
-  await recomputeTrust(userId);
+  await recomputeTrust(db, userId);
 
   await recordModerationAudit(db, "trust_freeze", userId, adminId, { frozen, reason: normalized });
   revalidateTrust(userId);
@@ -138,7 +139,7 @@ export async function reverseTrustEventAction(
   const normalized = normalizeReason(reason);
   if (!normalized) return { error: "reasonRequired" };
 
-  const reversed = await reverseTrustEvent(eventId, normalized, session.user?.email ?? "admin");
+  const reversed = await reverseTrustEvent(db, eventId, normalized, session.user?.email ?? "admin");
   if (!reversed) return { error: "notReversible" };
 
   await recordModerationAudit(db, "trust_event_reverse", userId, adminId, {
@@ -157,11 +158,11 @@ export async function recomputeTrustAction(userId: string): Promise<ActionResult
   const user = await db.select().from(users).where(eq(users.id, userId)).get();
   if (user) {
     const now = new Date();
-    await syncTrustAttributes(user);
-    await syncAccountAge(user, now);
+    await syncTrustAttributes(db, user);
+    await syncAccountAge(db, user, now);
   }
 
-  await recomputeTrust(userId);
+  await recomputeTrust(db, userId);
   await recordModerationAudit(db, "trust_recompute", userId, adminId);
   revalidateTrust(userId);
   return { success: true };
@@ -185,7 +186,7 @@ export async function adjustTrustScores(
   if (!Array.isArray(userIds) || userIds.length === 0) return { error: "noUsersSelected" };
 
   for (const userId of userIds) {
-    await recordTrustEvent({
+    await recordTrustEvent(db, {
       userId,
       kind: delta > 0 ? "manual_grant" : "manual_penalty",
       delta,

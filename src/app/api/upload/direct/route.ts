@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { uploadToR2, getR2Bucket } from "@/lib/r2";
@@ -87,6 +88,7 @@ export async function PUT(req: NextRequest) {
 
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const db = await getDatabase();
 
   const key = new URL(req.url).searchParams.get("key");
   if (!key) return NextResponse.json({ error: "Missing key" }, { status: 400 });
@@ -104,7 +106,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Missing or invalid Content-Length" }, { status: 411 });
   }
 
-  const trustState = await getTrustState(session.user.id);
+  const trustState = await getTrustState(db, session.user.id);
   const userTier = trustState.tier;
 
   const contentType = req.headers.get("content-type") || "application/octet-stream";

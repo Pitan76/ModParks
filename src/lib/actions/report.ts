@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
+import type { Database } from "@modparks/core/db/client";
 import { reports, posts, projects, users, userProfiles, comments, ideas } from "@modparks/core/db/schema";
 import { createReportSchema } from "@/lib/validations";
 import { createId } from "@paralleldrive/cuid2";
@@ -9,7 +10,6 @@ import { alias } from "drizzle-orm/sqlite-core";
 import { revalidatePath } from "next/cache";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 import { toggleUserSuspension } from "@/lib/actions/admin/users";
-import type { Database } from "@/lib/db";
 
 /**
  * ユーザーがプロジェクトを通報する Server Action
@@ -88,6 +88,7 @@ async function notifyNewReport(db: Database) {
  * 信頼ポイントの記録が失敗しても通報の処理自体は成立させたいので、ここで握る。
  */
 async function applyReportTrust(
+  db: Database,
   report: typeof reports.$inferSelect,
   status: "resolved" | "dismissed",
   penalizeReporter: boolean
@@ -95,10 +96,10 @@ async function applyReportTrust(
   try {
     const trust = await import("@/lib/services/trustModeration");
     if (status === "resolved") {
-      await trust.applyReportUpheld(report);
+      await trust.applyReportUpheld(db, report);
       return;
     }
-    await trust.applyReportRejected(report, { penalizeReporter });
+    await trust.applyReportRejected(db, report, { penalizeReporter });
   } catch (e) {
     console.error("Failed to apply trust events for report:", report.id, e);
   }
@@ -129,7 +130,7 @@ export async function updateReportStatus(
     .where(eq(reports.id, reportId))
     .run();
 
-  await applyReportTrust(report, status, penalizeReporter);
+  await applyReportTrust(db, report, status, penalizeReporter);
 
   await recordModerationAudit(
     db,

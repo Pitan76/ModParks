@@ -6,7 +6,7 @@
  * 加点漏れがあっても次のバッチで自動的に埋まる。
  */
 import { eq, isNull, and } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { users, userProfiles, accounts, type User } from "@modparks/core/db/schema";
 import { TRUST_ACCOUNT_AGE_STEPS, TRUST_DORMANT_DAYS } from "@/lib/trust/config";
 import { recordTrustEvent } from "./trust";
@@ -14,8 +14,7 @@ import { recordTrustEvent } from "./trust";
 const DAY_MS = 86_400_000;
 
 /** ソーシャル連携の有無。プロバイダ数によらず 1 回だけ加点する */
-export async function hasSocialAccount(userId: string): Promise<boolean> {
-  const db = await getDatabase();
+export async function hasSocialAccount(db: Database, userId: string): Promise<boolean> {
   const linked = await db
     .select({ userId: accounts.userId })
     .from(accounts)
@@ -37,15 +36,15 @@ export async function hasSocialAccount(userId: string): Promise<boolean> {
  * メール確認・2FA・ソーシャル連携の加点を、現在の状態に合わせる。
  * 連携解除の取り消しは扱わない（打ち消しイベントの担当、→ 設計 3.3）。
  */
-export async function syncTrustAttributes(user: User): Promise<void> {
+export async function syncTrustAttributes(db: Database, user: User): Promise<void> {
   if (user.emailVerified) {
-    await recordTrustEvent({ userId: user.id, kind: "email_verified" });
+    await recordTrustEvent(db, { userId: user.id, kind: "email_verified" });
   }
   if (user.twoFactorEnabled) {
-    await recordTrustEvent({ userId: user.id, kind: "two_factor_enabled" });
+    await recordTrustEvent(db, { userId: user.id, kind: "two_factor_enabled" });
   }
-  if (await hasSocialAccount(user.id)) {
-    await recordTrustEvent({ userId: user.id, kind: "social_linked" });
+  if (await hasSocialAccount(db, user.id)) {
+    await recordTrustEvent(db, { userId: user.id, kind: "social_linked" });
   }
 }
 
@@ -61,14 +60,14 @@ function isDormant(user: User, now: Date): boolean {
  * occurredAt には「その段に到達した日」を入れる。記録日ではない。
  * 遡って投入したときに減衰の起点がずれないようにするため。
  */
-export async function syncAccountAge(user: User, now: Date = new Date()): Promise<void> {
+export async function syncAccountAge(db: Database, user: User, now: Date = new Date()): Promise<void> {
   if (isDormant(user, now)) return;
 
   const ageDays = (now.getTime() - user.createdAt.getTime()) / DAY_MS;
 
   for (const [kind, requiredDays] of TRUST_ACCOUNT_AGE_STEPS) {
     if (ageDays < requiredDays) break;
-    await recordTrustEvent({
+    await recordTrustEvent(db, {
       userId: user.id,
       kind,
       occurredAt: new Date(user.createdAt.getTime() + requiredDays * DAY_MS),
@@ -83,8 +82,7 @@ const BATCH_SIZE = 200;
  * 有効なユーザを対象に属性と在籍年数を同期する。
  * 削除・停止済みは対象外（スコアを動かす意味がないため）。
  */
-export async function syncTrustForActiveUsers(limit = BATCH_SIZE): Promise<number> {
-  const db = await getDatabase();
+export async function syncTrustForActiveUsers(db: Database, limit = BATCH_SIZE): Promise<number> {
   const targets = await db
     .select()
     .from(users)
@@ -94,8 +92,8 @@ export async function syncTrustForActiveUsers(limit = BATCH_SIZE): Promise<numbe
 
   const now = new Date();
   for (const user of targets) {
-    await syncTrustAttributes(user);
-    await syncAccountAge(user, now);
+    await syncTrustAttributes(db, user);
+    await syncAccountAge(db, user, now);
   }
   return targets.length;
 }
