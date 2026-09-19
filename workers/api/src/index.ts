@@ -15,21 +15,33 @@ import type { ApiWorkerEnv } from "./env";
  */
 const app = new Hono<{ Bindings: ApiWorkerEnv }>();
 
+/**
+ * このWorkerが受け持つパス。メソッド不許可(405)と未実装(501)を
+ * 区別するために使う。Next 側は許可外メソッドへ 405 を返すので、
+ * 引き取ったパスでも同じ応答にしないと API の互換性が崩れる。
+ */
+const SERVED_PATHS = new Set(["/api/v2/projects"]);
+
 app.get("/api/v2/projects", (c) =>
   handleListProjects({ db: getDb(c.env.DB), kv: c.env.SETTINGS_KV }, c.req.raw)
 );
 
 /**
- * ルートパターンで拾ったのに実装が無いパス。
+ * 取りこぼしの受け皿。
  *
- * 取りこぼしを 404 で黙って返すと本体にあるエンドポイントが消えたように
- * 見えるため、wrangler.toml のパターンと実装のズレを明示して落とす。
+ * 受け持つパスへの許可外メソッドは 405（Next 側の挙動に合わせる）。
+ * それ以外は wrangler.toml のルートパターンと実装がズレている状態なので、
+ * 404 で黙らせず 501 で明示して落とす。
  */
-app.all("*", (c) =>
-  c.json(
-    { error: "not_implemented", error_description: `${c.req.method} ${new URL(c.req.url).pathname} is not served by modparks-api` },
+app.all("*", (c) => {
+  const path = new URL(c.req.url).pathname;
+  // Next のルートハンドラは 405 を空ボディで返す。実測して合わせている
+  if (SERVED_PATHS.has(path)) return c.body(null, 405);
+
+  return c.json(
+    { error: "not_implemented", error_description: `${c.req.method} ${path} is not served by modparks-api` },
     501
-  )
-);
+  );
+});
 
 export default app;
