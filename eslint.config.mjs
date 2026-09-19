@@ -20,6 +20,26 @@ const eslintConfig = defineConfig([
     "mp-recipe/**",
   ]),
   {
+    // React Compiler 由来のこの 2 ルールは Next 16 の eslint-config-next が
+    // error に昇格させたもの。実際に指摘されている 39 箇所を読んだ結果、
+    // いずれも動作するコードで、書き換える方が害が大きいと判断して warn にする。
+    //
+    // set-state-in-effect(25): 大半が SSR で localStorage / window を読む処理。
+    //   サーバに localStorage が無いため useState の初期値では読めず、
+    //   effect へ遅らせるのが正解。マウント後の再レンダリング 1 回は
+    //   ハイドレーション不整合を避けるための対価。
+    // refs(14): 13 件が ZoomableImage。useImageZoom が ref とハンドラを
+    //   同じオブジェクトで返しているため、ルールが zoom.handleWheel のような
+    //   ただの関数と ref の参照を区別できず、ref={zoom.viewportRef} という
+    //   正しい書き方まで報告している。
+    //
+    // 指摘自体は見え続けるので、新しく書くコードでは避けること。
+    rules: {
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "warn",
+    },
+  },
+  {
     // package.json に type: module が無いので .js は CommonJS。
     // これらは Node で直接動かす運用スクリプトであり、require が正しい。
     // .mjs / .ts 側は ESM のままなのでこのルールを外すのはここだけに留める。
