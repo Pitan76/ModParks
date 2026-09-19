@@ -10,8 +10,12 @@ compatibility_flags = ["nodejs_compat"]
 # メイン Worker(modparks) を経由せずこちらへ届く。
 workers_dev = false
 
+# 実装のあるパスだけを完全一致で挙げること。
+# ワイルドカード(/api/v2/*)にすると未実装のパスまで奪ってしまい、
+# 本体にあるエンドポイントが 501 になる。パスを増やすときは
+# src/index.ts に実装を足してからここへ追加する。
 [[routes]]
-pattern = "modparks.pitan76.net/api/v2/*"
+pattern = "modparks.pitan76.net/api/v2/projects"
 zone_name = "pitan76.net"
 
 # メインと同じリソースを名前で参照する
