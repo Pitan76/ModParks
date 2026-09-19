@@ -1,0 +1,37 @@
+name = "modparks-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# サイドカーと違い、この Worker は公開ルートを持つ。
+# Service Binding 経由にするとメイン Worker の isolate が起動してしまい、
+# 「Next のバンドル評価 CPU を払わない」という目的そのものが失われるため。
+# ルートパターンはカスタムドメインより優先されるので、ここに挙げたパスだけが
+# メイン Worker(modparks) を経由せずこちらへ届く。
+workers_dev = false
+
+[[routes]]
+pattern = "modparks.pitan76.net/api/v2/*"
+zone_name = "pitan76.net"
+
+# メインと同じリソースを名前で参照する
+[[d1_databases]]
+binding       = "DB"
+database_name = "modparks-db"
+database_id   = "7a0b941a-b8f4-47b7-97fb-428a126c96a2"
+
+[[kv_namespaces]]
+binding = "SETTINGS_KV"
+id      = "75c45e724c144cc18b629dd2dca50a7e"
+
+[[r2_buckets]]
+binding     = "modparks_storage"
+bucket_name = "modparks-storage"
+
+[vars]
+NEXT_PUBLIC_APP_URL = "https://modparks.pitan76.net"
+R2_PUBLIC_URL       = "https://files.modparks.pitan76.net"
+
+[observability]
+enabled = true
+head_sampling_rate = 1

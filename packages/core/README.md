@@ -61,3 +61,27 @@ export async function findProject(slug: string) {
 - `workers/*/tsconfig.json`（wrangler のバンドル解決用。worker を増やしたら必ず追加する）
 
 リポジトリを NTFS へ移せば workspaces へ移行できる。
+
+## 誰が使うのか
+
+- リポジトリ直下の Next.js アプリ
+- `workers/api` — 公開 API。ハンドラ本体（`src/api/v2/**`）を Next の
+  ルートハンドラと共有しており、どちらから呼んでも同じ実装が動く
+- `workers/jar` — JAR 解析。`src/data/**` を参照する
+
+`workers/*` は core を**バンドルに取り込む**ため、core を変えたら
+その Worker も再デプロイが必要になる。`.github/workflows/deploy.yml` の
+paths-filter に `packages/core/**` を含めてあるのはそのため。
+
+## アダプタとして Next 側に残しているもの
+
+core が環境に触らない代わりに、アンビエントな取得は Next 側が担う。
+対になっているものは次のとおり。
+
+| core | Next 側のアダプタ | 解決するもの |
+| --- | --- | --- |
+| `db/client.ts` の `getDb(d1)` | `src/lib/db.ts` の `getDatabase()` | `getCloudflareContext()` と dev 用 SQLite |
+| `config/readSettings.ts` の `readAppSettings(kv)` | `src/lib/config/readSettings.ts` の `getAppSettings()` | KV バインディング |
+| `rate-limit.ts` の `checkRateLimit(db, …)` | `src/lib/rate-limit.ts` | `headers()` と db |
+| `queries/masterData.ts` の `selectTags(db)` | `src/lib/queries/masterData.ts` | `unstable_cache` |
+| `auth/roles.ts` の `isAdminUser(db, id)` | `src/lib/auth/roles.ts` の `isAdminSession()` | next-auth の Session 型拡張 |

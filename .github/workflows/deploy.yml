@@ -58,7 +58,10 @@ jobs:
         uses: actions/checkout@v4
 
       # 各ターゲットに変更があるかを判定する
-      # main は workers/jar, workers/auth, workers/push 以外に変更があった場合のみ（バインドは名前参照のため）
+      # main は workers/* 以外に変更があった場合のみ（バインドは名前参照のため）
+      #
+      # jar と api は packages/core を取り込んでバンドルする。core だけが変わった
+      # 回に再デプロイしないと、古い共有コードを積んだまま動き続けるため含める。
       - name: Detect changes
         id: changes
         uses: dorny/paths-filter@v3
@@ -66,15 +69,20 @@ jobs:
           filters: |
             jar:
               - "workers/jar/**"
+              - "packages/core/**"
             auth:
               - "workers/auth/**"
             push:
               - "workers/push/**"
+            api:
+              - "workers/api/**"
+              - "packages/core/**"
             main:
               - "**"
               - "!workers/jar/**"
               - "!workers/auth/**"
               - "!workers/push/**"
+              - "!workers/api/**"
 
       - name: Setup Node.js
         if: steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch'
@@ -144,6 +152,20 @@ jobs:
           workingDirectory: workers/push
           command: deploy
 
+      # 公開 API Worker。ルートパターン(modparks.pitan76.net/api/v2/projects)が
+      # カスタムドメインより優先されるため、デプロイ時点でそのパスの処理がこちらへ移る。
+      # ハンドラ本体は packages/core にあり本体と共有しているので、
+      # 切り戻したいときは wrangler.toml の [[routes]] を外せば本体側へ戻る。
+      - name: Deploy api worker
+        if: steps.changes.outputs.api == 'true' || github.event_name == 'workflow_dispatch'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.100.0"
+          workingDirectory: workers/api
+          command: deploy
+
       # 本体（ModParks）。本体側に変更があったとき、または手動実行時にデプロイする
       - name: Deploy to Cloudflare
         if: steps.changes.outputs.main == 'true' || github.event_name == 'workflow_dispatch'
@@ -152,6 +174,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.100.0"
-          # --minify で本体 Worker を圧縮する。webpack(no minify) では gzip 約 3,068 KiB と
-          # 3 MiB 上限まで残り数 KiB しかないため、minify で約 2,712 KiB まで落として余裕を確保する。
+          # --minify で本体 Worker を圧縮する。圧縮後 3 MiB の上限は 2026-09-04 に
+          # 撤廃された（現在は非圧縮 64 MiB）が、isolate 起動時に解析するコード量が
+          # 減るぶん CPU に効くため続けている。
           command: deploy --minify
