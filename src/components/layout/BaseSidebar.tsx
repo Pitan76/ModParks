@@ -26,12 +26,21 @@ import { SIDEBAR_WIDTH, type NavItem } from "./sidebar/navTypes";
 export { SIDEBAR_WIDTH };
 export type { NavItem };
 
-export type BaseSidebarProps = {
+/**
+ * AppLayout が差し替えて使う 3 種のサイドバーに共通の入口。
+ *
+ * 差し替え先を any で受けるとプロップの渡し忘れを型が検出できないため、
+ * 共通の形をここに置いて各サイドバーとレイアウトの双方から参照する。
+ */
+export type SidebarProps = {
   mobileOpen: boolean;
   onMobileClose: () => void;
-  navItems: NavItem[];
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+};
+
+export type BaseSidebarProps = SidebarProps & {
+  navItems: NavItem[];
   hideCart?: boolean;
 };
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -8,26 +10,21 @@ import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useTranslations } from "next-intl";
-import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
-import type { NavItem } from "./BaseSidebar";
+import type { NavItem, SidebarProps } from "./BaseSidebar";
 
 export { SIDEBAR_WIDTH };
 
-export type AppSidebarProps = {
-  mobileOpen: boolean;
-  onMobileClose: () => void;
-  session: Session | null;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
-};
+export type AppSidebarProps = SidebarProps;
 
 /**
  * 一般ユーザー向けポータル用の共通サイドバーコンポーネント。
  * ホーム、プロジェクト検索、アイデアといったパブリックメニューに加え、
  * ログイン中ユーザーに対しては通知、ダッシュボード、マイプロジェクト、マイプロファイルを表示します。
  */
-const AppSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleCollapse }: AppSidebarProps) => {
+const AppSidebar = ({ mobileOpen, onMobileClose, collapsed, onToggleCollapse }: AppSidebarProps) => {
+  // HTML をセッション非依存に保つため、ログイン状態はクライアントで解決する
+  const { data: session } = useSession();
   const t = useTranslations("Nav");
 
   const navItems: NavItem[] = [

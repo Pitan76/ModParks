@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import ReportIcon from "@mui/icons-material/Report";
@@ -16,27 +18,22 @@ import PolicyIcon from "@mui/icons-material/Policy";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import ShieldIcon from "@mui/icons-material/Shield";
 import { useTranslations } from "next-intl";
-import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
-import type { NavItem } from "./BaseSidebar";
+import type { NavItem, SidebarProps } from "./BaseSidebar";
 import { isAdminSession } from "@/lib/auth/roles";
 
 export { SIDEBAR_WIDTH };
 
-export type AdminSidebarProps = {
-  mobileOpen: boolean;
-  onMobileClose: () => void;
-  session: Session | null;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
-};
+export type AdminSidebarProps = SidebarProps;
 
 /**
  * 管理者ダッシュボード用のサイドバーコンポーネント。
  * 管理者権限を持つユーザーに対して、ダッシュボード、ユーザー一覧、プロジェクト一覧、
  * アイデア、通報、構成、バックアップ、監査ログなどの管理用リンクを表示します。
  */
-const AdminSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleCollapse }: AdminSidebarProps) => {
+const AdminSidebar = ({ mobileOpen, onMobileClose, collapsed, onToggleCollapse }: AdminSidebarProps) => {
+  // HTML をセッション非依存に保つため、ログイン状態はクライアントで解決する
+  const { data: session } = useSession();
   const tAdmin = useTranslations("Admin");
 
   let navItems: NavItem[] = [];

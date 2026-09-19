@@ -9,6 +9,7 @@ import { usePathname } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";
+import type { SidebarProps } from "./BaseSidebar";
 import AppHeader from "./AppHeader";
 
 const AdminSidebar = dynamic(() => import("./AdminSidebar"), { ssr: false });
@@ -51,7 +52,8 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     });
   };
 
-  let SidebarComponent: React.ComponentType<any> = AppSidebar;
+  // any にすると渡し忘れたプロップを型が検出できない。3 種で共通の形を明示する
+  let SidebarComponent: React.ComponentType<SidebarProps> = AppSidebar;
   if (isAdminPage) SidebarComponent = AdminSidebar;
   else if (isSettingsPage) SidebarComponent = SettingsSidebar;
 

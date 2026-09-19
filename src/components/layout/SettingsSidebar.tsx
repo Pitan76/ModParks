@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import PersonIcon from "@mui/icons-material/Person";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import PaletteIcon from "@mui/icons-material/Palette";
@@ -10,25 +12,20 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import HubIcon from "@mui/icons-material/Hub";
 import RedeemIcon from "@mui/icons-material/Redeem";
 import { useTranslations } from "next-intl";
-import type { Session } from "next-auth";
 import BaseSidebar, { SIDEBAR_WIDTH } from "./BaseSidebar";
-import type { NavItem } from "./BaseSidebar";
+import type { NavItem, SidebarProps } from "./BaseSidebar";
 
 export { SIDEBAR_WIDTH };
 
-export type SettingsSidebarProps = {
-  mobileOpen: boolean;
-  onMobileClose: () => void;
-  session: Session | null;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
-};
+export type SettingsSidebarProps = SidebarProps;
 
 /**
  * 設定画面用のサイドバー。
  * 管理画面と同じく、各セクションを独立したルートとして左から選ばせる。
  */
-const SettingsSidebar = ({ mobileOpen, onMobileClose, session, collapsed, onToggleCollapse }: SettingsSidebarProps) => {
+const SettingsSidebar = ({ mobileOpen, onMobileClose, collapsed, onToggleCollapse }: SettingsSidebarProps) => {
+  // HTML をセッション非依存に保つため、ログイン状態はクライアントで解決する
+  const { data: session } = useSession();
   const t = useTranslations("Settings");
 
   const navItems: NavItem[] = session?.user
