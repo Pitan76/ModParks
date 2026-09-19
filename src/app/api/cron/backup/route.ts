@@ -3,7 +3,7 @@ import type { Database } from "@modparks/core/db/client";
 import { getDb, getD1 } from "@/lib/db";
 import { runAutoBackup } from "@/lib/backup/core";
 import { checkCronAuth } from "@/lib/cron/auth";
-import { describeError } from "@/lib/errors/describe";
+import { describeError } from "@modparks/core/errors/describe";
 import { generateSnapshot } from "@/lib/snapshot/generate";
 
 export const dynamic = "force-dynamic";

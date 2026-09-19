@@ -7,7 +7,7 @@
  */
 import { createId } from "@paralleldrive/cuid2";
 import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2 } from "@/lib/r2";
-import { isAllowedExternalUrl } from "@/lib/validations";
+import { isAllowedExternalUrl } from "@modparks/core/validations";
 import {
   fetchGithubReleases,
   fetchLatestGithubRelease,

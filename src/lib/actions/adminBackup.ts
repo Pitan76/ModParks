@@ -56,7 +56,7 @@ export const sendBackupToDrive = async (key: string): Promise<{ success: true; f
   const fileName = key.split("/").pop() ?? key;
 
   try {
-    const { uploadBackupToDrive } = await import("@/lib/backup/googleDrive");
+    const { uploadBackupToDrive } = await import("@modparks/core/backup/googleDrive");
     const uploaded = await uploadBackupToDrive(fileName, JSON.stringify(payload));
 
     await writeAuditLog(db, {

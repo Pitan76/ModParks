@@ -1,7 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { posts, projects, ideas } from "@modparks/core/db/schema";
-import { toProjectPost, toIdeaPost } from "@/lib/queries/postRow";
-import type { ProjectPost, IdeaPost } from "@/types/post";
+import { toProjectPost, toIdeaPost } from "@modparks/core/queries/postRow";
+import type { ProjectPost, IdeaPost } from "@modparks/core/types/post";
 
 /**
  * posts と子テーブルを結合して 1 件取得するヘルパ群。

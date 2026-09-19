@@ -33,7 +33,7 @@ import UserDetailsDialog from "./components/UserDetailsDialog";
 import UserEditDialog from "./components/UserEditDialog";
 import PremiumDialog from "./components/PremiumDialog";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
-import { getPremiumState } from "@/lib/premium";
+import { getPremiumState } from "@modparks/core/premium";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
 
 export interface User {

@@ -1,6 +1,6 @@
 import { pushSubscriptions, userSettings } from "@modparks/core/db/schema";
 import { eq, inArray } from "drizzle-orm";
-import type { NotificationType, NotificationPayload } from "@/lib/notifications/types";
+import type { NotificationType, NotificationPayload } from "@modparks/core/notifications/types";
 import { sendPush } from "@/lib/services/push";
 import type { Database } from "@/lib/db";
 

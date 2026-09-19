@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { posts, projects, projectTags } from "@modparks/core/db/schema";
-import { createProjectSchema } from "@/lib/validations";
+import { createProjectSchema } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
-import { vk } from "@/lib/validationKeys";
+import { vk } from "@modparks/core/validationKeys";
 
 export async function POST(req: NextRequest) {
   try {

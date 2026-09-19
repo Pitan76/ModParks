@@ -12,7 +12,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { RELEASE_CHANNELS } from "@/lib/releaseChannels";
+import { RELEASE_CHANNELS } from "@modparks/core/releaseChannels";
 import { useTranslations } from "next-intl";
 import LoaderAutocomplete from "./LoaderAutocomplete";
 import McVersionAutocomplete from "./McVersionAutocomplete";

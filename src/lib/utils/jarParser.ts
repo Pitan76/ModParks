@@ -1,6 +1,6 @@
 import { resizeImageFile } from "./image";
 import { uploadFileToR2 } from "./upload";
-import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
+import { NEW_PROJECT_SLUG } from "@modparks/core/upload/fileTypes";
 
 export type ParsedModData = {
   name: string;

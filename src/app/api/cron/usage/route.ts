@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { checkCronAuth } from "@/lib/cron/auth";
-import { rollupSliceIncrements } from "@/lib/usage/sliceRollup";
+import { rollupSliceIncrements } from "@modparks/core/usage/sliceRollup";
 import { expireModeIfDue } from "@/lib/runtime/mode";
-import { describeError } from "@/lib/errors/describe";
+import { describeError } from "@modparks/core/errors/describe";
 
 export const dynamic = "force-dynamic";
 

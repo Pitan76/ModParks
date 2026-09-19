@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { getTrustDetail } from "@/lib/queries/adminTrust";
-import { tierFromScore } from "@/lib/trust/score";
+import { tierFromScore } from "@modparks/core/trust/score";
 import TrustEventTable from "@/components/admin/TrustEventTable";
 import TrustActionsPanel from "@/components/admin/TrustActionsPanel";
 import { TIER_COLORS } from "@/components/admin/trustTierColors";

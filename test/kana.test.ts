@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { keywordVariants } from "@/lib/search/kana";
+import { keywordVariants } from "@modparks/core/search/kana";
 
 describe("keywordVariants", () => {
   it("元のキーワードを必ず含む", () => {

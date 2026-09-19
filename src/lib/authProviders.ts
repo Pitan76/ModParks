@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import Resend from "next-auth/providers/resend";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/types";
-import { DEFAULT_APP_SETTINGS } from "@/lib/config/appSettings";
+import { DEFAULT_APP_SETTINGS } from "@modparks/core/config/appSettings";
 import { eq } from "drizzle-orm";
 
 /**
@@ -51,7 +51,7 @@ export const authProviders = [
     async sendVerificationRequest({ identifier: to, provider, url }) {
       const { host } = new URL(url);
       const { getAppSettings } = await import("@/lib/config/readSettings");
-      const { formatMailFrom } = await import("@/lib/config/appSettings");
+      const { formatMailFrom } = await import("@modparks/core/config/appSettings");
 
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",

@@ -13,8 +13,8 @@ import {
   userProfiles,
   type TrustTier,
 } from "@modparks/core/db/schema";
-import { effectiveDelta, resolveTier, tierFromScore } from "@/lib/trust/score";
-import { TRUST_BASE_SCORE, TRUST_TIER_FLOORS } from "@/lib/trust/config";
+import { effectiveDelta, resolveTier, tierFromScore } from "@modparks/core/trust/score";
+import { TRUST_BASE_SCORE, TRUST_TIER_FLOORS } from "@modparks/core/trust/config";
 
 export const TRUST_PAGE_SIZE = 50;
 

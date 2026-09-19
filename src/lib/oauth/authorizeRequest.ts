@@ -2,9 +2,9 @@
  * 認可リクエスト（/api/oauth/authorize と同意画面）で共通に使う検証。
  * 同意画面はユーザーの操作を挟むぶんパラメータを持ち回すため、検証をここに集約する。
  */
-import { findClient, isAllowedRedirectUri } from "./clients";
+import { findClient, isAllowedRedirectUri } from "@modparks/core/oauth/clients";
 import type { Database } from "@modparks/core/db/client";
-import { resolveRequestedScope } from "./scopes";
+import { resolveRequestedScope } from "@modparks/core/oauth/scopes";
 import type { OAuthClient } from "@modparks/core/db/schema";
 import type { OAuthErrorCode } from "./errors";
 

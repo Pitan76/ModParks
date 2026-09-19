@@ -1,7 +1,7 @@
 import { getTableColumns, eq } from "drizzle-orm";
-import { SCHEMA_TABLES, TABLE_RESTORE_ORDER } from "./schemaConfig";
+import { SCHEMA_TABLES, TABLE_RESTORE_ORDER } from "@modparks/core/backup/schemaConfig";
 import type { Database } from "@/lib/db";
-import { chunkObjectRows } from "@/lib/db/chunkRows";
+import { chunkObjectRows } from "@modparks/core/db/chunkRows";
 
 export const SUPPORTED_BACKUP_VERSIONS = ["1.0"];
 
@@ -38,7 +38,7 @@ export const validateBackupPayload = (payload: unknown): Record<string, any> => 
  */
 export const loadBackupTables = async (payload: unknown): Promise<Record<string, any[]>> => {
   const rawTables = validateBackupPayload(payload);
-  const { isEncryptedEnvelope, decryptJson } = await import("@/lib/backup/crypto");
+  const { isEncryptedEnvelope, decryptJson } = await import("@modparks/core/backup/crypto");
 
   const tables: Record<string, any[]> = {};
   for (const [name, value] of Object.entries(rawTables)) {

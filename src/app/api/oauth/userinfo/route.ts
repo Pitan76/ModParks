@@ -4,7 +4,7 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { requireBearerScope } from "@/lib/oauth/bearer";
-import { buildUserClaims } from "@/lib/oauth/userClaims";
+import { buildUserClaims } from "@modparks/core/oauth/userClaims";
 import { bearerError } from "@/lib/oauth/errors";
 
 export async function GET(request: Request) {

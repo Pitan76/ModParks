@@ -29,7 +29,7 @@ import {
 } from "@/lib/actions/dependency";
 import { isActionError, type ActionResult } from "@/lib/actions/actionResult";
 import { isStaleServerActionError } from "@/lib/errors/staleAction";
-import { DEPENDENCY_TYPES, type DependencyType } from "@/lib/dependencies/types";
+import { DEPENDENCY_TYPES, type DependencyType } from "@modparks/core/dependencies/types";
 import { DEPENDENCY_COLOR } from "./VersionDependencies";
 
 type Props = {

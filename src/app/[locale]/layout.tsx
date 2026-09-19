@@ -15,7 +15,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import PinProvider from "@/components/pin/PinProvider";
 import AppFooter from "@/components/layout/AppFooter";
 import LocaleSyncer from "@/components/layout/LocaleSyncer";
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 import { SITE_NAME, canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
 import AdSenseLoader from "@/components/ads/AdSenseLoader";
 

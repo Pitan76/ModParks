@@ -5,7 +5,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import SettingsLink from "@/components/ui/SettingsLink";
-import { getNotifications, countNotifications } from "@/lib/queries/notifications";
+import { getNotifications, countNotifications } from "@modparks/core/queries/notifications";
 import NotificationList from "@/components/notification/NotificationListLazy";
 import MarkAllReadButton from "@/components/notification/MarkAllReadButton";
 import PaginationControls from "@/components/ui/PaginationControls";

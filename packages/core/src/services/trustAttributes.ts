@@ -8,7 +8,7 @@
 import { eq, isNull, and } from "drizzle-orm";
 import type { Database } from "@modparks/core/db/client";
 import { users, userProfiles, accounts, type User } from "@modparks/core/db/schema";
-import { TRUST_ACCOUNT_AGE_STEPS, TRUST_DORMANT_DAYS } from "@/lib/trust/config";
+import { TRUST_ACCOUNT_AGE_STEPS, TRUST_DORMANT_DAYS } from "@modparks/core/trust/config";
 import { recordTrustEvent } from "./trust";
 
 const DAY_MS = 86_400_000;

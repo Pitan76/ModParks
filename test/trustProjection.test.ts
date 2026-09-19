@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { User } from "@modparks/core/db/schema";
 import { groupCleanVersionsByUser, projectScore } from "../src/lib/services/trustProjection";
-import type { CleanVersion } from "../src/lib/services/trustActivity";
-import { TRUST_BASE_SCORE } from "@/lib/trust/config";
+import type { CleanVersion } from "@modparks/core/services/trustActivity";
+import { TRUST_BASE_SCORE } from "@modparks/core/trust/config";
 
 const NOW = new Date("2026-08-06T00:00:00Z");
 const DAY_MS = 86_400_000;

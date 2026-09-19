@@ -1,10 +1,10 @@
 import { projectDependencies, posts, projects, versions } from "@modparks/core/db/schema";
 import type { Database } from "@modparks/core/db/client";
 import { eq, and, isNull, or } from "drizzle-orm";
-import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@/lib/dependencies/scope";
-import { toStringArray } from "@/lib/utils/format";
-import type { DependencyType } from "@/lib/dependencies/types";
-import type { DependencyEntry, DependencyProjectSummary } from "@/lib/dependencies/entryTypes";
+import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@modparks/core/dependencies/scope";
+import { toStringArray } from "@modparks/core/utils/format";
+import type { DependencyType } from "@modparks/core/dependencies/types";
+import type { DependencyEntry, DependencyProjectSummary } from "@modparks/core/dependencies/entryTypes";
 
 const DEPENDENCY_COLUMNS = {
   id: projectDependencies.id,

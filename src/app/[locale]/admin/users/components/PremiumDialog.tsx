@@ -8,7 +8,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import type { User } from "../UsersClient";
-import { getPremiumState, premiumUntilMillis } from "@/lib/premium";
+import { getPremiumState, premiumUntilMillis } from "@modparks/core/premium";
 
 interface PremiumDialogProps {
   open: boolean;

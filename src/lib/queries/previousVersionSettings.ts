@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import type { Database } from "@modparks/core/db/client";
 import { posts, versions } from "@modparks/core/db/schema";
-import { normalizeReleaseChannel } from "@/lib/releaseChannels";
+import { normalizeReleaseChannel } from "@modparks/core/releaseChannels";
 import type { PreviousVersionSettings } from "@/components/project/PreviousVersionSettings";
 
 function parseJsonArray(raw: string): string[] {

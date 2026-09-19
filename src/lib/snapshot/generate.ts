@@ -7,7 +7,7 @@
  */
 import { collectSnapshotData, type SnapshotData } from "./query";
 import type { Database } from "@modparks/core/db/client";
-import { SNAPSHOT_SCHEMA_VERSION, type SnapshotManifest } from "./publicView";
+import { SNAPSHOT_SCHEMA_VERSION, type SnapshotManifest } from "@modparks/core/snapshot/publicView";
 import { deleteKey, getSnapshotBucket, listKeys, putJson } from "./storage";
 import { copyShell } from "./shell";
 

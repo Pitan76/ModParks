@@ -1,6 +1,6 @@
 "use client";
 
-import { buildProjectDownloadUrl } from "@/lib/utils/downloadUrl";
+import { buildProjectDownloadUrl } from "@modparks/core/utils/downloadUrl";
 import type { CartItem } from "./cartStore";
 
 /** ブラウザへの負荷を抑えるため、リクエストの間に置く待ち時間(ms) */

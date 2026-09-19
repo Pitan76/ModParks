@@ -6,11 +6,11 @@ import { and, eq } from "drizzle-orm";
 import { posts } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { locales, type AppLocale } from "@/lib/i18n/locales";
+import { locales, type AppLocale } from "@modparks/core/i18n/locales";
 import { translateContent } from "./translate";
-import { computeSourceHash } from "./sourceHash";
+import { computeSourceHash } from "@modparks/core/translation/sourceHash";
 import { countRunsSince, findTranslation, hasRecentFailure, recordRun, saveTranslation } from "./repository";
-import type { BodyFormat } from "./masking";
+import type { BodyFormat } from "@modparks/core/translation/masking";
 import { getTranslationSettings, type TranslationSettings } from "./settings";
 
 /** 同一対象で失敗した直後の再実行を抑える時間 */

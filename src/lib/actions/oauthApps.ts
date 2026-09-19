@@ -5,11 +5,11 @@ import { oauthClients } from "@modparks/core/db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
-import { generateClientId, generateClientSecret } from "@/lib/oauth/clients";
-import { sha256Hex } from "@/lib/oauth/crypto";
-import { DEFAULT_CLIENT_SCOPES, isOAuthScope, formatScope } from "@/lib/oauth/scopes";
-import { deleteGrant } from "@/lib/oauth/grants";
-import { revokeClientTokens } from "@/lib/oauth/tokens";
+import { generateClientId, generateClientSecret } from "@modparks/core/oauth/clients";
+import { sha256Hex } from "@modparks/core/oauth/crypto";
+import { DEFAULT_CLIENT_SCOPES, isOAuthScope, formatScope } from "@modparks/core/oauth/scopes";
+import { deleteGrant } from "@modparks/core/oauth/grants";
+import { revokeClientTokens } from "@modparks/core/oauth/tokens";
 
 const SETTINGS_PATH = "/settings/developer";
 

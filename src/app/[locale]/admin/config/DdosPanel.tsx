@@ -16,7 +16,7 @@ import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import { useTranslations } from "next-intl";
 import { toggleManualUnderAttack } from "@/lib/actions/admin";
 import { updateAppSettings } from "@/lib/actions/appSettings";
-import type { AppSettings } from "@/lib/config/appSettings";
+import type { AppSettings } from "@modparks/core/config/appSettings";
 import type { DdosStateModel } from "@modparks/core/db/schema";
 
 export default function DdosPanel({

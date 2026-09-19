@@ -1,6 +1,6 @@
 import { posts, ideas, comments } from "@modparks/core/db/schema";
 import { isAdminUser } from "@/lib/auth/roles";
-import { findIdeaPostById } from "@/lib/queries/post";
+import { findIdeaPostById } from "@modparks/core/queries/post";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getServerErrors } from "@/lib/i18n/serverErrors";

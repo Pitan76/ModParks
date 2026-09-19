@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 import { locales, routing } from "@/lib/i18n/routing";
 import { localePath } from "@/lib/i18n/localePath";
 

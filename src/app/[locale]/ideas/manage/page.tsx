@@ -6,7 +6,7 @@ import Breadcrumb from "@/components/ui/Breadcrumb";
 import AddIcon from "@mui/icons-material/Add";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { listIdeaPosts, countIdeaPosts } from "@/lib/queries/postList";
+import { listIdeaPosts, countIdeaPosts } from "@modparks/core/queries/postList";
 import LinkButton from "@/components/ui/LinkButton";
 import BatchIdeaOperationsClient from "@/components/idea/BatchIdeaOperationsClientLazy";
 import PaginationControls from "@/components/ui/PaginationControls";

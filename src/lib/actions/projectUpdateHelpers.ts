@@ -42,7 +42,7 @@ export async function normalizeExternalLinks(
   const t = await getServerErrors();
 
   if (discordWebhookUrl) {
-    const { isValidDiscordWebhookUrl } = await import("@/lib/notifications/discord");
+    const { isValidDiscordWebhookUrl } = await import("@modparks/core/notifications/discord");
     if (!isValidDiscordWebhookUrl(discordWebhookUrl)) {
       return { error: { discordWebhookUrl: [t("project.invalidDiscordWebhook")] } };
     }

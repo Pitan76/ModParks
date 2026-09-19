@@ -6,14 +6,14 @@
  * 判定ロジックはここに複製せず必ず score.ts を経由させる。
  */
 import type { TrustEvent, TrustEventKind, User } from "@modparks/core/db/schema";
-import { computeScore } from "@/lib/trust/score";
+import { computeScore } from "@modparks/core/trust/score";
 import {
   TRUST_ACCOUNT_AGE_STEPS,
   TRUST_DORMANT_DAYS,
   TRUST_EVENT_DELTAS,
   TRUST_NON_DECAYING_KINDS,
-} from "@/lib/trust/config";
-import type { CleanVersion } from "./trustActivity";
+} from "@modparks/core/trust/config";
+import type { CleanVersion } from "@modparks/core/services/trustActivity";
 
 const DAY_MS = 86_400_000;
 

@@ -6,23 +6,23 @@ import { projectDependencies, projectMembers, versions } from "@modparks/core/db
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion } from "@/lib/backup/tombstone";
-import { findProjectPostById, findProjectPostBySlug } from "@/lib/queries/post";
+import { findProjectPostById, findProjectPostBySlug } from "@modparks/core/queries/post";
 import { isAdminSession } from "@/lib/auth/roles";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import type { ActionResult } from "@/lib/actions/actionResult";
-import type { DependencyType } from "@/lib/dependencies/types";
-import type { DependencyScope, DependencyEntry } from "@/lib/dependencies/entryTypes";
+import type { DependencyType } from "@modparks/core/dependencies/types";
+import type { DependencyScope, DependencyEntry } from "@modparks/core/dependencies/entryTypes";
 import {
   getProjectDependencies as queryProjectDependencies,
   getVersionDependencies as queryVersionDependencies,
   getProjectDependents as queryProjectDependents,
-} from "@/lib/queries/dependency";
+} from "@modparks/core/queries/dependency";
 
-export type { DependencyType } from "@/lib/dependencies/types";
-export type { DependencyScope, DependencyProjectSummary, DependencyEntry } from "@/lib/dependencies/entryTypes";
+export type { DependencyType } from "@modparks/core/dependencies/types";
+export type { DependencyScope, DependencyProjectSummary, DependencyEntry } from "@modparks/core/dependencies/entryTypes";
 
 /**
- * 取得系はクエリ本体（@/lib/queries/dependency）へ委譲する薄いラッパ。
+ * 取得系はクエリ本体（@modparks/core/queries/dependency）へ委譲する薄いラッパ。
  *
  * クライアントコンポーネントから直接クエリを import すると、`@/lib/db` 以下の
  * サーバー専用モジュール（node:dns 等）がクライアントバンドルに引き込まれて

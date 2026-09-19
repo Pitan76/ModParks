@@ -6,7 +6,7 @@
  * 同じくらい困る。「入るのは人間、戻るのは自動」が安全側。
  */
 import { getRuntimeConfig, putRuntimeConfig } from "@/lib/runtime/state";
-import { effectiveMode, type RuntimeMode } from "@/lib/runtime/features";
+import { effectiveMode, type RuntimeMode } from "@modparks/core/runtime/features";
 
 /** 期限のプリセット(時間)。管理画面のボタンと対応させる */
 export const MODE_DURATION_PRESETS_HOURS = [1, 6, 24, 72];

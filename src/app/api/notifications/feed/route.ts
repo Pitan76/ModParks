@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { getNotifications, getUnreadCount } from "@/lib/queries/notifications";
+import { getNotifications, getUnreadCount } from "@modparks/core/queries/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 // ユーザー単位の上限。通常の画面遷移では当たらないが、暴走ループ等を頭打ちにする

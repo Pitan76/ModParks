@@ -3,11 +3,11 @@
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { versions, projects } from "@modparks/core/db/schema";
 import { getR2KeyFromUrl } from "@/lib/r2";
-import { isAllowedExternalUrl } from "@/lib/validations";
+import { isAllowedExternalUrl } from "@modparks/core/validations";
 import { extractRecipes, type JarSource } from "@/lib/services/jar";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { findProjectPostBySlug } from "@/lib/queries/post";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { isSharedNamespace } from "@modparks/core/data/sharedNamespaces";
 

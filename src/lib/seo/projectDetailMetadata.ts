@@ -3,8 +3,8 @@ import type { Database } from "@modparks/core/db/client";
 import { auth } from "@/lib/auth";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { findMetadataTranslation, listIndexableLocales } from "@/lib/translation/metadata";
-import { toPlainDescription } from "@/lib/utils/plainText";
-import { SITE_URL } from "@/lib/config";
+import { toPlainDescription } from "@modparks/core/utils/plainText";
+import { SITE_URL } from "@modparks/core/config";
 import { canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
 
 /**

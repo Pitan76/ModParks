@@ -1,5 +1,5 @@
 import { getAdminDb } from "@/lib/auth-helpers";
-import { listIdeaPosts, countIdeaPosts } from "@/lib/queries/postList";
+import { listIdeaPosts, countIdeaPosts } from "@modparks/core/queries/postList";
 import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import IdeasClient from "./IdeasClientLazy";

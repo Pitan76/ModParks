@@ -6,7 +6,7 @@
  */
 import { and, eq, gt } from "drizzle-orm";
 import { trustedDevices } from "@modparks/core/db/schema";
-import { sha256Hex } from "@/lib/oauth/crypto";
+import { sha256Hex } from "@modparks/core/oauth/crypto";
 import type { Database } from "@/lib/db";
 
 export const TRUSTED_DEVICE_COOKIE = "mp_trusted_device";

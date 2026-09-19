@@ -5,9 +5,9 @@ import { users, userProfiles, userSettings, verificationTokens, passwordResetTok
 import { eq, and } from "drizzle-orm";
 
 import { createId } from "@paralleldrive/cuid2";
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 import { getAppSettings } from "@/lib/config/readSettings";
-import { formatMailFrom } from "@/lib/config/appSettings";
+import { formatMailFrom } from "@modparks/core/config/appSettings";
 
 export async function sendRegistrationEmail(formData: FormData) {
   const email = formData.get("email") as string;
@@ -22,7 +22,7 @@ export async function sendRegistrationEmail(formData: FormData) {
 
   if (!email) return { error: "emailRequired" };
 
-  const { isBlockedEmailDomain } = await import("@/lib/validations");
+  const { isBlockedEmailDomain } = await import("@modparks/core/validations");
   if (isBlockedEmailDomain(email, appSettings.blockedEmailDomains)) {
     return { error: "errorDisposableEmail" };
   }

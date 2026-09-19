@@ -3,8 +3,8 @@
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { validateAuthorizeRequest } from "@/lib/oauth/authorizeRequest";
-import { saveGrant } from "@/lib/oauth/grants";
-import { issueAuthCode } from "@/lib/oauth/tokens";
+import { saveGrant } from "@modparks/core/oauth/grants";
+import { issueAuthCode } from "@modparks/core/oauth/tokens";
 
 type ConsentResult = { success: true; redirectTo: string } | { success: false; error: string };
 

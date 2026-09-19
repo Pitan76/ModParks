@@ -45,8 +45,8 @@ export const getBackups = async () => {
  */
 export const getEncryptionStatus = async () => {
   await getAdminDb();
-  const { isEncryptionConfigured } = await import("@/lib/backup/crypto");
-  const { getDriveConfig } = await import("@/lib/backup/googleDrive");
+  const { isEncryptionConfigured } = await import("@modparks/core/backup/crypto");
+  const { getDriveConfig } = await import("@modparks/core/backup/googleDrive");
 
   return {
     configured: isEncryptionConfigured(),

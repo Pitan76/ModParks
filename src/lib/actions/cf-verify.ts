@@ -5,7 +5,7 @@ import { userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { createId } from "@paralleldrive/cuid2";
-import { fetchCfProject, projectContainsCode } from "@/lib/curseforge";
+import { fetchCfProject, projectContainsCode } from "@modparks/core/curseforge";
 
 const CODE_PREFIX = "modparks-verify-";
 

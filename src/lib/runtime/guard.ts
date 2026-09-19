@@ -5,7 +5,7 @@
  * 停止できる操作は必ずこの 1 本を通すこと。
  */
 import { getRuntimeConfig } from "@/lib/runtime/state";
-import { effectiveMode, isFeatureEnabled, type RuntimeFeature } from "@/lib/runtime/features";
+import { effectiveMode, isFeatureEnabled, type RuntimeFeature } from "@modparks/core/runtime/features";
 
 /** 機能が停止されているときに投げる。呼び出し元は 503 として扱う */
 export class FeatureDisabledError extends Error {

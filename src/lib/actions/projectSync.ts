@@ -4,7 +4,7 @@ import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { findProjectPostById } from "@/lib/queries/post";
+import { findProjectPostById } from "@modparks/core/queries/post";
 import type { Database } from "@/lib/db";
 
 /**

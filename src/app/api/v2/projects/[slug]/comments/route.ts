@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { findProjectPostBySlug } from "@/lib/queries/post";
-import { listPostComments, countPostRootComments, createPostComment } from "@/lib/api/postComments";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
+import { listPostComments, countPostRootComments, createPostComment } from "@modparks/core/api/postComments";
 import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
-import type { PaginatedResponse, ApiComment } from "@/types/api";
+import type { PaginatedResponse, ApiComment } from "@modparks/core/types/api";
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

@@ -10,7 +10,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import LinkButton from "@/components/ui/LinkButton";
-import { formatDate } from "@/lib/utils/format";
+import { formatDate } from "@modparks/core/utils/format";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";
 import SortableTableCell from "@/components/ui/SortableTableCell";
 import { useTableSort } from "@/lib/hooks/useTableSort";

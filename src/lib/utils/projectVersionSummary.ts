@@ -1,4 +1,4 @@
-import { compactMcVersions, toStringArray } from "@/lib/utils/format";
+import { compactMcVersions, toStringArray } from "@modparks/core/utils/format";
 
 /** サイドバーの要約に必要な最小限のバージョン情報 */
 export type SummarizableVersion = {

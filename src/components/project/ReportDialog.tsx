@@ -16,7 +16,7 @@ import Alert from "@mui/material/Alert";
 import FlagIcon from "@mui/icons-material/Flag";
 import { useTranslations } from "next-intl";
 import { createReport } from "@/lib/actions/report";
-import { REPORT_REASONS } from "@/lib/validations";
+import { REPORT_REASONS } from "@modparks/core/validations";
 
 export type ReportDialogProps = {
   targetType: "project" | "idea" | "comment" | "user";

@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { comments, projectMembers } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 import { recordDeletion } from "@/lib/backup/tombstone";
-import { findProjectPostById } from "@/lib/queries/post";
+import { findProjectPostById } from "@modparks/core/queries/post";
 import { isAdminSession } from "@/lib/auth/roles";
 
 /**

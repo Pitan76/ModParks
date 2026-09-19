@@ -5,7 +5,7 @@ import {
   formatDate,
   formatCompactNumber,
   compactMcVersions,
-} from "../src/lib/utils/format";
+} from "@modparks/core/utils/format";
 
 describe("formatBytes", () => {
   it("バイト数が 1024 未満の場合は B 単位で出力されること", () => {

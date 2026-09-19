@@ -5,7 +5,7 @@
  * 空・null・壊れた値のいずれも「全プラットフォーム」に倒す。
  * 前提 MOD を出し損ねるより、余分に出す方が害が小さいため。
  */
-import { toStringArray } from "@/lib/utils/format";
+import { toStringArray } from "@modparks/core/utils/format";
 
 /** DB の loaders 列を配列に開く。空・null・壊れた値はすべて空配列 */
 export function parseDependencyLoaders(raw: string | string[] | null | undefined): string[] {

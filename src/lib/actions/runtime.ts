@@ -10,7 +10,7 @@ import {
   type RuntimeConfig,
   type RuntimeFeature,
   type RuntimeMode,
-} from "@/lib/runtime/features";
+} from "@modparks/core/runtime/features";
 import { applyModeChange } from "@/lib/runtime/mode";
 
 function isKnownFeature(value: string): value is RuntimeFeature {

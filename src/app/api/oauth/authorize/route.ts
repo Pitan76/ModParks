@@ -7,10 +7,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { validateAuthorizeRequest } from "@/lib/oauth/authorizeRequest";
-import { findCoveringGrant } from "@/lib/oauth/grants";
-import { issueAuthCode } from "@/lib/oauth/tokens";
+import { findCoveringGrant } from "@modparks/core/oauth/grants";
+import { issueAuthCode } from "@modparks/core/oauth/tokens";
 import { redirectError, tokenError } from "@/lib/oauth/errors";
-import { formatScope } from "@/lib/oauth/scopes";
+import { formatScope } from "@modparks/core/oauth/scopes";
 
 export async function GET(request: Request) {
   const db = await getDatabase();

@@ -5,7 +5,7 @@
  * 鍵は ES256 の秘密鍵 JWK を環境変数 OAUTH_ID_TOKEN_KEY に入れておき、
  * 対応する公開鍵を JWKS エンドポイントから配る。
  */
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 
 const ALG = "ES256";
 const ID_TOKEN_TTL_SEC = 60 * 60;

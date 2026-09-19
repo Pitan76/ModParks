@@ -4,20 +4,20 @@ import { posts, projects, projectDependencies, versions, projectMembers, version
 import { validateApiKey } from "@/lib/api-auth";
 import { eq, desc, and, getTableColumns, isNull } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";
-import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@/lib/dependencies/scope";
-import type { ApiVersion, ApiVersionDependency } from "@/types/api";
-import { createVersionSchema, isAllowedExternalUrl } from "@/lib/validations";
+import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@modparks/core/dependencies/scope";
+import type { ApiVersion, ApiVersionDependency } from "@modparks/core/types/api";
+import { createVersionSchema, isAllowedExternalUrl } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { buildR2Key, getR2PublicUrl, uploadToR2 } from "@/lib/r2";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { extractRecipes } from "@/lib/services/jar";
 import { revalidatePath } from "next/cache";
 import { withPublicCache } from "@/lib/http/cache";
-import { chunkRows } from "@/lib/db/chunkRows";
-import { findProjectPostBySlug } from "@/lib/queries/post";
-import { canManagePost } from "@/lib/auth/postAccess";
-import { isAllowedUpload } from "@/lib/upload/fileTypes";
-import { getTrustState } from "@/lib/services/trust";
+import { chunkRows } from "@modparks/core/db/chunkRows";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
+import { canManagePost } from "@modparks/core/auth/postAccess";
+import { isAllowedUpload } from "@modparks/core/upload/fileTypes";
+import { getTrustState } from "@modparks/core/services/trust";
 import { scanVersionFile } from "@/lib/actions/versionScan";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 

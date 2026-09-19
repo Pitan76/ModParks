@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chunkRows, chunkObjectRows, D1_MAX_BOUND_PARAMS } from "@/lib/db/chunkRows";
+import { chunkRows, chunkObjectRows, D1_MAX_BOUND_PARAMS } from "@modparks/core/db/chunkRows";
 
 /** 分割後のどの文もパラメータ上限を超えないこと */
 const withinLimit = (chunks: unknown[][], columnsPerRow: number) =>

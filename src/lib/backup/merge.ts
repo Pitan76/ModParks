@@ -18,7 +18,7 @@ import {
 import { MERGE_POLICIES } from "@/lib/backup/mergePolicy";
 import { getTombstonedKeys, recordKeyFromRow } from "@/lib/backup/tombstone";
 import type { Database } from "@/lib/db";
-import { chunkObjectRows } from "@/lib/db/chunkRows";
+import { chunkObjectRows } from "@modparks/core/db/chunkRows";
 
 /** テーブル1つ分のマージ結果の内訳 */
 export interface TableMergeSummary {

@@ -8,8 +8,8 @@ import { eq } from "drizzle-orm";
 import type { Database } from "@modparks/core/db/client";
 import { usageAlertState } from "@modparks/core/db/schema";
 import { getUsageOverview } from "@/lib/queries/usageOverview";
-import { sendUsageAlert } from "@/lib/usage/alertNotify";
-import type { UsageLevel, UsagePlan } from "@/lib/usage/quota";
+import { sendUsageAlert } from "@modparks/core/usage/alertNotify";
+import type { UsageLevel, UsagePlan } from "@modparks/core/usage/quota";
 
 /** 深刻度の強さ。数値が大きいほど深刻 */
 const LEVEL_RANK: Record<UsageLevel, number> = {

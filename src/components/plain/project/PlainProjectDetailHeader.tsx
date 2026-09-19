@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/routing";
-import { formatCompactNumber } from "@/lib/utils/format";
+import { formatCompactNumber } from "@modparks/core/utils/format";
 import { useLocale } from "next-intl";
 import type { ProjectDetailHeaderProps } from "@/components/project/ProjectDetailHeader";
 import ProjectFavoriteButton from "@/components/project/ProjectFavoriteButton";

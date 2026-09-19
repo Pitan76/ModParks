@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/config';
+import { SITE_URL } from '@modparks/core/config';
 import { locales } from '@/lib/i18n/routing';
 import { localePath } from '@/lib/i18n/localePath';
 import { isUnprefixedRoute } from '@/lib/i18n/unprefixedRoutes';

@@ -63,7 +63,7 @@ export const changeEmail = async (newEmail: string, password?: string) => {
 
   const { getAppSettings } = await import("@/lib/config/readSettings");
   const appSettings = await getAppSettings();
-  const { isBlockedEmailDomain } = await import("@/lib/validations");
+  const { isBlockedEmailDomain } = await import("@modparks/core/validations");
   if (isBlockedEmailDomain(newEmail, appSettings.blockedEmailDomains)) {
     return { error: "errorDisposableEmail" };
   }

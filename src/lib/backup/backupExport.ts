@@ -1,4 +1,4 @@
-import { SCHEMA_TABLES } from "./schemaConfig";
+import { SCHEMA_TABLES } from "@modparks/core/backup/schemaConfig";
 import { writeAuditLog } from "./core";
 import type { Database } from "@/lib/db";
 
@@ -22,7 +22,7 @@ const mirrorToDrive = async (key: string, jsonStr: string): Promise<DriveMirrorR
 
   try {
     const { uploadBackupToDrive, pruneDriveBackups, getDriveConfig } = await import(
-      "@/lib/backup/googleDrive"
+      "@modparks/core/backup/googleDrive"
     );
 
     if (!getDriveConfig()) {
@@ -49,7 +49,7 @@ const mirrorToDrive = async (key: string, jsonStr: string): Promise<DriveMirrorR
  * 全テーブルのデータをダンプして R2 に保存し、そのキーを返します。
  */
 export const dumpToR2 = async (db: Database, prefix: "backup" | "snapshot") => {
-  const { SENSITIVE_TABLES, encryptJson } = await import("@/lib/backup/crypto");
+  const { SENSITIVE_TABLES, encryptJson } = await import("@modparks/core/backup/crypto");
 
   const backupData: Record<string, any> = {};
 

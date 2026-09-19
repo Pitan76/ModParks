@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { resolveViewer } from "@/lib/api-auth";
 import { getAppSettings } from "@/lib/config/readSettings";
-import { listIdeaPosts } from "@/lib/queries/postList";
-import { toApiIdea } from "@/lib/api/toApi";
-import type { ApiIdea, ApiIdeaPrivate, PaginatedResponse } from "@/types/api";
+import { listIdeaPosts } from "@modparks/core/queries/postList";
+import { toApiIdea } from "@modparks/core/api/toApi";
+import type { ApiIdea, ApiIdeaPrivate, PaginatedResponse } from "@modparks/core/types/api";
 import { withPublicCache } from "@/lib/http/cache";
 
 export async function GET(request: Request) {

@@ -8,7 +8,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { updateAppSettings } from "@/lib/actions/appSettings";
-import { getAppSettingFields, type AppSettingGroup, type AppSettings } from "@/lib/config/appSettings";
+import { getAppSettingFields, type AppSettingGroup, type AppSettings } from "@modparks/core/config/appSettings";
 import AppSettingFields from "./AppSettingFields";
 
 /**

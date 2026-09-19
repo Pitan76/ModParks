@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { resolveViewer } from "@/lib/api-auth";
-import { findIdeaPostBySlug } from "@/lib/queries/post";
-import { listIdeaPosts } from "@/lib/queries/postList";
-import { toApiIdea } from "@/lib/api/toApi";
-import { canViewPost } from "@/lib/auth/postAccess";
-import type { ApiIdea, ApiIdeaPrivate } from "@/types/api";
+import { findIdeaPostBySlug } from "@modparks/core/queries/post";
+import { listIdeaPosts } from "@modparks/core/queries/postList";
+import { toApiIdea } from "@modparks/core/api/toApi";
+import { canViewPost } from "@modparks/core/auth/postAccess";
+import type { ApiIdea, ApiIdeaPrivate } from "@modparks/core/types/api";
 import { withPublicCache } from "@/lib/http/cache";
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {

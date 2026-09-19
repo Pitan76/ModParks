@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mergeDependencyEntries, mergeDependentEntries } from "@/lib/dependencies/merge";
-import type { DependencyEntry } from "@/lib/dependencies/entryTypes";
+import type { DependencyEntry } from "@modparks/core/dependencies/entryTypes";
 
 const entry = (over: Partial<DependencyEntry> & { id: string }): DependencyEntry => ({
   dependencyType: "required",

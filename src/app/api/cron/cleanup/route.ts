@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { checkCronAuth } from "@/lib/cron/auth";
-import { cleanupOldNotifications } from "@/lib/services/notificationCleanup";
-import { describeError } from "@/lib/errors/describe";
+import { cleanupOldNotifications } from "@modparks/core/services/notificationCleanup";
+import { describeError } from "@modparks/core/errors/describe";
 
 export const dynamic = "force-dynamic";
 

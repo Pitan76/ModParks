@@ -5,7 +5,7 @@ import { alias } from "drizzle-orm/sqlite-core";
 import { buildProjectSearchConditions, resolveProjectOrderBy } from "@/lib/queries/projectSearch";
 import { listPublicProjectVersions } from "@/lib/queries/versionList";
 import { mapProjectRow } from "@/lib/queries/projectRow";
-import { toProjectPost } from "@/lib/queries/postRow";
+import { toProjectPost } from "@modparks/core/queries/postRow";
 import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 
 type GetProjectsParams = {

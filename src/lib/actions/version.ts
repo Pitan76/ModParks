@@ -7,10 +7,10 @@ import { notifyNewVersion } from "@/lib/notifications/notify";
 import { createSystemCommentForResolvedIdea } from "@/lib/actions/versionIdeaLink";
 import { pushVersionToExternalPlatforms } from "@/lib/actions/versionExternalSync";
 import { scanVersionFile } from "@/lib/actions/versionScan";
-import { createVersionSchema, updateVersionSchema } from "@/lib/validations";
+import { createVersionSchema, updateVersionSchema } from "@modparks/core/validations";
 import { resolveDependencyDrafts } from "@/lib/dependencies/create";
 import { parseDependencyDraftsField } from "@/lib/dependencies/parseDrafts";
-import { isAllowedExternalUrl } from "@/lib/validations";
+import { isAllowedExternalUrl } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -18,9 +18,9 @@ import { getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import { findProjectPostBySlug } from "@/lib/queries/post";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";
-import { chunkRows } from "@/lib/db/chunkRows";
+import { chunkRows } from "@modparks/core/db/chunkRows";
 
 // 再エクスポートは置かない。"use server" ファイルは値を再公開できず、型を再公開すると
 // サーバー専用モジュールがクライアントバンドルへ引き込まれるため、呼び出し側は

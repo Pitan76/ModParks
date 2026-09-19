@@ -13,7 +13,7 @@ import LoaderAutocomplete from "./LoaderAutocomplete";
 import McVersionAutocomplete from "./McVersionAutocomplete";
 import VersionDependenciesManager from "./VersionDependenciesManager";
 import { updateVersion } from "@/lib/actions/version";
-import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
+import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@modparks/core/releaseChannels";
 import { useTranslations } from "next-intl";
 import type { ProjectVersion } from "./ProjectVersionsManager";
 

@@ -3,7 +3,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
-import type { QuotaUsage, UsageLevel } from "@/lib/usage/quota";
+import type { QuotaUsage, UsageLevel } from "@modparks/core/usage/quota";
 
 /** 深刻度に対応する MUI の色 */
 const LEVEL_COLOR: Record<UsageLevel, "success" | "info" | "warning" | "error"> = {

@@ -9,7 +9,7 @@ import { after } from "next/server";
 import { deleteFromR2, getR2Bucket } from "@/lib/r2";
 import { insertVersionRecord } from "@/lib/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
-import { channelFromGithubPrerelease } from "@/lib/releaseChannels";
+import { channelFromGithubPrerelease } from "@modparks/core/releaseChannels";
 import { parseModJar } from "@/lib/services/jar";
 import { scanVersionFile } from "@/lib/actions/versionScan";
 import {
@@ -25,7 +25,7 @@ import {
   storeAssetToR2,
   linkToAsset,
 } from "@/lib/utils/githubReleaseAsset";
-import { findProjectPostBySlug } from "@/lib/queries/post";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { getRepoAccessToken } from "@/lib/utils/githubRepoAccess";
 import type { Database } from "@/lib/db";
 import { getServerErrors } from "@/lib/i18n/serverErrors";

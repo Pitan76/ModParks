@@ -3,7 +3,7 @@
  * OIDC ディスカバリ（/.well-known/openid-configuration）と
  * RFC 8414（/.well-known/oauth-authorization-server）で同じ内容を返す。
  */
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 import { OAUTH_SCOPES } from "./scopes";
 
 export function buildAuthorizationServerMetadata() {

@@ -37,7 +37,7 @@ export async function checkProjectUploadAccess(db: Database,
   const { getDatabase } = await import("@/lib/db");
   const { projectMembers } = await import("@modparks/core/db/schema");
   const { eq, and } = await import("drizzle-orm");
-  const { findProjectPostBySlug } = await import("@/lib/queries/post");
+  const { findProjectPostBySlug } = await import("@modparks/core/queries/post");
 
   const project = await findProjectPostBySlug(db, projectSlug);
   if (!project) return NOT_FOUND;

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { resolveViewer } from "@/lib/api-auth";
 import { getAppSettings } from "@/lib/config/readSettings";
-import { listIdeaPosts } from "@/lib/queries/postList";
-import type { ApiIdea, PaginatedResponse } from "@/types/api-v1";
+import { listIdeaPosts } from "@modparks/core/queries/postList";
+import type { ApiIdea, PaginatedResponse } from "@modparks/core/types/api-v1";
 import { withPublicCache } from "@/lib/http/cache";
 
 /**

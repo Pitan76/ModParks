@@ -4,7 +4,7 @@ import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { notifications, projectSubscriptions, developerSubscriptions, userSettings } from "@modparks/core/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { NOTIFICATION_TYPES, type NotificationType } from "@/lib/notifications/types";
+import { NOTIFICATION_TYPES, type NotificationType } from "@modparks/core/notifications/types";
 
 /** 指定した通知を既読にする */
 export async function markNotificationsRead(ids: string[]) {
@@ -44,7 +44,7 @@ export async function updateNotificationPrefs(prefs: Record<string, boolean>, di
 
   let normalizedWebhook: string | null = null;
   if (discordWebhookUrl) {
-    const { isValidDiscordWebhookUrl } = await import("@/lib/notifications/discord");
+    const { isValidDiscordWebhookUrl } = await import("@modparks/core/notifications/discord");
     if (!isValidDiscordWebhookUrl(discordWebhookUrl)) {
       return { success: false, error: "invalid_webhook" };
     }

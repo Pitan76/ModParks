@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FormReader, CHECKBOX_ABSENT_VALUE } from "@/lib/forms/formReader";
 import { buildProjectCreateInput, buildProjectUpdateInput } from "@/lib/forms/projectFormInput";
-import { createProjectSchema, updateProjectSchema } from "@/lib/validations";
+import { createProjectSchema, updateProjectSchema } from "@modparks/core/validations";
 
 /** スイッチ（hidden + checkbox）の送信内容を再現する */
 const appendSwitch = (fd: FormData, name: string, checked: boolean) => {

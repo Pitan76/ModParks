@@ -1,11 +1,11 @@
-import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";
+import { buildVersionDownloadUrl } from "@modparks/core/utils/downloadUrl";
 import { getDatabase } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { getVersionById } from "@/lib/actions/versionQuery";
-import { getVersionDependencies } from "@/lib/queries/dependency";
+import { getVersionDependencies } from "@modparks/core/queries/dependency";
 import { mergeDependencyEntries } from "@/lib/dependencies/merge";
 import VersionDependencies from "@/components/project/VersionDependencies";
 import { getProjectMembers } from "@/lib/actions/member";
@@ -31,7 +31,7 @@ import { getLatestScanAppeal } from "@/lib/actions/scanAppealQuery";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import LinkButton from "@/components/ui/LinkButton";
 import { canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
-import { formatBytes, toStringArray } from "@/lib/utils/format";
+import { formatBytes, toStringArray } from "@modparks/core/utils/format";
 import { isAdminSession } from "@/lib/auth/roles";
 
 interface VersionDetailPageProps {

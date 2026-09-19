@@ -5,7 +5,7 @@
  * 判定のたびに読むため参照頻度が高く、キャッシュの寿命を独立させたいため。
  */
 import { getSettingsKV } from "@/lib/kv";
-import { DEFAULT_RUNTIME_CONFIG, type RuntimeConfig } from "@/lib/runtime/features";
+import { DEFAULT_RUNTIME_CONFIG, type RuntimeConfig } from "@modparks/core/runtime/features";
 
 export const RUNTIME_KEY = "app:runtime";
 

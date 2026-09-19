@@ -9,7 +9,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { formatCompactNumber } from "@/lib/utils/format";
+import { formatCompactNumber } from "@modparks/core/utils/format";
 import LinkButton from "@/components/ui/LinkButton";
 import ProjectVersionCell from "./ProjectVersionCell";
 import { tableContainerSx, tableHeadSx, tableRootSx } from "@/components/ui/tableStyles";

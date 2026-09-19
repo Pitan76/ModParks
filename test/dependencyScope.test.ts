@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@/lib/dependencies/scope";
-import { dependencyDraftsSchema } from "@/lib/validations";
+import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@modparks/core/dependencies/scope";
+import { dependencyDraftsSchema } from "@modparks/core/validations";
 
 describe("parseDependencyLoaders", () => {
   it("null / 空文字 / 空配列は指定なし扱い", () => {

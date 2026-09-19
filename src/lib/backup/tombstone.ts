@@ -9,7 +9,7 @@
 import { deletedRecords } from "@modparks/core/db/schema";
 import { TABLE_PRIMARY_KEYS } from "@/lib/backup/core";
 import type { Database } from "@/lib/db";
-import { chunkRows } from "@/lib/db/chunkRows";
+import { chunkRows } from "@modparks/core/db/chunkRows";
 
 /**
  * 墓標を意図的に記録していない削除箇所。

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { VALIDATION_KEY_PREFIX } from "@/lib/validationKeys";
+import { VALIDATION_KEY_PREFIX } from "@modparks/core/validationKeys";
 
 /**
  * フォームのエラーメッセージ配列を表示用の文字列へ解決するフック。

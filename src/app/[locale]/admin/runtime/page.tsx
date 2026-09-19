@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { getRuntimeConfig } from "@/lib/runtime/state";
-import { effectiveMode, normalizeFeatures } from "@/lib/runtime/features";
+import { effectiveMode, normalizeFeatures } from "@modparks/core/runtime/features";
 import FeatureSwitchList from "@/components/admin/FeatureSwitchList";
 import RuntimeModePanel from "@/components/admin/RuntimeModePanel";
 import SnapshotPanel from "@/components/admin/SnapshotPanel";

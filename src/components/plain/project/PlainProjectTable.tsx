@@ -4,7 +4,7 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 
 import { Link } from "@/lib/i18n/routing";
-import { formatCompactNumber } from "@/lib/utils/format";
+import { formatCompactNumber } from "@modparks/core/utils/format";
 import type { ProjectCardProps } from "@/components/project/ProjectCard";
 import styles from "../plain.module.css";
 

@@ -4,7 +4,7 @@ import {
   DEFAULT_APP_SETTINGS,
   normalizeAppSettings,
   type AppSettings,
-} from "@/lib/config/appSettings";
+} from "@modparks/core/config/appSettings";
 
 /**
  * KV からアプリ設定を読み出す。

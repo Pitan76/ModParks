@@ -7,7 +7,7 @@ import MarkdownRenderer from "./MarkdownRenderer";
 import DescriptionSkeleton from "./skeletons/DescriptionSkeleton";
 // @ts-expect-error - puki2md has no type declarations
 import puki2md from "puki2md";
-import { toPlainDescription } from "@/lib/utils/plainText";
+import { toPlainDescription } from "@modparks/core/utils/plainText";
 
 type DescriptionRendererProps = {
   content: string;

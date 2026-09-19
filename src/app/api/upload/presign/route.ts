@@ -4,17 +4,17 @@ import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { buildR2Key, getR2PublicUrl } from "@/lib/r2";
-import { getR2S3Config, createPresignedPutUrl } from "@/lib/r2Presign";
+import { getR2S3Config, createPresignedPutUrl } from "@modparks/core/r2Presign";
 import { createId } from "@paralleldrive/cuid2";
 import { checkProjectUploadAccess, type UploadActor, type UploadAccess } from "@/lib/upload/access";
-import { getTrustState } from "@/lib/services/trust";
+import { getTrustState } from "@modparks/core/services/trust";
 import {
   isAllowedUpload,
   isUploadType,
   MAX_UPLOAD_BYTES,
   NEW_PROJECT_SLUG,
   type UploadType,
-} from "@/lib/upload/fileTypes";
+} from "@modparks/core/upload/fileTypes";
 
 interface PresignRequest {
   fileName: string;

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { Env } from "@/lib/db";
-import { safeContentTypeForKey, UPLOAD_TYPES } from "@/lib/upload/fileTypes";
+import { safeContentTypeForKey, UPLOAD_TYPES } from "@modparks/core/upload/fileTypes";
 
 export async function GET(
   _req: NextRequest,

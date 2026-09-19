@@ -10,7 +10,7 @@ import { isActionError } from "@/lib/actions/actionResult";
 import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
 import { importGithubRelease } from "@/lib/actions/github";
 import type { GithubImportMode } from "@/lib/utils/github";
-import { normalizeReleaseChannel } from "@/lib/releaseChannels";
+import { normalizeReleaseChannel } from "@modparks/core/releaseChannels";
 import type { PreviousVersionSettings } from "./PreviousVersionSettings";
 
 export type ProjectVersion = {

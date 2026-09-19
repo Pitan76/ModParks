@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 import { SITE_NAME, canonicalUrl } from "@/lib/seo/canonical";
 
 /**

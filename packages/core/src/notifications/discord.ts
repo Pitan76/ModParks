@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 
 /** Discord Webhook URL の許可ホスト。他ホストへの SSRF を防ぐ */
 const ALLOWED_HOSTS = ["discord.com", "discordapp.com", "ptb.discord.com", "canary.discord.com"];

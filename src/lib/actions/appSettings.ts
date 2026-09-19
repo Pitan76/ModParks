@@ -10,7 +10,7 @@ import {
   appSettingsSchema,
   normalizeAppSettings,
   type AppSettings,
-} from "@/lib/config/appSettings";
+} from "@modparks/core/config/appSettings";
 import { getAppSettings } from "@/lib/config/readSettings";
 
 /**

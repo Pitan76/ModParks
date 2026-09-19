@@ -13,7 +13,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { Link as RoutingLink } from "@/lib/i18n/routing";
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 import { canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
 import IdeaCardList from "@/components/idea/IdeaCardList";
 import { getProfileMeta, resolveProfileUser, getProfileContent } from "./profileData";

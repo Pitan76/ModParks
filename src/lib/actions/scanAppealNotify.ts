@@ -2,7 +2,7 @@ import { versions, posts, projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { notifyToUser } from "@/lib/notifications/notify";
 import type { Database } from "@/lib/db";
-import { APPEAL_DECISION_LABELS, NO_REVIEW_NOTE, scanStatusLabel } from "@/lib/notifications/scanLabels";
+import { APPEAL_DECISION_LABELS, NO_REVIEW_NOTE, scanStatusLabel } from "@modparks/core/notifications/scanLabels";
 
 /**
  * 異議申請の裁定・スキャン判定の通知。

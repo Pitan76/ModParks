@@ -17,7 +17,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useTranslations } from "next-intl";
-import { DEPENDENCY_TYPES, MAX_DEPENDENCY_DRAFTS, type DependencyDraft, type DependencyType } from "@/lib/dependencies/types";
+import { DEPENDENCY_TYPES, MAX_DEPENDENCY_DRAFTS, type DependencyDraft, type DependencyType } from "@modparks/core/dependencies/types";
 import { DEPENDENCY_COLOR } from "./VersionDependencies";
 
 type Props = {

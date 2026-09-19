@@ -3,12 +3,12 @@ import { getDatabase } from "@/lib/db";
 import { resolveViewer } from "@/lib/api-auth";
 import { posts, projectMembers } from "@modparks/core/db/schema";
 import { eq, and, or } from "drizzle-orm";
-import { findProjectPostBySlug } from "@/lib/queries/post";
-import { listProjectPosts } from "@/lib/queries/postList";
-import { toApiProject } from "@/lib/api/toApi";
-import { canViewPost } from "@/lib/auth/postAccess";
-import { getProjectDependencies, getProjectDependents } from "@/lib/queries/dependency";
-import type { ApiProjectDetail, ApiProjectPrivateDetail, ApiDependency } from "@/types/api";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
+import { listProjectPosts } from "@modparks/core/queries/postList";
+import { toApiProject } from "@modparks/core/api/toApi";
+import { canViewPost } from "@modparks/core/auth/postAccess";
+import { getProjectDependencies, getProjectDependents } from "@modparks/core/queries/dependency";
+import type { ApiProjectDetail, ApiProjectPrivateDetail, ApiDependency } from "@modparks/core/types/api";
 import { withPublicCache } from "@/lib/http/cache";
 
 function toApiDependency(d: { id: string; dependencyType: ApiDependency["dependencyType"]; project: ApiDependency["project"] }): ApiDependency {

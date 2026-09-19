@@ -10,8 +10,8 @@ import { useTranslations } from "next-intl";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { useContextMenu, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 import { usePinMenuItem } from "@/components/pin/usePinMenuItem";
-import { formatDate } from "@/lib/utils/format";
-import { toPlainDescription } from "@/lib/utils/plainText";
+import { formatDate } from "@modparks/core/utils/format";
+import { toPlainDescription } from "@modparks/core/utils/plainText";
 import { useColorMode } from "@/components/ThemeRegistry";
 
 export interface IdeaCardData {

@@ -8,9 +8,9 @@ import { createVersion } from "@/lib/actions/version";
 import type { ExternalUploadSummary } from "@/lib/externalSync/uploadSummary";
 import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";
-import { DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
+import { DEFAULT_RELEASE_CHANNEL } from "@modparks/core/releaseChannels";
 import { runRecipeExtraction } from "./extractRecipes";
-import type { DependencyDraft } from "@/lib/dependencies/types";
+import type { DependencyDraft } from "@modparks/core/dependencies/types";
 import type { PreviousVersionSettings } from "../PreviousVersionSettings";
 
 const MB_LIMIT = 5;

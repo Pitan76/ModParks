@@ -3,8 +3,8 @@
 import { ReactNode } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/routing";
-import { formatBytes } from "@/lib/utils/format";
-import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";
+import { formatBytes } from "@modparks/core/utils/format";
+import { buildVersionDownloadUrl } from "@modparks/core/utils/downloadUrl";
 import type { ParsedProjectVersion } from "@/components/project/useProjectVersions";
 import styles from "../plain.module.css";
 

@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { versions, projectDependencies } from "@modparks/core/db/schema";
-import { findProjectPostBySlug } from "@/lib/queries/post";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
@@ -10,7 +10,7 @@ import { recordDeletion } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import type { ActionResult } from "@/lib/actions/actionResult";
 import type { Database } from "@/lib/db";
-import type { ProjectPost } from "@/types/post";
+import type { ProjectPost } from "@modparks/core/types/post";
 
 /**
  * バージョン単体を操作する Server Action の共通前処理。

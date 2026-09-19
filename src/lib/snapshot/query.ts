@@ -8,14 +8,14 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { posts, projects, userProfiles, users, versions } from "@modparks/core/db/schema";
 import { getR2PublicUrl } from "@/lib/r2";
-import { toPlainDescription } from "@/lib/utils/plainText";
+import { toPlainDescription } from "@modparks/core/utils/plainText";
 import {
   SNAPSHOT_VISIBILITY,
   type PublicAuthor,
   type PublicProjectDetail,
   type PublicProjectSummary,
   type PublicVersion,
-} from "./publicView";
+} from "@modparks/core/snapshot/publicView";
 
 type Db = Parameters<typeof eq>[0] extends never ? never : any; // eslint-disable-line @typescript-eslint/no-explicit-any
 

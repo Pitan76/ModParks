@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { resolveViewer } from "@/lib/api-auth";
-import { findIdeaPostBySlug } from "@/lib/queries/post";
-import { listIdeaPosts } from "@/lib/queries/postList";
-import { canViewPost } from "@/lib/auth/postAccess";
-import type { ApiIdea } from "@/types/api-v1";
+import { findIdeaPostBySlug } from "@modparks/core/queries/post";
+import { listIdeaPosts } from "@modparks/core/queries/postList";
+import { canViewPost } from "@modparks/core/auth/postAccess";
+import type { ApiIdea } from "@modparks/core/types/api-v1";
 
 /**
  * v1 互換シム。

@@ -7,8 +7,8 @@
  *
  * 編集UIは行単位の削除が要るため、こちらは通さないこと。
  */
-import type { DependencyEntry, DependencyProjectSummary } from "./entryTypes";
-import type { DependencyType } from "./types";
+import type { DependencyEntry, DependencyProjectSummary } from "@modparks/core/dependencies/entryTypes";
+import type { DependencyType } from "@modparks/core/dependencies/types";
 
 type DependentEntry = {
   id: string;

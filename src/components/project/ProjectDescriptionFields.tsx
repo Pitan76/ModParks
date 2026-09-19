@@ -8,7 +8,7 @@ import FormHelperText from "@mui/material/FormHelperText";
 import { useTranslations } from "next-intl";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormTextField from "@/components/ui/form/FormTextField";
-import { locales } from "@/lib/i18n/locales";
+import { locales } from "@modparks/core/i18n/locales";
 
 export interface ProjectDescriptionFieldsProps {
   description?: string;

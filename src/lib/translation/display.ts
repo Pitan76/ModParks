@@ -3,9 +3,9 @@
  * ここでは LLM を呼ばない（呼ぶのは閲覧者の明示操作を受けた service 側だけ）。
  */
 import type { Database } from "@/lib/db";
-import { computeSourceHash } from "./sourceHash";
+import { computeSourceHash } from "@modparks/core/translation/sourceHash";
 import { findTranslation } from "./repository";
-import type { BodyFormat } from "./masking";
+import type { BodyFormat } from "@modparks/core/translation/masking";
 
 export interface DisplaySource {
   id: string;

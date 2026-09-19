@@ -8,7 +8,7 @@ import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
-import type { AppSettingField, AppSettings } from "@/lib/config/appSettings";
+import type { AppSettingField, AppSettings } from "@modparks/core/config/appSettings";
 
 /**
  * 見出しで区切る小分類。タブ内の項目数が多いので、関連するものだけを塊にして読ませる。

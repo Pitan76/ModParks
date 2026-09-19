@@ -11,11 +11,11 @@
 import { and, isNull, lt } from "drizzle-orm";
 import type { Database } from "@modparks/core/db/client";
 import { users, userTrust, type User } from "@modparks/core/db/schema";
-import { TRUST_TIER_FLOORS } from "@/lib/trust/config";
-import { syncTrustAttributes, syncAccountAge, hasSocialAccount } from "./trustAttributes";
-import { syncVersionCleanCredits, listCleanVersions } from "./trustActivity";
+import { TRUST_TIER_FLOORS } from "@modparks/core/trust/config";
+import { syncTrustAttributes, syncAccountAge, hasSocialAccount } from "@modparks/core/services/trustAttributes";
+import { syncVersionCleanCredits, listCleanVersions } from "@modparks/core/services/trustActivity";
 import { groupCleanVersionsByUser, projectScore } from "./trustProjection";
-import { getTrustState, recordTrustEvent, recomputeTrust } from "./trust";
+import { getTrustState, recordTrustEvent, recomputeTrust } from "@modparks/core/services/trust";
 
 /** 見積もりで走査するバージョンの上限。移行対象の規模に合わせて調整する */
 const VERSION_SCAN_LIMIT = 5000;

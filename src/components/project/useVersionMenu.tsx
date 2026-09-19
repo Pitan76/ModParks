@@ -2,7 +2,7 @@
 
 import DownloadIcon from "@mui/icons-material/Download";
 import { useTranslations } from "next-intl";
-import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";
+import { buildVersionDownloadUrl } from "@modparks/core/utils/downloadUrl";
 import { useCommonItems } from "@/components/ui/ContextMenu";
 import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 

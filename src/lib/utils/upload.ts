@@ -4,7 +4,7 @@
  * （アバター / プロジェクトアイコン / Mod ファイルの各アップロードで共有）
  */
 
-import { MAX_UPLOAD_BYTES } from "@/lib/upload/fileTypes";
+import { MAX_UPLOAD_BYTES } from "@modparks/core/upload/fileTypes";
 
 export interface UploadTarget {
   type: "icon" | "mod" | "avatar" | "media";

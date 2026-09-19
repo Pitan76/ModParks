@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { parseCsvParam, type DownloadPreference } from "@/lib/utils/downloadUrl";
+import { parseCsvParam, type DownloadPreference } from "@modparks/core/utils/downloadUrl";
 
 /**
  * 現在の検索条件（高度な検索・プラットフォーム絞り込み）を

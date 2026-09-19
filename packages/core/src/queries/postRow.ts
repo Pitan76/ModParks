@@ -1,5 +1,5 @@
 import type { Post, ProjectFields, IdeaFields } from "@modparks/core/db/schema";
-import type { ProjectPost, IdeaPost, PostAuthor } from "@/types/post";
+import type { ProjectPost, IdeaPost, PostAuthor } from "@modparks/core/types/post";
 
 /**
  * posts と子テーブルを join した行を、平坦なドメインオブジェクトに直す。

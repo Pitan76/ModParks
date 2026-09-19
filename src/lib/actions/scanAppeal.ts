@@ -2,7 +2,7 @@
 
 import { getAuthenticatedDb, getAdminDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { scanAppeals, versions } from "@modparks/core/db/schema";
-import { findProjectPostById } from "@/lib/queries/post";
+import { findProjectPostById } from "@modparks/core/queries/post";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 import { notifyAppealResult, notifyScanStatusChanged } from "@/lib/actions/scanAppealNotify";
 import { createId } from "@paralleldrive/cuid2";

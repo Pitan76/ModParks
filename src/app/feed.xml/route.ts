@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { listProjectPosts } from "@/lib/queries/postList";
-import { SITE_URL } from "@/lib/config";
+import { listProjectPosts } from "@modparks/core/queries/postList";
+import { SITE_URL } from "@modparks/core/config";
 
 export async function GET() {
   const db = await getDatabase();

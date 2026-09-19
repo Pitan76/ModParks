@@ -6,7 +6,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import { useTranslations } from "next-intl";
 import { useContextMenu, useCommonItems } from "@/components/ui/ContextMenu";
 import { usePinMenuItem } from "@/components/pin/usePinMenuItem";
-import { buildProjectDownloadUrl } from "@/lib/utils/downloadUrl";
+import { buildProjectDownloadUrl } from "@modparks/core/utils/downloadUrl";
 import { useDownloadPreference } from "@/lib/hooks/useDownloadPreference";
 import { useCartMenuItems } from "./useCartMenuItems";
 

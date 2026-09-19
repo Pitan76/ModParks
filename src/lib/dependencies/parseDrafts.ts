@@ -1,5 +1,5 @@
-import { dependencyDraftsSchema } from "@/lib/validations";
-import type { DependencyDraft } from "@/lib/dependencies/types";
+import { dependencyDraftsSchema } from "@modparks/core/validations";
+import type { DependencyDraft } from "@modparks/core/dependencies/types";
 
 /**
  * フォームから来た依存関係の下書き（JSON文字列）を検証して取り出す。

@@ -43,7 +43,7 @@ export const authConfig = {
       if (user?.email) {
         const { getAppSettings } = await import("@/lib/config/readSettings");
         const appSettings = await getAppSettings();
-        const { isBlockedEmailDomain } = await import("@/lib/validations");
+        const { isBlockedEmailDomain } = await import("@modparks/core/validations");
         if (isBlockedEmailDomain(user.email as string, appSettings.blockedEmailDomains)) return false;
 
         const { getDatabase } = await import("@/lib/db");
@@ -122,7 +122,7 @@ export const authConfig = {
             
             if (dbUser) {
               token.role = dbUser.role as string;
-              const { isPremiumActive } = await import("@/lib/premium");
+              const { isPremiumActive } = await import("@modparks/core/premium");
               token.isPremium = isPremiumActive(dbUser);
               token.isDeleted = !!dbUser.deletedAt;
               token.isDeactivated = !!dbUser.deactivatedAt;

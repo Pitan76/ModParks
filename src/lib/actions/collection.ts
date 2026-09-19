@@ -7,8 +7,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
-import { chunkRows } from "@/lib/db/chunkRows";
-import { toProjectPost } from "@/lib/queries/postRow";
+import { chunkRows } from "@modparks/core/db/chunkRows";
+import { toProjectPost } from "@modparks/core/queries/postRow";
 import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 
 export async function createCollection(name: string, description: string | null, visibility: "public" | "unlisted" | "private") {

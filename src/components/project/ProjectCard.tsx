@@ -10,7 +10,7 @@ import Chip from "@mui/material/Chip";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import LinkCardActionArea from "@/components/ui/LinkCardActionArea";
 import { DateLabel } from "@/components/ui/ProjectInfoLabels";
-import { toPlainDescription } from "@/lib/utils/plainText";
+import { toPlainDescription } from "@modparks/core/utils/plainText";
 import { useCartEnabled } from "@/components/cart/cartStore";
 import ProjectTypeBadge from "./ProjectTypeBadge";
 import CartToggleButton from "./card/CartToggleButton";

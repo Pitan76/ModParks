@@ -6,8 +6,8 @@ import { revalidatePath } from "next/cache";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { userTrust, users, TRUST_TIERS, type TrustTier } from "@modparks/core/db/schema";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
-import { recomputeTrust, recordTrustEvent, reverseTrustEvent } from "@/lib/services/trust";
-import { syncTrustAttributes, syncAccountAge } from "@/lib/services/trustAttributes";
+import { recomputeTrust, recordTrustEvent, reverseTrustEvent } from "@modparks/core/services/trust";
+import { syncTrustAttributes, syncAccountAge } from "@modparks/core/services/trustAttributes";
 
 const REASON_MAX_LENGTH = 500;
 

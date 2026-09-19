@@ -7,7 +7,7 @@
 import { and, eq } from "drizzle-orm";
 import type { Database } from "@modparks/core/db/client";
 import { comments, posts, projects, trustEvents, users, userProfiles, versions, type Report } from "@modparks/core/db/schema";
-import { getTrustState, recordMalwareDetected, recordTrustEvent, reverseTrustEvent } from "./trust";
+import { getTrustState, recordMalwareDetected, recordTrustEvent, reverseTrustEvent } from "@modparks/core/services/trust";
 
 /** 通報対象の持ち主を引く。持ち主が特定できない通報は減点の対象にしない */
 async function findReportedOwnerId(db: Database, report: Report): Promise<string | null> {
@@ -137,7 +137,7 @@ async function notifyMalware(db: Database, userId: string, versionId: string, pr
     .get();
 
   const { getAdminWebhookUrl } = await import("@/lib/usage/webhook");
-  const { buildMalwareEmbed, sendTrustAlert } = await import("./trustAlert");
+  const { buildMalwareEmbed, sendTrustAlert } = await import("@modparks/core/services/trustAlert");
 
   await sendTrustAlert(await getAdminWebhookUrl(), buildMalwareEmbed({
     userId,

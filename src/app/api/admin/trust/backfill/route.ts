@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminDb, getReauthenticatedAdminDb } from "@/lib/auth-helpers";
 import { backfillTrust } from "@/lib/services/trustBackfill";
-import { describeError } from "@/lib/errors/describe";
+import { describeError } from "@modparks/core/errors/describe";
 
 export const dynamic = "force-dynamic";
 

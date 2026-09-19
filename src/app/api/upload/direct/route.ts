@@ -5,14 +5,14 @@ import { auth } from "@/lib/auth";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import { uploadToR2, getR2Bucket } from "@/lib/r2";
 import { checkProjectUploadAccess, type UploadActor } from "@/lib/upload/access";
-import { getTrustState } from "@/lib/services/trust";
+import { getTrustState } from "@modparks/core/services/trust";
 import {
   isAllowedUpload,
   uploadTypeFromKey,
   MAX_UPLOAD_BYTES,
   NEW_PROJECT_SLUG,
   UPLOAD_TYPES,
-} from "@/lib/upload/fileTypes";
+} from "@modparks/core/upload/fileTypes";
 
 /** そのキーへ書いてよいかの判定結果。失敗時はそのまま HTTP 応答に使う。 */
 type KeyCheck = { ok: true; projectType?: string } | { ok: false; status: number; error: string };

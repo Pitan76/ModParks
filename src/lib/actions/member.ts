@@ -7,7 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import { findProjectPostById } from "@/lib/queries/post";
+import { findProjectPostById } from "@modparks/core/queries/post";
 
 /**
  * プロジェクトのメンバー一覧を取得する

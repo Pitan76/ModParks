@@ -9,7 +9,7 @@
 import { comments, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, desc, and, isNull, inArray, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
-import type { ApiComment } from "@/types/api";
+import type { ApiComment } from "@modparks/core/types/api";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Db = any;

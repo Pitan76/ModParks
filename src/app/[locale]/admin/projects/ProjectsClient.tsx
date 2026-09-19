@@ -17,7 +17,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Link } from "@/lib/i18n/routing";
-import { buildSilentDownloadUrl } from "@/lib/utils/downloadUrl";
+import { buildSilentDownloadUrl } from "@modparks/core/utils/downloadUrl";
 import { adminDeleteProject } from "@/lib/actions/admin";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";

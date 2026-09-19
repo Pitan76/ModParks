@@ -1,4 +1,4 @@
-import type { DependencyType } from "@/lib/dependencies/types";
+import type { DependencyType } from "@modparks/core/dependencies/types";
 
 /** 依存の適用範囲。バージョン限定にするか、どのプラットフォームに要るか */
 export type DependencyScope = {

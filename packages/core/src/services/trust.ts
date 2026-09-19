@@ -17,8 +17,8 @@ import {
   type TrustTier,
   type UserTrust,
 } from "@modparks/core/db/schema";
-import { TRUST_BASE_SCORE, TRUST_EVENT_DELTAS, TRUST_NON_DECAYING_KINDS } from "@/lib/trust/config";
-import { computeScore, resolveTier, tierFromScore } from "@/lib/trust/score";
+import { TRUST_BASE_SCORE, TRUST_EVENT_DELTAS, TRUST_NON_DECAYING_KINDS } from "@modparks/core/trust/config";
+import { computeScore, resolveTier, tierFromScore } from "@modparks/core/trust/score";
 
 export type RecordTrustEventInput = {
   userId: string;

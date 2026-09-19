@@ -6,7 +6,7 @@
  * app/ 直下にドット始まりのディレクトリを置くとビルドが解決できないため、この形にしている。
  */
 import { NextResponse } from "next/server";
-import { buildAuthorizationServerMetadata } from "@/lib/oauth/metadata";
+import { buildAuthorizationServerMetadata } from "@modparks/core/oauth/metadata";
 
 export async function GET() {
   return NextResponse.json(buildAuthorizationServerMetadata(), {

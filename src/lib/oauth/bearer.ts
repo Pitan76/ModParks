@@ -3,7 +3,7 @@
  * API キー認証（lib/api-auth.ts）と並ぶもう一つの入口で、こちらはスコープを持つ。
  */
 import type { Database } from "@modparks/core/db/client";
-import { verifyAccessToken } from "./tokens";
+import { verifyAccessToken } from "@modparks/core/oauth/tokens";
 import { bearerError } from "./errors";
 
 export type BearerAuth = { userId: string; clientId: string; scopes: string[] };

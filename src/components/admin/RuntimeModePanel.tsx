@@ -9,7 +9,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { setRuntimeMode } from "@/lib/actions/runtime";
-import { RUNTIME_MODES, type ModeState, type RuntimeMode } from "@/lib/runtime/features";
+import { RUNTIME_MODES, type ModeState, type RuntimeMode } from "@modparks/core/runtime/features";
 import { DEFAULT_MODE_HOURS, MODE_DURATION_PRESETS_HOURS } from "@/lib/runtime/mode";
 
 interface RuntimeModePanelProps {

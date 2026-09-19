@@ -15,7 +15,7 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const { updateProfileSchema } = await import("@/lib/validations");
+    const { updateProfileSchema } = await import("@modparks/core/validations");
     const body = await request.json();
     
     const parsed = updateProfileSchema.safeParse(body);

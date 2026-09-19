@@ -10,7 +10,7 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { updateNotificationPrefs } from "@/lib/actions/notification";
-import { NOTIFICATION_TYPES, normalizePrefs } from "@/lib/notifications/types";
+import { NOTIFICATION_TYPES, normalizePrefs } from "@modparks/core/notifications/types";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
 import { useDirtyForm } from "@/lib/hooks/useDirtyForm";
 import StickySaveBar from "@/components/ui/StickySaveBar";

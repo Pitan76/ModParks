@@ -16,7 +16,7 @@ import {
   type QuotaUsage,
   type UsageLevel,
   type UsagePlan,
-} from "@/lib/usage/quota";
+} from "@modparks/core/usage/quota";
 import { toEpochDay } from "@/lib/usage/rollup";
 import { readAnalyticsStatus, type AnalyticsStatus } from "@/lib/usage/analyticsStatus";
 

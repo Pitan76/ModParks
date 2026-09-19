@@ -1,7 +1,7 @@
 /**
  * プロバイダの選択。差し替えは TRANSLATION_PROVIDER の値と、この表への追加だけで済む。
  */
-import type { TranslationProvider } from "./types";
+import type { TranslationProvider } from "@modparks/core/translation/providers/types";
 import { workersAiProvider } from "./workersAi";
 
 const PROVIDERS: Record<string, TranslationProvider> = {
@@ -17,4 +17,4 @@ export function getTranslationProvider(): TranslationProvider {
   return provider;
 }
 
-export type { TranslationProvider, TranslationRequest } from "./types";
+export type { TranslationProvider, TranslationRequest } from "@modparks/core/translation/providers/types";

@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { compactMcVersions, toStringArray } from "@/lib/utils/format";
-import { normalizeReleaseChannel } from "@/lib/releaseChannels";
+import { compactMcVersions, toStringArray } from "@modparks/core/utils/format";
+import { normalizeReleaseChannel } from "@modparks/core/releaseChannels";
 import { useTableSort } from "@/lib/hooks/useTableSort";
 import type { ProjectVersionsTableProps } from "./ProjectVersionsTable";
 

@@ -15,7 +15,7 @@ import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import ProjectEditClient from "@/components/project/ProjectEditClient";
 import ProjectDependenciesManager from "@/components/project/ProjectDependenciesManager";
 import { getProjectMembers } from "@/lib/actions/member";
-import { getProjectDependencies } from "@/lib/queries/dependency";
+import { getProjectDependencies } from "@modparks/core/queries/dependency";
 import { loadVersionUploadContext } from "@/lib/queries/versionUploadContext";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { versions, posts, versionIdeas } from "@modparks/core/db/schema";

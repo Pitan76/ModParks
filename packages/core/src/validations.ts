@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { locales } from "@/lib/i18n/locales";
-import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@/lib/releaseChannels";
+import { locales } from "@modparks/core/i18n/locales";
+import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@modparks/core/releaseChannels";
 import { MC_VERSIONS, type McVersion } from "@modparks/core/data/minecraftVersions";
-import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
+import { NEW_PROJECT_SLUG } from "@modparks/core/upload/fileTypes";
 import { CONTENT_TYPES } from "@modparks/core/data/projectTypes";
-import { vk } from "@/lib/validationKeys";
-import { DEPENDENCY_TYPES, MAX_DEPENDENCY_DRAFTS } from "@/lib/dependencies/types";
+import { vk } from "@modparks/core/validationKeys";
+import { DEPENDENCY_TYPES, MAX_DEPENDENCY_DRAFTS } from "@modparks/core/dependencies/types";
 
 const LICENSES = [
   "MIT",

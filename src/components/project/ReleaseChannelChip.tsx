@@ -2,7 +2,7 @@
 
 import BaseBadge from "@/components/ui/BaseBadge";
 import { useTranslations } from "next-intl";
-import { DEFAULT_RELEASE_CHANNEL, getChannelColor, normalizeReleaseChannel } from "@/lib/releaseChannels";
+import { DEFAULT_RELEASE_CHANNEL, getChannelColor, normalizeReleaseChannel } from "@modparks/core/releaseChannels";
 
 type ReleaseChannelChipProps = {
   channel: string;

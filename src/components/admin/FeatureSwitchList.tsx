@@ -14,7 +14,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { setFeatureEnabled } from "@/lib/actions/runtime";
-import { RUNTIME_FEATURES, type FeatureState, type RuntimeFeature } from "@/lib/runtime/features";
+import { RUNTIME_FEATURES, type FeatureState, type RuntimeFeature } from "@modparks/core/runtime/features";
 
 interface FeatureSwitchListProps {
   initial: Record<RuntimeFeature, FeatureState>;

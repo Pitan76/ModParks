@@ -1,8 +1,8 @@
 import { createNavigation } from "next-intl/navigation";
 import { defineRouting } from "next-intl/routing";
-import { defaultLocale, locales } from "./locales";
+import { defaultLocale, locales } from "@modparks/core/i18n/locales";
 
-export { localeToFileMap, locales, defaultLocale, type AppLocale } from "./locales";
+export { localeToFileMap, locales, defaultLocale, type AppLocale } from "@modparks/core/i18n/locales";
 
 export const routing = defineRouting({
   locales: locales,

@@ -6,7 +6,7 @@ import { getR2KeyFromUrl } from "@/lib/r2";
 import { scanJar, type JarSource } from "@/lib/services/jar";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
 import type { Database } from "@/lib/db";
-import { scanStatusLabel } from "@/lib/notifications/scanLabels";
+import { scanStatusLabel } from "@modparks/core/notifications/scanLabels";
 
 /** スキャン対象とする拡張子。zip 系以外は解凍できないため対象外 */
 const SCANNABLE_EXTS = [".jar", ".zip"];

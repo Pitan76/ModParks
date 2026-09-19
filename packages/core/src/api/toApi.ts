@@ -10,15 +10,15 @@
  * 詳細は docs-md/DESIGN.md の「層の分け方」を参照。
  */
 
-import type { ProjectPostView, IdeaPostView, PostAuthor } from "@/types/post";
+import type { ProjectPostView, IdeaPostView, PostAuthor } from "@modparks/core/types/post";
 import type {
   ApiUser,
   ApiProject,
   ApiProjectPrivate,
   ApiIdea,
   ApiIdeaPrivate,
-} from "@/types/api";
-import { canManagePost, type Viewer } from "@/lib/auth/postAccess";
+} from "@modparks/core/types/api";
+import { canManagePost, type Viewer } from "@modparks/core/auth/postAccess";
 
 function toApiUser(author: PostAuthor): ApiUser {
   return {

@@ -2,9 +2,9 @@ import { apiKeys } from "@modparks/core/db/schema";
 import type { Database } from "@modparks/core/db/client";
 import { isAdminUser } from "@/lib/auth/roles";
 import { eq } from "drizzle-orm";
-import type { Viewer } from "@/lib/auth/postAccess";
+import type { Viewer } from "@modparks/core/auth/postAccess";
 import { isOAuthAccessToken } from "@/lib/oauth/bearer";
-import { verifyAccessToken } from "@/lib/oauth/tokens";
+import { verifyAccessToken } from "@modparks/core/oauth/tokens";
 
 export async function validateApiKey(db: Database, request: Request) {
 

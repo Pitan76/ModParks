@@ -1,8 +1,8 @@
 import { notifications, projectSubscriptions, developerSubscriptions, userSettings, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, inArray } from "drizzle-orm";
-import type { ProjectPost } from "@/types/post";
-import { sendDiscordVersionNotification } from "@/lib/notifications/discord";
-import { isTypeEnabled, type NotificationType, type NotificationPayload } from "@/lib/notifications/types";
+import type { ProjectPost } from "@modparks/core/types/post";
+import { sendDiscordVersionNotification } from "@modparks/core/notifications/discord";
+import { isTypeEnabled, type NotificationType, type NotificationPayload } from "@modparks/core/notifications/types";
 import { sendPushToRecipients } from "@/lib/notifications/push";
 import type { Database } from "@/lib/db";
 
@@ -163,7 +163,7 @@ export async function notifyToUser(
     .get();
 
   if (settings?.discordWebhookUrl) {
-    const { isValidDiscordWebhookUrl } = await import("@/lib/notifications/discord");
+    const { isValidDiscordWebhookUrl } = await import("@modparks/core/notifications/discord");
     if (isValidDiscordWebhookUrl(settings.discordWebhookUrl)) {
       sendUserDiscordNotification(settings.discordWebhookUrl, settings.locale || "ja", type, payload);
     }

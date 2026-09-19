@@ -7,7 +7,7 @@ import Avatar from "@mui/material/Avatar";
 import { Link as RoutingLink } from "@/lib/i18n/routing";
 import { useContextMenu, useCommonItems, useContextMenuContext } from "@/components/ui/ContextMenu";
 import { useTranslations } from "next-intl";
-import { toPlainDescription } from "@/lib/utils/plainText";
+import { toPlainDescription } from "@modparks/core/utils/plainText";
 import { imageUrl } from "@/lib/utils/imageUrl";
 
 interface CollectionCardProps {

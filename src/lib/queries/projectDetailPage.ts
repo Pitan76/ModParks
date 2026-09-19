@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { favorites, projectSubscriptions, projectMembers, userSettings } from "@modparks/core/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import { getProjectDependencies, getProjectDependents } from "@/lib/queries/dependency";
+import { getProjectDependencies, getProjectDependents } from "@modparks/core/queries/dependency";
 import { mergeDependencyEntries, mergeDependentEntries } from "@/lib/dependencies/merge";
 import { getPublicProjectMedia } from "@/lib/queries/projectMedia";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";

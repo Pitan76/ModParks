@@ -7,7 +7,7 @@ import Avatar from "@mui/material/Avatar";
 import DownloadIcon from "@mui/icons-material/Download";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EditIcon from "@mui/icons-material/Edit";
-import { formatCompactNumber } from "@/lib/utils/format";
+import { formatCompactNumber } from "@modparks/core/utils/format";
 import { useLocale, useTranslations, useFormatter } from "next-intl";
 import LinkButton from "@/components/ui/LinkButton";
 import DateTimeTooltip from "@/components/ui/DateTimeTooltip";

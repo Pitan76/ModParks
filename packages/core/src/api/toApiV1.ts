@@ -6,8 +6,8 @@
  * 既存クライアントが依存しているため、v2 に合わせて改名してはならない。
  */
 
-import type { ProjectPostViewWithTags } from "@/lib/queries/postList";
-import type { ApiProject } from "@/types/api-v1";
+import type { ProjectPostViewWithTags } from "@modparks/core/queries/postList";
+import type { ApiProject } from "@modparks/core/types/api-v1";
 
 function toEpochMs(d: Date | string | null | undefined): number {
   if (!d) return 0;

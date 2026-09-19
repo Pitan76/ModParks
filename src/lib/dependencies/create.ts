@@ -7,9 +7,9 @@
  */
 import { eq, and, inArray } from "drizzle-orm";
 import { posts, projectDependencies } from "@modparks/core/db/schema";
-import { isAllowedExternalUrl } from "@/lib/validations";
+import { isAllowedExternalUrl } from "@modparks/core/validations";
 import type { Database } from "@/lib/db";
-import { MAX_DEPENDENCY_DRAFTS, type DependencyDraft } from "./types";
+import { MAX_DEPENDENCY_DRAFTS, type DependencyDraft } from "@modparks/core/dependencies/types";
 
 type ResolvedDependency = typeof projectDependencies.$inferInsert;
 

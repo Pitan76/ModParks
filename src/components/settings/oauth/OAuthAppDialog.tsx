@@ -12,7 +12,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { OAUTH_SCOPES } from "@/lib/oauth/scopes";
+import { OAUTH_SCOPES } from "@modparks/core/oauth/scopes";
 import type { OAuthAppInput } from "@/lib/actions/oauthApps";
 import type { OwnedOAuthApp } from "@/lib/queries/oauthSettings";
 

@@ -2,7 +2,7 @@ import { userSettings } from "@modparks/core/db/schema";
 import { createModrinthVersion } from "@/lib/modrinthUpload";
 import { fetchCfGameVersionMap, resolveCfGameVersionIds, uploadCfFile } from "@/lib/curseforgeUpload";
 import { eq } from "drizzle-orm";
-import type { ProjectPost } from "@/types/post";
+import type { ProjectPost } from "@modparks/core/types/post";
 import type { Database } from "@/lib/db";
 import type { ExternalUploadResult, ExternalUploadSummary } from "@/lib/externalSync/uploadSummary";
 

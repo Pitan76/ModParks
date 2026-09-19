@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
-import { getConsoleApiKey } from "@/lib/curseforge";
+import { getConsoleApiKey } from "@modparks/core/curseforge";
 
 function normalizeLicense(rawLicense: string | undefined | null): string {
   if (!rawLicense) return "All Rights Reserved";

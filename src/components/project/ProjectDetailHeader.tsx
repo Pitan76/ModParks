@@ -13,7 +13,7 @@ import ProjectFavoriteButton from "./ProjectFavoriteButton";
 import AddToCollectionButton from "./AddToCollectionButton";
 import ProjectHeaderMenu from "./ProjectHeaderMenu";
 import { AuthorLabel, DownloadLabel, DateLabel } from "@/components/ui/ProjectInfoLabels";
-import { SITE_URL } from "@/lib/config";
+import { SITE_URL } from "@modparks/core/config";
 import ProjectTypeBadge from "./ProjectTypeBadge";
 import { useColorMode } from "@/components/ThemeRegistry";
 import PlainProjectDetailHeader from "@/components/plain/project/PlainProjectDetailHeader";

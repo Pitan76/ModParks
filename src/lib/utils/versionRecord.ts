@@ -1,6 +1,6 @@
 import { versions, versionLoaders, versionMcVersions } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
-import { chunkRows } from "@/lib/db/chunkRows";
+import { chunkRows } from "@modparks/core/db/chunkRows";
 
 /** バージョン本体＋関連テーブル（ローダー / MCバージョン）への挿入に必要な入力 */
 export interface VersionRecordInput {

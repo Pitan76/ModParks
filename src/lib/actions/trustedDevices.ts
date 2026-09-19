@@ -41,7 +41,7 @@ export async function listTrustedDevices(): Promise<TrustedDeviceSummary[]> {
   const { db, userId } = await getAuthenticatedDb();
   const currentToken = (await cookies()).get(TRUSTED_DEVICE_COOKIE)?.value;
 
-  const { sha256Hex } = await import("@/lib/oauth/crypto");
+  const { sha256Hex } = await import("@modparks/core/oauth/crypto");
   const currentHash = currentToken ? await sha256Hex(currentToken) : null;
 
   const rows = await db

@@ -7,8 +7,8 @@
  * 管理画面は「探しに行く場所」ではなく「通知から飛んでくる場所」にする。
  * どの通知にも対象への直リンクを必ず載せる。
  */
-import { isValidDiscordWebhookUrl } from "@/lib/notifications/discord";
-import { SITE_URL } from "@/lib/config";
+import { isValidDiscordWebhookUrl } from "@modparks/core/notifications/discord";
+import { SITE_URL } from "@modparks/core/config";
 
 const COLOR_DANGER = 0xff0000;
 const COLOR_WARNING = 0xffaa00;

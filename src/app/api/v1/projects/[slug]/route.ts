@@ -3,11 +3,11 @@ import { getDatabase } from "@/lib/db";
 import { posts, projects } from "@modparks/core/db/schema";
 import { validateApiKey, resolveViewer } from "@/lib/api-auth";
 import { eq, and } from "drizzle-orm";
-import type { ApiProjectDetail } from "@/types/api-v1";
-import { findProjectPostBySlug } from "@/lib/queries/post";
-import { listProjectPosts } from "@/lib/queries/postList";
-import { getProjectDependencies, getProjectDependents } from "@/lib/queries/dependency";
-import { canViewPost } from "@/lib/auth/postAccess";
+import type { ApiProjectDetail } from "@modparks/core/types/api-v1";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
+import { listProjectPosts } from "@modparks/core/queries/postList";
+import { getProjectDependencies, getProjectDependents } from "@modparks/core/queries/dependency";
+import { canViewPost } from "@modparks/core/auth/postAccess";
 import { isAdminUser } from "@/lib/auth/roles";
 import { withPublicCache } from "@/lib/http/cache";
 

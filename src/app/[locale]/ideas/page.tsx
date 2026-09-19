@@ -4,7 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { seoAlternates } from "@/lib/seo/canonical";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { listIdeaPosts, countIdeaPosts, toIdeaCardData } from "@/lib/queries/postList";
+import { listIdeaPosts, countIdeaPosts, toIdeaCardData } from "@modparks/core/queries/postList";
 import { parseIdeaStatuses, parseIdeaSort } from "@modparks/core/data/ideaFilters";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";

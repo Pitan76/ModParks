@@ -2,8 +2,8 @@
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { posts, projects, projectTags, projectMembers, users } from "@modparks/core/db/schema";
-import { findProjectPostById } from "@/lib/queries/post";
-import { createProjectSchema, updateProjectSchema, updateDescriptionSchema } from "@/lib/validations";
+import { findProjectPostById } from "@modparks/core/queries/post";
+import { createProjectSchema, updateProjectSchema, updateDescriptionSchema } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";

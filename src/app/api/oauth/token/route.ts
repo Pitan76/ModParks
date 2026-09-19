@@ -5,12 +5,12 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import type { Database } from "@modparks/core/db/client";
-import { authenticateClient, findClient, readClientCredentials } from "@/lib/oauth/clients";
+import { authenticateClient, findClient, readClientCredentials } from "@modparks/core/oauth/clients";
 import { tokenError } from "@/lib/oauth/errors";
-import { consumeAuthCode, issueTokens, rotateRefreshToken, type IssuedTokens } from "@/lib/oauth/tokens";
-import { verifyPkceS256 } from "@/lib/oauth/crypto";
+import { consumeAuthCode, issueTokens, rotateRefreshToken, type IssuedTokens } from "@modparks/core/oauth/tokens";
+import { verifyPkceS256 } from "@modparks/core/oauth/crypto";
 import { issueIdToken } from "@/lib/oauth/idToken";
-import { buildUserClaims } from "@/lib/oauth/userClaims";
+import { buildUserClaims } from "@modparks/core/oauth/userClaims";
 import type { OAuthClient } from "@modparks/core/db/schema";
 
 export async function POST(request: Request) {

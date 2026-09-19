@@ -1,9 +1,9 @@
 import { eq, and, or, sql, asc, desc, inArray, like, type SQL } from "drizzle-orm";
 import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 import { posts, projects, ideas, ideaTags, users, userProfiles, favorites, comments, projectTags } from "@modparks/core/db/schema";
-import type { IdeaPostView, ProjectPostView } from "@/types/post";
+import type { IdeaPostView, ProjectPostView } from "@modparks/core/types/post";
 import type { ContentType } from "@modparks/core/data/projectTypes";
-import { keywordVariants } from "@/lib/search/kana";
+import { keywordVariants } from "@modparks/core/search/kana";
 
 /**
  * 投稿一覧の取得。表示に必要な形（PostView）まで組み立てて返す。

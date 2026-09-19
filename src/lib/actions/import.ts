@@ -3,13 +3,13 @@
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { posts, projects, userSettings } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
-import { findProjectPostBySlug } from "@/lib/queries/post";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { createId } from "@paralleldrive/cuid2";
 import { revalidatePath } from "next/cache";
-import { fetchCfAuthorProjects } from "@/lib/curseforge";
+import { fetchCfAuthorProjects } from "@modparks/core/curseforge";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { type ContentType } from "@modparks/core/data/projectTypes";
-import { chunkRows } from "@/lib/db/chunkRows";
+import { chunkRows } from "@modparks/core/db/chunkRows";
 
 export interface ImportedProject {
   id: string;

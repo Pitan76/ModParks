@@ -5,7 +5,7 @@
  * 本文の文字種から推定する。誤ることはあるので、編集画面の「原文の言語」で
  * 作者が上書きできることが前提の、あくまで初期値の決め方。
  */
-import { locales, defaultLocale, type AppLocale } from "@/lib/i18n/locales";
+import { locales, defaultLocale, type AppLocale } from "@modparks/core/i18n/locales";
 
 /**
  * 文字種ごとの判定順。上から順に見て、最初に閾値を超えたものを採る。

@@ -2,9 +2,9 @@
  * 翻訳の中核。マスク → LLM → 検証 → 復元 の一連を担い、失敗理由を型で返す。
  * DB 保存や権限判定はここでは行わない（呼び出し側の責務）。
  */
-import { getMasker, type BodyFormat, type MaskedDocument } from "./masking";
-import { parsePayload, payloadLength, toPayloadChunks, toPayloadFor, translatableIndices } from "./payload";
-import { keepValidLines, restore } from "./restore";
+import { getMasker, type BodyFormat, type MaskedDocument } from "@modparks/core/translation/masking";
+import { parsePayload, payloadLength, toPayloadChunks, toPayloadFor, translatableIndices } from "@modparks/core/translation/payload";
+import { keepValidLines, restore } from "@modparks/core/translation/restore";
 import { getTranslationProvider } from "./providers";
 import type { TranslationSettings } from "./settings";
 

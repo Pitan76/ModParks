@@ -7,7 +7,7 @@ import { recordDeletion } from "@/lib/backup/tombstone";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, asc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { findProjectPostById } from "@/lib/queries/post";
+import { findProjectPostById } from "@modparks/core/queries/post";
 import type { Database } from "@/lib/db";
 import type { Session } from "next-auth";
 

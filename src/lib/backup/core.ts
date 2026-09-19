@@ -1,7 +1,7 @@
 import * as schema from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 
-export { SCHEMA_TABLES, TABLE_RESTORE_ORDER, TABLE_PRIMARY_KEYS } from "./schemaConfig";
+export { SCHEMA_TABLES, TABLE_RESTORE_ORDER, TABLE_PRIMARY_KEYS } from "@modparks/core/backup/schemaConfig";
 export { BACKUP_FORMAT_VERSION, dumpToR2, pruneOldBackups, runAutoBackup } from "./backupExport";
 export { SUPPORTED_BACKUP_VERSIONS, validateBackupPayload, loadBackupTables, reviveRows, importBackupData } from "./backupImport";
 export type { RestoreOptions } from "./backupImport";

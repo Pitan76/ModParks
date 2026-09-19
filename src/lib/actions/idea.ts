@@ -3,7 +3,7 @@
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { posts, ideas, ideaTags } from "@modparks/core/db/schema";
 import { togglePostFavorite } from "./favorite";
-import { createIdeaSchema } from "@/lib/validations";
+import { createIdeaSchema } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";

@@ -7,9 +7,9 @@
  */
 
 import type { ContentType } from "@modparks/core/data/projectTypes";
-import type { ApiUser } from "@/types/apiShared";
+import type { ApiUser } from "@modparks/core/types/apiShared";
 
-export type { ApiUser, ApiVersion, PaginatedResponse } from "@/types/apiShared";
+export type { ApiUser, ApiVersion, PaginatedResponse } from "@modparks/core/types/apiShared";
 
 export interface ApiProject {
   id: string;

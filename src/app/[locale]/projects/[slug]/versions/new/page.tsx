@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import VersionUploadForm from "@/components/project/VersionUploadForm";
 import { getTranslations } from "next-intl/server";
 import { getPreviousVersionSettings } from "@/lib/queries/previousVersionSettings";
-import { findProjectPostBySlug } from "@/lib/queries/post";
+import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { loadVersionUploadContext } from "@/lib/queries/versionUploadContext";
 
 interface NewVersionPageProps {

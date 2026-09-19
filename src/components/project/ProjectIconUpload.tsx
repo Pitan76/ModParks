@@ -10,7 +10,7 @@ import { useState, useRef } from "react";
 import type { ChangeEvent } from "react";
 import { resizeImageFile } from "@/lib/utils/image";
 import { uploadFileToR2 } from "@/lib/utils/upload";
-import { NEW_PROJECT_SLUG } from "@/lib/upload/fileTypes";
+import { NEW_PROJECT_SLUG } from "@modparks/core/upload/fileTypes";
 import { useTranslations } from "next-intl";
 
 export type ProjectIconUploadProps = {

@@ -3,7 +3,7 @@
 import { getAuthenticatedDb, getAdminDb } from "@/lib/auth-helpers";
 import type { Database } from "@modparks/core/db/client";
 import { reports, posts, projects, users, userProfiles, comments, ideas } from "@modparks/core/db/schema";
-import { createReportSchema } from "@/lib/validations";
+import { createReportSchema } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { count, eq, desc, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
@@ -63,7 +63,7 @@ async function notifyNewReport(db: Database) {
   try {
     const [{ getAdminWebhookUrl }, { buildReportQueueEmbed, sendTrustAlert }] = await Promise.all([
       import("@/lib/usage/webhook"),
-      import("@/lib/services/trustAlert"),
+      import("@modparks/core/services/trustAlert"),
     ]);
 
     const pending = await db

@@ -4,8 +4,8 @@
  * 宛先は DDoS ガードと同じ Discord Webhook にそろえる。
  * 管理者向けの警報を複数の経路に散らすと、どれを見ればよいか分からなくなるため。
  */
-import { isValidDiscordWebhookUrl } from "@/lib/notifications/discord";
-import type { UsageLevel } from "@/lib/usage/quota";
+import { isValidDiscordWebhookUrl } from "@modparks/core/notifications/discord";
+import type { UsageLevel } from "@modparks/core/usage/quota";
 
 /** 深刻度に対応する Discord 埋め込みの色 */
 const LEVEL_COLOR: Record<UsageLevel, number> = {
