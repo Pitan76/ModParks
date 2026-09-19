@@ -40,8 +40,9 @@ interface ProjectDetailPageProps {
 }
 
 export async function generateMetadata({ params }: ProjectDetailPageProps) {
+  const db = await getDatabase();
   const { locale, slug } = await params;
-  return buildProjectDetailMetadata({ locale, slug });
+  return buildProjectDetailMetadata(db, { locale, slug });
 }
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {

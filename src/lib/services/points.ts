@@ -7,7 +7,7 @@
  * 必ず取引の記録と同じ batch で更新する。
  */
 import { eq, desc, sql } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { pointAccounts, pointTransactions, type PointTransaction } from "@modparks/core/db/schema";
 
 export type PointTransactionType = PointTransaction["type"];
@@ -33,8 +33,7 @@ export type PointBalance = {
 const EMPTY_BALANCE: PointBalance = { balance: 0, lifetimeEarned: 0, lifetimeSpent: 0 };
 
 /** 残高を返す。口座が未作成のユーザーはゼロ残高として扱う */
-export async function getPointBalance(userId: string): Promise<PointBalance> {
-  const db = await getDatabase();
+export async function getPointBalance(db: Database, userId: string): Promise<PointBalance> {
   const account = await db
     .select()
     .from(pointAccounts)
@@ -51,8 +50,7 @@ export async function getPointBalance(userId: string): Promise<PointBalance> {
 }
 
 /** 取引履歴を新しい順に返す */
-export async function listPointTransactions(userId: string, limit = 50): Promise<PointTransaction[]> {
-  const db = await getDatabase();
+export async function listPointTransactions(db: Database, userId: string, limit = 50): Promise<PointTransaction[]> {
   return db
     .select()
     .from(pointTransactions)
@@ -68,10 +66,9 @@ export async function listPointTransactions(userId: string, limit = 50): Promise
  * idempotencyKey が既に存在する場合は何もせず false を返すため、
  * 月次バッチや Webhook からの再実行が安全に行える。
  */
-export async function recordPointTransaction(input: RecordPointsInput): Promise<boolean> {
+export async function recordPointTransaction(db: Database, input: RecordPointsInput): Promise<boolean> {
   if (input.amount === 0) throw new Error("point transaction amount must not be zero");
 
-  const db = await getDatabase();
   const existing = await db
     .select({ id: pointTransactions.id })
     .from(pointTransactions)
@@ -123,10 +120,9 @@ export async function recordPointTransaction(input: RecordPointsInput): Promise<
  * ここがズレたまま出金を通すと、払えない残高を払い出すことになるため、
  * 定期実行して不一致が出たら分配・出金を止める。
  */
-export async function findBalanceMismatches(): Promise<
+export async function findBalanceMismatches(db: Database): Promise<
   { userId: string; cached: number; ledger: number }[]
 > {
-  const db = await getDatabase();
   const rows = await db
     .select({
       userId: pointAccounts.userId,

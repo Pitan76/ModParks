@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import { getDatabase } from "@/lib/db";
 import Typography from "@mui/material/Typography";
 import { getTranslations, getLocale } from "next-intl/server";
 import ProjectRecipesGrid from "./ProjectRecipesGrid";
@@ -19,6 +20,7 @@ type ProjectRecipesProps = {
  * CDNからこのプロジェクトのネームスペース分だけの索引を取得し、グリッド表示します。
  */
 const ProjectRecipes = async ({ projectId, projectSlug, namespaces, settings }: ProjectRecipesProps) => {
+  const db = await getDatabase();
   const t = await getTranslations("Project");
   const locale = await getLocale();
   const cdnUrl = process.env.NEXT_PUBLIC_RECIPE_CDN_URL || "https://recipe.modparks.pitan76.net";
@@ -29,8 +31,8 @@ const ProjectRecipes = async ({ projectId, projectSlug, namespaces, settings }: 
   // ネームスペース単位の索引はアイテム名まで同梱されて返るため、これ1回で一覧が組める。
   const [lists, hiddenIds, customNames] = await Promise.all([
     fetchRecipeLists(cdnUrl, nsList, locale),
-    getHiddenRecipeIds(projectId),
-    getCustomRecipeNames(projectId),
+    getHiddenRecipeIds(db, projectId),
+    getCustomRecipeNames(db, projectId),
   ]);
 
   // レシピが0件でも索引自体は返るため、1つも取れないのは取得失敗を意味する。

@@ -5,7 +5,7 @@
  * 「なぜ今この値なのか」を画面だけで追えるよう、台帳の生値と減衰後の寄与を併せて返す。
  */
 import { and, desc, eq, inArray, isNull, like, or, sql } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import {
   trustEvents,
   userTrust,
@@ -50,12 +50,11 @@ function filterCondition(filter: TrustFilter) {
 }
 
 /** 一覧。スコアの低い順に並べる（対処が要るのは下から） */
-export async function getTrustList(
+export async function getTrustList(db: Database,
   filter: TrustFilter,
   page: number,
   search?: string,
 ): Promise<TrustListRow[]> {
-  const db = await getDatabase();
   const keyword = search?.trim();
 
   const rows = await db
@@ -101,8 +100,7 @@ export async function getTrustList(
 }
 
 /** ページャ用の総件数。絞り込み条件は一覧と同じものを使う */
-export async function countTrustList(filter: TrustFilter, search?: string): Promise<number> {
-  const db = await getDatabase();
+export async function countTrustList(db: Database, filter: TrustFilter, search?: string): Promise<number> {
   const keyword = search?.trim();
 
   const row = await db
@@ -123,8 +121,7 @@ export async function countTrustList(filter: TrustFilter, search?: string): Prom
 }
 
 /** 段階ごとの人数。係数が妥当かはこの分布で判断する（→ memo/TRUST_CREDIT.md 8章） */
-export async function getTrustDistribution(): Promise<Record<string, number>> {
-  const db = await getDatabase();
+export async function getTrustDistribution(db: Database): Promise<Record<string, number>> {
   const rows = await db
     .select({ tier: TIER_EXPR, count: sql<number>`count(*)` })
     .from(users)
@@ -181,8 +178,7 @@ function distanceToNextTier(score: number): number | null {
 }
 
 /** 詳細。台帳は全件返す（件数が増えたらページングを足す） */
-export async function getTrustDetail(userId: string): Promise<TrustDetail | null> {
-  const db = await getDatabase();
+export async function getTrustDetail(db: Database, userId: string): Promise<TrustDetail | null> {
 
   const row = await db
     .select({
@@ -237,10 +233,9 @@ export async function getTrustDetail(userId: string): Promise<TrustDetail | null
 }
 
 /** 一覧に出すユーザの表示名をまとめて引く。他画面から信頼値を出すとき用 */
-export async function getTrustTiers(userIds: readonly string[]): Promise<Map<string, TrustTier>> {
+export async function getTrustTiers(db: Database, userIds: readonly string[]): Promise<Map<string, TrustTier>> {
   if (userIds.length === 0) return new Map();
 
-  const db = await getDatabase();
   const rows = await db
     .select({
       userId: userTrust.userId,

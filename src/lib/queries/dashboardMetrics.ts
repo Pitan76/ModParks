@@ -5,7 +5,7 @@
  * 日次の実測値を持つ project_metric_daily を唯一の入力にする。
  */
 import { and, eq, gte, sql } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { posts, projectMetricDaily, pointTransactions } from "@modparks/core/db/schema";
 
 const SECONDS_PER_DAY = 86_400;
@@ -54,8 +54,7 @@ function fillMissingDays(
 }
 
 /** 自分のプロジェクト全体の日次ダウンロード / 閲覧推移 */
-export async function getDownloadTrend(userId: string, days = 30): Promise<DailyMetricPoint[]> {
-  const db = await getDatabase();
+export async function getDownloadTrend(db: Database, userId: string, days = 30): Promise<DailyMetricPoint[]> {
   const fromDay = toEpochDay(new Date()) - (days - 1);
 
   const rows = await db
@@ -85,13 +84,12 @@ export type ProjectSeries = {
  * プロジェクト別の日次ダウンロード。
  * 系列が増えすぎると色で識別できなくなるため、上位 topN 以外は「その他」へまとめる。
  */
-export async function getProjectDownloadSeries(
+export async function getProjectDownloadSeries(db: Database,
   userId: string,
   days = 365,
   topN = 5,
   otherLabel = "Other"
 ): Promise<ProjectSeries> {
-  const db = await getDatabase();
   const fromDay = toEpochDay(new Date()) - (days - 1);
 
   const rows = await db
@@ -136,8 +134,7 @@ export async function getProjectDownloadSeries(
 }
 
 /** 月次のポイント獲得 / 消費。台帳が唯一の真実なので残高キャッシュは使わない */
-export async function getRewardTrend(userId: string, months = 6): Promise<MonthlyRewardPoint[]> {
-  const db = await getDatabase();
+export async function getRewardTrend(db: Database, userId: string, months = 6): Promise<MonthlyRewardPoint[]> {
   const from = new Date();
   from.setUTCMonth(from.getUTCMonth() - (months - 1), 1);
   from.setUTCHours(0, 0, 0, 0);

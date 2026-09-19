@@ -1,8 +1,8 @@
 /**
  * 設定画面「OAuthアプリ」が使う一覧取得。
  */
-import { getDatabase } from "@/lib/db";
 import { oauthClients, oauthGrants } from "@modparks/core/db/schema";
+import type { Database } from "@modparks/core/db/client";
 import { eq } from "drizzle-orm";
 
 export type OwnedOAuthApp = {
@@ -27,8 +27,7 @@ export type ConnectedOAuthApp = {
 };
 
 /** 自分が登録した（＝他サービス側の）アプリ */
-export async function getOwnedOAuthApps(userId: string): Promise<OwnedOAuthApp[]> {
-  const db = await getDatabase();
+export async function getOwnedOAuthApps(db: Database, userId: string): Promise<OwnedOAuthApp[]> {
   const rows = await db.select().from(oauthClients).where(eq(oauthClients.ownerUserId, userId));
 
   return rows.map((row) => ({
@@ -45,8 +44,7 @@ export async function getOwnedOAuthApps(userId: string): Promise<OwnedOAuthApp[]
 }
 
 /** 自分のアカウントへのアクセスを許可しているアプリ */
-export async function getConnectedOAuthApps(userId: string): Promise<ConnectedOAuthApp[]> {
-  const db = await getDatabase();
+export async function getConnectedOAuthApps(db: Database, userId: string): Promise<ConnectedOAuthApp[]> {
   const rows = await db
     .select({
       clientId: oauthClients.id,

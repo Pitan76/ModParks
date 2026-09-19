@@ -1,5 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { posts, versions } from "@modparks/core/db/schema";
 import { normalizeReleaseChannel } from "@/lib/releaseChannels";
 import type { PreviousVersionSettings } from "@/components/project/PreviousVersionSettings";
@@ -18,8 +18,7 @@ function parseJsonArray(raw: string): string[] {
  * 新バージョンのフォームに流用するため、プロジェクトの最新バージョンの
  * 対応MCバージョン・ローダー・リリースチャネルを取り出す。
  */
-export async function getPreviousVersionSettings(slug: string): Promise<PreviousVersionSettings | null> {
-  const db = await getDatabase();
+export async function getPreviousVersionSettings(db: Database, slug: string): Promise<PreviousVersionSettings | null> {
   const row = await db
     .select({
       versionNumber: versions.versionNumber,

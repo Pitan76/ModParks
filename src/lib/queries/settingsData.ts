@@ -4,7 +4,7 @@
  * セクションごとにルートを分けたため、必要なぶんだけを引ける粒度で用意する。
  */
 import { eq } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import {
   users,
   userProfiles,
@@ -27,8 +27,7 @@ export type SettingsUser = {
   showGithubLink: boolean;
 };
 
-export async function getSettingsUser(userId: string): Promise<SettingsUser> {
-  const db = await getDatabase();
+export async function getSettingsUser(db: Database, userId: string): Promise<SettingsUser> {
   const [userRecord, profile, settings] = await Promise.all([
     db.select().from(users).where(eq(users.id, userId)).get(),
     db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).get(),
@@ -51,8 +50,7 @@ export async function getSettingsUser(userId: string): Promise<SettingsUser> {
 }
 
 /** ログイン方法まわり（パスワード有無・2段階認証・パスキー） */
-export async function getSettingsCredentials(userId: string) {
-  const db = await getDatabase();
+export async function getSettingsCredentials(db: Database, userId: string) {
   const [userRecord, passkeys] = await Promise.all([
     db.select().from(users).where(eq(users.id, userId)).get(),
     db
@@ -72,14 +70,12 @@ export async function getSettingsCredentials(userId: string) {
   };
 }
 
-export async function getSettingsApiKeys(userId: string) {
-  const db = await getDatabase();
+export async function getSettingsApiKeys(db: Database, userId: string) {
   return db.select().from(apiKeys).where(eq(apiKeys.userId, userId));
 }
 
 /** 投稿の既定値・通知設定・外部サービス連携をまとめて返す */
-export async function getSettingsPreferences(userId: string) {
-  const db = await getDatabase();
+export async function getSettingsPreferences(db: Database, userId: string) {
   const [settings, userAccounts] = await Promise.all([
     db.select().from(userSettings).where(eq(userSettings.userId, userId)).get(),
     db.select().from(accounts).where(eq(accounts.userId, userId)),

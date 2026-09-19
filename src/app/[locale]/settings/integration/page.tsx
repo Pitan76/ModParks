@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getSettingsUser, getSettingsPreferences } from "@/lib/queries/settingsData";
 import SettingsSection from "@/components/settings/SettingsSection";
@@ -13,13 +14,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function IntegrationSettingsPage() {
+  const db = await getDatabase();
   const session = await auth();
   const t = await getTranslations("Settings");
 
   const [user, prefs, githubAppAccounts] = await Promise.all([
-    getSettingsUser(session!.user!.id!),
-    getSettingsPreferences(session!.user!.id!),
-    listGithubAppAccounts(session!.user!.id!),
+    getSettingsUser(db, session!.user!.id!),
+    getSettingsPreferences(db, session!.user!.id!),
+    listGithubAppAccounts(db, session!.user!.id!),
   ]);
 
   return (

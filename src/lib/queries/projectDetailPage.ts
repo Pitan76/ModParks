@@ -27,7 +27,7 @@ export async function loadProjectDetailPageData(db: Database, project: ProjectDe
     getProjectDependencies(db, project.id, true),
     getProjectDependents(db, project.id),
     userId ? db.select().from(projectSubscriptions).where(and(eq(projectSubscriptions.projectId, project.id), eq(projectSubscriptions.userId, userId))).get() : null,
-    getPublicProjectMedia(project.id),
+    getPublicProjectMedia(db, project.id),
     userId ? db.select({ userId: projectMembers.userId }).from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId))).get() : null,
     userId ? db.select({ defaultCommentBodyFormat: userSettings.defaultCommentBodyFormat }).from(userSettings).where(eq(userSettings.userId, userId)).get() : null,
   ]);

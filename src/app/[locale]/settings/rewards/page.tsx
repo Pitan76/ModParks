@@ -1,4 +1,5 @@
 import Alert from "@mui/material/Alert";
+import { getDatabase } from "@/lib/db";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -20,14 +21,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function RewardSettingsPage() {
+  const db = await getDatabase();
   const session = await auth();
   const t = await getTranslations("CreatorReward");
   const userId = session!.user!.id!;
 
   const [settings, balance, transactions, optIn] = await Promise.all([
     getAppSettings(),
-    getPointBalance(userId),
-    listPointTransactions(userId),
+    getPointBalance(db, userId),
+    listPointTransactions(db, userId),
     getCreatorRewardOptIn(userId),
   ]);
 

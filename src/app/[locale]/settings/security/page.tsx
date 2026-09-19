@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getSettingsCredentials } from "@/lib/queries/settingsData";
 import SettingsSection from "@/components/settings/SettingsSection";
@@ -11,9 +12,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function SecuritySettingsPage() {
+  const db = await getDatabase();
   const session = await auth();
   const t = await getTranslations("Settings");
-  const credentials = await getSettingsCredentials(session!.user!.id!);
+  const credentials = await getSettingsCredentials(db, session!.user!.id!);
 
   return (
     <SettingsSection title={t("security.title")}>

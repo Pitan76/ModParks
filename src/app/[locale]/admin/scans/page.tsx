@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import { getDatabase } from "@/lib/db";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -32,6 +33,7 @@ function toPage(raw: string | undefined): number {
 }
 
 export default async function AdminScansPage({ params, searchParams }: AdminScansPageProps) {
+  const db = await getDatabase();
   const { locale } = await params;
   setRequestLocale(locale);
 
@@ -47,9 +49,9 @@ export default async function AdminScansPage({ params, searchParams }: AdminScan
   const page = toPage(query.page);
 
   const [rows, counts, topFindings] = await Promise.all([
-    getScanLogs(filter, page),
-    getScanLogCounts(),
-    getTopScanFindings(),
+    getScanLogs(db, filter, page),
+    getScanLogCounts(db),
+    getTopScanFindings(db),
   ]);
 
   return (

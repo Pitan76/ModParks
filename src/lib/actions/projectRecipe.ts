@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
+import { getDatabase } from "@/lib/db";
 import { projects, projectHiddenRecipes, projectRecipeNames } from "@modparks/core/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -132,8 +133,9 @@ export async function setRecipesHiddenAction(slug: string, recipeIds: string[], 
  * @param projectId プロジェクトID
  */
 export async function getHiddenRecipeIdsAction(projectId: string) {
+  const db = await getDatabase();
   try {
-    const hiddenSet = await getHiddenRecipeIds(projectId);
+    const hiddenSet = await getHiddenRecipeIds(db, projectId);
     return { success: true, hiddenIds: Array.from(hiddenSet) };
   } catch (err: unknown) {
     return { error: err instanceof Error ? err.message : "Failed to fetch hidden recipes" };
@@ -158,7 +160,7 @@ export async function getProjectRecipesAction(
 
     const [lists, customNames] = await Promise.all([
       fetchRecipeLists(cdnUrl, nsList, locale),
-      getCustomRecipeNames(project.id),
+      getCustomRecipeNames(db, project.id),
     ]);
 
     const recipes = toRecipeItems(cdnUrl, lists, project.recipeSettings).map((r) => {

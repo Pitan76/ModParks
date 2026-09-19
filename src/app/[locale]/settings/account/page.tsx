@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getSettingsUser, getSettingsCredentials } from "@/lib/queries/settingsData";
 import SettingsSection from "@/components/settings/SettingsSection";
@@ -15,13 +16,14 @@ export default async function AccountSettingsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const db = await getDatabase();
   const session = await auth();
   const t = await getTranslations("Settings");
   const resolved = await searchParams;
 
   const [user, credentials] = await Promise.all([
-    getSettingsUser(session!.user!.id!),
-    getSettingsCredentials(session!.user!.id!),
+    getSettingsUser(db, session!.user!.id!),
+    getSettingsCredentials(db, session!.user!.id!),
   ]);
 
   const rawError = resolved.error as string | undefined;

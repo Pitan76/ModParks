@@ -4,8 +4,8 @@
  * jar 検査は判定をバージョン行（versions.scan_*）に持つだけで一覧できる場所が無く、
  * 「何がスキャンされ、どう判定されたか」を後から追えなかった。ここで横断的に引く。
  */
-import { getDatabase } from "@/lib/db";
 import { versions, projects, posts, scanAppeals } from "@modparks/core/db/schema";
+import type { Database } from "@modparks/core/db/client";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 
 /** 一覧のフィルタ。"all" は未スキャンや対象外も含めた全件 */
@@ -31,8 +31,7 @@ export type ScanLogRow = {
 /**
  * スキャン結果の一覧。新しい順（未スキャンは scanAt が無いので作成順で後ろに寄る）。
  */
-export async function getScanLogs(filter: ScanLogFilter, page: number): Promise<ScanLogRow[]> {
-  const db = await getDatabase();
+export async function getScanLogs(db: Database, filter: ScanLogFilter, page: number): Promise<ScanLogRow[]> {
 
   const query = db
     .select({
@@ -61,8 +60,7 @@ export async function getScanLogs(filter: ScanLogFilter, page: number): Promise<
 }
 
 /** ステータスごとの件数。タブのバッジと総ページ数に使う */
-export async function getScanLogCounts(): Promise<Record<string, number>> {
-  const db = await getDatabase();
+export async function getScanLogCounts(db: Database): Promise<Record<string, number>> {
 
   const rows = await db
     .select({ status: versions.scanStatus, count: count() })
@@ -81,8 +79,7 @@ export async function getScanLogCounts(): Promise<Record<string, number>> {
 /**
  * 直近の検出内容の集計。どのルールがよく当たっているか（＝誤検知の温床か）を見るためのもの。
  */
-export async function getTopScanFindings(limit = 10) {
-  const db = await getDatabase();
+export async function getTopScanFindings(db: Database, limit = 10) {
 
   const rows = await db
     .select({ findings: versions.scanFindings })

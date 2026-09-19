@@ -1,4 +1,5 @@
 import Alert from "@mui/material/Alert";
+import { getDatabase } from "@/lib/db";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
@@ -35,6 +36,7 @@ function toPage(raw: string | undefined): number {
 }
 
 export default async function AdminTrustPage({ params, searchParams }: AdminTrustPageProps) {
+  const db = await getDatabase();
   const { locale } = await params;
   setRequestLocale(locale);
 
@@ -50,9 +52,9 @@ export default async function AdminTrustPage({ params, searchParams }: AdminTrus
   const page = toPage(query.page);
 
   const [rows, distribution, totalCount] = await Promise.all([
-    getTrustList(filter, page, query.q),
-    getTrustDistribution(),
-    countTrustList(filter, query.q),
+    getTrustList(db, filter, page, query.q),
+    getTrustDistribution(db),
+    countTrustList(db, filter, query.q),
   ]);
 
   return (

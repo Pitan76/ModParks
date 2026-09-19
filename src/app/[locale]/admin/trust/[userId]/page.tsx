@@ -1,4 +1,5 @@
 import Alert from "@mui/material/Alert";
+import { getDatabase } from "@/lib/db";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
@@ -19,6 +20,7 @@ interface AdminTrustDetailPageProps {
 }
 
 export default async function AdminTrustDetailPage({ params }: AdminTrustDetailPageProps) {
+  const db = await getDatabase();
   const { locale, userId } = await params;
   setRequestLocale(locale);
 
@@ -29,7 +31,7 @@ export default async function AdminTrustDetailPage({ params }: AdminTrustDetailP
   }
 
   const t = await getTranslations("Admin");
-  const detail = await getTrustDetail(userId);
+  const detail = await getTrustDetail(db, userId);
   if (!detail) notFound();
 
   const derived = tierFromScore(detail.score);

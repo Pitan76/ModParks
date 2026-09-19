@@ -92,7 +92,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   }));
 
   const dependencies = await getProjectDependencies(db, project.id);
-  const media = await getPublicProjectMedia(project.id);
+  const media = await getPublicProjectMedia(db, project.id);
 
   // バージョン追加フォームの前提はページ側と同じローダーから取る（渡し漏れを防ぐため）
   const uploadContext = await loadVersionUploadContext(db, project, session.user.id);

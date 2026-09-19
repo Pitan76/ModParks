@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
+import type { Database } from "@modparks/core/db/client";
 import { auth } from "@/lib/auth";
-import { getDatabase } from "@/lib/db";
 import { getProjectBySlug } from "@/lib/actions/projectQuery";
 import { findMetadataTranslation, listIndexableLocales } from "@/lib/translation/metadata";
 import { toPlainDescription } from "@/lib/utils/plainText";
@@ -11,7 +11,7 @@ import { canonicalUrl, seoAlternates } from "@/lib/seo/canonical";
  * プロジェクト詳細ページの `generateMetadata` 本体。
  * ページコンポーネントから切り出し、OGP/SEO 用の組み立てだけに責務を絞る。
  */
-export async function buildProjectDetailMetadata({ locale, slug }: { locale: string; slug: string }) {
+export async function buildProjectDetailMetadata(db: Database, { locale, slug }: { locale: string; slug: string }) {
   const [project, session] = await Promise.all([
     getProjectBySlug(slug),
     auth(),
@@ -25,7 +25,6 @@ export async function buildProjectDetailMetadata({ locale, slug }: { locale: str
   if (!isViewable) return { title: "Not Found", robots: { index: false, follow: false } };
 
   // 一覧・OGP・<title> は cached も含めて訳文を使う（表示の一貫性を優先）
-  const db = await getDatabase();
   const translation = locale === project.sourceLocale
     ? null
     : await findMetadataTranslation(db, project.id, locale);

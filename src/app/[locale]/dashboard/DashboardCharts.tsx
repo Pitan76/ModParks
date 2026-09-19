@@ -1,4 +1,5 @@
 import Grid from "@mui/material/Grid";
+import { getDatabase } from "@/lib/db";
 import { getTranslations } from "next-intl/server";
 import ChartCard from "@/components/charts/ChartCard";
 import GroupedBarChart from "@/components/charts/GroupedBarChart";
@@ -12,11 +13,12 @@ const REWARD_MONTHS = 12;
 
 /** ダウンロード・閲覧・リワードの推移をグラフで見せるダッシュボードのセクション */
 export default async function DashboardCharts({ userId, locale }: { userId: string; locale: string }) {
+  const db = await getDatabase();
   const t = await getTranslations("Dashboard.charts");
   const [trend, projectSeries, rewards, settings] = await Promise.all([
-    getDownloadTrend(userId, TREND_DAYS),
-    getProjectDownloadSeries(userId, TREND_DAYS, 5, t("otherProjects")),
-    getRewardTrend(userId, REWARD_MONTHS),
+    getDownloadTrend(db, userId, TREND_DAYS),
+    getProjectDownloadSeries(db, userId, TREND_DAYS, 5, t("otherProjects")),
+    getRewardTrend(db, userId, REWARD_MONTHS),
     getAppSettings(),
   ]);
 

@@ -28,7 +28,7 @@ export default async function NewVersionPage({ params }: NewVersionPageProps) {
 
   const [uploadContext, previousSettings] = await Promise.all([
     loadVersionUploadContext(db, project, session?.user?.id),
-    getPreviousVersionSettings(slug),
+    getPreviousVersionSettings(db, slug),
   ]);
 
   return (
