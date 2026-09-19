@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 以下は .gitignore で除外済みだが、フラット設定の eslint は .gitignore を
+    // 読まないため個別に挙げる必要がある。ビルド成果物を検査しても意味が無いうえ、
+    // .open-next だけで 800 ファイル超を占めて実際の指摘が埋もれる。
+    ".open-next/**",
+    ".wrangler/**",
+    "mp-recipe/**",
   ]),
   {
     // packages/core は Next.js アプリと Cloudflare Workers の両方から使う。
