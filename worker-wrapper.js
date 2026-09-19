@@ -49,24 +49,23 @@ async function invokeCronRoute(path, env, ctx) {
 }
 
 /**
- * 温めを行う Cron。
+ * 5 分ごとの Cron。
  *
- * 他の枠と同居させない。scheduled は起動ごとに CPU 予算を持つため、相乗りすると
- * 描画が他の処理と 10ms を食い合って、どちらも打ち切られる。
- * 10 分枠 (USAGE_CRON) とは 5 分ずらして交互に動かす。
+ * 取り込みと温めを交互に受け持ち、それぞれ 10 分間隔で回る。同じ起動で両方やると、描画が取り込みと
+ * 10ms を食い合ってどちらも打ち切られるため、起動そのものを分ける必要がある。
+ * ただし Free の cron トリガーは 5 本までで、枠を増やす余地は無い。
+ * そこで 5 分ごとに発火させ、1 回の起動では片方だけを走らせる。
  */
-const WARM_CRON = "5-59/10 * * * *";
+const TICK_CRON = "*/5 * * * *";
 
-/**
- * スライスの取り込みを行う Cron。
- *
- * ddos_slices は 30 分で削除されるため、それより短い間隔で取り込む必要がある。
- */
-const USAGE_CRON = "*/10 * * * *";
+/** 5 分ごとに 1 増える連番。奇数の回を温めに充てる */
+function tickIndex(controller) {
+  return Math.floor(controller.scheduledTime / 300000);
+}
 
-/** 温めの順番を決める連番。10 分ごとに 1 増える */
-function warmTick(controller) {
-  return Math.floor(controller.scheduledTime / 600000);
+/** 温める対象の順番を決める連番。温めの回ごとに 1 増える */
+function warmTarget(tick) {
+  return Math.floor(tick / 2);
 }
 
 /**
@@ -154,12 +153,15 @@ export default {
 
   /** Cloudflare Cron Triggers 用のハンドラ */
   async scheduled(controller, env, ctx) {
-    // 温めは描画に予算を使い切るため、この枠では他を一切走らせない
-    if (controller.cron === WARM_CRON) return warmPublicPages(env, ctx, warmTick(controller));
+    if (controller.cron === TICK_CRON) {
+      const tick = tickIndex(controller);
+      // 温めは描画に予算を使い切るため、この回では他を一切走らせない
+      if (tick % 2 === 1) return warmPublicPages(env, ctx, warmTarget(tick));
 
-    await handleDdosCron(env);
+      await handleDdosCron(env);
 
-    if (controller.cron === USAGE_CRON) return handleUsageCron(env);
+      return handleUsageCron(env);
+    }
 
     const path = CRON_ROUTES[controller.cron];
     if (!path) return;
