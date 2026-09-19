@@ -111,11 +111,11 @@ export async function setRuntimeMode(
 export async function generateSnapshotNow(): Promise<
   { success: true; detail: unknown } | { error: string }
 > {
-  await getAdminDb();
+  const { db } = await getAdminDb();
 
   try {
     const { generateSnapshot } = await import("@/lib/snapshot/generate");
-    return { success: true, detail: await generateSnapshot() };
+    return { success: true, detail: await generateSnapshot(db) };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Snapshot generation failed" };
   }

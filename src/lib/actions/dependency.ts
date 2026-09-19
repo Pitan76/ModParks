@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
+import { getDatabase } from "@/lib/db";
 import { projectDependencies, projectMembers, versions } from "@modparks/core/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -31,15 +32,18 @@ export type { DependencyScope, DependencyProjectSummary, DependencyEntry } from 
  * サーバーコンポーネントやルートハンドラからは、RPC を経由せずクエリ本体を直接使う。
  */
 export async function getProjectDependencies(projectId: string, includeVersionScoped = false): Promise<DependencyEntry[]> {
-  return queryProjectDependencies(projectId, includeVersionScoped);
+  const db = await getDatabase();
+  return queryProjectDependencies(db, projectId, includeVersionScoped);
 }
 
 export async function getVersionDependencies(projectId: string, versionId: string): Promise<DependencyEntry[]> {
-  return queryVersionDependencies(projectId, versionId);
+  const db = await getDatabase();
+  return queryVersionDependencies(db, projectId, versionId);
 }
 
 export async function getProjectDependents(projectId: string) {
-  return queryProjectDependents(projectId);
+  const db = await getDatabase();
+  return queryProjectDependents(db, projectId);
 }
 
 /**

@@ -4,7 +4,7 @@
  * usage_daily を唯一の入力とし、含有枠との突き合わせまでを行う。
  */
 import { desc, gte } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { usageDaily, type UsageDaily } from "@modparks/core/db/schema";
 import { getAppSettings } from "@/lib/config/readSettings";
 import {
@@ -71,8 +71,7 @@ function sum(rows: UsageDaily[], pick: (row: UsageDaily) => number): number {
  * 直近 30 日ぶんだけを読み、期間の切り出しは JS 側で行う。
  * 行数が高々 30 なので、プランごとに SQL を分けるより単純になる。
  */
-export async function getUsageOverview(): Promise<UsageOverview> {
-  const db = await getDatabase();
+export async function getUsageOverview(db: Database): Promise<UsageOverview> {
   const settings = await getAppSettings();
   const today = toEpochDay();
 

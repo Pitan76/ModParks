@@ -5,7 +5,7 @@
  * 鳴りすぎるアラートは無視されるようになり、本当に危険なときに効かなくなる。
  */
 import { eq } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { usageAlertState } from "@modparks/core/db/schema";
 import { getUsageOverview } from "@/lib/queries/usageOverview";
 import { sendUsageAlert } from "@/lib/usage/alertNotify";
@@ -44,7 +44,7 @@ function toPeriodKey(plan: UsagePlan, now: Date = new Date()): string {
 
 /** その期間で最後に通知した深刻度 */
 async function readNotifiedLevel(
-  db: Awaited<ReturnType<typeof getDatabase>>,
+  db: Database,
   periodKey: string
 ): Promise<UsageLevel> {
   const row = await db
@@ -57,7 +57,7 @@ async function readNotifiedLevel(
 }
 
 async function markNotified(
-  db: Awaited<ReturnType<typeof getDatabase>>,
+  db: Database,
   periodKey: string,
   level: UsageLevel
 ): Promise<void> {
@@ -79,11 +79,10 @@ async function markNotified(
  * @param webhookUrl Discord Webhook。未設定なら判定だけ行って通知しない
  * @returns 通知した深刻度。通知しなければ null
  */
-export async function evaluateUsageAlert(webhookUrl: string | undefined): Promise<UsageLevel | null> {
-  const overview = await getUsageOverview();
+export async function evaluateUsageAlert(db: Database, webhookUrl: string | undefined): Promise<UsageLevel | null> {
+  const overview = await getUsageOverview(db);
   if (overview.level === "normal") return null;
 
-  const db = await getDatabase();
   const periodKey = toPeriodKey(overview.plan);
   const notified = await readNotifiedLevel(db, periodKey);
   if (LEVEL_RANK[overview.level] <= LEVEL_RANK[notified]) return null;

@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import type { Database } from "@modparks/core/db/client";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
@@ -43,7 +44,7 @@ function checkNewProjectKey(key: string, parts: string[], actor: UploadActor): K
 }
 
 /** キーの形と、その宛先に対する書き込み権限をまとめて検証する。 */
-async function checkUploadKey(key: string, actor: UploadActor): Promise<KeyCheck> {
+async function checkUploadKey(db: Database, key: string, actor: UploadActor): Promise<KeyCheck> {
   if (isOwnAvatarKey(key, actor)) return OK;
   if (!hasAllowedPrefix(key)) return deny("Forbidden: Invalid key prefix");
   if (key.startsWith("avatar/")) return deny("Forbidden: Invalid key");
@@ -54,7 +55,7 @@ async function checkUploadKey(key: string, actor: UploadActor): Promise<KeyCheck
   const slug = parts[1];
   if (slug === NEW_PROJECT_SLUG) return checkNewProjectKey(key, parts, actor);
 
-  return await checkProjectUploadAccess(slug, actor);
+  return await checkProjectUploadAccess(db, slug, actor);
 }
 
 /**
@@ -93,7 +94,7 @@ export async function PUT(req: NextRequest) {
   const key = new URL(req.url).searchParams.get("key");
   if (!key) return NextResponse.json({ error: "Missing key" }, { status: 400 });
 
-  const keyCheck = await checkUploadKey(key, session.user);
+  const keyCheck = await checkUploadKey(db, key, session.user);
   if (!keyCheck.ok) {
     return NextResponse.json({ error: keyCheck.error }, { status: keyCheck.status });
   }

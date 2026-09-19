@@ -36,8 +36,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   }
 
   const [dependencies, dependents] = await Promise.all([
-    getProjectDependencies(project.id),
-    getProjectDependents(project.id),
+    getProjectDependencies(db, project.id),
+    getProjectDependents(db, project.id),
   ]);
 
   const data: ApiProjectDetail = {

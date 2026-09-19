@@ -5,10 +5,10 @@
  * 取り込み済みの位置を持ち、保持期間より短い間隔で差分だけを積む。
  */
 import { and, eq, gt, lte, sql } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { ddosSlices, usageDaily, usageRollupState } from "@modparks/core/db/schema";
 
-type Db = Awaited<ReturnType<typeof getDatabase>>;
+type Db = Database;
 
 const STATE_KEY = "global";
 const SECONDS_PER_DAY = 86_400;
@@ -120,8 +120,7 @@ async function applyDelta(db: Db, delta: DayDelta): Promise<void> {
  *
  * @returns 取り込んだリクエスト数の合計
  */
-export async function rollupSliceIncrements(): Promise<number> {
-  const db = await getDatabase();
+export async function rollupSliceIncrements(db: Database): Promise<number> {
   const now = Math.floor(Date.now() / 1000);
   const settled = now - SETTLE_DELAY_SEC;
 

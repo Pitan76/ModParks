@@ -1,4 +1,5 @@
 import { buildVersionDownloadUrl } from "@/lib/utils/downloadUrl";
+import { getDatabase } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
@@ -94,7 +95,8 @@ export default async function VersionDetailPage({ params }: VersionDetailPagePro
   if (!project || !version) notFound();
 
   // このバージョンに効く依存（バージョン限定 + プロジェクト全体）
-  const dependencies = mergeDependencyEntries(await getVersionDependencies(project.id, version.id));
+  const db = await getDatabase();
+  const dependencies = mergeDependencyEntries(await getVersionDependencies(db, project.id, version.id));
 
   let canEdit = false;
   if (session?.user) {

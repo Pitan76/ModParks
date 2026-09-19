@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import type { Database } from "@modparks/core/db/client";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
 import { profilePins, userSettings, userProfiles } from "@modparks/core/db/schema";
@@ -97,7 +98,7 @@ export async function setShowIdeasOnProfile(show: boolean): Promise<{ success: t
   return { success: true };
 }
 
-async function revalidateProfile(db: Awaited<ReturnType<typeof getDatabase>>, userId: string) {
+async function revalidateProfile(db: Database, userId: string) {
   const profile = await db
     .select({ username: userProfiles.username })
     .from(userProfiles)

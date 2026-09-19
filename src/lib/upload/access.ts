@@ -6,6 +6,7 @@
  */
 
 import { ADMIN_ROLE } from "@/lib/auth/roles";
+import type { Database } from "@modparks/core/db/client";
 
 /** 権限判定の結果。失敗時はそのまま HTTP 応答に使えるステータスと文言を持つ。 */
 export type UploadAccess = { ok: true; projectType?: string } | { ok: false; status: number; error: string };
@@ -29,7 +30,7 @@ export interface UploadActor {
  * DB 関連は動的 import のままにしている。このルートは認証だけで到達できるため、
  * Worker のバンドルに drizzle / schema を静的に載せたくない。
  */
-export async function checkProjectUploadAccess(
+export async function checkProjectUploadAccess(db: Database,
   projectSlug: string,
   actor: UploadActor
 ): Promise<UploadAccess> {
@@ -38,7 +39,6 @@ export async function checkProjectUploadAccess(
   const { eq, and } = await import("drizzle-orm");
   const { findProjectPostBySlug } = await import("@/lib/queries/post");
 
-  const db = await getDatabase();
   const project = await findProjectPostBySlug(db, projectSlug);
   if (!project) return NOT_FOUND;
   if (project.authorId === actor.id) return { ok: true, projectType: project.type };

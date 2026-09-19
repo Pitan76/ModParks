@@ -8,7 +8,7 @@
  * 件数はリクエスト数ではなくユニーク訪問者数の桁に収まる。
  */
 import { sql } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { projectMetricDaily } from "@modparks/core/db/schema";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -35,12 +35,11 @@ export function resolveViewerTier(): ViewerTier {
  * 日次メトリクスに 1 件加算する。
  * 集計の失敗でページ表示やダウンロードを巻き戻さないよう、呼び出し側で例外を握る。
  */
-async function incrementMetric(
+async function incrementMetric(db: Database,
   projectId: string,
   column: "pageViews" | "downloads",
   tier: ViewerTier
 ): Promise<void> {
-  const db = await getDatabase();
   const date = toEpochDay();
   const isView = column === "pageViews";
 
@@ -71,14 +70,14 @@ async function incrementMetric(
  * レスポンス後の after() から呼ばれるため、headers() を読めない。
  * IP はレンダリング中に解決したものを受け取る。
  */
-export async function recordProjectView(projectId: string, isInsider: boolean, clientIp: string): Promise<void> {
+export async function recordProjectView(db: Database, projectId: string, isInsider: boolean, clientIp: string): Promise<void> {
   if (isInsider) return;
 
   try {
     const dedupe = await checkRateLimit(`rwview:${projectId}`, 1, VIEW_DEDUPE_WINDOW_MS, undefined, clientIp);
     if (!dedupe.success) return;
 
-    await incrementMetric(projectId, "pageViews", resolveViewerTier());
+    await incrementMetric(db, projectId, "pageViews", resolveViewerTier());
   } catch (err) {
     console.error("[REWARD] Failed to record project view:", (err as Error)?.message, err);
   }
@@ -90,9 +89,9 @@ export async function recordProjectView(projectId: string, isInsider: boolean, c
  * 呼び出し側で既存のダウンロードカウンタと同じ重複排除を通しているため、
  * ここでは追加の除外判定を行わない。
  */
-export async function recordProjectDownload(projectId: string): Promise<void> {
+export async function recordProjectDownload(db: Database, projectId: string): Promise<void> {
   try {
-    await incrementMetric(projectId, "downloads", resolveViewerTier());
+    await incrementMetric(db, projectId, "downloads", resolveViewerTier());
   } catch (err) {
     console.error("[REWARD] Failed to record project download:", err);
   }

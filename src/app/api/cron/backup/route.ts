@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { Database } from "@modparks/core/db/client";
 import { getDb, getD1 } from "@/lib/db";
 import { runAutoBackup } from "@/lib/backup/core";
 import { checkCronAuth } from "@/lib/cron/auth";
@@ -20,9 +21,9 @@ export const dynamic = "force-dynamic";
  * Cron 枠も増えない）。ただしバックアップの方が重要なので、
  * ここでの失敗をバックアップの結果に伝播させない。
  */
-async function runSnapshot(): Promise<{ ok: boolean; detail?: unknown }> {
+async function runSnapshot(db: Database): Promise<{ ok: boolean; detail?: unknown }> {
   try {
-    return { ok: true, detail: await generateSnapshot() };
+    return { ok: true, detail: await generateSnapshot(db) };
   } catch (error) {
     console.error("[CRON] Snapshot generation failed:", describeError(error));
     return { ok: false };
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
     const db = getDb(d1);
 
     const result = await runAutoBackup(db);
-    const snapshot = await runSnapshot();
+    const snapshot = await runSnapshot(db);
 
     if (result.skipped) {
       return NextResponse.json({ success: true, skipped: true, reason: result.reason, snapshot });

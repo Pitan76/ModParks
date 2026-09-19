@@ -6,12 +6,12 @@
  * 別経路で増分を積んでいる（lib/usage/sliceRollup.ts）。
  */
 import { sql } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { usageDaily, versionDownloadDaily } from "@modparks/core/db/schema";
 import { fetchDailyRequests, type DayRequests } from "@/lib/usage/analytics";
 import { writeAnalyticsStatus } from "@/lib/usage/analyticsStatus";
 
-type Db = Awaited<ReturnType<typeof getDatabase>>;
+type Db = Database;
 
 /** UTC 基準の epoch day */
 export function toEpochDay(at: Date = new Date()): number {
@@ -40,8 +40,7 @@ async function sumCountedDownloads(db: Db, date: number): Promise<number> {
  * @param measured Cloudflare の実測値。undefined なら既存の値を保つ
  *   （取得に失敗しただけで、取得済みの値を消さないため）
  */
-export async function refreshUsageForDay(date: number, measured?: DayRequests): Promise<void> {
-  const db = await getDatabase();
+export async function refreshUsageForDay(db: Database, date: number, measured?: DayRequests): Promise<void> {
   const downloadsCounted = await sumCountedDownloads(db, date);
 
   const cf = measured
@@ -63,7 +62,7 @@ export async function refreshUsageForDay(date: number, measured?: DayRequests): 
  * 前日も対象にするのは、日付境界をまたいだ直後の実行で
  * 前日ぶんの実測値が確定していないことがあるため。
  */
-export async function rollupRecentUsage(): Promise<void> {
+export async function rollupRecentUsage(db: Database): Promise<void> {
   const today = toEpochDay();
   const yesterday = today - 1;
 
@@ -72,6 +71,6 @@ export async function rollupRecentUsage(): Promise<void> {
   await writeAnalyticsStatus(result.ok ? undefined : result.failure);
 
   const measured = result.ok ? result.data : null;
-  await refreshUsageForDay(today, measured?.get(toIsoDate(today)));
-  await refreshUsageForDay(yesterday, measured?.get(toIsoDate(yesterday)));
+  await refreshUsageForDay(db, today, measured?.get(toIsoDate(today)));
+  await refreshUsageForDay(db, yesterday, measured?.get(toIsoDate(yesterday)));
 }

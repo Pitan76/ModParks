@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getDatabase, type Database } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
+import { getDatabase } from "@/lib/db";
 import { versions, projectMembers } from "@modparks/core/db/schema";
 import { isAdminUser } from "@/lib/auth/roles";
 import { eq, and, desc, isNull } from "drizzle-orm";
@@ -51,7 +52,7 @@ type Relation = {
 };
 
 async function resolveRelation(
-  db: Awaited<ReturnType<typeof getDatabase>>,
+  db: Database,
   project: { id: string; authorId: string },
   userId: string | null
 ): Promise<Relation> {
@@ -107,7 +108,7 @@ function matchesPreference(
  * 絞り込み条件に合致するものを優先し、無ければ単純な最新版を返す。
  */
 async function getLatestVersion(
-  db: Awaited<ReturnType<typeof getDatabase>>,
+  db: Database,
   slug: string,
   pref: DownloadPreference
 ) {
@@ -137,6 +138,7 @@ const DEDUPE_WINDOW_SEC = 10 * 60;
  * 数字が欠けることより、ファイルを配れなくなることの方が害が大きい。
  */
 async function countDownload(
+  db: Database,
   req: NextRequest,
   versionId: string,
   projectId: string,
@@ -149,9 +151,9 @@ async function countDownload(
     const ip = await resolveClientIp();
     if (!await shouldCountOnce(`dl:${versionId}:${ip}`, DEDUPE_WINDOW_SEC)) return;
 
-    await recordVersionDownload(versionId, projectId);
+    await recordVersionDownload(db, versionId, projectId);
     // 還元の配分計算は累積カウンタから期間差分を取れないため、日次でも積む
-    await recordProjectDownload(projectId);
+    await recordProjectDownload(db, projectId);
   } catch (err) {
     console.error("[DOWNLOAD] Failed to record download:", err);
   }
@@ -238,7 +240,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    await countDownload(req, versionId, project.id, {
+    await countDownload(db, req, versionId, project.id, {
       excludedFromCount: relation.excludedFromCount,
       silent,
     });

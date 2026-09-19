@@ -6,9 +6,8 @@
  * 既読を先に、未読はかなり長く置いてから消す。
  */
 import { and, asc, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
+import type { Database } from "@modparks/core/db/client";
 import { notifications } from "@modparks/core/db/schema";
-import { getDatabase } from "@/lib/db";
-import type { Database } from "@/lib/db";
 
 /** 既読の保持期間 */
 const READ_RETENTION_DAYS = 90;
@@ -124,8 +123,7 @@ async function trimOverLimitUsers(db: Database, budget: number): Promise<number>
  *
  * 1回で消しきれなかった分は次回に持ち越す（日次で回る前提）。
  */
-export async function cleanupOldNotifications(): Promise<NotificationCleanupResult> {
-  const db = await getDatabase();
+export async function cleanupOldNotifications(db: Database): Promise<NotificationCleanupResult> {
 
   const { expiredRead, expiredUnread } = await deleteExpired(db, MAX_DELETES_PER_RUN);
   const overLimit = await trimOverLimitUsers(db, MAX_DELETES_PER_RUN - expiredRead - expiredUnread);

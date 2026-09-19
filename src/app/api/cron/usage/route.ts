@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getDatabase } from "@/lib/db";
 import { checkCronAuth } from "@/lib/cron/auth";
 import { rollupSliceIncrements } from "@/lib/usage/sliceRollup";
 import { expireModeIfDue } from "@/lib/runtime/mode";
@@ -20,7 +21,8 @@ export async function GET(request: Request) {
   if (unauthorized) return unauthorized;
 
   try {
-    const requests = await rollupSliceIncrements();
+    const db = await getDatabase();
+  const requests = await rollupSliceIncrements(db);
     // 戻し忘れで止まったままにならないよう、期限切れをここで後始末する
     const modeRestored = await expireModeIfDue();
 

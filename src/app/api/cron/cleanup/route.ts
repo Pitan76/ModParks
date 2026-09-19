@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getDatabase } from "@/lib/db";
 import { checkCronAuth } from "@/lib/cron/auth";
 import { cleanupOldNotifications } from "@/lib/services/notificationCleanup";
 import { describeError } from "@/lib/errors/describe";
@@ -15,7 +16,8 @@ export async function GET(request: Request) {
   if (unauthorized) return unauthorized;
 
   try {
-    const notifications = await cleanupOldNotifications();
+    const db = await getDatabase();
+  const notifications = await cleanupOldNotifications(db);
     return NextResponse.json({ success: true, notifications });
   } catch (error) {
     const reason = describeError(error);

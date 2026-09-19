@@ -5,7 +5,7 @@
  * versions / projects の累積カウンタは Cron がまとめて更新する。
  */
 import { and, eq, gt, sql } from "drizzle-orm";
-import { getDatabase } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { projects, versionDownloadDaily, versions } from "@modparks/core/db/schema";
 
 /** UTC 基準の epoch day */
@@ -18,8 +18,7 @@ function toEpochDay(at: Date = new Date()): number {
  *
  * 累積カウンタは即時更新しない。反映は {@link rollupDownloadCounts} が行う。
  */
-export async function recordVersionDownload(versionId: string, projectId: string): Promise<void> {
-  const db = await getDatabase();
+export async function recordVersionDownload(db: Database, versionId: string, projectId: string): Promise<void> {
 
   await db
     .insert(versionDownloadDaily)
@@ -39,7 +38,7 @@ type PendingRow = {
 };
 
 /** 未反映の差分を持つ行だけを取り出す */
-async function selectPending(db: Awaited<ReturnType<typeof getDatabase>>): Promise<PendingRow[]> {
+async function selectPending(db: Database): Promise<PendingRow[]> {
   return db
     .select({
       versionId: versionDownloadDaily.versionId,
@@ -68,8 +67,7 @@ function sumByProject(rows: PendingRow[]): Map<string, number> {
  *
  * @returns 反映した件数の合計
  */
-export async function rollupDownloadCounts(): Promise<number> {
-  const db = await getDatabase();
+export async function rollupDownloadCounts(db: Database): Promise<number> {
   const pending = await selectPending(db);
   if (pending.length === 0) return 0;
 

@@ -91,7 +91,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     canExtractRecipes: !!v.fileUrl,
   }));
 
-  const dependencies = await getProjectDependencies(project.id);
+  const dependencies = await getProjectDependencies(db, project.id);
   const media = await getPublicProjectMedia(project.id);
 
   // バージョン追加フォームの前提はページ側と同じローダーから取る（渡し漏れを防ぐため）

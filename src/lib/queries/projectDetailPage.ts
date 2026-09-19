@@ -24,8 +24,8 @@ export async function loadProjectDetailPageData(db: Database, project: ProjectDe
     db.select({ count: sql<number>`count(*)` }).from(favorites).where(eq(favorites.postId, project.id)).get(),
     userId ? db.select().from(favorites).where(and(eq(favorites.postId, project.id), eq(favorites.userId, userId))).get() : null,
     // バージョン限定の依存もタブに出す（どのバージョン向けかはカード側で示す）
-    getProjectDependencies(project.id, true),
-    getProjectDependents(project.id),
+    getProjectDependencies(db, project.id, true),
+    getProjectDependents(db, project.id),
     userId ? db.select().from(projectSubscriptions).where(and(eq(projectSubscriptions.projectId, project.id), eq(projectSubscriptions.userId, userId))).get() : null,
     getPublicProjectMedia(project.id),
     userId ? db.select({ userId: projectMembers.userId }).from(projectMembers).where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, userId))).get() : null,

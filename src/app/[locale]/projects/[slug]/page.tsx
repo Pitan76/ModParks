@@ -83,7 +83,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   if (project.visibility === "public") {
     // IP はレンダリング中に解決する。after() の中では headers() を読めない
     const clientIp = await resolveClientIp();
-    after(() => recordProjectView(project.id, isOwner || !!membership, clientIp));
+    after(() => recordProjectView(db, project.id, isOwner || !!membership, clientIp));
   }
 
   if (!project) notFound();

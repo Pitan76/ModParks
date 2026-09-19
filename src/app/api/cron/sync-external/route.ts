@@ -26,11 +26,11 @@ export async function GET(request: Request) {
     await purgeExpiredRateLimits();
 
     // 外部同期が失敗しても累積カウンタは反映したいので、先に済ませる
-    const rolledUpDownloads = await rollupDownloadCounts();
+    const rolledUpDownloads = await rollupDownloadCounts(db);
 
     // 利用量の集計は計上済みの件数を読むため、ダウンロード反映の後に置く
-    await rollupRecentUsage();
-    const alerted = await evaluateUsageAlert(await getAdminWebhookUrl());
+    await rollupRecentUsage(db);
+    const alerted = await evaluateUsageAlert(db, await getAdminWebhookUrl());
 
     const threeDaysAgoMs = Date.now() - (3 * 24 * 60 * 60 * 1000);
 

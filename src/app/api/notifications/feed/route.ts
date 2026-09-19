@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getNotifications, getUnreadCount } from "@/lib/queries/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -26,10 +27,12 @@ export async function GET() {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
+  const db = await getDatabase();
+
   try {
     const [unreadCount, items] = await Promise.all([
-      getUnreadCount(session.user.id),
-      getNotifications(session.user.id, 15),
+      getUnreadCount(db, session.user.id),
+      getNotifications(db, session.user.id, 15),
     ]);
     return NextResponse.json({ unreadCount, items });
   } catch (error) {

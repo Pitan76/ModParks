@@ -1,12 +1,10 @@
-import { getDatabase } from "@/lib/db";
 import { notifications, users, userProfiles } from "@modparks/core/db/schema";
+import type { Database } from "@modparks/core/db/client";
 import { eq, and, or, desc, count, inArray } from "drizzle-orm";
 import type { Notification } from "@modparks/core/db/schema";
-import type { Database } from "@/lib/db";
 
 /** ベルのドロップダウンや通知ページで使う通知一覧 */
-export async function getNotifications(userId: string, limit = 20, offset = 0): Promise<Notification[]> {
-  const db = await getDatabase();
+export async function getNotifications(db: Database, userId: string, limit = 20, offset = 0): Promise<Notification[]> {
   const rows = await db
     .select()
     .from(notifications)
@@ -20,8 +18,7 @@ export async function getNotifications(userId: string, limit = 20, offset = 0): 
 }
 
 /** 通知の総件数（ページネーションのページ数算出に使用） */
-export async function countNotifications(userId: string): Promise<number> {
-  const db = await getDatabase();
+export async function countNotifications(db: Database, userId: string): Promise<number> {
   const row = await db
     .select({ value: count() })
     .from(notifications)
@@ -105,8 +102,7 @@ async function withActorAvatars(db: Database, rows: Notification[]): Promise<Not
 }
 
 /** 未読件数（ベルのドット表示判定に使用） */
-export async function getUnreadCount(userId: string): Promise<number> {
-  const db = await getDatabase();
+export async function getUnreadCount(db: Database, userId: string): Promise<number> {
   const row = await db
     .select({ value: count() })
     .from(notifications)

@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import type { Database } from "@modparks/core/db/client";
 import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { checkFeatureEnabled } from "@/lib/runtime/guard";
@@ -66,10 +67,10 @@ function parseRequest(body: unknown): Parsed {
  * 誰でも通せてしまう経路なので、アイコン（画像）に限定したうえで
  * キーを呼び出し元のユーザーIDで区切り、影響範囲を閉じる（キー生成は buildKey 側）。
  */
-async function authorize(req: PresignRequest, actor: UploadActor): Promise<UploadAccess> {
+async function authorize(db: Database, req: PresignRequest, actor: UploadActor): Promise<UploadAccess> {
   if (req.type === "avatar") return { ok: true } as const;
   if (req.projectSlug !== NEW_PROJECT_SLUG) {
-    return await checkProjectUploadAccess(req.projectSlug!, actor);
+    return await checkProjectUploadAccess(db, req.projectSlug!, actor);
   }
   if (req.type !== "icon") {
     return { ok: false, status: 400, error: "Invalid type for new project" } as const;
@@ -118,7 +119,7 @@ export async function POST(req: NextRequest) {
   const parsed = parseRequest(await req.json());
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: parsed.status });
 
-  const access = await authorize(parsed.value, session.user);
+  const access = await authorize(db, parsed.value, session.user);
   if (!access.ok) return NextResponse.json({ error: access.error }, { status: access.status });
 
   const trustState = await getTrustState(db, session.user.id);

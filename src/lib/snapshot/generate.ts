@@ -5,8 +5,8 @@
  * 非公開化・削除・凍結が反映されないのは可用性ではなくコンプライアンスの問題。
  * そのため差分ではなく毎回の全件照合で、余分なオブジェクトを必ず消す。
  */
-import { getDatabase } from "@/lib/db";
 import { collectSnapshotData, type SnapshotData } from "./query";
+import type { Database } from "@modparks/core/db/client";
 import { SNAPSHOT_SCHEMA_VERSION, type SnapshotManifest } from "./publicView";
 import { deleteKey, getSnapshotBucket, listKeys, putJson } from "./storage";
 import { copyShell } from "./shell";
@@ -59,8 +59,7 @@ async function pruneStale(
  * manifest は最後に書く。途中で落ちた場合に、読み手が不整合な状態を
  * 「完成したもの」と見なさないようにするため。
  */
-export async function generateSnapshot(): Promise<SnapshotResult> {
-  const db = await getDatabase();
+export async function generateSnapshot(db: Database): Promise<SnapshotResult> {
   const bucket = await getSnapshotBucket();
   const data = await collectSnapshotData(db);
 

@@ -1,4 +1,5 @@
 import type { AuthenticationResponseJSON } from "@simplewebauthn/types";
+import type { Database } from "@modparks/core/db/client";
 import { eq } from "drizzle-orm";
 import { verifyAuthentication } from "@/lib/services/auth";
 import { getRpContext } from "./config";

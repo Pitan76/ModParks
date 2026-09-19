@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -27,12 +28,13 @@ export default async function NotificationsPage({ params, searchParams }: Notifi
 
   const t = await getTranslations("Notifications");
 
+  const db = await getDatabase();
   const page = Math.max(1, parseInt(pageStr ?? "") || 1);
   const limit = Math.min(Math.max(parseInt(limitStr ?? "") || NOTIFICATIONS_PER_PAGE, 10), 80);
 
   const [items, totalCount] = await Promise.all([
-    getNotifications(session.user.id, limit, (page - 1) * limit),
-    countNotifications(session.user.id),
+    getNotifications(db, session.user.id, limit, (page - 1) * limit),
+    countNotifications(db, session.user.id),
   ]);
 
   return (

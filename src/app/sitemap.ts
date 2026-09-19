@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import type { Database } from "@modparks/core/db/client";
 import { canonicalUrl, languageAlternates } from '@/lib/seo/canonical';
 import { getDatabase } from '@/lib/db';
 import { posts, postTranslations, userProfiles, users } from '@modparks/core/db/schema';
@@ -60,7 +61,7 @@ const staticEntries = (): MetadataRoute.Sitemap =>
 
 /** 投稿ID → 手動確定済みの訳文がある言語。索引対象を絞るために使う */
 const manualTranslationLocales = async (
-  db: Awaited<ReturnType<typeof getDatabase>>,
+  db: Database,
 ): Promise<Map<string, string[]>> => {
   const rows = await db
     .select({ postId: postTranslations.postId, locale: postTranslations.locale })

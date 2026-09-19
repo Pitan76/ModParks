@@ -1,5 +1,5 @@
-import { getDatabase } from "@/lib/db";
 import { projectDependencies, posts, projects, versions } from "@modparks/core/db/schema";
+import type { Database } from "@modparks/core/db/client";
 import { eq, and, isNull, or } from "drizzle-orm";
 import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@/lib/dependencies/scope";
 import { toStringArray } from "@/lib/utils/format";
@@ -49,8 +49,7 @@ const toDependencyEntry = (d: DependencyRow): DependencyEntry => ({
  * 既定ではプロジェクト全体の依存（バージョン限定でないもの）だけを返す。
  * バージョン限定の依存はファイルごとに違うため、混ぜると「今どれが要るのか」が読めなくなる。
  */
-export async function getProjectDependencies(projectId: string, includeVersionScoped = false): Promise<DependencyEntry[]> {
-  const db = await getDatabase();
+export async function getProjectDependencies(db: Database, projectId: string, includeVersionScoped = false): Promise<DependencyEntry[]> {
 
   const scope = includeVersionScoped
     ? eq(projectDependencies.projectId, projectId)
@@ -78,8 +77,7 @@ export async function getProjectDependencies(projectId: string, includeVersionSc
  * そのバージョンのローダーに合うものだけを返す。合わないものを並べると、
  * 利用者には「要らないものを要求されている」ようにしか見えないため。
  */
-export async function getVersionDependencies(projectId: string, versionId: string): Promise<DependencyEntry[]> {
-  const db = await getDatabase();
+export async function getVersionDependencies(db: Database, projectId: string, versionId: string): Promise<DependencyEntry[]> {
 
   const [deps, version] = await Promise.all([
     db
@@ -112,8 +110,7 @@ export async function getVersionDependencies(projectId: string, versionId: strin
 /**
  * このプロジェクトに依存しているプロジェクト（逆引き）を取得する
  */
-export async function getProjectDependents(projectId: string) {
-  const db = await getDatabase();
+export async function getProjectDependents(db: Database, projectId: string) {
 
   const deps = await db
     .select({

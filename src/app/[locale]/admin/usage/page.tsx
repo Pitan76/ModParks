@@ -22,14 +22,15 @@ export default async function AdminUsagePage({ params }: AdminUsagePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
+  let db;
   try {
-    await getAdminDb();
+    ({ db } = await getAdminDb());
   } catch {
     redirect({ href: "/", locale: locale });
   }
 
   const t = await getTranslations("Admin.usage");
-  const overview = await getUsageOverview();
+  const overview = await getUsageOverview(db);
 
   return (
     <Box>
