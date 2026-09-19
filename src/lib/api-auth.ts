@@ -1,13 +1,12 @@
-import { getDatabase } from "@/lib/db";
 import { apiKeys } from "@modparks/core/db/schema";
+import type { Database } from "@modparks/core/db/client";
 import { isAdminUser } from "@/lib/auth/roles";
 import { eq } from "drizzle-orm";
 import type { Viewer } from "@/lib/auth/postAccess";
 import { isOAuthAccessToken } from "@/lib/oauth/bearer";
 import { verifyAccessToken } from "@/lib/oauth/tokens";
 
-export async function validateApiKey(request: Request) {
-  const db = await getDatabase();
+export async function validateApiKey(db: Database, request: Request) {
 
   const authHeader = request.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -58,11 +57,10 @@ export async function validateApiKey(request: Request) {
  * リクエストから canManagePost に渡せる Viewer を組み立てる。
  * APIキーが無い・無効なら匿名として扱う（エラーにはしない - 公開APIは未認証でも読める）。
  */
-export async function resolveViewer(request: Request): Promise<Viewer> {
-  const auth = await validateApiKey(request);
+export async function resolveViewer(db: Database, request: Request): Promise<Viewer> {
+  const auth = await validateApiKey(db, request);
   if (!auth.valid || !auth.userId) return { userId: null, isAdmin: false };
 
-  const db = await getDatabase();
   return { userId: auth.userId, isAdmin: await isAdminUser(db, auth.userId) };
 }
 
@@ -71,8 +69,8 @@ export async function resolveViewer(request: Request): Promise<Viewer> {
  * API キー（scopes が null）は従来どおり全権として通し、
  * OAuth トークンは必要なスコープを持つ場合だけ通す。
  */
-export async function requireScope(request: Request, scope: string) {
-  const auth = await validateApiKey(request);
+export async function requireScope(db: Database, request: Request, scope: string) {
+  const auth = await validateApiKey(db, request);
   if (!auth.valid || !auth.userId) return { ok: false as const, status: 401, error: auth.error ?? "Unauthorized" };
   if (auth.scopes && !auth.scopes.includes(scope)) {
     return { ok: false as const, status: 403, error: `Scope '${scope}' is required` };

@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  const viewer = await resolveViewer(request);
+  const viewer = await resolveViewer(db, request);
 
   // メンバーかどうかは canManagePost が持たない情報なので、ここで補って渡す
   let memberIds: string[] | undefined;

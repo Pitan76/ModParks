@@ -55,7 +55,7 @@ export async function GET(request: Request) {
     }
     authorId = authorProfile.userId;
 
-    const auth = await validateApiKey(request);
+    const auth = await validateApiKey(db, request);
     includeHidden = !!auth.valid && auth.userId === authorId;
   }
 
@@ -79,7 +79,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const db = await getDatabase();
 
-  const auth = await validateApiKey(request);
+  const auth = await validateApiKey(db, request);
   if (!auth.valid || !auth.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

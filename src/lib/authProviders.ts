@@ -1,4 +1,5 @@
 import GitHub from "next-auth/providers/github";
+import { getDatabase } from "@/lib/db";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import Resend from "next-auth/providers/resend";
@@ -216,7 +217,8 @@ export const authProviders = [
 
         const parsed = JSON.parse(credentials.response as string) as AuthenticationResponseJSON;
         const { verifyPasskeyLogin } = await import("@/lib/webauthn/verifyLogin");
-        return await verifyPasskeyLogin(parsed);
+        const db = await getDatabase();
+        return await verifyPasskeyLogin(db, parsed);
       } catch (e: unknown) {
         console.error("[Auth] Error in passkey authorize:", e);
         throw e;

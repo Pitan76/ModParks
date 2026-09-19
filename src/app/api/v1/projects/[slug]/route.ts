@@ -25,7 +25,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  const viewer = await resolveViewer(request);
+  const viewer = await resolveViewer(db, request);
   if (!canViewPost(projectStub, viewer)) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
@@ -79,7 +79,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 export async function PATCH(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const db = await getDatabase();
 
-  const auth = await validateApiKey(request);
+  const auth = await validateApiKey(db, request);
   if (!auth.valid || !auth.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

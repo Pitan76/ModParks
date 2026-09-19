@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   }
 
   if (project.visibility !== "public") {
-    const auth = await validateApiKey(request);
+    const auth = await validateApiKey(db, request);
     if (!auth.valid || !auth.userId) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
@@ -113,13 +113,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const auth = await validateApiKey(request);
+  const d1 = await getD1();
+  const db = getDb(d1);
+
+  const auth = await validateApiKey(db, request);
   if (!auth.valid || !auth.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const d1 = await getD1();
-  const db = getDb(d1);
   const { slug } = await params;
 
   const project = await findProjectPostBySlug(db, slug);

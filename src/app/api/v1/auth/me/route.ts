@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const d1 = await getD1();
   const db = getDb(d1);
 
-  const auth = await validateApiKey(request);
+  const auth = await validateApiKey(db, request);
   if (!auth.valid || !auth.userId) {
     return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: 401 });
   }

@@ -9,7 +9,7 @@ export async function PUT(request: Request) {
   const db = getDb(d1);
 
   // APIキー検証
-  const auth = await validateApiKey(request);
+  const auth = await validateApiKey(db, request);
   if (!auth.valid || !auth.userId) {
     return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: 401 });
   }

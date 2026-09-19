@@ -24,13 +24,11 @@ export interface PasskeyUser {
  * 移設済みで、この関数は互換のために DB 参照＋サイドカー呼び出しを束ねる薄い
  * ラッパーとして残している。将来的には呼び出し側をサイドカー直呼びへ寄せる想定。
  */
-export const verifyPasskeyLogin = async (response: AuthenticationResponseJSON): Promise<PasskeyUser | null> => {
+export const verifyPasskeyLogin = async (db: Database, response: AuthenticationResponseJSON): Promise<PasskeyUser | null> => {
   const { rpId, origin } = await getRpContext();
   const expectedChallenge = await getChallenge("auth");
   if (!expectedChallenge) return null;
 
-  const { getDatabase } = await import("@/lib/db");
-  const db = await getDatabase();
   const { authenticators, users, userProfiles } = await import("@modparks/core/db/schema");
 
   const auth = await db.select().from(authenticators).where(eq(authenticators.credentialID, response.id)).get();

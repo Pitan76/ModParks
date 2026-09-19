@@ -11,7 +11,7 @@ import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {
   const db = await getDatabase();
-  const viewer = await resolveViewer(request);
+  const viewer = await resolveViewer(db, request);
 
   const { searchParams } = new URL(request.url);
   const limitParam = parseInt(searchParams.get("limit") || "");

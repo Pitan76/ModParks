@@ -25,11 +25,11 @@ const RESTRICTED_STATUSES = new Set(["draft", "private"]);
  * ダウンロード要求元のユーザーID（セッション or APIキー）を解決する。
  * どちらも無ければ null。
  */
-async function resolveRequesterId(req: NextRequest): Promise<string | null> {
+async function resolveRequesterId(db: Database, req: NextRequest): Promise<string | null> {
   const session = await auth();
   if (session?.user?.id) return session.user.id;
 
-  const apiAuth = await validateApiKey(req);
+  const apiAuth = await validateApiKey(db, req);
   if (apiAuth.valid && apiAuth.userId) return apiAuth.userId;
 
   return null;
@@ -202,7 +202,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const requesterId = await resolveRequesterId(req);
+    const requesterId = await resolveRequesterId(db, req);
     const relation = await resolveRelation(db, project, requesterId);
 
     // 未公開（draft/private）は作者・メンバー・管理者のみアクセス可。

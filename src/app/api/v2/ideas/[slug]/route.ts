@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: "Idea not found" }, { status: 404 });
   }
 
-  const viewer = await resolveViewer(request);
+  const viewer = await resolveViewer(db, request);
   if (!canViewPost(ideaStub, viewer)) {
     return NextResponse.json({ error: "Idea not found" }, { status: 404 });
   }
