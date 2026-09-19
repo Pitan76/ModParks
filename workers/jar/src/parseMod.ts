@@ -57,7 +57,7 @@ const matchBySubstring = (ranges: string[]): string[] => {
       // まずは SemVer 範囲指定として解釈を試みる
       try {
         // [1.18, 1.19) のような Maven/Forge の範囲指定表記を SemVer 形式に緩く変換
-        let rangeStr = r.trim();
+        const rangeStr = r.trim();
         // [1.18,1.19) => >=1.18.0 <1.19.0
         // [1.18, ] => >=1.18.0
         // (,1.19] => <=1.19.0

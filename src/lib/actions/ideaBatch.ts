@@ -23,7 +23,7 @@ async function getManageableIdeas(db: Database, session: Session, ideaIds: strin
   // 管理者でない場合は自分が作成者であるもののみ
   const isAdmin = session.user.role === "admin";
   if (!isAdmin) {
-    // @ts-ignore
+    // @ts-expect-error drizzle のクエリビルダは where を重ねる型を持たないが、実行時には合成される
     query = query.where(eq(posts.authorId, session.user.id));
   }
 

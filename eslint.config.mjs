@@ -20,6 +20,15 @@ const eslintConfig = defineConfig([
     "mp-recipe/**",
   ]),
   {
+    // package.json に type: module が無いので .js は CommonJS。
+    // これらは Node で直接動かす運用スクリプトであり、require が正しい。
+    // .mjs / .ts 側は ESM のままなのでこのルールを外すのはここだけに留める。
+    files: ["**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+  {
     // packages/core は Next.js アプリと Cloudflare Workers の両方から使う。
     // フレームワーク依存が混ざると Workers 側のバンドルに Next が載り、
     // isolate 起動時にその評価 CPU を払うことになる（API を切り出す目的が消える）。

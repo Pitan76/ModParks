@@ -22,8 +22,8 @@ export async function parseModJar(file: File | ArrayBuffer | Uint8Array): Promis
   const loadedZip = await zip.loadAsync(file);
   
   let detectedVersion = "";
-  let detectedLoaders: string[] = [];
-  let detectedMcVersions: string[] = [];
+  const detectedLoaders: string[] = [];
+  const detectedMcVersions: string[] = [];
 
   // 1. Check fabric.mod.json
   const fabricJson = loadedZip.file("fabric.mod.json");
@@ -36,7 +36,7 @@ export async function parseModJar(file: File | ArrayBuffer | Uint8Array): Promis
       
       const mcDep = parsed.depends?.minecraft;
       if (mcDep) {
-        let ranges: string[] = [];
+        const ranges: string[] = [];
         if (typeof mcDep === "string") ranges.push(mcDep);
         else if (Array.isArray(mcDep)) ranges.push(...mcDep);
 

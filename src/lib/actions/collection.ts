@@ -163,7 +163,7 @@ export async function getUserCollections(targetUserId: string, viewerId?: string
   const db = await getDatabase();
   const isOwner = targetUserId === viewerId;
 
-  let query = db.select().from(collections).where(eq(collections.userId, targetUserId));
+  const query = db.select().from(collections).where(eq(collections.userId, targetUserId));
   const rows = await query.orderBy(desc(collections.createdAt)).all();
 
   // Filter based on visibility

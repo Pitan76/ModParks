@@ -21,6 +21,7 @@ import { buildSilentDownloadUrl } from "@modparks/core/utils/downloadUrl";
 import { adminDeleteProject } from "@/lib/actions/admin";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
+import LinkIconButton from "@/components/ui/LinkIconButton";
 
 interface AdminProject {
   id: string;
@@ -89,12 +90,12 @@ export default function ProjectsClient({ projects }: { projects: AdminProject[] 
                   </TableCell>
                   <TableCell>{createdDate.toLocaleDateString()}</TableCell>
                   <TableCell align="right">
-                    <IconButton component={Link} href={`/projects/${project.slug}/edit`} color="secondary" title="Manage Project">
+                    <LinkIconButton href={`/projects/${project.slug}/edit`} color="secondary" title="Manage Project">
                       <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton component={Link} href={`/projects/${project.slug}`} color="primary" title="View Project">
+                    </LinkIconButton>
+                    <LinkIconButton href={`/projects/${project.slug}`} color="primary" title="View Project">
                       <OpenInNewIcon fontSize="small" />
-                    </IconButton>
+                    </LinkIconButton>
                     <IconButton
                       component="a"
                       href={buildSilentDownloadUrl(project.slug)}

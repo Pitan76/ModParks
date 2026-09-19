@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import { Link } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import ErrorIcon from "@mui/icons-material/Error";
+import LinkButton from "@/components/ui/LinkButton";
 
 /**
  * 404 Not Found ページ。
@@ -58,8 +59,7 @@ export default function NotFound() {
           {t("description")}
         </Typography>
 
-        <Button
-          component={Link}
+        <LinkButton
           href="/"
           variant="contained"
           color="primary"
@@ -73,7 +73,7 @@ export default function NotFound() {
           }}
         >
           {t("goBack")}
-        </Button>
+        </LinkButton>
       </Box>
     </Container>
   );

@@ -18,6 +18,7 @@ import { Link } from "@/lib/i18n/routing";
 import { adminDeleteIdea } from "@/lib/actions/admin";
 import { useTranslations } from "next-intl";
 import { tableContainerSx, tableHeadSx, tableRootSx, TABLE_MIN_WIDTH } from "@/components/ui/tableStyles";
+import LinkIconButton from "@/components/ui/LinkIconButton";
 
 interface AdminIdea {
   id: string;
@@ -81,9 +82,9 @@ export default function IdeasClient({ ideas }: { ideas: AdminIdea[] }) {
                   </TableCell>
                   <TableCell>{createdDate.toLocaleDateString()}</TableCell>
                   <TableCell align="right">
-                    <IconButton component={Link} href={`/ideas/${idea.id}`} color="primary" title="View Idea">
+                    <LinkIconButton href={`/ideas/${idea.id}`} color="primary" title="View Idea">
                       <OpenInNewIcon fontSize="small" />
-                    </IconButton>
+                    </LinkIconButton>
                     <IconButton color="error" onClick={() => handleDeleteIdea(idea.id)} title="Delete Idea">
                       <DeleteIcon fontSize="small" />
                     </IconButton>

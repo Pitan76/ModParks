@@ -15,6 +15,7 @@ import MuiLink from "@mui/material/Link";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import { getLoaderInfo } from "@/lib/loaders";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import LinkListItem from "@/components/ui/LinkListItem";
 
 type DependencyProject = {
   id: string;
@@ -115,10 +116,9 @@ const ProjectDependencies = ({ dependencies, dependents }: ProjectDependenciesPr
       ) : (
         <List sx={{ bgcolor: "background.paper", borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
           {dependents.map((dep, i) => (
-            <ListItem 
+            <LinkListItem
               key={dep.id}
               divider={i !== dependents.length - 1}
-              component={Link}
               href={`/projects/${dep.project.slug}`}
               sx={{ textDecoration: "none", color: "inherit", '&:hover': { bgcolor: "action.hover" } }}
             >
@@ -131,7 +131,7 @@ const ProjectDependencies = ({ dependencies, dependents }: ProjectDependenciesPr
                 primary={dep.project.title}
               />
               <Chip size="small" label={t(`dependencies.${dep.dependencyType}`)} color={DEP_COLOR[dep.dependencyType] || "default"} />
-            </ListItem>
+            </LinkListItem>
           ))}
         </List>
       )}

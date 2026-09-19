@@ -225,6 +225,9 @@ const NewProjectForm = ({
             <Alert severity="info" sx={{ mt: 2 }}>
               {t.rich("create.import.batchImportNotice", {
                 link: (chunks) => (
+                  // クライアントコンポーネント内の 1 箇所だけなのでヘルパは作らない。
+                  // ui/Link*.tsx と同じく、Link を渡す行に限って無効化する
+                  // eslint-disable-next-line no-restricted-syntax
                   <MuiLink component={Link} href="/projects/import" color="inherit" sx={{ fontWeight: "bold" }}>
                     {chunks}
                   </MuiLink>

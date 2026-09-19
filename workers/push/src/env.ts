@@ -6,6 +6,5 @@
  * 呼び出し元（メインアプリ）から受け取る。Service Binding 経由でのみ到達可能
  * （workers_dev = false）。
  */
-export interface PushWorkerEnv {
-  // バインディングなし（純粋計算のみ）
-}
+/** バインディングなし（純粋計算のみ）であることを型で表す */
+export type PushWorkerEnv = Record<string, never>;

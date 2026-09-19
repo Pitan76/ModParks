@@ -5,6 +5,5 @@
  * 隔離する純粋計算 Worker。DB / Cookie / R2 には触れず、呼び出し元（メインアプリ）
  * が状態を管理する。Service Binding 経由でのみ到達可能にする（workers_dev = false）。
  */
-export interface AuthWorkerEnv {
-  // バインディングなし（純粋計算のみ）
-}
+/** バインディングなし（純粋計算のみ）であることを型で表す */
+export type AuthWorkerEnv = Record<string, never>;

@@ -13,6 +13,7 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import { Link } from "@/lib/i18n/routing";
 import ProjectTypeBadge from "../project/ProjectTypeBadge";
 import type { CartItem } from "./cartStore";
+import LinkListItemButton from "@/components/ui/LinkListItemButton";
 
 export interface CartItemRowProps {
   item: CartItem;
@@ -38,8 +39,7 @@ export default function CartItemRow({ item, onRemove, onNavigate, secondary }: C
       disablePadding
       sx={{ borderBottom: 1, borderColor: "divider" }}
     >
-      <ListItemButton
-        component={Link}
+      <LinkListItemButton
         href={`/projects/${item.slug}`}
         onClick={onNavigate}
         sx={{ py: 0.75, pl: 0.5, pr: 5, borderRadius: 1 }}
@@ -71,7 +71,7 @@ export default function CartItemRow({ item, onRemove, onNavigate, secondary }: C
             secondary ? <Typography variant="caption" color="text.secondary">{secondary}</Typography> : undefined
           }
         />
-      </ListItemButton>
+      </LinkListItemButton>
     </ListItem>
   );
 }
