@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { posts, projects } from "@modparks/core/db/schema";
-import { validateApiKey, resolveViewer } from "@/lib/api-auth";
+import { validateApiKey, resolveViewer } from "@modparks/core/api-auth";
 import { eq, and } from "drizzle-orm";
 import type { ApiProjectDetail } from "@modparks/core/types/api-v1";
 import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { listProjectPosts } from "@modparks/core/queries/postList";
 import { getProjectDependencies, getProjectDependents } from "@modparks/core/queries/dependency";
 import { canViewPost } from "@modparks/core/auth/postAccess";
-import { isAdminUser } from "@/lib/auth/roles";
-import { withPublicCache } from "@/lib/http/cache";
+import { isAdminUser } from "@modparks/core/auth/roles";
+import { withPublicCache } from "@modparks/core/http/cache";
 
 /**
  * v1 互換シム。

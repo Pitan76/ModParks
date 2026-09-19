@@ -3,9 +3,9 @@
  */
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { requireBearerScope } from "@/lib/oauth/bearer";
+import { requireBearerScope } from "@modparks/core/oauth/bearer";
 import { buildUserClaims } from "@modparks/core/oauth/userClaims";
-import { bearerError } from "@/lib/oauth/errors";
+import { bearerError } from "@modparks/core/oauth/errors";
 
 export async function GET(request: Request) {
   const db = await getDatabase();

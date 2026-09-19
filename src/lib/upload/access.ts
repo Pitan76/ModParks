@@ -5,7 +5,7 @@
  * 片方だけ条件が緩むとそちらが素通り口になるため、判定はこの 1 箇所に集約する。
  */
 
-import { ADMIN_ROLE } from "@/lib/auth/roles";
+import { ADMIN_ROLE } from "@modparks/core/auth/roles";
 import type { Database } from "@modparks/core/db/client";
 
 /** 権限判定の結果。失敗時はそのまま HTTP 応答に使えるステータスと文言を持つ。 */

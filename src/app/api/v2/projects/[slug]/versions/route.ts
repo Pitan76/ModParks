@@ -1,7 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { getDb, getD1, type Env } from "@/lib/db";
 import { posts, projects, projectDependencies, versions, projectMembers, versionLoaders, versionMcVersions } from "@modparks/core/db/schema";
-import { validateApiKey } from "@/lib/api-auth";
+import { validateApiKey } from "@modparks/core/api-auth";
 import { eq, desc, and, getTableColumns, isNull } from "drizzle-orm";
 import { displayDownloadsSql } from "@/lib/queries/versionList";
 import { dependencyAppliesToLoaders, parseDependencyLoaders } from "@modparks/core/dependencies/scope";
@@ -12,7 +12,7 @@ import { buildR2Key, getR2PublicUrl, uploadToR2 } from "@/lib/r2";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { extractRecipes } from "@/lib/services/jar";
 import { revalidatePath } from "next/cache";
-import { withPublicCache } from "@/lib/http/cache";
+import { withPublicCache } from "@modparks/core/http/cache";
 import { chunkRows } from "@modparks/core/db/chunkRows";
 import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { canManagePost } from "@modparks/core/auth/postAccess";

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { resolveViewer } from "@/lib/api-auth";
+import { resolveViewer } from "@modparks/core/api-auth";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { listIdeaPosts } from "@modparks/core/queries/postList";
 import type { ApiIdea, PaginatedResponse } from "@modparks/core/types/api-v1";
-import { withPublicCache } from "@/lib/http/cache";
+import { withPublicCache } from "@modparks/core/http/cache";
 
 /**
  * v1 互換シム。

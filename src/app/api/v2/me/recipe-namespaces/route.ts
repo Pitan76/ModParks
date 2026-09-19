@@ -5,7 +5,7 @@
  * 判定側（mp-recipe）はユーザーの投稿物そのものを知る必要が無く、ここが返す一覧だけで足りる。
  */
 import { NextResponse } from "next/server";
-import { requireBearerScope } from "@/lib/oauth/bearer";
+import { requireBearerScope } from "@modparks/core/oauth/bearer";
 import { getDatabase } from "@/lib/db";
 import { posts, projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { resolveViewer } from "@/lib/api-auth";
+import { resolveViewer } from "@modparks/core/api-auth";
 import { findIdeaPostBySlug } from "@modparks/core/queries/post";
 import { listIdeaPosts } from "@modparks/core/queries/postList";
 import { canViewPost } from "@modparks/core/auth/postAccess";

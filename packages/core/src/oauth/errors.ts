@@ -1,8 +1,10 @@
 /**
  * RFC 6749 準拠のエラー表現。
  * 認可エンドポイントは redirect_uri へ、トークンエンドポイントは JSON で返す。
+ *
+ * NextResponse ではなく素の Response を返す。Next のルートハンドラも Hono も
+ * どちらもこれをそのまま返せるため、core に置いて共有できる。
  */
-import { NextResponse } from "next/server";
 
 export type OAuthErrorCode =
   | "invalid_request"
@@ -27,7 +29,7 @@ function statusFor(error: OAuthErrorCode): number {
 }
 
 export function tokenError(error: OAuthErrorCode, description?: string) {
-  return NextResponse.json(
+  return Response.json(
     { error, ...(description ? { error_description: description } : {}) },
     { status: statusFor(error), headers: { "Cache-Control": "no-store", Pragma: "no-cache" } }
   );
@@ -37,7 +39,7 @@ export function tokenError(error: OAuthErrorCode, description?: string) {
 export function bearerError(error: OAuthErrorCode, description: string, scope?: string) {
   const parts = [`error="${error}"`, `error_description="${description}"`];
   if (scope) parts.push(`scope="${scope}"`);
-  return NextResponse.json(
+  return Response.json(
     { error, error_description: description },
     { status: statusFor(error), headers: { "WWW-Authenticate": `Bearer ${parts.join(", ")}` } }
   );
@@ -49,5 +51,5 @@ export function redirectError(redirectUri: string, error: OAuthErrorCode, state:
   url.searchParams.set("error", error);
   if (description) url.searchParams.set("error_description", description);
   if (state) url.searchParams.set("state", state);
-  return NextResponse.redirect(url.toString());
+  return Response.redirect(url.toString(), 307);
 }

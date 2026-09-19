@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { users, userProfiles } from "@modparks/core/db/schema";
-import { validateApiKey } from "@/lib/api-auth";
+import { validateApiKey } from "@modparks/core/api-auth";
 import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {

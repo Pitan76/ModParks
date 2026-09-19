@@ -6,7 +6,7 @@ import { findClient, isAllowedRedirectUri } from "@modparks/core/oauth/clients";
 import type { Database } from "@modparks/core/db/client";
 import { resolveRequestedScope } from "@modparks/core/oauth/scopes";
 import type { OAuthClient } from "@modparks/core/db/schema";
-import type { OAuthErrorCode } from "./errors";
+import type { OAuthErrorCode } from "@modparks/core/oauth/errors";
 
 export type AuthorizeParams = {
   clientId: string;

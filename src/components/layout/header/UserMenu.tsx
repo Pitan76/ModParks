@@ -11,7 +11,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { useTranslations } from "next-intl";
 import LinkMenuItem from "@/components/ui/LinkMenuItem";
 import type { Session } from "next-auth";
-import { ADMIN_ROLE } from "@/lib/auth/roles";
+import { ADMIN_ROLE } from "@modparks/core/auth/roles";
 
 export type UserMenuProps = {
   user: NonNullable<Session["user"]>;

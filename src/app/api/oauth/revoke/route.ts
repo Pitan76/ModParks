@@ -5,7 +5,7 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { authenticateClient, findClient, readClientCredentials } from "@modparks/core/oauth/clients";
-import { tokenError } from "@/lib/oauth/errors";
+import { tokenError } from "@modparks/core/oauth/errors";
 import { revokeToken } from "@modparks/core/oauth/tokens";
 
 export async function POST(request: Request) {

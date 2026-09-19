@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
-import { validateApiKey } from "@/lib/api-auth";
+import { validateApiKey } from "@modparks/core/api-auth";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { eq, and } from "drizzle-orm";
 import type { ApiProject, PaginatedResponse } from "@modparks/core/types/api-v1";
 import { createId } from "@paralleldrive/cuid2";
-import { withPublicCache } from "@/lib/http/cache";
+import { withPublicCache } from "@modparks/core/http/cache";
 import { posts, projects, userProfiles } from "@modparks/core/db/schema";
 import { CONTENT_TYPES, type ContentType } from "@modparks/core/data/projectTypes";
 import { listProjectPosts, type ProjectListSort } from "@modparks/core/queries/postList";

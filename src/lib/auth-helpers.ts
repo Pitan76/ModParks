@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import type { Database } from "@/lib/db";
 import type { Session } from "next-auth";
-import { isAdminUser } from "@/lib/auth/roles";
+import { isAdminUser } from "@modparks/core/auth/roles";
 import { redirect } from "@/lib/i18n/routing";
 
 /**
