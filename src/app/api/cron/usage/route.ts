@@ -11,6 +11,9 @@ export const dynamic = "force-dynamic";
  *
  * ddos_slices は 30 分で削除されるため、毎時の実行では取りこぼす。
  * 保持期間より短い 10 分間隔で増分だけを積む。
+ *
+ * 定期実行は worker/usage-cron.js が担う（Cron の枠で OpenNext を読み込むと
+ * バンドル評価だけで CPU 上限に達するため）。ここは手動実行用に残している。
  */
 export async function GET(request: Request) {
   const unauthorized = checkCronAuth(request);

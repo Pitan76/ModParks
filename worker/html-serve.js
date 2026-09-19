@@ -126,7 +126,7 @@ const WARM_UNITS = WARM_TARGETS.flatMap(({ path, themed }) =>
  * 1 回の量が多いほど途中で打ち切られて 1 件も保存されずに終わるため、
  * 少しずつ順繰りに回して数ティックかけて一周させる。
  */
-const WARM_BATCH = 2;
+const WARM_BATCH = 1;
 
 /**
  * 公開ページを描画して KV を埋める。

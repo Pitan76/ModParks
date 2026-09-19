@@ -1,6 +1,7 @@
 import { getDdosState } from "./worker/ddos-state.js";
 import { trackRequest } from "./worker/ddos-stats.js";
 import { handleDdosCron } from "./worker/ddos-cron.js";
+import { handleUsageCron } from "./worker/usage-cron.js";
 import { isBotRequest } from "./worker/bot-detect.js";
 import { getRuntimeMode, handleRestrictedMode } from "./worker/runtime-mode.js";
 import { isCacheableRequest, serveCachedHtml, cacheRenderedHtml, warmHtmlStore } from "./worker/html-serve.js";
@@ -22,8 +23,6 @@ function loadOpenNextWorker() {
 const CRON_ROUTES = {
   "0 * * * *": "/api/cron/sync-external",
   "0 3 * * *": "/api/cron/backup",
-  // ddos_slices は 30 分で削除されるため、それより短い間隔で取り込む必要がある
-  "*/10 * * * *": "/api/cron/usage",
   "30 3 * * *": "/api/cron/trust",
   "45 3 * * *": "/api/cron/cleanup",
 };
@@ -49,8 +48,21 @@ async function invokeCronRoute(path, env, ctx) {
   }
 }
 
-/** 温めを行う Cron。CRON_ROUTES と同じ枠に相乗りする */
-const WARM_CRON = "*/10 * * * *";
+/**
+ * 温めを行う Cron。
+ *
+ * 他の枠と同居させない。scheduled は起動ごとに CPU 予算を持つため、相乗りすると
+ * 描画が他の処理と 10ms を食い合って、どちらも打ち切られる。
+ * 10 分枠 (USAGE_CRON) とは 5 分ずらして交互に動かす。
+ */
+const WARM_CRON = "5-59/10 * * * *";
+
+/**
+ * スライスの取り込みを行う Cron。
+ *
+ * ddos_slices は 30 分で削除されるため、それより短い間隔で取り込む必要がある。
+ */
+const USAGE_CRON = "*/10 * * * *";
 
 /** 温めの順番を決める連番。10 分ごとに 1 増える */
 function warmTick(controller) {
@@ -142,14 +154,17 @@ export default {
 
   /** Cloudflare Cron Triggers 用のハンドラ */
   async scheduled(controller, env, ctx) {
+    // 温めは描画に予算を使い切るため、この枠では他を一切走らせない
+    if (controller.cron === WARM_CRON) return warmPublicPages(env, ctx, warmTick(controller));
+
     await handleDdosCron(env);
 
-    const path = CRON_ROUTES[controller.cron];
-    if (path) {
-      console.log(`Cron triggered (${controller.cron}): invoking ${path}`);
-      await invokeCronRoute(path, env, ctx);
-    }
+    if (controller.cron === USAGE_CRON) return handleUsageCron(env);
 
-    if (controller.cron === WARM_CRON) await warmPublicPages(env, ctx, warmTick(controller));
+    const path = CRON_ROUTES[controller.cron];
+    if (!path) return;
+
+    console.log(`Cron triggered (${controller.cron}): invoking ${path}`);
+    await invokeCronRoute(path, env, ctx);
   },
 };
