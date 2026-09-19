@@ -14,6 +14,37 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
+    // packages/core は Next.js アプリと Cloudflare Workers の両方から使う。
+    // フレームワーク依存が混ざると Workers 側のバンドルに Next が載り、
+    // isolate 起動時にその評価 CPU を払うことになる（API を切り出す目的が消える）。
+    // 契約の全文は packages/core/README.md を参照。
+    files: ["packages/core/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "next", "next/*",
+                "next-auth", "next-auth/*",
+                "next-intl", "next-intl/*",
+                "@opennextjs/*",
+                "react", "react-dom", "react/*", "react-dom/*",
+                "@mui/*", "@emotion/*",
+                "server-only",
+                "@/*",
+              ],
+              // next-auth の型だけは実行時コストを持たないため allowTypeImports で許す
+              allowTypeImports: true,
+              message: "packages/core はフレームワークに依存してはならない。値の import は禁止（型のみは可）。詳細は packages/core/README.md",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     rules: {
       "no-restricted-syntax": [
         "error",
