@@ -6,6 +6,7 @@ import { sameOrigin } from "./sameOrigin";
 import { patchProject } from "./routes/projects";
 import { getSession } from "./routes/session";
 import { getMyCollections } from "./routes/collections";
+import { getTrustedDevices } from "./routes/trustedDevices";
 
 /**
  * 公開 API を Next.js から切り離して処理する Worker。
@@ -43,6 +44,7 @@ const appOrigin = (env: unknown) => new URL((env as ApiWorkerEnv).NEXT_PUBLIC_AP
 app.use("/api/app/*", sameOrigin(appOrigin));
 app.get("/api/app/session", getSession);
 app.get("/api/app/collections", getMyCollections);
+app.get("/api/app/trusted-devices", getTrustedDevices);
 app.patch("/api/app/projects/:id", patchProject);
 // 上に無いメソッドは 405。登録順に照合されるので、実装の後ろに置く
 app.all("/api/app/projects/:id", (c) => c.body(null, 405));

@@ -2,6 +2,7 @@ import { ServerErrors as ja } from "../../../src/lang/ja_jp.json";
 import { ServerErrors as en } from "../../../src/lang/en_us.json";
 import { defaultLocale, locales, type AppLocale } from "@modparks/core/i18n/locales";
 import type { ServerErrorTranslator } from "@modparks/core/i18n/serverErrors";
+import { readCookie } from "./cookies";
 
 /**
  * modparks-api から返すエラー文言の翻訳。
@@ -26,16 +27,9 @@ const LOCALE_COOKIE = "NEXT_LOCALE";
  * ページを表示するたびに付け直されるため、直前に見ていたページの言語になる。
  */
 export function resolveLocale(req: Request): AppLocale {
-  const cookie = req.headers.get("cookie") ?? "";
-  for (const part of cookie.split(";")) {
-    const [key, ...rest] = part.trim().split("=");
-    if (key !== LOCALE_COOKIE) continue;
+  const value = readCookie(req, LOCALE_COOKIE);
 
-    const value = rest.join("=");
-    if ((locales as string[]).includes(value)) return value as AppLocale;
-  }
-
-  return defaultLocale;
+  return value && (locales as string[]).includes(value) ? (value as AppLocale) : defaultLocale;
 }
 
 /** "project.slugTaken" のような階層キーを辿る */

@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { trustedDevices } from "@modparks/core/db/schema";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import {
@@ -10,17 +10,6 @@ import {
   deleteTrustedDeviceByToken,
   trustedDeviceCookieOptions,
 } from "@/lib/auth/trustedDevice";
-
-/** 設定画面に出す信頼済みデバイス1件 */
-export type TrustedDeviceSummary = {
-  id: string;
-  userAgent: string | null;
-  createdAt: Date;
-  lastUsedAt: Date | null;
-  expiresAt: Date;
-  /** 今使っているブラウザかどうか（一覧で自分を見分けるため） */
-  current: boolean;
-};
 
 /**
  * いま使っているブラウザを信頼済みとして登録する。
@@ -34,31 +23,6 @@ export async function rememberCurrentBrowser() {
 
   (await cookies()).set(TRUSTED_DEVICE_COOKIE, token, trustedDeviceCookieOptions());
   return { success: true };
-}
-
-/** 登録済みのブラウザ一覧。新しいものから並べる */
-export async function listTrustedDevices(): Promise<TrustedDeviceSummary[]> {
-  const { db, userId } = await getAuthenticatedDb();
-  const currentToken = (await cookies()).get(TRUSTED_DEVICE_COOKIE)?.value;
-
-  const { sha256Hex } = await import("@modparks/core/oauth/crypto");
-  const currentHash = currentToken ? await sha256Hex(currentToken) : null;
-
-  const rows = await db
-    .select()
-    .from(trustedDevices)
-    .where(eq(trustedDevices.userId, userId))
-    .orderBy(desc(trustedDevices.createdAt))
-    .all();
-
-  return rows.map((row) => ({
-    id: row.id,
-    userAgent: row.userAgent,
-    createdAt: row.createdAt,
-    lastUsedAt: row.lastUsedAt,
-    expiresAt: row.expiresAt,
-    current: !!currentHash && row.tokenHash === currentHash,
-  }));
 }
 
 /** 指定のブラウザの記憶を取り消す。今使っているブラウザなら Cookie も消す */

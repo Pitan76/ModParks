@@ -12,12 +12,9 @@ import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useFlashMessage } from "@/lib/hooks/useFlashMessage";
-import {
-  listTrustedDevices,
-  revokeTrustedDevice,
-  revokeAllTrustedDevices,
-  type TrustedDeviceSummary,
-} from "@/lib/actions/trustedDevices";
+import { revokeTrustedDevice, revokeAllTrustedDevices } from "@/lib/actions/trustedDevices";
+import type { TrustedDeviceSummary } from "@modparks/core/auth/trustedDeviceList";
+import { getAppJson } from "@/lib/http/appApi";
 
 /** User-Agent は長すぎて一覧で読めないため、ブラウザ名の手掛かりだけを残す */
 const shortenUserAgent = (userAgent: string | null): string | null => {
@@ -36,7 +33,8 @@ export default function TrustedDeviceManager() {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    listTrustedDevices().then(setDevices).catch(() => flash("error", t("security.trustedDevicesLoadError")));
+    // Server Action ではなく GET で読む（開くたびに画面の再取得を起こさないため）
+    getAppJson<TrustedDeviceSummary[]>("/api/app/trusted-devices").then(setDevices).catch(() => flash("error", t("security.trustedDevicesLoadError")));
   }, [flash, t]);
 
   const handleRevoke = async (id: string) => {
