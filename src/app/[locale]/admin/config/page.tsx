@@ -13,6 +13,8 @@ import AppSettingsPanel from "./AppSettingsPanel";
 import AppSettingsGroupPanel from "./AppSettingsGroupPanel";
 import WorkerVarsPanel from "./WorkerVarsPanel";
 import SecretsPanel from "./SecretsPanel";
+// 【一時的】VAPID 鍵の回収用。回収後に削除する
+import SecretRevealPanel from "./SecretRevealPanel";
 import DdosPanel from "./DdosPanel";
 
 export default async function AdminConfigPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -45,10 +47,13 @@ export default async function AdminConfigPage({ params }: { params: Promise<{ lo
           />
         }
         secrets={
-          <SecretsPanel
-            initialSecrets={"success" in secretsResult ? secretsResult.secrets : []}
-            loadError={"error" in secretsResult ? secretsResult.error : undefined}
-          />
+          <>
+            <SecretsPanel
+              initialSecrets={"success" in secretsResult ? secretsResult.secrets : []}
+              loadError={"error" in secretsResult ? secretsResult.error : undefined}
+            />
+            <SecretRevealPanel />
+          </>
         }
         taxonomy={<ConfigClient initialTags={allTags} initialPlatforms={allPlatforms} />}
         ddos={<DdosPanel initialState={ddosStateVal ?? {
