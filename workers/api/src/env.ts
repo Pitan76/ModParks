@@ -14,4 +14,10 @@ export interface ApiWorkerEnv {
   AI?: AiBinding;
   NEXT_PUBLIC_APP_URL: string;
   R2_PUBLIC_URL: string;
+  /**
+   * セッション Cookie の復号鍵。**メイン Worker(modparks) と同じ値**でなければ
+   * 復号に失敗し、ログイン中のユーザーが全員未ログイン扱いになる。
+   * `wrangler secret put AUTH_SECRET --name modparks-api` で設定する。
+   */
+  AUTH_SECRET: string;
 }

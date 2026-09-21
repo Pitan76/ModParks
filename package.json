@@ -19,6 +19,7 @@
     "sync2local": "node scripts/sync2local.mjs"
   },
   "dependencies": {
+    "@auth/core": "0.41.2",
     "@auth/drizzle-adapter": "^1.11.2",
     "@cloudflare/workers-types": "^4.20260612.1",
     "@ducanh2912/next-pwa": "^10.2.9",
