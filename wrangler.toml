@@ -64,6 +64,11 @@ binding = "modparks_static"
 [images]
 binding = "IMAGES"
 
+# デプロイごとに変わるバージョン ID。HTML キャッシュのキーに含め、前のビルドの
+# HTML を配らないようにする（worker/html-key.js の setCacheGeneration を参照）
+[version_metadata]
+binding = "CF_VERSION_METADATA"
+
 # 説明文の AI 翻訳。外部 API キーを持たずに済むため Workers AI を使う。
 # プロバイダを変える場合は TRANSLATION_PROVIDER と providers/ の実装を差し替える。
 [ai]

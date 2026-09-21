@@ -5,6 +5,7 @@ import { handleUsageCron } from "./worker/usage-cron.js";
 import { isBotRequest } from "./worker/bot-detect.js";
 import { getRuntimeMode, handleRestrictedMode } from "./worker/runtime-mode.js";
 import { isCacheableRequest, serveCachedHtml, cacheRenderedHtml, warmHtmlStore } from "./worker/html-serve.js";
+import { setCacheGeneration } from "./worker/html-key.js";
 
 /**
  * OpenNext の本体は遅延読み込みにする。
@@ -108,6 +109,7 @@ function withCountSignals(req, state, isBot) {
 export default {
   /** OpenNext の fetch ハンドラをラップし、手前でDDoS統計の収集だけを行う */
   async fetch(req, env, ctx) {
+    setCacheGeneration(env.CF_VERSION_METADATA?.id);
     const url = new URL(req.url);
 
     // 運用モードの判定は最初に行う。止めている間は本体の処理を一切走らせない
@@ -153,6 +155,7 @@ export default {
 
   /** Cloudflare Cron Triggers 用のハンドラ */
   async scheduled(controller, env, ctx) {
+    setCacheGeneration(env.CF_VERSION_METADATA?.id);
     if (controller.cron === TICK_CRON) {
       const tick = tickIndex(controller);
       // 温めは描画に予算を使い切るため、この回では他を一切走らせない

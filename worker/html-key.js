@@ -97,18 +97,40 @@ export function isCacheableRequest(req, url) {
 }
 
 /**
+ * キャッシュの世代。デプロイごとに変わる Worker のバージョン ID を使う。
+ *
+ * キーにこれが無いと、デプロイ後も前のビルドの HTML が配られ続ける。その HTML は
+ * 新しいデプロイで消えた JS（ファイル名にハッシュが付く）を参照するので、
+ * ChunkLoadError で画面が壊れる。Server Action の後の再取得では、新旧のビルドの
+ * 食い違いから全体の読み直しに入り、また古い HTML が返って無限に読み直していた。
+ *
+ * 1 つの isolate は 1 つのデプロイ版しか実行しないので、モジュール変数に一度
+ * 入れれば足りる。古い世代のキーは二度と読まれず、各キャッシュの期限で消える。
+ */
+let generation = "0";
+
+/**
+ * 世代を設定する。worker-wrapper がリクエストと Cron の入口で呼ぶ。
+ * @param versionId env.CF_VERSION_METADATA.id。取れない環境（ローカル）では既定のまま
+ */
+export function setCacheGeneration(versionId) {
+  if (versionId) generation = versionId;
+}
+
+/**
  * この要求が読むべきキャッシュの識別子。
  *
  * 接頭辞なしURLでは Cookie が言語を決めるため、キーに言語を含めないと
  * 日本語の応答を英語の閲覧者へ返してしまう。テーマも SSR 結果に出るため同じ扱い。
+ * 先頭の世代については setCacheGeneration を参照。
  */
 export function variantKey(req, url) {
-  if (INVARIANT_PATHS.some((pattern) => pattern.test(url.pathname))) return `any/any${url.pathname}`;
+  if (INVARIANT_PATHS.some((pattern) => pattern.test(url.pathname))) return `${generation}/any/any${url.pathname}`;
 
   const locale = readLocaleCookie(req, url);
   const theme = readCookie(req, THEME_COOKIE) === "light" ? "light" : "dark";
 
-  return `${locale}/${theme}${url.pathname}`;
+  return `${generation}/${locale}/${theme}${url.pathname}`;
 }
 
 /** 応答へ付け直す言語。variantKey と同じ判定を使う */
