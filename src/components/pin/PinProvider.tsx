@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { togglePin } from "@/lib/actions/profilePins";
 import { MAX_PINS, type PinItemType, type PinRef } from "@/lib/pins";
+import { readPinCache, readPinCacheFetchedAt, writePinCache } from "./pinCache";
 
 interface PinContextValue {
   /** ログイン中か（未ログインならピン留めメニューを出さない） */
@@ -30,14 +31,31 @@ async function fetchMyPins(): Promise<PinRef[]> {
   return (await res.json()) as PinRef[];
 }
 
+/**
+ * 表示に使うピン留めのキー集合。控えが新しければそれを使い、無ければ取得して控える。
+ * 未ログインでは自分でピン留めできないので空。
+ */
+async function loadPinnedKeys(enabled: boolean, userId: string): Promise<Set<string>> {
+  if (!enabled || !userId) return new Set();
+
+  const cached = readPinCache(userId);
+  if (cached) return cached;
+
+  const keys = new Set((await fetchMyPins()).map((p) => keyOf(p.itemType, p.itemId)));
+  writePinCache(userId, keys);
+
+  return keys;
+}
+
 function keyOf(itemType: PinItemType, itemId: string) {
   return `${itemType}:${itemId}`;
 }
 
 export default function PinProvider({ children }: { children: React.ReactNode }) {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const t = useTranslations("ContextMenu");
   const enabled = status === "authenticated";
+  const userId = session?.user?.id ?? "";
 
   const [pinned, setPinned] = React.useState<Set<string>>(new Set());
   const [toast, setToast] = React.useState<string | null>(null);
@@ -47,17 +65,16 @@ export default function PinProvider({ children }: { children: React.ReactNode })
     // ここで保持するのは「ログイン中の本人が自分の何をピン留め済みか」だけ。
     // 用途は右クリックメニューのラベル切替と6件上限判定に限られる。
     // （プロフィールへの公開表示は別途サーバー側 getPinnedItems が全員向けに描画する）
-    // 未ログイン時は自分でピン留めできないため空。ログイン時はサーバーから取得。
+    // 端末内の控えが新しいうちはサーバへ問い合わせない（pinCache.ts を参照）。
     // いずれも非同期コールバック内で setState し、エフェクト本体からの同期 setState を避ける。
-    // Server Action ではなく GET で読む。理由は app/api/pins/mine/route.ts を参照
     (async () => {
-      const pins: PinRef[] = enabled ? await fetchMyPins() : [];
-      if (!cancelled) setPinned(new Set(pins.map((p) => keyOf(p.itemType, p.itemId))));
+      const keys = await loadPinnedKeys(enabled, userId);
+      if (!cancelled) setPinned(keys);
     })();
     return () => {
       cancelled = true;
     };
-  }, [enabled]);
+  }, [enabled, userId]);
 
   const isPinned = React.useCallback(
     (itemType: PinItemType, itemId: string) => pinned.has(keyOf(itemType, itemId)),
@@ -96,9 +113,14 @@ export default function PinProvider({ children }: { children: React.ReactNode })
         return;
       }
 
+      const next = new Set(pinned);
+      if (result.pinned) next.add(key);
+      else next.delete(key);
+      writePinCache(userId, next, readPinCacheFetchedAt());
+
       setToast(result.pinned ? t("pinned") : t("unpinned"));
     },
-    [pinned, t]
+    [pinned, t, userId]
   );
 
   const value = React.useMemo<PinContextValue>(
