@@ -18,7 +18,7 @@ import {
   normalizeGithubRepo,
   type GithubRelease,
   type GithubImportMode,
-} from "@/lib/utils/github";
+} from "@modparks/core/utils/github";
 import {
   stripVPrefix,
   resolveRelease,

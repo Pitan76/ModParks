@@ -9,7 +9,7 @@ import { batchAddMcVersion } from "@/lib/actions/versionBatch";
 import { isActionError } from "@/lib/actions/actionResult";
 import { extractRecipesFromVersion } from "@/lib/actions/versionRecipe";
 import { importGithubRelease } from "@/lib/actions/github";
-import type { GithubImportMode } from "@/lib/utils/github";
+import type { GithubImportMode } from "@modparks/core/utils/github";
 import { normalizeReleaseChannel } from "@modparks/core/releaseChannels";
 import type { PreviousVersionSettings } from "./PreviousVersionSettings";
 

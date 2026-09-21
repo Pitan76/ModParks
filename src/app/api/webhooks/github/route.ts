@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     // GitHub APIの呼び出しを削減するため、ここでReleaseを1回取得して共有する
     let prefetchedRelease: any = null;
     try {
-      const { fetchGithubReleases, normalizeGithubRepo } = await import("@/lib/utils/github");
+      const { fetchGithubReleases, normalizeGithubRepo } = await import("@modparks/core/utils/github");
       const repo = normalizeGithubRepo(repositoryFullName);
       if (repo) {
         const all = await fetchGithubReleases(repo);

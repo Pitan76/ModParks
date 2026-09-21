@@ -7,7 +7,7 @@
  */
 import { githubInstallations } from "@modparks/core/db/schema";
 import { and, eq } from "drizzle-orm";
-import { normalizeGithubRepo } from "@/lib/utils/github";
+import { normalizeGithubRepo } from "@modparks/core/utils/github";
 import type { Database } from "@/lib/db";
 import {
   createInstallationToken,

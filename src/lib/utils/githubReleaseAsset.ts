@@ -14,7 +14,7 @@ import {
   downloadGithubAsset,
   type GithubRelease,
   type GithubReleaseAsset,
-} from "@/lib/utils/github";
+} from "@modparks/core/utils/github";
 
 /** Worker のメモリ制約を踏まえたダウンロード/解析の上限 */
 export const MAX_ASSET_SIZE = 50 * 1024 * 1024; // 50MB

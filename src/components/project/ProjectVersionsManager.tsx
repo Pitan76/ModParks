@@ -15,7 +15,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LinkIcon from "@mui/icons-material/Link";
 import LayersIcon from "@mui/icons-material/Layers";
 import { useState } from "react";
-import type { GithubImportMode } from "@/lib/utils/github";
+import type { GithubImportMode } from "@modparks/core/utils/github";
 import AbstractDialog from "@/components/ui/AbstractDialog";
 import { useTranslations } from "next-intl";
 import TypedConfirmDialog from "@/components/ui/TypedConfirmDialog";

@@ -3,7 +3,7 @@
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { posts, projects, projectTags, projectMembers, users } from "@modparks/core/db/schema";
 import { findProjectPostById } from "@modparks/core/queries/post";
-import { createProjectSchema, updateProjectSchema, updateDescriptionSchema } from "@modparks/core/validations";
+import { createProjectSchema, updateDescriptionSchema } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -14,13 +14,9 @@ import { redirect } from "@/lib/i18n/routing";
 import { getLocale } from "next-intl/server";
 import { detectSourceLocale } from "@modparks/core/translation/detectLocale";
 import { FormReader } from "@modparks/core/forms/formReader";
-import { buildProjectCreateInput, buildProjectUpdateInput } from "@modparks/core/forms/projectFormInput";
-import {
-  normalizeExternalLinks,
-  resolveSlugChange,
-  syncProjectTags,
-  maybeNotifyPublish,
-} from "@/lib/actions/projectUpdateHelpers";
+import { buildProjectCreateInput } from "@modparks/core/forms/projectFormInput";
+import { updateProject as updateProjectCore } from "@modparks/core/projects/updateProject";
+import { getNextPushSender } from "@/lib/services/push";
 
 // ---- プロジェクト作成 ----
 
@@ -92,77 +88,17 @@ ${description}`),
  */
 export const updateProject = async (projectId: string, formData: FormData) => {
   const { db, session } = await getAuthenticatedDb();
+  const [t, push] = await Promise.all([getServerErrors(), getNextPushSender()]);
 
-  const project = await findProjectPostById(db, projectId);
+  const outcome = await updateProjectCore({ notify: { db, push }, t }, projectId, formData, session.user.id);
 
-  if (!project) throw new Error("Project not found");
+  // Server Action の契約を保つ。見つからない・権限なしは例外、検証エラーは { error } で返す
+  if (outcome.type === "notFound") throw new Error("Project not found");
+  if (outcome.type === "forbidden") throw new Error("Forbidden");
+  if (outcome.type === "invalid") return { error: outcome.error };
 
-  await assertProjectAccess(db, project, session);
-
-  const form = new FormReader(formData);
-  const parsed = updateProjectSchema.safeParse(buildProjectUpdateInput(formData));
-  if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
-
-  const { tags, githubRepo, discordWebhookUrl, ...fields } = parsed.data;
-
-  const links = await normalizeExternalLinks(githubRepo, discordWebhookUrl);
-  if ("error" in links) return links;
-
-  const slugChange = await resolveSlugChange(db, project.slug, fields.slug);
-  if ("error" in slugChange) return slugChange;
-  const previousSlugToSet = slugChange.previousSlug;
-
-  // 共通カラムは posts、Project 固有のカラムは projects へ。
-  // 2 つの UPDATE がちぐはぐな状態で残らないよう batch でまとめる。
-  const { name, description, descriptionFormat, status, sourceLocale, ...projectFields } = fields;
-
-  let resolvedSourceLocale = sourceLocale;
-  if (sourceLocale === "auto") {
-    const bodyText = description !== undefined ? description : project.body;
-    resolvedSourceLocale = detectSourceLocale(`${name ?? project.title}\n${bodyText}`);
-  }
-
-  // 下書きの間は「作成しただけ」の状態なので、他のステータスへ移した時点を作成日時とみなす
-  const isLeavingDraft = project.visibility === "draft" && status !== undefined && status !== "draft";
-
-  await db.batch([
-    db
-      .update(posts)
-      .set({
-        ...(name !== undefined ? { title: name } : {}),
-        ...(description !== undefined ? { body: description } : {}),
-        ...(descriptionFormat !== undefined ? { bodyFormat: descriptionFormat } : {}),
-        ...(resolvedSourceLocale !== undefined ? { sourceLocale: resolvedSourceLocale } : {}),
-        ...(status !== undefined ? { visibility: status } : {}),
-        ...(fields.slug !== undefined ? { slug: fields.slug } : {}),
-        ...(previousSlugToSet !== undefined ? { previousSlug: previousSlugToSet } : {}),
-        ...(isLeavingDraft ? { createdAt: new Date() } : {}),
-      })
-      .where(eq(posts.id, project.id)),
-    db
-      .update(projects)
-      .set({
-        ...projectFields,
-        // 送られてこなかった項目は undefined のままにして、既存値を保つ
-        issueTrackerUrl: fields.issueTrackerUrl,
-        sourceUrl: fields.sourceUrl === undefined ? undefined : fields.sourceUrl || null,
-        links: fields.links === undefined ? undefined : fields.links || null,
-        githubRepo: links.githubRepo,
-        discordWebhookUrl: links.discordWebhookUrl,
-        commentsEnabled: form.checkbox("commentsEnabled"),
-        recipesEnabled: form.checkbox("recipesEnabled"),
-        iconUrl: form.text("iconUrl") || undefined,
-        aiGenerated: fields.aiGenerated,
-      })
-      .where(eq(projects.id, project.id)),
-  ]);
-
-  if (tags !== undefined) await syncProjectTags(db, project.id, tags);
-
-  await maybeNotifyPublish(db, project, fields.slug ?? project.slug, fields.status);
-
-  revalidatePath(`/projects/${fields.slug ?? project.slug}`);
-  revalidatePath(`/projects/${fields.slug ?? project.slug}/edit`);
+  revalidatePath(`/projects/${outcome.slug}`);
+  revalidatePath(`/projects/${outcome.slug}/edit`);
   revalidatePath("/projects");
   return { success: true };
 };

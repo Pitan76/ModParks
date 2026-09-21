@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { canEditProject } from "@modparks/core/projects/access";
 import { getDatabase } from "@/lib/db";
 import type { Database } from "@/lib/db";
 import type { Session } from "next-auth";
@@ -83,26 +84,9 @@ export async function getReauthenticatedAdminDb(totpToken: string) {
  * 権限がない場合は "Forbidden" エラーをスローします。
  */
 export async function assertProjectAccess(db: Database, project: { id: string; authorId: string }, session: Session) {
-  if (project.authorId === session.user.id) {
-    return true; // Author
-  }
+  if (!(await canEditProject(db, project, session.user.id))) throw new Error("Forbidden");
 
-  const { projectMembers } = await import("@modparks/core/db/schema");
-  const { eq, and } = await import("drizzle-orm");
-
-  if (await isAdminUser(db, session.user.id)) {
-    return true; // Admin
-  }
-
-  const member = await db.select()
-    .from(projectMembers)
-    .where(and(eq(projectMembers.projectId, project.id), eq(projectMembers.userId, session.user.id)))
-    .get();
-  
-  if (!member) {
-    throw new Error("Forbidden");
-  }
-  return true; // Member
+  return true;
 }
 
 /**

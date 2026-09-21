@@ -1,15 +1,17 @@
 import { posts, projectTags, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
-import { notifyNewProject } from "@/lib/notifications/notify";
 import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
-import { getServerErrors } from "@/lib/i18n/serverErrors";
-import type { Database } from "@/lib/db";
+import { notifyNewProject, type NotifyContext } from "@modparks/core/notifications/dispatch";
+import type { ServerErrorTranslator } from "@modparks/core/i18n/serverErrors";
+import type { Database } from "@modparks/core/db/client";
 
 /**
  * updateProject の検証・付随更新。
  *
  * 本体は「検証 → 保存 → 付随更新」の流れだけを見せたいので、
  * 個々の判断（外部URLの形式、slug の重複、タグの入れ替え）はここへ寄せる。
+ *
+ * エラー文言の翻訳関数と通知の送り手は環境から作るものなので受け取る。
  */
 
 export type PublishProject = {
@@ -36,11 +38,10 @@ export type NormalizedLinks = {
  * @returns 不正な場合は該当フィールドのエラー、正常なら正規化済みの値
  */
 export async function normalizeExternalLinks(
+  t: ServerErrorTranslator,
   githubRepo: string | null | undefined,
   discordWebhookUrl: string | null | undefined,
 ): Promise<NormalizedLinks | FieldError> {
-  const t = await getServerErrors();
-
   if (discordWebhookUrl) {
     const { isValidDiscordWebhookUrl } = await import("@modparks/core/notifications/discord");
     if (!isValidDiscordWebhookUrl(discordWebhookUrl)) {
@@ -50,7 +51,7 @@ export async function normalizeExternalLinks(
 
   let normalizedGithubRepo: string | null | undefined = githubRepo === undefined ? undefined : null;
   if (githubRepo) {
-    const { normalizeGithubRepo } = await import("@/lib/utils/github");
+    const { normalizeGithubRepo } = await import("@modparks/core/utils/github");
     normalizedGithubRepo = normalizeGithubRepo(githubRepo);
     if (!normalizedGithubRepo) {
       return { error: { githubRepo: [t("project.invalidGithubRepo")] } };
@@ -69,6 +70,7 @@ export async function normalizeExternalLinks(
  */
 export async function resolveSlugChange(
   db: Database,
+  t: ServerErrorTranslator,
   currentSlug: string,
   newSlug: string | undefined,
 ): Promise<{ previousSlug: string | undefined } | FieldError> {
@@ -80,10 +82,8 @@ export async function resolveSlugChange(
     .where(and(eq(posts.kind, "project"), eq(posts.slug, newSlug)))
     .get();
 
-  if (existing) {
-    const t = await getServerErrors();
-    return { error: { slug: [t("project.slugTaken")] } };
-  }
+  if (existing) return { error: { slug: [t("project.slugTaken")] } };
+
   return { previousSlug: currentSlug };
 }
 
@@ -113,7 +113,7 @@ export async function syncProjectTags(db: Database, projectId: string, tags: str
 
 /** 下書き→公開の初回公開時のみ、作者フォロワーへ新プロジェクト通知を送る */
 export async function maybeNotifyPublish(
-  db: Database,
+  ctx: NotifyContext,
   project: PublishProject,
   newSlug: string,
   newVisibility: string | undefined,
@@ -121,7 +121,7 @@ export async function maybeNotifyPublish(
   if (project.visibility !== "draft") return;
   if (newVisibility !== "public" && newVisibility !== "unlisted") return;
 
-  const author = await db
+  const author = await ctx.db
     .select({ displayName: userProfiles.displayName, username: users.name })
     .from(users)
     .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
@@ -129,5 +129,5 @@ export async function maybeNotifyPublish(
     .get();
 
   const authorName = author?.displayName || author?.username || "";
-  await notifyNewProject(db, { ...project, slug: newSlug, title: project.title }, authorName);
+  await notifyNewProject(ctx, { ...project, slug: newSlug, title: project.title }, authorName);
 }
