@@ -109,3 +109,15 @@ describe("コレクションの Server Action", () => {
     }
   });
 });
+
+describe("バックアップの読み出し", () => {
+  it("中身を返す loadBackupFromR2 が 'use server' から export されていない", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("../src/lib/actions/adminBackupQuery.ts", import.meta.url), "utf8");
+
+    // ここにあると、外部から任意の key で呼んでバックアップの中身を読めてしまう
+    expect(src).not.toContain("export const loadBackupFromR2");
+    expect(src).not.toContain("export async function loadBackupFromR2");
+  });
+});
+

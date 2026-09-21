@@ -3,7 +3,7 @@
 import { getAdminDb, getReauthenticatedAdminDb } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 import { dumpToR2, getActor, importBackupData, loadBackupTables, writeAuditLog, RestoreOptions } from "@/lib/backup/core";
-import { loadBackupFromR2 } from "./adminBackupQuery";
+import { loadBackupFromR2 } from "@/lib/backup/loadFromR2";
 import type { Database } from "@/lib/db";
 
 export type ActionError = { success: false; error: string; message: string };

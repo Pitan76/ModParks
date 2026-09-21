@@ -1,22 +1,7 @@
 "use server";
 
 import { getAdminDb } from "@/lib/auth-helpers";
-
-/**
- * R2 バケット上の指定されたキーのバックアップデータをパースして取得するヘルパー。
- */
-export const loadBackupFromR2 = async (key: string) => {
-  if (!key.startsWith("backup/") && !key.startsWith("snapshot/")) {
-    throw new Error("Invalid backup key");
-  }
-
-  const { getR2Bucket } = await import("@/lib/r2");
-  const bucket = await getR2Bucket();
-  const obj = await bucket.get(key);
-  if (!obj) throw new Error("Backup file not found in R2");
-
-  return JSON.parse(await obj.text());
-};
+import { loadBackupFromR2 } from "@/lib/backup/loadFromR2";
 
 /**
  * R2 バケットに保存されているバックアップファイルの一覧を取得します。
