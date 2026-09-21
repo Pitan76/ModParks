@@ -18,6 +18,13 @@ workers_dev = false
 pattern = "modparks.pitan76.net/api/v2/projects"
 zone_name = "pitan76.net"
 
+# /api/app/* はこの Worker の専有。この下に Next のルートを置かない約束なので、
+# 上の注意に反してここだけはワイルドカードでよい（奪う Next のルートが存在しない）。
+# ブラウザから Cookie のセッションで呼ぶ、Server Action の置き換え。
+[[routes]]
+pattern = "modparks.pitan76.net/api/app/*"
+zone_name = "pitan76.net"
+
 # メインと同じリソースを名前で参照する
 [[d1_databases]]
 binding       = "DB"
@@ -32,9 +39,21 @@ id      = "75c45e724c144cc18b629dd2dca50a7e"
 binding     = "modparks_storage"
 bucket_name = "modparks-storage"
 
+# 公開時の通知を Web Push で送る。暗号化と VAPID 署名は modparks-push が行う
+[[services]]
+binding = "PUSH"
+service = "modparks-push"
+
 [vars]
 NEXT_PUBLIC_APP_URL = "https://modparks.pitan76.net"
 R2_PUBLIC_URL       = "https://files.modparks.pitan76.net"
+# メイン Worker と同じ値。公開鍵なので秘匿不要
+VAPID_PUBLIC_KEY    = "BF-bDjyywR9aPnv3tY_CqAyonXqq0qBPvkt0Ycr5NSoBXVJOR_P6FznPIVd4sdoV3E1LhcngfMI0nBnzezsTDhE"
+
+# 秘匿値は wrangler secret put ... --name modparks-api で設定する（メインと同じ値）:
+#   AUTH_SECRET        セッション Cookie の復号鍵。違うとログイン中の全員が未ログイン扱いになる
+#   VAPID_PRIVATE_KEY  Web Push の署名鍵。無ければプッシュだけ送らない（アプリ内通知は入る）
+#   VAPID_SUBJECT      同上
 
 [observability]
 enabled = true

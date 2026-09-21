@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { getDb } from "@modparks/core/db/client";
 import { handleListProjects } from "@modparks/core/api/v2/projects";
 import type { ApiWorkerEnv } from "./env";
+import { sameOrigin } from "./sameOrigin";
+import { patchProject } from "./routes/projects";
 
 /**
  * 公開 API を Next.js から切り離して処理する Worker。
@@ -27,6 +29,21 @@ app.get("/api/v2/projects", (c) =>
 );
 
 /**
+ * /api/app/* はブラウザ（自サイトのページ）から Cookie のセッションで呼ぶ API。
+ * 公開 API(/api/v1, /api/v2) と違い Server Action の置き換えなので、
+ * 変更系は必ず要求元が自サイトであることを確かめる（CSRF 対策）。
+ *
+ * この接頭辞の下には Next のルートを置かない約束にしている。そうすれば
+ * wrangler.toml でワイルドカード(/api/app/*)を使っても、Next のルートを
+ * 奪う事故が構造的に起きない。
+ */
+const appOrigin = (env: unknown) => new URL((env as ApiWorkerEnv).NEXT_PUBLIC_APP_URL).origin;
+app.use("/api/app/*", sameOrigin(appOrigin));
+app.patch("/api/app/projects/:id", patchProject);
+// 上に無いメソッドは 405。登録順に照合されるので、実装の後ろに置く
+app.all("/api/app/projects/:id", (c) => c.body(null, 405));
+
+/**
  * 取りこぼしの受け皿。
  *
  * 受け持つパスへの許可外メソッドは 405（Next 側の挙動に合わせる）。
@@ -37,6 +54,8 @@ app.all("*", (c) => {
   const path = new URL(c.req.url).pathname;
   // Next のルートハンドラは 405 を空ボディで返す。実測して合わせている
   if (SERVED_PATHS.has(path)) return c.body(null, 405);
+  // /api/app/* はこの Worker の専有なので、Next へ回る余地は無い。単に存在しない
+  if (path.startsWith("/api/app/")) return c.json({ error: "Not Found" }, 404);
 
   return c.json(
     { error: "not_implemented", error_description: `${c.req.method} ${path} is not served by modparks-api` },

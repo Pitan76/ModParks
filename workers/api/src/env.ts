@@ -20,4 +20,11 @@ export interface ApiWorkerEnv {
    * `wrangler secret put AUTH_SECRET --name modparks-api` で設定する。
    */
   AUTH_SECRET: string;
+  /** modparks-push への Service Binding。公開時の通知を Web Push で送る */
+  PUSH?: Fetcher;
+  VAPID_PUBLIC_KEY?: string;
+  /** `wrangler secret put VAPID_PRIVATE_KEY --name modparks-api` */
+  VAPID_PRIVATE_KEY?: string;
+  /** `wrangler secret put VAPID_SUBJECT --name modparks-api` */
+  VAPID_SUBJECT?: string;
 }
