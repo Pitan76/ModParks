@@ -2,14 +2,14 @@
 
 import { getReauthenticatedAdminDb, getAuditEmail } from "@/lib/auth-helpers";
 import { settingsAudit } from "@modparks/core/db/schema";
+import { SECRET_REVEAL_ENABLED } from "@/lib/config/secretReveal";
 
 /**
  * 【一時的】値を失った Web Push の鍵を回収するためだけの機能。
  *
  * Cloudflare のシークレットは API からもダッシュボードからも読み出せないが、
  * 実行中の Worker 自身は env から参照できる。それを管理者にだけ一度見せる。
- * modparks-api へ同じ値を設定し終えたら、このファイルと SecretRevealPanel.tsx を
- * 丸ごと削除すること。常設してよい機能ではない。
+ * 常設してよい機能ではないので、回収し終えたら lib/config/secretReveal.ts で無効にする。
  *
  * AUTH_SECRET は対象に含めない。漏れると全員になりすませる Cookie を作れて
  * しまうため。一致の確認は GET /api/app/session で副作用なしに行える。
@@ -27,6 +27,7 @@ export async function revealSecret(
     return { error: error instanceof Error ? error.message : "Unauthorized" };
   }
 
+  if (!SECRET_REVEAL_ENABLED) return { error: "SECRET_REVEAL_DISABLED" };
   if (!REVEALABLE.has(name)) return { error: "SECRET_NOT_REVEALABLE" };
 
   const { getCloudflareContext } = await import("@opennextjs/cloudflare");

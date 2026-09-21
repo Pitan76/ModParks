@@ -14,7 +14,7 @@ import { revealSecret } from "@/lib/actions/revealSecret";
 
 /**
  * 【一時的】値を失った Web Push の鍵を一度だけ表示する。
- * 回収後は revealSecret.ts と一緒に丸ごと削除すること。
+ * 回収後は revealSecret.ts の SECRET_REVEAL_ENABLED を false にして無効化する。
  */
 const NAMES = ["VAPID_PRIVATE_KEY", "VAPID_SUBJECT"] as const;
 

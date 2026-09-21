@@ -13,8 +13,9 @@ import AppSettingsPanel from "./AppSettingsPanel";
 import AppSettingsGroupPanel from "./AppSettingsGroupPanel";
 import WorkerVarsPanel from "./WorkerVarsPanel";
 import SecretsPanel from "./SecretsPanel";
-// 【一時的】VAPID 鍵の回収用。回収後に削除する
+// 【一時的】VAPID 鍵の回収用。回収後は SECRET_REVEAL_ENABLED を false にする
 import SecretRevealPanel from "./SecretRevealPanel";
+import { SECRET_REVEAL_ENABLED } from "@/lib/config/secretReveal";
 import DdosPanel from "./DdosPanel";
 
 export default async function AdminConfigPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -52,7 +53,7 @@ export default async function AdminConfigPage({ params }: { params: Promise<{ lo
               initialSecrets={"success" in secretsResult ? secretsResult.secrets : []}
               loadError={"error" in secretsResult ? secretsResult.error : undefined}
             />
-            <SecretRevealPanel />
+            {SECRET_REVEAL_ENABLED && <SecretRevealPanel />}
           </>
         }
         taxonomy={<ConfigClient initialTags={allTags} initialPlatforms={allPlatforms} />}
