@@ -4,7 +4,7 @@ import * as React from "react";
 import Snackbar from "@mui/material/Snackbar";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { getMyPins, togglePin } from "@/lib/actions/profilePins";
+import { togglePin } from "@/lib/actions/profilePins";
 import { MAX_PINS, type PinItemType, type PinRef } from "@/lib/pins";
 
 interface PinContextValue {
@@ -20,6 +20,14 @@ const PinContext = React.createContext<PinContextValue | null>(null);
 /** カードからピン留め状態・操作を参照する。Provider 外なら null を返す。 */
 export function usePins(): PinContextValue | null {
   return React.useContext(PinContext);
+}
+
+/** 読めなければ空として扱う。ピン留め表示が欠けるだけで、画面は壊さない */
+async function fetchMyPins(): Promise<PinRef[]> {
+  const res = await fetch("/api/pins/mine", { cache: "no-store" });
+  if (!res.ok) return [];
+
+  return (await res.json()) as PinRef[];
 }
 
 function keyOf(itemType: PinItemType, itemId: string) {
@@ -41,8 +49,9 @@ export default function PinProvider({ children }: { children: React.ReactNode })
     // （プロフィールへの公開表示は別途サーバー側 getPinnedItems が全員向けに描画する）
     // 未ログイン時は自分でピン留めできないため空。ログイン時はサーバーから取得。
     // いずれも非同期コールバック内で setState し、エフェクト本体からの同期 setState を避ける。
+    // Server Action ではなく GET で読む。理由は app/api/pins/mine/route.ts を参照
     (async () => {
-      const pins: PinRef[] = enabled ? await getMyPins() : [];
+      const pins: PinRef[] = enabled ? await fetchMyPins() : [];
       if (!cancelled) setPinned(new Set(pins.map((p) => keyOf(p.itemType, p.itemId))));
     })();
     return () => {
