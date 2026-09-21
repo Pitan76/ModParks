@@ -81,3 +81,17 @@ describe("翻訳漏れ", () => {
     expect(has(en.ServerErrors, key)).toBe(true);
   });
 });
+
+describe("resolveLocale（明示ヘッダ）", () => {
+  it("x-mp-locale を Cookie より優先する（編集画面など Cookie が今のページと食い違う場合）", () => {
+    const r = new Request(APP, { headers: { cookie: "NEXT_LOCALE=ja", "x-mp-locale": "en" } });
+
+    expect(resolveLocale(r)).toBe("en");
+  });
+
+  it("未知の値のヘッダは無視して Cookie を使う", () => {
+    const r = new Request(APP, { headers: { cookie: "NEXT_LOCALE=en", "x-mp-locale": "xx" } });
+
+    expect(resolveLocale(r)).toBe("en");
+  });
+});

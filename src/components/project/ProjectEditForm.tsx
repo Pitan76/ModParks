@@ -8,8 +8,7 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { useRef, useState } from "react";
 import { useRouter } from "@/lib/i18n/routing";
-import { useTranslations } from "next-intl";
-import { updateProject } from "@/lib/actions/project";
+import { useLocale, useTranslations } from "next-intl";
 import { syncExternalProjectData } from "@/lib/actions/projectSync";
 import ActionRow from "@/components/ui/ActionRow";
 import StickySaveBar from "@/components/ui/StickySaveBar";
@@ -39,8 +38,35 @@ interface ProjectEditFormProps {
   availableTags?: { slug: string; name: string }[];
 }
 
+type SaveResult =
+  | { type: "saved" }
+  | { type: "invalid"; fieldErrors: Record<string, string[]> }
+  | { type: "denied" };
+
+/**
+ * 基本情報を保存する（modparks-api の PATCH /api/app/projects/:id）。
+ *
+ * 以前は Server Action の updateProject を呼んでいた。本体は core にあり同じものが動く。
+ * 入力エラー（422）と権限の問題（401/403/404）は結果で返し、再試行で直りうる
+ * 失敗（5xx・通信断）だけを例外にする。権限の問題は再試行しても変わらないため。
+ */
+async function saveProject(projectId: string, formData: FormData, locale: string): Promise<SaveResult> {
+  // エラー文言をこのページの言語で返してもらう（API の URL には言語が無いため）
+  const res = await fetch(`/api/app/projects/${encodeURIComponent(projectId)}`, {
+    method: "PATCH",
+    body: formData,
+    headers: { "X-MP-Locale": locale },
+  });
+  if (res.ok) return { type: "saved" };
+  if (res.status === 422) return { type: "invalid", fieldErrors: ((await res.json()) as { error: Record<string, string[]> }).error };
+  if (res.status === 401 || res.status === 403 || res.status === 404) return { type: "denied" };
+
+  throw new Error(`save failed: ${res.status}`);
+}
+
 export default function ProjectEditForm({ project, availableTags = [] }: ProjectEditFormProps) {
   const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("Project");
   const tManage = useTranslations("Project.managePage");
@@ -74,62 +100,46 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
     }
   };
 
+  const handleSaved = (formData: FormData) => {
+    setDirty(false);
+    setPending(false);
+    setToast({ message: tCommon("saved"), severity: "success" });
+
+    // 保存後も管理画面に留まる。slug を変更した場合だけ、
+    // 現在の URL (/projects/[slug]/edit) が古くなるので置き換える
+    const nextSlug = String(formData.get("slug") ?? project.slug);
+    if (nextSlug !== project.slug) router.replace(`/projects/${nextSlug}/edit`);
+    else router.refresh();
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPending(true);
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    
     const maxRetries = 3;
-    let retries = 0;
-    let success = false;
 
-    while (retries < maxRetries && !success) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        // Server Action呼び出し
-        const result = await updateProject(project.id, formData);
-        
-        if (result && result.error) {
-          const fieldErrors = result.error as { [key: string]: string[] };
-          setError(fieldErrors);
-          setPending(false);
-          // 画面に出ていない項目のエラーだと、そのままでは無反応に見えてしまう
-          setToast({ message: tError("common.validationFailed", { fields: Object.keys(fieldErrors).join(", ") }), severity: "error" });
-          return; // バリデーションエラー時はリトライ不要
-        } else {
-          setDirty(false);
-          success = true;
-          setPending(false);
-          setToast({ message: tCommon("saved"), severity: "success" });
+        const result = await saveProject(project.id, formData, locale);
+        setPending(false);
+        if (result.type === "saved") return handleSaved(formData);
+        if (result.type === "denied") return setToast({ message: tCommon("error"), severity: "error" });
 
-          // 保存後も管理画面に留まる。slug を変更した場合だけ、
-          // 現在の URL (/projects/[slug]/edit) が古くなるので置き換える
-          const nextSlug = String(formData.get("slug") ?? project.slug);
-          if (nextSlug !== project.slug) {
-            router.replace(`/projects/${nextSlug}/edit`);
-          } else {
-            router.refresh();
-          }
-        }
-      } catch (err: any) {
-        retries++;
-        console.error(`Save attempt ${retries} failed:`, err);
-        
-        if (err?.message?.includes("Failed to find Server Action") || err?.message?.includes("UnrecognizedActionError")) {
-          setToast({ message: tError("common.reloading"), severity: "info" });
-          setPending(false);
-          setTimeout(() => window.location.reload(), 1500);
-          return;
-        }
-
-        if (retries >= maxRetries) {
+        setError(result.fieldErrors);
+        // 画面に出ていない項目のエラーだと、そのままでは無反応に見えてしまう
+        setToast({ message: tError("common.validationFailed", { fields: Object.keys(result.fieldErrors).join(", ") }), severity: "error" });
+        return;
+      } catch (err) {
+        console.error(`Save attempt ${attempt} failed:`, err);
+        if (attempt === maxRetries) {
           setToast({ message: tError("common.networkRetryFailed", { count: maxRetries }), severity: "error" });
           setPending(false);
-        } else {
-          // リトライ前に待機 (1回目: 1秒, 2回目: 2秒...)
-          await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+          return;
         }
+        // リトライ前に待機 (1回目: 1秒, 2回目: 2秒...)
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }
   };

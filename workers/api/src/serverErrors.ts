@@ -21,15 +21,32 @@ const MESSAGES: Record<AppLocale, unknown> = { ja, en };
 const LOCALE_COOKIE = "NEXT_LOCALE";
 
 /**
+ * ページの表示言語をクライアントが明示するヘッダ。
+ *
+ * Server Action のときは言語をページの URL（/en/...）から決めていたが、API の URL には
+ * 言語が無い。Cookie はキャッシュ対象のページを開いた時にしか付け直されないので、
+ * 編集画面などでは今のページの言語と一致する保証が無い。表示言語なので、
+ * クライアントの申告を信用しても害は無い。
+ */
+const LOCALE_HEADER = "x-mp-locale";
+
+/**
  * 要求の表示言語を決める。
  *
- * API の URL には言語の接頭辞が無いので Cookie だけを見る。Cookie は
- * ページを表示するたびに付け直されるため、直前に見ていたページの言語になる。
+ * API の URL には言語の接頭辞が無いので、クライアントが明示したヘッダを優先し、
+ * 無ければ Cookie を見る。
  */
 export function resolveLocale(req: Request): AppLocale {
-  const value = readCookie(req, LOCALE_COOKIE);
+  const explicit = req.headers.get(LOCALE_HEADER);
+  if (isLocale(explicit)) return explicit;
 
-  return value && (locales as string[]).includes(value) ? (value as AppLocale) : defaultLocale;
+  const cookie = readCookie(req, LOCALE_COOKIE);
+
+  return isLocale(cookie) ? cookie : defaultLocale;
+}
+
+function isLocale(value: string | null | undefined): value is AppLocale {
+  return !!value && (locales as string[]).includes(value);
 }
 
 /** "project.slugTaken" のような階層キーを辿る */
