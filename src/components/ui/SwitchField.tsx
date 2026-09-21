@@ -2,7 +2,7 @@
 
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import { CHECKBOX_ABSENT_VALUE } from "@/lib/forms/formReader";
+import { CHECKBOX_ABSENT_VALUE } from "@modparks/core/forms/formReader";
 
 interface SwitchFieldProps {
   name: string;

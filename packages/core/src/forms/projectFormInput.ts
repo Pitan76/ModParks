@@ -1,4 +1,4 @@
-import { FormReader } from "@/lib/forms/formReader";
+import { FormReader } from "@modparks/core/forms/formReader";
 
 /**
  * プロジェクトのフォーム入力を、検証スキーマに渡せる形へ組み立てる。

@@ -8,7 +8,7 @@
  * ここは Workers ランタイム（Web Crypto / fetch）だけで完結させている。
  */
 
-import type { PushSubscriptionJSON, VapidKeys } from "./types";
+import type { PushSubscriptionJSON, VapidKeys } from "@modparks/core/notifications/pushTypes";
 
 /**
  * Web Crypto の BufferSource は ArrayBuffer 裏付けのビューしか受け付けない。

@@ -3,7 +3,7 @@
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { projectMedia, projects } from "@modparks/core/db/schema";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, asc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { collections } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { isAdminSession } from "@/lib/auth/roles";
 
 export async function PUT(

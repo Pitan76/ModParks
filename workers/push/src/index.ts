@@ -1,5 +1,5 @@
 import type { PushWorkerEnv } from "./env";
-import type { SendRequest, SendResult } from "./types";
+import type { SendRequest, SendResult } from "@modparks/core/notifications/pushTypes";
 import { deliverPush } from "./webpush";
 
 const json = (body: unknown, status = 200) =>

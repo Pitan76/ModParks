@@ -6,7 +6,7 @@ import { collections, collectionItems, posts, projects, users, userProfiles, pro
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
 import { chunkRows } from "@modparks/core/db/chunkRows";
 import { toProjectPost } from "@modparks/core/queries/postRow";
 import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";

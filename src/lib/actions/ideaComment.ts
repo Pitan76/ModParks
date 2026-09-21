@@ -7,7 +7,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { getIdeaTarget, canManageIdea, resolveCommentParent } from "./ideaShared";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";

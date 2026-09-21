@@ -7,7 +7,7 @@ import { getDatabase } from "@/lib/db";
 import { profilePins, userSettings, userProfiles } from "@modparks/core/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { MAX_PINS, type PinItemType, type PinRef } from "@/lib/pins";
 
 /** 現在のログインユーザーのピン留め一覧（表示順）を返す。未ログインなら空配列。 */

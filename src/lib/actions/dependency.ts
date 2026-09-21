@@ -5,7 +5,7 @@ import { getDatabase } from "@/lib/db";
 import { projectDependencies, projectMembers, versions } from "@modparks/core/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { findProjectPostById, findProjectPostBySlug } from "@modparks/core/queries/post";
 import { isAdminSession } from "@/lib/auth/roles";
 import { getServerErrors } from "@/lib/i18n/serverErrors";

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getMasker, type BodyFormat } from "@modparks/core/translation/masking";
 import { parsePayload, toPayload, toPayloadChunks, toPayloadFor, translatableIndices } from "@modparks/core/translation/payload";
 import { keepValidLines, restore } from "@modparks/core/translation/restore";
-import { detectSourceLocale } from "../src/lib/translation/detectLocale";
+import { detectSourceLocale } from "@modparks/core/translation/detectLocale";
 
 /** 翻訳を通さず、返ってきた体で往復させる（記法が保たれることの確認） */
 function roundTrip(text: string, format: BodyFormat, translate = (s: string) => s): string {

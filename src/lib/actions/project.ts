@@ -7,14 +7,14 @@ import { createProjectSchema, updateProjectSchema, updateDescriptionSchema } fro
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { isAdminSession } from "@/lib/auth/roles";
 import { redirect } from "@/lib/i18n/routing";
 import { getLocale } from "next-intl/server";
-import { detectSourceLocale } from "@/lib/translation/detectLocale";
-import { FormReader } from "@/lib/forms/formReader";
-import { buildProjectCreateInput, buildProjectUpdateInput } from "@/lib/forms/projectFormInput";
+import { detectSourceLocale } from "@modparks/core/translation/detectLocale";
+import { FormReader } from "@modparks/core/forms/formReader";
+import { buildProjectCreateInput, buildProjectUpdateInput } from "@modparks/core/forms/projectFormInput";
 import {
   normalizeExternalLinks,
   resolveSlugChange,

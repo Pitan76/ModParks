@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { projects, ideas } from "@modparks/core/db/schema";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 
 /** 管理者がプロジェクトを削除する */
 export async function adminDeleteProject(projectId: string) {

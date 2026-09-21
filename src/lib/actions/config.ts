@@ -4,7 +4,7 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { tags, platforms } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 
 export async function createTag(name: string, slug: string, description?: string) {
   const { db } = await getAdminDb();

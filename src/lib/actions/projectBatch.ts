@@ -4,7 +4,7 @@ import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { posts } from "@modparks/core/db/schema";
 import { eq, and, inArray, type SQL } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { isAdminSession } from "@/lib/auth/roles";
 import type { Session } from "next-auth";
 

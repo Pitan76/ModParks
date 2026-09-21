@@ -1,4 +1,8 @@
-/** modparks-push Worker の Service Binding I/O 型 */
+/**
+ * modparks-push Worker との Service Binding の契約。
+ *
+ * 送る側（Next / modparks-api）と受ける側（modparks-push）の両方が使うため core に置く。
+ */
 
 export interface PushSubscriptionJSON {
   endpoint: string;

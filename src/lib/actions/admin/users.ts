@@ -4,7 +4,7 @@ import { eq, isNotNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAdminDb } from "@/lib/auth-helpers";
 import { users, userProfiles, userSettings } from "@modparks/core/db/schema";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
 
 /** プレミアム付与で受け付ける最大日数（約10年） */

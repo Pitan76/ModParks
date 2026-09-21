@@ -16,7 +16,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getR2KeyFromUrl } from "@/lib/r2";
 import { after } from "next/server";
-import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";

@@ -16,7 +16,7 @@ import {
   loadBackupTables,
 } from "@/lib/backup/core";
 import { MERGE_POLICIES } from "@/lib/backup/mergePolicy";
-import { getTombstonedKeys, recordKeyFromRow } from "@/lib/backup/tombstone";
+import { getTombstonedKeys, recordKeyFromRow } from "@modparks/core/backup/tombstone";
 import type { Database } from "@/lib/db";
 import { chunkObjectRows } from "@modparks/core/db/chunkRows";
 

@@ -74,6 +74,7 @@ jobs:
               - "workers/auth/**"
             push:
               - "workers/push/**"
+              - "packages/core/**"
             api:
               - "workers/api/**"
               - "packages/core/**"

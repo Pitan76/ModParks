@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FormReader, CHECKBOX_ABSENT_VALUE } from "@/lib/forms/formReader";
-import { buildProjectCreateInput, buildProjectUpdateInput } from "@/lib/forms/projectFormInput";
+import { FormReader, CHECKBOX_ABSENT_VALUE } from "@modparks/core/forms/formReader";
+import { buildProjectCreateInput, buildProjectUpdateInput } from "@modparks/core/forms/projectFormInput";
 import { createProjectSchema, updateProjectSchema } from "@modparks/core/validations";
 
 /** スイッチ（hidden + checkbox）の送信内容を再現する */

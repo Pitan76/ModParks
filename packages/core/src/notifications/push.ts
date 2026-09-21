@@ -1,8 +1,8 @@
 import { pushSubscriptions, userSettings } from "@modparks/core/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { NotificationType, NotificationPayload } from "@modparks/core/notifications/types";
-import { sendPush } from "@/lib/services/push";
-import type { Database } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
+import type { PushSender } from "@modparks/core/notifications/pushSender";
 
 /**
  * Web Push（PWA プッシュ通知）配信。
@@ -12,39 +12,10 @@ import type { Database } from "@/lib/db";
  * 本文暗号化と VAPID 署名は modparks-push サイドカーが行う（Web Crypto 実装）。
  */
 
-interface VapidEnv {
-  VAPID_PUBLIC_KEY?: string;
-  VAPID_PRIVATE_KEY?: string;
-  VAPID_SUBJECT?: string;
-}
-
-async function getVapid(): Promise<{ publicKey: string; privateKey: string; subject: string } | null> {
-  let env: VapidEnv = process.env as unknown as VapidEnv;
-  // Workers 本番では secret はバインディング env 側にあるため fallback で取得する
-  if (!env.VAPID_PRIVATE_KEY) {
-    try {
-      if (process.env.NODE_ENV === "development" && process.release?.name === "node") {
-        const { getCachedPlatformProxy } = await import("@/lib/proxy");
-        env = (await getCachedPlatformProxy()).env as unknown as VapidEnv;
-      } else {
-        const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-        env = (await getCloudflareContext({ async: true })).env as unknown as VapidEnv;
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-  const publicKey = env.VAPID_PUBLIC_KEY || process.env.VAPID_PUBLIC_KEY;
-  const privateKey = env.VAPID_PRIVATE_KEY || process.env.VAPID_PRIVATE_KEY;
-  const subject = env.VAPID_SUBJECT || process.env.VAPID_SUBJECT || "mailto:admin@modparks.pitan76.net";
-  if (!publicKey || !privateKey) return null;
-  return { publicKey, privateKey, subject };
-}
-
 /**
  * プッシュ本文テンプレート（種別 → 文言）。
- * 意図的にインライン定義し、全 i18n メッセージJSON（~127KB）をメイン Worker の
- * バンドルに巻き込まないようにしている（本体は 3 MiB 制限に張り付いているため）。
+ * 意図的にインライン定義し、全 i18n メッセージJSON（~127KB）をバンドルに
+ * 巻き込まないようにしている（isolate 起動時に評価される量を増やさないため）。
  * messages/*.json の Notifications.message と表現を揃えること。
  */
 const PUSH_TEMPLATES: Record<"ja" | "en", Record<string, string>> = {
@@ -96,13 +67,14 @@ function targetUrl(locale: string, payload: NotificationPayload): string {
  */
 export async function sendPushToRecipients(
   db: Database,
+  sender: PushSender,
   recipientIds: string[],
   type: NotificationType,
   payload: NotificationPayload,
 ): Promise<void> {
   if (recipientIds.length === 0) return;
 
-  const vapid = await getVapid();
+  const { vapid } = sender;
   if (!vapid) return; // VAPID 未設定なら黙ってスキップ（アプリ内通知は既に入っている）
 
   const subs = await db
@@ -151,7 +123,7 @@ export async function sendPushToRecipients(
       });
 
       try {
-        const res = await sendPush({
+        const res = await sender.send({
           subscription: { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
           payload: message,
           vapid,

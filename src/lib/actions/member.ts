@@ -5,7 +5,7 @@ import { getDatabase } from "@/lib/db";
 import { projects, projectMembers, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { findProjectPostById } from "@modparks/core/queries/post";
 

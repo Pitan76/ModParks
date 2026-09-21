@@ -7,7 +7,7 @@ import { createIdeaSchema } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { revalidateIdea, loadManageableIdea } from "./ideaShared";
 

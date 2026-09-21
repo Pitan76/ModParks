@@ -7,8 +7,8 @@
  * 行そのものは物理削除のままなので、通常の読み取りクエリには一切影響しません。
  */
 import { deletedRecords } from "@modparks/core/db/schema";
-import { TABLE_PRIMARY_KEYS } from "@/lib/backup/core";
-import type { Database } from "@/lib/db";
+import { TABLE_PRIMARY_KEYS } from "@modparks/core/backup/schemaConfig";
+import type { Database } from "@modparks/core/db/client";
 import { chunkRows } from "@modparks/core/db/chunkRows";
 
 /**

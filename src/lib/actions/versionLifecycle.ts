@@ -6,7 +6,7 @@ import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
-import { recordDeletion } from "@/lib/backup/tombstone";
+import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import type { ActionResult } from "@/lib/actions/actionResult";
 import type { Database } from "@/lib/db";

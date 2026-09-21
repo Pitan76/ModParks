@@ -3,7 +3,7 @@ import { getDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { collectionFollows, collections } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
-import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
 
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {

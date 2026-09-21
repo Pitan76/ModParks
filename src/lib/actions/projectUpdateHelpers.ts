@@ -1,7 +1,7 @@
 import { posts, projectTags, users, userProfiles } from "@modparks/core/db/schema";
 import { eq, and } from "drizzle-orm";
 import { notifyNewProject } from "@/lib/notifications/notify";
-import { recordDeletion, buildRecordKey } from "@/lib/backup/tombstone";
+import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import type { Database } from "@/lib/db";
 
