@@ -5,7 +5,8 @@ import { getProjectsWithCount, getUserProjectStats } from "@/lib/actions/project
 import { toProjectCardData } from "@/lib/queries/projectCardData";
 import { getFavoriteProjects } from "@/lib/actions/favorite";
 import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
-import { getUserCollections } from "@/lib/actions/collection";
+import { listUserCollections } from "@modparks/core/queries/collections";
+import { getDatabase } from "@/lib/db";
 import { mapProjectRow } from "@/lib/queries/projectRow";
 
 export async function getProfileMeta(username: string) {
@@ -262,7 +263,8 @@ export async function getProfileContent(user: ProfileUser, viewerId: string | un
   const [{ data: allProjects, totalCount }, favoritedProjects, userCollections, stats, pinnedItems, authorIdeas, totalIdeaCount] = await Promise.all([
     getProjectsWithCount({ authorId: user.id, limit, offset, sort: sort as any, locale }),
     getFavoriteProjects(user.id, locale),
-    getUserCollections(user.id, viewerId),
+    // viewerId はページがセッションから取った値。クライアントの入力ではない
+    getDatabase().then((db) => listUserCollections(db, user.id, viewerId)),
     getUserProjectStats(user.id),
     getPinnedItems(user.id, isOwner, locale),
     // 非表示設定でも本人は編集用に一覧を見られるようにする

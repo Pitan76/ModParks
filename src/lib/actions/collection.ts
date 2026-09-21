@@ -1,15 +1,12 @@
 "use server";
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { getDatabase } from "@/lib/db";
-import { collections, collectionItems, posts, projects, users, userProfiles, projectTags } from "@modparks/core/db/schema";
+import { collections, collectionItems, posts } from "@modparks/core/db/schema";
 import { createId } from "@paralleldrive/cuid2";
-import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
 import { chunkRows } from "@modparks/core/db/chunkRows";
-import { toProjectPost } from "@modparks/core/queries/postRow";
-import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
 
 export async function createCollection(name: string, description: string | null, visibility: "public" | "unlisted" | "private") {
   const { db, userId } = await getAuthenticatedDb();
@@ -157,110 +154,4 @@ export async function addProjectsToCollection(collectionId: string, projectIds: 
 
   revalidatePath("/[locale]/lists/[id]", "page");
   return { success: true, added: fresh.length };
-}
-
-export async function getUserCollections(targetUserId: string, viewerId?: string) {
-  const db = await getDatabase();
-  const isOwner = targetUserId === viewerId;
-
-  const query = db.select().from(collections).where(eq(collections.userId, targetUserId));
-  const rows = await query.orderBy(desc(collections.createdAt)).all();
-
-  // Filter based on visibility
-  return rows.filter(row => {
-    if (isOwner) return true;
-    return row.visibility === "public";
-  });
-}
-
-export async function getUserCollectionsWithProjectStatus(userId: string, projectId: string) {
-  const db = await getDatabase();
-  const userCollections = await db.select().from(collections).where(eq(collections.userId, userId)).orderBy(desc(collections.createdAt)).all();
-  
-  if (userCollections.length === 0) return [];
-
-  const collectionIds = userCollections.map(c => c.id);
-  const items = await db.select().from(collectionItems).where(
-    and(
-      inArray(collectionItems.collectionId, collectionIds),
-      eq(collectionItems.projectId, projectId)
-    )
-  ).all();
-
-  const itemSet = new Set(items.map(i => i.collectionId));
-
-  return userCollections.map(c => ({
-    ...c,
-    containsProject: itemSet.has(c.id)
-  }));
-}
-
-export async function getCollectionById(id: string, viewerId?: string, locale?: string) {
-  const db = await getDatabase();
-
-  const collectionRow = await db.select({
-    collection: collections,
-    author: {
-      username: userProfiles.username,
-      displayName: userProfiles.displayName,
-      avatarUrl: userProfiles.avatarUrl,
-    }
-  }).from(collections)
-    .leftJoin(users, eq(collections.userId, users.id))
-    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(collections.id, id))
-    .get();
-
-  if (!collectionRow || (collectionRow.collection.visibility === "private" && collectionRow.collection.userId !== viewerId)) return null;
-
-  // Fetch the basic project info for items in this collection
-  const items = await db.select({
-    posts: { ...getTableColumns(posts), title: translatedTitle(locale), body: translatedBodyPreview(locale) },
-    projects: projects,
-    author: {
-      username: userProfiles.username,
-      displayName: userProfiles.displayName,
-      avatarUrl: userProfiles.avatarUrl,
-    },
-    addedAt: collectionItems.addedAt,
-  })
-    .from(collectionItems)
-    .innerJoin(projects, eq(collectionItems.projectId, projects.id))
-    .innerJoin(posts, eq(posts.id, projects.id))
-    .leftJoin(users, eq(posts.authorId, users.id))
-    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-    .where(eq(collectionItems.collectionId, id))
-    .orderBy(desc(collectionItems.addedAt))
-    .all();
-
-  // ---- Gather tags for each project -------------------------------------
-  // Collect all project IDs from the items we just fetched.
-  const projectIds = items.map(i => i.posts.id);
-  // Pull tags (projectId, tag) for those projects.
-  const tagRows = await db
-    .select({ projectId: projectTags.projectId, tag: projectTags.tag })
-    .from(projectTags)
-    .where(inArray(projectTags.projectId, projectIds))
-    .all();
-  // Build a map of projectId → string[]
-  const tagsMap: Record<string, string[]> = {};
-  tagRows.forEach(row => {
-    if (!tagsMap[row.projectId]) tagsMap[row.projectId] = [];
-    tagsMap[row.projectId].push(row.tag);
-  });
-
-  return {
-    ...collectionRow.collection,
-    author: collectionRow.author,
-    // Map each item, attaching the gathered tags (or an empty array)
-    // posts と projects を平坦化してから返す。ネストした形は外へ出さない
-    items: items.map(item => ({
-      ...toProjectPost(item),
-      tags: tagsMap[item.posts.id] ?? [],
-      authorUsername: item.author?.username,
-      authorDisplayName: item.author?.displayName ?? item.author?.username,
-      authorAvatarUrl: item.author?.avatarUrl,
-      addedAt: item.addedAt,
-    })),
-  };
 }

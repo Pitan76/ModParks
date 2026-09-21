@@ -16,7 +16,8 @@ import FormTextField from "@/components/ui/form/FormTextField";
 import FormSelect from "@/components/ui/form/FormSelect";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
-import { getUserCollectionsWithProjectStatus, toggleProjectInCollection, createCollection } from "@/lib/actions/collection";
+import { toggleProjectInCollection, createCollection } from "@/lib/actions/collection";
+import { getAppJson } from "@/lib/http/appApi";
 
 export type AddToCollectionModalProps = {
   open: boolean;
@@ -35,6 +36,11 @@ type CollectionItem = {
 /**
  * プロジェクトをユーザーのコレクション（ブックマークリスト）に保存・整理するためのモーダルコンポーネント。
  */
+/** 本人のコレクションと、そのプロジェクトが入っているか。誰の一覧かはサーバがセッションで決める */
+function fetchCollections(projectId: string) {
+  return getAppJson<CollectionItem[]>(`/api/app/collections?projectId=${encodeURIComponent(projectId)}`);
+}
+
 const AddToCollectionModal = ({ open, onClose, projectId, userId }: AddToCollectionModalProps) => {
   const tProject = useTranslations("Project");
   const tList = useTranslations("List");
@@ -52,8 +58,8 @@ const AddToCollectionModal = ({ open, onClose, projectId, userId }: AddToCollect
       setLoading(true);
       setCreating(false);
       setNewCollectionName("");
-      getUserCollectionsWithProjectStatus(userId, projectId).then(data => {
-        setCollections(data as CollectionItem[]);
+      fetchCollections(projectId).then(data => {
+        setCollections(data);
         setLoading(false);
       }).catch(err => {
         console.error(err);
@@ -90,8 +96,7 @@ const AddToCollectionModal = ({ open, onClose, projectId, userId }: AddToCollect
           // Immediately toggle the project in the new collection
           await toggleProjectInCollection(result.id, projectId);
           // Refresh list
-          const data = await getUserCollectionsWithProjectStatus(userId, projectId);
-          setCollections(data as CollectionItem[]);
+          setCollections(await fetchCollections(projectId));
           setCreating(false);
           setNewCollectionName("");
         }

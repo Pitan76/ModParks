@@ -1,8 +1,7 @@
 import type { Context } from "hono";
-import { getDb } from "@modparks/core/db/client";
 import { updateProject } from "@modparks/core/projects/updateProject";
 import type { ApiWorkerEnv } from "../env";
-import { readSession } from "../session";
+import { requireSession } from "../requireSession";
 import { serverErrorsFor } from "../serverErrors";
 import { pushSenderFrom } from "../push";
 
@@ -20,22 +19,18 @@ type Ctx = Context<{ Bindings: ApiWorkerEnv }>;
  * 編集者の画面は保存後の router.refresh() で最新になる。
  */
 export async function patchProject(c: Ctx): Promise<Response> {
-  // getToken は鍵が無いと例外を投げ、原因の分からない 500 になる。
-  // 設定漏れはデプロイ直後に起きやすいので、何が足りないかを返す
-  if (!c.env.AUTH_SECRET) return c.json({ error: "AUTH_SECRET is not configured on modparks-api" }, 503);
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
 
   const projectId = c.req.param("id");
   if (!projectId) return c.json({ error: "Not Found" }, 404);
-
-  const db = getDb(c.env.DB);
-  const session = await readSession(db, c.req.raw, c.env.AUTH_SECRET);
-  if (!session) return c.json({ error: "Unauthorized" }, 401);
+  const { db, userId } = auth;
 
   const outcome = await updateProject(
     { notify: { db, push: pushSenderFrom(c.env) }, t: serverErrorsFor(c.req.raw) },
     projectId,
     await c.req.formData(),
-    session.userId,
+    userId,
   );
 
   if (outcome.type === "notFound") return c.json({ error: "Not Found" }, 404);

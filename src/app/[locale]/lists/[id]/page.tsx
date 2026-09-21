@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getCollectionById } from "@/lib/actions/collection";
+import { getCollectionById } from "@/lib/queries/collectionDetail";
 import { auth } from "@/lib/auth";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";

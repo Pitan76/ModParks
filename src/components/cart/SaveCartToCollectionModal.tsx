@@ -14,7 +14,8 @@ import FormTextField from "@/components/ui/form/FormTextField";
 import FormSelect from "@/components/ui/form/FormSelect";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
-import { getUserCollections, createCollection, addProjectsToCollection } from "@/lib/actions/collection";
+import { createCollection, addProjectsToCollection } from "@/lib/actions/collection";
+import { getAppJson } from "@/lib/http/appApi";
 import type { CartItem } from "./cartStore";
 
 export type SaveCartToCollectionModalProps = {
@@ -53,9 +54,10 @@ export default function SaveCartToCollectionModal({ open, onClose, userId, items
     setLoading(true);
     setCreating(false);
     setNewCollectionName("");
-    getUserCollections(userId, userId)
+    // 誰の一覧かはサーバがセッションで決める
+    getAppJson<CollectionRow[]>("/api/app/collections")
       .then((data) => {
-        setCollections(data as CollectionRow[]);
+        setCollections(data);
         setLoading(false);
       })
       .catch((err) => {

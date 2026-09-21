@@ -86,3 +86,26 @@ describe("GET /api/app/session", () => {
     expect((await call("GET", "/api/app/session")).status).toBe(401);
   });
 });
+
+describe("GET /api/app/collections", () => {
+  it("セッションが無ければ 401。userId を渡しても他人の一覧は返さない", async () => {
+    const res = await call("GET", "/api/app/collections?userId=victim&viewerId=victim");
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe("コレクションの Server Action", () => {
+  it("非公開コレクションを読める関数が 'use server' から export されていない", async () => {
+    // import すると next-auth 経由で Next の実行環境が要るので、ソースを静的に読む
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("../src/lib/actions/collection.ts", import.meta.url), "utf8");
+
+    expect(src.trimStart().startsWith('"use server"')).toBe(true);
+    for (const name of ["getUserCollections", "getUserCollectionsWithProjectStatus", "getCollectionById"]) {
+      // 「(」まで含めて探す。getUserCollections が getUserCollectionsWithProjectStatus の
+      // 先頭一致で引っかからないように
+      expect(src).not.toContain(`function ${name}(`);
+    }
+  });
+});

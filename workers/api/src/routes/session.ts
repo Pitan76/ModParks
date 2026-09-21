@@ -1,7 +1,6 @@
 import type { Context } from "hono";
-import { getDb } from "@modparks/core/db/client";
 import type { ApiWorkerEnv } from "../env";
-import { readSession } from "../session";
+import { requireSession } from "../requireSession";
 
 type Ctx = Context<{ Bindings: ApiWorkerEnv }>;
 
@@ -15,10 +14,8 @@ type Ctx = Context<{ Bindings: ApiWorkerEnv }>;
  * 返すのは呼び出した本人のユーザーIDだけなので、他人の情報は漏れない。
  */
 export async function getSession(c: Ctx): Promise<Response> {
-  if (!c.env.AUTH_SECRET) return c.json({ error: "AUTH_SECRET is not configured on modparks-api" }, 503);
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
 
-  const session = await readSession(getDb(c.env.DB), c.req.raw, c.env.AUTH_SECRET);
-  if (!session) return c.json({ error: "Unauthorized" }, 401);
-
-  return c.json({ userId: session.userId }, 200, { "Cache-Control": "no-store" });
+  return c.json({ userId: auth.userId }, 200, { "Cache-Control": "no-store" });
 }
