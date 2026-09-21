@@ -80,3 +80,9 @@ describe("設定漏れ", () => {
     expect(await res.json()).toEqual({ error: "AUTH_SECRET is not configured on modparks-api" });
   });
 });
+
+describe("GET /api/app/session", () => {
+  it("セッションが無ければ 401", async () => {
+    expect((await call("GET", "/api/app/session")).status).toBe(401);
+  });
+});
