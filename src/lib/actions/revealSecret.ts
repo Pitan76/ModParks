@@ -34,10 +34,11 @@ export async function revealSecret(
   const value = env[name];
   if (typeof value !== "string" || !value) return { error: "SECRET_NOT_FOUND" };
 
-  // 見せたこと自体を残す。値は監査ログにも残さない
+  // 見せたこと自体を残す。値は監査ログにも残さない。一時機能のためにスキーマの
+  // scope 列挙は増やさず、キーの接頭辞で「設定」ではなく「表示」だと区別する
   await ctx.db.insert(settingsAudit).values({
-    scope: "secret_reveal",
-    key: name,
+    scope: "secret",
+    key: `reveal:${name}`,
     oldValue: null,
     newValue: null,
     changedBy: ctx.userId,
