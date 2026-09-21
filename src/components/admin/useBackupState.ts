@@ -1,6 +1,6 @@
 import { useState, useTransition, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { getEncryptionStatus, getBackups } from "@/lib/actions/adminBackupQuery";
+import { getBackups } from "@/lib/actions/adminBackupQuery";
 import type { MergePlan } from "@/lib/backup/merge";
 
 export type Backup = {
@@ -49,8 +49,13 @@ export function useBackupState(initialBackups: Backup[]) {
   const [encryptionConfigured, setEncryptionConfigured] = useState<boolean | null>(null);
   const [driveConfigured, setDriveConfigured] = useState(false);
 
+  // Server Action ではなく GET で読む（開くたびに画面の再取得を起こさないため）
   useEffect(() => {
-    getEncryptionStatus()
+    fetch("/api/admin/backup/status", { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`);
+        return r.json() as Promise<{ configured: boolean; driveConfigured: boolean }>;
+      })
       .then((res) => {
         setEncryptionConfigured(res.configured);
         setDriveConfigured(res.driveConfigured);
