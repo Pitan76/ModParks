@@ -111,21 +111,22 @@ async function findVersionUploaderId(db: Database, versionId: string): Promise<s
  * 「審査に回す理由」であって減点の理由ではない。
  * 誤検知はありうるので、管理者が判定を覆したときは打ち消しイベントで戻す。
  */
-export async function applyScanMalicious(db: Database, versionId: string, reason: string): Promise<boolean> {
+export async function applyScanMalicious(db: Database, versionId: string, reason: string, adminWebhookUrl: string | undefined): Promise<boolean> {
   const uploaderId = await findVersionUploaderId(db, versionId);
   if (!uploaderId) return false;
 
   const { score } = await getTrustState(db, uploaderId);
   const recorded = await recordMalwareDetected(db, uploaderId, versionId, reason);
-  if (recorded) await notifyMalware(db, uploaderId, versionId, score);
+  if (recorded) await notifyMalware(db, adminWebhookUrl, uploaderId, versionId, score);
   return recorded;
 }
 
 /**
  * 確定検知を管理者へ知らせる。
  * 誤検知でも重い処分になるため、人の目に入らないまま放置されないようにする。
+ * Webhook の URL は秘密値（DISCORD_WEBHOOK_URL）なので呼び出し側が環境から取って渡す。
  */
-async function notifyMalware(db: Database, userId: string, versionId: string, previousScore: number): Promise<void> {
+async function notifyMalware(db: Database, adminWebhookUrl: string | undefined, userId: string, versionId: string, previousScore: number): Promise<void> {
   const target = await db
     .select({ projectName: posts.title, username: userProfiles.username, email: users.email })
     .from(versions)
@@ -136,10 +137,9 @@ async function notifyMalware(db: Database, userId: string, versionId: string, pr
     .where(eq(versions.id, versionId))
     .get();
 
-  const { getAdminWebhookUrl } = await import("@/lib/usage/webhook");
   const { buildMalwareEmbed, sendTrustAlert } = await import("@modparks/core/services/trustAlert");
 
-  await sendTrustAlert(await getAdminWebhookUrl(), buildMalwareEmbed({
+  await sendTrustAlert(adminWebhookUrl, buildMalwareEmbed({
     userId,
     userLabel: target?.username ?? target?.email ?? userId,
     versionId,

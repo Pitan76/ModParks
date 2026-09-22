@@ -85,7 +85,7 @@ export async function reviewScanAppeal(
       .run();
 
     // 誤検知だったので、確定検知で積んだ減点も取り消す
-    const { applyScanCleared } = await import("@/lib/services/trustModeration");
+    const { applyScanCleared } = await import("@modparks/core/services/trustModeration");
     await applyScanCleared(db, appeal.versionId, "scan appeal approved");
   }
 
@@ -162,9 +162,10 @@ export async function overrideScanStatus(
 
   await db.update(versions).set({ scanStatus: status }).where(eq(versions.id, versionId)).run();
 
-  const trust = await import("@/lib/services/trustModeration");
+  const trust = await import("@modparks/core/services/trustModeration");
   if (status === "malicious") {
-    await trust.applyScanMalicious(db, versionId, reviewNote ?? "manual override");
+    const { getAdminWebhookUrl } = await import("@/lib/usage/webhook");
+    await trust.applyScanMalicious(db, versionId, reviewNote ?? "manual override", await getAdminWebhookUrl());
   } else if (version.scanStatus === "malicious") {
     await trust.applyScanCleared(db, versionId, reviewNote ?? "manual override");
   }

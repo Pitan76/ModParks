@@ -94,7 +94,7 @@ async function applyReportTrust(
   penalizeReporter: boolean
 ) {
   try {
-    const trust = await import("@/lib/services/trustModeration");
+    const trust = await import("@modparks/core/services/trustModeration");
     if (status === "resolved") {
       await trust.applyReportUpheld(db, report);
       return;

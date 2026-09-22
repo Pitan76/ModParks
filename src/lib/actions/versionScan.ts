@@ -49,8 +49,9 @@ export async function scanVersionFile(db: Database, versionId: string, fileUrl: 
       .run();
 
     if (result.level === "malicious") {
-      const { applyScanMalicious } = await import("@/lib/services/trustModeration");
-      await applyScanMalicious(db, versionId, `scan: ${fileName}`);
+      const { applyScanMalicious } = await import("@modparks/core/services/trustModeration");
+      const { getAdminWebhookUrl } = await import("@/lib/usage/webhook");
+      await applyScanMalicious(db, versionId, `scan: ${fileName}`, await getAdminWebhookUrl());
     }
 
     if (result.level === "suspicious" || result.level === "malicious") {
