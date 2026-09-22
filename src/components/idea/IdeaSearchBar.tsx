@@ -6,14 +6,18 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
+import TuneIcon from "@mui/icons-material/Tune";
+import IconButton from "@mui/material/IconButton";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/lib/i18n/routing";
 import FormSelect from "@/components/ui/form/FormSelect";
 import FormMultiSelect from "@/components/ui/form/FormMultiSelect";
-import LoaderAutocomplete from "@/components/project/LoaderAutocomplete";
-import McVersionAutocomplete from "@/components/project/McVersionAutocomplete";
-import TagAutocomplete from "@/components/project/TagAutocomplete";
 import { IDEA_STATUSES, IDEA_SORTS, ideaStatusLabelKey } from "@modparks/core/data/ideaFilters";
+import type { IdeaDetailFilters } from "./IdeaFilterDialog";
+
+// ダイアログは開くまで不要なので遅延ロードする（プロジェクト一覧の詳細検索と同じ）
+const IdeaFilterDialog = dynamic(() => import("./IdeaFilterDialog"), { ssr: false });
 
 /** URL へ書き出す絞り込みの一式。項目が増えても呼び出し側の引数が増えないようまとめる */
 type IdeaFilterState = {
@@ -39,7 +43,7 @@ export type IdeaSearchBarProps = {
  * アイデア一覧の検索・絞り込みバー。
  *
  * プロジェクト一覧と同じく、状態は URL のクエリに持たせる（共有・戻る操作で再現できるため）。
- * 絞り込みの軸がプロジェクトより少ないため、詳細検索ダイアログには入れず全て表に出す。
+ * 見た目もプロジェクト一覧に揃え、状態と並び替えだけを表に出し、残りはダイアログに入れる。
  */
 export default function IdeaSearchBar({
   initialQ = "",
@@ -61,9 +65,8 @@ export default function IdeaSearchBar({
   const [debouncedQ, setDebouncedQ] = useState(initialQ);
   const [statuses, setStatuses] = useState<string[]>(initialStatuses);
   const [sort, setSort] = useState(initialSort);
-  const [loaders, setLoaders] = useState<string[]>(initialLoaders);
-  const [mcVersions, setMcVersions] = useState<string[]>(initialMcVersions);
-  const [tags, setTags] = useState<string[]>(initialTags);
+  const [detail, setDetail] = useState<IdeaDetailFilters>({ loaders: initialLoaders, mcVersions: initialMcVersions, tags: initialTags });
+  const [filterOpen, setFilterOpen] = useState(false);
   const isFirstRender = useRef(true);
 
   const updateSearch = useCallback(
@@ -95,28 +98,39 @@ export default function IdeaSearchBar({
       isFirstRender.current = false;
       return;
     }
-    updateSearch(debouncedQ, { statuses, sort, loaders, mcVersions, tags });
-  }, [debouncedQ, statuses, sort, loaders, mcVersions, tags, updateSearch]);
+    updateSearch(debouncedQ, { statuses, sort, ...detail });
+  }, [debouncedQ, statuses, sort, detail, updateSearch]);
+
+  const isDetailActive = detail.loaders.length > 0 || detail.mcVersions.length > 0 || detail.tags.length > 0;
 
   return (
     <Box sx={{ mb: 4 }}>
-      <TextField
-        id="idea-search-input"
-        fullWidth
-        placeholder={t("searchPlaceholder")}
-        value={q}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-        sx={{ mb: 2 }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: "text.disabled" }} />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+        <TextField
+          id="idea-search-input"
+          fullWidth
+          placeholder={t("searchPlaceholder")}
+          value={q}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "text.disabled" }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        <IconButton
+          onClick={() => setFilterOpen(true)}
+          color={isDetailActive ? "primary" : "default"}
+          aria-label={tSearch("advancedSearch")}
+          sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+        >
+          <TuneIcon />
+        </IconButton>
+      </Box>
 
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
         <Box sx={{ minWidth: 200 }}>
@@ -147,39 +161,20 @@ export default function IdeaSearchBar({
             options={IDEA_SORTS.map((value) => ({ value, label: t(`sort.${value}`) }))}
           />
         </Box>
-
-        <Box sx={{ minWidth: 220, flex: "1 1 220px" }}>
-          <LoaderAutocomplete
-            availablePlatforms={availablePlatforms}
-            loaders={loaders}
-            onChange={setLoaders}
-            label={tSearch("platforms")}
-            size="small"
-            required={false}
-          />
-        </Box>
-
-        <Box sx={{ minWidth: 220, flex: "1 1 220px" }}>
-          <McVersionAutocomplete
-            value={mcVersions}
-            onChange={setMcVersions}
-            label={tSearch("mcVersions")}
-            size="small"
-            required={false}
-          />
-        </Box>
-
-        <Box sx={{ minWidth: 220, flex: "1 1 220px" }}>
-          <TagAutocomplete
-            availableTags={availableTags}
-            tags={tags}
-            onChange={setTags}
-            label={tSearch("tags")}
-            size="small"
-            required={false}
-          />
-        </Box>
       </Box>
+
+      {filterOpen && (
+        <IdeaFilterDialog
+          onClose={() => setFilterOpen(false)}
+          initialFilters={detail}
+          availableTags={availableTags}
+          availablePlatforms={availablePlatforms}
+          onApply={(filters) => {
+            setDetail(filters);
+            setFilterOpen(false);
+          }}
+        />
+      )}
     </Box>
   );
 }
