@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dedupeTags } from "@/lib/utils/versionRecord";
+import { dedupeTags } from "@modparks/core/utils/versionRecord";
 
 describe("dedupeTags", () => {
   it("重複を落とす（複合主キー違反で取り込み全体が落ちるのを防ぐ）", () => {

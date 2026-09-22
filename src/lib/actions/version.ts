@@ -2,13 +2,13 @@
 
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, projectDependencies } from "@modparks/core/db/schema";
-import { insertVersionRecord } from "@/lib/utils/versionRecord";
+import { insertVersionRecord } from "@modparks/core/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { createSystemCommentForResolvedIdea } from "@/lib/actions/versionIdeaLink";
 import { pushVersionToExternalPlatforms } from "@/lib/actions/versionExternalSync";
 import { scanVersionFile } from "@/lib/actions/versionScan";
 import { createVersionSchema, updateVersionSchema } from "@modparks/core/validations";
-import { resolveDependencyDrafts } from "@/lib/dependencies/create";
+import { resolveDependencyDrafts } from "@modparks/core/dependencies/create";
 import { parseDependencyDraftsField } from "@modparks/core/dependencies/parseDrafts";
 import { isAllowedExternalUrl } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";

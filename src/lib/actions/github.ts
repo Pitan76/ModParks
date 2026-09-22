@@ -7,7 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { deleteFromR2, getR2Bucket } from "@/lib/r2";
-import { insertVersionRecord } from "@/lib/utils/versionRecord";
+import { insertVersionRecord } from "@modparks/core/utils/versionRecord";
 import { notifyNewVersion } from "@/lib/notifications/notify";
 import { channelFromGithubPrerelease } from "@modparks/core/releaseChannels";
 import { parseModJar } from "@/lib/services/jar";

@@ -1,5 +1,5 @@
 import { versions, versionLoaders, versionMcVersions } from "@modparks/core/db/schema";
-import type { Database } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { chunkRows } from "@modparks/core/db/chunkRows";
 
 /** バージョン本体＋関連テーブル（ローダー / MCバージョン）への挿入に必要な入力 */
