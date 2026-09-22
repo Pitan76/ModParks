@@ -18,6 +18,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
+import ChreeIdIcon from "@/components/auth/ChreeIdIcon";
 import PasskeyLoginButton from "@/components/auth/PasskeyLoginButton";
 import LastUsedBadge from "@/components/auth/LastUsedBadge";
 import { useLastLoginMethod, rememberLoginMethod } from "@/lib/hooks/useLastLoginMethod";
@@ -239,9 +240,9 @@ export default function LoginPage() {
                   variant="outlined"
                   aria-label={tAuth("login.loginWithChreeId")}
                   onClick={handleChreeIdLogin}
-                  sx={{ flex: "1 1 0", minWidth: 0, py: 1.2, fontWeight: 700 }}
+                  sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
                 >
-                  ChreeID
+                  <ChreeIdIcon />
                 </Button>
               </Tooltip>
             </LastUsedBadge>

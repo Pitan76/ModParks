@@ -11,6 +11,7 @@ import Divider from "@mui/material/Divider";
 import Tooltip from "@mui/material/Tooltip";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
+import ChreeIdIcon from "@/components/auth/ChreeIdIcon";
 import { Link } from "@/lib/i18n/routing";
 import { sendRegistrationEmail } from "@/lib/actions/auth";
 import { rememberLoginMethod } from "@/lib/hooks/useLastLoginMethod";
@@ -163,9 +164,9 @@ const RegisterPage = () => {
                 variant="outlined"
                 aria-label={tAuth("register.registerWithChreeId")}
                 onClick={handleChreeIdLogin}
-                sx={{ flex: "1 1 0", minWidth: 0, py: 1.2, fontWeight: 700 }}
+                sx={{ flex: "1 1 0", minWidth: 0, py: 1.2 }}
               >
-                ChreeID
+                <ChreeIdIcon />
               </Button>
             </Tooltip>
           )}
