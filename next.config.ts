@@ -1,13 +1,38 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import path from "path";
+import { readFileSync } from "fs";
+import { parse as parseToml } from "smol-toml";
 import { CSP_IMG_SRC } from "./src/lib/config/imageHosts";
 
 const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
 
+/**
+ * wrangler.toml の [vars] にある NEXT_PUBLIC_* をビルドへ渡す。
+ *
+ * NEXT_PUBLIC_* は `next build` を実行した環境の値がブラウザ用の JS に焼き込まれる。
+ * [vars] は Worker の実行時の変数で、ビルド時には存在しない。そのため CI のビルドでは
+ * 未設定のまま焼き込まれ、ブラウザでは process.env が空なので値が常に undefined に
+ * なっていた。広告の読み込み（NEXT_PUBLIC_ADS_MODE）が一切行われず、画像の縮小配信
+ * （NEXT_PUBLIC_IMAGE_TRANSFORM）なども効いていなかった。
+ *
+ * 値の正本は wrangler.toml の 1 箇所に保つ。既に環境にある変数は上書きしない。
+ * ローカル開発では .env.local の値（localhost など）を使う必要があるため。
+ */
+function publicVarsFromWrangler(): Record<string, string> {
+  const toml = parseToml(readFileSync(path.join(__dirname, "wrangler.toml"), "utf8")) as { vars?: Record<string, unknown> };
+  const vars: Record<string, string> = {};
+  for (const [key, value] of Object.entries(toml.vars ?? {})) {
+    if (key.startsWith("NEXT_PUBLIC_") && typeof value === "string" && process.env[key] === undefined) vars[key] = value;
+  }
+
+  return vars;
+}
+
 const nextConfig: NextConfig = {
   // Cloudflare Workers (Edge Runtime) 向け設定
   output: "standalone",
+  env: publicVarsFromWrangler(),
   typescript: {
     // 型チェックはビルドの直列区間で 36 秒を占めており、デプロイの待ち時間に直結していた。
     // ビルドからは外し、CI では typecheck ジョブ（npm run typecheck）を並列に流して担保する。
