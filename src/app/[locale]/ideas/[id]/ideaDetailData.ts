@@ -2,6 +2,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { posts, ideas, favorites, comments as commentsTable, users, userProfiles, versions, versionIdeas, projects } from "@modparks/core/db/schema";
 import { eq, and, or, sql, desc, isNull, inArray } from "drizzle-orm";
 import { getProjectsByIds } from "@/lib/actions/projectQuery";
+import { resolveDisplayContent } from "@/lib/translation/display";
 
 export async function getIdeaMeta(id: string) {
   const d1 = await getD1();
@@ -104,6 +105,8 @@ export async function getIdeaDetail(id: string, userId?: string, options: GetIde
       contentFormat: posts.bodyFormat,
       status: ideas.status,
       visibility: posts.visibility,
+      sourceLocale: posts.sourceLocale,
+      aiTranslationEnabled: posts.aiTranslationEnabled,
       createdAt: posts.createdAt,
       authorId: users.id,
       authorName: userProfiles.displayName,
@@ -136,6 +139,11 @@ export async function getIdeaDetail(id: string, userId?: string, options: GetIde
     ...ideaDataResult,
     tags: (ideaTagsResult || []).map((t) => t.tag),
   };
+
+  // 本文だけ表示ロケールの訳文に切り替える。タイトルはプロジェクトと同じく訳さない
+  const display = options.locale
+    ? await resolveDisplayContent(db, { ...ideaDataResult, body: ideaDataResult.content, bodyFormat: ideaDataResult.contentFormat }, options.locale)
+    : null;
 
   const commentSelection = {
     id: commentsTable.id,
@@ -199,6 +207,7 @@ export async function getIdeaDetail(id: string, userId?: string, options: GetIde
 
   return {
     ideaData,
+    display,
     initialCount: likesData?.count || 0,
     initialLiked: !!userLike,
     comments,

@@ -2,7 +2,7 @@
  * 翻訳リクエストの実行。権限・レート制限・上限を検査し、既訳があれば LLM を
  * 経由せずに返す。API ルートと Server Action の共通入口。
  */
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { posts } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -12,6 +12,9 @@ import { computeSourceHash } from "@modparks/core/translation/sourceHash";
 import { countRunsSince, findTranslation, hasRecentFailure, recordRun, saveTranslation } from "./repository";
 import type { BodyFormat } from "@modparks/core/translation/masking";
 import { getTranslationSettings, type TranslationSettings } from "./settings";
+
+/** 閲覧者が AI 翻訳を頼める投稿の種類。どちらも本文を posts に持つので同じ経路で訳せる */
+const TRANSLATABLE_KINDS = ["project", "idea"] as const;
 
 /** 同一対象で失敗した直後の再実行を抑える時間 */
 const FAILURE_COOLDOWN_MS = 10 * 60 * 1000;
@@ -52,7 +55,7 @@ export async function requestTranslation(
   const settings = await getTranslationSettings();
   if (!settings.enabled) return { ok: false, error: "feature_disabled" };
 
-  const post = await db.select().from(posts).where(and(eq(posts.id, postId), eq(posts.kind, "project"))).get();
+  const post = await db.select().from(posts).where(and(eq(posts.id, postId), inArray(posts.kind, TRANSLATABLE_KINDS))).get();
   if (!post) return { ok: false, error: "not_found" };
   // 限定公開の本文を LLM や共有キャッシュに乗せない
   if (post.visibility !== "public") return { ok: false, error: "not_public" };

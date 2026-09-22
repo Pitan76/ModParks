@@ -12,6 +12,7 @@ import IdeaOwnerActions from "@/components/idea/IdeaOwnerActions";
 import IdeaStatusControl from "@/components/idea/IdeaStatusControl";
 import ShareMenuButton from "@/components/ui/ShareMenuButton";
 import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
+import TranslatedDescription from "@/components/project/TranslatedDescription";
 import { formatDate } from "@modparks/core/utils/format";
 import DateTimeTooltip from "@/components/ui/DateTimeTooltip";
 import { Link } from "@/lib/i18n/routing";
@@ -84,7 +85,7 @@ export default async function IdeaDetailPage({ params, searchParams }: IdeaDetai
   ]);
   if (!detail) return notFound();
 
-  const { ideaData, initialCount, initialLiked, comments, totalCommentThreads, resolvedProjects } = detail;
+  const { ideaData, display, initialCount, initialLiked, comments, totalCommentThreads, resolvedProjects } = detail;
   const canManage =
     !!session?.user && (session.user.id === ideaData.authorId || isAdminSession(session));
 
@@ -158,7 +159,20 @@ export default async function IdeaDetailPage({ params, searchParams }: IdeaDetai
         )}
 
         <Box sx={{ mb: 4 }}>
-          <DescriptionRenderer content={ideaData.content} format={ideaData.contentFormat} />
+          {display ? (
+            <TranslatedDescription
+              postId={ideaData.id}
+              locale={locale}
+              original={{ body: ideaData.content, format: ideaData.contentFormat }}
+              translation={display.translated ? { body: display.body, format: display.bodyFormat } : null}
+              state={display.state}
+              stale={display.stale}
+              canTranslate={display.canTranslate}
+              isLoggedIn={!!session?.user?.id}
+            />
+          ) : (
+            <DescriptionRenderer content={ideaData.content} format={ideaData.contentFormat} />
+          )}
         </Box>
 
         <Box

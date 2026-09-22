@@ -6,6 +6,7 @@ import { createIdeaSchema } from "@modparks/core/validations";
 import { recordDeletion } from "@modparks/core/backup/tombstone";
 import type { ServerErrorTranslator } from "@modparks/core/i18n/serverErrors";
 import { formList, loadManageableIdea } from "@modparks/core/ideas/shared";
+import { detectSourceLocale } from "@modparks/core/translation/detectLocale";
 
 /**
  * idea の作成・編集・状態変更・削除の本体。
@@ -53,6 +54,8 @@ export async function createIdea({ db, t }: IdeaDeps, userId: string, formData: 
         slug: id,
         title,
         body: content,
+        sourceLocale: detectSourceLocale(`${title}
+${content}`),
         bodyFormat: contentFormat || settings?.defaultIdeaBodyFormat || "markdown",
         visibility: visibility || settings?.defaultIdeaStatus || "public",
       }),
@@ -87,7 +90,12 @@ export async function updateIdea({ db, t }: IdeaDeps, userId: string, ideaId: st
 
   // タイトル・本文・公開範囲はすべて posts 側にある
   await db.update(posts)
-    .set({ title, body: content, bodyFormat: contentFormat, visibility: visibility || "public", updatedAt: new Date() })
+    // idea には原文の言語を選ぶ欄が無いので、書き直されるたびに推定し直す
+    .set({
+      title, body: content, bodyFormat: contentFormat, visibility: visibility || "public",
+      sourceLocale: detectSourceLocale(`${title}
+${content}`), updatedAt: new Date(),
+    })
     .where(eq(posts.id, ideaId))
     .run();
 
