@@ -11,12 +11,16 @@ import type { Database } from "@/lib/db";
  * 以前は "use server" 付きで、db を受け取る関数が Server Action として公開されていた。
  * ブラウザから呼ぶものではないため普通のサーバー関数にしている。
  */
-export async function scanVersionFile(db: Database, versionId: string, fileUrl: string, fileName: string) {
-  await core.scanVersionFile({
+export async function nextScanContext(db: Database): Promise<core.VersionScanContext> {
+  return {
     notify: await userNotifyContext(db),
     jar: nextJarClient,
     r2PublicUrl: process.env.R2_PUBLIC_URL,
     isAnalysisEnabled: () => checkFeatureEnabled("jarAnalysis"),
     adminWebhookUrl: await getAdminWebhookUrl(),
-  }, versionId, fileUrl, fileName);
+  };
+}
+
+export async function scanVersionFile(db: Database, versionId: string, fileUrl: string, fileName: string) {
+  await core.scanVersionFile(await nextScanContext(db), versionId, fileUrl, fileName);
 }
