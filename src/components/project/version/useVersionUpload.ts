@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
-import { createVersion } from "@/lib/actions/version";
+import { createVersion } from "@/lib/http/versionApi";
 import type { ExternalUploadSummary } from "@modparks/core/externalSync/uploadSummary";
 import { parseModJar } from "@/lib/utils/modParser";
 import { uploadFileToR2 } from "@/lib/utils/upload";

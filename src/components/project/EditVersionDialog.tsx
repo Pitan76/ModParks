@@ -12,7 +12,7 @@ import FormTextField from "@/components/ui/form/FormTextField";
 import LoaderAutocomplete from "./LoaderAutocomplete";
 import McVersionAutocomplete from "./McVersionAutocomplete";
 import VersionDependenciesManager from "./VersionDependenciesManager";
-import { updateVersion } from "@/lib/actions/version";
+import { updateVersion } from "@/lib/http/versionApi";
 import { RELEASE_CHANNELS, DEFAULT_RELEASE_CHANNEL } from "@modparks/core/releaseChannels";
 import { useTranslations } from "next-intl";
 import type { ProjectVersion } from "./ProjectVersionsManager";
@@ -117,7 +117,7 @@ const EditVersionDialog = ({
     try {
       const res = await updateVersion(version.id, projectSlug, formData);
       if (res.error) {
-        setEditError(res.error as any);
+        setEditError(res.error);
       } else {
         onSuccess({
           ...version,

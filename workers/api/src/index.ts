@@ -8,6 +8,7 @@ import { getSession } from "./routes/session";
 import { getMyCollections } from "./routes/collections";
 import { getTrustedDevices } from "./routes/trustedDevices";
 import * as ideaRoutes from "./routes/ideas";
+import * as versionRoutes from "./routes/versions";
 
 /**
  * 公開 API を Next.js から切り離して処理する Worker。
@@ -57,6 +58,13 @@ app.patch("/api/app/idea-comments/:id", ideaRoutes.patchIdeaComment);
 app.delete("/api/app/idea-comments/:id", ideaRoutes.deleteIdeaComment);
 app.post("/api/app/posts/:id/favorite", ideaRoutes.postFavorite);
 
+// 固定パスの batch-mc-versions を :id より先に登録する
+app.post("/api/app/projects/:slug/versions", versionRoutes.postVersion);
+app.post("/api/app/projects/:slug/versions/batch-mc-versions", versionRoutes.postBatchMcVersions);
+app.patch("/api/app/projects/:slug/versions/:id", versionRoutes.patchVersion);
+app.delete("/api/app/projects/:slug/versions/:id", versionRoutes.deleteVersion);
+app.patch("/api/app/projects/:slug/versions/:id/archive", versionRoutes.patchVersionArchive);
+
 // 上に無いメソッドは 405。登録順に照合されるので、実装の後ろに置く
 const methodNotAllowed = (c: Context) => c.body(null, 405);
 for (const path of [
@@ -67,6 +75,10 @@ for (const path of [
   "/api/app/ideas/:id/comments",
   "/api/app/idea-comments/:id",
   "/api/app/posts/:id/favorite",
+  "/api/app/projects/:slug/versions",
+  "/api/app/projects/:slug/versions/batch-mc-versions",
+  "/api/app/projects/:slug/versions/:id",
+  "/api/app/projects/:slug/versions/:id/archive",
 ]) {
   app.all(path, methodNotAllowed);
 }
