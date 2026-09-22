@@ -2,7 +2,7 @@ import { eq, inArray } from "drizzle-orm";
 import { notifications, projectSubscriptions, developerSubscriptions, userSettings, users, userProfiles } from "@modparks/core/db/schema";
 import type { Database } from "@modparks/core/db/client";
 import type { ProjectPost } from "@modparks/core/types/post";
-import { sendDiscordVersionNotification } from "@modparks/core/notifications/discord";
+import { sendDiscordVersionNotification, isValidDiscordWebhookUrl } from "@modparks/core/notifications/discord";
 import { isTypeEnabled, type NotificationType, type NotificationPayload } from "@modparks/core/notifications/types";
 import { sendPushToRecipients } from "@modparks/core/notifications/push";
 import type { PushSender } from "@modparks/core/notifications/pushSender";
@@ -142,4 +142,73 @@ export async function resolveActor(db: Database, actorId: string): Promise<Notif
     ...(row?.username ? { actorUsername: row.username } : {}),
     ...(actorImage ? { actorImage } : {}),
   };
+}
+
+/**
+ * ユーザー宛て通知の Discord 文言を作る関数。
+ *
+ * 文言は lang/*.json の Notifications.message にある。core は翻訳の手段を持たないので
+ * 受け取る。Next は next-intl の getTranslations を、modparks-api は Notifications の枝
+ * だけを取り込んだものを渡す。
+ */
+export type NotificationMessage = (locale: "ja" | "en", type: NotificationType, payload: NotificationPayload) => Promise<string>;
+
+export type UserNotifyContext = NotifyContext & {
+  message: NotificationMessage;
+  /**
+   * 応答を返した後も走らせたい処理を預ける。Workers では応答後の処理が打ち切られる
+   * ことがあるため、modparks-api は executionCtx.waitUntil を渡す。無ければ投げっぱなし
+   * （Next 側の移設前の挙動）。
+   */
+  defer?: (task: Promise<unknown>) => void;
+};
+
+/** 単一受信者向けイベント（コメント・いいね・お気に入り・フォロー・リスト追加） */
+export async function notifyToUser(
+  ctx: UserNotifyContext,
+  recipientId: string,
+  actorId: string,
+  type: NotificationType,
+  payload: NotificationPayload,
+): Promise<void> {
+  if (recipientId === actorId) return;
+  await dispatchNotifications(ctx, [recipientId], type, { ...payload, actorId });
+
+  const settings = await ctx.db
+    .select({ locale: userSettings.locale, discordWebhookUrl: userSettings.discordWebhookUrl })
+    .from(userSettings)
+    .where(eq(userSettings.userId, recipientId))
+    .get();
+  if (!settings?.discordWebhookUrl || !isValidDiscordWebhookUrl(settings.discordWebhookUrl)) return;
+
+  const task = sendUserDiscordNotification(ctx.message, settings.discordWebhookUrl, settings.locale === "en" ? "en" : "ja", type, payload);
+  if (ctx.defer) ctx.defer(task);
+}
+
+/**
+ * ユーザー宛ての通知内容を Discord Webhook へ送信する。
+ * 例外は内部で処理し、呼び出し元の処理を妨げない。
+ */
+async function sendUserDiscordNotification(
+  message: NotificationMessage,
+  webhookUrl: string,
+  locale: "ja" | "en",
+  type: NotificationType,
+  payload: NotificationPayload,
+): Promise<void> {
+  // 外部API（Discord）への送信。失敗しても通知の本体（アプリ内通知）は済んでいる
+  try {
+    const embed = {
+      title: "ModParks Notification",
+      description: await message(locale, type, payload),
+      color: 0x38bdf8,
+      timestamp: new Date().toISOString(),
+      thumbnail: payload.actorImage ? { url: payload.actorImage } : undefined,
+      footer: { text: "ModParks" },
+    };
+
+    await fetch(webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ embeds: [embed] }) });
+  } catch (err) {
+    console.error("Failed to send user webhook notification:", err);
+  }
 }

@@ -1,52 +1,34 @@
 /**
- * 運用設定の読み書き。
+ * 運用設定の読み書き（Next 側のアダプタ）。
  *
- * アプリ設定 (`app:settings`) とはキーを分ける。
- * 判定のたびに読むため参照頻度が高く、キャッシュの寿命を独立させたいため。
+ * 本体は core/runtime/config.ts にあり、ここは KV バインディングを
+ * アンビエントに解決して渡すだけ。
  */
 import { getSettingsKV } from "@/lib/kv";
+import { readRuntimeConfig, writeRuntimeConfig, RUNTIME_KEY } from "@modparks/core/runtime/config";
 import { DEFAULT_RUNTIME_CONFIG, type RuntimeConfig } from "@modparks/core/runtime/features";
 
-export const RUNTIME_KEY = "app:runtime";
+export { RUNTIME_KEY };
 
 /**
- * Isolate 内キャッシュの寿命(ms)。
- * 毎リクエスト KV を読むと課金と遅延が乗るため、既存の DDoS 状態と同じ流儀で短く持つ。
- */
-const CACHE_TTL_MS = 5000;
-
-let cached: RuntimeConfig | null = null;
-let cachedAt = 0;
-
-/**
- * 運用設定を取得する。
+ * 運用設定を取得する。読めなかった場合は「全機能が有効」を返す。
  *
- * 読めなかった場合は「全機能が有効」を返す。
- * 設定が読めないことを理由にサイトを止める方が害が大きいため。
+ * KV バインディングの取得自体が失敗した場合も既定値に倒す（移設前と同じ）。
  */
 export async function getRuntimeConfig(): Promise<RuntimeConfig> {
-  const now = Date.now();
-  if (cached && now - cachedAt < CACHE_TTL_MS) return cached;
-
-  // KV は外部I/O境界。失敗しても既定値で処理を続ける
+  // バインディングの取得は外部I/O境界。失敗しても既定値で処理を続ける
+  let kv: KVNamespace;
   try {
-    const kv = await getSettingsKV();
-    const raw = await kv.get<RuntimeConfig>(RUNTIME_KEY, "json");
-    cached = raw ?? DEFAULT_RUNTIME_CONFIG;
+    kv = await getSettingsKV();
   } catch (err) {
     console.error("[RUNTIME] Failed to read runtime config:", err);
-    cached = DEFAULT_RUNTIME_CONFIG;
+    return DEFAULT_RUNTIME_CONFIG;
   }
 
-  cachedAt = now;
-  return cached;
+  return readRuntimeConfig(kv);
 }
 
 /** 運用設定を保存する。書き込み後は次の読み取りで KV を引き直させる */
 export async function putRuntimeConfig(config: RuntimeConfig): Promise<void> {
-  const kv = await getSettingsKV();
-  await kv.put(RUNTIME_KEY, JSON.stringify(config));
-
-  cached = null;
-  cachedAt = 0;
+  await writeRuntimeConfig(await getSettingsKV(), config);
 }
