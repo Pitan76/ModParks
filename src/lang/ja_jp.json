@@ -970,7 +970,8 @@
       "trust": "信頼ポイント",
       "groupContent": "コンテンツ",
       "groupModeration": "モデレーション",
-      "groupSystem": "システム"
+      "groupSystem": "システム",
+      "chreeid": "ChreeID 移行"
     },
     "dashboard": {
       "statsPendingReports": "未処理の通報",
@@ -1723,6 +1724,21 @@
         }
       },
       "notComputed": "未計算"
+    },
+    "chreeid": {
+      "title": "ChreeID への移行",
+      "notConfigured": "ChreeID が設定されていません（AUTH_CHREEID_ISSUER / AUTH_CHREEID_ID / AUTH_CHREEID_SECRET）。",
+      "policy": "ModParks のアカウントは特例としてそのまま残ります。ここでは各利用者に ChreeID を用意して紐付けるだけで、ModParks のログイン手段（パスワード・GitHub・Google・パスキー・メールリンク）は引き続き使えます。",
+      "counts": "利用者 {total} 人 ／ ChreeID 未発行 {pending} 人",
+      "runDesc": "1回で {batchSize} 人ずつ発行します。残りが 0 になるまで繰り返し押してください。済んだ人は飛ばします。",
+      "run": "発行する",
+      "runResult": "発行: {done} 人 ／ 失敗: {failed} 人 ／ 残り: {remaining} 人",
+      "allDone": "全員に ChreeID が紐付いています。",
+      "resyncTitle": "既存の連携を洗い直す",
+      "resyncDesc": "紐付け済みの人には「発行する」が当たりません。渡し損ねていた認証方法（Google・GitHub 連携など）を ChreeID 側に足したいときはこちらを流してください。",
+      "resync": "洗い直す",
+      "resyncContinue": "続きから洗い直す",
+      "resyncResult": "確認: {checked} 人 ／ 失敗: {failed} 人 ／ 残り: {remaining} 人"
     }
   },
   "Search": {
@@ -2158,6 +2174,16 @@
     "developer": {
       "title": "開発者設定",
       "description": "APIキーと OAuth アプリなど、外部から ModParks を利用するための設定です。"
+    },
+    "chreeid": {
+      "title": "ChreeID",
+      "desc": "ModParks のアカウントはそのまま使えます。ChreeID を受け取ると、同じアカウントに ChreeID でもログインできるようになり、ほかの Chree のサービスとも共通で使えます。",
+      "status": "ステータス",
+      "connected": "紐付け済み",
+      "disconnected": "未紐付け",
+      "claim": "ChreeID を受け取る",
+      "claimFailed": "ChreeID に接続できませんでした。時間をおいてお試しください。",
+      "alreadyClaimed": "ChreeID は受け取り済みです。ChreeID でもログインできます。"
     }
   },
   "Legal": {

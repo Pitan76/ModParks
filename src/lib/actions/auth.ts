@@ -8,6 +8,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { SITE_URL } from "@modparks/core/config";
 import { getAppSettings } from "@/lib/config/readSettings";
 import { formatMailFrom } from "@modparks/core/config/appSettings";
+import { syncChreeIdPassword } from "@/lib/chreeid/provisioner";
 
 export async function sendRegistrationEmail(formData: FormData) {
   const email = formData.get("email") as string;
@@ -253,6 +254,7 @@ export async function resetPasswordWithToken(formData: FormData) {
   const passwordHash = await hashPassword(newPassword, 8); // Using 8 to avoid Cloudflare Workers 50ms CPU limit
 
   await db.update(users).set({ passwordHash }).where(eq(users.id, resetToken.userId)).run();
+  await syncChreeIdPassword(resetToken.userId, passwordHash);
   await db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, resetToken.id)).run();
 
   return { success: true };

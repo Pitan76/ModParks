@@ -99,5 +99,6 @@ export async function getSettingsPreferences(db: Database, userId: string) {
     discordWebhookUrl: settings?.discordWebhookUrl ?? "",
     isGitHubConnected: userAccounts.some((acc) => acc.provider === "github"),
     isGoogleConnected: userAccounts.some((acc) => acc.provider === "google"),
+    isChreeIdConnected: userAccounts.some((acc) => acc.provider === "chreeid"),
   };
 }

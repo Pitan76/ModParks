@@ -969,7 +969,8 @@
       "trust": "Trust credit",
       "groupContent": "Content & Users",
       "groupModeration": "Moderation & Security",
-      "groupSystem": "System & Settings"
+      "groupSystem": "System & Settings",
+      "chreeid": "ChreeID migration"
     },
     "dashboard": {
       "statsPendingReports": "Pending Reports",
@@ -1722,6 +1723,21 @@
         }
       },
       "notComputed": "Not computed"
+    },
+    "chreeid": {
+      "title": "Migrate to ChreeID",
+      "notConfigured": "ChreeID is not configured (AUTH_CHREEID_ISSUER / AUTH_CHREEID_ID / AUTH_CHREEID_SECRET).",
+      "policy": "ModParks accounts are kept as they are. This only prepares and links a ChreeID for each user; all ModParks sign-in methods (password, GitHub, Google, passkey, email link) keep working.",
+      "counts": "{total} users / {pending} without ChreeID",
+      "runDesc": "Processes {batchSize} users per run. Repeat until none remain. Users already done are skipped.",
+      "run": "Issue",
+      "runResult": "Issued: {done} / Failed: {failed} / Remaining: {remaining}",
+      "allDone": "Every user has a linked ChreeID.",
+      "resyncTitle": "Resync existing links",
+      "resyncDesc": "\"Issue\" skips users who are already linked. Run this to add sign-in methods (such as Google or GitHub) that were not passed to ChreeID.",
+      "resync": "Resync",
+      "resyncContinue": "Continue resync",
+      "resyncResult": "Checked: {checked} / Failed: {failed} / Remaining: {remaining}"
     }
   },
   "Search": {
@@ -2157,6 +2173,16 @@
     "developer": {
       "title": "Developer",
       "description": "Settings for using ModParks from outside: API keys and OAuth apps."
+    },
+    "chreeid": {
+      "title": "ChreeID",
+      "desc": "Your ModParks account stays as it is. Once you claim your ChreeID, you can also sign in to this account with ChreeID and use it across other Chree services.",
+      "status": "Status",
+      "connected": "Linked",
+      "disconnected": "Not linked",
+      "claim": "Claim ChreeID",
+      "claimFailed": "Could not connect to ChreeID. Please try again later.",
+      "alreadyClaimed": "Your ChreeID is already claimed. You can sign in with ChreeID."
     }
   },
   "Legal": {

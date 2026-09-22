@@ -6,6 +6,7 @@ import SettingsSection from "@/components/settings/SettingsSection";
 import { IntegrationTabLazy } from "@/components/settings/SectionsLazy";
 import { getGithubAppInstallUrl } from "@/lib/utils/githubApp";
 import { listGithubAppAccounts } from "@/lib/queries/githubApp";
+import { isChreeIdProvisioningEnabled } from "@/lib/chreeid/client";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -34,6 +35,8 @@ export default async function IntegrationSettingsPage() {
         curseforgeUploadApiToken={prefs.curseforgeUploadApiToken}
         isGitHubConnected={prefs.isGitHubConnected}
         isGoogleConnected={prefs.isGoogleConnected}
+        chreeIdEnabled={isChreeIdProvisioningEnabled()}
+        isChreeIdConnected={prefs.isChreeIdConnected}
         showGithubLinkInitial={user.showGithubLink}
         githubAppAccounts={githubAppAccounts}
         githubAppInstallUrl={getGithubAppInstallUrl()}

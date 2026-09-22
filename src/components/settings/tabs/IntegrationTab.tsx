@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { updateIntegrations, disconnectGitHub, disconnectGoogle, toggleGithubVisibility } from "@/lib/actions/settings";
 import CurseForgeVerify from "./CurseForgeVerify";
 import GithubAppSection from "../GithubAppSection";
+import ChreeIdSection from "../ChreeIdSection";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -26,6 +27,9 @@ interface IntegrationTabProps {
   curseforgeUploadApiToken: string;
   isGitHubConnected: boolean;
   isGoogleConnected: boolean;
+  /** ChreeID の発行が使えるサーバーか */
+  chreeIdEnabled: boolean;
+  isChreeIdConnected: boolean;
   showGithubLinkInitial: boolean;
   /** GitHub App のインストール先アカウント名 */
   githubAppAccounts: string[];
@@ -33,7 +37,7 @@ interface IntegrationTabProps {
   githubAppInstallUrl: string | null;
 }
 
-export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, curseforgeUploadApiToken, isGitHubConnected, isGoogleConnected, showGithubLinkInitial, githubAppAccounts, githubAppInstallUrl }: IntegrationTabProps) {
+export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, curseforgeVerified, curseforgeVerifyCode, curseforgeUploadApiToken, isGitHubConnected, isGoogleConnected, chreeIdEnabled, isChreeIdConnected, showGithubLinkInitial, githubAppAccounts, githubAppInstallUrl }: IntegrationTabProps) {
   const t = useTranslations("Settings");
   const tCommon = useTranslations("Common");
   const { message, flash } = useFlashMessage();
@@ -136,6 +140,13 @@ export default function IntegrationTab({ modrinthApiKey, curseforgeProjectId, cu
         <Button variant="outlined" color="error" onClick={handleDisconnectGoogle}>{t("google.disconnect")}</Button>
       ) : (
         <Button variant="contained" onClick={() => signIn("google")}>{t("google.connect")}</Button>
+      )}
+
+      {chreeIdEnabled && (
+        <>
+          <Divider sx={{ my: 4 }} />
+          <ChreeIdSection isConnected={isChreeIdConnected} />
+        </>
       )}
 
       <StickySaveBar open={form.dirty} saving={form.saving} onSave={form.submit} onDiscard={form.reset} />

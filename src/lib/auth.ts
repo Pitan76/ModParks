@@ -62,6 +62,11 @@ export const authConfig = {
         // 在籍加点の休眠判定に使う。ログイン経路を問わずここを通るため一箇所で足りる
         if (dbUser) {
           await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, dbUser.id)).run();
+
+          // ModParks のアカウントは残したまま、裏で ChreeID を用意しておく。ログインは待たせない
+          const { after } = await import("next/server");
+          const { ensureChreeId } = await import("@/lib/chreeid/provisioner");
+          after(() => ensureChreeId(db, dbUser.id));
         }
 
         if (account?.provider === "github" && profile?.login && dbUser) {

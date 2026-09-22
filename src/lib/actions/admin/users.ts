@@ -6,6 +6,7 @@ import { getAdminDb } from "@/lib/auth-helpers";
 import { users, userProfiles, userSettings } from "@modparks/core/db/schema";
 import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { recordModerationAudit } from "@/lib/actions/moderationAudit";
+import { deactivateChreeId } from "@/lib/chreeid/provisioner";
 
 /** プレミアム付与で受け付ける最大日数（約10年） */
 const MAX_PREMIUM_DAYS = 3650;
@@ -140,6 +141,7 @@ export async function deleteUser(targetUserId: string) {
     email:    user.email ? `deleted_${timestamp}_${user.email}` : null,
     githubId: user.githubId ? `deleted_${timestamp}_${user.githubId}` : null,
   }).where(eq(users.id, targetUserId));
+  await deactivateChreeId(targetUserId);
 
   const profile = await db.select().from(userProfiles).where(eq(userProfiles.userId, targetUserId)).get();
   if (profile) {

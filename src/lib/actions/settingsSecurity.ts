@@ -5,6 +5,7 @@ import { users, userProfiles, userSettings, rateLimits } from "@modparks/core/db
 import { eq, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { hashPassword, comparePassword, validateTotpToken, provisionTotp } from "@/lib/services/auth";
+import { deactivateChreeId, syncChreeIdPassword } from "@/lib/chreeid/provisioner";
 
 /**
  * ユーザー名の変更を行う Server Action。
@@ -93,6 +94,7 @@ export const changePassword = async (oldPass: string, newPass: string, totpToken
 
   const hashed = await hashPassword(newPass, 8);
   await db.update(users).set({ passwordHash: hashed }).where(eq(users.id, userId));
+  await syncChreeIdPassword(userId, hashed);
 
   revalidatePath("/settings");
   return { success: true };
@@ -131,6 +133,8 @@ export const deleteAccount = async (passwordOrToken?: string) => {
     email: scrambledEmail,
     githubId: scrambledGithubId
   }).where(eq(users.id, userId));
+
+  await deactivateChreeId(userId);
 
   const profile = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).get();
   if (profile) {

@@ -15,6 +15,7 @@ import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PolicyIcon from "@mui/icons-material/Policy";
+import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import ShieldIcon from "@mui/icons-material/Shield";
 import { useTranslations } from "next-intl";
@@ -72,6 +73,7 @@ const AdminSidebar = ({ mobileOpen, onMobileClose, collapsed, onToggleCollapse }
         icon: <SettingsIcon />,
         children: [
           { id: "admin-oauth", label: tAdmin("sidebar.oauth"), path: "/admin/oauth", icon: <VpnKeyIcon /> },
+          { id: "admin-chreeid", label: tAdmin("sidebar.chreeid"), path: "/admin/chreeid", icon: <SyncAltIcon /> },
           { id: "admin-config", label: tAdmin("sidebar.config"), path: "/admin/config", icon: <SettingsIcon /> },
           { id: "admin-backup", label: tAdmin("sidebar.backup"), path: "/admin/backup", icon: <BackupIcon /> },
           { id: "admin-usage", label: tAdmin("sidebar.usage"), path: "/admin/usage", icon: <QueryStatsIcon /> },
