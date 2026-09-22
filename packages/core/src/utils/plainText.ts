@@ -83,6 +83,22 @@ export function isStructuralOnly(rawLine: string): boolean {
   return false;
 }
 
+/** Setext 見出しの下線（=== / ---）。前の行を見出しにする */
+const SETEXT_UNDERLINE = /^ {0,3}(=+|-+)\s*$/;
+
+/**
+ * 次の行が下線なら、この行は Setext 見出し（`AAA` + 改行 + `===`）。
+ * ATX 見出し（#）と同じく一覧には出さない。空行の後の `---` は区切り線なので対象外
+ */
+function isSetextHeading(line: string, next: string | undefined): boolean {
+  return line.trim() !== "" && next !== undefined && SETEXT_UNDERLINE.test(next);
+}
+
+/** `===` だけの行。`---` は区切り線として isStructuralOnly が落とす */
+function isSetextUnderline(line: string): boolean {
+  return /^ {0,3}=+\s*$/.test(line);
+}
+
 /**
  * 説明文を一覧カード向けのプレーンテキストへ変換します。
  * 見出し行と箇条書き記号を省き、HTMLを削除したテキスト行のみを連結します。
@@ -101,8 +117,8 @@ export function toPlainDescription(description: string | null | undefined): stri
 
   const lines = processed.split(/\r?\n/);
   const textLines: string[] = [];
-  for (const line of lines) {
-    if (isStructuralOnly(line)) continue;
+  for (const [i, line] of lines.entries()) {
+    if (isStructuralOnly(line) || isSetextHeading(line, lines[i + 1]) || isSetextUnderline(line)) continue;
     const text = stripMarkdownLine(line);
     if (text) textLines.push(text);
   }
