@@ -16,3 +16,20 @@ export const updateProjectIcon = (projectId: string, iconUrl: string) =>
 
 export const transferOwnership = (projectId: string, newOwnerId: string) =>
   sendAppAction<{ success: true }>(`${base(projectId)}/transfer`, "POST", { newOwnerId });
+
+type MediaResult = { success: true } | { error: string };
+
+export const addProjectMedia = (projectId: string, url: string, caption?: string) =>
+  sendAppAction<MediaResult>(`${base(projectId)}/media`, "POST", { url, caption });
+
+export const deleteProjectMedia = (mediaId: string) =>
+  sendAppAction<MediaResult>(`/api/app/media/${encodeURIComponent(mediaId)}`, "DELETE");
+
+export const toggleMediaFeatured = (mediaId: string, featured: boolean) =>
+  sendAppAction<MediaResult>(`/api/app/media/${encodeURIComponent(mediaId)}`, "PATCH", { featured });
+
+export const addProjectMember = (projectId: string, username: string) =>
+  sendAppAction<{ success: true } | { error: string }>(`${base(projectId)}/members`, "POST", { username });
+
+export const removeProjectMember = (projectId: string, userId: string) =>
+  sendAppAction<{ success: true }>(`${base(projectId)}/members/${encodeURIComponent(userId)}`, "DELETE");

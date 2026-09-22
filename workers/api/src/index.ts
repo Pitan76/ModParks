@@ -52,6 +52,11 @@ app.patch("/api/app/projects/:id", patchProject);
 app.patch("/api/app/projects/:id/description", projectSettingsRoutes.patchDescription);
 app.patch("/api/app/projects/:id/icon", projectSettingsRoutes.patchIcon);
 app.post("/api/app/projects/:id/transfer", projectSettingsRoutes.postTransfer);
+app.post("/api/app/projects/:id/media", projectSettingsRoutes.postMedia);
+app.patch("/api/app/media/:id", projectSettingsRoutes.patchMedia);
+app.delete("/api/app/media/:id", projectSettingsRoutes.deleteMedia);
+app.post("/api/app/projects/:id/members", projectSettingsRoutes.postMember);
+app.delete("/api/app/projects/:id/members/:userId", projectSettingsRoutes.deleteMember);
 
 app.post("/api/app/ideas", ideaRoutes.postIdea);
 app.patch("/api/app/ideas/:id", ideaRoutes.patchIdea);
@@ -77,6 +82,10 @@ for (const path of [
   "/api/app/projects/:id/description",
   "/api/app/projects/:id/icon",
   "/api/app/projects/:id/transfer",
+  "/api/app/projects/:id/media",
+  "/api/app/media/:id",
+  "/api/app/projects/:id/members",
+  "/api/app/projects/:id/members/:userId",
   "/api/app/ideas",
   "/api/app/ideas/:id",
   "/api/app/ideas/:id/status",

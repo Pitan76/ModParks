@@ -2,10 +2,10 @@
 
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
-import { projects, projectMembers, users, userProfiles } from "@modparks/core/db/schema";
-import { eq, and } from "drizzle-orm";
+import { projectMembers, users, userProfiles } from "@modparks/core/db/schema";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { recordDeletion, buildRecordKey } from "@modparks/core/backup/tombstone";
+import * as members from "@modparks/core/projects/members";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { findProjectPostById } from "@modparks/core/queries/post";
 
@@ -54,66 +54,20 @@ export async function getProjectMembers(projectId: string) {
   return result;
 }
 
-/**
- * プロジェクトにメンバーを追加する
- */
+/** プロジェクトにメンバーを追加する Server Action。本体は core/projects/members.ts */
 export async function addProjectMember(projectId: string, username: string) {
-  const t = await getServerErrors();
   const { db, session } = await getAuthenticatedDb();
+  const result = await members.addProjectMember(db, await getServerErrors(), session.user.id, projectId, username);
+  if ("success" in result) revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
 
-  // 権限チェック（オーナーのみ追加可能）
-  const project = await findProjectPostById(db, projectId);
-  if (!project || project.authorId !== session.user.id) {
-    throw new Error("Forbidden: Only the owner can add members");
-  }
-
-  // 追加対象ユーザーを探す
-  const targetProfile = await db.select().from(userProfiles).where(eq(userProfiles.username, username)).get();
-  if (!targetProfile) {
-    return { error: t("member.userNotFound") };
-  }
-  const targetUser = { id: targetProfile.userId };
-
-  if (targetUser.id === project.authorId) {
-    return { error: t("member.alreadyOwner") };
-  }
-
-  // 既存メンバーかチェック
-  const existing = await db.select().from(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, targetUser.id))).get();
-  if (existing) {
-    return { error: t("member.alreadyMember") };
-  }
-
-  // 追加
-  await db.insert(projectMembers).values({
-    projectId,
-    userId: targetUser.id,
-    role: "collaborator",
-  });
-
-  revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
-  return { success: true };
+  return result;
 }
 
-/**
- * プロジェクトからメンバーを削除する
- */
+/** プロジェクトからメンバーを削除する Server Action。本体は core/projects/members.ts */
 export async function removeProjectMember(projectId: string, userId: string) {
   const { db, session } = await getAuthenticatedDb();
-
-  // 権限チェック（オーナー、もしくは自分自身なら削除可能）
-  const project = await findProjectPostById(db, projectId);
-  if (!project) {
-    throw new Error("Project not found");
-  }
-
-  if (project.authorId !== session.user.id && userId !== session.user.id) {
-    throw new Error("Forbidden");
-  }
-
-  await db.delete(projectMembers).where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, userId)));
-  await recordDeletion(db, "project_members", buildRecordKey(projectId, userId));
+  const result = await members.removeProjectMember(db, session.user.id, projectId, userId);
 
   revalidatePath(`/[locale]/projects/[slug]/edit`, "page");
-  return { success: true };
+  return result;
 }
