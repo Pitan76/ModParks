@@ -8,12 +8,8 @@
 import { githubInstallations } from "@modparks/core/db/schema";
 import { and, eq } from "drizzle-orm";
 import { normalizeGithubRepo } from "@modparks/core/utils/github";
-import type { Database } from "@/lib/db";
-import {
-  createInstallationToken,
-  findInstallationIdForRepo,
-  isGithubAppConfigured,
-} from "@/lib/utils/githubApp";
+import type { Database } from "@modparks/core/db/client";
+import { createInstallationToken, findInstallationIdForRepo, type GithubAppConfig } from "@modparks/core/github/app";
 
 /**
  * repo に対して userId が使えるトークンを返す。
@@ -22,16 +18,18 @@ import {
  */
 export async function getRepoAccessToken(
   db: Database,
+  /** App 未設定なら null。呼び出し側が環境から作る（Next: nextGithubAppConfig） */
+  app: GithubAppConfig | null,
   userId: string | null | undefined,
   repo: string
 ): Promise<string | undefined> {
-  if (!userId || !isGithubAppConfigured()) return undefined;
+  if (!userId || !app) return undefined;
 
   const normalized = normalizeGithubRepo(repo);
   if (!normalized) return undefined;
 
   try {
-    const installationId = await findInstallationIdForRepo(normalized);
+    const installationId = await findInstallationIdForRepo(app, normalized);
     if (!installationId) return undefined;
 
     const owned = await db
@@ -45,7 +43,7 @@ export async function getRepoAccessToken(
     // 他人のインストールには絶対に乗らない
     if (!owned) return undefined;
 
-    return await createInstallationToken(installationId, normalized);
+    return await createInstallationToken(app, installationId, normalized);
   } catch (e: unknown) {
     // トークンが取れなくても公開リポジトリなら読めるので、ここでは握って続行する
     console.error("Failed to resolve GitHub App token for repo:", e);

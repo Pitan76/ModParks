@@ -1,12 +1,12 @@
 /**
  * GitHub Release のアセットを modparks のバージョンとして取り込むための下請け。
  *
- * Server Action 本体（actions/github.ts）から分けているのは、ここが
+ * 取り込み本体（versions/githubImport.ts）から分けているのは、ここが
  * 「どの Release を選ぶか」「ファイルをどこに置くか」だけを扱い、
  * 権限確認や DB 書き込みを持たないため。
  */
 import { createId } from "@paralleldrive/cuid2";
-import { buildR2Key, getR2PublicUrl, getR2Bucket, uploadToR2 } from "@/lib/r2";
+import { buildR2Key, r2PublicUrl, uploadToR2 } from "@modparks/core/r2";
 import { isAllowedExternalUrl } from "@modparks/core/validations";
 import {
   fetchGithubReleases,
@@ -14,7 +14,11 @@ import {
   downloadGithubAsset,
   type GithubRelease,
   type GithubReleaseAsset,
+  type GithubServerToken,
 } from "@modparks/core/utils/github";
+
+/** 取り込み先の R2。束縛は環境から取るものなので呼び出し側が渡す */
+export type AssetStorage = { getBucket: () => Promise<R2Bucket>; publicUrl: string | undefined };
 
 /** Worker のメモリ制約を踏まえたダウンロード/解析の上限 */
 export const MAX_ASSET_SIZE = 50 * 1024 * 1024; // 50MB
@@ -35,23 +39,26 @@ export async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
 /** 取り込み対象の Release を決定する。prefetch 済みならそれを優先する */
 export async function resolveRelease(
   repo: string,
-  releaseId?: number,
-  prefetchedRelease?: GithubRelease | null,
-  repoToken?: string
+  releaseId: number | undefined,
+  prefetchedRelease: GithubRelease | null | undefined,
+  repoToken: string | undefined,
+  serverToken: GithubServerToken
 ): Promise<GithubRelease | null> {
   if (prefetchedRelease !== undefined) return prefetchedRelease;
   if (releaseId != null) {
-    const all = await fetchGithubReleases(repo, repoToken);
+    const all = await fetchGithubReleases(repo, repoToken, serverToken);
     return all.find((r) => r.id === releaseId) ?? null;
   }
-  return fetchLatestGithubRelease(repo, repoToken);
+  return fetchLatestGithubRelease(repo, repoToken, serverToken);
 }
 
 /** アセットをダウンロードして R2 へ格納する */
 export async function storeAssetToR2(
+  storage: AssetStorage,
   projectSlug: string,
   asset: GithubReleaseAsset,
-  repoToken?: string
+  repoToken: string | undefined,
+  serverToken: GithubServerToken
 ): Promise<ImportedFile | { error: string }> {
   if (asset.size > MAX_ASSET_SIZE) {
     return { error: `Asset is too large to import (max ${MAX_ASSET_SIZE / 1024 / 1024}MB).` };
@@ -59,7 +66,7 @@ export async function storeAssetToR2(
 
   let arrayBuffer: ArrayBuffer;
   try {
-    arrayBuffer = await downloadGithubAsset(asset, repoToken);
+    arrayBuffer = await downloadGithubAsset(asset, repoToken, serverToken);
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to download release asset." };
   }
@@ -72,9 +79,8 @@ export async function storeAssetToR2(
 
   try {
     const fileSha256 = await sha256Hex(arrayBuffer);
-    const bucket = await getR2Bucket();
-    await uploadToR2(bucket, key, arrayBuffer, contentType);
-    return { fileUrl: getR2PublicUrl(key), fileSize: asset.size, fileSha256, r2Key: key };
+    await uploadToR2(await storage.getBucket(), key, arrayBuffer, contentType);
+    return { fileUrl: r2PublicUrl(storage.publicUrl, key), fileSize: asset.size, fileSha256, r2Key: key };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to store the release file." };
   }

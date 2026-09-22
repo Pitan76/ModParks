@@ -52,16 +52,14 @@ export function normalizeGithubRepo(input: string): string | null {
 }
 
 /**
- * 明示的にトークンが渡されなかった場合に使う既定トークン。
+ * 明示的にトークンが渡されなかった場合に使う既定トークン（serverToken 引数、秘密値 GITHUB_TOKEN）。
  * 未認証だと 60 req/hour（送信元 IP 単位）で、Worker の共有 IP ではすぐ枯渇するため、
  * 公開リポジトリの読み取り専用トークンを付けて 5000 req/hour にする。
  *
  * ここで GITHUB_CONFIG_TOKEN（設定リポジトリへの write 権限を持つ）にフォールバックしてはいけない。
  * 対象リポジトリはユーザーが任意に指定できるため、特権トークンをそこへ送ることになる。
  */
-function defaultGithubToken(): string | undefined {
-  return process.env.GITHUB_TOKEN || undefined;
-}
+export type GithubServerToken = string | undefined;
 
 function ghHeaders(token?: string): HeadersInit {
   const headers: Record<string, string> = {
@@ -104,7 +102,7 @@ async function describeGithubThrottle(res: Response): Promise<string> {
 }
 
 /** 指定リポジトリの Release 一覧を取得する（新しい順） */
-export async function fetchGithubReleases(repo: string, token?: string): Promise<GithubRelease[]> {
+export async function fetchGithubReleases(repo: string, token: string | undefined, serverToken: GithubServerToken): Promise<GithubRelease[]> {
   const normalized = normalizeGithubRepo(repo);
   if (!normalized) throw new Error("Invalid GitHub repository. Use 'owner/repo' format.");
 
@@ -112,7 +110,7 @@ export async function fetchGithubReleases(repo: string, token?: string): Promise
   // データキャッシュ経由で他のユーザーへ渡らないようキャッシュしない。
   const isUserToken = Boolean(token);
   const res = await fetch(`${GITHUB_API}/repos/${normalized}/releases?per_page=30`, {
-    headers: ghHeaders(token ?? defaultGithubToken()),
+    headers: ghHeaders(token ?? serverToken),
     ...(isUserToken ? { cache: "no-store" as const } : { next: { revalidate: 300 } }),
   });
 
@@ -133,8 +131,8 @@ export async function fetchGithubReleases(repo: string, token?: string): Promise
 }
 
 /** 指定リポジトリの最新の（下書きでない）Release を取得する。プレリリースはスキップ */
-export async function fetchLatestGithubRelease(repo: string, token?: string): Promise<GithubRelease | null> {
-  const releases = await fetchGithubReleases(repo, token);
+export async function fetchLatestGithubRelease(repo: string, token: string | undefined, serverToken: GithubServerToken): Promise<GithubRelease | null> {
+  const releases = await fetchGithubReleases(repo, token, serverToken);
   const stable = releases.find((r) => !r.prerelease);
   return stable ?? releases[0] ?? null;
 }
@@ -158,8 +156,8 @@ export function pickPrimaryAssets(release: GithubRelease): GithubReleaseAsset[] 
  * トークンがある場合は API のアセット URL を octet-stream で叩く。
  * browser_download_url は非公開リポジトリでは認証が通らないため。
  */
-export async function downloadGithubAsset(asset: GithubReleaseAsset, token?: string): Promise<ArrayBuffer> {
-  const effective = token ?? defaultGithubToken();
+export async function downloadGithubAsset(asset: GithubReleaseAsset, token: string | undefined, serverToken: GithubServerToken): Promise<ArrayBuffer> {
+  const effective = token ?? serverToken;
   const useApiUrl = Boolean(effective && asset.url);
 
   let res = await fetch(useApiUrl ? asset.url : asset.browser_download_url, {

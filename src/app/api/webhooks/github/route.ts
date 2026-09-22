@@ -1,8 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getDb, getD1 } from "@/lib/db";
 import { posts, projects } from "@modparks/core/db/schema";
 import { eq } from "drizzle-orm";
-import { importGithubReleaseSystem } from "@/lib/actions/github";
+import { importGithubReleaseSystem, type GithubImportDeps } from "@modparks/core/versions/githubImport";
+import type { GithubRelease } from "@modparks/core/utils/github";
+import { getRepoAccessToken } from "@modparks/core/github/repoAccess";
+import { nextScanContext } from "@/lib/actions/versionScan";
+import { nextGithubCredentials } from "@/lib/utils/githubCredentials";
+import { getServerErrors } from "@/lib/i18n/serverErrors";
+import { getR2Bucket } from "@/lib/r2";
+import { revalidatePath } from "next/cache";
 import { toProjectPost } from "@modparks/core/queries/postRow";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -110,12 +117,13 @@ export async function POST(request: Request) {
 
     // 複数のプロジェクトが同じリポジトリを参照している場合は、すべて同期する
     // GitHub APIの呼び出しを削減するため、ここでReleaseを1回取得して共有する
-    let prefetchedRelease: any = null;
+    const github = nextGithubCredentials();
+    let prefetchedRelease: GithubRelease | null = null;
     try {
       const { fetchGithubReleases, normalizeGithubRepo } = await import("@modparks/core/utils/github");
       const repo = normalizeGithubRepo(repositoryFullName);
       if (repo) {
-        const all = await fetchGithubReleases(repo);
+        const all = await fetchGithubReleases(repo, undefined, github.serverToken);
         prefetchedRelease = all.find((r) => r.id === releaseId) ?? null;
       }
     } catch (err) {
@@ -125,21 +133,23 @@ export async function POST(request: Request) {
 
     // 非公開リポジトリの場合は上の prefetch（未認証）が失敗するため、
     // 所有者がインストールした GitHub App のトークンでプロジェクトごとに取得させる。
-    const { getRepoAccessToken } = await import("@/lib/utils/githubRepoAccess");
+    const deps: GithubImportDeps = {
+      scan: await nextScanContext(db),
+      t: await getServerErrors(),
+      github,
+      getBucket: getR2Bucket,
+      defer: (task) => after(task),
+    };
 
     const results = await Promise.allSettled(
       projectList.map(async (project) => {
         const repoToken = prefetchedRelease
           ? undefined
-          : await getRepoAccessToken(db, project.authorId, repositoryFullName);
+          : await getRepoAccessToken(db, github.app, project.authorId, repositoryFullName);
         // prefetch に失敗した場合は undefined を渡して個別取得させる（null は「Release 無し」の意味になる）
-        return importGithubReleaseSystem(
-          db,
-          project,
-          releaseId,
-          prefetchedRelease ?? undefined,
-          repoToken
-        );
+        const result = await importGithubReleaseSystem(deps, project, releaseId, prefetchedRelease ?? undefined, repoToken);
+        if ("success" in result) revalidatePath(`/projects/${project.slug}`);
+        return result;
       })
     );
 
@@ -151,7 +161,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, processed: projectList.length });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("GitHub Webhook Error:", e);
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
