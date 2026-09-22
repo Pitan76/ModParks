@@ -1,6 +1,7 @@
 import { Notifications as ja } from "../../../src/lang/ja_jp.json";
 import { Notifications as en } from "../../../src/lang/en_us.json";
 import type { NotificationMessage } from "@modparks/core/notifications/dispatch";
+import type { SystemCommentMessage } from "@modparks/core/versions/ideaLink";
 
 /**
  * ユーザー宛て通知の Discord 文言（modparks-api 側）。
@@ -17,3 +18,9 @@ export const notificationMessage: NotificationMessage = async (locale, type, pay
 
   return template.replace(/\{(\w+)\}/g, (_, key: string) => String(payload[key as keyof typeof payload] ?? ""));
 };
+
+const SYSTEM_COMMENTS: Record<"ja" | "en", Record<string, string>> = { ja: ja.systemComment, en: en.systemComment };
+
+/** 自動コメントの文言（modparks-api 側）。差し込みの規則は上と同じ */
+export const systemCommentMessage: SystemCommentMessage = async (locale, key, values) =>
+  (SYSTEM_COMMENTS[locale][key] ?? "").replace(/\{(\w+)\}/g, (_, name: string) => values[name] ?? "");

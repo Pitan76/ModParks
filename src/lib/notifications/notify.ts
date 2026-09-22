@@ -1,6 +1,7 @@
 import type { ProjectPost } from "@modparks/core/types/post";
 import type { NotificationType, NotificationPayload } from "@modparks/core/notifications/types";
 import * as core from "@modparks/core/notifications/dispatch";
+import type { SystemCommentMessage } from "@modparks/core/versions/ideaLink";
 import { getNextPushSender } from "@/lib/services/push";
 import type { Database } from "@/lib/db";
 
@@ -53,6 +54,14 @@ const nextNotificationMessage: core.NotificationMessage = async (locale, type, p
   const t = await getTranslations({ locale, namespace: "Notifications.message" });
 
   return t(type, payload as Record<string, string>);
+};
+
+/** 自動コメントの文言（Next 側） */
+export const nextSystemCommentMessage: SystemCommentMessage = async (locale, key, values) => {
+  const { getTranslations } = await import("next-intl/server");
+  const t = await getTranslations({ locale, namespace: "Notifications.systemComment" });
+
+  return t(key, values);
 };
 
 /** 単一受信者向けイベント（コメント・いいね・お気に入り・フォロー・リスト追加） */

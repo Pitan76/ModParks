@@ -20,6 +20,13 @@ export interface ApiWorkerEnv {
    * `wrangler secret put AUTH_SECRET --name modparks-api` で設定する。
    */
   AUTH_SECRET: string;
+  /** modparks-jar への Service Binding。アップロード後のファイル検査に使う */
+  JAR: Fetcher;
+  /**
+   * 管理者通知（悪性ファイル検出など）の宛先。メイン Worker と同じ値。
+   * `wrangler secret put DISCORD_WEBHOOK_URL --name modparks-api` で設定する。
+   */
+  DISCORD_WEBHOOK_URL?: string;
   /** modparks-push への Service Binding。公開時の通知を Web Push で送る */
   PUSH?: Fetcher;
   VAPID_PUBLIC_KEY?: string;

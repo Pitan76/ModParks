@@ -4,7 +4,7 @@ import type { Database } from "@modparks/core/db/client";
 import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, projectDependencies } from "@modparks/core/db/schema";
 import { insertVersionRecord } from "@modparks/core/utils/versionRecord";
 import { notifyNewVersion } from "@modparks/core/notifications/dispatch";
-import { createSystemCommentForResolvedIdea } from "@modparks/core/versions/ideaLink";
+import { createSystemCommentForResolvedIdea, type SystemCommentMessage } from "@modparks/core/versions/ideaLink";
 import { pushVersionToExternalPlatforms } from "@modparks/core/versions/externalSync";
 import { scanVersionFile, type VersionScanContext } from "@modparks/core/versions/scan";
 import { createVersionSchema, updateVersionSchema, isAllowedExternalUrl } from "@modparks/core/validations";
@@ -27,6 +27,7 @@ export type VersionDeps = {
   /** 検査・通知に要る部品一式。db もここ（scan.notify.db）から取る */
   scan: VersionScanContext;
   t: ServerErrorTranslator;
+  systemComment: SystemCommentMessage;
   /**
    * 応答後に回す処理を預ける。Next は after()、modparks-api は waitUntil に渡す。
    * 検査は jar Worker の往復で遅いため、アップロードの応答を待たせない
@@ -68,7 +69,7 @@ async function linkResolvedIdea(deps: VersionDeps, ideaId: string, versionId: st
   const { db } = deps.scan.notify;
   await db.insert(versionIdeas).values({ versionId, ideaId }).run();
   await db.update(ideas).set({ status: "fulfilled" }).where(eq(ideas.id, ideaId)).run();
-  await createSystemCommentForResolvedIdea(deps.scan.notify, ideaId, versionId, versionNumber, projectSlug, userId);
+  await createSystemCommentForResolvedIdea({ ...deps.scan.notify, systemComment: deps.systemComment }, ideaId, versionId, versionNumber, projectSlug, userId);
 }
 
 /** 新しいバージョン（ファイル）を登録する */

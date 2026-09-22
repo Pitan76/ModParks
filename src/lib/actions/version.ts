@@ -3,6 +3,7 @@
 import * as core from "@modparks/core/versions/manage";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { nextScanContext } from "@/lib/actions/versionScan";
+import { nextSystemCommentMessage } from "@/lib/notifications/notify";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { assertFeatureEnabled } from "@/lib/runtime/guard";
 import type { Database } from "@/lib/db";
@@ -18,6 +19,7 @@ async function versionDeps(db: Database): Promise<core.VersionDeps> {
   return {
     scan: await nextScanContext(db),
     t: await getServerErrors(),
+    systemComment: nextSystemCommentMessage,
     defer: (task) => after(task),
   };
 }

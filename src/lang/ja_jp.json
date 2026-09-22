@@ -2205,6 +2205,9 @@
     "emptyProjects": "このリストにはまだプロジェクトが追加されていません。"
   },
   "Notifications": {
+    "systemComment": {
+      "ideaResolved": "このアイデアはバージョン [{versionNumber}](/projects/{projectSlug}) で解決されました。"
+    },
     "title": "通知",
     "empty": "通知はありません。",
     "viewAll": "すべて表示",

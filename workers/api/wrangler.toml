@@ -44,6 +44,11 @@ bucket_name = "modparks-storage"
 binding = "PUSH"
 service = "modparks-push"
 
+# JAR 解析サイドカー。アップロード後のファイル検査に使う（jszip はあちらにだけ載る）
+[[services]]
+binding = "JAR"
+service = "modparks-jar"
+
 [vars]
 NEXT_PUBLIC_APP_URL = "https://modparks.pitan76.net"
 R2_PUBLIC_URL       = "https://files.modparks.pitan76.net"
@@ -54,6 +59,7 @@ VAPID_PUBLIC_KEY    = "BF-bDjyywR9aPnv3tY_CqAyonXqq0qBPvkt0Ycr5NSoBXVJOR_P6FznPI
 #   AUTH_SECRET        セッション Cookie の復号鍵。違うとログイン中の全員が未ログイン扱いになる
 #   VAPID_PRIVATE_KEY  Web Push の署名鍵。無ければプッシュだけ送らない（アプリ内通知は入る）
 #   VAPID_SUBJECT      同上
+#   DISCORD_WEBHOOK_URL 管理者通知（悪性ファイル検出など）の宛先。無ければ管理者通知だけ送らない
 
 [observability]
 enabled = true
