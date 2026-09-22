@@ -60,6 +60,8 @@ VAPID_PUBLIC_KEY    = "BF-bDjyywR9aPnv3tY_CqAyonXqq0qBPvkt0Ycr5NSoBXVJOR_P6FznPI
 #   VAPID_PRIVATE_KEY  Web Push の署名鍵。無ければプッシュだけ送らない（アプリ内通知は入る）
 #   VAPID_SUBJECT      同上
 #   DISCORD_WEBHOOK_URL 管理者通知（悪性ファイル検出など）の宛先。無ければ管理者通知だけ送らない
+#   GITHUB_TOKEN       GitHub 取り込みの公開リポジトリ読み取り用。無くても動くがレート制限が厳しい
+#   GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY  非公開リポジトリの取り込み用。無ければ公開リポジトリのみ
 
 [observability]
 enabled = true

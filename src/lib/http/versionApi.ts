@@ -1,5 +1,7 @@
 import type * as manage from "@modparks/core/versions/manage";
 import type { BatchAddMcVersionData } from "@modparks/core/versions/batch";
+import type * as githubImport from "@modparks/core/versions/githubImport";
+import type { GithubImportMode } from "@modparks/core/utils/github";
 import type { ActionResult } from "@modparks/core/actionResult";
 import { sendAppAction } from "@/lib/http/appApi";
 
@@ -36,3 +38,9 @@ export const batchAddMcVersion = (
   sendAppAction<ActionResult<BatchAddMcVersionData>>(`${base(projectSlug)}/batch-mc-versions`, "POST", {
     versionIds, mcVersions, syncModrinth, syncCurseforge,
   });
+
+/** 連携している GitHub リポジトリの Release から取り込む。releaseId 未指定なら最新の安定版 */
+export const importGithubRelease = (projectSlug: string, releaseId?: number, mode?: GithubImportMode) =>
+  sendAppAction<Result<typeof githubImport.importGithubRelease>>(
+    `/api/app/projects/${encodeURIComponent(projectSlug)}/github-import`, "POST", { releaseId, mode },
+  );

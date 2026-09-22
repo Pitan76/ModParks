@@ -64,6 +64,7 @@ app.post("/api/app/projects/:slug/versions/batch-mc-versions", versionRoutes.pos
 app.patch("/api/app/projects/:slug/versions/:id", versionRoutes.patchVersion);
 app.delete("/api/app/projects/:slug/versions/:id", versionRoutes.deleteVersion);
 app.patch("/api/app/projects/:slug/versions/:id/archive", versionRoutes.patchVersionArchive);
+app.post("/api/app/projects/:slug/github-import", versionRoutes.postGithubImport);
 
 // 上に無いメソッドは 405。登録順に照合されるので、実装の後ろに置く
 const methodNotAllowed = (c: Context) => c.body(null, 405);
@@ -79,6 +80,7 @@ for (const path of [
   "/api/app/projects/:slug/versions/batch-mc-versions",
   "/api/app/projects/:slug/versions/:id",
   "/api/app/projects/:slug/versions/:id/archive",
+  "/api/app/projects/:slug/github-import",
 ]) {
   app.all(path, methodNotAllowed);
 }

@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import DownloadIcon from "@mui/icons-material/Download";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/routing";
-import { importGithubRelease } from "@/lib/actions/github";
+import { importGithubRelease } from "@/lib/http/versionApi";
 
 type ProjectVersionCellProps = {
   projectId?: string;

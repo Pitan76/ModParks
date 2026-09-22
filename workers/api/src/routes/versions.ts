@@ -2,6 +2,9 @@ import type { Context } from "hono";
 import * as manage from "@modparks/core/versions/manage";
 import * as lifecycle from "@modparks/core/versions/lifecycle";
 import * as batch from "@modparks/core/versions/batch";
+import * as githubImport from "@modparks/core/versions/githubImport";
+import { githubAppConfig } from "@modparks/core/github/app";
+import type { GithubImportMode } from "@modparks/core/utils/github";
 import { createJarClient } from "@modparks/core/jar/client";
 import { isFeatureAvailable, readRuntimeConfig } from "@modparks/core/runtime/config";
 import type { Database } from "@modparks/core/db/client";
@@ -109,4 +112,24 @@ export async function postBatchMcVersions(c: Ctx) {
     stringList(body.versionIds), stringList(body.mcVersions),
     body.syncModrinth === true, body.syncCurseforge === true,
   ));
+}
+
+type ImportBody = { releaseId: unknown; mode: unknown };
+
+/** POST /api/app/projects/:slug/github-import — 本文は { releaseId?, mode? } */
+export async function postGithubImport(c: Ctx) {
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
+
+  const body = await readJson<ImportBody>(c);
+  const releaseId = typeof body.releaseId === "number" ? body.releaseId : undefined;
+  const mode = body.mode === "file" || body.mode === "link" ? (body.mode as GithubImportMode) : undefined;
+  const { scan, t, defer } = versionDeps(c, auth.db);
+  const deps: githubImport.GithubImportDeps = {
+    scan, t, defer,
+    github: { serverToken: c.env.GITHUB_TOKEN, app: githubAppConfig(c.env.GITHUB_APP_ID, c.env.GITHUB_APP_PRIVATE_KEY) },
+    getBucket: async () => c.env.modparks_storage,
+  };
+
+  return respond(c, await githubImport.importGithubRelease(deps, auth.userId, c.req.param("slug")!, releaseId, mode));
 }

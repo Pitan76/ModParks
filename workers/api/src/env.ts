@@ -27,6 +27,15 @@ export interface ApiWorkerEnv {
    * `wrangler secret put DISCORD_WEBHOOK_URL --name modparks-api` で設定する。
    */
   DISCORD_WEBHOOK_URL?: string;
+  /**
+   * GitHub の公開リポジトリ読み取り用トークン。レート制限を緩めるため。メイン Worker と同じ値。
+   * `wrangler secret put GITHUB_TOKEN --name modparks-api`
+   */
+  GITHUB_TOKEN?: string;
+  /** 非公開リポジトリ用 GitHub App の ID。`wrangler secret put GITHUB_APP_ID --name modparks-api` */
+  GITHUB_APP_ID?: string;
+  /** 同 App の秘密鍵（PKCS#8）。`wrangler secret put GITHUB_APP_PRIVATE_KEY --name modparks-api` */
+  GITHUB_APP_PRIVATE_KEY?: string;
   /** modparks-push への Service Binding。公開時の通知を Web Push で送る */
   PUSH?: Fetcher;
   VAPID_PUBLIC_KEY?: string;
