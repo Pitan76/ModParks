@@ -1,4 +1,4 @@
-import type { JarSource } from "./types";
+import type { JarSource } from "@modparks/core/jar/types";
 import type { JarWorkerEnv } from "./env";
 import { assertInputSize, InputTooLargeError, MAX_INPUT_BYTES } from "./limits";
 

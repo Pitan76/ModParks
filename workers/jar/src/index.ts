@@ -17,7 +17,7 @@ import type {
   ScanJarRequest,
   ScanJarResult,
   ExtractBuildInfo,
-} from "./types";
+} from "@modparks/core/jar/types";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {

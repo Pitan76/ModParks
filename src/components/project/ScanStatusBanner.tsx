@@ -13,7 +13,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { createScanAppeal } from "@/lib/actions/scanAppeal";
-import type { ScanFinding } from "@/workers/jar/src/types";
+import type { ScanFinding } from "@modparks/core/jar/types";
 
 export type ScanStatusBannerProps = {
   versionId: string;

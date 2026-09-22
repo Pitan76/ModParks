@@ -11,7 +11,7 @@ import TextField from "@mui/material/TextField";
 import { Link } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 import { reviewScanAppeal } from "@/lib/actions/scanAppeal";
-import type { ScanFinding } from "@/workers/jar/src/types";
+import type { ScanFinding } from "@modparks/core/jar/types";
 
 type AppealRow = {
   appeal: {

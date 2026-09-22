@@ -1,74 +1,35 @@
-import type {
-  ExtractBuildInfo,
-  ExtractRecipesRequest,
-  ExtractRecipesResult,
-  JarSource,
-  ParseModRequest,
-  ParsedModInfo,
-  ScanJarRequest,
-  ScanJarResult,
-} from "@/workers/jar/src/types";
+import { createJarClient } from "@modparks/core/jar/client";
+import type { JarSource, ParsedModInfo, ExtractRecipesResult, ScanJarResult } from "@modparks/core/jar/types";
 
 export type { JarSource, ParsedModInfo, ExtractRecipesResult, ScanJarResult };
 
 /**
- * modparks-jar Worker のクライアント。
+ * modparks-jar Worker のクライアント（Next 側のアダプタ）。
  *
- * JAR 解析には jszip が必要だが、これをメインアプリに載せると Worker の
- * 3 MiB 制限を超えるため、解析処理はサイドカー Worker に隔離している。
- * ここは Service Binding 越しの呼び出しだけを担い、jszip を一切参照しない。
+ * 本体は core/jar/client.ts にあり、ここは Service Binding をアンビエントに
+ * 解決して渡すだけ。既存の呼び出し元（parseModJar などを直接 import している）の
+ * ために同じ名前で公開している。
  */
-async function getJarWorker(): Promise<Fetcher> {
-  const env = await getWorkerEnv();
-  const jar = (env as unknown as { JAR?: Fetcher }).JAR;
-  if (!jar) throw new Error("JAR service binding not found (deploy modparks-jar first)");
-  return jar;
-}
-
 async function getWorkerEnv(): Promise<unknown> {
   if (process.env.NODE_ENV === "development" && process.release?.name === "node") {
     const { getCachedPlatformProxy } = await import("@/lib/proxy");
     return (await getCachedPlatformProxy()).env;
   }
   const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+
   return (await getCloudflareContext({ async: true })).env;
 }
 
-/** Service Binding に POST し、JSON を返す。Worker 側のエラーは例外として伝播させる。 */
-async function callJarWorker<T>(path: string, body: unknown): Promise<T> {
-  const jar = await getJarWorker();
-  const res = await jar.fetch(`https://modparks-jar${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+async function getJarWorker(): Promise<Fetcher> {
+  const jar = ((await getWorkerEnv()) as { JAR?: Fetcher }).JAR;
+  if (!jar) throw new Error("JAR service binding not found (deploy modparks-jar first)");
 
-  const payload = (await res.json()) as T & { error?: string };
-  if (!res.ok) throw new Error(payload.error || `jar worker returned ${res.status}`);
-  return payload;
+  return jar;
 }
 
-/** JAR からバージョン・対応ローダー・対応MCバージョンを検出する */
-export function parseModJar(source: JarSource): Promise<ParsedModInfo> {
-  return callJarWorker<ParsedModInfo>("/parse-mod", { source } satisfies ParseModRequest);
-}
+/** Next のリクエスト中に使う JarClient */
+export const nextJarClient = createJarClient(getJarWorker);
 
-/** JAR からレシピ類を抽出し、CDN または R2 へアップロードする */
-export function extractRecipes(
-  source: JarSource,
-  cdnUrl: string,
-  useCdnApi: boolean,
-  build?: ExtractBuildInfo
-): Promise<ExtractRecipesResult> {
-  return callJarWorker<ExtractRecipesResult>("/extract-recipes", {
-    source,
-    cdnUrl,
-    useCdnApi,
-    build,
-  } satisfies ExtractRecipesRequest);
-}
-
-/** JAR をヒューリスティックに検査し、マルウェア的な構造の兆候を返す */
-export function scanJar(source: JarSource): Promise<ScanJarResult> {
-  return callJarWorker<ScanJarResult>("/scan-jar", { source } satisfies ScanJarRequest);
-}
+export const parseModJar = nextJarClient.parseModJar;
+export const extractRecipes = nextJarClient.extractRecipes;
+export const scanJar = nextJarClient.scanJar;

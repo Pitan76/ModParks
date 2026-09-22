@@ -1,5 +1,5 @@
 import type { NsBucket, RecipeSummary } from "./recipeExtract";
-import type { ExtractBuildInfo } from "./types";
+import type { ExtractBuildInfo } from "@modparks/core/jar/types";
 
 /** エントリ数と（任意で）バイト数を上限にレコードを分割する */
 function chunkRecord(

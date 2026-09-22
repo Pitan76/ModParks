@@ -3,7 +3,7 @@ import { parse as parseToml } from "smol-toml";
 import semver from "semver";
 import { MC_VERSIONS } from "@modparks/core/data/minecraftVersions";
 import { AVAILABLE_LOADERS } from "@modparks/core/data/loaderIds";
-import type { ParsedModInfo } from "./types";
+import type { ParsedModInfo } from "@modparks/core/jar/types";
 
 /** ローダー検出器1つ分の結果。version は見つかった場合のみ。 */
 interface Detection {

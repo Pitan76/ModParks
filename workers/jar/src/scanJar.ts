@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import type { ScanFinding, ScanJarResult, ScanLevel } from "./types";
+import type { ScanFinding, ScanJarResult, ScanLevel } from "@modparks/core/jar/types";
 import { MAX_ENTRY_BYTES, uncompressedSize } from "./limits";
 
 type Zip = Awaited<ReturnType<JSZip["loadAsync"]>>;
