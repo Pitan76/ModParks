@@ -1,7 +1,7 @@
 "use client";
 
 import { analyzeJar } from "@/lib/utils/jarExtractor";
-import { extractRecipesFromVersion, uploadClientExtractedRecipes } from "@/lib/actions/versionRecipe";
+import { extractRecipesFromVersion, uploadClientExtractedRecipes } from "@/lib/http/versionApi";
 
 export type RecipeExtractionResult = { ok: true } | { ok: false; message: string };
 

@@ -56,6 +56,9 @@ service = "modparks-jar"
 [vars]
 NEXT_PUBLIC_APP_URL = "https://modparks.pitan76.net"
 R2_PUBLIC_URL       = "https://files.modparks.pitan76.net"
+# レシピ CDN。メインと同じ値
+NEXT_PUBLIC_RECIPE_CDN_URL = "https://recipe.modparks.pitan76.net"
+USE_RECIPE_CDN_API  = "true"
 # メイン Worker と同じ値。公開鍵なので秘匿不要
 VAPID_PUBLIC_KEY    = "BF-bDjyywR9aPnv3tY_CqAyonXqq0qBPvkt0Ycr5NSoBXVJOR_P6FznPIVd4sdoV3E1LhcngfMI0nBnzezsTDhE"
 
@@ -67,6 +70,7 @@ VAPID_PUBLIC_KEY    = "BF-bDjyywR9aPnv3tY_CqAyonXqq0qBPvkt0Ycr5NSoBXVJOR_P6FznPI
 #   GITHUB_TOKEN       GitHub 取り込みの公開リポジトリ読み取り用。無くても動くがレート制限が厳しい
 #   GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY  非公開リポジトリの取り込み用。無ければ公開リポジトリのみ
 #   CURSEFORGE_FOR_STUDIOS_API_KEY  外部ダウンロード数の同期用。無ければ CFWidget で代用する
+#   RECIPE_CDN_SECRET  ブラウザで抽出したレシピを CDN へ中継する認証。無いと CDN に弾かれる
 
 [observability]
 enabled = true

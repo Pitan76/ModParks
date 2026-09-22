@@ -1,6 +1,7 @@
 import type * as manage from "@modparks/core/versions/manage";
 import type { BatchAddMcVersionData } from "@modparks/core/versions/batch";
 import type * as githubImport from "@modparks/core/versions/githubImport";
+import type * as recipes from "@modparks/core/versions/recipes";
 import type { GithubImportMode } from "@modparks/core/utils/github";
 import type { ActionResult } from "@modparks/core/actionResult";
 import { sendAppAction } from "@/lib/http/appApi";
@@ -44,3 +45,16 @@ export const importGithubRelease = (projectSlug: string, releaseId?: number, mod
   sendAppAction<Result<typeof githubImport.importGithubRelease>>(
     `/api/app/projects/${encodeURIComponent(projectSlug)}/github-import`, "POST", { releaseId, mode },
   );
+
+type RecipeResult = { success: true; count: number } | { error: string };
+
+/** jar Worker でレシピを抽出する */
+export const extractRecipesFromVersion = (versionId: string, projectSlug: string) =>
+  sendAppAction<RecipeResult>(`${one(projectSlug, versionId)}/recipes`, "POST");
+
+/** ブラウザで抽出したレシピを CDN へ中継する */
+export const uploadClientExtractedRecipes = (
+  versionId: string,
+  projectSlug: string,
+  byNs: Parameters<typeof recipes.uploadClientExtractedRecipes>[4],
+) => sendAppAction<RecipeResult>(`${one(projectSlug, versionId)}/recipes/upload`, "POST", { byNs });

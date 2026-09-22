@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import * as manage from "@modparks/core/versions/manage";
 import * as lifecycle from "@modparks/core/versions/lifecycle";
 import * as batch from "@modparks/core/versions/batch";
+import * as recipes from "@modparks/core/versions/recipes";
 import * as githubImport from "@modparks/core/versions/githubImport";
 import { githubAppConfig } from "@modparks/core/github/app";
 import type { GithubImportMode } from "@modparks/core/utils/github";
@@ -132,4 +133,42 @@ export async function postGithubImport(c: Ctx) {
   };
 
   return respond(c, await githubImport.importGithubRelease(deps, auth.userId, c.req.param("slug")!, releaseId, mode));
+}
+
+function recipeDeps(c: Ctx, db: Database): recipes.RecipeDeps {
+  return {
+    db,
+    t: serverErrorsFor(c.req.raw),
+    jar: createJarClient(async () => c.env.JAR),
+    r2PublicUrl: c.env.R2_PUBLIC_URL,
+    cdn: { url: c.env.NEXT_PUBLIC_RECIPE_CDN_URL, useApi: c.env.USE_RECIPE_CDN_API === "true", secret: c.env.RECIPE_CDN_SECRET },
+  };
+}
+
+/** Server Action の戻り値の形に戻す（slug は呼び出し側のキャッシュ無効化用で、画面には要らない） */
+const toRecipeResponse = (result: Awaited<ReturnType<typeof recipes.extractRecipesFromVersion>>) =>
+  "error" in result ? result : { success: true, count: result.count };
+
+/** POST /api/app/projects/:slug/versions/:id/recipes — jar Worker でレシピを抽出する */
+export async function postExtractRecipes(c: Ctx) {
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
+
+  const result = await recipes.extractRecipesFromVersion(recipeDeps(c, auth.db), auth.userId, c.req.param("id")!, c.req.param("slug")!);
+  return respond(c, toRecipeResponse(result));
+}
+
+/** POST /api/app/projects/:slug/versions/:id/recipes/upload — ブラウザで抽出したものを CDN へ中継する。本文は { byNs } */
+export async function postUploadRecipes(c: Ctx) {
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
+
+  const { byNs } = await readJson<{ byNs: unknown }>(c);
+  if (!byNs || typeof byNs !== "object" || Array.isArray(byNs)) return c.json({ error: "invalid_request" }, 400);
+
+  const deps = recipeDeps(c, auth.db);
+  const result = await recipes.uploadClientExtractedRecipes(
+    deps, auth.userId, c.req.param("id")!, c.req.param("slug")!, byNs as Parameters<typeof recipes.uploadClientExtractedRecipes>[4],
+  );
+  return respond(c, toRecipeResponse(result));
 }

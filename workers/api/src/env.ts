@@ -41,6 +41,15 @@ export interface ApiWorkerEnv {
    * `wrangler secret put CURSEFORGE_FOR_STUDIOS_API_KEY --name modparks-api`
    */
   CURSEFORGE_FOR_STUDIOS_API_KEY?: string;
+  /** レシピ CDN の公開 URL（メインと同じ値） */
+  NEXT_PUBLIC_RECIPE_CDN_URL: string;
+  /** "true" なら jar Worker から CDN の API へ直接上げる（メインと同じ値） */
+  USE_RECIPE_CDN_API?: string;
+  /**
+   * ブラウザで抽出したレシピを CDN へ中継するときの認証。メイン Worker と同じ値。
+   * `wrangler secret put RECIPE_CDN_SECRET --name modparks-api`
+   */
+  RECIPE_CDN_SECRET?: string;
   /** modparks-push への Service Binding。公開時の通知を Web Push で送る */
   PUSH?: Fetcher;
   VAPID_PUBLIC_KEY?: string;
