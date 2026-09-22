@@ -6,7 +6,7 @@ import {
   listProjectTranslations,
   removeTranslation,
   saveManualTranslation,
-} from "@/lib/actions/translation";
+} from "@/lib/http/translationApi";
 import type { TranslationDraft } from "./TranslationAccordion";
 
 interface EditorState {

@@ -11,6 +11,7 @@ import * as ideaRoutes from "./routes/ideas";
 import * as versionRoutes from "./routes/versions";
 import * as projectSettingsRoutes from "./routes/projectSettings";
 import * as dependencyRoutes from "./routes/dependencies";
+import * as translationRoutes from "./routes/translations";
 
 /**
  * 公開 API を Next.js から切り離して処理する Worker。
@@ -60,6 +61,12 @@ app.post("/api/app/projects/:id/members", projectSettingsRoutes.postMember);
 app.delete("/api/app/projects/:id/members/:userId", projectSettingsRoutes.deleteMember);
 app.post("/api/app/projects/:id/dependencies", dependencyRoutes.postDependency);
 app.delete("/api/app/dependencies/:id", dependencyRoutes.deleteDependency);
+app.post("/api/app/translate", translationRoutes.postTranslate);
+app.post("/api/app/translate/comment", translationRoutes.postTranslateComment);
+app.get("/api/app/projects/:id/translations", translationRoutes.getProjectTranslations);
+app.put("/api/app/projects/:id/translations/:locale", translationRoutes.putProjectTranslation);
+app.delete("/api/app/projects/:id/translations/:locale", translationRoutes.deleteProjectTranslation);
+app.post("/api/app/projects/:id/translations/:locale/draft", translationRoutes.postTranslationDraft);
 
 app.post("/api/app/ideas", ideaRoutes.postIdea);
 app.patch("/api/app/ideas/:id", ideaRoutes.patchIdea);
@@ -91,6 +98,11 @@ for (const path of [
   "/api/app/projects/:id/members/:userId",
   "/api/app/projects/:id/dependencies",
   "/api/app/dependencies/:id",
+  "/api/app/translate",
+  "/api/app/translate/comment",
+  "/api/app/projects/:id/translations",
+  "/api/app/projects/:id/translations/:locale",
+  "/api/app/projects/:id/translations/:locale/draft",
   "/api/app/ideas",
   "/api/app/ideas/:id",
   "/api/app/ideas/:id/status",

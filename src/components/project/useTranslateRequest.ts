@@ -9,7 +9,7 @@ export interface TranslateResponse {
   cached: boolean;
 }
 
-/** /api/translate の呼び出し。エラーはキーで返し、文言は呼び出し側で翻訳する */
+/** /api/app/translate（modparks-api）の呼び出し。エラーはキーで返し、文言は呼び出し側で翻訳する */
 export function useTranslateRequest() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +18,7 @@ export function useTranslateRequest() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/translate", {
+      const res = await fetch("/api/app/translate", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ postId, locale }),

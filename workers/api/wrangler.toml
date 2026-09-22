@@ -39,6 +39,10 @@ id      = "75c45e724c144cc18b629dd2dca50a7e"
 binding     = "modparks_storage"
 bucket_name = "modparks-storage"
 
+# AI 翻訳（Workers AI）。メインと同じく AI という名前で束ねる
+[ai]
+binding = "AI"
+
 # 公開時の通知を Web Push で送る。暗号化と VAPID 署名は modparks-push が行う
 [[services]]
 binding = "PUSH"

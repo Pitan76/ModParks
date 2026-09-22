@@ -18,10 +18,10 @@ interface TranslatableCommentBodyProps {
 
 type Translation = { body: string; bodyFormat: string };
 
-/** /api/translate/comment の呼び出し。@returns 失敗時はエラーキー */
+/** /api/app/translate/comment（modparks-api）の呼び出し。@returns 失敗時はエラーキー */
 async function fetchCommentTranslation(commentId: string, locale: string): Promise<Translation | { error: string }> {
   try {
-    const res = await fetch("/api/translate/comment", {
+    const res = await fetch("/api/app/translate/comment", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ commentId, locale }),
