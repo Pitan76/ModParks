@@ -56,6 +56,13 @@ const nextNotificationMessage: core.NotificationMessage = async (locale, type, p
 };
 
 /** 単一受信者向けイベント（コメント・いいね・お気に入り・フォロー・リスト追加） */
+/**
+ * ユーザー宛て通知の送り手（Next 側）。core の本体を直接呼ぶ Server Action が使う。
+ */
+export async function userNotifyContext(db: Database): Promise<core.UserNotifyContext> {
+  return { ...(await context(db)), message: nextNotificationMessage };
+}
+
 export async function notifyToUser(
   db: Database,
   recipientId: string,
@@ -63,5 +70,5 @@ export async function notifyToUser(
   type: NotificationType,
   payload: NotificationPayload,
 ): Promise<void> {
-  await core.notifyToUser({ ...(await context(db)), message: nextNotificationMessage }, recipientId, actorId, type, payload);
+  await core.notifyToUser(await userNotifyContext(db), recipientId, actorId, type, payload);
 }

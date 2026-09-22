@@ -3,10 +3,11 @@
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
 import { getDatabase } from "@/lib/db";
 import { favorites, posts, projects, users, userProfiles } from "@modparks/core/db/schema";
-import { eq, and, desc, sql, getTableColumns } from "drizzle-orm";
+import { eq, desc, sql, getTableColumns } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
+import { userNotifyContext } from "@/lib/notifications/notify";
+import { togglePostFavorite as coreTogglePostFavorite } from "@modparks/core/posts/favorite";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { mapProjectRow } from "@/lib/queries/projectRow";
 import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translatedColumns";
@@ -17,49 +18,21 @@ import { translatedBodyPreview, translatedTitle } from "@/lib/queries/translated
  * 投稿のお気に入りを切り替える。Project / Idea のどちらでも同じ経路を通る。
  * かつての toggleProjectFavorite（いいね/ブックマーク）を統合したもの。
  */
-export async function togglePostFavorite(postId: string) {
+/**
+ * 戻り値の形は移設前（本体がここにあった頃）の推論結果に合わせて明示している。
+ * 画面側は success を見ずに error を参照しているため。
+ */
+export async function togglePostFavorite(postId: string): Promise<{ success: boolean; favorited?: boolean; error?: string }> {
   const { db, userId } = await getAuthenticatedDb();
+  const deps = { notify: await userNotifyContext(db), t: await getServerErrors() };
+  const result = await coreTogglePostFavorite(deps, userId, postId);
+  if (!result.success) return result;
 
-  try {
-    const existing = await db
-      .select()
-      .from(favorites)
-      .where(and(eq(favorites.postId, postId), eq(favorites.userId, userId)))
-      .get();
+  revalidatePath("/[locale]/projects", "page");
+  revalidatePath("/[locale]/profile/[username]", "page");
+  if (result.kind) revalidatePath(result.kind === "project" ? "/[locale]/projects/[slug]" : "/[locale]/ideas/[slug]", "page");
 
-    if (existing) {
-      await db
-        .delete(favorites)
-        .where(and(eq(favorites.postId, postId), eq(favorites.userId, userId)));
-    } else {
-      await db.insert(favorites).values({ postId, userId });
-    }
-
-    revalidatePath("/[locale]/projects", "page");
-    revalidatePath("/[locale]/profile/[username]", "page");
-
-    const post = await db
-      .select({ kind: posts.kind, slug: posts.slug, title: posts.title, authorId: posts.authorId })
-      .from(posts)
-      .where(eq(posts.id, postId))
-      .get();
-    if (post) {
-      revalidatePath(post.kind === "project" ? "/[locale]/projects/[slug]" : "/[locale]/ideas/[slug]", "page");
-      if (!existing) {
-        await notifyToUser(db, post.authorId, userId, "favorite", {
-          kind: post.kind,
-          slug: post.slug,
-          title: post.title,
-          ...(await resolveActor(db, userId)),
-        });
-      }
-    }
-
-    return { success: true, favorited: !existing };
-  } catch (error) {
-    console.error("Failed to toggle favorite:", error);
-    return { success: false, error: (await getServerErrors())("favorite.toggleFailed") };
-  }
+  return { success: true, favorited: result.favorited };
 }
 
 // ---- お気に入り一覧取得 ----
