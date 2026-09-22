@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import ProjectDescriptionFields from "@/components/project/ProjectDescriptionFields";
 import TranslationEditor from "@/components/project/TranslationEditor";
-import { updateProjectDescription } from "@/lib/actions/project";
+import { updateProjectDescription } from "@/lib/http/projectApi";
 
 interface ProjectDescriptionFormProps {
   project: {

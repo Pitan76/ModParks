@@ -9,7 +9,7 @@ import ActionRow from "@/components/ui/ActionRow";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import { transferOwnership } from "@/lib/actions/project";
+import { transferOwnership } from "@/lib/http/projectApi";
 import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";
 

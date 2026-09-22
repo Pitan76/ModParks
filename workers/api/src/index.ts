@@ -9,6 +9,7 @@ import { getMyCollections } from "./routes/collections";
 import { getTrustedDevices } from "./routes/trustedDevices";
 import * as ideaRoutes from "./routes/ideas";
 import * as versionRoutes from "./routes/versions";
+import * as projectSettingsRoutes from "./routes/projectSettings";
 
 /**
  * 公開 API を Next.js から切り離して処理する Worker。
@@ -48,6 +49,9 @@ app.get("/api/app/session", getSession);
 app.get("/api/app/collections", getMyCollections);
 app.get("/api/app/trusted-devices", getTrustedDevices);
 app.patch("/api/app/projects/:id", patchProject);
+app.patch("/api/app/projects/:id/description", projectSettingsRoutes.patchDescription);
+app.patch("/api/app/projects/:id/icon", projectSettingsRoutes.patchIcon);
+app.post("/api/app/projects/:id/transfer", projectSettingsRoutes.postTransfer);
 
 app.post("/api/app/ideas", ideaRoutes.postIdea);
 app.patch("/api/app/ideas/:id", ideaRoutes.patchIdea);
@@ -70,6 +74,9 @@ app.post("/api/app/projects/:slug/github-import", versionRoutes.postGithubImport
 const methodNotAllowed = (c: Context) => c.body(null, 405);
 for (const path of [
   "/api/app/projects/:id",
+  "/api/app/projects/:id/description",
+  "/api/app/projects/:id/icon",
+  "/api/app/projects/:id/transfer",
   "/api/app/ideas",
   "/api/app/ideas/:id",
   "/api/app/ideas/:id/status",
