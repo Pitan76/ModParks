@@ -2333,7 +2333,8 @@
       "selfDependency": "自分自身を依存先には指定できません。",
       "alreadyExists": "同じ依存関係が既に登録されています。",
       "notFound": "依存関係が見つかりません。",
-      "versionNotInProject": "指定されたバージョンはこのプロジェクトのものではありません。"
+      "versionNotInProject": "指定されたバージョンはこのプロジェクトのものではありません。",
+      "invalidExternalUrl": "リンク先は http または https の URL を指定してください。"
     }
   },
   "Cart": {

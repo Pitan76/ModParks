@@ -2332,7 +2332,8 @@
       "selfDependency": "A project cannot depend on itself.",
       "alreadyExists": "That dependency is already registered.",
       "notFound": "Dependency not found.",
-      "versionNotInProject": "That version does not belong to this project."
+      "versionNotInProject": "That version does not belong to this project.",
+      "invalidExternalUrl": "The link must be an http or https URL."
     }
   },
   "Cart": {

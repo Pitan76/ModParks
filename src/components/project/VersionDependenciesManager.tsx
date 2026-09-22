@@ -20,13 +20,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslations } from "next-intl";
 // クライアントからは Server Action 経由で呼ぶ。クエリ本体を直接 import すると
 // サーバー専用モジュールがクライアントバンドルに混入してビルドが壊れる
-import {
-  addExternalProjectDependency,
-  addProjectDependencyBySlug,
-  getVersionDependencies,
-  removeProjectDependency,
-  type DependencyEntry,
-} from "@/lib/actions/dependency";
+import { getVersionDependencies, type DependencyEntry } from "@/lib/actions/dependency";
+import { addExternalProjectDependency, addProjectDependencyBySlug, removeProjectDependency } from "@/lib/http/dependencyApi";
 import { isActionError, type ActionResult } from "@modparks/core/actionResult";
 import { isStaleServerActionError } from "@/lib/errors/staleAction";
 import { DEPENDENCY_TYPES, type DependencyType } from "@modparks/core/dependencies/types";

@@ -26,7 +26,7 @@ import Stack from "@mui/material/Stack";
 import ActionRow from "@/components/ui/ActionRow";
 import LoaderAutocomplete from "./LoaderAutocomplete";
 import { getLoaderInfo } from "@/lib/loaders";
-import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/actions/dependency";
+import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/http/dependencyApi";
 import type { DependencyType, DependencyProjectSummary } from "@/lib/actions/dependency";
 import { isActionError, type ActionResult } from "@modparks/core/actionResult";
 import { isStaleServerActionError } from "@/lib/errors/staleAction";

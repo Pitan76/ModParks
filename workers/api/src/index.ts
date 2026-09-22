@@ -10,6 +10,7 @@ import { getTrustedDevices } from "./routes/trustedDevices";
 import * as ideaRoutes from "./routes/ideas";
 import * as versionRoutes from "./routes/versions";
 import * as projectSettingsRoutes from "./routes/projectSettings";
+import * as dependencyRoutes from "./routes/dependencies";
 
 /**
  * 公開 API を Next.js から切り離して処理する Worker。
@@ -57,6 +58,8 @@ app.patch("/api/app/media/:id", projectSettingsRoutes.patchMedia);
 app.delete("/api/app/media/:id", projectSettingsRoutes.deleteMedia);
 app.post("/api/app/projects/:id/members", projectSettingsRoutes.postMember);
 app.delete("/api/app/projects/:id/members/:userId", projectSettingsRoutes.deleteMember);
+app.post("/api/app/projects/:id/dependencies", dependencyRoutes.postDependency);
+app.delete("/api/app/dependencies/:id", dependencyRoutes.deleteDependency);
 
 app.post("/api/app/ideas", ideaRoutes.postIdea);
 app.patch("/api/app/ideas/:id", ideaRoutes.patchIdea);
@@ -86,6 +89,8 @@ for (const path of [
   "/api/app/media/:id",
   "/api/app/projects/:id/members",
   "/api/app/projects/:id/members/:userId",
+  "/api/app/projects/:id/dependencies",
+  "/api/app/dependencies/:id",
   "/api/app/ideas",
   "/api/app/ideas/:id",
   "/api/app/ideas/:id/status",
