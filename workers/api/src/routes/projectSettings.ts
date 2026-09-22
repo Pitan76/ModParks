@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import * as settings from "@modparks/core/projects/projectSettings";
 import * as media from "@modparks/core/projects/media";
 import * as members from "@modparks/core/projects/members";
+import * as externalDownloads from "@modparks/core/projects/externalDownloads";
 import { serverErrorsFor } from "../serverErrors";
 import type { ApiWorkerEnv } from "../env";
 import { requireSession } from "../requireSession";
@@ -96,4 +97,13 @@ export async function deleteMember(c: Ctx) {
   if (auth instanceof Response) return auth;
 
   return respond(c, await members.removeProjectMember(auth.db, auth.userId, c.req.param("id")!, c.req.param("userId")!));
+}
+
+/** POST /api/app/projects/:id/sync-external — 外部サイトのダウンロード数を取り直す */
+export async function postSyncExternal(c: Ctx) {
+  const auth = await requireSession(c);
+  if (auth instanceof Response) return auth;
+
+  const result = await externalDownloads.syncExternalProjectData(auth.db, auth.userId, c.req.param("id")!, c.env.CURSEFORGE_FOR_STUDIOS_API_KEY);
+  return respond(c, { success: true, externalDownloads: result.externalDownloads });
 }

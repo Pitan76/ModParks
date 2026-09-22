@@ -33,3 +33,7 @@ export const addProjectMember = (projectId: string, username: string) =>
 
 export const removeProjectMember = (projectId: string, userId: string) =>
   sendAppAction<{ success: true }>(`${base(projectId)}/members/${encodeURIComponent(userId)}`, "DELETE");
+
+/** 外部サイト（Modrinth / CurseForge）のダウンロード数を取り直す */
+export const syncExternalProjectData = (projectId: string) =>
+  sendAppAction<{ success: true; externalDownloads: number }>(`${base(projectId)}/sync-external`, "POST");

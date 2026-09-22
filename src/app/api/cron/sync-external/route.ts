@@ -3,7 +3,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { posts, projects, userSettings } from "@modparks/core/db/schema";
 import { eq, isNotNull, or } from "drizzle-orm";
 import { toProjectPost } from "@modparks/core/queries/postRow";
-import { syncExternalProjectDataSystem } from "@/lib/actions/projectSync";
+import { syncExternalDownloads } from "@modparks/core/projects/externalDownloads";
 import { purgeExpiredRateLimits } from "@/lib/rate-limit";
 import { rollupDownloadCounts } from "@modparks/core/download/counter";
 import { rollupRecentUsage } from "@/lib/usage/rollup";
@@ -62,9 +62,9 @@ export async function GET(request: Request) {
     for (const project of projectsToSync) {
       try {
         const settings = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, project.authorId) });
-        await syncExternalProjectDataSystem(db, project, settings);
+        await syncExternalDownloads(db, project, settings?.modrinthApiKey, process.env.CURSEFORGE_FOR_STUDIOS_API_KEY);
         results.push({ id: project.id, slug: project.slug, status: "success" });
-      } catch (err: any) {
+      } catch (err: unknown) {
         const reason = describeError(err);
         console.error(`[CRON] Failed to sync project ${project.id}:`, reason);
         results.push({ id: project.id, slug: project.slug, status: "error", error: reason });
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ success: true, syncedCount: projectsToSync.length, rolledUpDownloads, alerted, results });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const reason = describeError(error);
     console.error("[CRON] Sync error:", reason);
     return NextResponse.json({ success: false, error: reason }, { status: 500 });

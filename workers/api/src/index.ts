@@ -54,6 +54,7 @@ app.patch("/api/app/projects/:id", patchProject);
 app.patch("/api/app/projects/:id/description", projectSettingsRoutes.patchDescription);
 app.patch("/api/app/projects/:id/icon", projectSettingsRoutes.patchIcon);
 app.post("/api/app/projects/:id/transfer", projectSettingsRoutes.postTransfer);
+app.post("/api/app/projects/:id/sync-external", projectSettingsRoutes.postSyncExternal);
 app.post("/api/app/projects/:id/media", projectSettingsRoutes.postMedia);
 app.patch("/api/app/media/:id", projectSettingsRoutes.patchMedia);
 app.delete("/api/app/media/:id", projectSettingsRoutes.deleteMedia);
@@ -92,6 +93,7 @@ for (const path of [
   "/api/app/projects/:id/description",
   "/api/app/projects/:id/icon",
   "/api/app/projects/:id/transfer",
+  "/api/app/projects/:id/sync-external",
   "/api/app/projects/:id/media",
   "/api/app/media/:id",
   "/api/app/projects/:id/members",

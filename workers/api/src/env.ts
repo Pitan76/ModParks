@@ -36,6 +36,11 @@ export interface ApiWorkerEnv {
   GITHUB_APP_ID?: string;
   /** 同 App の秘密鍵（PKCS#8）。`wrangler secret put GITHUB_APP_PRIVATE_KEY --name modparks-api` */
   GITHUB_APP_PRIVATE_KEY?: string;
+  /**
+   * CurseForge のダウンロード数取得用。無ければ CFWidget で代用する。メイン Worker と同じ値。
+   * `wrangler secret put CURSEFORGE_FOR_STUDIOS_API_KEY --name modparks-api`
+   */
+  CURSEFORGE_FOR_STUDIOS_API_KEY?: string;
   /** modparks-push への Service Binding。公開時の通知を Web Push で送る */
   PUSH?: Fetcher;
   VAPID_PUBLIC_KEY?: string;

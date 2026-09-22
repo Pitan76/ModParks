@@ -9,7 +9,7 @@ import FormControl from "@mui/material/FormControl";
 import { useRef, useState } from "react";
 import { useRouter } from "@/lib/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
-import { syncExternalProjectData } from "@/lib/actions/projectSync";
+import { syncExternalProjectData } from "@/lib/http/projectApi";
 import ActionRow from "@/components/ui/ActionRow";
 import StickySaveBar from "@/components/ui/StickySaveBar";
 import ProjectFormFields from "@/components/project/ProjectFormFields";
@@ -84,6 +84,8 @@ export default function ProjectEditForm({ project, availableTags = [] }: Project
     try {
       await syncExternalProjectData(project.id);
       setToast({ message: tManage("syncSuccess"), severity: "success" });
+      // Server Action のときは暗黙に画面が取り直されていた。ダウンロード数の表示を更新するため
+      router.refresh();
     } catch (e: any) {
       if (e.message?.includes("Failed to find Server Action") || e.message?.includes("UnrecognizedActionError")) {
         setToast({ message: tError("common.reloading"), severity: "info" });

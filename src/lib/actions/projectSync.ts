@@ -1,157 +1,17 @@
 "use server";
 
-import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { projects } from "@modparks/core/db/schema";
-import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { findProjectPostById } from "@modparks/core/queries/post";
-import type { Database } from "@/lib/db";
-
-/**
- * 外部プラットフォーム（Modrinth, CurseForge）からプロジェクトのダウンロード数を同期するシステム関数
- */
-export const syncExternalProjectDataSystem = async (db: Database, project: any, settings: any) => {
-  let newExtDl = 0;
-  let modrinthDl = 0;
-  let curseforgeDl = 0;
-  
-  const fetchModrinth = async () => {
-    if (!project.modrinthId) return;
-    try {
-      const res = await fetch(`https://api.modrinth.com/v2/project/${project.modrinthId}`, {
-        headers: {
-          "User-Agent": "ModParks/1.0 (modparks.pitan76.net)",
-          ...(settings?.modrinthApiKey ? { Authorization: settings.modrinthApiKey } : {})
-        },
-        next: { revalidate: 300 },
-      });
-      if (res.ok) {
-        const data = await res.json() as any;
-        modrinthDl = (data.downloads || 0);
-        newExtDl += modrinthDl;
-      }
-    } catch(e) {}
-  };
-  
-  const fetchCurseforge = async () => {
-    if (!project.curseforgeId) return;
-    try {
-      const rawCfApiKey = process.env.CURSEFORGE_FOR_STUDIOS_API_KEY;
-      let targetCfId = project.curseforgeId;
-      let cfSuccess = false;
-
-      if (rawCfApiKey) {
-        const cfApiKey = rawCfApiKey.trim();
-        try {
-          if (!/^\d+$/.test(targetCfId)) {
-            const searchRes = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&slug=${targetCfId}`, {
-              headers: { 
-                "x-api-key": cfApiKey, 
-                "Accept": "application/json",
-                "User-Agent": "ModParks/1.0 (modparks.pitan76.net)"
-              },
-              next: { revalidate: 300 },
-            });
-            if (searchRes.ok) {
-              const searchData = await searchRes.json() as any;
-              if (searchData.data && searchData.data.length > 0) {
-                targetCfId = searchData.data[0].id.toString();
-                console.log(`[CF Sync] Resolved slug ${project.curseforgeId} to ID ${targetCfId}`);
-                await db.update(projects).set({ curseforgeId: targetCfId }).where(eq(projects.id, project.id)).run();
-              } else {
-                console.error(`[CF Sync] Slug ${targetCfId} not found in search.`);
-              }
-            } else {
-              console.error(`[CF Sync] Search API failed with status ${searchRes.status}`);
-            }
-          }
-
-          if (/^\d+$/.test(targetCfId)) {
-            console.log(`[CF Sync] Fetching data for ID ${targetCfId}`);
-            const res = await fetch(`https://api.curseforge.com/v1/mods/${targetCfId}`, {
-              headers: { 
-                "x-api-key": cfApiKey, 
-                "Accept": "application/json",
-                "User-Agent": "ModParks/1.0 (modparks.pitan76.net)"
-              },
-              next: { revalidate: 300 },
-            });
-            if (res.ok) {
-              const data = await res.json() as any;
-              curseforgeDl = (data.data?.downloadCount || 0);
-              console.log(`[CF Sync] Fetched downloads: ${curseforgeDl}`);
-              newExtDl += curseforgeDl;
-              cfSuccess = true;
-            } else {
-              console.error(`[CF Sync] Mod API failed with status ${res.status}`);
-            }
-          }
-        } catch (cfError) {
-          console.error(`[CF Sync] CurseForge API error:`, cfError);
-        }
-      }
-
-      // Fallback to CFWidget if API call was not successful or key is missing
-      if (!cfSuccess) {
-        console.log(`[CF Sync] Trying CFWidget fallback...`);
-        if (/^\d+$/.test(targetCfId)) {
-          const cfwRes = await fetch(`https://api.cfwidget.com/${targetCfId}`, {
-            headers: { "User-Agent": "ModParks/1.0 (modparks.pitan76.net)" },
-            next: { revalidate: 300 },
-          });
-          if (cfwRes.ok) {
-            const cfwData = await cfwRes.json() as any;
-            curseforgeDl = (cfwData.downloads?.total || 0);
-            newExtDl += curseforgeDl;
-            console.log(`[CF Sync] Fallback: Fetched via CFWidget: ${curseforgeDl}`);
-            cfSuccess = true;
-          } else {
-            console.error(`[CF Sync] CFWidget API failed with status ${cfwRes.status}`);
-          }
-        } else {
-          console.error(`[CF Sync] Cannot use CFWidget with slug: ${targetCfId}`);
-        }
-      }
-    } catch (e) {
-      console.error(`[CF Sync] Exception in fetchCurseforge:`, e);
-    }
-  };
-
-  await Promise.allSettled([fetchModrinth(), fetchCurseforge()]);
-
-  const extObj: Record<string, number> = {
-    ...(project.externalDownloads as Record<string, number> || {}),
-    lastSyncedAt: Date.now()
-  };
-  
-  if (modrinthDl > 0) extObj.modrinth = modrinthDl;
-  if (curseforgeDl > 0) extObj.curseforge = curseforgeDl;
-  
-  await db.update(projects).set({ 
-    externalDownloads: extObj,
-    totalDownloads: project.downloads + newExtDl
-  }).where(eq(projects.id, project.id)).run();
-
-  return newExtDl;
-};
+import { syncExternalProjectData as syncCore } from "@modparks/core/projects/externalDownloads";
+import { getAuthenticatedDb } from "@/lib/auth-helpers";
 
 /**
  * 特定のプロジェクトの外部ダウンロード数を手動で同期する Server Action。
+ * 本体は core/projects/externalDownloads.ts（cron は core の syncExternalDownloads を直接呼ぶ）。
  */
 export const syncExternalProjectData = async (projectId: string) => {
-  const { db, session } = await getAuthenticatedDb();
-  
-  const project = await findProjectPostById(db, projectId);
-  if (!project) throw new Error("Project not found");
+  const { db, userId } = await getAuthenticatedDb();
+  const { slug, externalDownloads } = await syncCore(db, userId, projectId, process.env.CURSEFORGE_FOR_STUDIOS_API_KEY);
 
-  const { assertProjectAccess } = await import("@/lib/auth-helpers");
-  await assertProjectAccess(db, project, session);
-
-  const { userSettings } = await import("@modparks/core/db/schema");
-  const settings = await db.query.userSettings.findFirst({ where: eq(userSettings.userId, session.user.id) });
-  
-  const newExtDl = await syncExternalProjectDataSystem(db, project, settings);
-  
-  revalidatePath(`/projects/${project.slug}`);
-  return { success: true, externalDownloads: newExtDl };
+  revalidatePath(`/projects/${slug}`);
+  return { success: true, externalDownloads };
 };
