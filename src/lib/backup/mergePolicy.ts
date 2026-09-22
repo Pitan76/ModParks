@@ -127,6 +127,10 @@ export const MERGE_POLICIES: Record<string, TablePolicy> = {
       "updatedAt を持つ。手動確定した訳文は作者の労力そのものなので、" +
       "新しい側を採る（AI キャッシュは失われても再生成できる）",
   },
+  comment_translations: {
+    strategy: "last_write_wins",
+    reason: "updatedAt を持つ。AI 生成のみで、失われても再生成できる",
+  },
   collections: {
     strategy: "last_write_wins",
     reason: "updatedAt を持つ",

@@ -1,7 +1,7 @@
 /**
  * post_translations / translation_runs の読み書き。
  */
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { postTranslations, translationRuns } from "@modparks/core/db/schema";
 import type { Database } from "@/lib/db";
@@ -50,6 +50,8 @@ export async function deleteTranslation(db: Database, postId: string, locale: st
 
 export interface RunLog {
   postId: string;
+  /** コメントを訳したときだけ。投稿本文の実行とは失敗の抑制を分けるため */
+  commentId?: string;
   locale: string;
   userId: string;
   provider: string;
@@ -69,7 +71,7 @@ export async function recordRun(db: Database, log: RunLog): Promise<void> {
  */
 export async function hasRecentFailure(
   db: Database,
-  postId: string,
+  target: { postId: string; commentId?: string },
   locale: string,
   windowMs: number,
 ): Promise<boolean> {
@@ -78,7 +80,8 @@ export async function hasRecentFailure(
     .select({ status: translationRuns.status })
     .from(translationRuns)
     .where(and(
-      eq(translationRuns.postId, postId),
+      eq(translationRuns.postId, target.postId),
+      target.commentId ? eq(translationRuns.commentId, target.commentId) : isNull(translationRuns.commentId),
       eq(translationRuns.locale, locale),
       gt(translationRuns.createdAt, since),
     ))

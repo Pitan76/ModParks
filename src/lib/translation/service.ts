@@ -87,17 +87,31 @@ interface RunContext {
   persist: boolean;
 }
 
+/**
+ * LLM を呼ぶ前の関門。失敗直後の抑制・利用者ごとの上限・全体の日次上限を順に見る。
+ * 投稿本文とコメントで共通（上限は両者を合わせて数える）。
+ * @returns 止める理由。呼んでよければ null
+ */
+export async function checkRunAllowed(
+  db: Database,
+  target: { postId: string; commentId?: string },
+  locale: string,
+  userId: string,
+  settings: TranslationSettings,
+): Promise<TranslationError | null> {
+  if (await hasRecentFailure(db, target, locale, FAILURE_COOLDOWN_MS)) return "cooling_down";
+
+  const limited = await checkRateLimit(RATE_LIMIT_ACTION, settings.userHourlyLimit, RATE_LIMIT_WINDOW_MS, userId);
+  if (!limited.success) return "rate_limited";
+  if (await countRunsSince(db, startOfToday()) >= settings.dailyRunLimit) return "budget_exceeded";
+
+  return null;
+}
+
 async function runTranslation(db: Database, ctx: RunContext): Promise<TranslationOutcome> {
   const { post, locale, userId, sourceHash, settings } = ctx;
-  if (await hasRecentFailure(db, post.id, locale, FAILURE_COOLDOWN_MS)) {
-    return { ok: false, error: "cooling_down" };
-  }
-  const limited = await checkRateLimit(
-    RATE_LIMIT_ACTION, settings.userHourlyLimit, RATE_LIMIT_WINDOW_MS, userId);
-  if (!limited.success) return { ok: false, error: "rate_limited" };
-  if (await countRunsSince(db, startOfToday()) >= settings.dailyRunLimit) {
-    return { ok: false, error: "budget_exceeded" };
-  }
+  const blocked = await checkRunAllowed(db, { postId: post.id }, locale, userId, settings);
+  if (blocked) return { ok: false, error: blocked };
 
   const result = await translateWithLogging(db, ctx);
   if (!result.ok) return { ok: false, error: result.reason };

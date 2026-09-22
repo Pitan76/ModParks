@@ -3,7 +3,7 @@
  */
 import { sqliteTable, text, integer, primaryKey, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
-import { posts } from "./posts";
+import { posts, comments } from "./posts";
 import { users } from "./auth";
 
 /**
@@ -45,6 +45,11 @@ export const translationRuns = sqliteTable("translation_runs", {
   postId: text("post_id")
     .notNull()
     .references(() => posts.id, { onDelete: "cascade" }),
+  /**
+   * コメントを訳した場合だけ入る。失敗直後の抑制をコメント単位で効かせるため。
+   * 外部キーは張らない。SQLite の ALTER では ON DELETE を付けられず、張るとコメントを消せなくなる
+   */
+  commentId: text("comment_id"),
   locale: text("locale").notNull(),
   userId: text("user_id")
     .notNull()
@@ -68,5 +73,30 @@ export const translationRuns = sqliteTable("translation_runs", {
   createdIdx: index("translation_runs_created_idx").on(t.createdAt),
 }));
 
+/**
+ * コメントの訳文（AI 生成のみ）。コメントには原文の言語の欄も手動訳の概念も無いため、
+ * post_translations とは分けて最小限の列だけ持つ。原文の言語は表示のたびに本文から推定する。
+ */
+export const commentTranslations = sqliteTable("comment_translations", {
+  commentId: text("comment_id")
+    .notNull()
+    .references(() => comments.id, { onDelete: "cascade" }),
+  locale: text("locale").notNull(),
+  body: text("body").notNull(),
+  /** 原文と同一。描画経路を原文と共通化するため */
+  bodyFormat: text("body_format", { enum: ["markdown", "plaintext", "pukiwiki"] }).notNull(),
+  /** 翻訳元とした原文のハッシュ。コメントが編集されたら訳し直す */
+  sourceHash: text("source_hash").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.commentId, t.locale] }),
+}));
+
+export type CommentTranslation = typeof commentTranslations.$inferSelect;
 export type PostTranslation = typeof postTranslations.$inferSelect;
 export type TranslationRun  = typeof translationRuns.$inferSelect;

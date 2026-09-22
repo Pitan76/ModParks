@@ -12,7 +12,7 @@ import ReplyIcon from "@mui/icons-material/Reply";
 import { useTranslations } from "next-intl";
 import { updateIdeaComment, deleteIdeaComment, createIdeaComment } from "@/lib/http/ideaApi";
 import { Link, useRouter } from "@/lib/i18n/routing";
-import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
+import TranslatableCommentBody from "@/components/comment/TranslatableCommentBody";
 import CommentForm from "@/components/ui/CommentForm";
 import ReportDialog from "@/components/project/ReportDialog";
 
@@ -109,7 +109,7 @@ export default function IdeaCommentItem(props: IdeaCommentItemProps) {
           </>
         ) : (
           <Box sx={{ mt: 0.5 }}>
-            <DescriptionRenderer content={content} format={contentFormat} />
+            <TranslatableCommentBody commentId={id} content={content} format={contentFormat} isLoggedIn={!!isLoggedIn} />
           </Box>
         )}
 

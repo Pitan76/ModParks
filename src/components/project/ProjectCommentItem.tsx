@@ -9,7 +9,7 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { useTranslations } from "next-intl";
-import DescriptionRenderer from "@/components/ui/DescriptionRenderer";
+import TranslatableCommentBody from "@/components/comment/TranslatableCommentBody";
 import CommentForm from "@/components/ui/CommentForm";
 import ReportDialog from "@/components/project/ReportDialog";
 
@@ -78,7 +78,7 @@ const ProjectCommentItem = ({
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Header comment={comment} currentUserId={currentUserId} onDelete={onDelete} />
         <Box sx={{ mt: 0.5 }}>
-          <DescriptionRenderer content={comment.content} format={comment.contentFormat} />
+          <TranslatableCommentBody commentId={comment.id} content={comment.content} format={comment.contentFormat} isLoggedIn={isLoggedIn} />
         </Box>
 
         {isLoggedIn && (
@@ -117,7 +117,7 @@ const ProjectCommentItem = ({
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Header comment={r} currentUserId={currentUserId} onDelete={onDelete} />
                   <Box sx={{ mt: 0.5 }}>
-                    <DescriptionRenderer content={r.content} format={r.contentFormat} />
+                    <TranslatableCommentBody commentId={r.id} content={r.content} format={r.contentFormat} isLoggedIn={isLoggedIn} />
                   </Box>
                 </Box>
               </Box>
