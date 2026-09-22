@@ -23,7 +23,7 @@ import LinkButton from "@/components/ui/LinkButton";
 import { recordProjectView } from "@/lib/services/rewardMetrics";
 import { resolveClientIp } from "@/lib/rate-limit";
 import TranslatedDescription from "@/components/project/TranslatedDescription";
-import { resolveDisplayContent } from "@/lib/translation/display";
+import { resolveDisplayContent } from "@modparks/core/translation/display";
 import { toPlainDescription } from "@modparks/core/utils/plainText";
 import AdSlot from "@/components/ads/AdSlot";
 import AddIcon from "@mui/icons-material/Add";

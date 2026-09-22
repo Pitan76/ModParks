@@ -2,7 +2,7 @@ import { getDb, getD1 } from "@/lib/db";
 import { posts, ideas, favorites, comments as commentsTable, users, userProfiles, versions, versionIdeas, projects } from "@modparks/core/db/schema";
 import { eq, and, or, sql, desc, isNull, inArray } from "drizzle-orm";
 import { getProjectsByIds } from "@/lib/actions/projectQuery";
-import { resolveDisplayContent } from "@/lib/translation/display";
+import { resolveDisplayContent } from "@modparks/core/translation/display";
 
 export async function getIdeaMeta(id: string) {
   const d1 = await getD1();

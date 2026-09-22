@@ -3,15 +3,15 @@
  */
 import { and, eq } from "drizzle-orm";
 import { comments, commentTranslations, posts } from "@modparks/core/db/schema";
-import type { Database } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { locales, type AppLocale } from "@modparks/core/i18n/locales";
 import { detectSourceLocale } from "@modparks/core/translation/detectLocale";
 import { computeSourceHash } from "@modparks/core/translation/sourceHash";
 import type { BodyFormat } from "@modparks/core/translation/masking";
-import { translateContent } from "./translate";
-import { recordRun } from "./repository";
-import { checkRunAllowed, type TranslationError } from "./service";
-import { getTranslationSettings, type TranslationSettings } from "./settings";
+import { translateContent } from "@modparks/core/translation/translate";
+import { recordRun } from "@modparks/core/translation/repository";
+import { checkRunAllowed, type TranslationDeps, type TranslationError } from "@modparks/core/translation/service";
+import type { TranslationSettings } from "@modparks/core/translation/settings";
 
 export type CommentTranslationOutcome =
   | { ok: true; body: string; bodyFormat: BodyFormat; cached: boolean }
@@ -44,14 +44,15 @@ async function loadPublicComment(db: Database, commentId: string) {
  * @param userId 実行者。ログインを必須にしているのは LLM 呼び出しの濫用を防ぐため
  */
 export async function requestCommentTranslation(
-  db: Database,
+  deps: TranslationDeps,
   commentId: string,
   locale: string,
   userId: string,
 ): Promise<CommentTranslationOutcome> {
   if (!locales.includes(locale as AppLocale)) return { ok: false, error: "invalid_locale" };
 
-  const settings = await getTranslationSettings();
+  const { db } = deps;
+  const settings = await deps.getSettings();
   if (!settings.enabled) return { ok: false, error: "feature_disabled" };
 
   const comment = await loadPublicComment(db, commentId);
@@ -69,11 +70,11 @@ export async function requestCommentTranslation(
     return { ok: true, body: existing.body, bodyFormat: existing.bodyFormat, cached: true };
   }
 
-  return runCommentTranslation(db, comment, locale, userId, settings, sourceHash);
+  return runCommentTranslation(deps, comment, locale, userId, settings, sourceHash);
 }
 
 async function runCommentTranslation(
-  db: Database,
+  deps: TranslationDeps,
   comment: TargetComment,
   locale: string,
   userId: string,
@@ -81,10 +82,11 @@ async function runCommentTranslation(
   sourceHash: string,
 ): Promise<CommentTranslationOutcome> {
   const target = { postId: comment.postId, commentId: comment.id };
-  const blocked = await checkRunAllowed(db, target, locale, userId, settings);
+  const { db } = deps;
+  const blocked = await checkRunAllowed(deps, target, locale, userId, settings);
   if (blocked) return { ok: false, error: blocked };
 
-  const result = await translateWithLogging(db, comment, locale, userId, settings);
+  const result = await translateWithLogging(deps, comment, locale, userId, settings);
   if (!result.ok) return { ok: false, error: result.reason };
 
   const now = new Date();
@@ -102,7 +104,7 @@ async function runCommentTranslation(
 
 /** LLM 呼び出しの結果は成否によらず translation_runs に残す（投稿本文と同じ） */
 async function translateWithLogging(
-  db: Database,
+  { db, provider }: TranslationDeps,
   comment: TargetComment,
   locale: string,
   userId: string,
@@ -116,6 +118,7 @@ async function translateWithLogging(
       sourceLocale: detectSourceLocale(comment.content),
       targetLocale: locale,
       settings,
+      provider,
     });
     await recordRun(db, {
       ...base,

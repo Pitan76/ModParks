@@ -6,7 +6,7 @@
  */
 import { and, eq } from "drizzle-orm";
 import { postTranslations } from "@modparks/core/db/schema";
-import type { Database } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 
 export interface MetadataTranslation {
   title: string;

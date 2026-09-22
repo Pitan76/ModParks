@@ -2,17 +2,22 @@
  * Workers AI を使う翻訳プロバイダ。外部 API キーを持たずに済むため初期実装に採用する。
  */
 import { buildSystemPrompt, buildUserPrompt } from "@modparks/core/translation/prompt";
-import type { AiBinding } from "@/lib/db";
+import type { AiBinding } from "@modparks/core/db/client";
 import type { TranslationProvider, TranslationRequest } from "@modparks/core/translation/providers/types";
 
 const DEFAULT_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
-export const workersAiProvider: TranslationProvider = {
-  name:         "workers-ai",
+export const WORKERS_AI_PROVIDER = "workers-ai";
+
+/**
+ * @param getAi AI の束縛。環境から取るものなので呼び出し側が渡す（使うときだけ解決する）
+ */
+export const createWorkersAiProvider = (getAi: () => Promise<AiBinding>): TranslationProvider => ({
+  name:         WORKERS_AI_PROVIDER,
   defaultModel: DEFAULT_MODEL,
 
   async translate(req: TranslationRequest): Promise<string> {
-    const ai = await getAiBinding();
+    const ai = await getAi();
     const result = await ai.run(req.model, {
       messages: [
         { role: "system", content: buildSystemPrompt(req.sourceLocale, req.targetLocale, req.strict) },
@@ -27,20 +32,4 @@ export const workersAiProvider: TranslationProvider = {
     if (typeof result.response !== "string") throw new Error("Workers AI returned no response");
     return result.response;
   },
-};
-
-async function getAiBinding(): Promise<AiBinding> {
-  const env = await getWorkerEnv();
-  const ai = (env as { AI?: AiBinding }).AI;
-  if (!ai) throw new Error("AI binding not found (add [ai] to wrangler.toml)");
-  return ai;
-}
-
-async function getWorkerEnv(): Promise<unknown> {
-  if (process.env.NODE_ENV === "development" && process.release?.name === "node") {
-    const { getCachedPlatformProxy } = await import("@/lib/proxy");
-    return (await getCachedPlatformProxy()).env;
-  }
-  const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-  return (await getCloudflareContext({ async: true })).env;
-}
+});

@@ -1,4 +1,4 @@
-import type { TranslationError } from "./service";
+import type { TranslationError } from "@modparks/core/translation/service";
 
 /** エラー種別ごとの HTTP ステータス。文言はクライアント側で翻訳する */
 export const TRANSLATION_ERROR_STATUS: Record<TranslationError, number> = {

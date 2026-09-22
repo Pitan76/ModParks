@@ -4,14 +4,14 @@
  */
 import { and, eq, inArray } from "drizzle-orm";
 import { posts } from "@modparks/core/db/schema";
-import type { Database } from "@/lib/db";
-import { checkRateLimit } from "@/lib/rate-limit";
+import type { Database } from "@modparks/core/db/client";
 import { locales, type AppLocale } from "@modparks/core/i18n/locales";
-import { translateContent } from "./translate";
+import { translateContent } from "@modparks/core/translation/translate";
 import { computeSourceHash } from "@modparks/core/translation/sourceHash";
-import { countRunsSince, findTranslation, hasRecentFailure, recordRun, saveTranslation } from "./repository";
+import { countRunsSince, findTranslation, hasRecentFailure, recordRun, saveTranslation } from "@modparks/core/translation/repository";
 import type { BodyFormat } from "@modparks/core/translation/masking";
-import { getTranslationSettings, type TranslationSettings } from "./settings";
+import type { TranslationSettings } from "@modparks/core/translation/settings";
+import type { TranslationProvider } from "@modparks/core/translation/providers/types";
 
 /** 閲覧者が AI 翻訳を頼める投稿の種類。どちらも本文を posts に持つので同じ経路で訳せる */
 const TRANSLATABLE_KINDS = ["project", "idea"] as const;
@@ -34,6 +34,18 @@ export type TranslationError =
   | "translation_disabled"
   | "feature_disabled";
 
+/**
+ * 翻訳に要る環境依存の部品。core は束縛や設定を自分で取りに行かないため、呼び出し側が揃えて渡す。
+ */
+export type TranslationDeps = {
+  db: Database;
+  /** アプリ設定（KV）の翻訳の分。LLM を呼ぶ前にだけ読む */
+  getSettings: () => Promise<TranslationSettings>;
+  provider: TranslationProvider;
+  /** 利用者ごとの回数制限。IP の取り方が入口ごとに違うため受け取る */
+  rateLimit: (action: string, limit: number, windowMs: number, userId: string) => Promise<{ success: boolean }>;
+};
+
 export type TranslationOutcome =
   | { ok: true; title: string; body: string; bodyFormat: BodyFormat; cached: boolean }
   | { ok: false; error: TranslationError };
@@ -43,7 +55,7 @@ export type TranslationOutcome =
  * @param userId 実行者。ログインを必須にしているのは LLM 呼び出しの濫用を防ぐため
  */
 export async function requestTranslation(
-  db: Database,
+  deps: TranslationDeps,
   postId: string,
   locale: string,
   userId: string,
@@ -52,7 +64,8 @@ export async function requestTranslation(
 ): Promise<TranslationOutcome> {
   if (!locales.includes(locale as AppLocale)) return { ok: false, error: "invalid_locale" };
 
-  const settings = await getTranslationSettings();
+  const { db } = deps;
+  const settings = await deps.getSettings();
   if (!settings.enabled) return { ok: false, error: "feature_disabled" };
 
   const post = await db.select().from(posts).where(and(eq(posts.id, postId), inArray(posts.kind, TRANSLATABLE_KINDS))).get();
@@ -64,7 +77,7 @@ export async function requestTranslation(
   if (!post.aiTranslationEnabled) return { ok: false, error: "translation_disabled" };
 
   const sourceHash = await computeSourceHash(post);
-  if (options.regenerate) return runTranslation(db, { post, locale, userId, sourceHash, settings, persist: false });
+  if (options.regenerate) return runTranslation(deps, { post, locale, userId, sourceHash, settings, persist: false });
 
   const existing = await findTranslation(db, postId, locale);
   if (existing && existing.sourceHash === sourceHash) {
@@ -74,7 +87,7 @@ export async function requestTranslation(
     // 手動確定は原文が更新されても自動では訳し直さない（作者の明示操作でのみ更新する）
     return { ok: true, title: existing.title, body: existing.body, bodyFormat: existing.bodyFormat, cached: true };
   }
-  return runTranslation(db, { post, locale, userId, sourceHash, settings, persist: true });
+  return runTranslation(deps, { post, locale, userId, sourceHash, settings, persist: true });
 }
 
 interface RunContext {
@@ -93,7 +106,7 @@ interface RunContext {
  * @returns 止める理由。呼んでよければ null
  */
 export async function checkRunAllowed(
-  db: Database,
+  { db, rateLimit }: TranslationDeps,
   target: { postId: string; commentId?: string },
   locale: string,
   userId: string,
@@ -101,19 +114,20 @@ export async function checkRunAllowed(
 ): Promise<TranslationError | null> {
   if (await hasRecentFailure(db, target, locale, FAILURE_COOLDOWN_MS)) return "cooling_down";
 
-  const limited = await checkRateLimit(RATE_LIMIT_ACTION, settings.userHourlyLimit, RATE_LIMIT_WINDOW_MS, userId);
+  const limited = await rateLimit(RATE_LIMIT_ACTION, settings.userHourlyLimit, RATE_LIMIT_WINDOW_MS, userId);
   if (!limited.success) return "rate_limited";
   if (await countRunsSince(db, startOfToday()) >= settings.dailyRunLimit) return "budget_exceeded";
 
   return null;
 }
 
-async function runTranslation(db: Database, ctx: RunContext): Promise<TranslationOutcome> {
+async function runTranslation(deps: TranslationDeps, ctx: RunContext): Promise<TranslationOutcome> {
+  const { db } = deps;
   const { post, locale, userId, sourceHash, settings } = ctx;
-  const blocked = await checkRunAllowed(db, { postId: post.id }, locale, userId, settings);
+  const blocked = await checkRunAllowed(deps, { postId: post.id }, locale, userId, settings);
   if (blocked) return { ok: false, error: blocked };
 
-  const result = await translateWithLogging(db, ctx);
+  const result = await translateWithLogging(deps, ctx);
   if (!result.ok) return { ok: false, error: result.reason };
   // タイトルは訳さないので原文をそのまま持つ
   if (!ctx.persist) {
@@ -137,7 +151,7 @@ type LoggedResult =
   | { ok: false; reason: "too_long" | "invalid_output" | "provider_error" };
 
 /** LLM 呼び出しの結果は成否によらず translation_runs に残す */
-async function translateWithLogging(db: Database, ctx: RunContext): Promise<LoggedResult> {
+async function translateWithLogging({ db, provider }: TranslationDeps, ctx: RunContext): Promise<LoggedResult> {
   const { post, locale, userId } = ctx;
   const base = { postId: post.id, locale, userId };
   try {
@@ -147,6 +161,7 @@ async function translateWithLogging(db: Database, ctx: RunContext): Promise<Logg
       sourceLocale: post.sourceLocale,
       targetLocale: locale,
       settings:     ctx.settings,
+      provider,
     });
     await recordRun(db, {
       ...base,

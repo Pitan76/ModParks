@@ -4,7 +4,7 @@
  * 各モジュールが個別に KV を読むと呼び出し回数が読めなくなるため、
  * 入口で 1 度だけ解決し、以降は値を引き回す。
  */
-import { getAppSettings } from "@/lib/config/readSettings";
+import type { AppSettings } from "@modparks/core/config/appSettings";
 
 export interface TranslationSettings {
   enabled: boolean;
@@ -16,8 +16,8 @@ export interface TranslationSettings {
   userHourlyLimit: number;
 }
 
-export async function getTranslationSettings(): Promise<TranslationSettings> {
-  const settings = await getAppSettings();
+/** アプリ設定から翻訳の分だけを取り出す。設定の読み出し（KV）は呼び出し側で行う */
+export function toTranslationSettings(settings: AppSettings): TranslationSettings {
   return {
     enabled:         settings.translationEnabled,
     model:           settings.translationModel,

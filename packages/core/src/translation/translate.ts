@@ -5,8 +5,8 @@
 import { getMasker, type BodyFormat, type MaskedDocument } from "@modparks/core/translation/masking";
 import { parsePayload, payloadLength, toPayloadChunks, toPayloadFor, translatableIndices } from "@modparks/core/translation/payload";
 import { keepValidLines, restore } from "@modparks/core/translation/restore";
-import { getTranslationProvider } from "./providers";
-import type { TranslationSettings } from "./settings";
+import type { TranslationSettings } from "@modparks/core/translation/settings";
+import type { TranslationProvider } from "@modparks/core/translation/providers/types";
 
 /**
  * 訳せた行の割合がこれを下回ったら失敗とみなす。
@@ -24,6 +24,8 @@ export interface TranslateInput {
   targetLocale: string;
   /** 実行パラメータ。管理画面から変更できる */
   settings: TranslationSettings;
+  /** 呼び出し先の LLM。束縛を使うので呼び出し側が作って渡す */
+  provider: TranslationProvider;
 }
 
 interface ResultMeta {
@@ -45,8 +47,7 @@ export type TranslateResult =
  * 本文は塊に分けて渡す（一度に投げると応答が出力上限で切れるため）。
  */
 export async function translateContent(input: TranslateInput): Promise<TranslateResult> {
-  const provider = getTranslationProvider();
-  const { settings } = input;
+  const { settings, provider } = input;
   const bodyDoc = getMasker(input.bodyFormat).mask(input.body);
   const inputChars = payloadLength(bodyDoc);
   const meta = { provider: provider.name, model: settings.model, inputChars };
@@ -106,7 +107,7 @@ async function translateChunk(
   let pendingIndices = indices;
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const raw = await getTranslationProvider().translate({
+    const raw = await input.provider.translate({
       payload:      pending,
       sourceLocale: input.sourceLocale,
       targetLocale: input.targetLocale,

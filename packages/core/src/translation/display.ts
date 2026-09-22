@@ -2,9 +2,9 @@
  * 表示ロケールに応じて、原文と訳文のどちらを出すかを解決する。
  * ここでは LLM を呼ばない（呼ぶのは閲覧者の明示操作を受けた service 側だけ）。
  */
-import type { Database } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import { computeSourceHash } from "@modparks/core/translation/sourceHash";
-import { findTranslation } from "./repository";
+import { findTranslation } from "@modparks/core/translation/repository";
 import type { BodyFormat } from "@modparks/core/translation/masking";
 
 export interface DisplaySource {

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAuthenticatedDb } from "@/lib/auth-helpers";
-import { requestTranslation } from "@/lib/translation/service";
-import { TRANSLATION_ERROR_STATUS } from "@/lib/translation/errorStatus";
+import { requestTranslation } from "@modparks/core/translation/service";
+import { nextTranslationDeps } from "@/lib/translation/deps";
+import { TRANSLATION_ERROR_STATUS } from "@modparks/core/translation/errorStatus";
 
 const requestSchema = z.object({
   postId: z.string().min(1),
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
     const parsed = requestSchema.safeParse(await req.json());
     if (!parsed.success) return NextResponse.json({ error: "invalid_request" }, { status: 400 });
 
-    const result = await requestTranslation(db, parsed.data.postId, parsed.data.locale, userId);
+    const result = await requestTranslation(nextTranslationDeps(db), parsed.data.postId, parsed.data.locale, userId);
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: TRANSLATION_ERROR_STATUS[result.error] });
 
     return NextResponse.json({
