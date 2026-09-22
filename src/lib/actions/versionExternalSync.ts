@@ -1,10 +1,10 @@
 import { userSettings } from "@modparks/core/db/schema";
-import { createModrinthVersion } from "@/lib/modrinthUpload";
-import { fetchCfGameVersionMap, resolveCfGameVersionIds, uploadCfFile } from "@/lib/curseforgeUpload";
+import { createModrinthVersion } from "@modparks/core/modrinthUpload";
+import { fetchCfGameVersionMap, resolveCfGameVersionIds, uploadCfFile } from "@modparks/core/curseforgeUpload";
 import { eq } from "drizzle-orm";
 import type { ProjectPost } from "@modparks/core/types/post";
 import type { Database } from "@/lib/db";
-import type { ExternalUploadResult, ExternalUploadSummary } from "@/lib/externalSync/uploadSummary";
+import type { ExternalUploadResult, ExternalUploadSummary } from "@modparks/core/externalSync/uploadSummary";
 
 type PushVersionParams = {
   db: Database;

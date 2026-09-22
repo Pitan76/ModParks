@@ -5,7 +5,7 @@ import { posts, projects, versions, versionMcVersions, userSettings } from "@mod
 import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import type { ActionResult } from "@/lib/actions/actionResult";
+import type { ActionResult } from "@modparks/core/actionResult";
 import type { Database } from "@/lib/db";
 import type { Session } from "next-auth";
 import { applyMcVersionOperation } from "@/lib/externalSync/mcVersionOps";

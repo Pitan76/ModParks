@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 import { getR2Bucket, deleteFromR2, getR2KeyFromUrl } from "@/lib/r2";
 import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import type { ActionResult } from "@/lib/actions/actionResult";
+import type { ActionResult } from "@modparks/core/actionResult";
 import type { Database } from "@/lib/db";
 import type { ProjectPost } from "@modparks/core/types/post";
 

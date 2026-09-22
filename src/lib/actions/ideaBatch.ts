@@ -6,7 +6,7 @@ import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
 import { recordDeletion } from "@modparks/core/backup/tombstone";
-import type { ActionResult } from "@/lib/actions/actionResult";
+import type { ActionResult } from "@modparks/core/actionResult";
 import type { Database } from "@/lib/db";
 import type { Session } from "next-auth";
 

@@ -4,11 +4,11 @@ import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { versions, versionMcVersions, userSettings } from "@modparks/core/db/schema";
 import { findProjectPostBySlug } from "@modparks/core/queries/post";
 import { fetchCfModFiles } from "@modparks/core/curseforge";
-import { fetchCfGameVersionMap, resolveCfGameVersionIds, updateCfFileGameVersions } from "@/lib/curseforgeUpload";
+import { fetchCfGameVersionMap, resolveCfGameVersionIds, updateCfFileGameVersions } from "@modparks/core/curseforgeUpload";
 import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import type { ActionResult } from "@/lib/actions/actionResult";
+import type { ActionResult } from "@modparks/core/actionResult";
 import type { ProjectPost } from "@modparks/core/types/post";
 import type { Database } from "@/lib/db";
 

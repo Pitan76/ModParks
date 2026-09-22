@@ -9,7 +9,7 @@ import { recordDeletion } from "@modparks/core/backup/tombstone";
 import { findProjectPostById, findProjectPostBySlug } from "@modparks/core/queries/post";
 import { isAdminSession } from "@/lib/auth/roles";
 import { getServerErrors } from "@/lib/i18n/serverErrors";
-import type { ActionResult } from "@/lib/actions/actionResult";
+import type { ActionResult } from "@modparks/core/actionResult";
 import type { DependencyType } from "@modparks/core/dependencies/types";
 import type { DependencyScope, DependencyEntry } from "@modparks/core/dependencies/entryTypes";
 import {

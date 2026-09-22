@@ -28,7 +28,7 @@ import LoaderAutocomplete from "./LoaderAutocomplete";
 import { getLoaderInfo } from "@/lib/loaders";
 import { addProjectDependencyBySlug, addExternalProjectDependency, removeProjectDependency } from "@/lib/actions/dependency";
 import type { DependencyType, DependencyProjectSummary } from "@/lib/actions/dependency";
-import { isActionError, type ActionResult } from "@/lib/actions/actionResult";
+import { isActionError, type ActionResult } from "@modparks/core/actionResult";
 import { isStaleServerActionError } from "@/lib/errors/staleAction";
 import { useRouter } from "@/lib/i18n/routing";
 import { useTranslations } from "next-intl";

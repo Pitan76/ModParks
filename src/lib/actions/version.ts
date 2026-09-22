@@ -9,7 +9,7 @@ import { pushVersionToExternalPlatforms } from "@/lib/actions/versionExternalSyn
 import { scanVersionFile } from "@/lib/actions/versionScan";
 import { createVersionSchema, updateVersionSchema } from "@modparks/core/validations";
 import { resolveDependencyDrafts } from "@/lib/dependencies/create";
-import { parseDependencyDraftsField } from "@/lib/dependencies/parseDrafts";
+import { parseDependencyDraftsField } from "@modparks/core/dependencies/parseDrafts";
 import { isAllowedExternalUrl } from "@modparks/core/validations";
 import { createId } from "@paralleldrive/cuid2";
 import { eq, and, sql } from "drizzle-orm";
