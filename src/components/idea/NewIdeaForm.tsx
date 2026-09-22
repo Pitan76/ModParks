@@ -15,7 +15,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
 import { useRouter } from "@/lib/i18n/routing";
-import { createIdea } from "@/lib/actions/idea";
+import { createIdea } from "@/lib/http/ideaApi";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LinkButton from "@/components/ui/LinkButton";
 import SettingsLink from "@/components/ui/SettingsLink";

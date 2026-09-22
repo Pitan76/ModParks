@@ -121,3 +121,32 @@ describe("バックアップの読み出し", () => {
   });
 });
 
+
+describe("idea の /api/app ルート", () => {
+  const mutations: [string, string][] = [
+    ["POST", "/api/app/ideas"],
+    ["PATCH", "/api/app/ideas/i1"],
+    ["DELETE", "/api/app/ideas/i1"],
+    ["PATCH", "/api/app/ideas/i1/status"],
+    ["PATCH", "/api/app/idea-comments/c1"],
+    ["DELETE", "/api/app/idea-comments/c1"],
+    ["POST", "/api/app/posts/p1/favorite"],
+  ];
+
+  it.each(mutations)("%s %s は他サイトからだと 403（CSRF）", async (method, path) => {
+    expect((await call(method, path, { origin: "https://evil.example" })).status).toBe(403);
+  });
+
+  it.each(mutations)("%s %s はセッションが無ければ 401", async (method, path) => {
+    expect((await call(method, path, { origin: ORIGIN })).status).toBe(401);
+  });
+
+  it.each([
+    ["GET", "/api/app/ideas"],
+    ["GET", "/api/app/ideas/i1"],
+    ["GET", "/api/app/idea-comments/c1"],
+    ["GET", "/api/app/posts/p1/favorite"],
+  ])("%s %s は許可外メソッドなので 405", async (method, path) => {
+    expect((await call(method, path)).status).toBe(405);
+  });
+});

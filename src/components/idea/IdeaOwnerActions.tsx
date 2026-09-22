@@ -20,7 +20,7 @@ import Typography from "@mui/material/Typography";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslations } from "next-intl";
-import { updateIdea, deleteIdea } from "@/lib/actions/idea";
+import { updateIdea, deleteIdea } from "@/lib/http/ideaApi";
 
 import TagAutocomplete from "@/components/project/TagAutocomplete";
 import LoaderAutocomplete from "@/components/project/LoaderAutocomplete";

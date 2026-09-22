@@ -7,7 +7,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
-import { toggleIdeaFavorite } from "@/lib/actions/idea";
+import { toggleIdeaFavorite } from "@/lib/http/ideaApi";
 import { useTranslations } from "next-intl";
 
 export interface IdeaLikeButtonProps {

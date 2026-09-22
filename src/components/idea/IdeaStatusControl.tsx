@@ -8,7 +8,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import CircularProgress from "@mui/material/CircularProgress";
-import { updateIdeaStatus } from "@/lib/actions/idea";
+import { updateIdeaStatus } from "@/lib/http/ideaApi";
 
 interface IdeaStatusControlProps {
   ideaId: string;

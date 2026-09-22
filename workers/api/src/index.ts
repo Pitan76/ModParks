@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { getDb } from "@modparks/core/db/client";
 import { handleListProjects } from "@modparks/core/api/v2/projects";
 import type { ApiWorkerEnv } from "./env";
@@ -7,6 +7,7 @@ import { patchProject } from "./routes/projects";
 import { getSession } from "./routes/session";
 import { getMyCollections } from "./routes/collections";
 import { getTrustedDevices } from "./routes/trustedDevices";
+import * as ideaRoutes from "./routes/ideas";
 
 /**
  * 公開 API を Next.js から切り離して処理する Worker。
@@ -46,8 +47,29 @@ app.get("/api/app/session", getSession);
 app.get("/api/app/collections", getMyCollections);
 app.get("/api/app/trusted-devices", getTrustedDevices);
 app.patch("/api/app/projects/:id", patchProject);
+
+app.post("/api/app/ideas", ideaRoutes.postIdea);
+app.patch("/api/app/ideas/:id", ideaRoutes.patchIdea);
+app.delete("/api/app/ideas/:id", ideaRoutes.deleteIdea);
+app.patch("/api/app/ideas/:id/status", ideaRoutes.patchIdeaStatus);
+app.post("/api/app/ideas/:id/comments", ideaRoutes.postIdeaComment);
+app.patch("/api/app/idea-comments/:id", ideaRoutes.patchIdeaComment);
+app.delete("/api/app/idea-comments/:id", ideaRoutes.deleteIdeaComment);
+app.post("/api/app/posts/:id/favorite", ideaRoutes.postFavorite);
+
 // 上に無いメソッドは 405。登録順に照合されるので、実装の後ろに置く
-app.all("/api/app/projects/:id", (c) => c.body(null, 405));
+const methodNotAllowed = (c: Context) => c.body(null, 405);
+for (const path of [
+  "/api/app/projects/:id",
+  "/api/app/ideas",
+  "/api/app/ideas/:id",
+  "/api/app/ideas/:id/status",
+  "/api/app/ideas/:id/comments",
+  "/api/app/idea-comments/:id",
+  "/api/app/posts/:id/favorite",
+]) {
+  app.all(path, methodNotAllowed);
+}
 
 /**
  * 取りこぼしの受け皿。
