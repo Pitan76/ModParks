@@ -227,7 +227,7 @@
       "datapack": "データパック",
       "shader": "シェーダー",
       "modpack": "MODパック",
-      "skill": "Skill (Mod開発支援)",
+      "skill": "AI Skills",
       "other": "その他"
     },
     "fields": {
@@ -1745,7 +1745,7 @@
       "datapack": "データパック",
       "shader": "シェーダー",
       "modpack": "MODパック",
-      "skill": "Skill (Mod開発支援)",
+      "skill": "AI Skills",
       "other": "その他"
     },
     "sort": {
