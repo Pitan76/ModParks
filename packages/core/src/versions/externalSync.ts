@@ -3,7 +3,7 @@ import { createModrinthVersion } from "@modparks/core/modrinthUpload";
 import { fetchCfGameVersionMap, resolveCfGameVersionIds, uploadCfFile } from "@modparks/core/curseforgeUpload";
 import { eq } from "drizzle-orm";
 import type { ProjectPost } from "@modparks/core/types/post";
-import type { Database } from "@/lib/db";
+import type { Database } from "@modparks/core/db/client";
 import type { ExternalUploadResult, ExternalUploadSummary } from "@modparks/core/externalSync/uploadSummary";
 
 type PushVersionParams = {

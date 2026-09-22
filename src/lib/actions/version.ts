@@ -3,9 +3,9 @@
 import { getAuthenticatedDb, assertProjectAccess } from "@/lib/auth-helpers";
 import { posts, versions, versionIdeas, ideas, versionLoaders, versionMcVersions, projectDependencies } from "@modparks/core/db/schema";
 import { insertVersionRecord } from "@modparks/core/utils/versionRecord";
-import { notifyNewVersion } from "@/lib/notifications/notify";
-import { createSystemCommentForResolvedIdea } from "@/lib/actions/versionIdeaLink";
-import { pushVersionToExternalPlatforms } from "@/lib/actions/versionExternalSync";
+import { notifyNewVersion, userNotifyContext } from "@/lib/notifications/notify";
+import { createSystemCommentForResolvedIdea } from "@modparks/core/versions/ideaLink";
+import { pushVersionToExternalPlatforms } from "@modparks/core/versions/externalSync";
 import { scanVersionFile } from "@/lib/actions/versionScan";
 import { createVersionSchema, updateVersionSchema } from "@modparks/core/validations";
 import { resolveDependencyDrafts } from "@modparks/core/dependencies/create";
@@ -104,7 +104,7 @@ export const createVersion = async (projectSlug: string, formData: FormData) => 
   if (ideaId) {
     await db.insert(versionIdeas).values({ versionId: id, ideaId }).run();
     await db.update(ideas).set({ status: "fulfilled" }).where(eq(ideas.id, ideaId)).run();
-    await createSystemCommentForResolvedIdea(db, ideaId, id, parsed.data.versionNumber, projectSlug, session.user.id);
+    await createSystemCommentForResolvedIdea(await userNotifyContext(db), ideaId, id, parsed.data.versionNumber, projectSlug, session.user.id);
   }
 
   revalidatePath(`/projects/${projectSlug}`);
@@ -239,7 +239,7 @@ export const updateVersion = async (versionId: string, projectSlug: string, form
     await db.insert(versionIdeas).values({ versionId, ideaId }).run();
     await db.update(ideas).set({ status: "fulfilled" }).where(eq(ideas.id, ideaId)).run();
     const finalVersionNumber = parsed.data.versionNumber ?? version.versionNumber;
-    await createSystemCommentForResolvedIdea(db, ideaId, versionId, finalVersionNumber, projectSlug, session.user.id);
+    await createSystemCommentForResolvedIdea(await userNotifyContext(db), ideaId, versionId, finalVersionNumber, projectSlug, session.user.id);
     revalidatePath(`/ideas/${ideaId}`);
   }
 

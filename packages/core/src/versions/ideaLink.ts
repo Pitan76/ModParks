@@ -1,20 +1,20 @@
 import { posts, ideas, comments } from "@modparks/core/db/schema";
-import { notifyToUser, resolveActor } from "@/lib/notifications/notify";
+import { notifyToUser, resolveActor, type UserNotifyContext } from "@modparks/core/notifications/dispatch";
 import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
-import type { Database } from "@/lib/db";
 
 /**
  * アイデアが解決された際に自動でシステムコメントを追加し、起票者へ通知を送るヘルパー関数。
  */
 export async function createSystemCommentForResolvedIdea(
-  db: Database,
+  notify: UserNotifyContext,
   ideaId: string,
   versionId: string,
   versionNumber: string,
   projectSlug: string,
   userId: string
 ) {
+  const { db } = notify;
   const commentId = createId();
   const content = `このアイデアはバージョン [${versionNumber}](/projects/${projectSlug}) で解決されました。`;
 
@@ -40,7 +40,7 @@ export async function createSystemCommentForResolvedIdea(
 
   if (idea) {
     const actor = await resolveActor(db, userId);
-    await notifyToUser(db, idea.authorId, userId, "comment", {
+    await notifyToUser(notify, idea.authorId, userId, "comment", {
       kind: "idea",
       slug: idea.slug,
       title: idea.title,
